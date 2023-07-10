@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "157009524901",
+    "firebase_url": "https://orcamentofacil-lite.firebaseio.com",
+    "project_id": "orcamentofacil-lite",
+    "storage_bucket": "orcamentofacil-lite.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157009524901:android:5ea24ac280199b104df54c",
+        "android_client_info": {
+          "package_name": "com.housestudio.oflite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "157009524901-cf8t928c2u8ai2kh0hqpv24v9bpj2sru.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrKC00sdSPo6DAqPcmO61CxcQnXCEv5nk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "157009524901-cf8t928c2u8ai2kh0hqpv24v9bpj2sru.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-5106035309089315~7780835833"
+    }
+  ],
+  "configuration_version": "1"
+}
