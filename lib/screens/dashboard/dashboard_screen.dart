@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
-
 import '../../constants.dart';
 import '../../responsive.dart';
 import 'components/header.dart';
-
 import 'components/my_fields.dart';
 import 'components/recent_files.dart';
 import 'components/storage_details.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
+  @override
+  _DashboardScreen createState() => _DashboardScreen();
+}
+
+
+class _DashboardScreen extends State<DashboardScreen> {
+  @override
+  initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +37,12 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       const MyFiles(),
                       const SizedBox(height: defaultPadding),
-                      const RecentFiles(),
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),
-                      if (Responsive.isMobile(context)) const StarageDetails(),
+                      if (Responsive.isMobile(context))
+                        const StarageDetails(),
+                      const SizedBox(height: defaultPadding),
+                      const RecentFiles(),
                     ],
                   ),
                 ),

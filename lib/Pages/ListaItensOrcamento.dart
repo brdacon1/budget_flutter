@@ -112,7 +112,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
                         itemBuilder: (context, index) {
                           return SizedBox(
-                            height: 90,
+                            height: 110,
                             child: Card(
                               color: Colors.cyan[50],
                               shape: RoundedRectangleBorder(
@@ -125,7 +125,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                   style: const TextStyle(
                                     color: Color(0xFF1F1A30),
                                     letterSpacing: 0.5,
-                                    fontSize: 12.0,
+                                    fontSize: 10.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -393,7 +393,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                           style: const TextStyle(
                             color: Color(0xFF1F1A30),
                             letterSpacing: 0.5,
-                            fontSize: 12.0,
+                            fontSize: 10.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

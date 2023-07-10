@@ -5,10 +5,21 @@ import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import 'file_info_card.dart';
 
-class MyFiles extends StatelessWidget {
+class MyFiles extends StatefulWidget {
   const MyFiles({
     Key? key,
   }) : super(key: key);
+  @override
+  _MyFiles createState() => _MyFiles();
+}
+
+class _MyFiles extends State<MyFiles> {
+
+  @override
+  initState() {
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {

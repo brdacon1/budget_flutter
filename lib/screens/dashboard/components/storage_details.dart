@@ -4,10 +4,21 @@ import '../../../constants.dart';
 import 'chart.dart';
 import 'storage_info_card.dart';
 
-class StarageDetails extends StatelessWidget {
+class StarageDetails extends StatefulWidget {
   const StarageDetails({
     Key? key,
   }) : super(key: key);
+
+  @override
+  _StarageDetails createState() => _StarageDetails();
+}
+
+class _StarageDetails extends State<StarageDetails> {
+
+  @override
+  initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
