@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         ),
         initial: AdaptiveThemeMode.dark,
         builder: (theme, darkTheme) => MaterialApp(
-          title: 'Orçamento de Vendas',
+          title: 'Orçamento de Vendas - PDF',
           theme: theme,
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
