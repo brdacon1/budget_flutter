@@ -86,12 +86,8 @@ flutter:
   uses-material-design: true
   assets:
       - assets/icon.png
-      - assets/banner.jpg
-      - assets/adidas.png
       - assets/360.png
-      - assets/cart.png
       - assets/work.png
-      - assets/phone.png
       - assets/pintor.png
       - assets/constru_man.png
       - assets/images/
