@@ -24,8 +24,8 @@ class _DashboardScreen extends State<DashboardScreen> {
     try {
       setState(() async {
         await getInformationBudget();
-        setState(() {});
       });
+      setState(() {});
     } catch (e) {}
     super.initState();
   }
