@@ -46,11 +46,8 @@ class _MyFiles extends State<MyFiles> {
                   onPressed: () {
                     AdaptiveTheme.of(context).toggleThemeMode();
                   },
-                  icon: const Icon(Icons.ac_unit_sharp),
-                  label: const Text("Change Theme"),
-                ),
-                const SizedBox(
-                  width: 20,
+                  icon: const Icon(Icons.payment_rounded),
+                  label: const Text("VERSÃO PREMIUN"),
                 ),
               ],
             ),

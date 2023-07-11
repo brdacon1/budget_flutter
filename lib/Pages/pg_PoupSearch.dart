@@ -36,13 +36,14 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
   @override
   initState() {
-    super.initState();
     try {
       setState(() async {
         await getInformationOrcamento();
         setState(() {});
       });
     } catch (e) {}
+    super.initState();
+
   }
 
   Future<void> _duplicateEvent(bool clientData, bool quoteItems, bool comments)async {
@@ -497,7 +498,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
     _foundUsers.clear();
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
-        .orderBy('NOMECLIENTE', descending: false)
+        .orderBy('ID', descending: true)
         .get()
         .then((value) async {
       for (var questionTmp in value.docs) {

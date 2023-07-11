@@ -11,7 +11,6 @@ import 'package:share/share.dart';
 
 class PdfViewPage extends StatefulWidget {
   const PdfViewPage({Key? key}) : super(key: key);
-
   @override
   _PdfViewPageState createState() => _PdfViewPageState();
 }
@@ -68,9 +67,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
           // Handle empty list
         }
       }
-    } catch (ex) {
-      print(ex);
-    }
+    } catch (ex) {}
   }
 
   @override

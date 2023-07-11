@@ -5,6 +5,7 @@ import 'chart.dart';
 import 'storage_info_card.dart';
 
 class StarageDetails extends StatefulWidget {
+
   const StarageDetails({
     Key? key,
   }) : super(key: key);
