@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/models/MyFiles.dart';
 import 'package:oflite/responsive.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,13 @@ class _MyFiles extends State<MyFiles> {
                     ),
                   ),
                   onPressed: () {
-                    AdaptiveTheme.of(context).toggleThemeMode();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => pg_subscription(),
+                      ),
+                    );
+                    //AdaptiveTheme.of(context).toggleThemeMode();
                   },
                   icon: const Icon(Icons.payment_rounded),
                   label: const Text("VERSÃO PREMIUN"),

@@ -53,6 +53,12 @@ class _DashboardScreen extends State<DashboardScreen> {
       for (var questionTmp in value.docs) {
         _foundUsers.add(DADOS.fromMap(questionTmp));
       }
+       for(int i = 0; i < _foundUsers.length; i++)
+       {
+         print(_foundUsers[i].toJson());
+       }
+    }).then((value) => {
+
     });
     return _foundUsers;
   }

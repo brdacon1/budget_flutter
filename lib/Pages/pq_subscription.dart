@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../anmition/fadeanimation.dart';
@@ -9,7 +8,7 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 
 class pg_subscription extends StatefulWidget {
   @override
-  _pg_subscription createState() => new _pg_subscription();
+  _pg_subscription createState() => _pg_subscription();
 }
 
 class _pg_subscription extends State<pg_subscription> {
