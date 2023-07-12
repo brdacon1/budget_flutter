@@ -203,6 +203,149 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           });
   }
 
+  Future<void> EventSave() async{
+    final we = MediaQuery.of(context).size.width;
+    final he = MediaQuery.of(context).size.height;
+    if(nameButton == "ATUALIZAR")
+    {
+      orcamento.ID = widget.item.ID;
+      orcamento.DATA = widget.item.DATA;
+      orcamento.EMAIL = widget.item.EMAIL;
+      orcamento.ENDERECO = widget.item.ENDERECO;
+      orcamento.GERADO = widget.item.GERADO;
+      orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
+      orcamento.NOMECLIENTE = _nameText.text;
+      orcamento.FONE = _phoneText.text;
+      orcamento.STATUS = _statusText.text;
+      orcamento.CEP = _cepText.text;
+      orcamento.RUA = _ruaText.text;
+      orcamento.CITY = _cityText.text;
+      orcamento.BAIRRO = _bairroText.text;
+      UpdateItensDADOS(orcamento).then((value) {
+        setState(() {
+          widget.item.ID =  orcamento.ID;
+          widget.item.DATA = orcamento.DATA;
+          widget.item.EMAIL = orcamento.EMAIL;
+          widget.item.ENDERECO = orcamento.ENDERECO;
+          widget.item.GERADO = orcamento.GERADO;
+          widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
+          widget.item.NOMECLIENTE = _nameText.text;
+          widget.item.FONE = _phoneText.text;
+          widget.item.STATUS = _statusText.text;
+          widget.item.CEP = _cepText.text;
+          widget.item.RUA = _ruaText.text;
+          widget.item.CITY = _cityText.text;
+          widget.item.BAIRRO = _bairroText.text;
+        });
+        AwesomeDialog(
+          width: we * 0.99,
+          context: context,
+          dialogBackgroundColor: Colors.cyan[50],
+          animType: AnimType.scale,
+          headerAnimationLoop: false,
+          dialogType: DialogType.SUCCES,
+          showCloseIcon: false,
+          title: 'Feito!',
+          desc: 'Dados do orçamento atualizado com sucesso!',
+          btnOkOnPress: () {
+
+          },
+          btnOkIcon: Icons.check_circle,
+        ).show().then((value) async {
+
+        });
+      });
+    }
+    else if(nameButton == "SALVAR")
+    {
+      final DateTime now = DateTime.now();
+      final DateFormat formatter = DateFormat('dd/MM/yyyy');
+      final String formatted = formatter.format(now);
+
+      orcamento.EMAIL = widget.item.EMAIL;
+      orcamento.ENDERECO = widget.item.ENDERECO;
+      orcamento.GERADO = widget.item.GERADO;
+      orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
+      orcamento.ID = DateTime.now().millisecondsSinceEpoch.toString();
+      orcamento.DATA = formatted;
+      orcamento.NOMECLIENTE = _nameText.text;
+      orcamento.FONE = _phoneText.text;
+      orcamento.STATUS = _statusText.text;
+      orcamento.CEP = _cepText.text;
+      orcamento.RUA = _ruaText.text;
+      orcamento.CITY = _cityText.text;
+      orcamento.BAIRRO = _bairroText.text;
+      SalvaOrcamento(orcamento).then((value)  async {
+        setState(() {
+          widget.item.ID =  orcamento.ID;
+          widget.item.DATA = orcamento.DATA;
+          widget.item.EMAIL = orcamento.EMAIL;
+          widget.item.ENDERECO = orcamento.ENDERECO;
+          widget.item.GERADO = orcamento.GERADO;
+          widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
+          widget.item.NOMECLIENTE = _nameText.text;
+          widget.item.FONE = _phoneText.text;
+          widget.item.STATUS = _statusText.text;
+          widget.item.CEP = _cepText.text;
+          widget.item.RUA = _ruaText.text;
+          widget.item.CITY = _cityText.text;
+          widget.item.BAIRRO = _bairroText.text;
+          nameButton = 'ATUALIZAR';
+          titlePage = 'Editar orçamento';
+          titleBox = 'Clique para editar';
+          fieldVisible = true;
+          _dataText.text = orcamento.DATA.toString();
+          _idText.text = orcamento.ID.toString();
+        });
+        if (await UserInfo.FlutterContacts.requestPermission ()) {
+          await AwesomeDialog(
+            width: we * 0.99,
+            context: context,
+            dialogBackgroundColor: Colors.cyan[50],
+            animType: AnimType.topSlide,
+            headerAnimationLoop: false,
+            dialogType: DialogType.SUCCES,
+            showCloseIcon: false,
+            title: 'Feito!',
+            desc: 'Orçamento criado com sucesso!',
+            btnOkOnPress: () async {
+              await AwesomeDialog(
+                context: context,
+                width: we * 0.99,
+                dialogBackgroundColor: Colors.cyan[50],
+                buttonsBorderRadius: const BorderRadius.all(
+                  Radius.circular(10),
+                ),
+                headerAnimationLoop: false,
+                animType: AnimType.BOTTOMSLIDE,
+                title: 'Salvar contato',
+                desc: 'Gostaria de salvar o telefone em sua lista de contatos?',
+                showCloseIcon: false,
+                btnCancelText: "Não",
+                btnOkText: "Sim",
+                btnCancelOnPress: () {
+                },
+                btnOkOnPress: () async {
+                  UserInfo.Contact newContact = UserInfo.Contact()
+                    ..name = Name(first: orcamento.NOMECLIENTE.toString())
+                    ..phones = [Phone(orcamento.FONE.toString()), Phone(orcamento.FONE.toString(), label: PhoneLabel.work)];
+                  await UserInfo.FlutterContacts.insertContact(newContact).then((value) async {
+
+                  });
+                },
+              ).show().then((value) {
+
+              });
+            },
+            btnOkIcon: Icons.check_circle,
+          ).show();
+        }
+      });
+    }
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
@@ -751,142 +894,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                           delay: 1,
                           child: TextButton(
                               onPressed: () async {
-                                if(nameButton == "ATUALIZAR")
-                                {
-                                    orcamento.ID = widget.item.ID;
-                                    orcamento.DATA = widget.item.DATA;
-                                    orcamento.EMAIL = widget.item.EMAIL;
-                                    orcamento.ENDERECO = widget.item.ENDERECO;
-                                    orcamento.GERADO = widget.item.GERADO;
-                                    orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
-                                    orcamento.NOMECLIENTE = _nameText.text;
-                                    orcamento.FONE = _phoneText.text;
-                                    orcamento.STATUS = _statusText.text;
-                                    orcamento.CEP = _cepText.text;
-                                    orcamento.RUA = _ruaText.text;
-                                    orcamento.CITY = _cityText.text;
-                                    orcamento.BAIRRO = _bairroText.text;
-                                    UpdateItensDADOS(orcamento).then((value) {
-                                      setState(() {
-                                        widget.item.ID =  orcamento.ID;
-                                        widget.item.DATA = orcamento.DATA;
-                                        widget.item.EMAIL = orcamento.EMAIL;
-                                        widget.item.ENDERECO = orcamento.ENDERECO;
-                                        widget.item.GERADO = orcamento.GERADO;
-                                        widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
-                                        widget.item.NOMECLIENTE = _nameText.text;
-                                        widget.item.FONE = _phoneText.text;
-                                        widget.item.STATUS = _statusText.text;
-                                        widget.item.CEP = _cepText.text;
-                                        widget.item.RUA = _ruaText.text;
-                                        widget.item.CITY = _cityText.text;
-                                        widget.item.BAIRRO = _bairroText.text;
-                                      });
-                                    AwesomeDialog(
-                                      width: we * 0.99,
-                                      context: context,
-                                      dialogBackgroundColor: Colors.cyan[50],
-                                      animType: AnimType.LEFTSLIDE,
-                                      headerAnimationLoop: false,
-                                      dialogType: DialogType.SUCCES,
-                                      showCloseIcon: false,
-                                      title: 'Feito!',
-                                      desc: 'Dados do orçamento atualizado com sucesso!',
-                                      btnOkOnPress: () {
-
-                                      },
-                                      btnOkIcon: Icons.check_circle,
-                                      ).show().then((value) async {
-
-                                      });
-                                    });
-                                }
-                                else if(nameButton == "SALVAR")
-                                {
-                                    final DateTime now = DateTime.now();
-                                    final DateFormat formatter = DateFormat('dd/MM/yyyy');
-                                    final String formatted = formatter.format(now);
-
-                                    orcamento.EMAIL = widget.item.EMAIL;
-                                    orcamento.ENDERECO = widget.item.ENDERECO;
-                                    orcamento.GERADO = widget.item.GERADO;
-                                    orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
-                                    orcamento.ID = DateTime.now().millisecondsSinceEpoch.toString();
-                                    orcamento.DATA = formatted;
-                                    orcamento.NOMECLIENTE = _nameText.text;
-                                    orcamento.FONE = _phoneText.text;
-                                    orcamento.STATUS = _statusText.text;
-                                    orcamento.CEP = _cepText.text;
-                                    orcamento.RUA = _ruaText.text;
-                                    orcamento.CITY = _cityText.text;
-                                    orcamento.BAIRRO = _bairroText.text;
-                                    SalvaOrcamento(orcamento).then((value)  async {
-                                      setState(() {
-                                        widget.item.ID =  orcamento.ID;
-                                        widget.item.DATA = orcamento.DATA;
-                                        widget.item.EMAIL = orcamento.EMAIL;
-                                        widget.item.ENDERECO = orcamento.ENDERECO;
-                                        widget.item.GERADO = orcamento.GERADO;
-                                        widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
-                                        widget.item.NOMECLIENTE = _nameText.text;
-                                        widget.item.FONE = _phoneText.text;
-                                        widget.item.STATUS = _statusText.text;
-                                        widget.item.CEP = _cepText.text;
-                                        widget.item.RUA = _ruaText.text;
-                                        widget.item.CITY = _cityText.text;
-                                        widget.item.BAIRRO = _bairroText.text;
-                                        nameButton = 'ATUALIZAR';
-                                        titlePage = 'Editar orçamento';
-                                        titleBox = 'Clique para editar';
-                                        fieldVisible = true;
-                                        _dataText.text = orcamento.DATA.toString();
-                                        _idText.text = orcamento.ID.toString();
-                                      });
-                                  if (await UserInfo.FlutterContacts.requestPermission ()) {
-                                  await   AwesomeDialog(
-                                          width: we * 0.99,
-                                          context: context,
-                                          dialogBackgroundColor: Colors.cyan[50],
-                                          animType: AnimType.LEFTSLIDE,
-                                          headerAnimationLoop: false,
-                                          dialogType: DialogType.SUCCES,
-                                          showCloseIcon: false,
-                                          title: 'Feito!',
-                                          desc: 'Orçamento criado com sucesso!',
-                                          btnOkOnPress: () async {
-                                    await  AwesomeDialog(
-                                            context: context,
-                                            width: we * 0.99,
-                                            dialogBackgroundColor: Colors.cyan[50],
-                                            buttonsBorderRadius: const BorderRadius.all(
-                                              Radius.circular(10),
-                                            ),
-                                            headerAnimationLoop: false,
-                                            animType: AnimType.BOTTOMSLIDE,
-                                            title: 'Salvar contato',
-                                            desc: 'Gostaria de salvar o telefone em sua lista de contatos?',
-                                            showCloseIcon: false,
-                                            btnCancelText: "Não",
-                                            btnOkText: "Sim",
-                                            btnCancelOnPress: () {
-                                            },
-                                            btnOkOnPress: () async {
-                                              UserInfo.Contact newContact = UserInfo.Contact()
-                                                ..name = Name(first: orcamento.NOMECLIENTE.toString())
-                                                ..phones = [Phone(orcamento.FONE.toString()), Phone(orcamento.FONE.toString(), label: PhoneLabel.work)];
-                                              await UserInfo.FlutterContacts.insertContact(newContact).then((value) async {
-
-                                              });
-                                            },
-                                          ).show().then((value) {
-
-                                          });
-                                        },
-                                        btnOkIcon: Icons.check_circle,
-                                        ).show();
-                                    }
-                                  });
-                                }
+                                  await EventSave();
                               },
                               style:  TextButton.styleFrom(
                                   backgroundColor: buttonColor,

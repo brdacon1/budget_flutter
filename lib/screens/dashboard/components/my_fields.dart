@@ -64,7 +64,7 @@ class _MyFiles extends State<MyFiles> {
             ),
           ],
         ),
-        const SizedBox(height: defaultPadding),
+        /*const SizedBox(height: defaultPadding),
         Responsive(
           mobile: FileInfoCardGridView(
             crossAxisCount: size.width < 650 ? 2 : 4,
@@ -74,7 +74,7 @@ class _MyFiles extends State<MyFiles> {
           desktop: FileInfoCardGridView(
             childAspectRatio: size.width < 1400 ? 1.1 : 1.4,
           ),
-        ),
+        ),*/
       ],
     );
   }

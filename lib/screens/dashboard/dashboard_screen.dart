@@ -94,7 +94,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                   flex: 5,
                   child: Column(
                     children: [
-                      //MyFiles(item: _myBudgetDashboard),
+                      MyFiles(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),

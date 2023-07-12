@@ -33,7 +33,6 @@ class _pg_subscription extends State<pg_subscription> {
     await FlutterInappPurchase.instance.getSubscriptions(_productLists);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -54,7 +53,9 @@ class _pg_subscription extends State<pg_subscription> {
                   Icons.arrow_back,
                   size: screenAwareSize(20.0, context),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
               ),
               title: Text("Premium",
                   style: TextStyle(
@@ -169,8 +170,6 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
   }
 
   List<Widget> colorSelector() {
-
-
     for (var i = 0; i < colors.length; i++) {
       colorItemList
           .add(colorItem(colors[i], i == currentColorIndex, context, () {
@@ -179,7 +178,6 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
         });
       }));
     }
-
     return colorItemList;
   }
 
@@ -297,11 +295,6 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                             onPressed: () async {
                               await FlutterInappPurchase.instance.requestPurchase("newproduct");
                             },
-                            child: Text("ASSINAR", style: GoogleFonts.heebo(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),),
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(
@@ -309,7 +302,12 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30.0)
                                 )
-                            )
+                            ),
+                            child: Text("ASSINAR", style: GoogleFonts.heebo(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),)
                         ),
                       ),
                     ],
