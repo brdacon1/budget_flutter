@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/constants.dart';
 import 'Models/Db.dart';
 import 'Objetos/ObjetoUIDUser.dart';
 import 'Objetos/Owner.dart';
@@ -215,7 +216,7 @@ class _SingupState extends State<Singup> {
                       await _createUserWithEmailAndPassword(_passwordText.text.trim(), _emailText.text.trim());
                     },
                     style:  TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF0DF5E4),
+                        backgroundColor: buttonColor,
                         padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0)
@@ -249,7 +250,7 @@ class _SingupState extends State<Singup> {
                         ));
                       },
                       child: Text("Entre",style: GoogleFonts.heebo(
-                        color:  const Color(0xFF0DF5E4).withOpacity(0.9),
+                        color: buttonColor.withOpacity(0.9),
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       )),

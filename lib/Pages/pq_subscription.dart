@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/constants.dart';
 import '../anmition/fadeanimation.dart';
 import 'utils.dart';
 import 'data.dart';
@@ -302,7 +303,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                               fontWeight: FontWeight.bold,
                             ),),
                             style: TextButton.styleFrom(
-                                backgroundColor: const Color(0xFF0DF5E4),
+                                backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 15.0, horizontal: 125),
                                 shape: RoundedRectangleBorder(

@@ -7,6 +7,7 @@ import '../../../constants.dart';
 class RecentFiles extends StatelessWidget {
   const RecentFiles({
     Key? key,
+
   }) : super(key: key);
 
   @override

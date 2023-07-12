@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../Objetos/DADOS.dart';
+import '../../Objetos/MyBudgetDashboard.dart';
 import '../../constants.dart';
 import '../../responsive.dart';
 import 'components/header.dart';
@@ -18,14 +19,21 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreen extends State<DashboardScreen> {
   final _foundUsers = <DADOS>[];
-
+  final MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
+    qtdApproved: 0,
+    qtdPending: 0,
+    qtdDisapproved: 0,
+    qtdFinish: 0,
+  );
   @override
   initState() {
     try {
       setState(() async {
-        await getInformationBudget();
+        await getInformationBudget().then((value) => {
+        setState(() {}),
+        });
       });
-      setState(() {});
+
     } catch (e) {}
     super.initState();
   }
@@ -53,16 +61,22 @@ class _DashboardScreen extends State<DashboardScreen> {
       for (var questionTmp in value.docs) {
         _foundUsers.add(DADOS.fromMap(questionTmp));
       }
-       for(int i = 0; i < _foundUsers.length; i++)
-       {
-         print(_foundUsers[i].toJson());
-       }
-    }).then((value) => {
 
+      for (int i = 0; i < _foundUsers.length; i++) {
+        if (_foundUsers[i].STATUS == "APROVADO") {
+          _myBudgetDashboard.qtdApproved = _myBudgetDashboard.qtdApproved! + 1;
+        } else if (_foundUsers[i].STATUS == "PENDENTE") {
+          _myBudgetDashboard.qtdPending = _myBudgetDashboard.qtdPending! + 1;
+        } else if (_foundUsers[i].STATUS == "REPROVADO") {
+          _myBudgetDashboard.qtdDisapproved = _myBudgetDashboard.qtdDisapproved! + 1;
+        } else if (_foundUsers[i].STATUS == "FINALIZADO") {
+          _myBudgetDashboard.qtdFinish = _myBudgetDashboard.qtdFinish! + 1;
+        }
+      }
+    }).then((value) => {
     });
     return _foundUsers;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +94,12 @@ class _DashboardScreen extends State<DashboardScreen> {
                   flex: 5,
                   child: Column(
                     children: [
-                      const MyFiles(),
+                      //MyFiles(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
-                        const StarageDetails(),
+                         StarageDetails(item: _myBudgetDashboard,),
                       const SizedBox(height: defaultPadding),
                       const RecentFiles(),
                     ],
@@ -95,9 +109,9 @@ class _DashboardScreen extends State<DashboardScreen> {
                   const SizedBox(width: defaultPadding),
                 // On Mobile means if the screen is less than 850 we dont want to show it
                 if (!Responsive.isMobile(context))
-                  const Expanded(
+                    Expanded(
                     flex: 2,
-                    child: StarageDetails(),
+                    child: StarageDetails(item: _myBudgetDashboard,),
                   ),
               ],
             )

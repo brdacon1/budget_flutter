@@ -9,6 +9,8 @@ import '../Models/PDFGenerate.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:share/share.dart';
 
+import '../constants.dart';
+
 class PdfViewPage extends StatefulWidget {
   const PdfViewPage({Key? key}) : super(key: key);
   @override
@@ -110,7 +112,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
                                 }
                             },
                             style: TextButton.styleFrom(
-                                backgroundColor: const Color(0xFF0DF5E4),
+                                backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 15.0, horizontal: 80),
                                 shape: RoundedRectangleBorder(

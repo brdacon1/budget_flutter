@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
 import 'Services/loading_event.dart';
 import 'anmition/fadeanimation.dart';
@@ -237,7 +238,7 @@ class _Login extends State<Login> {
                         });
                       },
                       style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFF0DF5E4),
+                          backgroundColor: buttonColor,
                           padding: const EdgeInsets.symmetric(
                               vertical: 15.0, horizontal: 80),
                           shape: RoundedRectangleBorder(
@@ -259,7 +260,7 @@ class _Login extends State<Login> {
                 FadeAnimation(
                   delay: 1,
                   child: Text("Esqueceu sua senha?", style: GoogleFonts.heebo(
-                    color: const Color(0xFF0DF5E4).withOpacity(0.9),
+                    color: buttonColor.withOpacity(0.9),
                     letterSpacing: 0.5,
                   )),
                 ),
@@ -284,7 +285,7 @@ class _Login extends State<Login> {
                               ));
                         },
                         child: Text("Clique aqui", style: GoogleFonts.heebo(
-                          color: const Color(0xFF0DF5E4).withOpacity(0.9),
+                          color: buttonColor.withOpacity(0.9),
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         )),

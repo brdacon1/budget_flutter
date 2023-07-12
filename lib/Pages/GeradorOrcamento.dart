@@ -15,6 +15,8 @@ import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:intl/intl.dart';
 
+import '../constants.dart';
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 enum Gender{
@@ -443,7 +445,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     builder: (BuildContext context) {
                                   return SimpleDialog(
                                     backgroundColor: Colors.cyan[50],
-                                    title: Text("Selecione status"),
+                                    title: const Text("Selecione status"),
                                     children: [
                                       SizedBox(
                                         width: MediaQuery.of(context).size.width,
@@ -887,7 +889,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                 }
                               },
                               style:  TextButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0DF5E4),
+                                  backgroundColor: buttonColor,
                                   padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(30.0)

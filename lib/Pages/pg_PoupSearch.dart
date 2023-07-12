@@ -15,6 +15,8 @@ import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:badges/badges.dart' as badges;
 
+import '../constants.dart';
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class pg_PoupSearch extends StatefulWidget {
@@ -257,7 +259,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                      }
                                 },
                                 style: TextButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0DF5E4),
+                                  backgroundColor: buttonColor,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 15.0,
                                     horizontal: 70,
@@ -444,7 +446,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             }
                           },
                           style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFF0DF5E4),
+                              backgroundColor: buttonColor,
                               padding: const EdgeInsets.symmetric(
                                   vertical: 15.0, horizontal: 70),
                               shape: RoundedRectangleBorder(
@@ -857,7 +859,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
               child: FloatingActionButton(
                 heroTag: "delete",
                 onPressed: _dialogDeleteBuilder,
-                backgroundColor: const Color(0xFF0DF5E4),
+                backgroundColor: buttonColor,
                 child: const Icon(
                   Icons.delete_outline_rounded,
                   color: Colors.black,
@@ -902,7 +904,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                     }
                   }));
             },
-            backgroundColor: const Color(0xFF0DF5E4),
+            backgroundColor: buttonColor,
             child: const Icon(
               Icons.add,
               color: Colors.black,

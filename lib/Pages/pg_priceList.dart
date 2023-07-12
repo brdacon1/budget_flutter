@@ -6,6 +6,7 @@ import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/Pages/pg_PopUp.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oflite/constants.dart';
 import '../Objetos/DADOS.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
@@ -483,7 +484,7 @@ class _pg_priceList extends State<pg_priceList>  {
                             setState(() {});
                           },
                           style:  TextButton.styleFrom(
-                              backgroundColor: const Color(0xFF0DF5E4),
+                              backgroundColor: buttonColor,
                               padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 70),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0)

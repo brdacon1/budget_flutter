@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../Objetos/MyBudgetDashboard.dart';
 import '../../../constants.dart';
 import 'chart.dart';
 import 'storage_info_card.dart';
 
 class StarageDetails extends StatefulWidget {
-
+  final MyBudgetDashboard item;
   const StarageDetails({
     Key? key,
+    required this.item
   }) : super(key: key);
 
   @override
@@ -29,7 +31,7 @@ class _StarageDetails extends State<StarageDetails> {
         color: Theme.of(context).canvasColor,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      child: const Column(
+      child:  Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -44,26 +46,26 @@ class _StarageDetails extends State<StarageDetails> {
           StorageInfoCard(
             svgSrc: "assets/icons/Documents.svg",
             title: "Aprovados",
-            amountOfFiles: "1.3GB",
-            numOfFiles: 1328,
+            amountOfFiles: widget.item.qtdApproved.toString(),
+            numOfFiles: widget.item.qtdApproved!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/media.svg",
             title: "Reprovados",
-            amountOfFiles: "15.3GB",
-            numOfFiles: 1328,
+            amountOfFiles: widget.item.qtdDisapproved.toString(),
+            numOfFiles: widget.item.qtdDisapproved!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/folder.svg",
             title: "Pendentes",
-            amountOfFiles: "1.3GB",
-            numOfFiles: 1328,
+            amountOfFiles: widget.item.qtdPending.toString(),
+            numOfFiles: widget.item.qtdPending!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/unknown.svg",
             title: "Finalizados",
-            amountOfFiles: "1.3GB",
-            numOfFiles: 140,
+            amountOfFiles: widget.item.qtdFinish.toString(),
+            numOfFiles: widget.item.qtdFinish!,
           ),
         ],
       ),

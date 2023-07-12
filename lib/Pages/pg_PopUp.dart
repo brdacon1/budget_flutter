@@ -10,6 +10,8 @@ import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:extended_masked_text/extended_masked_text.dart';
 
+import '../constants.dart';
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 enum Gender{
@@ -516,7 +518,7 @@ class _pg_PopUp extends State<pg_PopUp> {
 
                                 },
                                 style:  TextButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0DF5E4),
+                                    backgroundColor: buttonColor,
                                     padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30.0)

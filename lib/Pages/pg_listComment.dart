@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/Objetos/ObjectObservation.dart';
+import 'package:oflite/constants.dart';
 import '../Objetos/DADOS.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -211,7 +212,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                             }
                           },
                           style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFF0DF5E4),
+                              backgroundColor: buttonColor,
                               padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 90),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0)

@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:oflite/Objetos/MyBudgetDashboard.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/models/MyFiles.dart';
 import 'package:oflite/responsive.dart';
@@ -7,8 +8,11 @@ import '../../../constants.dart';
 import 'file_info_card.dart';
 
 class MyFiles extends StatefulWidget {
+  final MyBudgetDashboard item;
+
   const MyFiles({
     Key? key,
+    required this.item
   }) : super(key: key);
   @override
   _MyFiles createState() => _MyFiles();

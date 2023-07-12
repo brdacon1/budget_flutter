@@ -8,6 +8,7 @@ import 'package:oflite/Pages/pg_priceList.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oflite/constants.dart';
 import '../Objetos/DADOS.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import '../Objetos/ObjectListItens.dart';
@@ -600,7 +601,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
               child: FloatingActionButton(
                 heroTag: "delete",
                 onPressed: _dialogDeleteBuilder,
-                backgroundColor: const Color(0xFF0DF5E4),
+                backgroundColor: buttonColor,
                 child: const Icon(Icons.delete_outline_rounded, color: Colors.black,),
               ),
             ),
@@ -627,7 +628,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 }
               }));
             },
-            backgroundColor: const Color(0xFF0DF5E4),
+            backgroundColor: buttonColor,
             child: const Icon(Icons.add, color: Colors.black,),
           ),
         ],
