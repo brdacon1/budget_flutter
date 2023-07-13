@@ -4,6 +4,7 @@ import 'package:oflite/Pages/GeradorOrcamento.dart';
 import 'package:oflite/Pages/PdfViewPage.dart';
 import 'package:oflite/Pages/pg_listComment.dart';
 import '../Objetos/DADOS.dart';
+import '../constants.dart';
 import 'ListaItensOrcamento.dart';
 
 class pg_TabOrcamento extends StatefulWidget {
@@ -66,7 +67,7 @@ class _pg_TabOrcamentoState extends State<pg_TabOrcamento> {
       body: children[_currentIndex],
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: const Color(0xFF1F1A30), // Define a cor de fundo do BottomNavigationBar
+          canvasColor: secondaryColor, // Define a cor de fundo do BottomNavigationBar
         ),
         child: BottomNavigationBar(
           selectedItemColor: Colors.cyan[50],

@@ -34,7 +34,6 @@ class _SingupState extends State<Singup> {
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
-  Color backgroundColor = const Color(0xFF1F1A30);
   bool ispasswordev = true;
   Gender? selected;
   final db = Db();
@@ -144,7 +143,7 @@ class _SingupState extends State<Singup> {
                   height:he * 0.071,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
-                    color: selected == Gender.Email ?  enabled : backgroundColor,
+                    color: selected == Gender.Email ?  enabled : bgColor,
                   ),
                   padding: const EdgeInsets.all(8.0),
                   child:  TextField(
@@ -177,7 +176,7 @@ class _SingupState extends State<Singup> {
                   height:he * 0.071,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.0),
-                      color: selected == Gender.password ? enabled : backgroundColor
+                      color: selected == Gender.password ? enabled : bgColor
                   ),
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(

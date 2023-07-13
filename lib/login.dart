@@ -33,7 +33,6 @@ class _Login extends State<Login> {
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
-  Color backgroundColor = const Color(0xFF1F1A30);
   bool ispasswordev = true;
   Gender? selected;
   late String uid;
@@ -105,7 +104,7 @@ class _Login extends State<Login> {
         .height;
 
     return Scaffold(
-        backgroundColor: const Color(0xFF1F1A30),
+        backgroundColor: bgColor,
         body: SingleChildScrollView(
           child: Column(
               children: <Widget>[
@@ -142,7 +141,7 @@ class _Login extends State<Login> {
                       borderRadius: BorderRadius.circular(20.0),
                       color: selected == Gender.email
                           ? enabled
-                          : backgroundColor,
+                          : bgColor,
                     ),
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
@@ -184,7 +183,7 @@ class _Login extends State<Login> {
                         borderRadius: BorderRadius.circular(20.0),
                         color: selected == Gender.password
                             ? enabled
-                            : backgroundColor
+                            : bgColor
                     ),
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(

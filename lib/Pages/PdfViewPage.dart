@@ -77,7 +77,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('PDF'),
-        backgroundColor: const Color(0xFF1F1A30),
+        backgroundColor: bgColor,
       ),
       body: Container(
         color: Colors.white,

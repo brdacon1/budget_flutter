@@ -34,8 +34,6 @@ class pg_PopUp extends StatefulWidget {
 }
 
 class _pg_PopUp extends State<pg_PopUp> {
-  Color enabled = const Color(0xFF1F1A30);
-  Color backgroundColor = const Color(0xFF1F1A30);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
@@ -185,7 +183,7 @@ class _pg_PopUp extends State<pg_PopUp> {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: SingleChildScrollView(
         child: SizedBox(
           width: we,
@@ -245,16 +243,16 @@ class _pg_PopUp extends State<pg_PopUp> {
                                 baseColor: Colors.cyan[50],
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
-                                    backgroundColor: Color(0xFF1F1A30),
+                                    backgroundColor: bgColor,
                                     child: Icon(Icons.shopping_cart_outlined, color: Colors.white,)),
                                 title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
-                                    color: enabled,
+                                    color: bgColor,
                                     fontWeight: FontWeight.normal,
                                     fontSize: 15,
                                     letterSpacing: 1),
                                 ),
                                 subtitle: Text("Dados do produto ou serviço",style: GoogleFonts.heebo(
-                                    color: enabled,
+                                    color: bgColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                     letterSpacing: 1),
@@ -267,7 +265,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                       height:he * 0.071,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.categoriaText ?  enabled : backgroundColor,
+                                        color: selected == Gender.categoriaText ?  bgColor : bgColor,
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child:  TextField(
@@ -294,7 +292,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                               crossAxisAlignment: CrossAxisAlignment.start,
                                                               children: [
-                                                                Text(values[index], style: const TextStyle(color: Color(0xFF1F1A30),
+                                                                Text(values[index], style: const TextStyle(color: bgColor,
                                                                     fontSize: 15.0)),
                                                               ]
                                                           ),
@@ -337,7 +335,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                       height:he * 0.071,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.unidadeText ?  enabled : backgroundColor,
+                                        color: selected == Gender.unidadeText ?  bgColor : bgColor,
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child:  TextField(
@@ -370,7 +368,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                       height:he * 0.071,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.unidadeText ? enabled : backgroundColor
+                                          color: selected == Gender.unidadeText ? bgColor : bgColor
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextField(
@@ -406,7 +404,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                         height:he * 0.071,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.qtdText ?  enabled : backgroundColor,
+                                          color: selected == Gender.qtdText ?  bgColor : bgColor,
                                         ),
                                         padding: const EdgeInsets.all(8.0),
                                         child:  TextField(
@@ -441,7 +439,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                       height:he * 0.1,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.descricaoText ? enabled : backgroundColor
+                                          color: selected == Gender.descricaoText ? bgColor : bgColor
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextField(

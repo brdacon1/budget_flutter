@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants.dart';
+
 class LoadingEvent {
   bool _isLoading = false;
 
@@ -12,7 +14,7 @@ class LoadingEvent {
         return WillPopScope(
           onWillPop: () async => false,
           child: const AlertDialog(
-            backgroundColor: Color(0xFF1F1A30),
+            backgroundColor: bgColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[

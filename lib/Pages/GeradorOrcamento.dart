@@ -51,8 +51,6 @@ class GeradorOrcamento extends StatefulWidget {
 
 class _GeradorOrcamento extends State<GeradorOrcamento> {
   DADOS orcamento = DADOS();
-  Color enabled = const Color(0xFF1F1A30);
-  Color backgroundColor = const Color(0xFF1F1A30);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
@@ -351,7 +349,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
@@ -406,17 +404,17 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
-                                  backgroundColor: Color(0xFF1F1A30),
+                                  backgroundColor: bgColor,
                                   child: Icon(Icons.person_outlined, color: Colors.white,)),
                               title: Text(titleBox!,style: GoogleFonts.heebo(
-                                  color: enabled,
+                                  color: bgColor,
                                   fontWeight: FontWeight.normal,
                                   fontSize: 16,
                                   letterSpacing: 1
                               ),
                               ),
                               subtitle: Text("Informações do cliente",style: GoogleFonts.heebo(
-                                  color: enabled,
+                                  color: bgColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                   letterSpacing: 1
@@ -430,7 +428,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height: he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.fullname ?  enabled : backgroundColor,
+                                      color: selected == Gender.fullname ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -508,7 +506,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.phone ?  enabled : backgroundColor,
+                                      color: selected == Gender.phone ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -547,17 +545,17 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                       baseColor: Colors.cyan[50],
                       expandedColor: Colors.cyan[50],
                       leading: const CircleAvatar(
-                          backgroundColor: Color(0xFF1F1A30),
+                          backgroundColor: bgColor,
                           child: Icon(Icons.request_page_outlined, color: Colors.white,)),
                           title: Text(titleBox!,style: GoogleFonts.heebo(
-                          color: enabled,
+                          color: bgColor,
                           fontWeight: FontWeight.normal,
                           fontSize: 16,
                           letterSpacing: 1
                         ),
                       ),
                       subtitle: Text("Informações do orçamento",style: GoogleFonts.heebo(
-                          color: enabled,
+                          color: bgColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           letterSpacing: 1
@@ -574,7 +572,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                             height:he * 0.071,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20.0),
-                              color: selected == Gender.status ?  enabled : backgroundColor,
+                              color: selected == Gender.status ?  bgColor : bgColor,
                             ),
                             padding: const EdgeInsets.all(8.0),
                             child:  TextField(
@@ -601,7 +599,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                Text(values[index], style: const TextStyle(color: Color(0xFF1F1A30),
+                                                Text(values[index], style: const TextStyle(color: bgColor,
                                                     fontSize: 15.0)),
                                                 ]
                                               ),
@@ -646,7 +644,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                 height:he * 0.071,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20.0),
-                                  color: selected == Gender.data ?  enabled : backgroundColor,
+                                  color: selected == Gender.data ?  bgColor : bgColor,
                                 ),
                                 padding: const EdgeInsets.all(8.0),
                                 child:  TextField(
@@ -682,7 +680,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                 height:he * 0.071,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20.0),
-                                  color: selected == Gender.id ?  enabled : backgroundColor,
+                                  color: selected == Gender.id ?  bgColor : bgColor,
                                 ),
                                 padding: const EdgeInsets.all(8.0),
                                 child:  TextField(
@@ -720,17 +718,17 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
-                                  backgroundColor: Color(0xFF1F1A30),
+                                  backgroundColor: bgColor,
                                   child: Icon(Icons.location_on_outlined, color: Colors.white,)),
                               title: Text(titleBox!,style: GoogleFonts.heebo(
-                                  color: enabled,
+                                  color: bgColor,
                                   fontWeight: FontWeight.normal,
                                   fontSize: 16,
                                   letterSpacing: 1
                               ),
                               ),
                               subtitle: Text("Informações de endereço",style: GoogleFonts.heebo(
-                                  color: enabled,
+                                  color: bgColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                   letterSpacing: 1
@@ -744,7 +742,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.cep ?  enabled : backgroundColor,
+                                      color: selected == Gender.cep ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -791,7 +789,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.rua ?  enabled : backgroundColor,
+                                      color: selected == Gender.rua ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -824,7 +822,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.city ?  enabled : backgroundColor,
+                                      color: selected == Gender.city ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -857,7 +855,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.bairro ?  enabled : backgroundColor,
+                                      color: selected == Gender.bairro ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
@@ -896,7 +894,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                               onPressed: () async {
                                   await EventSave();
                               },
-                              style:  TextButton.styleFrom(
+                              style: TextButton.styleFrom(
                                   backgroundColor: buttonColor,
                                   padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
                                   shape: RoundedRectangleBorder(

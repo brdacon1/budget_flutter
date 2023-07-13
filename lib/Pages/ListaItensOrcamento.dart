@@ -30,7 +30,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
   var deleteItens = <ObjectListItens>[];
   ObjectListItens novo = ObjectListItens();
   convert_coin moneyConvert = convert_coin();
-  Color backgroundColor = const Color(0xFF1F1A30);
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
@@ -60,7 +59,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(19),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -121,10 +120,10 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               ),
                               child: ListTile(
                                 title: Text(
-                                  "Descrição: ${deleteItens[index].DESCRICAO}",
+                                  deleteItens[index].DESCRICAO!,
                                   maxLines: 2,
                                   style: const TextStyle(
-                                    color: Color(0xFF1F1A30),
+                                    color: bgColor,
                                     letterSpacing: 0.5,
                                     fontSize: 10.0,
                                     fontWeight: FontWeight.bold,
@@ -137,7 +136,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                     Text(
                                       "Status:   ${deleteItens[index].CATEGORIA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -145,7 +144,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                     Text(
                                       "Medida:  ${deleteItens[index].MEDIDA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -153,7 +152,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                     Text(
                                       "Preço:     ${moneyConvert.convertFromDouble(deleteItens[index].PRECO!)}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -175,7 +174,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                     },
                                     child: const Icon(
                                       Icons.close,
-                                      color: Color(0xFF1F1A30),
+                                      color: bgColor,
                                       size: 23.0,
                                     ),
                                   ),
@@ -285,7 +284,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -365,7 +364,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
             Expanded(
               child: RefreshIndicator(
                 color: Colors.cyan[50],
-                backgroundColor: const Color(0xFF1F1A30),
+                backgroundColor: bgColor,
                 onRefresh: () async {
                   await getListItens();
                   setState(() {
@@ -385,14 +384,14 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         baseColor: Colors.cyan[50],
                         expandedColor: Colors.blue[50],
                         leading: const CircleAvatar(
-                            backgroundColor: Color(0xFF1F1A30),
+                            backgroundColor: bgColor,
                             child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
                         title:
                         Text(
-                          "Descrição: ${_foundUsers[index].DESCRICAO}",
+                          _foundUsers[index].DESCRICAO!,
                           maxLines: 2,
                           style: const TextStyle(
-                            color: Color(0xFF1F1A30),
+                            color: bgColor,
                             letterSpacing: 0.5,
                             fontSize: 10.0,
                             fontWeight: FontWeight.bold,
@@ -401,7 +400,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         subtitle: Text(
                           "Preço: ${moneyConvert.convertFromDouble(_foundUsers[index].PRECO!)}",
                           style: const TextStyle(
-                            color: Color(0xFF1F1A30),
+                            color: bgColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                           ),
@@ -421,7 +420,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Categoria: ${_foundUsers[index].CATEGORIA}",
                                 style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -438,7 +437,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Total: ${moneyConvert.convertFromDouble(_foundUsers[index].TOTAL!)}",
                                 style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -455,7 +454,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Quantidade: ${_foundUsers[index].QTD}",
                                 style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -472,7 +471,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Unidade de medida: ${_foundUsers[index].MEDIDA}",
                                 style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -496,7 +495,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF1F1A30),
+                                            backgroundColor: bgColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -533,7 +532,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                       height: 52.0,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF1F1A30),
+                                          backgroundColor: bgColor,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                           ),

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 class DisplayAlert {
   Future<void> notificationError(BuildContext context, String firstMessage, String secondMessage) {
     final width = MediaQuery.of(context).size.width;
-
     final completer = Completer<void>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -29,9 +28,7 @@ class DisplayAlert {
 
   Future<void> notification(BuildContext context, String firstMessage, String secondMessage) {
     final width = MediaQuery.of(context).size.width;
-
     final completer = Completer<void>();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AwesomeDialog(
         width: width * 0.99,

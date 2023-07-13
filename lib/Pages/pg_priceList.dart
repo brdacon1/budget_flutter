@@ -25,7 +25,6 @@ class pg_priceList  extends StatefulWidget {
 
 class _pg_priceList extends State<pg_priceList>  {
   Color enabled = const Color(0xFF827F8A);
-  Color backgroundColor = const Color(0xFF1F1A30);
   var orcamentos = <ObjectListItens>[];
   var deleteItens = <ObjectListItens>[];
   var addItens = <ObjectListItens>[];
@@ -134,7 +133,7 @@ class _pg_priceList extends State<pg_priceList>  {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(19),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -195,10 +194,10 @@ class _pg_priceList extends State<pg_priceList>  {
                               ),
                               child: ListTile(
                                 title: Text(
-                                  "Descrição: ${addItens[index].DESCRICAO}",
+                                  addItens[index].DESCRICAO!,
                                   maxLines: 2,
                                   style: const TextStyle(
-                                    color: Color(0xFF1F1A30),
+                                    color: bgColor,
                                     letterSpacing: 0.5,
                                     fontSize: 10.0,
                                     fontWeight: FontWeight.bold,
@@ -225,7 +224,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Status:   ${addItens[index].CATEGORIA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -233,7 +232,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Medida:  ${addItens[index].MEDIDA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -241,7 +240,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Preço:     R\$ ${moneyConvert.convertFromDouble(addItens[index].PRECO!)}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -261,7 +260,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     },
                                     child: const Icon(
                                       Icons.close,
-                                      color: Color(0xFF1F1A30),
+                                      color: bgColor,
                                       size: 23.0,
                                     ),
                                   ),
@@ -331,7 +330,7 @@ class _pg_priceList extends State<pg_priceList>  {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(19),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -392,10 +391,10 @@ class _pg_priceList extends State<pg_priceList>  {
                               ),
                               child: ListTile(
                                 title: Text(
-                                  "Descrição: ${deleteItens[index].DESCRICAO}",
+                                  deleteItens[index].DESCRICAO!,
                                   maxLines: 2,
                                   style: const TextStyle(
-                                    color: Color(0xFF1F1A30),
+                                    color: bgColor,
                                     letterSpacing: 0.5,
                                     fontSize: 10.0,
                                     fontWeight: FontWeight.bold,
@@ -408,7 +407,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Status:   ${deleteItens[index].CATEGORIA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -416,7 +415,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Medida:  ${deleteItens[index].MEDIDA}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -424,7 +423,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     Text(
                                       "Preço:     ${moneyConvert.convertFromDouble(deleteItens[index].PRECO!)}",
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -447,7 +446,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                     },
                                     child: const Icon(
                                       Icons.close,
-                                      color: Color(0xFF1F1A30),
+                                      color: bgColor,
                                       size: 23.0,
                                     ),
                                   ),
@@ -579,7 +578,7 @@ class _pg_priceList extends State<pg_priceList>  {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
@@ -653,7 +652,7 @@ class _pg_priceList extends State<pg_priceList>  {
             Expanded(
               child: RefreshIndicator(
                 color: Colors.cyan[50],
-                backgroundColor: const Color(0xFF1F1A30),
+                backgroundColor: bgColor,
                 onRefresh: () async {
                   await getListItens();
                   setState(() {});
@@ -690,7 +689,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                       "${orcamentos[index].DESCRICAO}",
                                       maxLines: 2,
                                       style: const TextStyle(
-                                        color: Color(0xFF1F1A30),
+                                        color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 10.0,
                                         fontWeight: FontWeight.bold,
@@ -706,13 +705,13 @@ class _pg_priceList extends State<pg_priceList>  {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("Categoria:   ${orcamentos[index].CATEGORIA}", style: const TextStyle(color: Color(0xFF1F1A30),
+                                    Text("Categoria:   ${orcamentos[index].CATEGORIA}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
-                                    Text("Medida:       ${orcamentos[index].MEDIDA}", style: const TextStyle(color: Color(0xFF1F1A30),
+                                    Text("Medida:       ${orcamentos[index].MEDIDA}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
-                                    Text("Preço:          ${moneyConvert.convertFromDouble(orcamentos[index].PRECO!)}", style: const TextStyle(color: Color(0xFF1F1A30),
+                                    Text("Preço:          ${moneyConvert.convertFromDouble(orcamentos[index].PRECO!)}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
                                   ])
@@ -747,11 +746,11 @@ class _pg_priceList extends State<pg_priceList>  {
                               child: Checkbox(
                                 value:  orcamentos[index].selectProduct,
                                 side: const BorderSide(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                 ),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                                 checkColor:  Colors.white,
-                                activeColor: const Color(0xFF1F1A30),
+                                activeColor: bgColor,
                                 onChanged: (bool? newValue) async
                                 {
                                   double totalPrice = 0;
@@ -784,11 +783,11 @@ class _pg_priceList extends State<pg_priceList>  {
                               child: Checkbox(
                                 value:  orcamentos[index].checkBox,
                                 side: const BorderSide(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                 ),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                                 checkColor:  Colors.white,
-                                activeColor: const Color(0xFF1F1A30),
+                                activeColor: bgColor,
                                 onChanged: (bool? newValue) async {
                                   if(orcamentos[index].checkBox == false)
                                   {

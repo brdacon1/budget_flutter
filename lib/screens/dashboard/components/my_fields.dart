@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Objetos/MyBudgetDashboard.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/models/MyFiles.dart';
@@ -40,26 +41,40 @@ class _MyFiles extends State<MyFiles> {
             ),
             Row(
               children: [
-                ElevatedButton.icon(
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: defaultPadding * 1.5,
-                      vertical: defaultPadding /
-                          (Responsive.isMobile(context) ? 2 : 1),
-                    ),
-                  ),
-                  onPressed: () {
+                TextButton.icon(
+                  onPressed: () async {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => pg_subscription(),
                       ),
                     );
-                    //AdaptiveTheme.of(context).toggleThemeMode();
                   },
-                  icon: const Icon(Icons.payment_rounded),
-                  label: const Text("VERSÃO PREMIUN"),
+                  style: TextButton.styleFrom(
+                    backgroundColor: buttonColor,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: defaultPadding * 1.5,
+                      vertical: defaultPadding / (Responsive.isMobile(context) ? 2 : 1),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.payment_rounded,
+                    color: Colors.black,
+                  ),
+                  label: Text(
+                    "VERSÃO PREMIUM",
+                    style: GoogleFonts.heebo(
+                      color: Colors.black,
+                      letterSpacing: 0.5,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
+
               ],
             ),
           ],

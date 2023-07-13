@@ -27,7 +27,6 @@ class pg_PoupSearch extends StatefulWidget {
 class _pg_PoupSearch extends State<pg_PoupSearch> {
   DADOS customerBudget = DADOS();
   Color enabled = const Color(0xFF827F8A);
-  Color backgroundColor = const Color(0xFF1F1A30);
   var _foundUsers = <DADOS>[];
   var deleteItens = <DADOS>[];
   DADOS novo = DADOS();
@@ -131,7 +130,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(15),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -165,10 +164,10 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             children: <Widget>[
                               CheckboxListTile(
                                 side: const BorderSide(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                 ),
                                 checkColor:  Colors.white,
-                                activeColor: const Color(0xFF1F1A30),
+                                activeColor: bgColor,
                                 title: Text(
                                   "Duplicar dados do cliente",
                                   style: GoogleFonts.heebo(
@@ -190,10 +189,10 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               ),
                               CheckboxListTile(
                                 side: const BorderSide(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                 ),
                                 checkColor:  Colors.white,
-                                activeColor: const Color(0xFF1F1A30),
+                                activeColor: bgColor,
                                 title: Text(
                                   "Duplicar itens do orçamento",
                                   style: GoogleFonts.heebo(
@@ -215,10 +214,10 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               ),
                               CheckboxListTile(
                                 side: const BorderSide(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                 ),
                                 checkColor:  Colors.white,
-                                activeColor: const Color(0xFF1F1A30),
+                                activeColor: bgColor,
                                 title: Text(
                                   "Duplicar comentários",
                                   style: GoogleFonts.heebo(
@@ -302,7 +301,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(19),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -366,7 +365,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                 title: Text(
                                     "Cliente: ${deleteItens[index].NOMECLIENTE}",
                                     style: const TextStyle(
-                                      color: Color(0xFF1F1A30),
+                                      color: bgColor,
                                       letterSpacing: 0.5,
                                       fontSize: 12.0,
                                       fontWeight: FontWeight.bold,
@@ -379,19 +378,19 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       Text(
                                           "Nº orçamento: ${deleteItens[index].ID}",
                                           style: const TextStyle(
-                                              color: Color(0xFF1F1A30),
+                                              color: bgColor,
                                               letterSpacing: 0.5,
                                               fontSize: 12.0)),
                                       Text(
                                           "Status: ${deleteItens[index].STATUS}",
                                           style: const TextStyle(
-                                              color: Color(0xFF1F1A30),
+                                              color: bgColor,
                                               letterSpacing: 0.5,
                                               fontSize: 12.0)),
                                       Text(
                                           "Criado em: ${deleteItens[index].DATA}",
                                           style: const TextStyle(
-                                              color: Color(0xFF1F1A30),
+                                              color: bgColor,
                                               letterSpacing: 0.5,
                                               fontSize: 12.0)),
                                     ]),
@@ -411,7 +410,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     },
                                     child: const Icon(
                                       Icons.close,
-                                      color: Color(0xFF1F1A30),
+                                      color: bgColor,
                                       size: 23.0,
                                     ),
                                   ),
@@ -517,7 +516,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
         SizedBox(
           height: he * 0.04,
@@ -587,7 +586,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
         Expanded(
           child: RefreshIndicator(
             color: Colors.cyan[50],
-            backgroundColor: const Color(0xFF1F1A30),
+            backgroundColor: bgColor,
             onRefresh: () async {
               await getInformationOrcamento();
               setState(() {
@@ -608,7 +607,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                     baseColor: Colors.cyan[50],
                     expandedColor: Colors.green[50],
                     leading: const CircleAvatar(
-                        backgroundColor: Color(0xFF1F1A30),
+                        backgroundColor: bgColor,
                         child: Icon(
                           Icons.account_balance_wallet_outlined,
                           color: Colors.white,
@@ -617,7 +616,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                       "${_foundUsers[index].NOMECLIENTE}",
                       maxLines: 2,
                       style: const TextStyle(
-                        color: Color(0xFF1F1A30),
+                        color: bgColor,
                         letterSpacing: 0.5,
                         fontSize: 12.0,
                         fontWeight: FontWeight.bold,
@@ -625,7 +624,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                     ),
                     subtitle: Text("Nº orçamento: ${_foundUsers[index].ID}",
                         style: const TextStyle(
-                            color: Color(0xFF1F1A30),
+                            color: bgColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0)),
                     children: <Widget>[
@@ -643,7 +642,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           child: Text(
                             "Telefone: ${_foundUsers[index].FONE}",
                             style: const TextStyle(
-                              color: Color(0xFF1F1A30),
+                              color: bgColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                             ),
@@ -660,7 +659,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           child: Text(
                               "Data do orçamento: ${_foundUsers[index].DATA}",
                               style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -674,7 +673,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           ),
                           child: Text("Status: ${_foundUsers[index].STATUS}",
                               style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -688,7 +687,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           ),
                           child: Text("Criado em: ${_foundUsers[index].DATA}",
                               style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -712,7 +711,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
-                                            const Color(0xFF1F1A30),
+                                             bgColor,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(5.0),
@@ -750,7 +749,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                   height: 52.0,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF1F1A30),
+                                      backgroundColor: bgColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(5.0),
@@ -798,7 +797,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                   height: 52.0,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF1F1A30),
+                                      backgroundColor: bgColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(5.0),

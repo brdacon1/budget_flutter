@@ -29,7 +29,6 @@ class _ListCommentPageState extends State<ListCommentPage> {
   var deleteItems = <ObjectObservation>[];
   ObjectObservation novo = ObjectObservation();
   Color enabled = const Color(0xFF827F8A);
-  Color backgroundColor = const Color(0xFF1F1A30);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
   Gender? selected;
@@ -109,7 +108,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           insetPadding: const EdgeInsets.all(19),
-          backgroundColor: const Color(0xFF1F1A30),
+          backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
@@ -158,7 +157,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                       height:he * 0.35,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20.0),
-                          color: selected == Gender.comentText ? enabled : backgroundColor
+                          color: selected == Gender.comentText ? enabled : bgColor
                       ),
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
@@ -325,7 +324,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
     var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color(0xFF1F1A30),
+      backgroundColor: bgColor,
       body: Column(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
@@ -370,7 +369,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
             Expanded(
               child: RefreshIndicator(
                 color: Colors.cyan[50],
-                backgroundColor: const Color(0xFF1F1A30),
+                backgroundColor: bgColor,
                 onRefresh: () async {
                   foundObservation.clear();
                   observation.clear();
@@ -392,14 +391,14 @@ class _ListCommentPageState extends State<ListCommentPage> {
                         baseColor: Colors.cyan[50],
                         expandedColor: Colors.blue[50],
                         leading: const CircleAvatar(
-                            backgroundColor: Color(0xFF1F1A30),
+                            backgroundColor: bgColor,
                             child: Icon(Icons.comment, color: Colors.white,)),
                         title:
                         Text(
                           "${foundObservation[index].observacao}",
                           maxLines: 2,
                           style: const TextStyle(
-                            color: Color(0xFF1F1A30),
+                            color: bgColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                             fontWeight: FontWeight.bold,
@@ -408,7 +407,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                         subtitle: Text(
                           "Data: ${foundObservation[index].data}",
                           style: const TextStyle(
-                            color: Color(0xFF1F1A30),
+                            color: bgColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                           ),
@@ -428,7 +427,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                               child: Text(
                                 "Comentário: ${foundObservation[index].observacao}",
                                 style: const TextStyle(
-                                  color: Color(0xFF1F1A30),
+                                  color: bgColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -452,7 +451,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF1F1A30),
+                                            backgroundColor: bgColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -485,7 +484,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                       height: 52.0,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF1F1A30),
+                                          backgroundColor: bgColor,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                           ),
