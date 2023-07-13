@@ -34,38 +34,38 @@ class _StarageDetails extends State<StarageDetails> {
       child:  Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "Orçamentos gerados",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: defaultPadding),
-          Chart(),
+          const SizedBox(height: defaultPadding),
+          Chart(item: widget.item),
           StorageInfoCard(
             svgSrc: "assets/icons/Documents.svg",
             title: "Aprovados",
-            amountOfFiles: widget.item.qtdApproved.toString(),
-            numOfFiles: widget.item.qtdApproved!,
+            amountOfFiles: widget.item.qtdIntApproved.toString(),
+            numOfFiles: widget.item.qtdIntApproved!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/media.svg",
             title: "Reprovados",
-            amountOfFiles: widget.item.qtdDisapproved.toString(),
-            numOfFiles: widget.item.qtdDisapproved!,
+            amountOfFiles: widget.item.qtdIntDisapproved.toString(),
+            numOfFiles: widget.item.qtdIntDisapproved!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/folder.svg",
             title: "Pendentes",
-            amountOfFiles: widget.item.qtdPending.toString(),
-            numOfFiles: widget.item.qtdPending!,
+            amountOfFiles: widget.item.qtdIntPending.toString(),
+            numOfFiles: widget.item.qtdIntPending!,
           ),
           StorageInfoCard(
             svgSrc: "assets/icons/unknown.svg",
             title: "Finalizados",
-            amountOfFiles: widget.item.qtdFinish.toString(),
-            numOfFiles: widget.item.qtdFinish!,
+            amountOfFiles: widget.item.qtdIntFinish.toString(),
+            numOfFiles: widget.item.qtdIntFinish!,
           ),
         ],
       ),

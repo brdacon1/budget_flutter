@@ -1,14 +1,55 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../Objetos/MyBudgetDashboard.dart';
 import '../../../constants.dart';
 
-class Chart extends StatelessWidget {
+class Chart extends StatefulWidget {
+  final MyBudgetDashboard item;
   const Chart({
     Key? key,
+    required this.item
   }) : super(key: key);
+  @override
+  _Chart createState() => _Chart();
+}
+
+class _Chart extends State<Chart> {
+  List<PieChartSectionData> paiChartSelectionDatas = [];
+
+
+  @override
+  initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    paiChartSelectionDatas = [
+      PieChartSectionData(
+        color: Colors.green,
+        value: widget.item.qtdDoubleApproved,
+        showTitle: false,
+        radius: widget.item.qtdDoubleApproved ! * 6,
+      ),
+      PieChartSectionData(
+        color: Colors.red,
+        value: widget.item.qtdDoubleDisapproved,
+        showTitle: false,
+        radius: widget.item.qtdDoubleDisapproved! * 6,
+      ),
+      PieChartSectionData(
+        color: Colors.amberAccent,
+        value: widget.item.qtdDoublePending,
+        showTitle: false,
+        radius: widget.item.qtdDoublePending! * 6,
+      ),
+      PieChartSectionData(
+        color: Colors.white,
+        value: widget.item.qtdDoubleFinish,
+        showTitle: false,
+        radius: widget.item.qtdDoubleFinish! * 6,
+      ),
+    ];
     return SizedBox(
       height: 200,
       child: Stack(
@@ -27,13 +68,18 @@ class Chart extends StatelessWidget {
               children: [
                 const SizedBox(height: defaultPadding),
                 Text(
-                  "29.1",
-                  style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                  widget.item.qtdTotal.toString(),
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 30
+                    fontSize: 34
                   ),
                 ),
-                const Text("of 128GB")
+                Text("Total",
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14
+                  ),
+                )
               ],
             ),
           ),
@@ -43,35 +89,4 @@ class Chart extends StatelessWidget {
   }
 }
 
-List<PieChartSectionData> paiChartSelectionDatas = [
-  PieChartSectionData(
-    color: primaryColor,
-    value: 25,
-    showTitle: false,
-    radius: 25,
-  ),
-  PieChartSectionData(
-    color: const Color(0xFF26E5FF),
-    value: 20,
-    showTitle: false,
-    radius: 22,
-  ),
-  PieChartSectionData(
-    color: const Color(0xFFFFCF26),
-    value: 10,
-    showTitle: false,
-    radius: 19,
-  ),
-  PieChartSectionData(
-    color: const Color(0xFFEE2727),
-    value: 15,
-    showTitle: false,
-    radius: 16,
-  ),
-  PieChartSectionData(
-    color: primaryColor.withOpacity(0.1),
-    value: 25,
-    showTitle: false,
-    radius: 13,
-  ),
-];
+

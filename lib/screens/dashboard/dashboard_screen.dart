@@ -16,26 +16,43 @@ class DashboardScreen extends StatefulWidget {
   _DashboardScreen createState() => _DashboardScreen();
 }
 
-
 class _DashboardScreen extends State<DashboardScreen> {
   final _foundUsers = <DADOS>[];
   final MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
-    qtdApproved: 0,
-    qtdPending: 0,
-    qtdDisapproved: 0,
-    qtdFinish: 0,
-  );
+      qtdTotal: 0,
+      qtdIntApproved: 0,
+      qtdIntPending: 0,
+      qtdIntFinish: 0,
+      qtdIntDisapproved: 0,
+      qtdDoubleApproved: 0,
+      qtdDoublePending: 0,
+      qtdDoubleFinish: 0,
+      qtdDoubleDisapproved: 0);
+
   @override
   initState() {
+    super.initState();
     try {
       setState(() async {
         await getInformationBudget().then((value) => {
-        setState(() {}),
-        });
+        _myBudgetDashboard.qtdTotal = value.length,
+          for (int i = 0; i < value.length; i++) {
+            if (value[i].STATUS == "APROVADO") {
+              _myBudgetDashboard.qtdIntApproved = _myBudgetDashboard.qtdIntApproved! + 1,
+              _myBudgetDashboard.qtdDoubleApproved = _myBudgetDashboard.qtdDoubleApproved! + 1,
+            } else if (_foundUsers[i].STATUS == "PENDENTE") {
+              _myBudgetDashboard.qtdIntPending = _myBudgetDashboard.qtdIntPending! + 1,
+              _myBudgetDashboard.qtdDoublePending = _myBudgetDashboard.qtdDoublePending! + 1,
+            } else if (_foundUsers[i].STATUS == "REPROVADO") {
+              _myBudgetDashboard.qtdIntDisapproved = _myBudgetDashboard.qtdIntDisapproved! + 1,
+              _myBudgetDashboard.qtdDoubleDisapproved = _myBudgetDashboard.qtdDoubleDisapproved! + 1,
+            } else if (_foundUsers[i].STATUS == "FINALIZADO") {
+              _myBudgetDashboard.qtdIntFinish = _myBudgetDashboard.qtdIntFinish! + 1,
+              _myBudgetDashboard.qtdDoubleFinish = _myBudgetDashboard.qtdDoubleFinish! + 1,},
+          },
+          setState(() {})});
       });
-
     } catch (e) {}
-    super.initState();
   }
 
   Future<List<DADOS>> getInformationBudget() async {
@@ -60,18 +77,6 @@ class _DashboardScreen extends State<DashboardScreen> {
         .then((value) async {
       for (var questionTmp in value.docs) {
         _foundUsers.add(DADOS.fromMap(questionTmp));
-      }
-
-      for (int i = 0; i < _foundUsers.length; i++) {
-        if (_foundUsers[i].STATUS == "APROVADO") {
-          _myBudgetDashboard.qtdApproved = _myBudgetDashboard.qtdApproved! + 1;
-        } else if (_foundUsers[i].STATUS == "PENDENTE") {
-          _myBudgetDashboard.qtdPending = _myBudgetDashboard.qtdPending! + 1;
-        } else if (_foundUsers[i].STATUS == "REPROVADO") {
-          _myBudgetDashboard.qtdDisapproved = _myBudgetDashboard.qtdDisapproved! + 1;
-        } else if (_foundUsers[i].STATUS == "FINALIZADO") {
-          _myBudgetDashboard.qtdFinish = _myBudgetDashboard.qtdFinish! + 1;
-        }
       }
     }).then((value) => {
     });
@@ -99,7 +104,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
-                         StarageDetails(item: _myBudgetDashboard,),
+                         StarageDetails(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
                       const RecentFiles(),
                     ],
