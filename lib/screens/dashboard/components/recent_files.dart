@@ -61,13 +61,16 @@ DataRow recentFileDataRow(DADOS fileInfo) {
   return DataRow(
     cells: [
       DataCell(
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: Text(fileInfo.NOMECLIENTE!.split(' ')[0], softWrap: false,),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 80),
+          child: Tooltip(
+            message: fileInfo.NOMECLIENTE!,
+            child: Text(
+              fileInfo.NOMECLIENTE!.split(' ')[0],
+              softWrap: true,
+              overflow: TextOverflow.fade,
             ),
-          ],
+          ),
         ),
       ),
       DataCell(Text(fileInfo.DATA!)),
