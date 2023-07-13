@@ -17,7 +17,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreen extends State<DashboardScreen> {
-  final _foundUsers = <DADOS>[];
+  final List<DADOS> _foundUsers = <DADOS>[];
   final MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
       qtdTotal: 0,
       qtdIntApproved: 0,
@@ -106,7 +106,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       if (Responsive.isMobile(context))
                          StarageDetails(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
-                      const RecentFiles(),
+                       RecentFiles(items: _foundUsers!),
                     ],
                   ),
                 ),

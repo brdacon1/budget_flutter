@@ -29,25 +29,25 @@ class _Chart extends State<Chart> {
         color: Colors.green,
         value: widget.item.qtdDoubleApproved,
         showTitle: false,
-        radius: widget.item.qtdDoubleApproved ! * 6,
+        radius: widget.item.qtdDoubleApproved,
       ),
       PieChartSectionData(
         color: Colors.red,
         value: widget.item.qtdDoubleDisapproved,
         showTitle: false,
-        radius: widget.item.qtdDoubleDisapproved! * 6,
+        radius: widget.item.qtdDoubleDisapproved,
       ),
       PieChartSectionData(
         color: Colors.amberAccent,
         value: widget.item.qtdDoublePending,
         showTitle: false,
-        radius: widget.item.qtdDoublePending! * 6,
+        radius: widget.item.qtdDoublePending,
       ),
       PieChartSectionData(
         color: Colors.white,
         value: widget.item.qtdDoubleFinish,
         showTitle: false,
-        radius: widget.item.qtdDoubleFinish! * 6,
+        radius: widget.item.qtdDoubleFinish,
       ),
     ];
     return SizedBox(

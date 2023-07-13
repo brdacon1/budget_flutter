@@ -2,13 +2,18 @@ import 'package:oflite/models/RecentFile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../Objetos/DADOS.dart';
 import '../../../constants.dart';
 
-class RecentFiles extends StatelessWidget {
-  const RecentFiles({
-    Key? key,
+class RecentFiles extends StatefulWidget {
+  final List<DADOS> items;
 
-  }) : super(key: key);
+  const RecentFiles({Key? key, required this.items}) : super(key: key);
+  @override
+  _RecentFiles createState() => _RecentFiles();
+}
+
+class _RecentFiles extends State<RecentFiles> {
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +46,8 @@ class RecentFiles extends StatelessWidget {
                 ),
               ],
               rows: List.generate(
-                demoRecentFiles.length,
-                (index) => recentFileDataRow(demoRecentFiles[index]),
+                widget.items.length >= 5 ? 5 : widget.items.length,
+                    (index) => recentFileDataRow(widget.items[widget.items.length - index - 1]),
               ),
             ),
           ),
@@ -52,26 +57,21 @@ class RecentFiles extends StatelessWidget {
   }
 }
 
-DataRow recentFileDataRow(RecentFile fileInfo) {
+DataRow recentFileDataRow(DADOS fileInfo) {
   return DataRow(
     cells: [
       DataCell(
         Row(
           children: [
-            SvgPicture.asset(
-              fileInfo.icon!,
-              height: 30,
-              width: 30,
-            ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
-              child: Text(fileInfo.title!),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Text(fileInfo.NOMECLIENTE!.split(' ')[0], softWrap: false,),
             ),
           ],
         ),
       ),
-      DataCell(Text(fileInfo.date!)),
-      DataCell(Text(fileInfo.size!)),
+      DataCell(Text(fileInfo.DATA!)),
+      DataCell(Text(fileInfo.ID!)),
     ],
   );
 }
