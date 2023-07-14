@@ -1,58 +1,95 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Pages/pg_priceList.dart';
 
-import '../anmition/fadeanimation.dart';
 import '../constants.dart';
 
+class MenuItem {
+  final IconData icon;
+  final String title;
+
+  MenuItem({required this.icon, required this.title});
+}
+
 class MenuSelectionPage extends StatelessWidget {
-  final List<String> menuItems = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+  final List<MenuItem> menuItems = [
+    MenuItem(icon: Icons.list, title: 'Lista de preço'),
+    MenuItem(icon: Icons.password, title: 'Trocar de senha'),
+    MenuItem(icon: Icons.menu, title: 'Editar PDF'),
+  ];
 
   MenuSelectionPage({Key? key}) : super(key: key);
+
+  void navigateToPage(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const pg_priceList(fromMenu: true,)),
+        );
+        break;
+      case 1:
+      // Navegue para a segunda página aqui
+        break;
+      case 2:
+      // Navegue para a segunda página aqui
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
-      body: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
-        SizedBox(
-          height: he * 0.04,
-        ),
-        SizedBox(
-          height: he * 0.03,
-        ),
-        FadeAnimation(
-          delay: 1,
-          child: Container(
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          SizedBox(height: he * 0.04),
+          SizedBox(height: he * 0.03),
+          Container(
             margin: const EdgeInsets.only(right: 275.0),
             child: Text(
               "Menu",
               style: GoogleFonts.heebo(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                  letterSpacing: 2),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                letterSpacing: 2,
+              ),
             ),
           ),
-        ),
-        Expanded(
+          Expanded(
             child: ListView.builder(
               itemCount: menuItems.length,
               itemBuilder: (context, index) {
                 final menuItem = menuItems[index];
-                return ListTile(
-                  leading: const Icon(Icons.menu),
-                  title: Text(menuItem),
-                  trailing: const Icon(Icons.arrow_right),
-                  onTap: () {
-                    print('Item $menuItem clicado!');
-                  },
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
+                  child: GestureDetector(
+                    onTap: () => navigateToPage(context, index),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: secondaryColor, width: 2),
+                      ),
+                      child: ListTile(
+                        leading: Icon(menuItem.icon),
+                        title: Text(
+                          menuItem.title,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        trailing: const Icon(Icons.arrow_right),
+                      ),
+                    ),
+                  ),
                 );
               },
-             ),
             ),
-        ]
+          ),
+        ],
       ),
     );
   }

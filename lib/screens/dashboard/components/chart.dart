@@ -16,7 +16,6 @@ class Chart extends StatefulWidget {
 class _Chart extends State<Chart> {
   List<PieChartSectionData> paiChartSelectionDatas = [];
 
-
   @override
   initState() {
     super.initState();

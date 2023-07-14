@@ -743,7 +743,7 @@ class _pg_priceList extends State<pg_priceList>  {
                           trailing: Transform.scale(
                             scale: 1.7,
                             child: Visibility(
-                              visible: cheBoxAppearProduct,
+                              visible: !(widget.fromMenu ?? false) && cheBoxAppearProduct,
                               child: Checkbox(
                                 value:  orcamentos[index].selectProduct,
                                 side: const BorderSide(

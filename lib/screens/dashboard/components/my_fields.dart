@@ -35,10 +35,6 @@ class _MyFiles extends State<MyFiles> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Dashboard",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
             Row(
               children: [
                 TextButton.icon(

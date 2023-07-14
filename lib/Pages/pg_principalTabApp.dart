@@ -58,7 +58,7 @@ class _pg_PrincipalTabApp extends State<pg_PrincipalTabApp> {
               label: 'Dashboard',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.list),
+              icon: Icon(Icons.inventory_outlined),
               label: 'Orçamentos',
             ),
             BottomNavigationBarItem(
