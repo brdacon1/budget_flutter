@@ -138,18 +138,41 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                 width: we,
                 child: Column(
                   children: <Widget>[
-                    Padding(padding: const EdgeInsets.only(bottom: 15),
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Text(
-                            "Duplicar orçamento",
-                            style: GoogleFonts.heebo(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              Navigator.pop(context, true);
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            margin: EdgeInsets.only(left: we * 0.0),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
                           ),
                         ),
-                      ),
+                        Container(
+                          margin: EdgeInsets.only(right: we * 0.22),
+                          child: Text(
+                            "Duplicar orçamento",
+                            style: GoogleFonts.heebo(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: he * 0.02,
                     ),
                     Expanded(
                       child: SizedBox(

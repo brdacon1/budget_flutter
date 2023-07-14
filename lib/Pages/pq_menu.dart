@@ -15,7 +15,7 @@ class MenuSelectionPage extends StatelessWidget {
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: 'Lista de preço'),
     MenuItem(icon: Icons.password, title: 'Trocar de senha'),
-    MenuItem(icon: Icons.menu, title: 'Editar PDF'),
+    MenuItem(icon: Icons.picture_as_pdf_outlined, title: 'Editar PDF'),
   ];
 
   MenuSelectionPage({Key? key}) : super(key: key);
