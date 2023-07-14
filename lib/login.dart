@@ -23,13 +23,10 @@ enum Gender{
 
 class Login extends StatefulWidget {
   @override
-  State<Login> createState() => _Login(
-
-  );
+  State<Login> createState() => _Login();
 }
 
 class _Login extends State<Login> {
-
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
@@ -86,7 +83,7 @@ class _Login extends State<Login> {
                  UID.PurchaseToken = obj['PurchaseToken'];
                  UID.AutoRenewing = obj['AutoRenewing'];
                  alertDisplayLoading.closeLoading(context);
-                 Navigator.pushReplacementNamed(context, '/dashboard');
+                 Navigator.pushReplacementNamed(context, '/menu');
              });
         });
         return users;

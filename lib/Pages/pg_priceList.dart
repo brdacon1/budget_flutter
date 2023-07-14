@@ -17,8 +17,9 @@ import '../Services/loading_event.dart';
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 class pg_priceList  extends StatefulWidget {
-  final DADOS item;
-  const pg_priceList({Key? key, required this.item}) : super(key: key);
+  final DADOS? item;
+  final bool? fromMenu;
+  const pg_priceList({Key? key, this.item, this.fromMenu}) : super(key: key);
   @override
   State<pg_priceList> createState() => _pg_priceList();
 }
@@ -821,7 +822,7 @@ class _pg_priceList extends State<pg_priceList>  {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Visibility(
-            visible: !deleteVisible ?? true,
+            visible: !(widget.fromMenu ?? false) && !(deleteVisible ?? false),
             child: badges.Badge(
               badgeStyle: badges.BadgeStyle(
                 badgeColor: const Color.fromARGB(255, 231, 15, 87),
@@ -846,7 +847,7 @@ class _pg_priceList extends State<pg_priceList>  {
                 onPressed: _dialogBuilder,
                 backgroundColor: const Color(0xFF0DF5E4),
                 child: const Icon(Icons.shopping_cart_outlined, color: Colors.black,),
-              )
+              ),
             ),
           ),
           Visibility(

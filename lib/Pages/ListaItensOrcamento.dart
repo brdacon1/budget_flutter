@@ -612,7 +612,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => pg_priceList(item: widget.item,)),
+                    builder: (context) => pg_priceList(item: widget.item, fromMenu: false,)),
               ).then((value) => setState(() {
                 try{
                   setState(()  async {
