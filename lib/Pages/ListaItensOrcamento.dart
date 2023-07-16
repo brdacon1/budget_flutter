@@ -318,8 +318,8 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 child: Text("Itens orçamentos",style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    letterSpacing: 2
+                    fontSize: 26,
+                    letterSpacing: 1
                 ),
                 ),
               ),

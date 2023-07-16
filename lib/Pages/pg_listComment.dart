@@ -358,7 +358,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                 child: Text("Comentários",style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 28,
+                    fontSize: 26,
                     letterSpacing: 2
                 ),
                 ),

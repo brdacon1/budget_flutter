@@ -214,8 +214,8 @@ class _pg_PopUp extends State<pg_PopUp> {
                     child: Text(titlePage!,style: GoogleFonts.heebo(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 35,
-                        letterSpacing: 2
+                        fontSize: 26,
+                        letterSpacing: 1
                     ),
                     ),
                   ),
