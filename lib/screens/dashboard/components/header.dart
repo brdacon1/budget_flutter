@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../../anmition/fadeanimation.dart';
 import '../../../constants.dart';
 import '../../../controllers/MenuControllerApp.dart';
 import '../../../responsive.dart';
@@ -17,9 +19,18 @@ class Header extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (!Responsive.isDesktop(context))
-          Text(
-            "Dashboard",
-            style: Theme.of(context).textTheme.titleMedium,
+          FadeAnimation(
+            delay: 1,
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: Text("Dashboard",style: GoogleFonts.heebo(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  letterSpacing: 1
+              ),
+              ),
+            ),
           ),
         if (!Responsive.isMobile(context))
           Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
