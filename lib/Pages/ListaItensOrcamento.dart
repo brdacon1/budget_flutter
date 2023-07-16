@@ -394,7 +394,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                           style: const TextStyle(
                             color: bgColor,
                             letterSpacing: 0.5,
-                            fontSize: 10.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

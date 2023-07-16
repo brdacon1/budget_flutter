@@ -692,8 +692,8 @@ class _pg_priceList extends State<pg_priceList>  {
                                       maxLines: 2,
                                       style: const TextStyle(
                                         color: bgColor,
-                                        letterSpacing: 0,
-                                        fontSize: 10.0,
+                                        letterSpacing: 0.5,
+                                        fontSize: 12.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
