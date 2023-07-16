@@ -21,6 +21,7 @@ enum Gender{
   fullname,
   email,
   phone,
+  site,
   cep,
   rua,
   data,
@@ -31,7 +32,7 @@ enum Gender{
 TextEditingController _nameText = TextEditingController();
 TextEditingController _phoneText = TextEditingController();
 TextEditingController _emailText = TextEditingController();
-TextEditingController _idText = TextEditingController();
+TextEditingController _siteText = TextEditingController();
 TextEditingController _cepText = TextEditingController();
 TextEditingController _ruaText = TextEditingController();
 TextEditingController _cityText = TextEditingController();
@@ -50,7 +51,6 @@ class _PgEditPDF extends State<PgEditPDF> {
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
-  String? titlePage;
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -239,7 +239,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                       decoration: InputDecoration(
                                         enabledBorder: InputBorder.none,
                                         border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.email ? enabledtxt : deaible),
+                                        prefixIcon: Icon(Icons.email_outlined, color: selected == Gender.email ? enabledtxt : deaible),
                                         hintText: 'E-mail',
                                         hintStyle: TextStyle(
                                           color:  selected == Gender.email ? enabledtxt : deaible,
@@ -259,28 +259,26 @@ class _PgEditPDF extends State<PgEditPDF> {
                                     height:he * 0.071,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.phone ?  bgColor : bgColor,
+                                      color: selected == Gender.site ?  bgColor : bgColor,
                                     ),
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [maskFormatter],
-                                      controller: _phoneText,
+                                      controller: _siteText,
                                       onTap: (){
                                         setState(() {
-                                          selected = Gender.phone;
+                                          selected = Gender.site;
                                         });
                                       },
                                       decoration: InputDecoration(
                                         enabledBorder: InputBorder.none,
                                         border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.phone ? enabledtxt : deaible),
+                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.site ? enabledtxt : deaible),
                                         hintText: 'Site/Facebook',
                                         hintStyle: TextStyle(
-                                          color:  selected == Gender.phone ? enabledtxt : deaible,
+                                          color:  selected == Gender.site ? enabledtxt : deaible,
                                         ),
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.phone ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      style:  TextStyle(color:  selected == Gender.site ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                     ),
                                   ),
                                 ),
