@@ -351,6 +351,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     return Scaffold(
       backgroundColor: bgColor,
       body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
             SizedBox(
@@ -362,7 +363,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
               },
               child: Container(
                 alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(left: we * 0.04),
+                margin: EdgeInsets.only(left: we * 0.040),
                 child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
               ),
             ),
@@ -372,25 +373,24 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
             FadeAnimation(
               delay: 1,
               child: Container(
-                margin: const EdgeInsets.only(right: 95.0),
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: we * 0.05),
                 child: Text(titlePage!,style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 30,
+                    fontSize: 26,
                     letterSpacing: 2
                 ),
                 ),
               ),
             ),
-            FadeAnimation(
-              delay: 1,
-              child: Container(
-                margin: const EdgeInsets.only(right: 165.0),
+            Container(
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: we * 0.05),
                 child: Text("Informações do orçamento",style: GoogleFonts.heebo(
                     color: Colors.grey,
                     letterSpacing: 1),
                 ),
-              ),
             ),
             Expanded(
               child: SingleChildScrollView(

@@ -550,13 +550,13 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
         FadeAnimation(
           delay: 1,
           child: Container(
-            margin: const EdgeInsets.only(right: 80.0),
+            margin: const EdgeInsets.only(right: 125.0),
             child: Text(
               "Meus orçamentos",
               style: GoogleFonts.heebo(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 28,
+                  fontSize: 26,
                   letterSpacing: 2),
             ),
           ),
@@ -568,7 +568,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           delay: 1,
           child: Container(
             height: 50.0,
-            margin: const EdgeInsets.only(right: 20.0, left: 20.0, bottom: 25),
+            margin: const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
             child: CupertinoSearchTextField(
               placeholder: "Buscar orçamento...",
               style: const TextStyle(

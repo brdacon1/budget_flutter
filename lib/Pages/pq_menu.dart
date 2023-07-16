@@ -49,7 +49,7 @@ class MenuSelectionPage extends StatelessWidget {
           SizedBox(height: he * 0.04),
           SizedBox(height: he * 0.03),
           Container(
-            margin: const EdgeInsets.only(right: 275.0),
+            margin: const EdgeInsets.only(right: 285.0),
             child: Text(
               "Menu",
               style: GoogleFonts.heebo(

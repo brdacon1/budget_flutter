@@ -341,7 +341,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                   },
                   child: Container(
                     alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(left: we * 0.04),
+                    margin: EdgeInsets.only(left: we * 0.02),
                     child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
                   ),
                 ),
@@ -353,7 +353,8 @@ class _ListCommentPageState extends State<ListCommentPage> {
             FadeAnimation(
               delay: 1,
               child: Container(
-                margin: const EdgeInsets.only(right: 165.0),
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: we * 0.028),
                 child: Text("Comentários",style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

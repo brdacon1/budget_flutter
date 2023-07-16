@@ -204,12 +204,13 @@ class _pg_PopUp extends State<pg_PopUp> {
                   ),
                 ),
                 SizedBox(
-                  height: he * 0.03,
+                  height: he * 0.02,
                 ),
                 FadeAnimation(
                   delay: 1,
                   child: Container(
-                    margin: const EdgeInsets.only(right: 160.0),
+                    alignment: Alignment.topLeft,
+                    margin: EdgeInsets.only(left: we * 0.048),
                     child: Text(titlePage!,style: GoogleFonts.heebo(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -222,7 +223,8 @@ class _pg_PopUp extends State<pg_PopUp> {
                 FadeAnimation(
                   delay: 1,
                   child: Container(
-                    margin: const EdgeInsets.only(right: 130.0),
+                    alignment: Alignment.topLeft,
+                    margin: EdgeInsets.only(left: we * 0.05),
                     child: Text("Cadastro de produto ou serviço",style: GoogleFonts.heebo(
                         color: Colors.grey,
                         letterSpacing: 1),
@@ -230,7 +232,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                   ),
                 ),
                 SizedBox(
-                    height: he * 0.01
+                    height: he * 0.02
                 ),
                 Expanded(
                   child: SizedBox(

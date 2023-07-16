@@ -301,19 +301,20 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                     },
                     child: Container(
                       alignment: Alignment.topLeft,
-                      margin: EdgeInsets.only(left: we * 0.04),
+                      margin: EdgeInsets.only(left: we * 0.028),
                       child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
                     ),
                   ),
                 ],
             ),
             SizedBox(
-              height: he * 0.03,
+              height: he * 0.02,
             ),
             FadeAnimation(
               delay: 1,
               child: Container(
-                margin: const EdgeInsets.only(right: 80.0),
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: we * 0.035),
                 child: Text("Itens orçamentos",style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -324,13 +325,13 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
               ),
             ),
             SizedBox(
-              height: he * 0.03,
+              height: he * 0.02,
             ),
             FadeAnimation(
               delay: 1,
               child: Container(
                 height: 50.0,
-                margin: const EdgeInsets.only(right: 20.0, left: 20.0, bottom: 25),
+                margin: const EdgeInsets.only(right: 15.0, left: 15.0, bottom: 25),
                 child: CupertinoSearchTextField(
                   placeholder: "Buscar Itens...",
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
@@ -375,7 +376,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 },
                 child: ListView.builder(
                   shrinkWrap: true,
-                  padding: const EdgeInsets.only(bottom: 100, left: 15, right: 15, top: 10),
+                  padding: const EdgeInsets.only(bottom: 100, left: 15, right: 15, top: 3),
                   itemCount: _foundUsers.length,
                   itemBuilder: (context, index) {
                     return  Padding(

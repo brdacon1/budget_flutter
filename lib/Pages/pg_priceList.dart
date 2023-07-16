@@ -596,19 +596,20 @@ class _pg_priceList extends State<pg_priceList>  {
                   },
                   child: Container(
                     alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(left: we * 0.04),
+                    margin: EdgeInsets.only(left: we * 0.032),
                     child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
                   ),
                 ),
               ],
             ),
             SizedBox(
-              height: he * 0.03,
+              height: he * 0.02,
             ),
             FadeAnimation(
               delay: 1,
               child: Container(
-                margin: const EdgeInsets.only(right: 140.0),
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: we * 0.04),
                 child: Text("Lista de preço",style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -619,13 +620,13 @@ class _pg_priceList extends State<pg_priceList>  {
               ),
             ),
             SizedBox(
-              height: he * 0.03,
+              height: he * 0.02,
             ),
             FadeAnimation(
               delay: 1,
               child: Container(
                 height: 50.0,
-                margin: const EdgeInsets.only(right: 20.0, left: 20.0, bottom: 25),
+                margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),
                 child: CupertinoSearchTextField(
                   placeholder: "Buscar Itens...",
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
