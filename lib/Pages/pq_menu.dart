@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_priceList.dart';
 
 import '../constants.dart';
@@ -30,10 +31,14 @@ class MenuSelectionPage extends StatelessWidget {
         );
         break;
       case 1:
-      // Navegue para a segunda página aqui
+
         break;
       case 2:
-      // Navegue para a segunda página aqui
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const PgEditPDF()),
+        );
         break;
     }
   }
