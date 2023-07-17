@@ -48,6 +48,16 @@ class Db{
       rethrow;
     }
   }
+
+  Future<void> updatePDF(Owner orcamento) async {
+    try {
+      String documentPath = "EMPRESAS/${UID.USER}/USERS/${UID.USER}/INFOPDF";
+      await FirebaseFirestore.instance.doc(documentPath).update(orcamento.toJson());
+    } catch (e) {
+      print('Error updating PDF: $e');
+    }
+  }
+
   Future<List<ObjectListItens>> getListItemsGenerator(String? ID) async {
     List<ObjectListItens> yourModels = [];
     try
