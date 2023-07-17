@@ -22,6 +22,7 @@ enum Gender{
   email,
   phone,
   site,
+  cpf,
   cep,
   rua,
   data,
@@ -33,6 +34,7 @@ TextEditingController _nameText = TextEditingController();
 TextEditingController _phoneText = TextEditingController();
 TextEditingController _emailText = TextEditingController();
 TextEditingController _siteText = TextEditingController();
+TextEditingController _cpfText = TextEditingController();
 TextEditingController _cepText = TextEditingController();
 TextEditingController _ruaText = TextEditingController();
 TextEditingController _cityText = TextEditingController();
@@ -54,6 +56,11 @@ class _PgEditPDF extends State<PgEditPDF> {
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
+      filter: { "#": RegExp(r'[0-9]') },
+      type: MaskAutoCompletionType.lazy
+  );
+  var maskFormatterCNPJ =  MaskTextInputFormatter(
+      mask: '##.###.###/0001-##',
       filter: { "#": RegExp(r'[0-9]') },
       type: MaskAutoCompletionType.lazy
   );
@@ -136,7 +143,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
                                   backgroundColor: bgColor,
-                                  child: Icon(Icons.person_outlined, color: Colors.white,)),
+                                  child: Icon(Icons.account_balance, color: Colors.white,)),
                               title: Text("Clique para editar",style: GoogleFonts.heebo(
                                   color: bgColor,
                                   fontWeight: FontWeight.normal,
@@ -171,7 +178,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                       decoration: InputDecoration(
                                         enabledBorder: InputBorder.none,
                                         border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.person_outlined,color: selected == Gender.fullname ? enabledtxt : deaible),
+                                        prefixIcon: Icon(Icons.account_balance,color: selected == Gender.fullname ? enabledtxt : deaible),
                                         hintText: 'Nome da empresa',
                                         hintStyle: TextStyle(
                                           color:  selected == Gender.fullname ? enabledtxt : deaible,
@@ -297,23 +304,23 @@ class _PgEditPDF extends State<PgEditPDF> {
                                     padding: const EdgeInsets.all(8.0),
                                     child:  TextField(
                                       keyboardType: TextInputType.number,
-                                      inputFormatters: [maskFormatter],
-                                      controller: _phoneText,
+                                      inputFormatters: [maskFormatterCNPJ],
+                                      controller: _cpfText,
                                       onTap: (){
                                         setState(() {
-                                          selected = Gender.phone;
+                                          selected = Gender.cpf;
                                         });
                                       },
                                       decoration: InputDecoration(
                                         enabledBorder: InputBorder.none,
                                         border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.phone ? enabledtxt : deaible),
-                                        hintText: 'C.N.P.J/CPF',
+                                        prefixIcon: Icon(Icons.contact_page_outlined, color: selected == Gender.cpf ? enabledtxt : deaible),
+                                        hintText: 'CNPJ',
                                         hintStyle: TextStyle(
-                                          color:  selected == Gender.phone ? enabledtxt : deaible,
+                                          color:  selected == Gender.cpf ? enabledtxt : deaible,
                                         ),
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.phone ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      style:  TextStyle(color:  selected == Gender.cpf ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                     ),
                                   ),
                                 ),
