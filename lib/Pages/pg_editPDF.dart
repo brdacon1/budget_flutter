@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Objetos/Owner.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
+import '../Models/Db.dart';
 import '../Objetos/DADOS.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,8 +17,9 @@ import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:intl/intl.dart';
-
+import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 import '../constants.dart';
+import 'package:http/http.dart' as http;
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -33,13 +39,11 @@ enum Gender{
 TextEditingController _nameText = TextEditingController();
 TextEditingController _phoneText = TextEditingController();
 TextEditingController _emailText = TextEditingController();
-TextEditingController _siteText = TextEditingController();
 TextEditingController _cpfText = TextEditingController();
 TextEditingController _cepText = TextEditingController();
 TextEditingController _ruaText = TextEditingController();
 TextEditingController _cityText = TextEditingController();
 TextEditingController _bairroText = TextEditingController();
-TextEditingController _statusText = TextEditingController();
 
 class PgEditPDF extends StatefulWidget {
   const PgEditPDF({Key? key}) : super(key: key);
@@ -48,11 +52,13 @@ class PgEditPDF extends StatefulWidget {
 }
 
 class _PgEditPDF extends State<PgEditPDF> {
-  DADOS orcamento = DADOS();
+  Owner owner = Owner();
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
+  final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
+  late Future<Uint8List?> fileContentFuture;
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -75,11 +81,43 @@ class _PgEditPDF extends State<PgEditPDF> {
       type: MaskAutoCompletionType.lazy
   );
 
-  final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
+  Future<Uint8List?> initialData() async {
+    var db = Db();
+    var ownerInitial = await db.getInformationEnterprise();
+    owner = ownerInitial;
+    var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: globalUIDUser.EMAIL!.trim(),
+      password: globalUIDUser.Senha!.trim(),
+    );
+    var token = await auth.user?.getIdToken();
+    var endpointUrl =
+        'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
+    var response = await http.get(
+      Uri.parse(endpointUrl),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json;odata=verbose',
+      },
+    );
+
+    _nameText.text = owner.empresa!;
+    _phoneText.text = owner.fone!;
+    _emailText.text = owner.email!;
+    _cpfText.text = owner.cnpj!;
+    _cepText.text = owner.cep!;
+    _ruaText.text = owner.rua!;
+    _cityText.text = owner.city!;
+    _bairroText.text = owner.bairro!;
+    print(owner.fotoId!);
+    setState(() {});
+
+    return response.bodyBytes;
+  }
 
   @override
   initState() {
     super.initState();
+    fileContentFuture = initialData();
   }
 
   @override
@@ -135,9 +173,32 @@ class _PgEditPDF extends State<PgEditPDF> {
                 child: SizedBox(
                   child: Column(
                       children: <Widget>[
-                        SizedBox(
+                      SizedBox(
+                          height: he * 0.02,
+                      ),
+                      FutureBuilder<Uint8List?>(
+                                future: fileContentFuture,
+                                builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                 } else if (snapshot.hasError) {
+                                    return const Text('Erro ao carregar a imagem');
+                                 } else {
+                                 return GestureDetector(
+                                     onTap: () {
+                                      // Seu código de ação ao tocar no avatar (se necessário).
+                                 },
+                                     child: CircleAvatar(
+                                     radius: 100,
+                                     backgroundImage: MemoryImage(snapshot.data!),
+                          ),
+                        );
+                      }
+                    },
+                      ),
+                      SizedBox(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                             child: ExpansionTileCard(
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
@@ -253,39 +314,6 @@ class _PgEditPDF extends State<PgEditPDF> {
                                         ),
                                       ),
                                       style:  TextStyle(color:  selected == Gender.email ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.site ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                      controller: _siteText,
-                                      onTap: (){
-                                        setState(() {
-                                          selected = Gender.site;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.site ? enabledtxt : deaible),
-                                        hintText: 'Site/Facebook',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.site ? enabledtxt : deaible,
-                                        ),
-                                      ),
-                                      style:  TextStyle(color:  selected == Gender.site ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                     ),
                                   ),
                                 ),
