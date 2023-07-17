@@ -92,7 +92,7 @@ class PDFGenerate {
       font = PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.regular);
 
       graphics.drawString(
-        '${obs3.empresa}\n${obs3.rua}\n${obs3.city}  ${obs3.bairro}\nCEP: ${obs3.cep}\nE-mail: ${obs3.email}\nTelefone: ${obs3.fone}',
+        '${obs3.empresa}\nCNPJ: ${obs3.cnpj}\n${obs3.rua}\n${obs3.city}  ${obs3.bairro}\nCEP: ${obs3.cep}\nE-mail: ${obs3.email}\nTelefone: ${obs3.fone}',
         font,
         brush: PdfBrushes.black,
         bounds: Rect.fromLTWH(0, 0, page.getClientSize().width, page.getClientSize().height),
@@ -153,7 +153,7 @@ class PDFGenerate {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Telefone :';
           row.cells[1].value = obs2.FONE!;
-          count += 15;
+          count += 10;
         }
 
         if (obs2?.NOMEEMPRESA?.isNotEmpty ?? false) {
