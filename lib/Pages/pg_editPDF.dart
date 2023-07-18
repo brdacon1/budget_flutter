@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oflite/Objetos/Owner.dart';
+import 'package:oflite/Pages/ImageEditorApp.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import '../Models/Db.dart';
 import '../Objetos/DADOS.dart';
@@ -57,8 +61,10 @@ class _PgEditPDF extends State<PgEditPDF> {
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
+  File? _imageFile;
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
   late Future<Uint8List?> fileContentFuture;
+  late Uint8List? fileContent;
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -112,6 +118,25 @@ class _PgEditPDF extends State<PgEditPDF> {
     setState(() {});
 
     return response.bodyBytes;
+  }
+
+  Future<void> _uploadImage() async {
+    if (_imageFile == null) {
+      print("Nenhuma imagem selecionada.");
+      return;
+    }
+
+    try {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference ref = storage.ref().child('images/$fileName.jpg');
+      UploadTask uploadTask = ref.putFile(_imageFile!);
+      await uploadTask.whenComplete(() {
+        print('Imagem enviada com sucesso!');
+      });
+    } catch (e) {
+      print('Erro ao enviar a imagem: $e');
+    }
   }
 
   @override
@@ -176,27 +201,33 @@ class _PgEditPDF extends State<PgEditPDF> {
                       SizedBox(
                           height: he * 0.02,
                       ),
-                      FutureBuilder<Uint8List?>(
-                                future: fileContentFuture,
-                                builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return const CircularProgressIndicator();
-                                 } else if (snapshot.hasError) {
-                                    return const Text('Erro ao carregar a imagem');
-                                 } else {
-                                 return GestureDetector(
-                                     onTap: () {
-                                      // Seu código de ação ao tocar no avatar (se necessário).
-                                 },
-                                     child: CircleAvatar(
-                                     radius: 100,
-                                     backgroundImage: MemoryImage(snapshot.data!),
-                          ),
-                        );
-                      }
-                    },
-                      ),
-                      SizedBox(
+                        FutureBuilder<Uint8List?>(
+                          future: fileContentFuture,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return const Text('Erro ao carregar a imagem');
+                            } else {
+                              Uint8List? fileContent = snapshot.data;
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const ImageEditorPage()),
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  radius: 100,
+                                  backgroundImage: fileContent != null ? MemoryImage(fileContent) : null,
+                                  child: fileContent == null ? const Icon(Icons.image, size: 100) : null,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                             child: ExpansionTileCard(
@@ -539,9 +570,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                         FadeAnimation(
                           delay: 1,
                           child: TextButton(
-                            onPressed: () async {
-
-                            },
+                            onPressed:_uploadImage,
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
