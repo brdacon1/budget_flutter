@@ -64,7 +64,6 @@ class _PgEditPDF extends State<PgEditPDF> {
   File? _imageFile;
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
   late Future<Uint8List?> fileContentFuture;
-  late Uint8List? fileContent;
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -139,6 +138,44 @@ class _PgEditPDF extends State<PgEditPDF> {
     }
   }
 
+  Widget _image(Uint8List? fileContent) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    if (fileContent != null) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 0.8 * screenWidth,
+          maxHeight: 0.7 * screenHeight,
+        ),
+        child: fileContent == null ? const Icon(Icons.image, size: 100) : null,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget _imageCard(Uint8List? fileContent) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding:
+            const EdgeInsets.symmetric(horizontal: true ? 24.0 : 16.0),
+            child: Card(
+              elevation: 4.0,
+              child: Padding(
+                padding: const EdgeInsets.all(true ? 24.0 : 16.0),
+                child: _image(fileContent),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   initState() {
     super.initState();
@@ -209,7 +246,6 @@ class _PgEditPDF extends State<PgEditPDF> {
                             } else if (snapshot.hasError) {
                               return const Text('Erro ao carregar a imagem');
                             } else {
-                              Uint8List? fileContent = snapshot.data;
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -218,11 +254,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                         builder: (context) => const ImageEditorPage()),
                                   );
                                 },
-                                child: CircleAvatar(
-                                  radius: 100,
-                                  backgroundImage: fileContent != null ? MemoryImage(fileContent) : null,
-                                  child: fileContent == null ? const Icon(Icons.image, size: 100) : null,
-                                ),
+                                child: _imageCard(snapshot.data)
                               );
                             }
                           },

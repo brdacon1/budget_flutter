@@ -4,9 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../constants.dart';
-
 
 class ImageEditorPage extends StatelessWidget {
   const ImageEditorPage({Key? key }) : super(key: key);
@@ -164,23 +162,12 @@ class _HomePageState extends State<CutPicturePage> {
           onPressed: () {
             _clear();
           },
-          backgroundColor: Colors.redAccent,
-          tooltip: 'Delete',
-          child: const Icon(Icons.delete),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 32.0),
-          child: FloatingActionButton(
-            onPressed: () {
-              _clear();
-            },
-            backgroundColor: Colors.green,
-            tooltip: 'Save',
-            child: const Icon(Icons.save),
-          ),
+          backgroundColor: Colors.green,
+          tooltip: 'Save',
+          child: const Icon(Icons.save),
         ),
         if (_croppedFile == null)
-          Padding(
+        Padding(
             padding: const EdgeInsets.only(left: 32.0),
             child: FloatingActionButton(
               onPressed: () {
@@ -190,7 +177,18 @@ class _HomePageState extends State<CutPicturePage> {
               tooltip: 'Crop',
               child: const Icon(Icons.crop),
             ),
-          )
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 32.0),
+          child: FloatingActionButton(
+            onPressed: () {
+              _clear();
+            },
+            backgroundColor: Colors.redAccent,
+            tooltip: 'Delete',
+            child: const Icon(Icons.delete),
+          ),
+        ),
       ],
     );
   }
