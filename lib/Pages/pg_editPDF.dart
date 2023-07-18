@@ -147,10 +147,13 @@ class _PgEditPDF extends State<PgEditPDF> {
           maxWidth: 0.8 * screenWidth,
           maxHeight: 0.7 * screenHeight,
         ),
-        child: fileContent == null ? const Icon(Icons.image, size: 100) : null,
+        child: Image.memory(
+          fileContent,
+          fit: BoxFit.contain,
+        ),
       );
     } else {
-      return const SizedBox.shrink();
+      return const Icon(Icons.image, size: 100);
     }
   }
 
@@ -161,12 +164,15 @@ class _PgEditPDF extends State<PgEditPDF> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: true ? 24.0 : 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Card(
+              color: Colors.white,
               elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(true ? 24.0 : 16.0),
+                padding: const EdgeInsets.all(10.0),
                 child: _image(fileContent),
               ),
             ),
@@ -251,10 +257,11 @@ class _PgEditPDF extends State<PgEditPDF> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const ImageEditorPage()),
+                                      builder: (context) => const ImageEditorPage(),
+                                    ),
                                   );
                                 },
-                                child: _imageCard(snapshot.data)
+                                child: _imageCard(snapshot.data),
                               );
                             }
                           },
