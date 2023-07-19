@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oflite/Models/Db.dart';
-import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:path_provider/path_provider.dart';
 import '../Objetos/Owner.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;

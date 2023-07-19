@@ -638,6 +638,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                           delay: 1,
                           child: TextButton(
                             onPressed: (){
+                              alertDisplayLoading.alertLoading(context);
                               var db = Db();
                               var localOwner = Owner();
                               localOwner.bairro = _bairroText.text;
