@@ -1,27 +1,17 @@
-import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:oflite/Objetos/Owner.dart';
 import 'package:oflite/Pages/ImageEditorApp.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import '../Models/Db.dart';
-import '../Objetos/DADOS.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/Models/ViaCEPServico.dart' as CEP;
-import 'package:fluttercontactpicker/fluttercontactpicker.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
-import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
-import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
-import 'package:intl/intl.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
+import '../Services/loading_event.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
 
@@ -61,7 +51,7 @@ class _PgEditPDF extends State<PgEditPDF> {
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
-
+  final alertDisplayLoading = LoadingEvent();
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
   late Future<Uint8List?> fileContentFuture;
 
@@ -116,9 +106,17 @@ class _PgEditPDF extends State<PgEditPDF> {
       _bairroText.text = owner.bairro!;
       setState(() {});
 
-      return response.bodyBytes;
-    }
-    catch(e){
+      // Verificar se a resposta é válida e contém a imagem
+      if (response.statusCode == 200) {
+        // Se a resposta for válida, retornar os bytes da imagem
+        return response.bodyBytes;
+      } else {
+        // Se a resposta não contém a imagem, retornar null
+        return null;
+      }
+    } catch (e) {
+      // Se ocorrer algum erro na requisição, retornar null
+      return null;
     }
   }
 
@@ -234,19 +232,65 @@ class _PgEditPDF extends State<PgEditPDF> {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (snapshot.hasError) {
+                              // Lidar com o erro, por exemplo, exibir uma imagem padrão ou uma mensagem de erro
                               return const Text('Erro ao carregar a imagem');
                             } else {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
+                              // Verificar se o snapshot.data é null antes de exibir a imagem
+                              if (snapshot.data != null) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
+                                      ),
+                                    ).then((value) {
+                                      // Atualizar o FutureBuilder quando voltar da tela de edição
+                                      setState(() {
+                                        fileContentFuture = initialData();
+                                      });
+                                    });
+                                  },
+                                  child: _imageCard(snapshot.data!),
+                                );
+                              } else {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 40),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
+                                        ),
+                                      ).then((value) {
+                                        // Atualizar o FutureBuilder quando voltar da tela de edição
+                                        setState(() {
+                                          fileContentFuture = initialData();
+                                        });
+                                      });
+                                    },
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Sem imagem disponível',
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                          Text(
+                                            'Toque para incluir nova imagem',
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  );
-                                },
-                                child: _imageCard(snapshot.data),
-                              );
+                                  ),
+                                );
+                              }
                             }
                           },
                         ),
@@ -415,7 +459,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                         ),
                         SizedBox(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                             child: ExpansionTileCard(
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
@@ -594,7 +638,20 @@ class _PgEditPDF extends State<PgEditPDF> {
                           delay: 1,
                           child: TextButton(
                             onPressed: (){
-
+                              var db = Db();
+                              var localOwner = Owner();
+                              localOwner.bairro = _bairroText.text;
+                              localOwner.fotoId = owner.fotoId;
+                              localOwner.city = _cityText.text;
+                              localOwner.rua = _ruaText.text;
+                              localOwner.cep = _cepText.text;
+                              localOwner.email = _emailText.text;
+                              localOwner.fone = _phoneText.text;
+                              localOwner.cnpj = _cpfText.text;
+                              localOwner.empresa = _nameText.text;
+                              localOwner.logoName = owner.logoName;
+                              db.savePDF(localOwner);
+                              alertDisplayLoading.closeLoading(context);
                             },
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,

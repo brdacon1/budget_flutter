@@ -33,6 +33,7 @@ class _HomePageState extends State<CutPicturePage> {
   CroppedFile? _croppedFile;
   String? fileName;
   final alertDisplayLoading = LoadingEvent();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,6 +124,7 @@ class _HomePageState extends State<CutPicturePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton(
+          heroTag: "Save",
           onPressed: () async {
             alertDisplayLoading.alertLoading(context);
             var db = Db();
@@ -149,12 +151,8 @@ class _HomePageState extends State<CutPicturePage> {
                   widget.owner.logoName = fileName,
                   db.savePDF(localOwner),
                   alertDisplayLoading.closeLoading(context),
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const PgEditPDF()),
-                    ModalRoute.withName('/pg-pdf-config'),
-                  ),
-              }
+                  Navigator.of(context).pop(),
+                }
               });
 
             } catch (e){
@@ -170,6 +168,7 @@ class _HomePageState extends State<CutPicturePage> {
         Padding(
             padding: const EdgeInsets.only(left: 32.0),
             child: FloatingActionButton(
+              heroTag: "Crop",
               onPressed: () {
                 _cropImage();
               },
@@ -181,6 +180,7 @@ class _HomePageState extends State<CutPicturePage> {
         Padding(
           padding: const EdgeInsets.only(left: 32.0),
           child: FloatingActionButton(
+            heroTag: "Delete",
             onPressed: () {
               _clear();
             },
