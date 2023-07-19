@@ -1,66 +1,27 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:oflite/Models/Db.dart';
+import 'package:oflite/Pages/pg_editPDF.dart';
+import 'package:path_provider/path_provider.dart';
+import '../Objetos/Owner.dart';
+import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
+import '../Services/loading_event.dart';
 import '../constants.dart';
 
-class ImageEditorPage extends StatelessWidget {
-  const ImageEditorPage({Key? key }) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'CutPicture',
-      theme: ThemeData(
-          highlightColor: bgColor,
-          canvasColor: secondaryColor,
-          textTheme: TextTheme(
-            headlineSmall: ThemeData.light()
-                .textTheme
-                .headlineSmall!
-                .copyWith(color: bgColor),
-          ),
-          iconTheme: IconThemeData(
-            color: Colors.grey[600],
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: bgColor,
-            centerTitle: false,
-            foregroundColor: Colors.white,
-            actionsIconTheme: IconThemeData(color: Colors.white),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateColor.resolveWith(
-                      (states) => bgColor),
-            ),
-          ),
-          outlinedButtonTheme: OutlinedButtonThemeData(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateColor.resolveWith(
-                    (states) => bgColor,
-              ),
-              side: MaterialStateBorderSide.resolveWith(
-                      (states) => const BorderSide(color: bgColor)),
-            ),
-          ),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-              .copyWith(background: const Color(0xFFFDF5EC))),
-      home: const CutPicturePage(title: 'Editar Logo'),
-    );
-  }
-}
 
 class CutPicturePage extends StatefulWidget {
   final String title;
-
+  final Owner owner;
   const CutPicturePage({
     Key? key,
     required this.title,
+    required this.owner,
   }) : super(key: key);
 
   @override
@@ -70,11 +31,13 @@ class CutPicturePage extends StatefulWidget {
 class _HomePageState extends State<CutPicturePage> {
   XFile? _pickedFile;
   CroppedFile? _croppedFile;
-
+  String? fileName;
+  final alertDisplayLoading = LoadingEvent();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !kIsWeb ? AppBar(title: Text(widget.title)) : null,
+      appBar: !kIsWeb ? AppBar(title: Text(widget.title),
+      backgroundColor: bgColor,) : null,
       body: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,6 +77,7 @@ class _HomePageState extends State<CutPicturePage> {
             padding:
             const EdgeInsets.symmetric(horizontal: kIsWeb ? 24.0 : 16.0),
             child: Card(
+              color: Colors.white,
               elevation: 4.0,
               child: Padding(
                 padding: const EdgeInsets.all(kIsWeb ? 24.0 : 16.0),
@@ -159,8 +123,44 @@ class _HomePageState extends State<CutPicturePage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton(
-          onPressed: () {
-            _clear();
+          onPressed: () async {
+            alertDisplayLoading.alertLoading(context);
+            var db = Db();
+            var localOwner = Owner();
+            try {
+
+              if(widget.owner.fotoId!.isNotEmpty &&  widget.owner.logoName!.isNotEmpty)
+              {
+                await deleteImage(widget.owner.logoName);
+              }
+              await _uploadImageToFirebase().then((value) => {
+                if(extractTokenFromUrl(value)!.isNotEmpty){
+                  localOwner.bairro = widget.owner.bairro,
+                  localOwner.fotoId = extractTokenFromUrl(value),
+                  widget.owner.fotoId = extractTokenFromUrl(value),
+                  localOwner.city = widget.owner.city,
+                  localOwner.rua = widget.owner.rua,
+                  localOwner.cep = widget.owner.cep,
+                  localOwner.email = widget.owner.email,
+                  localOwner.fone = widget.owner.fone,
+                  localOwner.cnpj = widget.owner.cnpj,
+                  localOwner.empresa = widget.owner.empresa,
+                  localOwner.logoName = fileName,
+                  widget.owner.logoName = fileName,
+                  db.savePDF(localOwner),
+                  alertDisplayLoading.closeLoading(context),
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PgEditPDF()),
+                    ModalRoute.withName('/pg-pdf-config'),
+                  ),
+              }
+              });
+
+            } catch (e){
+              alertDisplayLoading.closeLoading(context);
+            }
+
           },
           backgroundColor: Colors.green,
           tooltip: 'Save',
@@ -196,6 +196,7 @@ class _HomePageState extends State<CutPicturePage> {
   Widget _uploaderCard() {
     return Center(
       child: Card(
+        color: Colors.white,
         elevation: 4.0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
@@ -215,32 +216,21 @@ class _HomePageState extends State<CutPicturePage> {
                     radius: const Radius.circular(12.0),
                     borderType: BorderType.RRect,
                     dashPattern: const [8, 4],
-                    color: Theme.of(context).highlightColor.withOpacity(0.4),
-                    child: Center(
+                    color: bgColor,
+                    child: const Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.image,
-                            color: Theme.of(context).highlightColor,
+                            color: bgColor,
                             size: 80.0,
                           ),
-                          const SizedBox(height: 24.0),
+                          SizedBox(height: 24.0),
                           Text(
-                            'Upload an image to start',
-                            style: kIsWeb
-                                ? Theme.of(context)
-                                .textTheme
-                                .headlineSmall!
-                                .copyWith(
-                                color: Theme.of(context).highlightColor)
-                                : Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                color:
-                                Theme.of(context).highlightColor),
+                            'Selecione uma imagem',
+                            style: TextStyle(color: bgColor)
                           )
                         ],
                       ),
@@ -250,11 +240,24 @@ class _HomePageState extends State<CutPicturePage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
-                child: ElevatedButton(
-                  onPressed: () {
+                child:  TextButton(
+                  onPressed: (){
                     _uploadImage();
                   },
-                  child: const Text('Upload'),
+                  style: TextButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0)
+                      )
+                  ),
+                  child: Text("Selecionar foto",style: GoogleFonts.heebo(
+                    color: Colors.black,
+                    letterSpacing: 0.5,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
                 ),
               ),
             ],
@@ -262,6 +265,84 @@ class _HomePageState extends State<CutPicturePage> {
         ),
       ),
     );
+  }
+
+  Future<String> _uploadImageToFirebase() async {
+    if (_croppedFile != null) {
+      try {
+        final FirebaseStorage storage = FirebaseStorage.instance;
+        final String? fileName = UID.USER;
+        final Directory appDir = await getApplicationDocumentsDirectory();
+        this.fileName = "$fileName.jpg";
+        final filePath = "${appDir.path}/$fileName.jpg";
+        final File file = File(filePath);
+        await file.writeAsBytes(await _croppedFile!.readAsBytes());
+
+        final Reference ref = storage.ref().child('$fileName.jpg');
+        final UploadTask uploadTask = ref.putFile(file);
+
+        final TaskSnapshot taskSnapshot = await uploadTask;
+        final String imageUrl = await taskSnapshot.ref.getDownloadURL();
+        print('Imagem enviada com sucesso! URL da imagem: $imageUrl');
+
+        // Delete the temporary file after uploading.
+        file.delete();
+
+        return imageUrl;
+      } catch (e) {
+        print('Erro ao enviar a imagem: $e');
+        return '';
+      }
+    }
+    else{
+      final FirebaseStorage storage = FirebaseStorage.instance;
+      final String? fileName = UID.USER;
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      this.fileName = "$fileName.jpg";
+      final filePath = "${appDir.path}/$fileName.jpg";
+      final File file = File(filePath);
+      await file.writeAsBytes(await _pickedFile!.readAsBytes());
+
+      final Reference ref = storage.ref().child('$fileName.jpg');
+      final UploadTask uploadTask = ref.putFile(file);
+
+      final TaskSnapshot taskSnapshot = await uploadTask;
+      final String imageUrl = await taskSnapshot.ref.getDownloadURL();
+      print('Imagem enviada com sucesso! URL da imagem: $imageUrl');
+
+      // Delete the temporary file after uploading.
+      file.delete();
+
+      return imageUrl;
+    }
+  }
+
+  String? extractTokenFromUrl(String url) {
+    try {
+      Uri uri = Uri.parse(url);
+      Map<String, String> queryParameters = uri.queryParameters;
+      return queryParameters['token'];
+    } catch (e) {
+      print('Erro ao extrair o token da URL: $e');
+      return null;
+    }
+  }
+
+  Future<void> deleteImage(String? imageName) async {
+    try {
+      // Inicialize a instância do Firebase Storage
+      FirebaseStorage storage = FirebaseStorage.instance;
+
+      // Crie uma referência para a imagem que você deseja excluir
+      Reference reference = storage.ref().child('images/$imageName.jpg');
+
+      // Exclua a imagem
+      await reference.delete();
+
+      print('Imagem excluída com sucesso!');
+    } catch (e) {
+      print('Erro ao excluir a imagem: $e');
+    }
   }
 
   Future<void> _cropImage() async {

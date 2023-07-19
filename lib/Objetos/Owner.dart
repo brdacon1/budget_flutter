@@ -3,7 +3,6 @@ class Owner {
   String? empresa;
   String? email;
   String? cnpj;
-  String? nomeOwner;
   String? bairro;
   String? city;
   String? cep;
@@ -16,7 +15,6 @@ class Owner {
      this.empresa,
      this.email,
      this.cnpj,
-     this.nomeOwner,
      this.bairro,
      this.city,
      this.cep,
@@ -27,11 +25,10 @@ class Owner {
 
   factory Owner.fromJson(Map<String, dynamic>? json) { // Adicione '?' após 'dynamic'
     return Owner(
-      rua: json?['DATA'] ?? '',
+      rua: json?['RUA'] ?? '',
       empresa: json?['EMPRESA'] ?? '',
       email: json?['EMAIL'] ?? '',
       cnpj: json?['CNPJ'] ?? '',
-      nomeOwner: json?['NOMEOWNER'] ?? '',
       bairro: json?['BAIRRO'] ?? '',
       city: json?['CITY'] ?? '',
       cep: json?['CEP'] ?? '',
@@ -43,17 +40,16 @@ class Owner {
 
   Map<String, dynamic> toJson() {
     return {
-      'DATA': rua,
       'EMPRESA': empresa,
       'EMAIL': email,
       'CNPJ': cnpj,
-      'NOMEOWNER': nomeOwner,
       'BAIRRO': bairro,
       'CITY': city,
       'CEP': cep,
       'FOTOID': fotoId,
       'FONE': fone,
       'LOGONAME': logoName,
+      'RUA': rua,
     };
   }
 }

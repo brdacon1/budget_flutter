@@ -35,6 +35,21 @@ class Db{
     }
     return yourModels;
   }
+
+  Future<void> updatePDF(Owner orcamento) async {
+    try {
+      final CollectionReference infoPdfRef = FirebaseFirestore.instance
+          .collection('EMPRESAS/${UID.USER}/USERS/${UID.USER}/INFOPDF');
+      final DocumentReference informationDocRef = infoPdfRef.doc('INFORMATION');
+
+      await informationDocRef.update(orcamento.toJson());
+
+      print('PDF atualizado com sucesso!');
+    } catch (e) {
+      print('Erro ao atualizar o PDF: $e');
+    }
+  }
+
   Future<List<ObjectListObservationPDF>> getListComment(String? ID) async {
     try {
       var group = await FirebaseFirestore.instance
@@ -46,15 +61,6 @@ class Db{
     } catch (e) {
       print(e);
       rethrow;
-    }
-  }
-
-  Future<void> updatePDF(Owner orcamento) async {
-    try {
-      String documentPath = "EMPRESAS/${UID.USER}/USERS/${UID.USER}/INFOPDF";
-      await FirebaseFirestore.instance.doc(documentPath).update(orcamento.toJson());
-    } catch (e) {
-      print('Error updating PDF: $e');
     }
   }
 
@@ -87,11 +93,10 @@ class Db{
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/INFOPDF")
         .doc("INFORMATION")
         .set({
-            'DATA': pdfInfo.rua,
             'EMPRESA': pdfInfo.empresa,
             'EMAIL': pdfInfo.email,
             'CNPJ': pdfInfo.cnpj,
-            'NOMEOWNER': pdfInfo.nomeOwner,
+            'RUA': pdfInfo.rua,
             'BAIRRO': pdfInfo.bairro,
             'CITY': pdfInfo.city,
             'CEP': pdfInfo.cep,

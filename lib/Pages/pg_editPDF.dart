@@ -61,7 +61,7 @@ class _PgEditPDF extends State<PgEditPDF> {
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
-  File? _imageFile;
+
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
   late Future<Uint8List?> fileContentFuture;
 
@@ -87,54 +87,38 @@ class _PgEditPDF extends State<PgEditPDF> {
   );
 
   Future<Uint8List?> initialData() async {
-    var db = Db();
-    var ownerInitial = await db.getInformationEnterprise();
-    owner = ownerInitial;
-    var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: globalUIDUser.EMAIL!.trim(),
-      password: globalUIDUser.Senha!.trim(),
-    );
-    var token = await auth.user?.getIdToken();
-    var endpointUrl =
-        'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
-    var response = await http.get(
-      Uri.parse(endpointUrl),
-      headers: <String, String>{
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json;odata=verbose',
-      },
-    );
-
-    _nameText.text = owner.empresa!;
-    _phoneText.text = owner.fone!;
-    _emailText.text = owner.email!;
-    _cpfText.text = owner.cnpj!;
-    _cepText.text = owner.cep!;
-    _ruaText.text = owner.rua!;
-    _cityText.text = owner.city!;
-    _bairroText.text = owner.bairro!;
-    print(owner.fotoId!);
-    setState(() {});
-
-    return response.bodyBytes;
-  }
-
-  Future<void> _uploadImage() async {
-    if (_imageFile == null) {
-      print("Nenhuma imagem selecionada.");
-      return;
-    }
-
     try {
-      FirebaseStorage storage = FirebaseStorage.instance;
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = storage.ref().child('images/$fileName.jpg');
-      UploadTask uploadTask = ref.putFile(_imageFile!);
-      await uploadTask.whenComplete(() {
-        print('Imagem enviada com sucesso!');
-      });
-    } catch (e) {
-      print('Erro ao enviar a imagem: $e');
+      var db = Db();
+      var ownerInitial = await db.getInformationEnterprise();
+      owner = ownerInitial;
+      var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: globalUIDUser.EMAIL!.trim(),
+        password: globalUIDUser.Senha!.trim(),
+      );
+      var token = await auth.user?.getIdToken();
+      var endpointUrl =
+          'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
+      var response = await http.get(
+        Uri.parse(endpointUrl),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json;odata=verbose',
+        },
+      );
+
+      _nameText.text = owner.empresa!;
+      _phoneText.text = owner.fone!;
+      _emailText.text = owner.email!;
+      _cpfText.text = owner.cnpj!;
+      _cepText.text = owner.cep!;
+      _ruaText.text = owner.rua!;
+      _cityText.text = owner.city!;
+      _bairroText.text = owner.bairro!;
+      setState(() {});
+
+      return response.bodyBytes;
+    }
+    catch(e){
     }
   }
 
@@ -257,7 +241,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const ImageEditorPage(),
+                                      builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
                                     ),
                                   );
                                 },
@@ -609,7 +593,9 @@ class _PgEditPDF extends State<PgEditPDF> {
                         FadeAnimation(
                           delay: 1,
                           child: TextButton(
-                            onPressed:_uploadImage,
+                            onPressed: (){
+
+                            },
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),

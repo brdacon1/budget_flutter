@@ -3,6 +3,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_principalTabApp.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/controllers/MenuControllerApp.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
             '/menu_tecnico': (BuildContext _) => pg_PoupSearch(),
             '/pg-subscription': (BuildContext _) => pg_subscription(),
             '/menu': (BuildContext _) => pg_PrincipalTabApp(),
+            '/pg-pdf-config': (BuildContext _) => const PgEditPDF(),
           },
         ),
       ),
