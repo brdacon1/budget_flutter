@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_priceList.dart';
+import 'package:oflite/Services/display_alert.dart';
 
 import '../constants.dart';
 
@@ -13,6 +14,7 @@ class MenuItem {
 }
 
 class MenuSelectionPage extends StatelessWidget {
+  final displayAlert = DisplayAlert();
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: 'Lista de preço'),
     MenuItem(icon: Icons.password, title: 'Trocar de senha'),
@@ -31,7 +33,7 @@ class MenuSelectionPage extends StatelessWidget {
         );
         break;
       case 1:
-
+        displayAlert.dialogChangePassword(context);
         break;
       case 2:
         Navigator.push(

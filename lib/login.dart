@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
+import 'Services/display_alert.dart';
 import 'Services/loading_event.dart';
 import 'anmition/fadeanimation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,6 +34,7 @@ class _Login extends State<Login> {
   bool ispasswordev = true;
   Gender? selected;
   late String uid;
+  final displayAlert = DisplayAlert();
   ObjetoUIDUser users = ObjetoUIDUser();
   final alertDisplayLoading = LoadingEvent();
 
@@ -255,10 +257,26 @@ class _Login extends State<Login> {
                 ),
                 FadeAnimation(
                   delay: 1,
-                  child: Text("Esqueceu sua senha?", style: GoogleFonts.heebo(
-                    color: buttonColor.withOpacity(0.9),
-                    letterSpacing: 0.5,
-                  )),
+                  child: TextButton(
+                      onPressed: () async {
+                        displayAlert.dialogChangePassword(context);
+                      },
+                      style: TextButton.styleFrom(
+                          backgroundColor: bgColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 80),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0)
+                          )
+                      ),
+                      child: Text("Esqueceu sua senha?", style: GoogleFonts.heebo(
+                        color: buttonColor,
+                        letterSpacing: 0.5,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      )
+                  ),
                 ),
                 SizedBox(
                     height: he * 0.12
