@@ -11,6 +11,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/Models/ViaCEPServico.dart' as CEP;
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
+import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
@@ -641,6 +642,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                               alertDisplayLoading.alertLoading(context);
                               var db = Db();
                               var localOwner = Owner();
+                              var displayAlert = DisplayAlert();
                               localOwner.bairro = _bairroText.text;
                               localOwner.fotoId = owner.fotoId;
                               localOwner.city = _cityText.text;
@@ -651,8 +653,10 @@ class _PgEditPDF extends State<PgEditPDF> {
                               localOwner.cnpj = _cpfText.text;
                               localOwner.empresa = _nameText.text;
                               localOwner.logoName = owner.logoName;
-                              db.savePDF(localOwner);
-                              alertDisplayLoading.closeLoading(context);
+                              db.savePDF(localOwner).then((value) => {
+                                 alertDisplayLoading.closeLoading(context),
+                                 displayAlert.notification(context, "Feito!", "Cometário adicionado com sucesso!"),
+                              });
                             },
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,

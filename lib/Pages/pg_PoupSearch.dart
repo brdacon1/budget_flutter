@@ -357,7 +357,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           child: Container(
                             margin: EdgeInsets.only(right: we * 0.15),
                             child: Text(
-                              "Remover produtos",
+                              "Remover orçamentos",
                               style: GoogleFonts.heebo(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -474,7 +474,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0))),
                           child: Text(
-                            "EXCLUIR ITENS",
+                            "EXCLUIR TODOS",
                             style: GoogleFonts.heebo(
                               color: Colors.black,
                               letterSpacing: 0.5,
