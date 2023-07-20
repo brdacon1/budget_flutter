@@ -163,7 +163,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                       child: TextField(
                         controller: _descricaoText,
                         keyboardType: TextInputType.multiline,
-                        maxLines: 7,
+                        maxLines: 50,
                         onTap: (){
                           setState(() {
                             selected = Gender.comentText;

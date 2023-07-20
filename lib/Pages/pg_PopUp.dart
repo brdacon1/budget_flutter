@@ -235,8 +235,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                     height: he * 0.02
                 ),
                 Expanded(
-                  child: SizedBox(
-                    child: Column(
+                  child: ListView(
                         children: <Widget>[
                           SizedBox(
                             child: Padding(
@@ -431,111 +430,103 @@ class _pg_PopUp extends State<pg_PopUp> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  FadeAnimation(
-                                    delay: 1,
-                                    child: Container(
-                                      width: we * 0.80,
-                                      height:he * 0.1,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.descricaoText ? bgColor : bgColor
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: TextField(
-                                        controller: _descricaoText,
-                                        keyboardType: TextInputType.multiline,
-                                        maxLines: 7,
-                                        onTap: (){
-                                          setState(() {
-                                            selected = Gender.descricaoText;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                            enabledBorder: InputBorder.none,
-                                            border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.comment_bank_outlined,color: selected == Gender.descricaoText ? enabledtxt : deaible,),
-                                            hintText: 'Descrição do item',
-                                            hintStyle: TextStyle(
-                                                color: selected == Gender.descricaoText ? enabledtxt : deaible
-                                            )
-                                        ),
-                                        style:  TextStyle(color: selected == Gender.descricaoText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.03,
-                                  ),
+                                  Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
+                                     child: Container(
+                                       width: we * 0.80,
+                                       height: he * 0.30,
+                                       decoration: BoxDecoration(
+                                         borderRadius: BorderRadius.circular(20.0),
+                                         color: selected == Gender.descricaoText ? bgColor : bgColor,
+                                       ),
+                                       padding: const EdgeInsets.all(8.0),
+                                       child: TextField(
+                                         controller: _descricaoText,
+                                         keyboardType: TextInputType.multiline,
+                                         maxLines: 50,
+                                         onTap: () {
+                                           setState(() {
+                                             selected = Gender.descricaoText;
+                                           });
+                                         },
+                                         decoration: const InputDecoration(
+                                           enabledBorder: InputBorder.none,
+                                           border: InputBorder.none,
+                                           hintText: 'Escreva a descrição do produto ou serviço...',
+                                           hintStyle: TextStyle(color: Colors.grey),
+                                         ),
+                                         style: TextStyle(
+                                           color: selected == Gender.descricaoText ? enabledtxt : deaible,
+                                           fontWeight: FontWeight.bold,
+                                         ),
+                                       ),
+                                     ),
+                                  )
                                 ],
                               ),
                             ),
                           ),
-                          FadeAnimation( delay: 1,
-                            child: TextButton(
-                                onPressed: () async {
-
-                                  double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                  if(nameButton == 'SALVAR')
-                                  {
-                                    ITENS.CATEGORIA = _categoriaText.text;
-                                    ITENS.DESCRICAO = _descricaoText.text;
-                                    ITENS.MEDIDA = _unidadeText.text.toString();
-                                    ITENS.PRECO = cleanAmount;
-                                    ITENS.QTD = 0;
-                                    await SaveItensInPriceList(ITENS).then((value) => {
+                          Padding(padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+                                  child: TextButton(
+                                    onPressed: () async {
+                                      double cleanAmount = moneyConvert.convertFromString(controller.text);
+                                      if(nameButton == 'SALVAR')
+                                      {
+                                        ITENS.CATEGORIA = _categoriaText.text;
+                                        ITENS.DESCRICAO = _descricaoText.text;
+                                        ITENS.MEDIDA = _unidadeText.text.toString();
+                                        ITENS.PRECO = cleanAmount;
+                                        ITENS.QTD = 0;
+                                        await SaveItensInPriceList(ITENS).then((value) => {
                                           notification(context, "Feito!", "Item adicionado com sucesso!"),
-                                    });
-                                  }
-                                  else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
-                                  {
-                                    ITENS.CATEGORIA = _categoriaText.text;
-                                    ITENS.DESCRICAO = _descricaoText.text;
-                                    ITENS.MEDIDA = _unidadeText.text.toString();
-                                    ITENS.PRECO = cleanAmount;
-                                    ITENS.QTD = 0;
-                                    await UpadateItensInPriceList(ITENS).then((value) => {
+                                        });
+                                      }
+                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
+                                      {
+                                        ITENS.CATEGORIA = _categoriaText.text;
+                                        ITENS.DESCRICAO = _descricaoText.text;
+                                        ITENS.MEDIDA = _unidadeText.text.toString();
+                                        ITENS.PRECO = cleanAmount;
+                                        ITENS.QTD = 0;
+                                        await UpadateItensInPriceList(ITENS).then((value) => {
                                           notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                    });
-                                  }
-                                  else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
-                                  {
-                                    double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                    double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
-                                    ITENS.CATEGORIA = _categoriaText.text;
-                                    ITENS.DESCRICAO = _descricaoText.text;
-                                    ITENS.MEDIDA = _unidadeText.text.toString();
-                                    ITENS.PRECO = cleanAmount;
-                                    ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
-                                    controllerTotal.text = totalPrice.toStringAsFixed(2);
-                                    ITENS.TOTAL = totalPrice;
-                                    await UpdateItensOrcamentoList(ITENS).then((value) => {
-                                           notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                    });
-                                  }
+                                        });
+                                      }
+                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
+                                      {
+                                        double cleanAmount = moneyConvert.convertFromString(controller.text);
+                                        double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        ITENS.CATEGORIA = _categoriaText.text;
+                                        ITENS.DESCRICAO = _descricaoText.text;
+                                        ITENS.MEDIDA = _unidadeText.text.toString();
+                                        ITENS.PRECO = cleanAmount;
+                                        ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        controllerTotal.text = totalPrice.toStringAsFixed(2);
+                                        ITENS.TOTAL = totalPrice;
+                                        await UpdateItensOrcamentoList(ITENS).then((value) => {
+                                          notification(context, "Feito!", "Item atualizado com sucesso!"),
+                                        });
+                                      }
 
-                                },
-                                style:  TextButton.styleFrom(
-                                    backgroundColor: buttonColor,
-                                    padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30.0)
-                                    )
-                                ),
-                                child: Text(nameButton!,style: GoogleFonts.heebo(
-                                  color: Colors.black,
-                                  letterSpacing: 0.5,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),)
-                            ),
-                          ),
+                                    },
+                                    style:  TextButton.styleFrom(
+                                        backgroundColor: buttonColor,
+                                        padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(30.0)
+                                        )
+                                    ),
+                                    child: Text(nameButton!,style: GoogleFonts.heebo(
+                                      color: Colors.black,
+                                      letterSpacing: 0.5,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
+                                  ),
+                          )
                         ]
                     ),
                   ),
-                ),
               ]
           ),
         ),

@@ -655,7 +655,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                               localOwner.logoName = owner.logoName;
                               db.savePDF(localOwner).then((value) => {
                                  alertDisplayLoading.closeLoading(context),
-                                 displayAlert.notification(context, "Feito!", "Cometário adicionado com sucesso!"),
+                                 displayAlert.notification(context, "Feito!", "Dados do PDF atualizados com sucesso!"),
                               });
                             },
                             style: TextButton.styleFrom(
