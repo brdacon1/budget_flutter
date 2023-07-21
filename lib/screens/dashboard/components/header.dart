@@ -40,10 +40,25 @@ class Header extends StatelessWidget {
   }
 }
 
-class ProfileCard extends StatelessWidget {
+class ProfileCard extends StatefulWidget {
   const ProfileCard({
     Key? key,
   }) : super(key: key);
+  @override
+  _ProfileCard createState() => _ProfileCard();
+}
+
+class _ProfileCard extends State<ProfileCard> {
+  String _selectedItem = 'David'; // Valor inicial selecionado
+  final List<String> _dropdownItems = [
+    'David',
+    'Sair',
+  ];
+
+  final List<IconData> _dropdownIcons = [
+    Icons.person,
+    Icons.logout,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -58,20 +73,27 @@ class ProfileCard extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         border: Border.all(color: Colors.white10),
       ),
-      child: Row(
-        children: [
-          Image.asset(
-            "assets/images/profile_pic.png",
-            height: 38,
-          ),
-          if (!Responsive.isMobile(context))
-            const Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-              child: Text("Angelina Jolie"),
+      child: DropdownButton<String>(
+        underline: Container(color: Colors.transparent),
+        value: _selectedItem,
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedItem = newValue!;
+          });
+        },
+        items: _dropdownItems.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+          int index = entry.key;
+          String value = entry.value;
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Row(
+              children: [
+                Icon(_dropdownIcons[index]), // Íconee
+                Text(value), // Texto do item
+              ],
             ),
-          const Icon(Icons.keyboard_arrow_down),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
