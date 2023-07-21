@@ -82,17 +82,15 @@ class PDFGenerate {
       }
       ///End image
 
-      PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+      PdfFont font = PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular);
 
       PdfStringFormat format = PdfStringFormat(
         textDirection: PdfTextDirection.rightToLeft,
         alignment: PdfTextAlignment.right,
       );
 
-      font = PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.regular);
-
       graphics.drawString(
-        '${obs3.empresa}\nCNPJ: ${obs3.cnpj}\n${obs3.rua}\n${obs3.city}  ${obs3.bairro}\nCEP: ${obs3.cep}\nE-mail: ${obs3.email}\nTelefone: ${obs3.fone}',
+        '${obs3.empresa}\nCNPJ: ${obs3.cnpj}\nE-mail: ${obs3.email}\nTelefone: ${obs3.fone}\n${obs3.rua}\n${obs3.bairro}\n${obs3.city}\nCEP: ${obs3.cep}',
         font,
         brush: PdfBrushes.black,
         bounds: Rect.fromLTWH(0, 0, page.getClientSize().width, page.getClientSize().height),
