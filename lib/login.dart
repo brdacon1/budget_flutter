@@ -231,9 +231,16 @@ class _Login extends State<Login> {
                   delay: 1,
                   child: TextButton(
                       onPressed: () async {
-                        alertDisplayLoading.alertLoading(context);
-                        await _emailAndPassword().then((value) => {
-                        });
+                        try
+                        {
+                          alertDisplayLoading.alertLoading(context);
+                          await _emailAndPassword().then((value) => {
+                          });
+                        }catch(e){
+                          alertDisplayLoading.closeLoading(context);
+                          displayAlert.notificationError(context, "Erro!", "Problemas para realizar seu login verifique sua senha e e-mail");
+                        }
+
                       },
                       style: TextButton.styleFrom(
                           backgroundColor: buttonColor,

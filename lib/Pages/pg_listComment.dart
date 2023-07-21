@@ -172,7 +172,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                         decoration: InputDecoration(
                             enabledBorder: InputBorder.none,
                             border:InputBorder.none,
-                            hintText: 'Escreva o co mentário...',
+                            hintText: 'Escreva o comentário...',
                             hintStyle: TextStyle(
                                 color: selected == Gender.comentText ? enabledtxt : deaible
                             )

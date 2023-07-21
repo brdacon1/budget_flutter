@@ -7,8 +7,11 @@ import '../anmition/fadeanimation.dart';
 import '../constants.dart';
 
 TextEditingController _emailText = TextEditingController();
-TextEditingController _passwordText = TextEditingController();
 final FirebaseAuth _auth = FirebaseAuth.instance;
+enum Gender{
+  email,
+}
+
 
 class DisplayAlert {
   Future<void> notificationError(BuildContext context, String firstMessage, String secondMessage) {
@@ -37,22 +40,27 @@ class DisplayAlert {
   Future<void> dialogChangePassword(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;
+    Color enabled = const Color(0xFF827F8A);
+    Color enabledtxt = Colors.white;
+    Color deaible = Colors.grey;
+    Gender? selected;
+
     _emailText.text = '';
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          insetPadding: const EdgeInsets.all(5),
+          insetPadding: const EdgeInsets.all(19),
           backgroundColor: bgColor,
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: 260,
+                height: 180,
                 width: we,
                 child: Column(
                   children: <Widget>[
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
                         GestureDetector(
@@ -63,7 +71,7 @@ class DisplayAlert {
                           },
                           child: Container(
                             alignment: Alignment.topLeft,
-                            margin: EdgeInsets.only(right: we * 0.1),
+                            margin: EdgeInsets.only(left: we * 0.0),
                             child: const Icon(
                               Icons.close,
                               color: Colors.white,
@@ -72,13 +80,13 @@ class DisplayAlert {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(right: we * 0.13),
+                          margin: EdgeInsets.only(right: we * 0.1),
                           child: Text(
                             "Recuperação de senha",
                             style: GoogleFonts.heebo(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 17,
+                              fontSize: 20,
                             ),
                           ),
                         ),
@@ -87,57 +95,56 @@ class DisplayAlert {
                     SizedBox(
                       height: he * 0.02,
                     ),
-                    Expanded(
-                      child: SizedBox(
-                        height: 30,
-                        child: Card(
-                          color: Colors.cyan[50],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(padding: const EdgeInsets.only(left: 5, right: 5),
-                                      child:Container(
-                                        width: we * 0.8,
-                                        height: he * 0.071,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: bgColor,
-                                        ),
-                                        padding: const EdgeInsets.all(8.0),
-                                        child:  TextField(
-                                          controller: _emailText,
-                                          decoration: const InputDecoration(
-                                            enabledBorder: InputBorder.none,
-                                            border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.email_outlined, color: Colors.white),
-                                            hintText: 'E-mail',
-                                            hintStyle: TextStyle(
-                                              color: bgColor,
-                                            ),
-                                          ),
-                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                              ),
-                            ],
+                    Container(
+                      width: we * 0.80,
+                      height:he * 0.07,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: selected == Gender.email ? enabled : bgColor
+                      ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        controller: _emailText,
+                        onTap: () {
+                          setState(() {
+                            selected = Gender.email;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.email_outlined,
+                            color: selected == Gender.email
+                                ? enabledtxt
+                                : deaible,),
+                          hintText: 'E-mail',
+                          hintStyle: TextStyle(
+                            color: selected == Gender.email
+                                ? enabledtxt
+                                : deaible,
                           ),
                         ),
+                        style: TextStyle(color: selected == Gender.email
+                            ? enabledtxt
+                            : deaible, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Padding(padding: const EdgeInsets.only(top: 15),
+                    Padding(padding: const EdgeInsets.only(top: 20),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: TextButton(
                           onPressed: () async {
-                            await _auth.sendPasswordResetEmail(
-                              email: _emailText.text.trim(),
-                            ).then((value) async => {
-                              notification(context, "Feito!", "Você recebeu um email para trocar de senha")
-                            });
-
+                            try
+                            {
+                              await _auth.sendPasswordResetEmail(
+                                email: _emailText.text.trim(),
+                              ).then((value) async => {
+                                notification(context, "Feito!", "Você recebeu um email para trocar de senha")
+                              });
+                            }
+                            catch (e){
+                             await notificationError(context, "Erro!", "Problemas para restaurar sua senha verifique seu e-email se está correto!");
+                            }
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: buttonColor,
