@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/Objetos/ObjetoUIDUser.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -41,17 +42,38 @@ class _Login extends State<Login> {
   @override
   void initState() {
     super.initState();
+    checkAutoLogin();
   }
 
-  Future<void> _emailAndPassword() async {
+  void checkAutoLogin() async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? email = prefs.getString('email');
+    String? password = prefs.getString('password');
+
+    if (email != null && password != null) {
+      try
+      {
+        alertDisplayLoading.alertLoading(context);
+        await _emailAndPassword(email, password);
+      }catch(e){
+        alertDisplayLoading.closeLoading(context);
+      }
+    } else {
+    }
+  }
+
+  Future<void> _emailAndPassword(String email, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await _auth.signInWithEmailAndPassword(
-      email: _emailText.text.trim(),
-      password: _passwordText.text.trim(),
+      email: email.trim(),
+      password: password.trim(),
      ).then((value) async => {
+          await prefs.setString('email', email),
+          await prefs.setString('password', password),
+          UID.Senha = password.trim(),
           uid = value.user!.uid.toString(),
-          await getUserInfo().then((value) {
-            UID.Senha = _passwordText.text.trim();
-          }),
+          await getUserInfo(),
      });
   }
 
@@ -234,13 +256,11 @@ class _Login extends State<Login> {
                         try
                         {
                           alertDisplayLoading.alertLoading(context);
-                          await _emailAndPassword().then((value) => {
-                          });
-                        }catch(e){
+                          await _emailAndPassword(_emailText.text, _passwordText.text);
+                        } catch(e){
                           alertDisplayLoading.closeLoading(context);
                           displayAlert.notificationError(context, "Erro!", "Problemas para realizar seu login verifique sua senha e e-mail");
                         }
-
                       },
                       style: TextButton.styleFrom(
                           backgroundColor: buttonColor,

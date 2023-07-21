@@ -65,6 +65,7 @@ dependencies:
   image_gallery_saver: ^2.0.3
   image_cropper: ^4.0.1
   dotted_border: ^2.0.0+3
+  shared_preferences: ^2.2.0
 
 dev_dependencies:
   flutter_test:

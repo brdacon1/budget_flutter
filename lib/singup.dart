@@ -6,6 +6,7 @@ import 'package:oflite/constants.dart';
 import 'Models/Db.dart';
 import 'Objetos/ObjetoUIDUser.dart';
 import 'Objetos/Owner.dart';
+import 'Services/display_alert.dart';
 import 'Services/loading_event.dart';
 import 'anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -39,6 +40,7 @@ class _SingupState extends State<Singup> {
   final db = Db();
   final DADOS = ObjetoUIDUser();
   final PDF = Owner();
+  final displayAlert = DisplayAlert();
   final alertDisplayLoading = LoadingEvent();
 
   Future<void> _createUserWithEmailAndPassword(String password, String email) async {
@@ -214,8 +216,14 @@ class _SingupState extends State<Singup> {
                 delay: 1,
                 child: TextButton(
                     onPressed: () async {
-                      alertDisplayLoading.alertLoading(context);
-                      await _createUserWithEmailAndPassword(_passwordText.text.trim(), _emailText.text.trim());
+                      try{
+                        alertDisplayLoading.alertLoading(context);
+                        await _createUserWithEmailAndPassword(_passwordText.text.trim(), _emailText.text.trim());
+                      }
+                      catch(e){
+                        alertDisplayLoading.closeLoading(context);
+                        displayAlert.notificationError(context, "Erro!", "Problemas para registrar usuário!");
+                      }
                     },
                     style:  TextButton.styleFrom(
                         backgroundColor: buttonColor,
