@@ -26,7 +26,6 @@ class ListaItensOrcamento extends StatefulWidget {
 
 class _ListaItensOrcamento extends State<ListaItensOrcamento> {
   var orcamentos = <ObjectListItens>[];
-  var _foundUsers = <ObjectListItens>[];
   var deleteItens = <ObjectListItens>[];
   ObjectListItens novo = ObjectListItens();
   convert_coin moneyConvert = convert_coin();
@@ -35,20 +34,16 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
   Color deaible = Colors.grey;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
+  double totalProducts = 0;
+  double totalServices = 0;
+  double totalBudget = 0;
+  int countProduct = 0;
+  int countService = 0;
 
   @override
   initState() {
     super.initState();
-    try{
-      setState(()  async {
-        await getListItens();
-        setState(() {
-          _foundUsers = orcamentos;
-        });
-      });
-    }
-    catch (e){
-    }
+    getListItens();
   }
 
   Future<void> _dialogDeleteBuilder() {
@@ -233,8 +228,12 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           ),
         );
       },
-    ).then((value) {
-      setState(() {});
+    ).then((value) async {
+        deleteItens.clear();
+        orcamentos.clear();
+        deleteVisible = false;
+        await getListItens();
+        setState(() {});
     });
   }
 
@@ -247,22 +246,16 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${widget.item.ID}/ITENS")
           .doc(deleteItens[i].id)
           .delete();
-      if (i == count) {
-        deleteItens.clear();
-        orcamentos.clear();
-        deleteVisible = false;
-        await getListItens();
-        _foundUsers = orcamentos;
-      }
     }
-
     result = true;
     return result;
   }
 
-  Future<List<ObjectListItens>> getListItens() async {
-    _foundUsers.clear();
+  Future<void> getListItens() async {
     orcamentos.clear();
+    totalProducts = 0;
+    totalServices = 0;
+    totalBudget = 0;
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${widget.item.ID}/ITENS")
         .orderBy('CATEGORIA', descending: false)
@@ -275,7 +268,18 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
       item.id = document.id; // Obter o doc.id e atribuir ao item.id
       orcamentos.add(item);
     }
-    return orcamentos;
+    for (int index = 0; index < orcamentos.length; index++) {
+      double total = orcamentos[index].TOTAL!;
+      if (orcamentos[index].CATEGORIA == 'Produtos') {
+        totalProducts += total;
+        countProduct++;
+      } else if (orcamentos[index].CATEGORIA == 'Serviços') {
+        totalServices += total;
+        countService++;
+      }
+      totalBudget += total;
+    }
+    setState(() {});
   }
 
 
@@ -345,7 +349,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                        result  = orcamentos;
                     }
                     setState(() {
-                       _foundUsers = result;
+                      orcamentos = result;
                     });
                   },
                   onSubmitted: (String value) {
@@ -356,7 +360,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         result  = orcamentos;
                     }
                     setState(() {
-                        _foundUsers = result;
+                      orcamentos = result;
                     });
                   },
                 ),
@@ -377,7 +381,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 100, left: 15, right: 15, top: 3),
-                  itemCount: _foundUsers.length,
+                  itemCount: orcamentos.length,
                   itemBuilder: (context, index) {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -389,7 +393,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
                         title:
                         Text(
-                          _foundUsers[index].DESCRICAO!,
+                          orcamentos[index].DESCRICAO!,
                           maxLines: 2,
                           style: const TextStyle(
                             color: bgColor,
@@ -399,7 +403,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                           ),
                         ),
                         subtitle: Text(
-                          "Preço: ${moneyConvert.convertFromDouble(_foundUsers[index].PRECO!)}",
+                          "Preço: ${moneyConvert.convertFromDouble(orcamentos[index].PRECO!)}",
                           style: const TextStyle(
                             color: bgColor,
                             letterSpacing: 0.5,
@@ -419,7 +423,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Categoria: ${_foundUsers[index].CATEGORIA}",
+                                "Categoria: ${orcamentos[index].CATEGORIA}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -436,7 +440,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Total: ${moneyConvert.convertFromDouble(_foundUsers[index].TOTAL!)}",
+                                "Total: ${moneyConvert.convertFromDouble(orcamentos[index].TOTAL!)}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -453,7 +457,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Quantidade: ${_foundUsers[index].QTD}",
+                                "Quantidade: ${orcamentos[index].QTD}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -470,7 +474,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Unidade de medida: ${_foundUsers[index].MEDIDA}",
+                                "Unidade de medida: ${orcamentos[index].MEDIDA}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -487,7 +491,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 LayoutBuilder(
                                   builder: (BuildContext context, BoxConstraints constraints) {
                                     return Visibility(
-                                      visible: !_foundUsers[index].checkBox!,
+                                      visible: !orcamentos[index].checkBox!,
                                       maintainSize: true,
                                       maintainAnimation: true,
                                       maintainState: true,
@@ -502,10 +506,10 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                             ),
                                           ),
                                           onPressed: () {
-                                            if (!_foundUsers[index].checkBox!) {
-                                              _foundUsers[index].checkBox = true;
-                                              _foundUsers[index].selectProduct = false;
-                                              _foundUsers[index].indice = index;
+                                            if (!orcamentos[index].checkBox!) {
+                                              orcamentos[index].checkBox = true;
+                                              orcamentos[index].selectProduct = false;
+                                              orcamentos[index].indice = index;
                                               deleteItens.add(orcamentos[index]);
                                               if (deleteItens.isNotEmpty) {
                                                 deleteVisible = true;
@@ -542,11 +546,11 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => pg_PopUp(item: _foundUsers[index]),
+                                              builder: (context) => pg_PopUp(item: orcamentos[index]),
                                             ),
                                           ).then((value) async => {
                                             await getListItens(),
-                                            _foundUsers = orcamentos,
+                                            orcamentos = orcamentos,
                                             setState(() {}),
                                           });
                                         },
@@ -618,9 +622,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 try{
                   setState(()  async {
                     await getListItens();
-                    setState(() {
-                      _foundUsers = orcamentos;
-                    });
                   });
                 }
                 catch (e){
@@ -632,6 +633,39 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
             child: const Icon(Icons.add, color: Colors.black,),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: buttonColor,
+        elevation: 0,
+        child: Container(
+          height: 65.0,
+          color: buttonColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Alinhar à esquerda
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+
+              Padding(padding: const EdgeInsets.only(left: 10),
+                child: Text(
+                  "Total Serviços: ${moneyConvert.convertFromDouble(totalServices!)}",
+                  style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
+                ),
+              ),
+              Padding(padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                        "Total produtos: ${moneyConvert.convertFromDouble(totalProducts!)}",
+                        style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
+                      ),
+              ),
+              Padding(padding: const EdgeInsets.only(left: 10),
+                child: Text(
+                  "Total orçamento: ${moneyConvert.convertFromDouble(totalBudget!)}",
+                  style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
