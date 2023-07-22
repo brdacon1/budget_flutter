@@ -122,6 +122,22 @@ class Db{
         });
   }
 
+  Future<void> updateUserAdm(ObjetoUIDUser userInfo) async {
+    await FirebaseFirestore.instance
+        .collection("USUARIOS/")
+        .doc(userInfo.USER)
+        .update({'USER' : userInfo.USER,
+      'FONE' : userInfo.FONE,
+      'EMAIL' : userInfo.EMAIL,
+      'NOME' : userInfo.NOME,
+      'Id': userInfo.Id,
+      'AutoRenewing' : userInfo.AutoRenewing,
+      'IdPay' : userInfo.IdPay,
+      'ProductId' : userInfo.ProductId,
+      'PurchaseToken' : userInfo.PurchaseToken,
+    });
+  }
+
   Future<void> saveItemsList(List<ObjectListItens> addItems) async {
     for(int i = 0; i < addItems.length; i++)
     {

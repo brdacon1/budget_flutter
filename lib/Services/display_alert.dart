@@ -3,20 +3,27 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../Models/Db.dart';
+import '../Objetos/ObjetoUIDUser.dart';
 import '../constants.dart';
+import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 
 TextEditingController _emailText = TextEditingController();
+TextEditingController _nameText = TextEditingController();
 final FirebaseAuth _auth = FirebaseAuth.instance;
+
 enum Gender{
   email,
+  name,
 }
 
 
 class DisplayAlert {
+  final db = Db();
+  final DADOS = ObjetoUIDUser();
   Future<void> notificationError(BuildContext context, String firstMessage, String secondMessage) {
     final width = MediaQuery.of(context).size.width;
     final completer = Completer<void>();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AwesomeDialog(
         width: width * 0.99,
@@ -178,6 +185,168 @@ class DisplayAlert {
 
     });
   }
+
+
+  Future<void> dialogChangeName(BuildContext context) {
+    final we = MediaQuery.of(context).size.width;
+    final he = MediaQuery.of(context).size.height;
+    Color enabled = const Color(0xFF827F8A);
+    Color enabledtxt = Colors.white;
+    Color deaible = Colors.grey;
+    Gender? selected;
+
+    _nameText.text = '';
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          insetPadding: const EdgeInsets.all(19),
+          backgroundColor: bgColor,
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                height: 180,
+                width: we,
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              Navigator.pop(context, true);
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            margin: EdgeInsets.only(left: we * 0.0),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(right: we * 0.15),
+                          child: Text(
+                            "Trocar nome usuário",
+                            style: GoogleFonts.heebo(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 19,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: he * 0.02,
+                    ),
+                    Container(
+                      width: we * 0.80,
+                      height:he * 0.07,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: selected == Gender.name ? enabled : bgColor
+                      ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        controller: _nameText,
+                        onTap: () {
+                          setState(() {
+                            selected = Gender.name;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.person_pin_outlined,
+                            color: selected == Gender.name
+                                ? enabledtxt
+                                : deaible,),
+                          hintText: 'SEU NOME',
+                          hintStyle: TextStyle(
+                            color: selected == Gender.name
+                                ? enabledtxt
+                                : deaible,
+                          ),
+                        ),
+                        style: TextStyle(color: selected == Gender.name
+                            ? enabledtxt
+                            : deaible, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(padding: const EdgeInsets.only(top: 20),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: TextButton(
+                          onPressed: () async {
+                            try
+                            {
+                              print(_nameText.text);
+                              if(_nameText.text.isNotEmpty){
+                                DADOS.AutoRenewing = globalUIDUser.AutoRenewing;
+                                DADOS.EMAIL = globalUIDUser.EMAIL;
+                                DADOS.FONE = globalUIDUser.FONE;
+                                DADOS.Id = globalUIDUser.Id;
+                                DADOS.IdPay = globalUIDUser.IdPay;
+                                DADOS.NOME = _nameText.text;
+                                DADOS.ProductId = globalUIDUser.ProductId;
+                                DADOS.PurchaseToken = globalUIDUser.PurchaseToken;
+                                DADOS.USER = globalUIDUser.USER;
+
+                                await db.updateUserAdm(DADOS).then((value) => {
+                                  globalUIDUser.NOME = _nameText.text,
+                                });
+                              }
+                              else
+                              {
+                                await notificationError(context, "Erro!", "O campo nome não pode ser vazio!");
+                              }
+
+                            }
+                            catch (e){
+                              await notificationError(context, "Erro!", "Problemas para restaurar sua senha verifique seu e-email se está correto!");
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 15.0,
+                              horizontal: 70,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                          ),
+                          child: Text(
+                            "Solicitar senha",
+                            style: GoogleFonts.heebo(
+                              color: Colors.black,
+                              letterSpacing: 0.5,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    ).then((value) async {
+
+    });
+  }
+
+
 
   Future<void> notification(BuildContext context, String firstMessage, String secondMessage) {
     final width = MediaQuery.of(context).size.width;

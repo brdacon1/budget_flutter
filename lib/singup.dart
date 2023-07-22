@@ -10,7 +10,7 @@ import 'Objetos/Owner.dart';
 import 'Services/display_alert.dart';
 import 'Services/loading_event.dart';
 import 'anmition/fadeanimation.dart';
-import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
+import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 import 'login.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -68,15 +68,15 @@ class _SingupState extends State<Singup> {
         await db.saveUserAdm(DADOS),
         await prefs.setString('email', email),
         await prefs.setString('password', password),
-        UID.USER = value.user!.uid,
-        UID.NOME = nome,
-        UID.EMAIL = DADOS.EMAIL,
-        UID.FONE = DADOS.FONE,
-        UID.Id = DADOS.Id,
-        UID.IdPay = "",
-        UID.ProductId = "",
-        UID.PurchaseToken = "",
-        UID.AutoRenewing = false,
+        globalUIDUser.USER = value.user!.uid,
+        globalUIDUser.NOME = nome,
+        globalUIDUser.EMAIL = DADOS.EMAIL,
+        globalUIDUser.FONE = DADOS.FONE,
+        globalUIDUser.Id = DADOS.Id,
+        globalUIDUser.IdPay = "",
+        globalUIDUser.ProductId = "",
+        globalUIDUser.PurchaseToken = "",
+        globalUIDUser.AutoRenewing = false,
         await db.savePDF(PDF).then((value) async => {
           alertDisplayLoading.closeLoading(context),
           Navigator.pop(context),
@@ -158,7 +158,7 @@ class _SingupState extends State<Singup> {
                     decoration: InputDecoration(
                       enabledBorder: InputBorder.none,
                       border:InputBorder.none,
-                      prefixIcon: Icon(Icons.email_outlined,color: selected == Gender.name ? enabledtxt : deaible),
+                      prefixIcon: Icon(Icons.person_pin_outlined,color: selected == Gender.name ? enabledtxt : deaible),
                       hintText: 'SEU NOME',
                       hintStyle: TextStyle(
                         color:  selected == Gender.name ? enabledtxt : deaible,

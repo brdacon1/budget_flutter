@@ -17,8 +17,8 @@ class MenuSelectionPage extends StatelessWidget {
   final displayAlert = DisplayAlert();
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: 'Lista de preço'),
-    MenuItem(icon: Icons.password, title: 'Trocar de senha'),
     MenuItem(icon: Icons.picture_as_pdf_outlined, title: 'Editar PDF'),
+    MenuItem(icon: Icons.person_pin_outlined, title: 'Trocar nome de usuário'),
   ];
 
   MenuSelectionPage({Key? key}) : super(key: key);
@@ -33,14 +33,14 @@ class MenuSelectionPage extends StatelessWidget {
         );
         break;
       case 1:
-        displayAlert.dialogChangePassword(context);
-        break;
-      case 2:
         Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => const PgEditPDF()),
         );
+        break;
+      case 2:
+        displayAlert.dialogChangeName(context);
         break;
     }
   }
@@ -86,7 +86,7 @@ class MenuSelectionPage extends StatelessWidget {
                         leading: Icon(menuItem.icon),
                         title: Text(
                           menuItem.title,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
                         ),
                         trailing: const Icon(Icons.arrow_right),
                       ),
