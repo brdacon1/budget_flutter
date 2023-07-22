@@ -1,11 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../anmition/fadeanimation.dart';
 import '../../../constants.dart';
-import '../../../controllers/MenuControllerApp.dart';
+import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
+import '../../../login.dart';
 import '../../../responsive.dart';
+
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class Header extends StatelessWidget {
   const Header({
@@ -40,18 +46,28 @@ class Header extends StatelessWidget {
   }
 }
 
+Future<void> _logout() async {
+  await _auth.signOut();
+}
+
 class ProfileCard extends StatefulWidget {
+
   const ProfileCard({
     Key? key,
   }) : super(key: key);
   @override
   _ProfileCard createState() => _ProfileCard();
 }
-
+String capitalizeFirstLetter(String text) {
+  if (text == null || text.isEmpty) {
+    return '';
+  }
+  return text[0].toUpperCase() + text.substring(1).toLowerCase();
+}
 class _ProfileCard extends State<ProfileCard> {
-  String _selectedItem = 'David'; // Valor inicial selecionado
+  final String _selectedItem = capitalizeFirstLetter(globalUIDUser.NOME!.split(' ')[0]); // Valor inicial selecionado
   final List<String> _dropdownItems = [
-    'David',
+    capitalizeFirstLetter(globalUIDUser.NOME!.split(' ')[0]),
     'Sair',
   ];
 
@@ -76,10 +92,20 @@ class _ProfileCard extends State<ProfileCard> {
       child: DropdownButton<String>(
         underline: Container(color: Colors.transparent),
         value: _selectedItem,
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedItem = newValue!;
-          });
+        onChanged: (String? newValue)  async {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            if(newValue! == 'Sair')
+            {
+              await _logout();
+              await prefs.remove('email');
+              await prefs.remove('password');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => Login()),
+                    (Route<dynamic> route) => false,
+                 ).then((value) async => {
+              });
+            }
         },
         items: _dropdownItems.asMap().entries.map<DropdownMenuItem<String>>((entry) {
           int index = entry.key;
@@ -88,8 +114,10 @@ class _ProfileCard extends State<ProfileCard> {
             value: value,
             child: Row(
               children: [
-                Icon(_dropdownIcons[index]), // Íconee
-                Text(value), // Texto do item
+                Icon(_dropdownIcons[index]), // Ícone
+                const SizedBox(width: 5), // Espaçamento entre o ícone e o texto
+                Text(value, style: const TextStyle(fontSize: 12),),
+                const SizedBox(width: 5),// Texto do item
               ],
             ),
           );
@@ -98,6 +126,7 @@ class _ProfileCard extends State<ProfileCard> {
     );
   }
 }
+
 
 class SearchField extends StatelessWidget {
   const SearchField({

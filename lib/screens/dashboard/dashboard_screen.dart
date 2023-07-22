@@ -32,6 +32,7 @@ class _DashboardScreen extends State<DashboardScreen> {
   @override
   initState() {
     super.initState();
+    print(UID.NOME);
     try {
       setState(() async {
         await getInformationBudget().then((value) => {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Models/Db.dart';
 import 'Objetos/ObjetoUIDUser.dart';
 import 'Objetos/Owner.dart';
@@ -15,9 +16,9 @@ import 'login.dart';
 final FirebaseAuth _auth = FirebaseAuth.instance;
 TextEditingController _emailText = TextEditingController();
 TextEditingController _passwordText = TextEditingController();
-
+TextEditingController _nomeText = TextEditingController();
 enum Gender{
-  fullname,
+  name,
   Email,
   password,
   confirmpassword,
@@ -43,8 +44,8 @@ class _SingupState extends State<Singup> {
   final displayAlert = DisplayAlert();
   final alertDisplayLoading = LoadingEvent();
 
-  Future<void> _createUserWithEmailAndPassword(String password, String email) async {
-
+  Future<void> _createUserWithEmailAndPassword(String password, String email, String nome) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
@@ -52,7 +53,7 @@ class _SingupState extends State<Singup> {
         DADOS.EMAIL = email,
         DADOS.FONE = '15991111111',
         DADOS.USER = value.user!.uid,
-        DADOS.NOME = 'Minha Empresa',
+        DADOS.NOME = nome,
         DADOS.Id = value.user!.uid,
         PDF.email = email,
         PDF.empresa = "Minha Empresa",
@@ -65,8 +66,10 @@ class _SingupState extends State<Singup> {
         PDF.logoName = '1_auto_pdf_oflite.png',
         PDF.fotoId = '09acd7c6-3133-40be-88c9-550698f6c4c1',
         await db.saveUserAdm(DADOS),
+        await prefs.setString('email', email),
+        await prefs.setString('password', password),
         UID.USER = value.user!.uid,
-        UID.NOME = DADOS.NOME,
+        UID.NOME = nome,
         UID.EMAIL = DADOS.EMAIL,
         UID.FONE = DADOS.FONE,
         UID.Id = DADOS.Id,
@@ -74,9 +77,9 @@ class _SingupState extends State<Singup> {
         UID.ProductId = "",
         UID.PurchaseToken = "",
         UID.AutoRenewing = false,
-        await db.savePDF(PDF).then((value) => {
+        await db.savePDF(PDF).then((value) async => {
           alertDisplayLoading.closeLoading(context),
-          Navigator.pushReplacementNamed(context, "/menu_tecnico"),
+          Navigator.pop(context),
         }),
     });
   }
@@ -135,8 +138,35 @@ class _SingupState extends State<Singup> {
               SizedBox(
                   height: he * 0.07
               ),
-              SizedBox(
-                height: he * 0.02,
+              FadeAnimation(
+                delay: 1,
+                child: Container(
+                  width: we * 0.9,
+                  height:he * 0.071,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: selected == Gender.name ?  enabled : bgColor,
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child:  TextField(
+                    controller: _nomeText,
+                    onTap: (){
+                      setState(() {
+                        selected = Gender.name;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      enabledBorder: InputBorder.none,
+                      border:InputBorder.none,
+                      prefixIcon: Icon(Icons.email_outlined,color: selected == Gender.name ? enabledtxt : deaible),
+                      hintText: 'SEU NOME',
+                      hintStyle: TextStyle(
+                        color:  selected == Gender.name ? enabledtxt : deaible,
+                      ),
+                    ),
+                    style:  TextStyle(color:  selected == Gender.name ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                  ),
+                ),
               ),
               SizedBox(
                 height: he * 0.02,
@@ -217,8 +247,14 @@ class _SingupState extends State<Singup> {
                 child: TextButton(
                     onPressed: () async {
                       try{
-                        alertDisplayLoading.alertLoading(context);
-                        await _createUserWithEmailAndPassword(_passwordText.text.trim(), _emailText.text.trim());
+                          if(_passwordText.text.isNotEmpty && _emailText.text.isNotEmpty && _nomeText.text.isNotEmpty)
+                          {
+                            alertDisplayLoading.alertLoading(context);
+                            await _createUserWithEmailAndPassword(_passwordText.text.trim(), _emailText.text.trim(), _nomeText.text);
+                          }
+                          else {
+                            displayAlert.notificationError(context, "Erro!", "Por favor preencha todos os campos!");
+                          }
                       }
                       catch(e){
                         alertDisplayLoading.closeLoading(context);

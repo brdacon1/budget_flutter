@@ -46,7 +46,6 @@ class _Login extends State<Login> {
   }
 
   void checkAutoLogin() async {
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? email = prefs.getString('email');
     String? password = prefs.getString('password');
@@ -323,7 +322,9 @@ class _Login extends State<Login> {
                               MaterialPageRoute(builder: (context) {
                                 return const Singup();
                               }
-                              ));
+                              )).then((_) {
+                                  checkAutoLogin();
+                              });
                         },
                         child: Text("Clique aqui", style: GoogleFonts.heebo(
                           color: buttonColor.withOpacity(0.9),
