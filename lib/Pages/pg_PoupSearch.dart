@@ -10,6 +10,7 @@ import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supercharged/supercharged.dart';
 import '../Models/Db.dart';
+import '../Models/convert_coin.dart';
 import '../Objetos/DADOS.dart';
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -34,6 +35,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   Color deaible = Colors.grey;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
+  convert_coin moneyConvert = convert_coin();
 
   @override
   initState() {
@@ -701,6 +703,20 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             vertical: 5.0,
                           ),
                           child: Text("Status: ${_foundUsers[index].STATUS}",
+                              style: const TextStyle(
+                                  color: bgColor,
+                                  letterSpacing: 0.5,
+                                  fontSize: 12.0)),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0,
+                            vertical: 5.0,
+                          ),
+                          child: Text("Valor total: ${moneyConvert.convertFromDouble(_foundUsers[index].VALORTOTAL!)}",
                               style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,

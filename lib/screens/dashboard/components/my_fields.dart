@@ -30,7 +30,7 @@ class _MyFiles extends State<MyFiles> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Column(
+    return const Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

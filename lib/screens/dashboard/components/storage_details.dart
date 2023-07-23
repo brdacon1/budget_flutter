@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/screens/dashboard/components/chart_line.dart';
 
 import '../../../Objetos/MyBudgetDashboard.dart';
 import '../../../constants.dart';
@@ -71,6 +72,8 @@ class _StarageDetails extends State<StarageDetails> {
             amountOfFiles: widget.item.qtdIntFinish.toString(),
             numOfFiles: widget.item.qtdIntFinish!,
           ),
+          const SizedBox(height: defaultPadding),
+          ChartLine(item: widget.item)
         ],
       ),
     );
