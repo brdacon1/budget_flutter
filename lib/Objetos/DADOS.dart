@@ -1,7 +1,5 @@
 library oflite.globals;
 
-import 'dart:ffi';
-
 class DADOS {
   String? ID;
   String? DATA;

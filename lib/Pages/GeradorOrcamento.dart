@@ -83,6 +83,21 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     super.initState();
     try{
       setState(()  async {
+        Orcamento.ID = widget.item.ID;
+        Orcamento.DATA = widget.item.DATA;
+        Orcamento.RUA = widget.item.RUA;
+        Orcamento.GERADO = widget.item.GERADO;
+        Orcamento.BAIRRO = widget.item.BAIRRO;
+        Orcamento.CITY = widget.item.CITY;
+        Orcamento.CEP = widget.item.CEP;
+        Orcamento.EMAIL = widget.item.EMAIL;
+        Orcamento.ENDERECO = widget.item.ENDERECO;
+        Orcamento.FONE = widget.item.FONE;
+        Orcamento.NOMECLIENTE = widget.item.NOMECLIENTE;
+        Orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
+        Orcamento.STATUS = widget.item.STATUS;
+        Orcamento.VALORTOTAL = widget.item.VALORTOTAL;
+
         if(widget.item.ID.toString() != '')
         {
           nameButton = 'ATUALIZAR';
@@ -176,6 +191,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
         'VALORTOTAL': orcamento.VALORTOTAL}).then((value) async {
          }).then((value) {
             Orcamento.IDORCAMENTO = orcamento.ID;
+            Orcamento.VALORTOTAL = orcamento.VALORTOTAL ?? 0;
         });
   }
 

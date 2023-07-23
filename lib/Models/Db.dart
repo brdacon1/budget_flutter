@@ -121,6 +121,30 @@ class Db{
               'PurchaseToken' : userInfo.PurchaseToken,
         });
   }
+  Future <void> updateItemsDADOS() async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
+        .doc(Orcamento.ID)
+        .update({
+      'ID': Orcamento.ID,
+      'DATA' : Orcamento.DATA,
+      'RUA' : Orcamento.RUA,
+      'GERADO' : Orcamento.GERADO,
+      'BAIRRO' : Orcamento.BAIRRO,
+      'CITY' : Orcamento.CITY,
+      'EMAIL' : Orcamento.EMAIL,
+      'ENDERECO' : Orcamento.ENDERECO,
+      'FONE' : Orcamento.FONE,
+      'NOMECLIENTE' : Orcamento.NOMECLIENTE,
+      'NOMEEMPRESA' : Orcamento.NOMEEMPRESA,
+      'STATUS' : Orcamento.STATUS,
+      'CEP' : Orcamento.CEP,
+      'VALORTOTAL' : Orcamento.VALORTOTAL}).then((value) async {
+    }).then((value) {
+      Orcamento.IDORCAMENTO = Orcamento.ID;
+      Orcamento.VALORTOTAL = Orcamento.VALORTOTAL ?? 0;
+    });
+  }
 
   Future<void> updateUserAdm(ObjetoUIDUser userInfo) async {
     await FirebaseFirestore.instance

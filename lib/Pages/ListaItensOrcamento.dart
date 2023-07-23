@@ -2,6 +2,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/Pages/pg_PopUp.dart';
 import 'package:oflite/Pages/pg_priceList.dart';
@@ -11,6 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/constants.dart';
 import '../Objetos/DADOS.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
+import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import '../Objetos/ObjectListItens.dart';
 import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
@@ -29,6 +31,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
   var deleteItens = <ObjectListItens>[];
   ObjectListItens novo = ObjectListItens();
   convert_coin moneyConvert = convert_coin();
+  var db = Db();
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
@@ -239,7 +242,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
 
   Future<bool> deleteData() async {
     bool result = false;
-    int count = deleteItens.length - 1;
 
     for (int i = 0; i < deleteItens.length; i++) {
       await FirebaseFirestore.instance
@@ -279,6 +281,12 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
       }
       totalBudget += total;
     }
+    if(Orcamento.VALORTOTAL != totalBudget)
+    {
+       Orcamento.VALORTOTAL = totalBudget;
+       await db.updateItemsDADOS();
+    }
+
     setState(() {});
   }
 
