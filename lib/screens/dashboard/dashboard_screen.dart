@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:oflite/screens/dashboard/components/month_evolution.dart';
 import '../../Objetos/DADOS.dart';
 import '../../Objetos/MyBudgetDashboard.dart';
 import '../../constants.dart';
@@ -55,6 +56,38 @@ class _DashboardScreen extends State<DashboardScreen> {
     } catch (e) {}
   }
 
+  Future<List<DADOS>> getInformationBudgetMonths() async {
+    _foundUsers.clear();
+
+    // Obter a data atual
+    DateTime currentDate = DateTime.now();
+
+    // Subtrair 30 dias da data atual
+    DateTime thirtyDaysAgo = currentDate.subtract(const Duration(days: 90));
+
+    // Converter as datas para milissegundos desde a época em string
+    String currentMillis = currentDate.millisecondsSinceEpoch.toString();
+    String thirtyDaysAgoMillis = thirtyDaysAgo.millisecondsSinceEpoch.toString();
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
+        .where('ID', isGreaterThanOrEqualTo: thirtyDaysAgoMillis)
+        .where('ID', isLessThanOrEqualTo: currentMillis)
+        .orderBy('ID', descending: false)
+        .get();
+
+    for (var questionTmp in querySnapshot.docs) {
+      final data = questionTmp.data();
+      if (data != null) {
+        // Verifica se os dados não são nulos antes de criar a instância de DADOS
+        _foundUsers.add(DADOS.fromMap(data));
+      }
+    }
+
+    return _foundUsers;
+  }
+
+
   Future<List<DADOS>> getInformationBudget() async {
     _foundUsers.clear();
 
@@ -108,7 +141,9 @@ class _DashboardScreen extends State<DashboardScreen> {
                       if (Responsive.isMobile(context))
                          StarageDetails(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
-                         RecentFiles(items: _foundUsers!),
+                            MonthEvolution(items: _foundUsers!),
+                      const SizedBox(height: defaultPadding),
+                            RecentFiles(items: _foundUsers!),
                     ],
                   ),
                 ),
