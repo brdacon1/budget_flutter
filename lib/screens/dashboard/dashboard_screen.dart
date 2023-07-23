@@ -69,18 +69,21 @@ class _DashboardScreen extends State<DashboardScreen> {
     String currentMillis = currentDate.millisecondsSinceEpoch.toString();
     String thirtyDaysAgoMillis = thirtyDaysAgo.millisecondsSinceEpoch.toString();
 
-    await FirebaseFirestore.instance
+    final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
         .where('ID', isGreaterThanOrEqualTo: thirtyDaysAgoMillis)
         .where('ID', isLessThanOrEqualTo: currentMillis)
         .orderBy('ID', descending: false)
-        .get()
-        .then((value) async {
-      for (var questionTmp in value.docs) {
-        _foundUsers.add(DADOS.fromMap(questionTmp));
+        .get();
+
+    for (var questionTmp in querySnapshot.docs) {
+      final data = questionTmp.data();
+      if (data != null) {
+        // Verifica se os dados não são nulos antes de criar a instância de DADOS
+        _foundUsers.add(DADOS.fromMap(data));
       }
-    }).then((value) => {
-    });
+    }
+
     return _foundUsers;
   }
 

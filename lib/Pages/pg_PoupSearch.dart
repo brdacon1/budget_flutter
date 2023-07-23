@@ -520,19 +520,25 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   Future<List<DADOS>> getInformationOrcamento() async {
     int index = 0;
     _foundUsers.clear();
-    await FirebaseFirestore.instance
+
+    final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
         .orderBy('ID', descending: true)
-        .get()
-        .then((value) async {
-      for (var questionTmp in value.docs) {
-        _foundUsers.add(DADOS.fromMap(questionTmp));
+        .get();
+
+    for (var questionTmp in querySnapshot.docs) {
+      final data = questionTmp.data();
+      if (data != null) {
+        // Verifica se os dados não são nulos antes de criar a instância de DADOS
+        _foundUsers.add(DADOS.fromMap(data));
         _foundUsers[index].checkBox = false;
         index++;
       }
-    });
+    }
+
     return _foundUsers;
   }
+
 
   @override
   Widget build(BuildContext context) {

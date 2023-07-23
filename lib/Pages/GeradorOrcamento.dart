@@ -155,7 +155,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     catch (e) {}
   }
 
-  Future <void> SalvaOrcamento(DADOS orcamento) async {
+  Future <void> saveBudget(DADOS orcamento) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
         .doc(orcamento.ID)
@@ -172,7 +172,8 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
         'NOMECLIENTE' : orcamento.NOMECLIENTE,
         'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
         'STATUS' : orcamento.STATUS,
-        'CEP' : orcamento.CEP}).then((value) async {
+        'CEP' : orcamento.CEP,
+        'VALORTOTAL': orcamento.VALORTOTAL}).then((value) async {
          }).then((value) {
             Orcamento.IDORCAMENTO = orcamento.ID;
         });
@@ -195,7 +196,8 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
            'NOMECLIENTE' : orcamento.NOMECLIENTE,
            'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
            'STATUS' : orcamento.STATUS,
-           'CEP' : orcamento.CEP}).then((value) async {
+           'CEP' : orcamento.CEP,
+           'VALORTOTAL' : orcamento.VALORTOTAL}).then((value) async {
           }).then((value) {
 
           });
@@ -206,6 +208,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     final he = MediaQuery.of(context).size.height;
     if(nameButton == "ATUALIZAR")
     {
+      orcamento.VALORTOTAL = widget.item.VALORTOTAL;
       orcamento.ID = widget.item.ID;
       orcamento.DATA = widget.item.DATA;
       orcamento.EMAIL = widget.item.EMAIL;
@@ -221,6 +224,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
       orcamento.BAIRRO = _bairroText.text;
       UpdateItensDADOS(orcamento).then((value) {
         setState(() {
+          widget.item.VALORTOTAL = orcamento.VALORTOTAL;
           widget.item.ID =  orcamento.ID;
           widget.item.DATA = orcamento.DATA;
           widget.item.EMAIL = orcamento.EMAIL;
@@ -259,7 +263,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
       final DateTime now = DateTime.now();
       final DateFormat formatter = DateFormat('dd/MM/yyyy');
       final String formatted = formatter.format(now);
-
+      orcamento.VALORTOTAL = 0;
       orcamento.EMAIL = widget.item.EMAIL;
       orcamento.ENDERECO = widget.item.ENDERECO;
       orcamento.GERADO = widget.item.GERADO;
@@ -268,13 +272,14 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
       orcamento.DATA = formatted;
       orcamento.NOMECLIENTE = _nameText.text;
       orcamento.FONE = _phoneText.text;
-      orcamento.STATUS = _statusText.text;
+      orcamento.STATUS = _statusText.text ?? 'PENDENTE';
       orcamento.CEP = _cepText.text;
       orcamento.RUA = _ruaText.text;
       orcamento.CITY = _cityText.text;
       orcamento.BAIRRO = _bairroText.text;
-      SalvaOrcamento(orcamento).then((value)  async {
+      saveBudget(orcamento).then((value)  async {
         setState(() {
+          widget.item.VALORTOTAL =  orcamento.VALORTOTAL;
           widget.item.ID =  orcamento.ID;
           widget.item.DATA = orcamento.DATA;
           widget.item.EMAIL = orcamento.EMAIL;
@@ -283,7 +288,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
           widget.item.NOMECLIENTE = _nameText.text;
           widget.item.FONE = _phoneText.text;
-          widget.item.STATUS = _statusText.text;
+          widget.item.STATUS = _statusText.text ?? 'PENDENTE';
           widget.item.CEP = _cepText.text;
           widget.item.RUA = _ruaText.text;
           widget.item.CITY = _cityText.text;

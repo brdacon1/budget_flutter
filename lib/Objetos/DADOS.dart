@@ -1,5 +1,7 @@
 library oflite.globals;
 
+import 'dart:ffi';
+
 class DADOS {
   String? ID;
   String? DATA;
@@ -14,6 +16,7 @@ class DADOS {
   String? NOMECLIENTE;
   String? NOMEEMPRESA;
   String? STATUS;
+  double? VALORTOTAL;
   bool? checkBox;
   int indice = 0;
 
@@ -29,7 +32,8 @@ class DADOS {
         this.NOMECLIENTE,
         this.NOMEEMPRESA,
         this.STATUS,
-        this.CEP});
+        this.CEP,
+        this.VALORTOTAL});
 
    DADOS.fromMap(dynamic json) {
     ID = json['ID'];
@@ -45,6 +49,7 @@ class DADOS {
     NOMEEMPRESA = json['NOMEEMPRESA'];
     STATUS = json['STATUS'];
     CEP = json['CEP'];
+    VALORTOTAL = json['VALORTOTAL'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -62,6 +67,7 @@ class DADOS {
     data['NOMEEMPRESA'] = this.NOMEEMPRESA;
     data['STATUS'] = this.STATUS;
     data['CEP'] = this.CEP;
+    data['VALORTOTAL'] = this.VALORTOTAL;
     return data;
   }
 }
