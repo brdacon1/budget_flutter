@@ -8,6 +8,8 @@ import '../Objetos/ObjetoUIDUser.dart';
 import '../constants.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 
+import 'loading_event.dart';
+
 TextEditingController _emailText = TextEditingController();
 TextEditingController _nameText = TextEditingController();
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -21,6 +23,9 @@ enum Gender{
 class DisplayAlert {
   final db = Db();
   final DADOS = ObjetoUIDUser();
+  final alertDisplayLoading = LoadingEvent();
+
+
   Future<void> notificationError(BuildContext context, String firstMessage, String secondMessage) {
     final width = MediaQuery.of(context).size.width;
     final completer = Completer<void>();
@@ -205,7 +210,7 @@ class DisplayAlert {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: 180,
+                height: 200,
                 width: we,
                 child: Column(
                   children: <Widget>[
@@ -243,7 +248,7 @@ class DisplayAlert {
                       ],
                     ),
                     SizedBox(
-                      height: he * 0.02,
+                      height: he * 0.03,
                     ),
                     Container(
                       width: we * 0.80,
@@ -279,14 +284,16 @@ class DisplayAlert {
                             : deaible, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Padding(padding: const EdgeInsets.only(top: 20),
-                      child: Align(
+                    SizedBox(
+                      height: he * 0.0416,
+                    ),
+                    Align(
                         alignment: Alignment.bottomCenter,
                         child: TextButton(
                           onPressed: () async {
                             try
                             {
-                              print(_nameText.text);
+                              alertDisplayLoading.alertLoading(context);
                               if(_nameText.text.isNotEmpty){
                                 DADOS.AutoRenewing = globalUIDUser.AutoRenewing;
                                 DADOS.EMAIL = globalUIDUser.EMAIL;
@@ -298,8 +305,10 @@ class DisplayAlert {
                                 DADOS.PurchaseToken = globalUIDUser.PurchaseToken;
                                 DADOS.USER = globalUIDUser.USER;
 
-                                await db.updateUserAdm(DADOS).then((value) => {
+                                await db.updateUserAdm(DADOS).then((value) async => {
                                   globalUIDUser.NOME = _nameText.text,
+                                  alertDisplayLoading.closeLoading(context),
+                                  await notification(context, "Feito!", "Nome atualizado com sucesso!"),
                                 });
                               }
                               else
@@ -323,7 +332,7 @@ class DisplayAlert {
                             ),
                           ),
                           child: Text(
-                            "Solicitar senha",
+                            "SALVAR",
                             style: GoogleFonts.heebo(
                               color: Colors.black,
                               letterSpacing: 0.5,
@@ -333,7 +342,6 @@ class DisplayAlert {
                           ),
                         ),
                       ),
-                    )
                   ],
                 ),
               );

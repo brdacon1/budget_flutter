@@ -517,7 +517,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
             ),
           ]
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           var newObservation = ObjectObservation();
           newObservation.checkbox = false;
@@ -527,14 +527,11 @@ class _ListCommentPageState extends State<ListCommentPage> {
           newObservation.observacao = '';
           addNewComment(newObservation);
         },
-        label: Text("Criar comentário",style: GoogleFonts.heebo(
+        backgroundColor: buttonColor,
+        child: const Icon(
+          Icons.add,
           color: Colors.black,
-          letterSpacing: 0.5,
-          fontSize: 20.0,
-          fontWeight: FontWeight.bold,
-        ),),
-        icon: const Icon(Icons.add, color: Colors.black, size: 30.0,),
-        backgroundColor: const Color(0xFF0DF5E4),
+        ),
       ),
     );
   }
