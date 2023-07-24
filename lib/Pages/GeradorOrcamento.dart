@@ -261,7 +261,18 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           dialogBackgroundColor: Colors.cyan[50],
           animType: AnimType.scale,
           headerAnimationLoop: false,
-          dialogType: DialogType.SUCCES,
+          dialogType: DialogType.success,
+          titleTextStyle: const TextStyle(
+            color: Colors.black, // Defina a cor do título
+            fontSize: 24, // Defina o tamanho da fonte do título
+            fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+            // Adicione outros atributos do TextStyle conforme necessário
+          ),
+          descTextStyle: const TextStyle(
+            color: Colors.black, // Defina a cor da descrição
+            fontSize: 18, // Defina o tamanho da fonte da descrição
+            // Adicione outros atributos do TextStyle conforme necessário
+          ),
           showCloseIcon: false,
           title: 'Feito!',
           desc: 'Dados do orçamento atualizado com sucesso!',
@@ -323,8 +334,19 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
             dialogBackgroundColor: Colors.cyan[50],
             animType: AnimType.topSlide,
             headerAnimationLoop: false,
-            dialogType: DialogType.SUCCES,
+            dialogType: DialogType.success,
             showCloseIcon: false,
+            titleTextStyle: const TextStyle(
+              color: Colors.black, // Defina a cor do título
+              fontSize: 24, // Defina o tamanho da fonte do título
+              fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+              // Adicione outros atributos do TextStyle conforme necessário
+            ),
+            descTextStyle: const TextStyle(
+              color: Colors.black, // Defina a cor da descrição
+              fontSize: 18, // Defina o tamanho da fonte da descrição
+              // Adicione outros atributos do TextStyle conforme necessário
+            ),
             title: 'Feito!',
             desc: 'Orçamento criado com sucesso!',
             btnOkOnPress: () async {
@@ -336,7 +358,18 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                   Radius.circular(10),
                 ),
                 headerAnimationLoop: false,
-                animType: AnimType.BOTTOMSLIDE,
+                animType: AnimType.bottomSlide,
+                titleTextStyle: const TextStyle(
+                  color: Colors.black, // Defina a cor do título
+                  fontSize: 24, // Defina o tamanho da fonte do título
+                  fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+                  // Adicione outros atributos do TextStyle conforme necessário
+                ),
+                descTextStyle: const TextStyle(
+                  color: Colors.black, // Defina a cor da descrição
+                  fontSize: 18, // Defina o tamanho da fonte da descrição
+                  // Adicione outros atributos do TextStyle conforme necessário
+                ),
                 title: 'Salvar contato',
                 desc: 'Gostaria de salvar o telefone em sua lista de contatos?',
                 showCloseIcon: false,
@@ -466,6 +499,17 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                           ),
                                           headerAnimationLoop: false,
                                           animType: AnimType.bottomSlide,
+                                          titleTextStyle: const TextStyle(
+                                            color: Colors.black, // Defina a cor do título
+                                            fontSize: 24, // Defina o tamanho da fonte do título
+                                            fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+                                            // Adicione outros atributos do TextStyle conforme necessário
+                                          ),
+                                          descTextStyle: const TextStyle(
+                                            color: Colors.black, // Defina a cor da descrição
+                                            fontSize: 18, // Defina o tamanho da fonte da descrição
+                                            // Adicione outros atributos do TextStyle conforme necessário
+                                          ),
                                           title: 'Lista de contatos',
                                           desc: 'Gostaria de buscar cliente em sua lista de contatos?',
                                           showCloseIcon: false,

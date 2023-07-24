@@ -287,11 +287,11 @@ class _pg_priceList extends State<pg_priceList>  {
                               await getListItens();
 
                               alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notification(context, "Tudo Certo!", "Orçamentos removidos com sucesso!");
+                              await displayAlert.notification(context, "Feito!", "Itens adicionados na lista do orçamento com sucesso!");
                               setState(() {});
                             } catch (e) {
                               alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro ao remover os orçamentos.");
+                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro para adicionar os itens na lista do orçamento");
                             }
                             setState(() {});
                           },
@@ -474,11 +474,11 @@ class _pg_priceList extends State<pg_priceList>  {
                               checkBoxAppear = false;
 
                               alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notification(context, "Tudo Certo!", "Orçamentos removidos com sucesso!");
+                              await displayAlert.notification(context, "Feito!", "Itens removidos com sucesso!");
                               setState(() {});
                             } catch (e) {
                               alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro ao remover os orçamentos.");
+                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro ao remover os itens.");
                             }
 
                             setState(() {});

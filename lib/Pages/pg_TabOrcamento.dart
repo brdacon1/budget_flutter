@@ -39,6 +39,17 @@ class _pg_TabOrcamentoState extends State<pg_TabOrcamento> {
                   headerAnimationLoop: false,
                   dialogType: DialogType.error,
                   showCloseIcon: false,
+                 titleTextStyle: const TextStyle(
+                   color: Colors.black, // Defina a cor do título
+                   fontSize: 24, // Defina o tamanho da fonte do título
+                   fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+                   // Adicione outros atributos do TextStyle conforme necessário
+                 ),
+                 descTextStyle: const TextStyle(
+                   color: Colors.black, // Defina a cor da descrição
+                   fontSize: 18, // Defina o tamanho da fonte da descrição
+                   // Adicione outros atributos do TextStyle conforme necessário
+                 ),
                   title: 'Erro!',
                   desc: 'Finalize o cadastro do cliente para acessar as demais etapas do orçamento!',
                   btnOkOnPress: () async {},

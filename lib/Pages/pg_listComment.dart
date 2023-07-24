@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:oflite/Objetos/ObjectObservation.dart';
 import 'package:oflite/constants.dart';
 import '../Objetos/DADOS.dart';
+import '../Services/display_alert.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 
@@ -25,6 +26,7 @@ enum Gender{
 
 class _ListCommentPageState extends State<ListCommentPage> {
   var observation = <ObjectObservation>[];
+  var displayAlert = DisplayAlert();
   var foundObservation = <ObjectObservation>[];
   var deleteItems = <ObjectObservation>[];
   ObjectObservation novo = ObjectObservation();
@@ -68,7 +70,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
         return objectComment;
       }).toList();
     } catch (e){
-      notificationError(context, "Erro!", "Não foi possível carregar os comentários");
+      await displayAlert.notificationError(context, "Erro!", "Não foi possível carregar os comentários");
     }
   }
 
@@ -86,7 +88,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
       });
     }
     catch (e){
-      notificationError(context, "Erro!", "Não foi possível adicionar o comentário");
+     await displayAlert.notificationError(context, "Erro!", "Não foi possível adicionar o comentário");
     }
   }
 
@@ -191,11 +193,11 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                 foundObservation.clear(),
                                 observation.clear(),
                                 await getListComment().then((value) => {
-                                  setState(() {
+                                  setState(() async {
                                     deleteItems.clear();
                                     deleteVisible = false;
                                     checkBoxAppear = false;
-                                    notification(context, "Feito!", "Cometário adicionado com sucesso!");
+                                    await displayAlert.notification(context, "Feito!", "Cometário adicionado com sucesso!");
                                   }),
                                 }),
                               });
@@ -204,8 +206,8 @@ class _ListCommentPageState extends State<ListCommentPage> {
                             {
                               popupObservation.observacao = _descricaoText.text;
                               await updateComment(popupObservation).then((value) => {
-                                setState(() {
-                                  notification(context, "Feito!", "Cometário atualizado com sucesso!");
+                                setState(() async {
+                                  await displayAlert.notification(context, "Feito!", "Cometário atualizado com sucesso!");
                                 }),
                               });
                             }
@@ -245,40 +247,6 @@ class _ListCommentPageState extends State<ListCommentPage> {
     });
   }
 
-  void notification(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      headerAnimationLoop: false,
-      dialogType: DialogType.success,
-      showCloseIcon: false,
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkIcon: Icons.check_circle,
-      btnOkOnPress: () {
-        Navigator.pop(context, true);
-      },
-    ).show();
-  }
-
-  void notificationError(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      animType: AnimType.leftSlide,
-      headerAnimationLoop: false,
-      dialogType: DialogType.error,
-      showCloseIcon: false,
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkOnPress: () async {},
-      btnOkIcon: Icons.check_circle,).show();
-  }
-
   Future<void> updateComment(ObjectObservation updateObservation) async {
     try {
       await FirebaseFirestore.instance
@@ -287,7 +255,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
           .update({'OBSERVACAO': updateObservation.observacao, 'DATA': updateObservation.data
       });
     } catch (e) {
-      notificationError(context, "Erro!", "Não foi possível atualizar o comentário");
+      await displayAlert.notificationError(context, "Erro!", "Não foi possível atualizar o comentário");
     }
   }
 
@@ -314,7 +282,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
       return result;
 
     }catch (e){
-      notificationError(context, "Erro!", "Não foi possível remover o comentário");
+      await displayAlert.notificationError(context, "Erro!", "Não foi possível remover o comentário");
       return false;
     }
   }

@@ -153,6 +153,17 @@ class _pg_PopUp extends State<pg_PopUp> {
       headerAnimationLoop: false,
       dialogType: DialogType.success,
       showCloseIcon: false,
+      titleTextStyle: const TextStyle(
+        color: Colors.black, // Defina a cor do título
+        fontSize: 24, // Defina o tamanho da fonte do título
+        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+        // Adicione outros atributos do TextStyle conforme necessário
+      ),
+      descTextStyle: const TextStyle(
+        color: Colors.black, // Defina a cor da descrição
+        fontSize: 18, // Defina o tamanho da fonte da descrição
+        // Adicione outros atributos do TextStyle conforme necessário
+      ),
       title: firstMessage,
       desc: secondMessage,
       btnOkIcon: Icons.check_circle,
@@ -170,6 +181,17 @@ class _pg_PopUp extends State<pg_PopUp> {
       dialogBackgroundColor: Colors.cyan[50],
       animType: AnimType.leftSlide,
       headerAnimationLoop: false,
+      titleTextStyle: const TextStyle(
+        color: Colors.black, // Defina a cor do título
+        fontSize: 24, // Defina o tamanho da fonte do título
+        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+        // Adicione outros atributos do TextStyle conforme necessário
+      ),
+      descTextStyle: const TextStyle(
+        color: Colors.black, // Defina a cor da descrição
+        fontSize: 18, // Defina o tamanho da fonte da descrição
+        // Adicione outros atributos do TextStyle conforme necessário
+      ),
       dialogType: DialogType.error,
       showCloseIcon: false,
       title: firstMessage,

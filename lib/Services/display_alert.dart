@@ -40,6 +40,17 @@ class DisplayAlert {
         showCloseIcon: false,
         title: firstMessage,
         desc: secondMessage,
+        titleTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor do título
+          fontSize: 24, // Defina o tamanho da fonte do título
+          fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        descTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor da descrição
+          fontSize: 18, // Defina o tamanho da fonte da descrição
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
         btnOkOnPress: () => completer.complete(),
         btnOkIcon: Icons.check_circle,
       ).show();
@@ -370,6 +381,17 @@ class DisplayAlert {
         title: firstMessage,
         desc: secondMessage,
         btnOkIcon: Icons.check_circle,
+        titleTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor do título
+          fontSize: 24, // Defina o tamanho da fonte do título
+          fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        descTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor da descrição
+          fontSize: 18, // Defina o tamanho da fonte da descrição
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
         btnOkOnPress: () {
           Navigator.pop(context, true);
           completer.complete();

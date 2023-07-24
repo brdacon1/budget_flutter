@@ -1,13 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../Objetos/DADOS.dart';
+import '../../../Objetos/month_calculate.dart';
 import '../../../constants.dart';
+import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 
 class ChartLine extends StatefulWidget {
-  final List<DADOS> items;
+  final MonthCalculate item;
   const ChartLine({
     Key? key,
-    required this.items,
+    required this.item
   }) : super(key: key);
 
   @override
@@ -30,7 +33,6 @@ class _ChartLine extends State<ChartLine> {
     return date.day ~/ 7;
   }
 
-
   LineChartData get sampleData1 => LineChartData(
     lineTouchData: lineTouchData1,
     gridData: gridData,
@@ -38,8 +40,8 @@ class _ChartLine extends State<ChartLine> {
     borderData: borderData,
     lineBarsData: lineBarsData1,
     minX: 0,
-    maxX: 5,
-    maxY: 12,
+    maxX: 3,
+    maxY: 8,
     minY: 0,
   );
 
@@ -68,7 +70,6 @@ class _ChartLine extends State<ChartLine> {
   List<LineChartBarData> get lineBarsData1 => [
     lineChartBarData_1,
     lineChartBarData_2,
-    lineChartBarData_3,
   ];
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
@@ -120,22 +121,16 @@ class _ChartLine extends State<ChartLine> {
     Widget text;
     switch (value.toInt()) {
       case 0:
-        text = const Text('JUL', style: style);
+        text = const Text('Sem. 1', style: style);
         break;
       case 1:
-        text = const Text('AGO', style: style);
+        text = const Text('Sem. 2', style: style);
         break;
       case 2:
-        text = const Text('SET', style: style);
+        text = const Text('Sem. 3', style: style);
         break;
       case 3:
-        text = const Text('OUT', style: style);
-        break;
-      case 4:
-        text = const Text('NOV', style: style);
-        break;
-      case 5:
-        text = const Text('DEZ', style: style);
+        text = const Text('Sem. 4', style: style);
         break;
       default:
         text = const Text('');
@@ -161,8 +156,7 @@ class _ChartLine extends State<ChartLine> {
   FlBorderData get borderData => FlBorderData(
     show: true,
     border: const Border(
-      bottom:
-      BorderSide(color: Colors.grey, width: 2),
+      bottom: BorderSide(color: Colors.grey, width: 2),
       left: BorderSide(color: Colors.transparent),
       right: BorderSide(color: Colors.transparent),
       top: BorderSide(color: Colors.transparent),
@@ -171,18 +165,16 @@ class _ChartLine extends State<ChartLine> {
 
   LineChartBarData get lineChartBarData_1 => LineChartBarData(
     isCurved: true,
-    color: creamColor,
+    color: redColor,
     barWidth: 2,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(show: false),
-    spots: const [
-      FlSpot(0, 8),
-      FlSpot(1, 2),
-      FlSpot(2, 8.8),
-      FlSpot(3, 4.8),
-      FlSpot(4, 5.8),
-      FlSpot(5, 8.8),
+    spots: [
+      FlSpot(0, widget.item.totalReprovedMonth_0!),
+      FlSpot(1, widget.item.totalReprovedMonth_1!),
+      FlSpot(2, widget.item.totalReprovedMonth_2!),
+      FlSpot(3, widget.item.totalReprovedMonth_3!),
     ],
   );
 
@@ -196,33 +188,13 @@ class _ChartLine extends State<ChartLine> {
       show: false,
       color: buttonColor,
     ),
-    spots: const [
-      FlSpot(0, 0),
-      FlSpot(1, 0.5),
-      FlSpot(2, 0.8),
-      FlSpot(3, 10),
-      FlSpot(4, 6.2),
-      FlSpot(5, 3),
+    spots: [
+      FlSpot(0,  widget.item.totalApprovedMonth_0!),
+      FlSpot(1, widget.item.totalApprovedMonth_1!),
+      FlSpot(2, widget.item.totalApprovedMonth_2!),
+      FlSpot(3, widget.item.totalApprovedMonth_3!),
     ],
   );
-
-  LineChartBarData get lineChartBarData_3 => LineChartBarData(
-    isCurved: true,
-    color: greenColor,
-    barWidth: 2,
-    isStrokeCapRound: true,
-    dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(show: false),
-    spots: const [
-      FlSpot(0, 10),
-      FlSpot(1, 2),
-      FlSpot(2, 7),
-      FlSpot(3, 5.8),
-      FlSpot(4, 4.2),
-      FlSpot(5, 1.8),
-    ],
-  );
-
 
   @override
   void initState() {
@@ -258,9 +230,7 @@ class _ChartLine extends State<ChartLine> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 6, left: 0),
-                  child: LineChart(
-                      sampleData1
-                  ),
+                  child: LineChart(sampleData1),
                 ),
               ),
               const SizedBox(

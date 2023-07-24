@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../Objetos/DADOS.dart';
+import '../../../Objetos/month_calculate.dart';
 import '../../../constants.dart';
 import 'chart_line.dart';
 
 class MonthEvolution extends StatefulWidget {
-  final List<DADOS> items;
-
-  const MonthEvolution({Key? key, required this.items}) : super(key: key);
+  final MonthCalculate item;
+  const MonthEvolution({Key? key, required this.item}) : super(key: key);
   @override
   _MonthEvolution createState() => _MonthEvolution();
 }
@@ -27,7 +27,7 @@ class _MonthEvolution extends State<MonthEvolution> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ChartLine(items: widget.items),
+          ChartLine(item: widget.item),
         ],
       ),
     );
