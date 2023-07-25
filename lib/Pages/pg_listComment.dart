@@ -356,7 +356,10 @@ class _ListCommentPageState extends State<ListCommentPage> {
                   itemBuilder: (context, index) {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Theme(
+                      data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
                       child: ExpansionTileCard(
+                      expandedTextColor: bgColor,
                         baseColor: Colors.cyan[50],
                         expandedColor: Colors.blue[50],
                         leading: const CircleAvatar(
@@ -477,6 +480,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                             ),
                           )
                         ],
+                      ),
                       ),
                     );
                   },

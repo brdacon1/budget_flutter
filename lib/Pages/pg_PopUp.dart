@@ -262,7 +262,11 @@ class _pg_PopUp extends State<pg_PopUp> {
                           SizedBox(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                              child: ExpansionTileCard(
+                              child: Theme(
+                                data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                                child: ExpansionTileCard(
+                                  initiallyExpanded: true,
+                                  expandedTextColor: bgColor,
                                 baseColor: Colors.cyan[50],
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
@@ -302,7 +306,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                             builder: (BuildContext context) {
                                               return SimpleDialog(
                                                 backgroundColor: Colors.cyan[50],
-                                                title: const Text("Selecione categoria"),
+                                                title: const Text("Selecione categoria", style: TextStyle(color: Colors.black),),
                                                 children: [
                                                   SizedBox(
                                                     width: MediaQuery.of(context).size.width,
@@ -484,6 +488,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                      ),
                                   )
                                 ],
+                              ),
                               ),
                             ),
                           ),

@@ -394,14 +394,18 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                   itemBuilder: (context, index) {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: ExpansionTileCard(
-                        baseColor: Colors.cyan[50],
-                        expandedColor: Colors.blue[50],
-                        leading: const CircleAvatar(
+                      child:
+                      Theme(
+                          data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                          child: ExpansionTileCard(
+                          expandedTextColor: bgColor,
+                          baseColor: Colors.cyan[50],
+                          expandedColor: Colors.blue[50],
+                          leading: const CircleAvatar(
                             backgroundColor: bgColor,
                             child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
-                        title:
-                        Text(
+                           title:
+                           Text(
                           orcamentos[index].DESCRICAO!,
                           maxLines: 2,
                           style: const TextStyle(
@@ -579,6 +583,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             ),
                           )
                         ],
+                      ),
                       ),
                     );
                   },

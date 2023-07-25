@@ -466,10 +466,14 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                            child: ExpansionTileCard(
-                              baseColor: Colors.cyan[50],
-                              expandedColor: Colors.cyan[50],
-                              leading: const CircleAvatar(
+                            child: Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                initiallyExpanded: true,
+                                expandedTextColor: bgColor,
+                                baseColor: Colors.cyan[50],
+                                expandedColor: Colors.cyan[50],
+                                leading: const CircleAvatar(
                                   backgroundColor: bgColor,
                                   child: Icon(Icons.person_outlined, color: Colors.white,)),
                               title: Text(titleBox!,style: GoogleFonts.heebo(
@@ -612,13 +616,16 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                   height: he * 0.02,
                                ),
                             ],
-                         ),
+                         ),),
                       ),
                    ),
                    SizedBox(
                       child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                      child: ExpansionTileCard(
+                      child:Theme(
+                        data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                        child: ExpansionTileCard(
+                          expandedTextColor: bgColor,
                       baseColor: Colors.cyan[50],
                       expandedColor: Colors.cyan[50],
                       leading: const CircleAvatar(
@@ -663,7 +670,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     builder: (BuildContext context) {
                                   return SimpleDialog(
                                     backgroundColor: Colors.cyan[50],
-                                    title: const Text("Selecione status"),
+                                    title: const Text("Selecione status", style: TextStyle(color: Colors.black),),
                                     children: [
                                       SizedBox(
                                         width: MediaQuery.of(context).size.width,
@@ -786,12 +793,16 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                             ),
                            ],
                           ),
+                          ),
                          ),
                         ),
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                            child: ExpansionTileCard(
+                            child: Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                expandedTextColor: bgColor,
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
@@ -959,6 +970,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                   height: he * 0.02,
                                 ),
                               ],
+                            ),
                             ),
                           ),
                         ),

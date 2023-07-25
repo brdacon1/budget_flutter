@@ -634,7 +634,10 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Theme(
+                  data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
                   child: ExpansionTileCard(
+                  expandedTextColor: bgColor,
                     baseColor: Colors.cyan[50],
                     expandedColor: Colors.green[50],
                     leading: const CircleAvatar(
@@ -868,6 +871,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                         ),
                       )
                     ],
+                  ),
                   ),
                 );
               },

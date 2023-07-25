@@ -298,7 +298,11 @@ class _PgEditPDF extends State<PgEditPDF> {
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-                            child: ExpansionTileCard(
+                            child: Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                initiallyExpanded: true,
+                                expandedTextColor: bgColor,
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
@@ -456,12 +460,16 @@ class _PgEditPDF extends State<PgEditPDF> {
                                 ),
                               ],
                             ),
+                            ),
                           ),
                         ),
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-                            child: ExpansionTileCard(
+                            child: Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                expandedTextColor: bgColor,
                               baseColor: Colors.cyan[50],
                               expandedColor: Colors.cyan[50],
                               leading: const CircleAvatar(
@@ -629,6 +637,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                   height: he * 0.02,
                                 ),
                               ],
+                            ),
                             ),
                           ),
                         ),
