@@ -24,12 +24,19 @@ class _RecentFiles extends State<RecentFiles> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            "Orçamentos Recentes",
-            style: Theme.of(context).textTheme.titleMedium,
+          const Text(
+            'Orçamentos recentes',
+            style: TextStyle(
+              color: creamColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: defaultPadding),
           SizedBox(
             width: double.infinity,
             child: DataTable(

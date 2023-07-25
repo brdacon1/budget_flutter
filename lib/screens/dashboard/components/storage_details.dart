@@ -31,14 +31,17 @@ class _StarageDetails extends State<StarageDetails> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       child:  Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            "Orçamentos gerados",
+            'Orçamentos do mês',
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
+              color: creamColor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: defaultPadding),
           Chart(item: widget.item),
