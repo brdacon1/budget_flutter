@@ -46,68 +46,62 @@ class _DashboardScreen extends State<DashboardScreen> {
 
   double getWeekOfMonthFromMilliseconds(int millisecondsSinceEpoch) {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+    int day = dateTime.day;
+    double week = day / 7;
 
-    // Calcular o número de dias no mês
-    int daysInMonth = DateTime(dateTime.year, dateTime.month + 1, 0).day;
-
-    // Calcular o número da semana do mês
-    double weeks = daysInMonth / 7;
-
-    // Verificar se o mês é fevereiro de um ano bissexto
-    if (dateTime.month == 2 && DateTime(dateTime.year, 2 + 1, 0).day == 29) {
-      return 4.14;
-    }
-
-    // Retornar o número de semanas com duas casas decimais
-    return double.parse(weeks.toStringAsFixed(2));
+    return week;
   }
+
 
   @override
   initState() {
     super.initState();
     int millisecondsSinceEpoch = 0;
-    double weekOfMonth = 0;
-    int totalWeeksInMonth = 0;
+    double weekNumber = 0;
 
     try {
       setState(() async {
         await getInformationBudget().then((value) async {
           _myBudgetDashboard.qtdTotal = value.length;
           for (int i = 0; i < value.length; i++) {
+            weekNumber = 0;
             if (value[i].STATUS == "APROVADO") {
-              millisecondsSinceEpoch = int.parse(_foundUsers[i].ID!);
-              weekOfMonth = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
               _myBudgetDashboard.qtdIntApproved = _myBudgetDashboard.qtdIntApproved! + 1;
               _myBudgetDashboard.qtdDoubleApproved = _myBudgetDashboard.qtdDoubleApproved! + 1;
-              print(weekOfMonth);
-              if (weekOfMonth < 1) {
-                _monthCalculate.totalApprovedMonth_0 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_0!) / 1000;
-              } else if (weekOfMonth <= 2) {
-                _monthCalculate.totalApprovedMonth_1 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_1!) / 1000;
-              } else if (weekOfMonth <= 3) {
-                _monthCalculate.totalApprovedMonth_2 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_2!) / 1000;
-              } else if (weekOfMonth <= 4) {
-                _monthCalculate.totalApprovedMonth_3 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_3!) / 1000;
+              millisecondsSinceEpoch = int.parse(value[i].ID!);
+              weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+              if (weekNumber <= 1) {
+                _monthCalculate.totalApprovedMonth_0 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalApprovedMonth_0!;
+              } else if (weekNumber <= 2) {
+                _monthCalculate.totalApprovedMonth_1 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalApprovedMonth_1!;
+              } else if (weekNumber <= 3) {
+                _monthCalculate.totalApprovedMonth_2 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalApprovedMonth_2!;
+              } else if (weekNumber <= 4.5) {
+                _monthCalculate.totalApprovedMonth_3 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalApprovedMonth_3!;
               }
-            } else if (_foundUsers[i].STATUS == "PENDENTE") {
+
+            } else if (value[i].STATUS == "PENDENTE") {
               _myBudgetDashboard.qtdIntPending = _myBudgetDashboard.qtdIntPending! + 1;
               _myBudgetDashboard.qtdDoublePending = _myBudgetDashboard.qtdDoublePending! + 1;
-            } else if (_foundUsers[i].STATUS == "REPROVADO") {
-              millisecondsSinceEpoch = int.parse(_foundUsers[i].ID!);
-              weekOfMonth = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+            } else if (value[i].STATUS == "REPROVADO") {
+
               _myBudgetDashboard.qtdIntDisapproved = _myBudgetDashboard.qtdIntDisapproved! + 1;
               _myBudgetDashboard.qtdDoubleDisapproved = _myBudgetDashboard.qtdDoubleDisapproved! + 1;
-              ///print(weekOfMonth);
-              if (weekOfMonth == 1) {
-                _monthCalculate.totalApprovedMonth_0 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_0!) / 1000;
-              } else if (weekOfMonth == 2) {
-                _monthCalculate.totalApprovedMonth_1 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_1!) / 1000;
-              } else if (weekOfMonth == 3) {
-                _monthCalculate.totalApprovedMonth_2 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_2!) / 1000;
-              } else if (weekOfMonth == 4) {
-                _monthCalculate.totalApprovedMonth_3 = (_foundUsers[i].VALORTOTAL! + _monthCalculate.totalApprovedMonth_3!) / 1000;
+              millisecondsSinceEpoch = int.parse(value[i].ID!);
+              weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+              if (weekNumber <= 1) {
+                _monthCalculate.totalReprovedMonth_0 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalReprovedMonth_0!;
+              } else if (weekNumber <= 2) {
+                _monthCalculate.totalReprovedMonth_1 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalReprovedMonth_1!;
+              } else if  (weekNumber <= 3) {
+                _monthCalculate.totalReprovedMonth_2 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalReprovedMonth_2!;
+              } else if (weekNumber <= 4.5) {
+                _monthCalculate.totalReprovedMonth_3 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalReprovedMonth_3!;
               }
-            } else if (_foundUsers[i].STATUS == "FINALIZADO") {
+            } else if (value[i].STATUS == "FINALIZADO") {
               _myBudgetDashboard.qtdIntFinish = _myBudgetDashboard.qtdIntFinish! + 1;
               _myBudgetDashboard.qtdDoubleFinish = _myBudgetDashboard.qtdDoubleFinish! + 1;
             }
@@ -117,8 +111,6 @@ class _DashboardScreen extends State<DashboardScreen> {
       });
     } catch (e) {}
   }
-
-
 
   Future<List<DADOS>> getInformationBudget() async {
     _foundUsers.clear();
