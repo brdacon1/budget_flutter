@@ -187,7 +187,7 @@ class _pg_priceList extends State<pg_priceList>  {
                         itemCount: addItens.length,
                         itemBuilder: (context, index) {
                           return SizedBox(
-                            height: 110,
+                            height: 120,
                             child: Card(
                               color: Colors.cyan[50],
                               shape: RoundedRectangleBorder(
@@ -384,7 +384,7 @@ class _pg_priceList extends State<pg_priceList>  {
                         padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
                         itemBuilder: (context, index) {
                           return SizedBox(
-                            height: 110,
+                            height: 120,
                             child: Card(
                               color: Colors.cyan[50],
                               shape: RoundedRectangleBorder(
@@ -665,7 +665,7 @@ class _pg_priceList extends State<pg_priceList>  {
                   itemCount: orcamentos.length,
                   itemBuilder: (context, index) {
                     return SizedBox(
-                      height: 110,
+                      height: 130,
                       child: Card(
                         color: Colors.cyan[50],
                         shape: RoundedRectangleBorder(
@@ -674,7 +674,7 @@ class _pg_priceList extends State<pg_priceList>  {
                         child:
                         ListTile(
                           title:  Padding(
-                            padding: const EdgeInsets.only(bottom: 5, top: 5.3),
+                            padding: const EdgeInsets.only(bottom: 5, top:10),
                             child: Row(
                               children: [
                                 Expanded(
