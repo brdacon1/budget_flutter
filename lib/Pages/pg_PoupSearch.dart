@@ -922,7 +922,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
               novo.EMAIL = '';
               novo.GERADO = '';
               novo.DATA = '';
-              novo.STATUS = '';
+              novo.STATUS = 'PENDENTE';
               novo.CEP = '';
               novo.CITY = '';
               novo.BAIRRO = '';

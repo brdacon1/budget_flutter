@@ -72,7 +72,7 @@ class _pg_PopUp extends State<pg_PopUp> {
         {
           nameButton = 'SALVAR';
           titlePage = 'Criar item';
-          _categoriaText.text = '';
+          _categoriaText.text = 'Serviços';
           _unidadeText.text = '';
           _qtdText.text = '';
           controller.text = '';
@@ -108,7 +108,7 @@ class _pg_PopUp extends State<pg_PopUp> {
           await FirebaseFirestore.instance
                 .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/ITENS")
                 .doc(widget.item.IDPRODUCT)
-                .update({'CATEGORIA': itens.CATEGORIA,
+                .update({'CATEGORIA': itens.CATEGORIA ?? 'Serviços',
                 'DESCRICAO' : itens.DESCRICAO,
                 'PRECO' : itens.PRECO,
                 'QTD' : itens.QTD,
