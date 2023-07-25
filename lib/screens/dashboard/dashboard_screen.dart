@@ -58,7 +58,6 @@ class _DashboardScreen extends State<DashboardScreen> {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
     int day = dateTime.day;
     double week = day / 7;
-
     return week;
   }
 
@@ -150,21 +149,23 @@ class _DashboardScreen extends State<DashboardScreen> {
 
   Future<List<DADOS>> getInformationBudget() async {
     _foundUsers.clear();
-
-    // Obter a data atual
     DateTime currentDate = DateTime.now();
+    DateTime firstDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month, 1);
 
-    // Subtrair 30 dias da data atual
-    DateTime thirtyDaysAgo = currentDate.subtract(const Duration(days: 30));
+    DateTime lastDayOfCurrentMonth;
+    if (currentDate.month == 12) {
+      lastDayOfCurrentMonth = DateTime(currentDate.year + 1, 1, 0);
+    } else {
+      lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
+    }
 
-    // Converter as datas para milissegundos desde a época em string
-    String currentMillis = currentDate.millisecondsSinceEpoch.toString();
-    String thirtyDaysAgoMillis = thirtyDaysAgo.millisecondsSinceEpoch.toString();
+    String firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch.toString();
+    String lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch.toString();
 
     final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
-        .where('ID', isGreaterThanOrEqualTo: thirtyDaysAgoMillis)
-        .where('ID', isLessThanOrEqualTo: currentMillis)
+        .where('ID', isGreaterThanOrEqualTo: firstDayMillis)
+        .where('ID', isLessThanOrEqualTo: lastDayMillis)
         .orderBy('ID', descending: false)
         .get();
 
@@ -178,6 +179,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     return _foundUsers;
   }
+
 
   @override
   Widget build(BuildContext context) {
