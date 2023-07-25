@@ -42,6 +42,16 @@ class _DashboardScreen extends State<DashboardScreen> {
     totalReprovedMonth_1: 0,
     totalReprovedMonth_2: 0,
     totalReprovedMonth_3: 0,
+
+    totalPendingMonth_0: 0,
+    totalPendingMonth_1: 0,
+    totalPendingMonth_2: 0,
+    totalPendingMonth_3: 0,
+
+    totalFinishMonth_0: 0,
+    totalFinishMonth_1: 0,
+    totalFinishMonth_2: 0,
+    totalFinishMonth_3: 0,
   );
 
   double getWeekOfMonthFromMilliseconds(int millisecondsSinceEpoch) {
@@ -85,6 +95,19 @@ class _DashboardScreen extends State<DashboardScreen> {
               _myBudgetDashboard.qtdIntPending = _myBudgetDashboard.qtdIntPending! + 1;
               _myBudgetDashboard.qtdDoublePending = _myBudgetDashboard.qtdDoublePending! + 1;
 
+              millisecondsSinceEpoch = int.parse(value[i].ID!);
+              weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+              if (weekNumber <= 1) {
+                _monthCalculate.totalPendingMonth_0 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalPendingMonth_0!;
+              } else if (weekNumber <= 2) {
+                _monthCalculate.totalPendingMonth_1 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalPendingMonth_1!;
+              } else if  (weekNumber <= 3) {
+                _monthCalculate.totalPendingMonth_2 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalPendingMonth_2!;
+              } else if (weekNumber <= 4.5) {
+                _monthCalculate.totalPendingMonth_3 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalPendingMonth_3!;
+              }
+
             } else if (value[i].STATUS == "REPROVADO") {
 
               _myBudgetDashboard.qtdIntDisapproved = _myBudgetDashboard.qtdIntDisapproved! + 1;
@@ -104,6 +127,19 @@ class _DashboardScreen extends State<DashboardScreen> {
             } else if (value[i].STATUS == "FINALIZADO") {
               _myBudgetDashboard.qtdIntFinish = _myBudgetDashboard.qtdIntFinish! + 1;
               _myBudgetDashboard.qtdDoubleFinish = _myBudgetDashboard.qtdDoubleFinish! + 1;
+
+              millisecondsSinceEpoch = int.parse(value[i].ID!);
+              weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+              if (weekNumber <= 1) {
+                _monthCalculate.totalFinishMonth_0 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalFinishMonth_0!;
+              } else if (weekNumber <= 2) {
+                _monthCalculate.totalFinishMonth_1 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalFinishMonth_1!;
+              } else if  (weekNumber <= 3) {
+                _monthCalculate.totalFinishMonth_2 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalFinishMonth_2!;
+              } else if (weekNumber <= 4.5) {
+                _monthCalculate.totalFinishMonth_3 = (value[i].VALORTOTAL! / 1000) + _monthCalculate.totalFinishMonth_3!;
+              }
             }
           }
           setState(() {});

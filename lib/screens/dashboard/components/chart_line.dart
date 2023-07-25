@@ -70,6 +70,8 @@ class _ChartLine extends State<ChartLine> {
   List<LineChartBarData> get lineBarsData1 => [
     lineChartBarData_1,
     lineChartBarData_2,
+    lineChartBarData_3,
+    lineChartBarData_4,
   ];
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
@@ -166,7 +168,7 @@ class _ChartLine extends State<ChartLine> {
   LineChartBarData get lineChartBarData_1 => LineChartBarData(
     isCurved: true,
     color: redColor,
-    barWidth: 2,
+    barWidth: 3,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(show: false),
@@ -180,8 +182,8 @@ class _ChartLine extends State<ChartLine> {
 
   LineChartBarData get lineChartBarData_2 => LineChartBarData(
     isCurved: true,
-    color: buttonColor,
-    barWidth: 2,
+    color: greenColor,
+    barWidth: 3,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(
@@ -193,6 +195,42 @@ class _ChartLine extends State<ChartLine> {
       FlSpot(1, widget.item.totalApprovedMonth_1!),
       FlSpot(2, widget.item.totalApprovedMonth_2!),
       FlSpot(3, widget.item.totalApprovedMonth_3!),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData_3 => LineChartBarData(
+    isCurved: true,
+    color: Colors.yellow,
+    barWidth: 3,
+    isStrokeCapRound: true,
+    dotData: const FlDotData(show: false),
+    belowBarData: BarAreaData(
+      show: false,
+      color: buttonColor,
+    ),
+    spots: [
+      FlSpot(0, widget.item.totalPendingMonth_0!),
+      FlSpot(1, widget.item.totalPendingMonth_1!),
+      FlSpot(2, widget.item.totalPendingMonth_2!),
+      FlSpot(3, widget.item.totalPendingMonth_3!),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData_4 => LineChartBarData(
+    isCurved: true,
+    color: Colors.white,
+    barWidth: 3,
+    isStrokeCapRound: true,
+    dotData: const FlDotData(show: false),
+    belowBarData: BarAreaData(
+      show: false,
+      color: buttonColor,
+    ),
+    spots: [
+      FlSpot(0, widget.item.totalFinishMonth_0!),
+      FlSpot(1, widget.item.totalFinishMonth_1!),
+      FlSpot(2, widget.item.totalFinishMonth_2!),
+      FlSpot(3, widget.item.totalFinishMonth_3!),
     ],
   );
 
@@ -215,7 +253,7 @@ class _ChartLine extends State<ChartLine> {
                 height: 5,
               ),
               const Text(
-                'Progresso mensal',
+                'Progresso semanal',
                 style: TextStyle(
                   color: creamColor,
                   fontSize: 20,
