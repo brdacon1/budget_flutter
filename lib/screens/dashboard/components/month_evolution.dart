@@ -1,7 +1,9 @@
 import 'package:oflite/models/RecentFile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:oflite/screens/dashboard/components/storage_info_card.dart';
 
+import '../../../Models/convert_coin.dart';
 import '../../../Objetos/DADOS.dart';
 import '../../../Objetos/month_calculate.dart';
 import '../../../constants.dart';
@@ -15,9 +17,40 @@ class MonthEvolution extends StatefulWidget {
 }
 
 class _MonthEvolution extends State<MonthEvolution> {
+  convert_coin moneyConvert = convert_coin();
+  late double totalApproved = 0;
+  late double totalReproved = 0;
+  late double totalPending = 0;
+  late double totalFinish = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    totalApproved = (widget.item.totalApprovedMonth_0!
+        + widget.item.totalApprovedMonth_1!
+        + widget.item.totalApprovedMonth_2!
+        + widget.item.totalApprovedMonth_3!) * 1000;
+
+    totalReproved = (widget.item.totalReprovedMonth_0!
+        + widget.item.totalReprovedMonth_1!
+        + widget.item.totalReprovedMonth_2!
+        + widget.item.totalReprovedMonth_3!) * 1000;
+
+    totalPending  = (widget.item.totalPendingMonth_0!
+        + widget.item.totalPendingMonth_1!
+        + widget.item.totalPendingMonth_2!
+        + widget.item.totalPendingMonth_3!) * 1000;
+
+    totalFinish   = (widget.item.totalFinishMonth_0!
+        + widget.item.totalFinishMonth_1!
+        + widget.item.totalFinishMonth_2!
+        + widget.item.totalFinishMonth_3!) * 1000;
+
     return Container(
       padding: const EdgeInsets.all(defaultPadding),
       decoration: BoxDecoration(
@@ -25,9 +58,49 @@ class _MonthEvolution extends State<MonthEvolution> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ChartLine(item: widget.item),
+          const SizedBox(height: 30),
+          const Text(
+            'Resultado semanal',
+            style: TextStyle(
+              color: creamColor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: defaultPadding),
+          StorageInfoCard(
+            svgSrc: Icons.check,
+            iconColor: Colors.green,
+            title: "Aprovados",
+            amountOfFiles: moneyConvert.convertFromDouble(totalApproved!),
+            numOfFiles: totalApproved.toInt(),
+          ),
+          StorageInfoCard(
+            svgSrc: Icons.close_sharp,
+            iconColor: Colors.red,
+            title: "Reprovados",
+            amountOfFiles: moneyConvert.convertFromDouble(totalReproved!),
+            numOfFiles: totalReproved.toInt(),
+          ),
+          StorageInfoCard(
+            svgSrc: Icons.pending_outlined,
+            iconColor: Colors.amberAccent,
+            title: "Pendentes",
+            amountOfFiles: moneyConvert.convertFromDouble(totalPending!),
+            numOfFiles: totalPending.toInt(),
+          ),
+          StorageInfoCard(
+            svgSrc: Icons.circle,
+            iconColor: Colors.white,
+            title: "Finalizados",
+            amountOfFiles: moneyConvert.convertFromDouble(totalFinish!),
+            numOfFiles: totalFinish.toInt(),
+          ),
         ],
       ),
     );

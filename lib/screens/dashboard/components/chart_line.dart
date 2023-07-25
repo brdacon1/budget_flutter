@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../Objetos/DADOS.dart';
 import '../../../Objetos/month_calculate.dart';
 import '../../../constants.dart';
-import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 
 class ChartLine extends StatefulWidget {
   final MonthCalculate item;
