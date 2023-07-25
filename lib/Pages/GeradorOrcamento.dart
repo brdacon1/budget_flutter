@@ -320,6 +320,20 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           widget.item.RUA = _ruaText.text;
           widget.item.CITY = _cityText.text;
           widget.item.BAIRRO = _bairroText.text;
+          Orcamento.ID = widget.item.ID;
+          Orcamento.DATA = widget.item.DATA;
+          Orcamento.RUA = widget.item.RUA;
+          Orcamento.GERADO = widget.item.GERADO;
+          Orcamento.BAIRRO = widget.item.BAIRRO;
+          Orcamento.CITY = widget.item.CITY;
+          Orcamento.CEP = widget.item.CEP;
+          Orcamento.EMAIL = widget.item.EMAIL;
+          Orcamento.ENDERECO = widget.item.ENDERECO;
+          Orcamento.FONE = widget.item.FONE;
+          Orcamento.NOMECLIENTE = widget.item.NOMECLIENTE;
+          Orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
+          Orcamento.STATUS = widget.item.STATUS;
+          Orcamento.VALORTOTAL = widget.item.VALORTOTAL;
           nameButton = 'ATUALIZAR';
           titlePage = 'Editar orçamento';
           titleBox = 'Clique para editar';
@@ -381,9 +395,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                   UserInfo.Contact newContact = UserInfo.Contact()
                     ..name = Name(first: orcamento.NOMECLIENTE.toString())
                     ..phones = [Phone(orcamento.FONE.toString()), Phone(orcamento.FONE.toString(), label: PhoneLabel.work)];
-                  await UserInfo.FlutterContacts.insertContact(newContact).then((value) async {
-
-                  });
+                  await UserInfo.FlutterContacts.insertContact(newContact);
                 },
               ).show().then((value) {
 
