@@ -80,8 +80,6 @@ class Db{
         objectListItens.selectProduct = false;
         return objectListItens;
       }).toList();
-
-
     }
     catch (e)
     {
