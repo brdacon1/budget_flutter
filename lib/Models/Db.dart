@@ -73,12 +73,14 @@ class Db{
           .orderBy('CATEGORIA', descending: false)
           .get();
 
-      List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-      for (var document in documents) {
-        Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-        ObjectListItens item = ObjectListItens.fromMap(data);
-        yourModels.add(item);
-      }
+      yourModels = querySnapshot.docs.map<ObjectListItens>((doc) {
+        final objectListItens = ObjectListItens.fromMap(doc.data()!);
+        objectListItens.id = doc.id;
+        objectListItens.checkBox = false;
+        objectListItens.selectProduct = false;
+        return objectListItens;
+      }).toList();
+
 
     }
     catch (e)

@@ -59,6 +59,7 @@ class _pg_PopUp extends State<pg_PopUp> {
           _qtdText.text = widget.item.QTD.toString();
           controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
           _descricaoText.text = widget.item.DESCRICAO.toString();
+          print(widget.item.IDPRODUCT.toString());
           if(widget.item.IDPRODUCT.toString() == 'null')
           {
             fieldVisible = false;
