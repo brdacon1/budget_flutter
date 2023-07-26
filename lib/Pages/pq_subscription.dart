@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
+import 'package:supercharged/supercharged.dart';
 import '../anmition/fadeanimation.dart';
 import 'utils.dart';
 import 'data.dart';
@@ -149,6 +150,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
   int currentSizeIndex = 0;
   int currentColorIndex = 0;
   int _counter = 0;
+  late List<PurchasedItem>? resultSubscription = [];
   List<Widget> colorItemList = [];
 
   void _increase() {
@@ -293,7 +295,25 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                         delay: 1,
                         child: TextButton(
                             onPressed: () async {
-                              await FlutterInappPurchase.instance.requestPurchase("newproduct");
+                              /*await FlutterInappPurchase.instance.requestSubscription("newproduct").then((value) async => {
+                                  resultSubscription  = await FlutterInappPurchase.instance.getPurchaseHistory(),
+                                  print(resultSubscription![0].purchaseToken),
+                                });*/
+                                 resultSubscription  = await FlutterInappPurchase.instance.getPurchaseHistory();
+
+                                var latestSubscription = resultSubscription!.reduce((current, next) =>
+                                current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
+                                  ? current
+                                  : next);
+
+                                for(int i = 0; i < resultSubscription!.length; i++)
+                                {
+                                  print(resultSubscription![i].transactionDate!.millisecondsSinceEpoch);
+                                  print(resultSubscription![i].transactionDate);
+                                }
+                                print(latestSubscription);
+                                await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
+
                             },
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,

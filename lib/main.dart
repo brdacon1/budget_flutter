@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
-          home: Login(),
+          home: pg_subscription(),
           routes: {
             '/menu_tecnico': (BuildContext _) => pg_PoupSearch(),
             '/pg-subscription': (BuildContext _) => pg_subscription(),
