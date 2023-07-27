@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Objetos/Owner.dart';
 import 'package:oflite/Pages/ImageEditorApp.dart';
+import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import '../Models/Db.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/Models/ViaCEPServico.dart' as CEP;
+import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
@@ -55,6 +57,7 @@ class _PgEditPDF extends State<PgEditPDF> {
   final alertDisplayLoading = LoadingEvent();
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey();
   late Future<Uint8List?> fileContentFuture;
+  var displayAlert = DisplayAlert();
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -233,65 +236,77 @@ class _PgEditPDF extends State<PgEditPDF> {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (snapshot.hasError) {
-                              // Lidar com o erro, por exemplo, exibir uma imagem padrão ou uma mensagem de erro
                               return const Text('Erro ao carregar a imagem');
                             } else {
-                              // Verificar se o snapshot.data é null antes de exibir a imagem
-                              if (snapshot.data != null) {
+                             if(UID.AutoRenewing!){
+                               if (snapshot.data != null) {
+                                 return GestureDetector(
+                                   onTap: () async {
+                                     Navigator.push(
+                                       context,
+                                       MaterialPageRoute(
+                                         builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
+                                       ),
+                                     ).then((value) {
+                                       // Atualizar o FutureBuilder quando voltar da tela de edição
+                                       setState(() {
+                                         fileContentFuture = initialData();
+                                       });
+                                     });
+                                   },
+                                   child: _imageCard(snapshot.data!),
+                                 );
+                               } else {
+                                 return Padding(
+                                   padding: const EdgeInsets.symmetric(vertical: 40),
+                                   child: GestureDetector(
+                                     onTap: () {
+                                       Navigator.push(
+                                         context,
+                                         MaterialPageRoute(
+                                           builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
+                                         ),
+                                       ).then((value) {
+                                         // Atualizar o FutureBuilder quando voltar da tela de edição
+                                         setState(() {
+                                           fileContentFuture = initialData();
+                                         });
+                                       });
+                                     },
+                                     child: Align(
+                                       alignment: Alignment.center,
+                                       child: Column(
+                                         mainAxisSize: MainAxisSize.min,
+                                         crossAxisAlignment: CrossAxisAlignment.center,
+                                         children: [
+                                           Text(
+                                             'Sem imagem disponível',
+                                             style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
+                                           ),
+                                           const SizedBox(height: 8.0),
+                                           Text(
+                                             'Toque para incluir nova imagem',
+                                             style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                   ),
+                                 );
+                               }
+                             }
+                             else{
                                 return GestureDetector(
-                                  onTap: () {
+                                  onTap: () async {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
-                                      ),
-                                    ).then((value) {
-                                      // Atualizar o FutureBuilder quando voltar da tela de edição
-                                      setState(() {
-                                        fileContentFuture = initialData();
-                                      });
-                                    });
-                                  },
-                                  child: _imageCard(snapshot.data!),
+                                          builder: (context) => pg_subscription()),
+                                    );
+                                 },
+                                 child: _imageCard(snapshot.data!),
                                 );
-                              } else {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 40),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
-                                        ),
-                                      ).then((value) {
-                                        // Atualizar o FutureBuilder quando voltar da tela de edição
-                                        setState(() {
-                                          fileContentFuture = initialData();
-                                        });
-                                      });
-                                    },
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'Sem imagem disponível',
-                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
-                                          ),
-                                          const SizedBox(height: 8.0),
-                                          Text(
-                                            'Toque para incluir nova imagem',
-                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
+                             }
                             }
                           },
                         ),

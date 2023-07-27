@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
@@ -38,11 +41,24 @@ class _Login extends State<Login> {
   final displayAlert = DisplayAlert();
   ObjetoUIDUser users = ObjetoUIDUser();
   final alertDisplayLoading = LoadingEvent();
+  late List<PurchasedItem>? resultSubscription = [];
+
+  final List<String> _productLists = Platform.isAndroid
+      ? [
+    'newproduct',
+  ] : ['com.housestudio.oflite', 'com.housestudio.oflite'];
+
 
   @override
   void initState() {
     super.initState();
+    asyncInitState();
     checkAutoLogin();
+  }
+
+  void asyncInitState() async {
+    await FlutterInappPurchase.instance.initialize();
+    await FlutterInappPurchase.instance.getSubscriptions(_productLists);
   }
 
   void checkAutoLogin() async {
@@ -72,7 +88,9 @@ class _Login extends State<Login> {
           await prefs.setString('password', password),
           UID.Senha = password.trim(),
           uid = value.user!.uid.toString(),
-          await getUserInfo(),
+          await getUserInfo().then((value) => {
+
+          }),
      });
   }
 
@@ -85,7 +103,7 @@ class _Login extends State<Login> {
         .collection('USUARIOS')
         .where('USER', isEqualTo: uid)
         .get().then((value) async {
-             value.docs.forEach((element) {
+             value.docs.forEach((element) async {
                Map<String, dynamic> obj = element.data();
                  users.USER = obj['USER'];
                  users.NOME = obj['NOME'];
@@ -105,9 +123,33 @@ class _Login extends State<Login> {
                  UID.ProductId = obj['ProductId'];
                  UID.PurchaseToken = obj['PurchaseToken'];
                  UID.AutoRenewing = obj['AutoRenewing'];
-                 alertDisplayLoading.closeLoading(context);
-                 Navigator.pushReplacementNamed(context, '/menu');
+
+                 resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
+                 if(resultSubscription!.isNotEmpty){
+                   var latestSubscription = resultSubscription!.reduce((current, next) =>
+                   current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
+                       ? current
+                       : next);
+
+                   Map<String, dynamic> data = jsonDecode(latestSubscription!.transactionReceipt ?? '');
+                   bool acknowledgedValue = data['acknowledged'];
+                   UID.AutoRenewing = data['autoRenewing'];
+                   UID.PurchaseToken = data['purchaseToken'];
+                   UID.ProductId = data['productId'];
+
+                    if(!acknowledgedValue) {
+                        await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
+                      }
+                 }
+                 else
+                 {
+                     UID.AutoRenewing = false;
+                     UID.PurchaseToken = '';
+                 }
+
              });
+             alertDisplayLoading.closeLoading(context);
+             Navigator.pushReplacementNamed(context, '/menu');
         });
         return users;
   }

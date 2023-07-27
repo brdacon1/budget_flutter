@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/Pages/pg_TabOrcamento.dart';
+import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/Services/display_alert.dart';
 import 'package:oflite/Services/loading_event.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:supercharged/supercharged.dart';
 import '../Models/Db.dart';
 import '../Models/convert_coin.dart';
 import '../Objetos/DADOS.dart';
@@ -35,6 +35,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   Color deaible = Colors.grey;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
+  var displayAlert = DisplayAlert();
   convert_coin moneyConvert = convert_coin();
 
   @override
@@ -270,7 +271,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               child: TextButton(
                                 onPressed: () async {
                                      var alertDisplayLoading = LoadingEvent();
-                                     var displayAlert = DisplayAlert();
+
                                      if(!duplicateClientData & !duplicateQuoteItems & !duplicateComments) {
                                        displayAlert.notificationError(context, "Erro!", "Por favor selecione alguma opção");
                                      }
@@ -451,7 +452,6 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                       alignment: Alignment.bottomCenter,
                       child: TextButton(
                           onPressed: () async {
-                            var displayAlert = DisplayAlert();
                             var alertDisplayLoading = LoadingEvent();
                             await alertDisplayLoading.alertLoading(context);
 
@@ -540,7 +540,6 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
     return _foundUsers;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -852,8 +851,20 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       ),
                                     ),
                                     onPressed: () async {
-                                      Orcamento.IDORCAMENTO = _foundUsers[index].ID;
-                                      await _dialogDuplicate();
+                                      if(!UID.AutoRenewing! && _foundUsers.length > 10) {
+                                        await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados").then((value) => {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => pg_subscription()),
+                                          ),
+                                        });
+                                      }
+                                      else{
+                                        Orcamento.IDORCAMENTO =
+                                            _foundUsers[index].ID;
+                                        await _dialogDuplicate();
+                                      }
                                     },
                                     child: const Column(
                                       children: <Widget>[
@@ -919,25 +930,35 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-              novo.FONE = '';
-              novo.NOMECLIENTE = '';
-              novo.NOMEEMPRESA = '';
-              novo.ENDERECO = '';
-              novo.EMAIL = '';
-              novo.GERADO = '';
-              novo.DATA = '';
-              novo.STATUS = 'PENDENTE';
-              novo.CEP = '';
-              novo.CITY = '';
-              novo.BAIRRO = '';
-              novo.ID = '';
-              novo.RUA = '';
-              Orcamento.IDORCAMENTO = '';
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => pg_TabOrcamento(item: novo)),
-              ).then((value) => setState(() {
+                if(!UID.AutoRenewing! && _foundUsers.length > 10) {
+                  await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados").then((value) => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => pg_subscription()),
+                    ),
+                  });
+                }
+                else{
+                  novo.FONE = '';
+                  novo.NOMECLIENTE = '';
+                  novo.NOMEEMPRESA = '';
+                  novo.ENDERECO = '';
+                  novo.EMAIL = '';
+                  novo.GERADO = '';
+                  novo.DATA = '';
+                  novo.STATUS = 'PENDENTE';
+                  novo.CEP = '';
+                  novo.CITY = '';
+                  novo.BAIRRO = '';
+                  novo.ID = '';
+                  novo.RUA = '';
+                  Orcamento.IDORCAMENTO = '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => pg_TabOrcamento(item: novo)),
+                  ).then((value) => setState(() {
                     try {
                       setState(() async {
                         await getInformationOrcamento();
@@ -951,6 +972,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                       print(e);
                     }
                   }));
+                }
             },
             backgroundColor: buttonColor,
             child: const Icon(

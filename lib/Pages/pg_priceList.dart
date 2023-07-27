@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/Pages/pg_PopUp.dart';
+import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/constants.dart';
@@ -36,7 +37,7 @@ class _pg_priceList extends State<pg_priceList>  {
   bool deleteVisible = false;
   bool checkBoxAppear = false;
   bool cheBoxAppearProduct = true;
-
+  var displayAlert = DisplayAlert();
 
   @override
   initState() {
@@ -162,24 +163,21 @@ class _pg_priceList extends State<pg_priceList>  {
                             ),
                           ),
                         ),
-                        FadeAnimation(
-                          delay: 1,
-                          child: Container(
-                            margin: EdgeInsets.only(right: we * 0.15),
-                            child: Text(
-                              "Carrinho de produtos",
-                              style: GoogleFonts.heebo(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
+                        Container(
+                          margin: EdgeInsets.only(right: we * 0.15),
+                          child: Text(
+                            "Carrinho de produtos",
+                            style: GoogleFonts.heebo(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
                         ),
                       ],
                     ),
                     SizedBox(
-                      height: he * 0.02,
+                      height: he * 0.025,
                     ),
                     Expanded(
                       child: ListView.builder(
@@ -883,13 +881,25 @@ class _pg_priceList extends State<pg_priceList>  {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => pg_PopUp(item: novo)),
-              ).then((value) async => {
+              if(!UID.AutoRenewing! && orcamentos.length > 15) {
+                await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível cadastrar produtos ilimitados").then((value) => {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => pg_subscription()),
+                  ),
+                });
+
+              } else{
+
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => pg_PopUp(item: novo)),
+                ).then((value) async => {
                   await getListItens(),
                   setState(() {}),
-              });
+                });
+              }
             },
             backgroundColor: const Color(0xFF0DF5E4),
             child: const Icon(Icons.add, color: Colors.black,),

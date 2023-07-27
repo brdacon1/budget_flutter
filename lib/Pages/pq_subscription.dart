@@ -1,8 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
-import 'package:supercharged/supercharged.dart';
 import '../anmition/fadeanimation.dart';
 import 'utils.dart';
 import 'data.dart';
@@ -15,25 +15,6 @@ class pg_subscription extends StatefulWidget {
 
 class _pg_subscription extends State<pg_subscription> {
 
-  final List<String> _productLists = Platform.isAndroid
-      ? [
-    'newproduct',
-    'newproduct',
-    'newproduct',
-    'newproduct',
-  ] : ['com.housestudio.oflite', 'com.housestudio.oflite'];
-
-  @override
-  void initState() {
-    super.initState();
-    asyncInitState(); // async is not allowed on initState() directly
-  }
-
-  void asyncInitState() async {
-    await FlutterInappPurchase.instance.initialize();
-    await FlutterInappPurchase.instance.getSubscriptions(_productLists);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,7 +26,7 @@ class _pg_subscription extends State<pg_subscription> {
                 end: Alignment.bottomCenter,
                 tileMode: TileMode.clamp)),
         child: Scaffold(
-            backgroundColor: Colors.transparent,
+            backgroundColor: bgColor,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0.0,
@@ -122,11 +103,11 @@ class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
                     SizedBox(
                       width: screenAwareSize(5.0, context),
                     ),
-                    const Text("4.0", style: TextStyle(color: Color(0xFFFFE600))),
+                    const Text("5.0", style: TextStyle(color: Color(0xFFFFE600))),
                     SizedBox(
                       width: screenAwareSize(5.0, context),
                     ),
-                    const Text("(116 pessoas)",
+                    const Text("Melhor preço",
                         style: TextStyle(color: Colors.white, fontSize: 14.0))
                   ],
                 )
@@ -149,20 +130,22 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
   bool isExpanded = false;
   int currentSizeIndex = 0;
   int currentColorIndex = 0;
-  int _counter = 0;
-  late List<PurchasedItem>? resultSubscription = [];
   List<Widget> colorItemList = [];
 
-  void _increase() {
-    setState(() {
-      _counter++;
-    });
+  final List<String> _productLists = Platform.isAndroid
+      ? [
+    'newproduct',
+  ] : ['com.housestudio.oflite', 'com.housestudio.oflite'];
+
+  @override
+  void initState() {
+    super.initState();
+    asyncInitState(); // async is not allowed on initState() directly
   }
 
-  void _decrease() {
-    setState(() {
-      _counter--;
-    });
+  void asyncInitState() async {
+    await FlutterInappPurchase.instance.initialize();
+    await FlutterInappPurchase.instance.getSubscriptions(_productLists);
   }
 
   void _expand() {
@@ -295,25 +278,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                         delay: 1,
                         child: TextButton(
                             onPressed: () async {
-                              /*await FlutterInappPurchase.instance.requestSubscription("newproduct").then((value) async => {
-                                  resultSubscription  = await FlutterInappPurchase.instance.getPurchaseHistory(),
-                                  print(resultSubscription![0].purchaseToken),
-                                });*/
-                                 resultSubscription  = await FlutterInappPurchase.instance.getPurchaseHistory();
-
-                                var latestSubscription = resultSubscription!.reduce((current, next) =>
-                                current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
-                                  ? current
-                                  : next);
-
-                                for(int i = 0; i < resultSubscription!.length; i++)
-                                {
-                                  print(resultSubscription![i].transactionDate!.millisecondsSinceEpoch);
-                                  print(resultSubscription![i].transactionDate);
-                                }
-                                print(latestSubscription);
-                                await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
-
+                              await FlutterInappPurchase.instance.requestSubscription("newproduct");
                             },
                             style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,

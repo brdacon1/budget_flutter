@@ -17,7 +17,5 @@ List<Color> colors = [
 
 String desc =
     "- Orçamentos ilimitados\n"
-    "- Versão web\n"
-    "- Edição dos orçamentos\n"
-    "- Inserir logo da empresa\n"
-    "- Excluir mais de 1 orçamentos por dia\n";
+    "- Lista de preço ilimitada\n"
+    "- Inserir logo da empresa\n";
