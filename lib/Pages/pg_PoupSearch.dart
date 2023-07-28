@@ -272,7 +272,6 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               child: TextButton(
                                 onPressed: () async {
                                      var alertDisplayLoading = LoadingEvent();
-
                                      if(!duplicateClientData & !duplicateQuoteItems & !duplicateComments) {
                                        displayAlert.notificationError(context, "Erro!", "Por favor selecione alguma opção");
                                      }
@@ -554,6 +553,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           .toList(); // Filtra a lista original com base no texto de busca
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

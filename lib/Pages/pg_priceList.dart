@@ -16,6 +16,7 @@ import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
+TextEditingController _searchController = TextEditingController();
 
 class pg_priceList  extends StatefulWidget {
   final DADOS? item;
@@ -252,7 +253,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        orcamentos[addItens[index].indice]
+                                        getFilteredData()[addItens[index].indice]
                                             .selectProduct = false;
                                             addItens.remove(addItens[index]);
                                       });
@@ -434,7 +435,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                   alignment: Alignment.topCenter,
                                   child: GestureDetector(
                                     onTap: () {
-                                      orcamentos[deleteItens[index].indice].checkBox = false;
+                                      getFilteredData()[deleteItens[index].indice].checkBox = false;
                                       deleteItens.remove(deleteItens[index]);
                                       if (deleteItens.isEmpty) {
                                         deleteVisible = false;
@@ -572,6 +573,20 @@ class _pg_priceList extends State<pg_priceList>  {
     return List<ObjectListItens>.from(orcamentos);
   }
 
+  void onSearchTextChanged(String value) {
+    setState(() {});
+  }
+
+  List<ObjectListItens> getFilteredData() {
+    if (_searchController.text.isEmpty) {
+      return orcamentos; // Retorna a lista original se não houver texto de busca
+    } else {
+      return orcamentos
+          .where((x) => x.DESCRICAO!.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList(); // Filtra a lista original com base no texto de busca
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
@@ -630,22 +645,8 @@ class _pg_priceList extends State<pg_priceList>  {
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
                   backgroundColor:  Colors.white12,
                   itemColor: Colors.white,
-                  onChanged: (String value) {
-                    var result = <ObjectListItens>[];
-                    if (value.isNotEmpty) {
-                      result = orcamentos.where((e) => e.DESCRICAO!.contains(value)).toList();
-                    } else {
-                      result  = orcamentos;
-                    }
-                  },
-                  onSubmitted: (String value) {
-                    var result = <ObjectListItens>[];
-                    if (value.isNotEmpty) {
-                      result = orcamentos.where((e) => e.DESCRICAO!.contains(value)).toList();
-                    } else {
-                      result  = orcamentos;
-                    }
-                  },
+                  controller: _searchController,
+                  onChanged: onSearchTextChanged,
                 ),
               ),
             ),
@@ -660,7 +661,7 @@ class _pg_priceList extends State<pg_priceList>  {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 160, left: 15, right: 15, top: 10),
-                  itemCount: orcamentos.length,
+                  itemCount: getFilteredData().length,
                   itemBuilder: (context, index) {
                     return SizedBox(
                       height: 130,
@@ -686,7 +687,7 @@ class _pg_priceList extends State<pg_priceList>  {
                                       ),
                                     ),
                                     child: Text(
-                                      "${orcamentos[index].DESCRICAO}",
+                                      "${getFilteredData()[index].DESCRICAO}",
                                       maxLines: 2,
                                       style: const TextStyle(
                                         color: bgColor,
@@ -705,13 +706,13 @@ class _pg_priceList extends State<pg_priceList>  {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("Categoria:   ${orcamentos[index].CATEGORIA}", style: const TextStyle(color: bgColor,
+                                    Text("Categoria:   ${getFilteredData()[index].CATEGORIA}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
-                                    Text("Medida:       ${orcamentos[index].MEDIDA}", style: const TextStyle(color: bgColor,
+                                    Text("Medida:       ${getFilteredData()[index].MEDIDA}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
-                                    Text("Preço:          ${moneyConvert.convertFromDouble(orcamentos[index].PRECO!)}", style: const TextStyle(color: bgColor,
+                                    Text("Preço:          ${moneyConvert.convertFromDouble(getFilteredData()[index].PRECO!)}", style: const TextStyle(color: bgColor,
                                         letterSpacing: 0,
                                         fontSize: 12.0)),
                                   ])
@@ -721,9 +722,9 @@ class _pg_priceList extends State<pg_priceList>  {
                             cheBoxAppearProduct = !checkBoxAppear;
                             addItens.clear();
                             if (!checkBoxAppear) {
-                              for (int i = 0; i < orcamentos.length; i++) {
-                                orcamentos[i].checkBox = false;
-                                orcamentos[i].selectProduct = false;
+                              for (int i = 0; i < getFilteredData().length; i++) {
+                                getFilteredData()[i].checkBox = false;
+                                getFilteredData()[i].selectProduct = false;
                               }
                               deleteItens.clear();
                               deleteVisible = false;
@@ -733,7 +734,7 @@ class _pg_priceList extends State<pg_priceList>  {
                           onTap: () async {
                             await Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => pg_PopUp(item: orcamentos[index])),
+                              MaterialPageRoute(builder: (context) => pg_PopUp(item: getFilteredData()[index])),
                             ).then((value) async => {
                               await getListItens(),
                               setState(() {}),
@@ -744,7 +745,7 @@ class _pg_priceList extends State<pg_priceList>  {
                             child: Visibility(
                               visible: !(widget.fromMenu ?? false) && cheBoxAppearProduct,
                               child: Checkbox(
-                                value:  orcamentos[index].selectProduct,
+                                value:  getFilteredData()[index].selectProduct,
                                 side: const BorderSide(
                                   color: bgColor,
                                 ),
@@ -754,18 +755,18 @@ class _pg_priceList extends State<pg_priceList>  {
                                 onChanged: (bool? newValue) async
                                 {
                                   double totalPrice = 0;
-                                  if(orcamentos[index].selectProduct == false)
+                                  if(getFilteredData()[index].selectProduct == false)
                                   {
                                     await _showTextInputDialog().then((value) => {
                                       if(_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar')
                                         {
-                                          totalPrice = double.parse(_inputValue.replaceAll(',', '.')) * orcamentos[index].PRECO!,
-                                          orcamentos[index].selectProduct = true,
-                                          orcamentos[index].indice = index,
-                                          orcamentos[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
-                                          orcamentos[index].IDPRODUCT = orcamentos[index].id,
-                                          orcamentos[index].TOTAL = totalPrice,
-                                          addItens.add(orcamentos[index]),
+                                          totalPrice = double.parse(_inputValue.replaceAll(',', '.')) * getFilteredData()[index].PRECO!,
+                                          getFilteredData()[index].selectProduct = true,
+                                          getFilteredData()[index].indice = index,
+                                          getFilteredData()[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
+                                          getFilteredData()[index].IDPRODUCT = getFilteredData()[index].id,
+                                          getFilteredData()[index].TOTAL = totalPrice,
+                                          addItens.add(getFilteredData()[index]),
                                           _inputValue = '',
                                           _valueButtonPopup = '',
                                         }
@@ -781,7 +782,7 @@ class _pg_priceList extends State<pg_priceList>  {
                             child: Visibility(
                               visible: checkBoxAppear,
                               child: Checkbox(
-                                value:  orcamentos[index].checkBox,
+                                value:  getFilteredData()[index].checkBox,
                                 side: const BorderSide(
                                   color: bgColor,
                                 ),
@@ -789,13 +790,13 @@ class _pg_priceList extends State<pg_priceList>  {
                                 checkColor:  Colors.white,
                                 activeColor: bgColor,
                                 onChanged: (bool? newValue) async {
-                                  if(orcamentos[index].checkBox == false)
+                                  if(getFilteredData()[index].checkBox == false)
                                   {
                                     cheBoxAppearProduct = false;
-                                    orcamentos[index].checkBox = true;
-                                    orcamentos[index].selectProduct = false;
-                                    orcamentos[index].indice = index;
-                                    deleteItens.add(orcamentos[index]);
+                                    getFilteredData()[index].checkBox = true;
+                                    getFilteredData()[index].selectProduct = false;
+                                    getFilteredData()[index].indice = index;
+                                    deleteItens.add(getFilteredData()[index]);
                                     if(deleteItens.length == 1)
                                     {
                                       deleteVisible = true;
@@ -881,7 +882,7 @@ class _pg_priceList extends State<pg_priceList>  {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-              if(!UID.AutoRenewing! && orcamentos.length > 15) {
+              if(!UID.AutoRenewing! && getFilteredData().length > 15) {
                 await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível cadastrar produtos ilimitados").then((value) => {
                   Navigator.push(
                     context,

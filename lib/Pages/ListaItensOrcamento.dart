@@ -18,6 +18,7 @@ import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
+TextEditingController _searchController = TextEditingController();
 
 class ListaItensOrcamento extends StatefulWidget {
   final DADOS item;
@@ -162,7 +163,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                   alignment: Alignment.topCenter,
                                   child: GestureDetector(
                                     onTap: () {
-                                      orcamentos[deleteItens[index].indice].checkBox = false;
+                                      getFilteredData()[deleteItens[index].indice].checkBox = false;
                                       deleteItens.remove(deleteItens[index]);
                                       if (deleteItens.isEmpty) {
                                         deleteVisible = false;
@@ -291,6 +292,19 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
     setState(() {});
   }
 
+  void onSearchTextChanged(String value) {
+    setState(() {});
+  }
+
+  List<ObjectListItens> getFilteredData() {
+    if (_searchController.text.isEmpty) {
+      return orcamentos; // Retorna a lista original se não houver texto de busca
+    } else {
+      return orcamentos
+          .where((x) => x.DESCRICAO!.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList(); // Filtra a lista original com base no texto de busca
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -350,28 +364,8 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
                   backgroundColor:  Colors.white12,
                   itemColor: Colors.white,
-                  onChanged: (String value) {
-                    var result = <ObjectListItens>[];
-                    if (value.isNotEmpty) {
-                       result = orcamentos.where((e) => e.DESCRICAO!.contains(value)).toList();
-                    } else {
-                       result  = orcamentos;
-                    }
-                    setState(() {
-                      orcamentos = result;
-                    });
-                  },
-                  onSubmitted: (String value) {
-                    var result = <ObjectListItens>[];
-                    if (value.isNotEmpty) {
-                        result = orcamentos.where((e) => e.DESCRICAO!.contains(value)).toList();
-                    } else {
-                        result  = orcamentos;
-                    }
-                    setState(() {
-                      orcamentos = result;
-                    });
-                  },
+                  controller: _searchController,
+                  onChanged: onSearchTextChanged,
                 ),
               ),
             ),
@@ -390,7 +384,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 100, left: 15, right: 15, top: 3),
-                  itemCount: orcamentos.length,
+                  itemCount: getFilteredData().length,
                   itemBuilder: (context, index) {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -406,7 +400,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
                            title:
                            Text(
-                          orcamentos[index].DESCRICAO!,
+                             getFilteredData()[index].DESCRICAO!,
                           maxLines: 2,
                           style: const TextStyle(
                             color: bgColor,
@@ -416,7 +410,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                           ),
                         ),
                         subtitle: Text(
-                          "Preço: ${moneyConvert.convertFromDouble(orcamentos[index].PRECO!)}",
+                          "Preço: ${moneyConvert.convertFromDouble(getFilteredData()[index].PRECO!)}",
                           style: const TextStyle(
                             color: bgColor,
                             letterSpacing: 0.5,
@@ -436,7 +430,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Categoria: ${orcamentos[index].CATEGORIA}",
+                                "Categoria: ${getFilteredData()[index].CATEGORIA}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -453,7 +447,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Total: ${moneyConvert.convertFromDouble(orcamentos[index].TOTAL!)}",
+                                "Total: ${moneyConvert.convertFromDouble(getFilteredData()[index].TOTAL!)}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -470,7 +464,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Quantidade: ${orcamentos[index].QTD}",
+                                "Quantidade: ${getFilteredData()[index].QTD}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -487,7 +481,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 vertical: 5.0,
                               ),
                               child: Text(
-                                "Unidade de medida: ${orcamentos[index].MEDIDA}",
+                                "Unidade de medida: ${getFilteredData()[index].MEDIDA}",
                                 style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -504,7 +498,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                 LayoutBuilder(
                                   builder: (BuildContext context, BoxConstraints constraints) {
                                     return Visibility(
-                                      visible: !orcamentos[index].checkBox!,
+                                      visible: !getFilteredData()[index].checkBox!,
                                       maintainSize: true,
                                       maintainAnimation: true,
                                       maintainState: true,
@@ -519,11 +513,11 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                             ),
                                           ),
                                           onPressed: () {
-                                            if (!orcamentos[index].checkBox!) {
-                                              orcamentos[index].checkBox = true;
-                                              orcamentos[index].selectProduct = false;
-                                              orcamentos[index].indice = index;
-                                              deleteItens.add(orcamentos[index]);
+                                            if (!getFilteredData()[index].checkBox!) {
+                                              getFilteredData()[index].checkBox = true;
+                                              getFilteredData()[index].selectProduct = false;
+                                              getFilteredData()[index].indice = index;
+                                              deleteItens.add(getFilteredData()[index]);
                                               if (deleteItens.isNotEmpty) {
                                                 deleteVisible = true;
                                               }
@@ -559,11 +553,11 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => pg_PopUp(item: orcamentos[index]),
+                                              builder: (context) => pg_PopUp(item: getFilteredData()[index]),
                                             ),
                                           ).then((value) async => {
                                             await getListItens(),
-                                            orcamentos = orcamentos,
+                                            orcamentos = getFilteredData(),
                                             setState(() {}),
                                           });
                                         },

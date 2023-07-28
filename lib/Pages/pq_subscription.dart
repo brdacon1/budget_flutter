@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/constants.dart';
@@ -14,7 +15,7 @@ class pg_subscription extends StatefulWidget {
 }
 
 class _pg_subscription extends State<pg_subscription> {
-
+  late List<PurchasedItem>? resultSubscription = [];
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,7 +36,30 @@ class _pg_subscription extends State<pg_subscription> {
                   Icons.arrow_back,
                   size: screenAwareSize(20.0, context),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
+                  if(resultSubscription!.isNotEmpty){
+                    var latestSubscription = resultSubscription!.reduce((current, next) =>
+                    current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
+                        ? current
+                        : next);
+
+                    Map<String, dynamic> data = jsonDecode(latestSubscription!.transactionReceipt ?? '');
+                    bool acknowledgedValue = data['acknowledged'];
+                    UID.AutoRenewing = data['autoRenewing'];
+                    UID.PurchaseToken = data['purchaseToken'];
+                    UID.ProductId = data['productId'];
+
+                    if(!acknowledgedValue) {
+                      await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
+                    }
+                  }
+                  else
+                  {
+                    UID.AutoRenewing = false;
+                    UID.PurchaseToken = '';
+                  }
+
                   Navigator.pop(context, true);
                 },
               ),
