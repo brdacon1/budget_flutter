@@ -19,6 +19,7 @@ import 'package:badges/badges.dart' as badges;
 import '../constants.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
+TextEditingController _searchController = TextEditingController();
 
 class pg_PoupSearch extends StatefulWidget {
   @override
@@ -425,7 +426,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                   alignment: Alignment.topCenter,
                                   child: GestureDetector(
                                     onTap: () {
-                                      _foundUsers[deleteItens[index].indice]
+                                      getFilteredData()[deleteItens[index].indice]
                                           .checkBox = false;
                                       deleteItens.remove(deleteItens[index]);
                                       if (deleteItens.isEmpty) {
@@ -540,10 +541,22 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
     return _foundUsers;
   }
+  void onSearchTextChanged(String value) {
+    setState(() {});
+  }
+
+  List<DADOS> getFilteredData() {
+    if (_searchController.text.isEmpty) {
+      return _foundUsers; // Retorna a lista original se não houver texto de busca
+    } else {
+      return _foundUsers
+          .where((x) => x.NOMECLIENTE!.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList(); // Filtra a lista original com base no texto de busca
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
@@ -579,37 +592,14 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
             child: CupertinoSearchTextField(
               placeholder: "Buscar orçamento...",
               style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
               backgroundColor: Colors.white12,
               itemColor: Colors.white,
-              onChanged: (String value) {
-                var result = <DADOS>[];
-                if (value.isNotEmpty) {
-                  result = _foundUsers
-                      .where((e) => e.NOMECLIENTE!.contains(value))
-                      .toList();
-                } else {
-                  result = _foundUsers;
-                }
-                setState(() {
-                  _foundUsers = result;
-                });
-              },
-              onSubmitted: (String value) {
-                var result = <DADOS>[];
-                if (value.isNotEmpty) {
-                  result = _foundUsers
-                      .where((e) => e.NOMECLIENTE!.contains(value))
-                      .toList();
-                } else {
-                  result = _foundUsers;
-                }
-                setState(() {
-                  _foundUsers = result;
-                });
-              },
+              controller: _searchController,
+              onChanged: onSearchTextChanged,
             ),
           ),
         ),
@@ -629,7 +619,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
               shrinkWrap: true,
               padding: const EdgeInsets.only(
                   bottom: 170, left: 15, right: 15, top: 0),
-              itemCount: _foundUsers.length,
+              itemCount: getFilteredData().length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
@@ -646,7 +636,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           color: Colors.white,
                         )),
                     title: Text(
-                      "${_foundUsers[index].NOMECLIENTE}",
+                      "${getFilteredData()[index].NOMECLIENTE}",
                       maxLines: 2,
                       style: const TextStyle(
                         color: bgColor,
@@ -655,7 +645,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    subtitle: Text("Nº orçamento: ${_foundUsers[index].ID}",
+                    subtitle: Text("Nº orçamento: ${getFilteredData()[index].ID}",
                         style: const TextStyle(
                             color: bgColor,
                             letterSpacing: 0.5,
@@ -673,7 +663,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             vertical: 5.0,
                           ),
                           child: Text(
-                            "Telefone: ${_foundUsers[index].FONE}",
+                            "Telefone: ${getFilteredData()[index].FONE}",
                             style: const TextStyle(
                               color: bgColor,
                               letterSpacing: 0.5,
@@ -690,7 +680,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             vertical: 5.0,
                           ),
                           child: Text(
-                              "Data do orçamento: ${_foundUsers[index].DATA}",
+                              "Data do orçamento: ${getFilteredData()[index].DATA}",
                               style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -704,7 +694,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             horizontal: 20.0,
                             vertical: 5.0,
                           ),
-                          child: Text("Status: ${_foundUsers[index].STATUS}",
+                          child: Text("Status: ${getFilteredData()[index].STATUS}",
                               style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -718,7 +708,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             horizontal: 20.0,
                             vertical: 5.0,
                           ),
-                          child: Text("Valor total: ${moneyConvert.convertFromDouble(_foundUsers[index].VALORTOTAL!)}",
+                          child: Text("Valor total: ${moneyConvert.convertFromDouble(getFilteredData()[index].VALORTOTAL!)}",
                               style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -732,7 +722,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                             horizontal: 20.0,
                             vertical: 5.0,
                           ),
-                          child: Text("Criado em: ${_foundUsers[index].DATA}",
+                          child: Text("Criado em: ${getFilteredData()[index].DATA}",
                               style: const TextStyle(
                                   color: bgColor,
                                   letterSpacing: 0.5,
@@ -748,7 +738,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                               builder: (BuildContext context,
                                   BoxConstraints constraints) {
                                 return Visibility(
-                                  visible: !_foundUsers[index].checkBox!,
+                                  visible: !getFilteredData()[index].checkBox!,
                                   maintainSize: true,
                                   maintainAnimation: true,
                                   maintainState: true,
@@ -765,10 +755,10 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        if (!_foundUsers[index].checkBox!) {
-                                          _foundUsers[index].checkBox = true;
-                                          _foundUsers[index].indice = index;
-                                          deleteItens.add(_foundUsers[index]);
+                                        if (!getFilteredData()[index].checkBox!) {
+                                          getFilteredData()[index].checkBox = true;
+                                          getFilteredData()[index].indice = index;
+                                          deleteItens.add(getFilteredData()[index]);
                                           if (deleteItens.isNotEmpty) {
                                             deleteVisible = true;
                                           }
@@ -804,12 +794,12 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     ),
                                     onPressed: () {
                                       Orcamento.IDORCAMENTO =
-                                          _foundUsers[index].ID;
+                                          getFilteredData()[index].ID;
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => pg_TabOrcamento(
-                                              item: _foundUsers[index]),
+                                              item: getFilteredData()[index]),
                                         ),
                                       ).then((value) => setState(() {
                                             try {
@@ -851,7 +841,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       ),
                                     ),
                                     onPressed: () async {
-                                      if(!UID.AutoRenewing! && _foundUsers.length > 10) {
+                                      if(!UID.AutoRenewing! && getFilteredData().length > 10) {
                                         await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados").then((value) => {
                                           Navigator.push(
                                             context,
@@ -862,7 +852,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       }
                                       else{
                                         Orcamento.IDORCAMENTO =
-                                            _foundUsers[index].ID;
+                                            getFilteredData()[index].ID;
                                         await _dialogDuplicate();
                                       }
                                     },
@@ -930,7 +920,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-                if(!UID.AutoRenewing! && _foundUsers.length > 10) {
+                if(!UID.AutoRenewing! && getFilteredData().length > 10) {
                   await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados").then((value) => {
                     Navigator.push(
                       context,
