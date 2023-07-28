@@ -551,10 +551,14 @@ class _pg_PopUp extends State<pg_PopUp> {
                                     ),
                                     ),
                                   ),
-                          )
+                          ),
+                          SizedBox(
+                            height: he * 0.3,
+                          ),
                         ]
                     ),
                   ),
+
               ]
           ),
         ),

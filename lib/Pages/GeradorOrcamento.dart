@@ -50,6 +50,12 @@ class GeradorOrcamento extends StatefulWidget {
 }
 
 class _GeradorOrcamento extends State<GeradorOrcamento> {
+  final _name = FocusNode();
+  final _phone = FocusNode();
+  final _cep = FocusNode();
+  final _rua = FocusNode();
+  final _city = FocusNode();
+  final _bairro = FocusNode();
   DADOS orcamento = DADOS();
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
@@ -175,48 +181,48 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
         .doc(orcamento.ID)
         .set({
-        'ID': orcamento.ID,
-        'DATA' : orcamento.DATA,
-        'RUA' : orcamento.RUA,
-        'GERADO' : orcamento.GERADO,
-        'BAIRRO' : orcamento.BAIRRO,
-        'CITY' : orcamento.CITY,
-        'EMAIL' : orcamento.EMAIL,
-        'ENDERECO' : orcamento.ENDERECO,
-        'FONE' : orcamento.FONE,
-        'NOMECLIENTE' : orcamento.NOMECLIENTE,
-        'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
-        'STATUS' : orcamento.STATUS,
-        'CEP' : orcamento.CEP,
-        'VALORTOTAL': orcamento.VALORTOTAL}).then((value) async {
-         }).then((value) {
-            Orcamento.IDORCAMENTO = orcamento.ID;
-            Orcamento.VALORTOTAL = orcamento.VALORTOTAL ?? 0;
-        });
+      'ID': orcamento.ID,
+      'DATA' : orcamento.DATA,
+      'RUA' : orcamento.RUA,
+      'GERADO' : orcamento.GERADO,
+      'BAIRRO' : orcamento.BAIRRO,
+      'CITY' : orcamento.CITY,
+      'EMAIL' : orcamento.EMAIL,
+      'ENDERECO' : orcamento.ENDERECO,
+      'FONE' : orcamento.FONE,
+      'NOMECLIENTE' : orcamento.NOMECLIENTE,
+      'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
+      'STATUS' : orcamento.STATUS,
+      'CEP' : orcamento.CEP,
+      'VALORTOTAL': orcamento.VALORTOTAL}).then((value) async {
+    }).then((value) {
+      Orcamento.IDORCAMENTO = orcamento.ID;
+      Orcamento.VALORTOTAL = orcamento.VALORTOTAL ?? 0;
+    });
   }
 
   Future <void> UpdateItensDADOS(DADOS orcamento) async {
-      await FirebaseFirestore.instance
-          .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
-          .doc(widget.item.ID)
-          .update({
-           'ID': orcamento.ID,
-           'DATA' : orcamento.DATA,
-           'RUA' : orcamento.RUA,
-           'GERADO' : orcamento.GERADO,
-           'BAIRRO' : orcamento.BAIRRO,
-           'CITY' : orcamento.CITY,
-           'EMAIL' : orcamento.EMAIL,
-           'ENDERECO' : orcamento.ENDERECO,
-           'FONE' : orcamento.FONE,
-           'NOMECLIENTE' : orcamento.NOMECLIENTE,
-           'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
-           'STATUS' : orcamento.STATUS,
-           'CEP' : orcamento.CEP,
-           'VALORTOTAL' : orcamento.VALORTOTAL}).then((value) async {
-          }).then((value) {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
+        .doc(widget.item.ID)
+        .update({
+      'ID': orcamento.ID,
+      'DATA' : orcamento.DATA,
+      'RUA' : orcamento.RUA,
+      'GERADO' : orcamento.GERADO,
+      'BAIRRO' : orcamento.BAIRRO,
+      'CITY' : orcamento.CITY,
+      'EMAIL' : orcamento.EMAIL,
+      'ENDERECO' : orcamento.ENDERECO,
+      'FONE' : orcamento.FONE,
+      'NOMECLIENTE' : orcamento.NOMECLIENTE,
+      'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
+      'STATUS' : orcamento.STATUS,
+      'CEP' : orcamento.CEP,
+      'VALORTOTAL' : orcamento.VALORTOTAL}).then((value) async {
+    }).then((value) {
 
-          });
+    });
   }
 
   Future<void> EventSave() async{
@@ -417,9 +423,9 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     return Scaffold(
       backgroundColor: bgColor,
       body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
             SizedBox(
               height: he * 0.07,
             ),
@@ -451,12 +457,12 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
               ),
             ),
             Container(
-                alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(left: we * 0.05),
-                child: Text("Informações do orçamento",style: GoogleFonts.heebo(
-                    color: Colors.grey,
-                    letterSpacing: 1),
-                ),
+              alignment: Alignment.topLeft,
+              margin: EdgeInsets.only(left: we * 0.05),
+              child: Text("Informações do orçamento",style: GoogleFonts.heebo(
+                  color: Colors.grey,
+                  letterSpacing: 1),
+              ),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -474,327 +480,331 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                 baseColor: Colors.cyan[50],
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
-                                  backgroundColor: bgColor,
-                                  child: Icon(Icons.person_outlined, color: Colors.white,)),
-                              title: Text(titleBox!,style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 16,
-                                  letterSpacing: 1
-                              ),
-                              ),
-                              subtitle: Text("Informações do cliente",style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  letterSpacing: 1
-                              ),
-                              ),
-                              children:  <Widget>[
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height: he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.fullname ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
+                                    backgroundColor: bgColor,
+                                    child: Icon(Icons.person_outlined, color: Colors.white,)),
+                                title: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                    letterSpacing: 1
+                                ),
+                                ),
+                                subtitle: Text("Informações do cliente",style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    letterSpacing: 1
+                                ),
+                                ),
+                                children:  <Widget>[
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height: he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.fullname ?  bgColor : bgColor,
+                                      ),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        focusNode: _name,
                                         readOnly: fieldFone,
                                         controller: _nameText,
                                         onTap: () async {
-                                        AwesomeDialog(
-                                          context: context,
-                                          width: we * 0.99,
-                                          dialogBackgroundColor: Colors.cyan[50],
-                                          dialogType: DialogType.infoReverse,
-                                          buttonsBorderRadius: const BorderRadius.all(
-                                            Radius.circular(10),
-                                          ),
-                                          headerAnimationLoop: false,
-                                          animType: AnimType.bottomSlide,
-                                          titleTextStyle: const TextStyle(
-                                            color: Colors.black, // Defina a cor do título
-                                            fontSize: 24, // Defina o tamanho da fonte do título
-                                            fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-                                            // Adicione outros atributos do TextStyle conforme necessário
-                                          ),
-                                          descTextStyle: const TextStyle(
-                                            color: Colors.black, // Defina a cor da descrição
-                                            fontSize: 18, // Defina o tamanho da fonte da descrição
-                                            // Adicione outros atributos do TextStyle conforme necessário
-                                          ),
-                                          title: 'Lista de contatos',
-                                          desc: 'Gostaria de buscar cliente em sua lista de contatos?',
-                                          showCloseIcon: false,
-                                          btnCancelText: "Não",
-                                          btnOkText: "Sim",
-                                          btnCancelOnPress: () {
-                                            setState(() {
-                                              fieldFone = false;
-                                            });
-
-                                          },
-                                          btnOkOnPress: () async {
+                                          _name.requestFocus();
+                                          AwesomeDialog(
+                                            context: context,
+                                            width: we * 0.99,
+                                            dialogBackgroundColor: Colors.cyan[50],
+                                            dialogType: DialogType.infoReverse,
+                                            buttonsBorderRadius: const BorderRadius.all(
+                                              Radius.circular(10),
+                                            ),
+                                            headerAnimationLoop: false,
+                                            animType: AnimType.bottomSlide,
+                                            titleTextStyle: const TextStyle(
+                                              color: Colors.black, // Defina a cor do título
+                                              fontSize: 24, // Defina o tamanho da fonte do título
+                                              fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+                                              // Adicione outros atributos do TextStyle conforme necessário
+                                            ),
+                                            descTextStyle: const TextStyle(
+                                              color: Colors.black, // Defina a cor da descrição
+                                              fontSize: 18, // Defina o tamanho da fonte da descrição
+                                              // Adicione outros atributos do TextStyle conforme necessário
+                                            ),
+                                            title: 'Lista de contatos',
+                                            desc: 'Gostaria de buscar cliente em sua lista de contatos?',
+                                            showCloseIcon: false,
+                                            btnCancelText: "Não",
+                                            btnOkText: "Sim",
+                                            btnCancelOnPress: () {
                                               setState(() {
-                                                 fieldFone = true;
-                                               });
-                                            int index = 0;
-                                            String? nome;
-                                            String? tel;
-                                             await FlutterContactPicker.pickFullContact().then((value)  {
-                                                 final FullContact contact = value;
-                                                 contact.phones.forEach((result) {
-                                                 if(index == 0)
-                                                 {
-                                                   setState(() {
-                                                     nome = contact.name?.nickName;
-                                                     tel = result.number;
-                                                     tel = tel?.replaceAll('+55', '');
-                                                     tel = tel?.replaceAll('+', '');
-                                                     _nameText.text = nome!;
-                                                     _phoneText.text =  maskFormatter.maskText(tel!);
-                                                   });
-                                                 }
-                                                 index++;
-                                               });
-                                            });
-                                          },
-                                        ).show();
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.person_outlined,color: selected == Gender.fullname ? enabledtxt : deaible),
-                                        hintText: 'Nome do cliente',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.fullname ? enabledtxt : deaible,
-                                        ),
-                                      ),
-                                      style:  TextStyle(color:  selected == Gender.fullname ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.phone ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [maskFormatter],
-                                      controller: _phoneText,
-                                      onTap: (){
-                                        setState(() {
-                                          selected = Gender.phone;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.phone ? enabledtxt : deaible),
-                                        hintText: 'Telefone',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.phone ? enabledtxt : deaible,
-                                        ),
-                                      ),
-                                      style:  TextStyle(color:  selected == Gender.phone ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                               ),
-                            ],
-                         ),),
-                      ),
-                   ),
-                   SizedBox(
-                      child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                      child:Theme(
-                        data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
-                        child: ExpansionTileCard(
-                          expandedTextColor: bgColor,
-                      baseColor: Colors.cyan[50],
-                      expandedColor: Colors.cyan[50],
-                      leading: const CircleAvatar(
-                          backgroundColor: bgColor,
-                          child: Icon(Icons.request_page_outlined, color: Colors.white,)),
-                          title: Text(titleBox!,style: GoogleFonts.heebo(
-                          color: bgColor,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 16,
-                          letterSpacing: 1
-                        ),
-                      ),
-                      subtitle: Text("Informações do orçamento",style: GoogleFonts.heebo(
-                          color: bgColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          letterSpacing: 1
-                      ),
-                      ),
-                      children:  <Widget>[
-                        SizedBox(
-                          height: he * 0.02,
-                        ),
-                        FadeAnimation(
-                          delay: 1,
-                          child: Container(
-                            width: we * 0.8,
-                            height:he * 0.071,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              color: selected == Gender.status ?  bgColor : bgColor,
-                            ),
-                            padding: const EdgeInsets.all(8.0),
-                            child:  TextField(
-                              readOnly: true,
-                              enableInteractiveSelection: true,
-                              controller: _statusText,
-                              onTap: () async {
-                                List<String> values = ['APROVADO', 'PENDENTE', 'REPROVADO', 'FINALIZADO'];
-                                await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                  return SimpleDialog(
-                                    backgroundColor: Colors.cyan[50],
-                                    title: const Text("Selecione status", style: TextStyle(color: Colors.black),),
-                                    children: [
-                                      SizedBox(
-                                        width: MediaQuery.of(context).size.width,
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          itemBuilder: (ctx, index) {
-                                            return SimpleDialogOption(
-                                              onPressed: () => Navigator.pop(context, values[index]),
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                Text(values[index], style: const TextStyle(color: bgColor,
-                                                    fontSize: 15.0)),
-                                                ]
-                                              ),
-                                            );
-                                          },
-                                          itemCount: values.length,
-                                        ),
-                                      )
-                                    ],
-                                  );
-                                },
-                                ).then((value) => {
-                                  setState(() {
-                                    _statusText.text = value;
-                                   }),
+                                                fieldFone = false;
+                                              });
 
-                                });
-                              },
-                              decoration: InputDecoration(
-                                enabledBorder: InputBorder.none,
-                                border:InputBorder.none,
-                                prefixIcon: Icon(Icons.domain_verification_outlined, color: selected == Gender.status ? enabledtxt : deaible),
-                                suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.status ? enabledtxt : deaible,),
-                                hintText: 'Status do orçamentos',
-                                hintStyle: TextStyle(
-                                  color:  selected == Gender.status ? enabledtxt : deaible,
-                                ),
-                              ),
-                              style:  TextStyle(color:  selected == Gender.status ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                            ),
+                                            },
+                                            btnOkOnPress: () async {
+                                              setState(() {
+                                                fieldFone = true;
+                                              });
+                                              int index = 0;
+                                              String? nome;
+                                              String? tel;
+                                              await FlutterContactPicker.pickFullContact().then((value)  {
+                                                final FullContact contact = value;
+                                                contact.phones.forEach((result) {
+                                                  if(index == 0)
+                                                  {
+                                                    setState(() {
+                                                      nome = contact.name?.nickName;
+                                                      tel = result.number;
+                                                      tel = tel?.replaceAll('+55', '');
+                                                      tel = tel?.replaceAll('+', '');
+                                                      _nameText.text = nome!;
+                                                      _phoneText.text =  maskFormatter.maskText(tel!);
+                                                    });
+                                                  }
+                                                  index++;
+                                                });
+                                              });
+                                            },
+                                          ).show();
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.person_outlined,color: selected == Gender.fullname ? enabledtxt : deaible),
+                                          hintText: 'Nome do cliente',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.fullname ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.fullname ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.phone ?  bgColor : bgColor,
+                                      ),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [maskFormatter],
+                                        controller: _phoneText,
+                                        focusNode: _phone,
+                                        onTap: (){
+                                          setState(() {
+                                            _phone.requestFocus();
+                                            selected = Gender.phone;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.phone_android_outlined, color: selected == Gender.phone ? enabledtxt : deaible),
+                                          hintText: 'Telefone',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.phone ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.phone ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                ],
+                              ),),
                           ),
                         ),
                         SizedBox(
-                          height: he * 0.02,
-                        ),
-                        Visibility(
-                            visible: fieldVisible,
-                            child: FadeAnimation(
-                              delay: 1,
-                              child: Container(
-                                width: we * 0.8,
-                                height:he * 0.071,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  color: selected == Gender.data ?  bgColor : bgColor,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
+                            child:Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                expandedTextColor: bgColor,
+                                baseColor: Colors.cyan[50],
+                                expandedColor: Colors.cyan[50],
+                                leading: const CircleAvatar(
+                                    backgroundColor: bgColor,
+                                    child: Icon(Icons.request_page_outlined, color: Colors.white,)),
+                                title: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                    letterSpacing: 1
                                 ),
-                                padding: const EdgeInsets.all(8.0),
-                                child:  TextField(
-                                  controller: _dataText,
-                                  onTap: (){
-                                    setState(() {
-                                      selected = Gender.data;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    enabledBorder: InputBorder.none,
-                                    border:InputBorder.none,
-                                    enabled: false,
-                                    prefixIcon: Icon(Icons.calendar_month_outlined, color: selected == Gender.data ? enabledtxt : deaible,),
-                                    hintText: 'Data do orçamento',
-                                    hintStyle: TextStyle(
-                                      color:  selected == Gender.data ? enabledtxt : deaible,
+                                ),
+                                subtitle: Text("Informações do orçamento",style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    letterSpacing: 1
+                                ),
+                                ),
+                                children:  <Widget>[
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.status ?  bgColor : bgColor,
+                                      ),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        readOnly: true,
+                                        enableInteractiveSelection: true,
+                                        controller: _statusText,
+                                        onTap: () async {
+                                          List<String> values = ['APROVADO', 'PENDENTE', 'REPROVADO', 'FINALIZADO'];
+                                          await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return SimpleDialog(
+                                                backgroundColor: Colors.cyan[50],
+                                                title: const Text("Selecione status", style: TextStyle(color: Colors.black),),
+                                                children: [
+                                                  SizedBox(
+                                                    width: MediaQuery.of(context).size.width,
+                                                    child: ListView.builder(
+                                                      shrinkWrap: true,
+                                                      itemBuilder: (ctx, index) {
+                                                        return SimpleDialogOption(
+                                                          onPressed: () => Navigator.pop(context, values[index]),
+                                                          child: Column(
+                                                              mainAxisAlignment: MainAxisAlignment.start,
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(values[index], style: const TextStyle(color: bgColor,
+                                                                    fontSize: 15.0)),
+                                                              ]
+                                                          ),
+                                                        );
+                                                      },
+                                                      itemCount: values.length,
+                                                    ),
+                                                  )
+                                                ],
+                                              );
+                                            },
+                                          ).then((value) => {
+                                            setState(() {
+                                              _statusText.text = value;
+                                            }),
+
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.domain_verification_outlined, color: selected == Gender.status ? enabledtxt : deaible),
+                                          suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.status ? enabledtxt : deaible,),
+                                          hintText: 'Status do orçamentos',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.status ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.status ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
                                     ),
                                   ),
-                                  style:  TextStyle(color:  selected == Gender.data ? enabledtxt : deaible,fontWeight:FontWeight.bold),
-                                ),
-                              ),
-                            )),
-                        SizedBox(
-                          height: he * 0.02,
-                        ),
-                        Visibility(
-                            visible: fieldVisible,
-                            child: FadeAnimation(
-                              delay: 1,
-                              child: Container(
-                                width: we * 0.8,
-                                height:he * 0.071,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  color: selected == Gender.id ?  bgColor : bgColor,
-                                ),
-                                padding: const EdgeInsets.all(8.0),
-                                child:  TextField(
-                                  controller: _idText,
-                                  onTap: (){
-                                    setState(() {
-                                      selected = Gender.id;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    enabled: false,
-                                    enabledBorder: InputBorder.none,
-                                    border:InputBorder.none,
-                                    prefixIcon: Icon(Icons.confirmation_number_outlined, color: selected == Gender.id ? enabledtxt : deaible),
-                                    hintText: 'Número do orçamento',
-                                    hintStyle: TextStyle(
-                                      color:  selected == Gender.id ? enabledtxt : deaible,
-                                    ),
+                                  SizedBox(
+                                    height: he * 0.02,
                                   ),
-                                  style:  TextStyle(color:  selected == Gender.id ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                ),
+                                  Visibility(
+                                      visible: fieldVisible,
+                                      child: FadeAnimation(
+                                        delay: 1,
+                                        child: Container(
+                                          width: we * 0.8,
+                                          height:he * 0.071,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                            color: selected == Gender.data ?  bgColor : bgColor,
+                                          ),
+                                          padding: const EdgeInsets.all(8.0),
+                                          child:  TextField(
+                                            controller: _dataText,
+                                            onTap: (){
+                                              setState(() {
+                                                selected = Gender.data;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              enabledBorder: InputBorder.none,
+                                              border:InputBorder.none,
+                                              enabled: false,
+                                              prefixIcon: Icon(Icons.calendar_month_outlined, color: selected == Gender.data ? enabledtxt : deaible,),
+                                              hintText: 'Data do orçamento',
+                                              hintStyle: TextStyle(
+                                                color:  selected == Gender.data ? enabledtxt : deaible,
+                                              ),
+                                            ),
+                                            style:  TextStyle(color:  selected == Gender.data ? enabledtxt : deaible,fontWeight:FontWeight.bold),
+                                          ),
+                                        ),
+                                      )),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  Visibility(
+                                      visible: fieldVisible,
+                                      child: FadeAnimation(
+                                        delay: 1,
+                                        child: Container(
+                                          width: we * 0.8,
+                                          height:he * 0.071,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                            color: selected == Gender.id ?  bgColor : bgColor,
+                                          ),
+                                          padding: const EdgeInsets.all(8.0),
+                                          child:  TextField(
+                                            controller: _idText,
+                                            onTap: (){
+                                              setState(() {
+                                                selected = Gender.id;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              enabled: false,
+                                              enabledBorder: InputBorder.none,
+                                              border:InputBorder.none,
+                                              prefixIcon: Icon(Icons.confirmation_number_outlined, color: selected == Gender.id ? enabledtxt : deaible),
+                                              hintText: 'Número do orçamento',
+                                              hintStyle: TextStyle(
+                                                color:  selected == Gender.id ? enabledtxt : deaible,
+                                              ),
+                                            ),
+                                            style:  TextStyle(color:  selected == Gender.id ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                          ),
+                                        ),
+                                      )),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                ],
                               ),
-                            )),
-                          SizedBox(
-                          height: he * 0.02,
                             ),
-                           ],
                           ),
-                          ),
-                         ),
                         ),
                         SizedBox(
                           child: Padding(
@@ -803,174 +813,182 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                               data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
                               child: ExpansionTileCard(
                                 expandedTextColor: bgColor,
-                              baseColor: Colors.cyan[50],
-                              expandedColor: Colors.cyan[50],
-                              leading: const CircleAvatar(
-                                  backgroundColor: bgColor,
-                                  child: Icon(Icons.location_on_outlined, color: Colors.white,)),
-                              title: Text(titleBox!,style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 16,
-                                  letterSpacing: 1
-                              ),
-                              ),
-                              subtitle: Text("Informações de endereço",style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  letterSpacing: 1
-                              ),
-                              ),
-                              children:  <Widget>[
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.cep ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                         keyboardType: TextInputType.number,
-                                         onChanged: (value) async {
-                                         var findAdress = CEP.ViaCEPServico();
-                                         if(value.length == 9)
-                                         {
-                                           var adress =  await findAdress.getAdress(value);
-                                           setState(() {
-                                             _ruaText.text = adress.logradouro!.toUpperCase();
-                                             _cityText.text = adress.localidade!.toUpperCase();
-                                             _bairroText.text = adress.bairro!.toUpperCase();
-                                           });
+                                baseColor: Colors.cyan[50],
+                                expandedColor: Colors.cyan[50],
+                                leading: const CircleAvatar(
+                                    backgroundColor: bgColor,
+                                    child: Icon(Icons.location_on_outlined, color: Colors.white,)),
+                                title: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                    letterSpacing: 1
+                                ),
+                                ),
+                                subtitle: Text("Informações de endereço",style: GoogleFonts.heebo(
+                                    color: bgColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    letterSpacing: 1
+                                ),
+                                ),
+                                children:  <Widget>[
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.cep ?  bgColor : bgColor,
+                                      ),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (value) async {
+                                          var findAdress = CEP.ViaCEPServico();
+                                          if(value.length == 9)
+                                          {
+                                            var adress =  await findAdress.getAdress(value);
+                                            setState(() {
+                                              _ruaText.text = adress.logradouro!.toUpperCase();
+                                              _cityText.text = adress.localidade!.toUpperCase();
+                                              _bairroText.text = adress.bairro!.toUpperCase();
+                                            });
                                           }
                                         },
                                         inputFormatters: [maskCep],
                                         controller: _cepText,
+                                        focusNode: _cep,
                                         onTap: (){
                                           setState(() {
+                                            _cep.requestFocus();
                                             selected = Gender.cep;
                                           });
                                         },
-                                       decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.add_location_outlined, color: selected == Gender.cep ? enabledtxt : deaible),
-                                        hintText: 'CEP',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.cep ? enabledtxt : deaible,
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.add_location_outlined, color: selected == Gender.cep ? enabledtxt : deaible),
+                                          hintText: 'CEP',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.cep ? enabledtxt : deaible,
+                                          ),
                                         ),
+                                        style:  TextStyle(color:  selected == Gender.cep ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.cep ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.rua ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                      controller: _ruaText,
-                                      onTap: (){
-                                        setState(() {
-                                          selected = Gender.rua;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.location_on_outlined, color: selected == Gender.rua ? enabledtxt : deaible),
-                                        hintText: 'Rua',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.rua ? enabledtxt : deaible,
-                                        ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.rua ?  bgColor : bgColor,
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.rua ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        focusNode: _rua,
+                                        controller: _ruaText,
+                                        onTap: (){
+                                          setState(() {
+                                            _rua.requestFocus();
+                                            selected = Gender.rua;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.location_on_outlined, color: selected == Gender.rua ? enabledtxt : deaible),
+                                          hintText: 'Rua',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.rua ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.rua ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.city ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                      controller: _cityText,
-                                      onTap: (){
-                                        setState(() {
-                                          selected = Gender.city;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.location_city_outlined, color: selected == Gender.city ? enabledtxt : deaible),
-                                        hintText: 'Cidade',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.city ? enabledtxt : deaible,
-                                        ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.city ?  bgColor : bgColor,
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.city ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        focusNode: _city,
+                                        controller: _cityText,
+                                        onTap: (){
+                                          setState(() {
+                                            _city.requestFocus();
+                                            selected = Gender.city;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.location_city_outlined, color: selected == Gender.city ? enabledtxt : deaible),
+                                          hintText: 'Cidade',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.city ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.city ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                                FadeAnimation(
-                                  delay: 1,
-                                  child: Container(
-                                    width: we * 0.8,
-                                    height:he * 0.071,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      color: selected == Gender.bairro ?  bgColor : bgColor,
-                                    ),
-                                    padding: const EdgeInsets.all(8.0),
-                                    child:  TextField(
-                                      controller: _bairroText,
-                                      onTap: (){
-                                        setState(() {
-                                          selected = Gender.bairro;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: InputBorder.none,
-                                        border:InputBorder.none,
-                                        prefixIcon: Icon(Icons.location_searching, color: selected == Gender.bairro ? enabledtxt : deaible),
-                                        hintText: 'Bairro',
-                                        hintStyle: TextStyle(
-                                          color:  selected == Gender.bairro ? enabledtxt : deaible,
-                                        ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  FadeAnimation(
+                                    delay: 1,
+                                    child: Container(
+                                      width: we * 0.8,
+                                      height:he * 0.071,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.bairro ?  bgColor : bgColor,
                                       ),
-                                      style:  TextStyle(color:  selected == Gender.bairro ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child:  TextField(
+                                        focusNode: _bairro,
+                                        controller: _bairroText,
+                                        onTap: (){
+                                          setState(() {
+                                            selected = Gender.bairro;
+                                            _bairro.requestFocus();
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border:InputBorder.none,
+                                          prefixIcon: Icon(Icons.location_searching, color: selected == Gender.bairro ? enabledtxt : deaible),
+                                          hintText: 'Bairro',
+                                          hintStyle: TextStyle(
+                                            color:  selected == Gender.bairro ? enabledtxt : deaible,
+                                          ),
+                                        ),
+                                        style:  TextStyle(color:  selected == Gender.bairro ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: he * 0.02,
-                                ),
-                              ],
-                            ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -980,34 +998,34 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                         FadeAnimation(
                           delay: 1,
                           child: TextButton(
-                              onPressed: () async {
-                                  await EventSave();
-                              },
-                              style: TextButton.styleFrom(
-                                  backgroundColor: buttonColor,
-                                  padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30.0)
-                                  )
-                              ),
-                              child: Text(nameButton!,style: GoogleFonts.heebo(
-                                color: Colors.black,
-                                letterSpacing: 0.5,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            onPressed: () async {
+                              await EventSave();
+                            },
+                            style: TextButton.styleFrom(
+                                backgroundColor: buttonColor,
+                                padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 70),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0)
+                                )
+                            ),
+                            child: Text(nameButton!,style: GoogleFonts.heebo(
+                              color: Colors.black,
+                              letterSpacing: 0.5,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                             ),
                           ),
                         ),
                         SizedBox(
                           height: he * 0.10,
-                     ),
-                  ]
+                        ),
+                      ]
+                  ),
                 ),
               ),
             ),
-           ),
-         ]
+          ]
       ),
     );
   }
