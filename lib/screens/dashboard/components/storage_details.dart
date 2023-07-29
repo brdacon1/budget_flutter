@@ -37,7 +37,7 @@ class _StarageDetails extends State<StarageDetails> {
             'Orçamentos do mês',
             style: TextStyle(
               color: creamColor,
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
             ),

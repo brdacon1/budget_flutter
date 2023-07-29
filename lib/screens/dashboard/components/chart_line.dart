@@ -17,7 +17,7 @@ class ChartLine extends StatefulWidget {
 
 class _ChartLine extends State<ChartLine> {
   late final bool isShowingMainData;
-
+  double? sizeLine = 0;
   Map<int, List<DADOS>> groupDataByWeek(List<DADOS> dataList) {
     Map<int, List<DADOS>> groupedData = {};
     for (var data in dataList) {
@@ -39,9 +39,15 @@ class _ChartLine extends State<ChartLine> {
     lineBarsData: lineBarsData1,
     minX: 0,
     maxX: 3,
-    maxY: 8,
+    maxY: sizeLine! + 1,
     minY: 0,
   );
+
+  double roundToTwoDecimals(double? value) {
+    // Usa o método toStringAsFixed() para arredondar o valor para duas casas decimais
+    return double.parse(value!.toStringAsFixed(0));
+  }
+
 
   LineTouchData get lineTouchData1 => LineTouchData(
     handleBuiltInTouches: true,
@@ -76,7 +82,7 @@ class _ChartLine extends State<ChartLine> {
     const style = TextStyle(
       color: Colors.grey,
       fontWeight: FontWeight.normal,
-      fontSize: 10,
+      fontSize: 12,
     );
     String text;
     switch (value.toInt()) {
@@ -98,6 +104,21 @@ class _ChartLine extends State<ChartLine> {
       case 10:
         text = 'R\$ 10k';
         break;
+      case 12:
+        text = 'R\$ 12k';
+        break;
+      case 14:
+        text = 'R\$ 14k';
+        break;
+      case 16:
+        text = 'R\$ 16k';
+        break;
+      case 18:
+        text = 'R\$ 18k';
+        break;
+      case 20:
+        text = 'R\$ 20k';
+        break;
       default:
         return Container();
     }
@@ -109,7 +130,7 @@ class _ChartLine extends State<ChartLine> {
     getTitlesWidget: leftTitleWidgets,
     showTitles: true,
     interval: 1,
-    reservedSize: 30,
+    reservedSize: 42,
   );
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
@@ -232,6 +253,29 @@ class _ChartLine extends State<ChartLine> {
     ],
   );
 
+  double findLargestValue(double? value1, double? value2, double? value3, double? value4) {
+    double largestValue = 0.0;
+
+    if (value1 != null && value1 > largestValue) {
+      largestValue = value1;
+    }
+
+    if (value2 != null && value2 > largestValue) {
+      largestValue = value2;
+    }
+
+    if (value3 != null && value3 > largestValue) {
+      largestValue = value3;
+    }
+
+    if (value4 != null && value4 > largestValue) {
+      largestValue = value4;
+    }
+
+    return largestValue;
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -240,6 +284,44 @@ class _ChartLine extends State<ChartLine> {
 
   @override
   Widget build(BuildContext context) {
+    double largestValueReproved = findLargestValue(
+      widget.item.totalReprovedMonth_0,
+      widget.item.totalReprovedMonth_1,
+      widget.item.totalReprovedMonth_2,
+      widget.item.totalReprovedMonth_3,
+    );
+
+    double largestValueApproved = findLargestValue(
+      widget.item.totalApprovedMonth_0,
+      widget.item.totalApprovedMonth_1,
+      widget.item.totalApprovedMonth_2,
+      widget.item.totalApprovedMonth_3,
+    );
+
+    double largestValuePending = findLargestValue(
+      widget.item.totalPendingMonth_0,
+      widget.item.totalPendingMonth_1,
+      widget.item.totalPendingMonth_2,
+      widget.item.totalPendingMonth_3,
+    );
+
+    double largestValueFinish = findLargestValue(
+      widget.item.totalFinishMonth_0,
+      widget.item.totalFinishMonth_1,
+      widget.item.totalFinishMonth_2,
+      widget.item.totalFinishMonth_3,
+    );
+
+    sizeLine = findLargestValue(
+      largestValueReproved,
+      largestValueApproved,
+      largestValuePending,
+      largestValueFinish,
+    );
+    setState(() {
+
+    });
+    sizeLine = roundToTwoDecimals(sizeLine);
     return AspectRatio(
       aspectRatio: 1.23,
       child: Stack(
@@ -254,7 +336,7 @@ class _ChartLine extends State<ChartLine> {
                 'Progresso semanal',
                 style: TextStyle(
                   color: creamColor,
-                  fontSize: 20,
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
                 ),

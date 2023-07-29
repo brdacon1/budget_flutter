@@ -30,7 +30,7 @@ class _RecentFiles extends State<RecentFiles> {
             'Orçamentos recentes',
             style: TextStyle(
               color: creamColor,
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
             ),

@@ -66,7 +66,7 @@ class _MonthEvolution extends State<MonthEvolution> {
             'Resultado semanal',
             style: TextStyle(
               color: creamColor,
-              fontSize: 20,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
             ),

@@ -57,7 +57,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 32
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 73
+        versionCode 85
         versionName '1.8.2'
     }
 
@@ -65,7 +65,7 @@ android {
         release {
             keyAlias 'davidelias1511@gmail.com'
             keyPassword 'Eminem622315'
-            storeFile file('C:\\Users\\david\\Downloads\\davidelias1511@gmail.com.keystore')
+            storeFile file('C:\\Users\\david\\source\\repos\\of-flutter\\key\\davidelias1511@gmail.com.keystore')
             storePassword 'Eminem622315'
         }
     }
