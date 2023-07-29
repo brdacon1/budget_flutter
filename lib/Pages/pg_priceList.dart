@@ -641,7 +641,7 @@ class _pg_priceList extends State<pg_priceList>  {
                 height: 50.0,
                 margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),
                 child: CupertinoSearchTextField(
-                  placeholder: "Buscar Itens...",
+                  placeholder: "Digite a descrição do item...",
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
                   backgroundColor:  Colors.white12,
                   itemColor: Colors.white,

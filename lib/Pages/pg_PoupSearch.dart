@@ -592,7 +592,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
             height: 50.0,
             margin: const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
             child: CupertinoSearchTextField(
-              placeholder: "Buscar orçamento...",
+              placeholder: "Digite o nome do cliente...",
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -819,9 +819,9 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     child: const Column(
                                       children: <Widget>[
                                         SizedBox(height: 4),
-                                        Icon(Icons.edit),
+                                        Icon(Icons.open_in_new_rounded),
                                         SizedBox(height: 2.0),
-                                        Text('Editar', style: TextStyle(fontSize: 10)),
+                                        Text('Abrir', style: TextStyle(fontSize: 10)),
                                       ],
                                     ),
                                   ),
