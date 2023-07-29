@@ -59,6 +59,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
       final String formatted = formatter.format(now);
       if(clientData) {
         await db.getInformationOrcamento1().then((value) => {
+          print(value.toJson()),
           if(value.NOMECLIENTE!.isNotEmpty)
             {
               customerBudget.NOMECLIENTE = value.NOMECLIENTE,
@@ -74,6 +75,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
               customerBudget.BAIRRO = value.BAIRRO,
               customerBudget.DATA = formatted,
               customerBudget.ID = DateTime.now().millisecondsSinceEpoch.toString(),
+              customerBudget.VALORTOTAL = value.VALORTOTAL,
               db.saveBudget(customerBudget).then((value)  async {
                 var quoteItemsObject = await db.getListItemsGenerator(ID);
                 var commentsObject = await db.getListComment(ID);
@@ -540,6 +542,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
     return _foundUsers;
   }
+
   void onSearchTextChanged(String value) {
     setState(() {});
   }
@@ -553,7 +556,6 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           .toList(); // Filtra a lista original com base no texto de busca
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

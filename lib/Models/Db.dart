@@ -214,7 +214,8 @@ class Db{
       'NOMECLIENTE' : orcamento.NOMECLIENTE,
       'NOMEEMPRESA' : orcamento.NOMEEMPRESA,
       'STATUS' : orcamento.STATUS,
-      'CEP' : orcamento.CEP}).then((value) async {
+      'CEP' : orcamento.CEP,
+      'VALORTOTAL' : orcamento.VALORTOTAL}).then((value) async {
     }).then((value) {
       Orcamento.IDORCAMENTO = orcamento.ID;
     });
