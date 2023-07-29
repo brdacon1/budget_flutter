@@ -171,10 +171,11 @@ class _Login extends State<Login> {
           child: Column(
               children: <Widget>[
                 FadeAnimation(delay: 0.8,
-                  child: CachedNetworkImage(
-                    imageUrl: "https://cdni.iconscout.com/illustration/premium/thumb/job-starting-date-2537382-2146478.png",
-                    width: we * 0.9,
-                    height: he * 0.4,),),
+                  child:  Image.asset(
+                    'assets/login-initial-page.png',
+                    width: we * 0.4,
+                    height: 340,
+                  ),),
                 FadeAnimation(
                   delay: 1,
                   child: Container(
@@ -190,9 +191,6 @@ class _Login extends State<Login> {
                 ),
                 SizedBox(
                   height: he * 0.01,
-                ),
-                SizedBox(
-                  height: he * 0.04,
                 ),
                 FadeAnimation(
                   delay: 1,
@@ -376,7 +374,7 @@ class _Login extends State<Login> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
