@@ -39,7 +39,7 @@ class _ChartLine extends State<ChartLine> {
     lineBarsData: lineBarsData1,
     minX: 0,
     maxX: 3,
-    maxY: sizeLine! + 1,
+    maxY: sizeLine! + 2,
     minY: 0,
   );
 

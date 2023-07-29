@@ -112,8 +112,14 @@ class _PgEditPDF extends State<PgEditPDF> {
 
       // Verificar se a resposta é válida e contém a imagem
       if (response.statusCode == 200) {
-        // Se a resposta for válida, retornar os bytes da imagem
-        return response.bodyBytes;
+        // Verify if the response contains valid image data
+        if (response.headers["content-type"]?.startsWith("image/") == true) {
+          // Se a resposta for válida e contém a imagem, retornar os bytes da imagem
+          return response.bodyBytes;
+        } else {
+          // Se a resposta não contém uma imagem válida, retornar null
+          return null;
+        }
       } else {
         // Se a resposta não contém a imagem, retornar null
         return null;
@@ -127,7 +133,8 @@ class _PgEditPDF extends State<PgEditPDF> {
   Widget _image(Uint8List? fileContent) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    if (fileContent != null) {
+
+    if (fileContent != null && fileContent.isNotEmpty) {
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -139,7 +146,13 @@ class _PgEditPDF extends State<PgEditPDF> {
         ),
       );
     } else {
-      return const Icon(Icons.image, size: 100);
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 0.8 * screenWidth,
+          maxHeight: 0.7 * screenHeight,
+        ),
+        child: const Icon(Icons.image, size: 100),
+      );
     }
   }
 
@@ -230,86 +243,102 @@ class _PgEditPDF extends State<PgEditPDF> {
                       SizedBox(
                           height: he * 0.02,
                       ),
-                        FutureBuilder<Uint8List?>(
-                          future: fileContentFuture,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return const Text('Erro ao carregar a imagem');
+                    FutureBuilder<Uint8List?>(
+                      future: fileContentFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Erro ao carregar a imagem'),
+                          );
+                        } else {
+                          if (UID.AutoRenewing!) {
+                            if (snapshot.data != null) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CutPicturePage(
+                                        owner: owner,
+                                        title: 'Editar Logo',
+                                      ),
+                                    ),
+                                  ).then((value) {
+                                    // Atualizar o FutureBuilder quando voltar da tela de edição
+                                    setState(() {
+                                      fileContentFuture = initialData();
+                                    });
+                                  });
+                                },
+                                child: _imageCard(snapshot.data!),
+                              );
                             } else {
-                             if(UID.AutoRenewing!){
-                               if (snapshot.data != null) {
-                                 return GestureDetector(
-                                   onTap: () async {
-                                     Navigator.push(
-                                       context,
-                                       MaterialPageRoute(
-                                         builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
-                                       ),
-                                     ).then((value) {
-                                       // Atualizar o FutureBuilder quando voltar da tela de edição
-                                       setState(() {
-                                         fileContentFuture = initialData();
-                                       });
-                                     });
-                                   },
-                                   child: _imageCard(snapshot.data!),
-                                 );
-                               } else {
-                                 return Padding(
-                                   padding: const EdgeInsets.symmetric(vertical: 40),
-                                   child: GestureDetector(
-                                     onTap: () {
-                                       Navigator.push(
-                                         context,
-                                         MaterialPageRoute(
-                                           builder: (context) => CutPicturePage(owner: owner, title: 'Editar Logo',),
-                                         ),
-                                       ).then((value) {
-                                         // Atualizar o FutureBuilder quando voltar da tela de edição
-                                         setState(() {
-                                           fileContentFuture = initialData();
-                                         });
-                                       });
-                                     },
-                                     child: Align(
-                                       alignment: Alignment.center,
-                                       child: Column(
-                                         mainAxisSize: MainAxisSize.min,
-                                         crossAxisAlignment: CrossAxisAlignment.center,
-                                         children: [
-                                           Text(
-                                             'Sem imagem disponível',
-                                             style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
-                                           ),
-                                           const SizedBox(height: 8.0),
-                                           Text(
-                                             'Toque para incluir nova imagem',
-                                             style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white),
-                                           ),
-                                         ],
-                                       ),
-                                     ),
-                                   ),
-                                 );
-                               }
-                             }
-                             else{
-                                return GestureDetector(
-                                  onTap: () async {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 40),
+                                child: GestureDetector(
+                                  onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => pg_subscription()),
-                                    );
-                                 },
-                                 child: _imageCard(snapshot.data!),
-                                );
-                             }
+                                        builder: (context) => CutPicturePage(
+                                          owner: owner,
+                                          title: 'Editar Logo',
+                                        ),
+                                      ),
+                                    ).then((value) {
+                                      // Atualizar o FutureBuilder quando voltar da tela de edição
+                                      setState(() {
+                                        fileContentFuture = initialData();
+                                      });
+                                    });
+                                  },
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Sem imagem disponível',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.white),
+                                        ),
+                                        const SizedBox(height: 8.0),
+                                        Text(
+                                          'Toque para incluir nova imagem',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium!
+                                              .copyWith(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
                             }
-                          },
-                        ),
+                          } else {
+                            return GestureDetector(
+                              onTap: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => pg_subscription(),
+                                  ),
+                                );
+                              },
+                              child: _imageCard(snapshot.data!),
+                            );
+                           }
+                          }
+                        },
+                       ),
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
