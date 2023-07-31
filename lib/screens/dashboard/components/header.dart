@@ -66,7 +66,7 @@ String capitalizeFirstLetter(String text) {
 class _ProfileCard extends State<ProfileCard> {
   final String _selectedItem = capitalizeFirstLetter(globalUIDUser.NOME!.split(' ')[0]); // Valor inicial selecionado
   final List<String> _dropdownItems = [
-    capitalizeFirstLetter(globalUIDUser.NOME!.split(' ')[0]),
+    capitalizeFirstLetter(globalUIDUser.NOME!.split(' ')[0] ?? ''),
     'Sair',
   ];
 
@@ -115,7 +115,7 @@ class _ProfileCard extends State<ProfileCard> {
               children: [
                 Icon(_dropdownIcons[index]), // Ícone
                 const SizedBox(width: 5), // Espaçamento entre o ícone e o texto
-                Text(value, style: const TextStyle(fontSize: 12),),
+                Text(value ?? '', style: const TextStyle(fontSize: 12),),
                 const SizedBox(width: 5),// Texto do item
               ],
             ),

@@ -115,7 +115,7 @@ class _Login extends State<Login> {
                  users.PurchaseToken = obj['PurchaseToken'];
                  users.AutoRenewing = obj['AutoRenewing'];
                  UID.USER = obj['USER'];
-                 UID.NOME = obj['NOME'];
+                 UID.NOME = obj['NOME'] ?? 'User';
                  UID.EMAIL = obj['EMAIL'];
                  UID.FONE = obj['FONE'];
                  UID.Id = obj['Id'];
