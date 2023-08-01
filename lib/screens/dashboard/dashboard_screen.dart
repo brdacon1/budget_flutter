@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/screens/dashboard/components/month_evolution.dart';
 import '../../Objetos/DADOS.dart';
 import '../../Objetos/MyBudgetDashboard.dart';
@@ -20,6 +23,13 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreen extends State<DashboardScreen> {
   final List<DADOS> _foundUsers = <DADOS>[];
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   final MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
       qtdTotal: 0,
@@ -188,6 +198,7 @@ class _DashboardScreen extends State<DashboardScreen> {
         padding: const EdgeInsets.all(defaultPadding),
         child: Column(
           children: [
+            // Restante do seu código permanece inalterado
             const Header(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,29 +207,28 @@ class _DashboardScreen extends State<DashboardScreen> {
                   flex: 5,
                   child: Column(
                     children: [
-                         MyFiles(item: _myBudgetDashboard),
+                      MyFiles(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
                         const SizedBox(height: defaultPadding),
                       if (Responsive.isMobile(context))
-                         StarageDetails(item: _myBudgetDashboard),
+                        StarageDetails(item: _myBudgetDashboard),
                       const SizedBox(height: defaultPadding),
-                            MonthEvolution(item: _monthCalculate),
+                      MonthEvolution(item: _monthCalculate),
                       const SizedBox(height: defaultPadding),
-                            RecentFiles(items: _foundUsers!),
+                      RecentFiles(items: _foundUsers!),
                     ],
                   ),
                 ),
                 if (!Responsive.isMobile(context))
                   const SizedBox(width: defaultPadding),
-                // On Mobile means if the screen is less than 850 we dont want to show it
                 if (!Responsive.isMobile(context))
-                    Expanded(
+                  Expanded(
                     flex: 2,
                     child: StarageDetails(item: _myBudgetDashboard,),
                   ),
               ],
-            )
+            ),
           ],
         ),
       ),

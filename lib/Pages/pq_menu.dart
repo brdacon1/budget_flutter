@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_priceList.dart';
 import 'package:oflite/Services/display_alert.dart';
@@ -13,15 +16,25 @@ class MenuItem {
   MenuItem({required this.icon, required this.title});
 }
 
-class MenuSelectionPage extends StatelessWidget {
+class MenuSelectionPage extends StatefulWidget {
+
+  const MenuSelectionPage({Key? key}) : super(key: key);
+
+  @override
+  State<MenuSelectionPage> createState() => _MenuSelectionPage();
+}
+
+class _MenuSelectionPage extends State<MenuSelectionPage> {
   final displayAlert = DisplayAlert();
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: 'Lista de preço'),
     MenuItem(icon: Icons.picture_as_pdf_outlined, title: 'Editar PDF'),
     MenuItem(icon: Icons.person_pin_outlined, title: 'Trocar nome de usuário'),
   ];
-
-  MenuSelectionPage({Key? key}) : super(key: key);
+  BannerAd? _bannerAd;
+  final String _adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-5106035309089315/6550502888';
 
   void navigateToPage(BuildContext context, int index) {
     switch (index) {
@@ -44,7 +57,42 @@ class MenuSelectionPage extends StatelessWidget {
         break;
     }
   }
+  void _loadAd() async {
+    BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) {},
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {},
+        // Called when an impression occurs on the ad.
+        onAdImpression: (Ad ad) {},
+      ),
+    ).load();
+  }
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
 
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     var he = MediaQuery.of(context).size.height;
@@ -98,6 +146,12 @@ class MenuSelectionPage extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: _bannerAd != null
+          ? BottomAppBar(color: bgColor,
+            height: _bannerAd!.size.height.toDouble(),
+            child: SizedBox(height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
+        ),
+      ) : null,
     );
   }
 }

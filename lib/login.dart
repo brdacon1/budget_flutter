@@ -173,8 +173,8 @@ class _Login extends State<Login> {
                 FadeAnimation(delay: 0.8,
                   child:  Image.asset(
                     'assets/login-initial-page.png',
-                    width: we * 0.4,
-                    height: 340,
+                    width: we * 0.8,
+                    height: he * 0.4,
                   ),),
                 FadeAnimation(
                   delay: 1,

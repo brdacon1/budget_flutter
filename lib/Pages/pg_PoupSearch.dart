@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/Pages/pg_TabOrcamento.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
@@ -38,10 +41,15 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   bool checkBoxAppear = false;
   var displayAlert = DisplayAlert();
   convert_coin moneyConvert = convert_coin();
+  BannerAd? _bannerAd;
+  final String _adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-5106035309089315/6550502888';
 
   @override
   initState() {
     try {
+      _loadAd();
       setState(() async {
         await getInformationOrcamento();
         setState(() {});
@@ -557,6 +565,32 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
     }
   }
 
+  void _loadAd() async {
+    BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) {},
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {},
+        // Called when an impression occurs on the ad.
+        onAdImpression: (Ad ad) {},
+      ),
+    ).load();
+  }
+
   @override
   Widget build(BuildContext context) {
     var he = MediaQuery.of(context).size.height;
@@ -974,6 +1008,13 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           ),
         ],
       ),
+      bottomNavigationBar: _bannerAd != null
+          ? BottomAppBar(
+           color: bgColor,
+           height: _bannerAd!.size.height.toDouble(),
+           child: SizedBox(height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
+        ),
+      ) : null, // Se o banner não estiver carregado ou não for exibido, não mostrar o bottomNavigationBar
     );
   }
 }

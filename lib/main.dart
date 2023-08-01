@@ -3,6 +3,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_principalTabApp.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
@@ -14,6 +15,7 @@ import 'constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   await Firebase.initializeApp();
   runApp(MyApp());
 }
