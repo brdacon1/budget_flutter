@@ -1,6 +1,7 @@
 library oflite.globals;
 
 String? IDORCAMENTO;
+String? IDRECIBO;
 String? ID;
 String? DATA;
 String? RUA;

@@ -6,6 +6,7 @@ import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import '../Objetos/ObjectListItens.dart';
 import '../Objetos/ObjectListObservationPDF.dart';
+import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjetoUIDUser.dart';
 import '../Objetos/Owner.dart';
 
@@ -241,7 +242,35 @@ class Db{
       rethrow;
     }
   }
+  Future<void> savePaymentCustomer(ObjectPagamentosCliente payment) async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
+        .add(payment.toMap());
+  }
 
+  Future<void> updatePaymentCustomer(ObjectPagamentosCliente orcamento) async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
+        .doc(orcamento.id)
+        .update(orcamento.toMap()); // Certifique-se que sua classe ObjectPagamentosCliente tenha um método toMap() que converte o objeto para um Map.
+  }
+
+
+  Future<List<ObjectPagamentosCliente>> getListPaymentCustomer(String buscaUser) async {
+    var group = await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
+        .get();
+
+    var yourModels = group.docs.map((doc) => ObjectPagamentosCliente.fromMap(doc.data())).toList();
+    return yourModels;
+  }
+
+  Future<void> deletePaymentCustomer(String orcamento) async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
+        .doc(orcamento)
+        .delete();
+  }
 
   Future<Owner> getInformationEnterprise() async {
     try {

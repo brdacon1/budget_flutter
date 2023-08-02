@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_listComment.dart';
+import 'package:oflite/Pages/pg_listRecibos.dart';
 import 'package:oflite/Services/display_alert.dart';
 import '../Objetos/DADOS.dart';
 import '../anmition/fadeanimation.dart';
@@ -45,7 +46,7 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const PgEditPDF()),
+              builder: (context) => ListRecibosPage(item: widget.item)),
         );
         break;
     }
@@ -86,6 +87,7 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
     _bannerAd?.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
