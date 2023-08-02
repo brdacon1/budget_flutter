@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/Pages/pg_PoupSearch.dart';
-import 'package:oflite/Pages/pg_priceList.dart';
 import 'package:oflite/Pages/pq_menu.dart';
 import 'package:oflite/screens/dashboard/dashboard_screen.dart';
 import '../constants.dart';
@@ -56,8 +55,9 @@ class _pg_PrincipalTabAppState extends State<pg_PrincipalTabApp> {
           canvasColor: secondaryColor, // Define a cor de fundo do BottomNavigationBar
         ),
         child: BottomNavigationBar(
+          showUnselectedLabels: true,
           selectedItemColor: Colors.cyan[50],
-          selectedLabelStyle: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold),
+          selectedLabelStyle: const TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold),
           unselectedItemColor: Colors.grey,
           onTap: onTabTapped,
           currentIndex: _currentIndex,

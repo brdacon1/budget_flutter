@@ -1,14 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_listComment.dart';
-import 'package:oflite/Pages/pg_priceList.dart';
 import 'package:oflite/Services/display_alert.dart';
-
 import '../Objetos/DADOS.dart';
+import '../anmition/fadeanimation.dart';
 import '../constants.dart';
 
 class MenuItem {
@@ -91,24 +88,50 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
   }
   @override
   Widget build(BuildContext context) {
+    var we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          SizedBox(height: he * 0.04),
-          SizedBox(height: he * 0.03),
-          Container(
-            margin: const EdgeInsets.only(right: 260.0),
-            child: Text(
-              "Opções",
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-                letterSpacing: 2,
+          SizedBox(
+            height: he * 0.07,
+          ),
+          GestureDetector(
+            onTap: (){
+              Navigator.pop(context, true);
+            },
+            child: Container(
+              alignment: Alignment.topLeft,
+              margin: EdgeInsets.only(left: we * 0.040),
+              child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
+            ),
+          ),
+          SizedBox(
+            height: he * 0.03,
+          ),
+          FadeAnimation(
+            delay: 1,
+            child: Container(
+              alignment: Alignment.topLeft,
+              margin: EdgeInsets.only(left: we * 0.05),
+              child: Text("Opções",style: GoogleFonts.heebo(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 26,
+                  letterSpacing: 2
               ),
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.topLeft,
+            margin: EdgeInsets.only(left: we * 0.05),
+            child: Text("Opções do orçamento",style: GoogleFonts.heebo(
+                color: Colors.grey,
+                letterSpacing: 1),
             ),
           ),
           Expanded(

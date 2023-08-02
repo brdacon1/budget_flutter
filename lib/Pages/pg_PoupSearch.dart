@@ -832,7 +832,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => PgTabOrcamento(
+                                          builder: (context) => pg_TabOrcamento(
                                               item: getFilteredData()[index]),
                                         ),
                                       ).then((value) => setState(() {
@@ -981,7 +981,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => PgTabOrcamento(item: novo)),
+                        builder: (context) => pg_TabOrcamento(item: novo)),
                   ).then((value) => setState(() {
                     try {
                       setState(() async {
