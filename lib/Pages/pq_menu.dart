@@ -32,9 +32,7 @@ class _MenuSelectionPage extends State<MenuSelectionPage> {
     MenuItem(icon: Icons.person_pin_outlined, title: 'Trocar nome de usuário'),
   ];
   BannerAd? _bannerAd;
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-5106035309089315/6550502888';
+  final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
 
   void navigateToPage(BuildContext context, int index) {
     switch (index) {

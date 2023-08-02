@@ -42,9 +42,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   var displayAlert = DisplayAlert();
   convert_coin moneyConvert = convert_coin();
   BannerAd? _bannerAd;
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-5106035309089315/6550502888';
+  final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
 
   @override
   initState() {
@@ -834,7 +832,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => pg_TabOrcamento(
+                                          builder: (context) => PgTabOrcamento(
                                               item: getFilteredData()[index]),
                                         ),
                                       ).then((value) => setState(() {
@@ -983,7 +981,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => pg_TabOrcamento(item: novo)),
+                        builder: (context) => PgTabOrcamento(item: novo)),
                   ).then((value) => setState(() {
                     try {
                       setState(() async {
