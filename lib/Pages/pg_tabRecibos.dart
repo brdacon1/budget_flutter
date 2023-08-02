@@ -8,15 +8,15 @@ import '../Objetos/DADOS.dart';
 import '../constants.dart';
 import 'ListaItensOrcamento.dart';
 
-class pg_TabOrcamento extends StatefulWidget {
+class PageTabRecibos extends StatefulWidget {
   final DADOS item;
-  const pg_TabOrcamento({Key? key, required this.item}) : super(key: key);
+  const PageTabRecibos({Key? key, required this.item}) : super(key: key);
 
   @override
-  _pg_TabOrcamentoState createState() => _pg_TabOrcamentoState();
+  _PageTabRecibos createState() => _PageTabRecibos();
 }
 
-class _pg_TabOrcamentoState extends State<pg_TabOrcamento> {
+class _PageTabRecibos extends State<PageTabRecibos> {
   int _currentIndex = 0;
   double we = 0;
 
