@@ -2,6 +2,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,7 +10,7 @@ import '../Objetos/ObjectListItens.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:extended_masked_text/extended_masked_text.dart';
-
+import '../Objetos/ObjectPagamentosCliente.dart';
 import '../constants.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -26,24 +27,25 @@ TextEditingController _unidadeText = TextEditingController();
 TextEditingController _qtdText = TextEditingController();
 TextEditingController _descricaoText = TextEditingController();
 
-class pg_PopUp extends StatefulWidget {
-  final ObjectListItens item;
-  const pg_PopUp({Key? key, required this.item}) : super(key: key);
+class PgCreatePayment extends StatefulWidget {
+  final ObjectPagamentosCliente item;
+  const PgCreatePayment({Key? key, required this.item}) : super(key: key);
   @override
-  _pg_PopUp createState() => _pg_PopUp();
+  _PgCreatePayment createState() => _PgCreatePayment();
 }
 
-class _pg_PopUp extends State<pg_PopUp> {
+class _PgCreatePayment extends State<PgCreatePayment> {
   Color enabledtxt = Colors.white;
+  convert_coin moneyConvert = convert_coin();
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
   String? titlePage;
   bool fieldVisible = false;
-  ObjectListItens ITENS = ObjectListItens();
+  ObjectPagamentosCliente ITENS = ObjectPagamentosCliente();
   final controller = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   final controllerTotal = MoneyMaskedTextController(leftSymbol: 'R\$ ');
-  convert_coin moneyConvert = convert_coin();
+  var db = Db();
 
   @override
   initState() {
@@ -54,94 +56,27 @@ class _pg_PopUp extends State<pg_PopUp> {
         {
           nameButton = 'ATUALIZAR';
           titlePage = 'Editar item';
-          _categoriaText.text = widget.item.CATEGORIA.toString();
-          _unidadeText.text = widget.item.MEDIDA.toString();
-          _qtdText.text = widget.item.QTD.toString();
+          _categoriaText.text = widget.item.METODO.toString();
+          _qtdText.text = widget.item.QTDDIV.toString();
           controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
           _descricaoText.text = widget.item.DESCRICAO.toString();
-          print(widget.item.IDPRODUCT.toString());
-          if(widget.item.IDPRODUCT.toString() == 'null')
-          {
-            fieldVisible = false;
-          }
-          else
-          {
-            fieldVisible = true;
-          }
+
+          fieldVisible = true;
         }
         else
         {
           nameButton = 'SALVAR';
           titlePage = 'Criar item';
-          _categoriaText.text = 'Serviços';
+          _categoriaText.text = 'Dinheiro';
           _unidadeText.text = '';
-          _qtdText.text = '';
+          _qtdText.text ?? '1';
           controller.text = '';
           _descricaoText.text = '';
-          fieldVisible = false;
+          fieldVisible = true;
         }
       });
     }
     catch (e){
-    }
-  }
-
-  Future <void> UpadateItensInPriceList(ObjectListItens itens) async {
-    try{
-            await FirebaseFirestore.instance
-                  .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/PRICELIST")
-                  .doc(widget.item.id)
-                  .update({'CATEGORIA': itens.CATEGORIA,
-                  'DESCRICAO' : itens.DESCRICAO,
-                  'PRECO' : itens.PRECO,
-                  'QTD' : itens.QTD,
-                  'MEDIDA' : itens.MEDIDA,
-                  'TOTAL' : itens.TOTAL,
-                  'COLOR': 'false',
-                  'IDPRODUCT': itens.IDPRODUCT,}).then((value) async {});
-    } catch (e) {
-      notificationError(context, "Erro!", "Não foi possível atualizar o item em sua lista de preço");
-    }
-  }
-
-  Future <void> UpdateItensOrcamentoList(ObjectListItens itens) async {
-    try{
-          await FirebaseFirestore.instance
-                .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/ITENS")
-                .doc(widget.item.IDPRODUCT)
-                .update({'CATEGORIA': itens.CATEGORIA ?? 'Serviços',
-                'DESCRICAO' : itens.DESCRICAO,
-                'PRECO' : itens.PRECO,
-                'QTD' : itens.QTD,
-                'MEDIDA' : itens.MEDIDA,
-                'TOTAL' : itens.TOTAL,
-                'COLOR': widget.item.checkBox,
-                'IDPRODUCT': widget.item.IDPRODUCT,}).then((value) async {});
-    }
-    catch (e) {
-      notificationError(context, "Erro!", "Não foi possível atualizar o item na lista de orçamentos.");
-    }
-  }
-
-  Future <void> SaveItensInPriceList(ObjectListItens itens) async {
-
-    try{
-      await FirebaseFirestore.instance
-          .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/PRICELIST")
-          .add({'CATEGORIA': itens.CATEGORIA,
-        'DESCRICAO' : itens.DESCRICAO,
-        'PRECO' : itens.PRECO,
-        'QTD' : itens.QTD,
-        'MEDIDA' : itens.MEDIDA,
-        'TOTAL' : itens.TOTAL,
-        'COLOR': 'false',
-        'IDPRODUCT': itens.IDPRODUCT,
-      }).then((value) async {
-
-      }).then((value) {
-      });
-    }catch (e){
-      notificationError(context, "Erro!", "Não foi possível adicionar um novo item em sua lista de preço");
     }
   }
 
@@ -248,26 +183,23 @@ class _pg_PopUp extends State<pg_PopUp> {
                   child: Container(
                     alignment: Alignment.topLeft,
                     margin: EdgeInsets.only(left: we * 0.05),
-                    child: Text("Cadastro de produto ou serviço",style: GoogleFonts.heebo(
+                    child: Text("Cadastro do pagamento",style: GoogleFonts.heebo(
                         color: Colors.grey,
                         letterSpacing: 1),
                     ),
                   ),
                 ),
-                SizedBox(
-                    height: he * 0.02
-                ),
                 Expanded(
                   child: ListView(
-                        children: <Widget>[
-                          SizedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                              child: Theme(
-                                data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
-                                child: ExpansionTileCard(
-                                  initiallyExpanded: true,
-                                  expandedTextColor: bgColor,
+                      children: <Widget>[
+                        SizedBox(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 0),
+                            child: Theme(
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              child: ExpansionTileCard(
+                                initiallyExpanded: true,
+                                expandedTextColor: bgColor,
                                 baseColor: Colors.cyan[50],
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
@@ -279,7 +211,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                     fontSize: 15,
                                     letterSpacing: 1),
                                 ),
-                                subtitle: Text("Dados do produto ou serviço",style: GoogleFonts.heebo(
+                                subtitle: Text("Dados do pagamento",style: GoogleFonts.heebo(
                                     color: bgColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
@@ -301,13 +233,13 @@ class _pg_PopUp extends State<pg_PopUp> {
                                         enableInteractiveSelection: true,
                                         controller: _categoriaText,
                                         onTap: () async {
-                                          List<String> values = ['Produtos', 'Serviços'];
+                                          List<String> values = ['Crédito', 'Débito', 'Dinheiro'];
                                           await showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
                                               return SimpleDialog(
                                                 backgroundColor: Colors.cyan[50],
-                                                title: const Text("Selecione categoria", style: TextStyle(color: Colors.black),),
+                                                title: const Text("Tipo do pagamento", style: TextStyle(color: Colors.black),),
                                                 children: [
                                                   SizedBox(
                                                     width: MediaQuery.of(context).size.width,
@@ -344,45 +276,12 @@ class _pg_PopUp extends State<pg_PopUp> {
                                           border:InputBorder.none,
                                           prefixIcon: Icon(Icons.list_alt,color: selected == Gender.categoriaText ? enabledtxt : deaible),
                                           suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.categoriaText ? enabledtxt : deaible,),
-                                          hintText: 'Definir categoria',
+                                          hintText: 'Definir pagamento',
                                           hintStyle: TextStyle(
                                             color:  selected == Gender.categoriaText ? enabledtxt : deaible,
                                           ),
                                         ),
                                         style:  TextStyle(color:  selected == Gender.categoriaText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  FadeAnimation(
-                                    delay: 1,
-                                    child: Container(
-                                      width: we * 0.80,
-                                      height:he * 0.071,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.unidadeText ?  bgColor : bgColor,
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child:  TextField(
-                                        controller: _unidadeText,
-                                        onTap: (){
-                                          setState(() {
-                                            selected = Gender.unidadeText;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          enabledBorder: InputBorder.none,
-                                          border:InputBorder.none,
-                                          prefixIcon: Icon(Icons.analytics_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
-                                          hintText: 'Unidade de medida',
-                                          hintStyle: TextStyle(
-                                            color:  selected == Gender.unidadeText ? enabledtxt : deaible,
-                                          ),
-                                        ),
-                                        style:  TextStyle(color:  selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -447,7 +346,7 @@ class _pg_PopUp extends State<pg_PopUp> {
                                             enabledBorder: InputBorder.none,
                                             border:InputBorder.none,
                                             prefixIcon: Icon(Icons.calculate_outlined,color: selected == Gender.qtdText ? enabledtxt : deaible),
-                                            hintText: 'Quantidade',
+                                            hintText: 'Parcelas',
                                             hintStyle: TextStyle(
                                               color:  selected == Gender.qtdText ? enabledtxt : deaible,
                                             ),
@@ -458,107 +357,87 @@ class _pg_PopUp extends State<pg_PopUp> {
                                     ),
                                   ),
                                   Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
-                                     child: Container(
-                                       width: we * 0.80,
-                                       height: he * 0.30,
-                                       decoration: BoxDecoration(
-                                         borderRadius: BorderRadius.circular(20.0),
-                                         color: selected == Gender.descricaoText ? bgColor : bgColor,
-                                       ),
-                                       padding: const EdgeInsets.all(8.0),
-                                       child: TextField(
-                                         controller: _descricaoText,
-                                         keyboardType: TextInputType.multiline,
-                                         maxLines: 50,
-                                         onTap: () {
-                                           setState(() {
-                                             selected = Gender.descricaoText;
-                                           });
-                                         },
-                                         decoration: const InputDecoration(
-                                           enabledBorder: InputBorder.none,
-                                           border: InputBorder.none,
-                                           hintText: 'Escreva a descrição do produto ou serviço...',
-                                           hintStyle: TextStyle(color: Colors.grey),
-                                         ),
-                                         style: TextStyle(
-                                           color: selected == Gender.descricaoText ? enabledtxt : deaible,
-                                           fontWeight: FontWeight.bold,
-                                         ),
-                                       ),
-                                     ),
+                                    child: Container(
+                                      width: we * 0.80,
+                                      height: he * 0.30,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        color: selected == Gender.descricaoText ? bgColor : bgColor,
+                                      ),
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        controller: _descricaoText,
+                                        keyboardType: TextInputType.multiline,
+                                        maxLines: 50,
+                                        onTap: () {
+                                          setState(() {
+                                            selected = Gender.descricaoText;
+                                          });
+                                        },
+                                        decoration: const InputDecoration(
+                                          enabledBorder: InputBorder.none,
+                                          border: InputBorder.none,
+                                          hintText: 'Escreva a descrição do pagamento...',
+                                          hintStyle: TextStyle(color: Colors.grey),
+                                        ),
+                                        style: TextStyle(
+                                          color: selected == Gender.descricaoText ? enabledtxt : deaible,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
                                   )
                                 ],
                               ),
-                              ),
                             ),
                           ),
-                          Padding(padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                  child: TextButton(
-                                    onPressed: () async {
-                                      double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                      if(nameButton == 'SALVAR')
-                                      {
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = 0;
-                                        await SaveItensInPriceList(ITENS).then((value) => {
-                                          notification(context, "Feito!", "Item adicionado com sucesso!"),
-                                        });
-                                      }
-                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
-                                      {
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = 0;
-                                        await UpadateItensInPriceList(ITENS).then((value) => {
-                                          notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                        });
-                                      }
-                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
-                                      {
-                                        double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
-                                        controllerTotal.text = totalPrice.toStringAsFixed(2);
-                                        ITENS.TOTAL = totalPrice;
-                                        await UpdateItensOrcamentoList(ITENS).then((value) => {
-                                          notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                        });
-                                      }
+                        ),
+                        Padding(padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
+                          child: TextButton(
+                            onPressed: () async {
+                              double cleanAmount = moneyConvert.convertFromString(controller.text);
+                              if(nameButton == 'SALVAR')
+                              {
+                                ITENS.METODO = _categoriaText.text;
+                                ITENS.DESCRICAO = _descricaoText.text;
+                                ITENS.PRECO = cleanAmount;
+                                await db.savePaymentCustomer(ITENS).then((value) => {
+                                      notification(context, "Feito!", "Pagamento criado com sucesso!"),
+                                });
 
-                                    },
-                                    style:  TextButton.styleFrom(
-                                        backgroundColor: buttonColor,
-                                        padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(30.0)
-                                        )
-                                    ),
-                                    child: Text(nameButton!,style: GoogleFonts.heebo(
-                                      color: Colors.black,
-                                      letterSpacing: 0.5,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    ),
-                                  ),
+                              }
+                              else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
+                              {
+                                ITENS.METODO = _categoriaText.text;
+                                ITENS.DESCRICAO = _descricaoText.text;
+                                ITENS.PRECO = cleanAmount;
+                                await db.updatePaymentCustomer(ITENS).then((value) => {
+                                  notification(context, "Feito!", "Pagamento atualizado com sucesso!"),
+                                });
+                              }
+                            },
+                            style:  TextButton.styleFrom(
+                                backgroundColor: buttonColor,
+                                padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0)
+                                )
+                            ),
+                            child: Text(nameButton!,style: GoogleFonts.heebo(
+                              color: Colors.black,
+                              letterSpacing: 0.5,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            ),
                           ),
-                          SizedBox(
-                            height: he * 0.3,
-                          ),
-                        ]
-                    ),
+                        ),
+                        SizedBox(
+                          height: he * 0.3,
+                        ),
+                      ]
                   ),
-
+                ),
               ]
           ),
         ),

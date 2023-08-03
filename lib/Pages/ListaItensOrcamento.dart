@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
-import 'package:oflite/Pages/pg_PopUp.dart';
+import 'package:oflite/Pages/pg_createProduct.dart';
 import 'package:oflite/Pages/pg_priceList.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:badges/badges.dart' as badges;
@@ -553,7 +553,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => pg_PopUp(item: getFilteredData()[index]),
+                                              builder: (context) => PgCreateProduct(item: getFilteredData()[index]),
                                             ),
                                           ).then((value) async => {
                                             await getListItens(),

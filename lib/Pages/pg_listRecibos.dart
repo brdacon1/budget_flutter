@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:oflite/Objetos/ObjectObservation.dart';
+import 'package:oflite/Pages/pg_createPayment.dart';
 import 'package:oflite/constants.dart';
+import '../Models/convert_coin.dart';
 import '../Objetos/DADOS.dart';
+import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Services/display_alert.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
+import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 
 TextEditingController _descricaoText = TextEditingController();
 
@@ -24,17 +26,17 @@ enum Gender{
 }
 
 class _ListRecibosPage extends State<ListRecibosPage> {
-  var observation = <ObjectObservation>[];
   var displayAlert = DisplayAlert();
-  var foundObservation = <ObjectObservation>[];
-  var deleteItems = <ObjectObservation>[];
-  ObjectObservation novo = ObjectObservation();
-  Color enabled = const Color(0xFF827F8A);
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.grey;
+  var foundPayment = <ObjectPagamentosCliente>[];
+  var deleteItems = <ObjectPagamentosCliente>[];
+  convert_coin moneyConvert = convert_coin();
   Gender? selected;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
+  Color enabled = const Color(0xFF827F8A);
+  Color enabledtxt = Colors.white;
+  Color deaible = Colors.grey;
+
 
   @override
   initState() {
@@ -45,7 +47,6 @@ class _ListRecibosPage extends State<ListRecibosPage> {
     }
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -108,11 +109,12 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 150, left: 15, right: 15, top: 10),
-                  itemCount: foundObservation.length,
+                  itemCount: foundPayment.length,
                   itemBuilder: (context, index) {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Theme(
+                      child:
+                      Theme(
                         data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
                         child: ExpansionTileCard(
                           expandedTextColor: bgColor,
@@ -120,10 +122,10 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                           expandedColor: Colors.blue[50],
                           leading: const CircleAvatar(
                               backgroundColor: bgColor,
-                              child: Icon(Icons.comment, color: Colors.white,)),
+                              child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
                           title:
                           Text(
-                            "${foundObservation[index].observacao}",
+                            foundPayment[index].DESCRICAO!,
                             maxLines: 2,
                             style: const TextStyle(
                               color: bgColor,
@@ -133,7 +135,7 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                             ),
                           ),
                           subtitle: Text(
-                            "Data: ${foundObservation[index].data}",
+                            "Preço: ${moneyConvert.convertFromDouble(foundPayment[index].PRECO!)}",
                             style: const TextStyle(
                               color: bgColor,
                               letterSpacing: 0.5,
@@ -153,7 +155,41 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                                   vertical: 5.0,
                                 ),
                                 child: Text(
-                                  "Comentário: ${foundObservation[index].observacao}",
+                                  "Método do pagamento: ${foundPayment[index].METODO}",
+                                  style: const TextStyle(
+                                    color: bgColor,
+                                    letterSpacing: 0.5,
+                                    fontSize: 12.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0,
+                                  vertical: 5.0,
+                                ),
+                                child: Text(
+                                  "Total: ${moneyConvert.convertFromDouble(foundPayment[index].TOTAL!)}",
+                                  style: const TextStyle(
+                                    color: bgColor,
+                                    letterSpacing: 0.5,
+                                    fontSize: 12.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0,
+                                  vertical: 5.0,
+                                ),
+                                child: Text(
+                                  "Quantidade: ${foundPayment[index].QTDDIV}",
                                   style: const TextStyle(
                                     color: bgColor,
                                     letterSpacing: 0.5,
@@ -170,7 +206,7 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                                   LayoutBuilder(
                                     builder: (BuildContext context, BoxConstraints constraints) {
                                       return Visibility(
-                                        visible: !foundObservation[index].checkbox!,
+                                        visible: true,
                                         maintainSize: true,
                                         maintainAnimation: true,
                                         maintainState: true,
@@ -184,12 +220,8 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                                                 borderRadius: BorderRadius.circular(5.0),
                                               ),
                                             ),
-                                            onPressed: () async {
-                                              deleteItems.add(foundObservation[index]);
+                                            onPressed: () {
 
-                                              deleteItems.clear();
-                                              deleteVisible = false;
-                                              checkBoxAppear = false;
                                               setState(() {});
                                             },
                                             child: const Column(
@@ -217,8 +249,15 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
                                           ),
-                                          onPressed: () async {
-
+                                          onPressed: () {
+                                            /*Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => PgCreateProduct(item: getFilteredData()[index]),
+                                              ),
+                                            ).then((value) async => {
+                                              setState(() {}),
+                                            });*/
                                           },
                                           child: const Column(
                                             children: <Widget>[
@@ -246,12 +285,21 @@ class _ListRecibosPage extends State<ListRecibosPage> {
           ]
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          var newObservation = ObjectObservation();
-          newObservation.checkbox = false;
-          newObservation.id = '';
-          newObservation.data = '';
-          newObservation.uid = '';
+        onPressed: () async {
+          ObjectPagamentosCliente ITENS = ObjectPagamentosCliente();
+          ITENS.METODO = '';
+          ITENS.id = '';
+          ITENS.QTDDIV = 1;
+          ITENS.TOTAL = 0;
+          ITENS.DESCRICAO = 'null';
+          ITENS.PRECO = 0;
+          Orcamento.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PgCreatePayment(item: ITENS)),
+          ).then((value) async => {
+            setState(() {}),
+          });
         },
         backgroundColor: buttonColor,
         child: const Icon(

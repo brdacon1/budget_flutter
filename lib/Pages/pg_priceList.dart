@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/convert_coin.dart';
-import 'package:oflite/Pages/pg_PopUp.dart';
+import 'package:oflite/Pages/pg_createProduct.dart';
 import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -734,7 +734,7 @@ class _pg_priceList extends State<pg_priceList>  {
                           onTap: () async {
                             await Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => pg_PopUp(item: getFilteredData()[index])),
+                              MaterialPageRoute(builder: (context) => PgCreateProduct(item: getFilteredData()[index])),
                             ).then((value) async => {
                               await getListItens(),
                               setState(() {}),
@@ -892,10 +892,9 @@ class _pg_priceList extends State<pg_priceList>  {
                 });
 
               } else{
-
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => pg_PopUp(item: novo)),
+                  MaterialPageRoute(builder: (context) => PgCreateProduct(item: novo)),
                 ).then((value) async => {
                   await getListItens(),
                   setState(() {}),

@@ -4,9 +4,9 @@ class ObjectPagamentosCliente {
   String? id;
   String? METODO;
   String? DESCRICAO;
-  String? PRECO;
-  String? QTDDIV;
-  bool? selectProduct;
+  double? PRECO;
+  double? QTDDIV;
+  double? TOTAL;
 
   ObjectPagamentosCliente({
     this.id,
@@ -14,7 +14,7 @@ class ObjectPagamentosCliente {
     this.DESCRICAO,
     this.PRECO,
     this.QTDDIV,
-    this.selectProduct,
+    this.TOTAL,
   });
 
   // Método para converter um objeto Map em um objeto ObjectPagamentosCliente
@@ -25,7 +25,7 @@ class ObjectPagamentosCliente {
       DESCRICAO: map['DESCRICAO'],
       PRECO: map['PRECO'],
       QTDDIV: map['QTDDIV'],
-      selectProduct: map['selectProduct'],
+      TOTAL: map['TOTAL'],
     );
   }
 
@@ -37,7 +37,7 @@ class ObjectPagamentosCliente {
       'DESCRICAO': DESCRICAO,
       'PRECO': PRECO,
       'QTDDIV': QTDDIV,
-      'selectProduct': selectProduct,
+      'TOTAL': TOTAL,
     };
   }
 }
