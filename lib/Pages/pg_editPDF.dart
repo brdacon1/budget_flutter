@@ -187,6 +187,13 @@ class _PgEditPDF extends State<PgEditPDF> {
     fileContentFuture = initialData();
   }
 
+  // Function to update the fileContentFuture
+  void _updateFileContentFuture() {
+    setState(() {
+      fileContentFuture = initialData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
@@ -240,9 +247,9 @@ class _PgEditPDF extends State<PgEditPDF> {
                 child: SizedBox(
                   child: Column(
                       children: <Widget>[
-                      SizedBox(
+                        SizedBox(
                           height: he * 0.02,
-                      ),
+                        ),
                     FutureBuilder<Uint8List?>(
                       future: fileContentFuture,
                       builder: (context, snapshot) {
@@ -269,9 +276,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                     ),
                                   ).then((value) {
                                     // Atualizar o FutureBuilder quando voltar da tela de edição
-                                    setState(() {
-                                      fileContentFuture = initialData();
-                                    });
+                                    _updateFileContentFuture();
                                   });
                                 },
                                 child: _imageCard(snapshot.data!),
@@ -291,9 +296,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                                       ),
                                     ).then((value) {
                                       // Atualizar o FutureBuilder quando voltar da tela de edição
-                                      setState(() {
-                                        fileContentFuture = initialData();
-                                      });
+                                      _updateFileContentFuture();
                                     });
                                   },
                                   child: Align(
@@ -324,21 +327,43 @@ class _PgEditPDF extends State<PgEditPDF> {
                               );
                             }
                           } else {
-                            return GestureDetector(
-                              onTap: () async {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => pg_subscription(),
+                            if (snapshot.data != null) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => pg_subscription(),
+                                    ),
+                                  );
+                                },
+                                child: _imageCard(snapshot.data!),
+                              );
+                            } else {
+                              // Display a fallback image from resources when Firebase image is null
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 40),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => pg_subscription(),
+                                      ),
+                                    );
+                                  },
+                                  child: Image.asset(
+                                    'assets/login-initial-page.png', // Replace with your resource image path
+                                    width: 100, // Replace with desired width
+                                    height: 100, // Replace with desired height
                                   ),
-                                );
-                              },
-                              child: _imageCard(snapshot.data!),
-                            );
-                           }
+                                ),
+                              );
+                            }
                           }
-                        },
-                       ),
+                        }
+                      },
+                    ),
                         SizedBox(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -113,7 +112,7 @@ class _Login extends State<Login> {
                  users.IdPay = obj['IdPay'];
                  users.ProductId = obj['ProductId'];
                  users.PurchaseToken = obj['PurchaseToken'];
-                 users.AutoRenewing = obj['AutoRenewing'];
+                 users.AutoRenewing = obj['AutoRenewing'] ?? false;
                  UID.USER = obj['USER'];
                  UID.NOME = obj['NOME'] ?? 'User';
                  UID.EMAIL = obj['EMAIL'];
@@ -122,7 +121,7 @@ class _Login extends State<Login> {
                  UID.IdPay = obj['IdPay'];
                  UID.ProductId = obj['ProductId'];
                  UID.PurchaseToken = obj['PurchaseToken'];
-                 UID.AutoRenewing = obj['AutoRenewing'];
+                 UID.AutoRenewing = obj['AutoRenewing'] ?? false;
 
                  resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
                  if(resultSubscription!.isNotEmpty){
@@ -133,7 +132,7 @@ class _Login extends State<Login> {
 
                    Map<String, dynamic> data = jsonDecode(latestSubscription!.transactionReceipt ?? '');
                    bool acknowledgedValue = data['acknowledged'];
-                   UID.AutoRenewing = data['autoRenewing'];
+                   UID.AutoRenewing = data['autoRenewing'] ?? false;
                    UID.PurchaseToken = data['purchaseToken'];
                    UID.ProductId = data['productId'];
 
