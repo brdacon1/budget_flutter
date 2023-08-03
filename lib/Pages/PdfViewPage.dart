@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../Models/Db.dart';
 import '../Models/PDFGenerate.dart';
+import '../Services/display_alert.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:share/share.dart';
 
@@ -20,6 +21,7 @@ class PdfViewPage extends StatefulWidget {
 class _PdfViewPageState extends State<PdfViewPage> {
   String? _fileBytes;
   convert_coin moneyConvert = convert_coin();
+  var displayAlert = DisplayAlert();
 
   @override
   void initState() {
@@ -66,7 +68,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
           });
           setState(() {});
         } else {
-          // Handle empty list
+          await displayAlert.notificationError(context, "Erro!", "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
         }
       }
     } catch (ex) {}

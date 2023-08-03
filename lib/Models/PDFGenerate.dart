@@ -36,7 +36,7 @@ class PDFGenerate {
       document.pageSettings.margins.bottom = 50;
       PdfPage page = document.pages.add();
       PdfGraphics graphics = page.graphics;
-
+      double sizeWithImage = 0;
       ///Start image
       if (obs3.fotoId!.isNotEmpty) {
         try {
@@ -62,16 +62,18 @@ class PDFGenerate {
             final double originalRatio = image.width / image.height;
             final double sizeH = image.height.toDouble();
             final double sizeW = image.width.toDouble();
-
             Rect bounds;
 
             if (sizeH == sizeW) {
+              sizeWithImage = 80 + 10;
               bounds = const Rect.fromLTWH(0, 0, 80, 80);
               page.graphics.drawImage(image, Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height));
             } else if (sizeH > sizeW) {
+              sizeWithImage = 60 + 10;
               bounds = const Rect.fromLTWH(0, 0, 60, 80);
               page.graphics.drawImage(image, Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height));
             } else if (sizeH < sizeW) {
+              sizeWithImage = (80 * originalRatio) + 10;
               bounds = Rect.fromLTWH(0, 0, 80 * originalRatio, 80);
               page.graphics.drawImage(image, Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height));
             }
@@ -89,13 +91,67 @@ class PDFGenerate {
         alignment: PdfTextAlignment.right,
       );
 
-      graphics.drawString(
-        '${obs3.empresa}\nCNPJ: ${obs3.cnpj}\nE-mail: ${obs3.email}\nTelefone: ${obs3.fone}\n${obs3.rua}\n${obs3.bairro}\n${obs3.city}\nCEP: ${obs3.cep}',
-        font,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(0, 0, page.getClientSize().width, page.getClientSize().height),
-        format: format,
-      );
+      PdfGrid pdfGrid = PdfGrid();
+      pdfGrid.columns.add(count: 2);
+      PdfGridRow header = pdfGrid.headers.add(1)[0];
+      header.cells[0].value = 'Informação';
+      pdfGrid.headers.clear();
+      PdfGridRow row;
+
+      if (obs3?.empresa?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.empresa;
+      }
+
+      if (obs3?.cnpj?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.cnpj;
+      }
+
+      if (obs3?.email?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.email;
+      }
+
+      if (obs3?.fone?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.fone;
+      }
+
+      if (obs3?.rua?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.rua!;
+      }
+
+      if (obs3?.city?.isNotEmpty ?? false) {
+        row = pdfGrid.rows.add();
+        row.cells[0].value = obs3.city!;
+      }
+
+      PdfGridCellStyle style = PdfGridCellStyle();
+      style.borders.all = PdfPens.transparent;
+
+      for (int i = 0; i < pdfGrid.rows.count; i++) {
+        PdfGridRow row = pdfGrid.rows[i];
+          if(i == 0)
+          {
+             row.style.font = PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+          }
+        else{
+          row.style.font = PdfStandardFont(PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular);
+        }
+        for (int j = 0; j < row.cells.count; j++) {
+          PdfGridCell cell = row.cells[j];
+
+          cell.style = style;
+        }
+      }
+
+      PdfGridCellStyle headerStyle = PdfGridCellStyle(font: font, textBrush: PdfBrushes.black, textPen: PdfPens.white);
+      pdfGrid.headers.applyStyle(headerStyle);
+      pdfGrid.columns[0].width = 180;
+      pdfGrid.columns[1].width = 360;
+      pdfGrid.draw(graphics: page.graphics, bounds: Rect.fromLTWH(sizeWithImage, 0, page.getClientSize().width, page.getClientSize().height));
 
       format = PdfStringFormat(
         textDirection: PdfTextDirection.rightToLeft,

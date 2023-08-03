@@ -30,7 +30,7 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
   final displayAlert = DisplayAlert();
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.comment_outlined, title: 'Inserir comentários'),
-    MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),
+    /*MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),*/
   ];
   BannerAd? _bannerAd;
   final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
@@ -44,13 +44,13 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
               builder: (context) => ListCommentPage(item: widget.item,)),
         );
         break;
-      case 1:
+      /*case 1:
         Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => PageTabRecibos(item: widget.item)),
         );
-        break;
+        break;*/
     }
   }
   void _loadAd() async {
