@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_contacts/properties/name.dart';
 import 'package:flutter_contacts/properties/phone.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import '../Objetos/DADOS.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -50,6 +51,8 @@ class GeradorOrcamento extends StatefulWidget {
 }
 
 class _GeradorOrcamento extends State<GeradorOrcamento> {
+  BannerAd? _bannerAd;
+  final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
   final _name = FocusNode();
   final _phone = FocusNode();
   final _cep = FocusNode();
@@ -65,6 +68,32 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
   String? titleBox;
   bool fieldVisible = false;
   bool fieldFone = true;
+
+  void _loadAd() async {
+    BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+        // Called when an ad opens an overlay that covers the screen.
+        onAdOpened: (Ad ad) {},
+        // Called when an ad removes an overlay that covers the screen.
+        onAdClosed: (Ad ad) {},
+        // Called when an impression occurs on the ad.
+        onAdImpression: (Ad ad) {},
+      ),
+    ).load();
+  }
 
   var maskFormatter =  MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -88,6 +117,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
   initState() {
     super.initState();
     try{
+      _loadAd();
       setState(()  async {
         Orcamento.ID = widget.item.ID;
         Orcamento.DATA = widget.item.DATA;
@@ -174,6 +204,12 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
       });
     }
     catch (e) {}
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   Future <void> saveBudget(DADOS orcamento) async {
@@ -1027,6 +1063,12 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
             ),
           ]
       ),
+      bottomNavigationBar: _bannerAd != null
+          ? BottomAppBar(color: bgColor,
+        height: _bannerAd!.size.height.toDouble(),
+        child: SizedBox(height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
+        ),
+      ) : null,
     );
   }
 }

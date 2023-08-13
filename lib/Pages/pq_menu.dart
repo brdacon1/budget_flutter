@@ -91,6 +91,7 @@ class _MenuSelectionPage extends State<MenuSelectionPage> {
     _bannerAd?.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     var he = MediaQuery.of(context).size.height;
