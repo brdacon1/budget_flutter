@@ -10,6 +10,7 @@ import '../Models/convert_coin.dart';
 import '../Objetos/DADOS.dart';
 import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Services/display_alert.dart';
+import '../Services/loading_event.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
@@ -31,6 +32,7 @@ enum Gender{
 class _PgPaymentList extends State<PgPaymentList> {
   var displayAlert = DisplayAlert();
   var db = Db();
+  var loadingEvent = LoadingEvent();
   var foundPayment = <ObjectPagamentosCliente>[];
   var deleteItems = <ObjectPagamentosCliente>[];
   convert_coin moneyConvert = convert_coin();
@@ -42,7 +44,7 @@ class _PgPaymentList extends State<PgPaymentList> {
   Color deaible = Colors.grey;
 
   Future<void> inicialData()async {
-    foundPayment = await db.getListPayment(widget.recibos.ID);
+    foundPayment = await db.getListPayment(widget.recibos, widget.item);
     setState(() {});
   }
 
@@ -127,7 +129,7 @@ class _PgPaymentList extends State<PgPaymentList> {
                           expandedColor: Colors.blue[50],
                           leading: const CircleAvatar(
                               backgroundColor: bgColor,
-                              child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
+                              child: Icon(Icons.payments_outlined, color: Colors.white,)),
                           title:
                           Text(
                             foundPayment[index].DESCRICAO!,
@@ -192,10 +194,20 @@ class _PgPaymentList extends State<PgPaymentList> {
                                               ),
                                             ),
                                             onPressed: () async {
-                                              await db.deletePaymentCustomer(foundPayment[index].id!).then((value) => {
-                                                setState(() {
-                                                  inicialData();
-                                                }),
+                                              loadingEvent.alertLoading(context);
+                                              try{
+                                                await db.deletePaymentCustomer(foundPayment[index].id!).then((value) async => {
+                                                  loadingEvent.closeLoading(context),
+                                                  await displayAlert.notificationNotCloseScreen(context, "Feito!", "Pagamento removido com sucesso!"),
+                                                });
+                                              }
+                                              catch (e) {
+                                                loadingEvent.closeLoading(context);
+                                                await displayAlert.notificationError(context, "Erro!", "Problemas para remover o pagamento");
+                                              }
+
+                                              setState(() {
+                                                inicialData();
                                               });
                                             },
                                             child: const Column(
@@ -282,6 +294,26 @@ class _PgPaymentList extends State<PgPaymentList> {
         child: const Icon(
           Icons.add,
           color: Colors.black,
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: buttonColor,
+        elevation: 0,
+        child: Container(
+          height: 65.0,
+          color: buttonColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Alinhar à esquerda
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(padding: const EdgeInsets.only(left: 10),
+                child: Text(
+                  "Total produtos: ${moneyConvert.convertFromDouble(widget.recibos.VALORTOTAL!)}",
+                  style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

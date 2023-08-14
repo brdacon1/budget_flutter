@@ -259,9 +259,10 @@ class Db{
   }
 
 
-  Future<List<ObjectPagamentosCliente>> getListPayment(String? id) async {
+  Future<List<ObjectPagamentosCliente>> getListPayment(Recived recived, DADOS dados) async {
+    double totalProducts = 0;
     var group = await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${id}/PAGAMENTOS")
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${recived.ID}/PAGAMENTOS")
         .get();
 
     var yourModels = group.docs.map<ObjectPagamentosCliente>((doc) {
@@ -269,6 +270,15 @@ class Db{
       objectListItens.id = doc.id;
       return objectListItens;
     }).toList();
+
+    for (int index = 0; index < yourModels.length; index++) {
+      totalProducts += yourModels[index].PRECO!;
+    }
+    if(recived.VALORTOTAL != totalProducts)
+    {
+      recived.VALORTOTAL = totalProducts;
+      await savedRecived(recived);
+    }
 
     return yourModels;
   }
@@ -287,6 +297,7 @@ class Db{
 
     return yourModels;
   }
+
   Future<void> savedRecived(Recived recived) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS")

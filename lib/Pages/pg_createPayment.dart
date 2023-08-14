@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
+import 'package:oflite/Services/display_alert.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import '../Objetos/ObjectPagamentosCliente.dart';
+import '../Services/loading_event.dart';
 import '../constants.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -41,6 +43,8 @@ class _PgCreatePayment extends State<PgCreatePayment> {
   final controller = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   final controllerTotal = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   var db = Db();
+  var loadingEvent = LoadingEvent();
+  var displayAlert = DisplayAlert();
 
   @override
   initState() {
@@ -68,62 +72,6 @@ class _PgCreatePayment extends State<PgCreatePayment> {
     }
     catch (e){
     }
-  }
-
-  void notification(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      headerAnimationLoop: false,
-      dialogType: DialogType.success,
-      showCloseIcon: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor do título
-        fontSize: 24, // Defina o tamanho da fonte do título
-        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor da descrição
-        fontSize: 18, // Defina o tamanho da fonte da descrição
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkIcon: Icons.check_circle,
-      btnOkOnPress: () {
-        Navigator.pop(context, true);
-      },
-    ).show();
-  }
-
-  void notificationError(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      animType: AnimType.leftSlide,
-      headerAnimationLoop: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor do título
-        fontSize: 24, // Defina o tamanho da fonte do título
-        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor da descrição
-        fontSize: 18, // Defina o tamanho da fonte da descrição
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      dialogType: DialogType.error,
-      showCloseIcon: false,
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkOnPress: () async {},
-      btnOkIcon: Icons.check_circle,).show();
   }
 
   @override
@@ -194,14 +142,14 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.shopping_cart_outlined, color: Colors.white,)),
+                                    child: Icon(Icons.payments_outlined, color: Colors.white,)),
                                 title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
                                     color: bgColor,
                                     fontWeight: FontWeight.normal,
                                     fontSize: 15,
                                     letterSpacing: 1),
                                 ),
-                                subtitle: Text("Dados do pagamento",style: GoogleFonts.heebo(
+                                subtitle: Text("Insira dados do pagamento",style: GoogleFonts.heebo(
                                     color: bgColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
@@ -349,13 +297,15 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                           child: TextButton(
                             onPressed: () async {
                               double cleanAmount = moneyConvert.convertFromString(controller.text);
+                              loadingEvent.alertLoading(context);
                               if(nameButton == 'SALVAR')
                               {
                                 ITENS.METODO = _typeText.text;
                                 ITENS.DESCRICAO = _descricaoText.text;
                                 ITENS.PRECO = cleanAmount;
                                 await db.savePaymentCustomer(ITENS).then((value) => {
-                                      notification(context, "Feito!", "Pagamento criado com sucesso!"),
+                                      loadingEvent.closeLoading(context),
+                                      displayAlert.notification(context, "Feito!", "Pagamento criado com sucesso!"),
                                 });
                               }
                               else if(nameButton == 'ATUALIZAR')
@@ -365,9 +315,11 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                 ITENS.PRECO = cleanAmount;
                                 ITENS.id = widget.item.id;
                                 await db.updatePaymentCustomer(ITENS).then((value) => {
-                                  notification(context, "Feito!", "Pagamento atualizado com sucesso!"),
+                                  loadingEvent.closeLoading(context),
+                                  displayAlert.notification(context, "Feito!", "Pagamento atualizado com sucesso!"),
                                 });
                               }
+
                             },
                             style:  TextButton.styleFrom(
                                 backgroundColor: buttonColor,

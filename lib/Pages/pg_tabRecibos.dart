@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:oflite/Objetos/ObjectRecived.dart';
 import 'package:oflite/Pages/GeradorOrcamento.dart';
 import 'package:oflite/Pages/PdfViewPage.dart';
+import 'package:oflite/Pages/pg_generateRecived.dart';
 import 'package:oflite/Pages/pg_paymentList.dart';
+import 'package:oflite/Pages/pg_pdfViewPageRecived.dart';
 import '../Objetos/DADOS.dart';
 import '../constants.dart';
 
@@ -41,8 +43,9 @@ class _PageTabRecibos extends State<PageTabRecibos> {
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
     final List children = [
+      PgGenerateRecived(item: widget.item, recibos: widget.recibos),
       PgPaymentList(item: widget.item, recibos: widget.recibos),
-      const PdfViewPage(),
+      PgPdfViewPageRecived(item: widget.item, recibos: widget.recibos),
     ];
     return Scaffold(
       body: children[_currentIndex],
@@ -58,6 +61,10 @@ class _PageTabRecibos extends State<PageTabRecibos> {
           onTap: onTabTapped,
           currentIndex: _currentIndex,
           items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.picture_as_pdf),
+              label: 'Recibo',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.payments_outlined),
               label: 'Pagamentos',

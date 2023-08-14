@@ -10,6 +10,8 @@ import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Objetos/ObjectRecived.dart';
+import '../Services/display_alert.dart';
+import '../Services/loading_event.dart';
 import '../constants.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -33,6 +35,8 @@ class PgGenerateRecived extends StatefulWidget {
 class _PgGenerateRecived extends State<PgGenerateRecived> {
   Color enabledtxt = Colors.white;
   convert_coin moneyConvert = convert_coin();
+  var displayAlert = DisplayAlert();
+  var loadingEvent = LoadingEvent();
   Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
@@ -56,7 +60,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
         }
         else {
           nameButton = 'SALVAR';
-          titlePage = 'Criar pagamento';
+          titlePage = 'Criar recibo';
           _descricaoText.text = '';
           _idText.text = '';
           _data.text = '';
@@ -66,62 +70,6 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
     }
     catch (e){
     }
-  }
-
-  void notification(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      headerAnimationLoop: false,
-      dialogType: DialogType.success,
-      showCloseIcon: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor do título
-        fontSize: 24, // Defina o tamanho da fonte do título
-        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor da descrição
-        fontSize: 18, // Defina o tamanho da fonte da descrição
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkIcon: Icons.check_circle,
-      btnOkOnPress: () {
-        Navigator.pop(context, true);
-      },
-    ).show();
-  }
-
-  void notificationError(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      animType: AnimType.leftSlide,
-      headerAnimationLoop: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor do título
-        fontSize: 24, // Defina o tamanho da fonte do título
-        fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black, // Defina a cor da descrição
-        fontSize: 18, // Defina o tamanho da fonte da descrição
-        // Adicione outros atributos do TextStyle conforme necessário
-      ),
-      dialogType: DialogType.error,
-      showCloseIcon: false,
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkOnPress: () async {},
-      btnOkIcon: Icons.check_circle,).show();
   }
 
   @override
@@ -192,14 +140,14 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                 expandedColor: Colors.cyan[50],
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.shopping_cart_outlined, color: Colors.white,)),
+                                    child: Icon(Icons.receipt_long_rounded, color: Colors.white,)),
                                 title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
                                     color: bgColor,
                                     fontWeight: FontWeight.normal,
                                     fontSize: 15,
                                     letterSpacing: 1),
                                 ),
-                                subtitle: Text("Dados do pagamento",style: GoogleFonts.heebo(
+                                subtitle: Text("Insira dados do recibo",style: GoogleFonts.heebo(
                                     color: bgColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
@@ -316,6 +264,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                         Padding(padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
                           child: TextButton(
                             onPressed: () async {
+                              loadingEvent.alertLoading(context);
                               if(nameButton == 'SALVAR')
                               {
                                 final DateTime now = DateTime.now();
@@ -326,21 +275,29 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                 ITENS.DATA = formatted;
                                 ITENS.VALORTOTAL = 0;
                                 await db.savedRecived(ITENS).then((value) async => {
-                                await Navigator.push(
-                                      context,
-                                         MaterialPageRoute(builder: (context) => PageTabRecibos(item: widget.item, recibos: ITENS,)),
-                                      ).then((value) async => {
-                                         setState(() {}),}),
+                                  loadingEvent.closeLoading(context),
+                                  displayAlert.notificationNotCloseScreen(context, "Feito!", "Recibo atualizado com sucesso!"),
+                                  widget.recibos.DATA = ITENS.DATA,
+                                  widget.recibos.ID = ITENS.ID,
+                                  widget.recibos.VALORTOTAL = ITENS.VALORTOTAL,
+                                  widget.recibos.DESCRICAO = ITENS.DESCRICAO,
+                                  _data.text = widget.recibos.DATA!,
+                                  _descricaoText.text = widget.recibos.DESCRICAO!,
+                                  _idText.text = widget.recibos.ID!,
+                                  fieldVisible = true,
+                                  setState(() {}),
                                 });
                               }
-                              else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
+                              else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                               {
                                 ITENS.DESCRICAO = _descricaoText.text;
                                 ITENS.ID = widget.recibos.ID;
                                 ITENS.DATA = widget.recibos.DATA;
                                 ITENS.VALORTOTAL = widget.recibos.VALORTOTAL;
                                 await db.savedRecived(ITENS).then((value) => {
-                                  notification(context, "Feito!", "Pagamento atualizado com sucesso!"),
+                                    loadingEvent.closeLoading(context),
+                                    displayAlert.notificationNotCloseScreen(context, "Feito!", "Recibo atualizado com sucesso!"),
+                                    setState(() {}),
                                 });
                               }
                             },

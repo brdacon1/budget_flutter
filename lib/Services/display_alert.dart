@@ -21,9 +21,9 @@ enum Gender{
 
 
 class DisplayAlert {
-  final db = Db();
-  final DADOS = ObjetoUIDUser();
-  final alertDisplayLoading = LoadingEvent();
+  var db = Db();
+  var DADOS = ObjetoUIDUser();
+  var alertDisplayLoading = LoadingEvent();
 
 
   Future<void> notificationError(BuildContext context, String firstMessage, String secondMessage) {
@@ -77,7 +77,7 @@ class DisplayAlert {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: 180,
+                height: he * 0.25,
                 width: we,
                 child: Column(
                   children: <Widget>[
@@ -202,7 +202,6 @@ class DisplayAlert {
     });
   }
 
-
   Future<void> dialogChangeName(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;
@@ -221,7 +220,7 @@ class DisplayAlert {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: 200,
+                height: he * 0.25,
                 width: we,
                 child: Column(
                   children: <Widget>[
@@ -365,6 +364,39 @@ class DisplayAlert {
     });
   }
 
+  Future<void> notificationNotCloseScreen(BuildContext context, String firstMessage, String secondMessage) {
+    final width = MediaQuery.of(context).size.width;
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AwesomeDialog(
+        width: width * 0.99,
+        context: context,
+        dialogBackgroundColor: Colors.cyan[50],
+        headerAnimationLoop: false,
+        dialogType: DialogType.success,
+        showCloseIcon: false,
+        title: firstMessage,
+        desc: secondMessage,
+        btnOkIcon: Icons.check_circle,
+        titleTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor do título
+          fontSize: 24, // Defina o tamanho da fonte do título
+          fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        descTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor da descrição
+          fontSize: 18, // Defina o tamanho da fonte da descrição
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        btnOkOnPress: () {
+          completer.complete();
+        },
+      ).show();
+    });
+
+    return completer.future;
+  }
 
 
   Future<void> notification(BuildContext context, String firstMessage, String secondMessage) {

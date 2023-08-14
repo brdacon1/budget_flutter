@@ -11,6 +11,7 @@ import '../Objetos/DADOS.dart';
 import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../Services/display_alert.dart';
+import '../Services/loading_event.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 
@@ -39,6 +40,7 @@ class _PgRecivedList extends State<PgRecivedList> {
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
+  var loadingEvent = LoadingEvent();
 
   Future<void> inicialData()async {
     foundPayment = await db.getListRecived();
@@ -126,7 +128,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                           expandedColor: Colors.blue[50],
                           leading: const CircleAvatar(
                               backgroundColor: bgColor,
-                              child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
+                              child: Icon(Icons.receipt_long_rounded, color: Colors.white,)),
                           title:
                           Text(
                             foundPayment[index].DESCRICAO!,
@@ -207,8 +209,21 @@ class _PgRecivedList extends State<PgRecivedList> {
                                                 borderRadius: BorderRadius.circular(5.0),
                                               ),
                                             ),
-                                            onPressed: () {
-
+                                            onPressed: () async {
+                                              try {
+                                                loadingEvent.alertLoading(context);
+                                                await db.deleteRecived(foundPayment[index]).then((value) => {
+                                                  loadingEvent.closeLoading(context),
+                                                  displayAlert.notificationNotCloseScreen(context, "Feito!", "Recibo removido com sucesso!").then((value) => {
+                                                    setState(() {
+                                                      inicialData();
+                                                    }),
+                                                  }),
+                                                });
+                                              } catch (e){
+                                                loadingEvent.closeLoading(context);
+                                                await displayAlert.notificationError(context, "Erro!", "Problemas para remover o recibo!");
+                                              }
                                             },
                                             child: const Column(
                                               children: <Widget>[
@@ -239,18 +254,20 @@ class _PgRecivedList extends State<PgRecivedList> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => PgGenerateRecived(item: widget.item, recibos: foundPayment[index]),
+                                                builder: (context) => PageTabRecibos(item: widget.item, recibos: foundPayment[index]),
                                               ),
                                             ).then((value) async => {
-                                              setState(() {}),
+                                              setState(() {
+                                                 inicialData();
+                                              }),
                                             });
                                           },
                                           child: const Column(
                                             children: <Widget>[
                                               SizedBox(height: 4),
-                                              Icon(Icons.edit),
+                                              Icon(Icons.open_in_new_rounded),
                                               SizedBox(height: 2.0),
-                                              Text('Editar'),
+                                              Text('Abrir'),
                                             ],
                                           ),
                                         ),
@@ -280,9 +297,11 @@ class _PgRecivedList extends State<PgRecivedList> {
           Orcamento.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => PgGenerateRecived(item: widget.item, recibos: ITENS,)),
+            MaterialPageRoute(builder: (context) => PageTabRecibos(item: widget.item, recibos: ITENS,)),
           ).then((value) async => {
-            setState(() {}),
+            setState(() {
+              inicialData();
+            }),
           });
         },
         backgroundColor: buttonColor,
