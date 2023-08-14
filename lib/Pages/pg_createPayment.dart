@@ -6,8 +6,6 @@ import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
-import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:extended_masked_text/extended_masked_text.dart';
 import '../Objetos/ObjectPagamentosCliente.dart';
 import '../constants.dart';
@@ -15,15 +13,13 @@ import '../constants.dart';
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 enum Gender{
-  categoriaText,
-  unidadeText,
-  qtdText,
   descricaoText,
+  precoText,
+  typeText
 }
 
-TextEditingController _categoriaText = TextEditingController();
-TextEditingController _unidadeText = TextEditingController();
-TextEditingController _qtdText = TextEditingController();
+TextEditingController _typeText = TextEditingController();
+TextEditingController _precoText = TextEditingController();
 TextEditingController _descricaoText = TextEditingController();
 
 class PgCreatePayment extends StatefulWidget {
@@ -51,26 +47,21 @@ class _PgCreatePayment extends State<PgCreatePayment> {
     super.initState();
     try{
       setState(()  async {
-        if(widget.item.DESCRICAO.toString() != 'null')
-        {
+        if(widget.item.DESCRICAO.toString() != 'null') {
           nameButton = 'ATUALIZAR';
-          titlePage = 'Editar item';
-          _categoriaText.text = widget.item.METODO.toString();
-          _qtdText.text = widget.item.QTDDIV.toString();
+          titlePage = 'Editar pagamento';
+          _typeText.text = widget.item.METODO.toString();
           controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
           _descricaoText.text = widget.item.DESCRICAO.toString();
-
           fieldVisible = true;
         }
-        else
-        {
+        else {
           nameButton = 'SALVAR';
-          titlePage = 'Criar item';
-          _categoriaText.text = 'Dinheiro';
-          _unidadeText.text = '';
-          _qtdText.text ?? '1';
+          titlePage = 'Criar pagamento';
+          _typeText.text = 'Dinheiro';
           controller.text = '';
           _descricaoText.text = '';
+          _precoText.text = '1';
           fieldVisible = true;
         }
       });
@@ -182,7 +173,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                   child: Container(
                     alignment: Alignment.topLeft,
                     margin: EdgeInsets.only(left: we * 0.05),
-                    child: Text("Cadastro do pagamento",style: GoogleFonts.heebo(
+                    child: Text("Dados do pagamento",style: GoogleFonts.heebo(
                         color: Colors.grey,
                         letterSpacing: 1),
                     ),
@@ -224,13 +215,13 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                       height:he * 0.071,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.categoriaText ?  bgColor : bgColor,
+                                        color: selected == Gender.typeText ?  bgColor : bgColor,
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child:  TextField(
                                         readOnly: true,
                                         enableInteractiveSelection: true,
-                                        controller: _categoriaText,
+                                        controller: _typeText,
                                         onTap: () async {
                                           List<String> values = ['Crédito', 'Débito', 'Dinheiro'];
                                           await showDialog(
@@ -265,7 +256,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                             },
                                           ).then((value) => {
                                             setState(() {
-                                              _categoriaText.text = value;
+                                              _typeText.text = value;
                                             }),
 
                                           });
@@ -273,14 +264,14 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                         decoration: InputDecoration(
                                           enabledBorder: InputBorder.none,
                                           border:InputBorder.none,
-                                          prefixIcon: Icon(Icons.list_alt,color: selected == Gender.categoriaText ? enabledtxt : deaible),
-                                          suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.categoriaText ? enabledtxt : deaible,),
+                                          prefixIcon: Icon(Icons.list_alt,color: selected == Gender.typeText ? enabledtxt : deaible),
+                                          suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.precoText ? enabledtxt : deaible,),
                                           hintText: 'Definir pagamento',
                                           hintStyle: TextStyle(
-                                            color:  selected == Gender.categoriaText ? enabledtxt : deaible,
+                                            color:  selected == Gender.typeText ? enabledtxt : deaible,
                                           ),
                                         ),
-                                        style:  TextStyle(color:  selected == Gender.categoriaText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                        style:  TextStyle(color:  selected == Gender.typeText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -294,64 +285,27 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                       height:he * 0.071,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.unidadeText ? bgColor : bgColor
+                                          color: selected == Gender.precoText ? bgColor : bgColor
                                       ),
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextField(
                                         controller: controller,
                                         onTap: (){
                                           setState(() {
-                                            selected = Gender.unidadeText;
+                                            selected = Gender.precoText;
                                           });
                                         },
                                         decoration: InputDecoration(
                                             enabledBorder: InputBorder.none,
                                             border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.price_change_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
+                                            prefixIcon: Icon(Icons.price_change_outlined,color: selected == Gender.precoText ? enabledtxt : deaible,),
                                             hintText: 'Preço',
                                             hintStyle: TextStyle(
-                                                color: selected == Gender.unidadeText ? enabledtxt : deaible
+                                                color: selected == Gender.precoText ? enabledtxt : deaible
                                             )
                                         ),
                                         keyboardType: TextInputType.number,
-                                        style:  TextStyle(color: selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  Visibility(
-                                    visible: fieldVisible,
-                                    child: FadeAnimation(
-                                      delay: 1,
-                                      child: Container(
-                                        width: we * 0.80,
-                                        height:he * 0.071,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.qtdText ?  bgColor : bgColor,
-                                        ),
-                                        padding: const EdgeInsets.all(8.0),
-                                        child:  TextField(
-                                          controller: _qtdText,
-                                          keyboardType: TextInputType.number,
-                                          onTap: (){
-                                            setState(() {
-                                              selected = Gender.qtdText;
-                                            });
-                                          },
-                                          decoration: InputDecoration(
-                                            enabledBorder: InputBorder.none,
-                                            border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.calculate_outlined,color: selected == Gender.qtdText ? enabledtxt : deaible),
-                                            hintText: 'Parcelas',
-                                            hintStyle: TextStyle(
-                                              color:  selected == Gender.qtdText ? enabledtxt : deaible,
-                                            ),
-                                          ),
-                                          style:  TextStyle(color:  selected == Gender.qtdText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                        ),
+                                        style:  TextStyle(color: selected == Gender.precoText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
                                       ),
                                     ),
                                   ),
@@ -397,7 +351,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                               double cleanAmount = moneyConvert.convertFromString(controller.text);
                               if(nameButton == 'SALVAR')
                               {
-                                ITENS.METODO = _categoriaText.text;
+                                ITENS.METODO = _typeText.text;
                                 ITENS.DESCRICAO = _descricaoText.text;
                                 ITENS.PRECO = cleanAmount;
                                 await db.savePaymentCustomer(ITENS).then((value) => {
@@ -407,7 +361,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                               }
                               else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
                               {
-                                ITENS.METODO = _categoriaText.text;
+                                ITENS.METODO = _typeText.text;
                                 ITENS.DESCRICAO = _descricaoText.text;
                                 ITENS.PRECO = cleanAmount;
                                 await db.updatePaymentCustomer(ITENS).then((value) => {

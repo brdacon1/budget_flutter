@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/Models/Db.dart';
+import 'package:oflite/Objetos/ObjectRecived.dart';
 import 'package:oflite/Pages/pg_createPayment.dart';
 import 'package:oflite/constants.dart';
 import '../Models/convert_coin.dart';
@@ -14,19 +16,21 @@ import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 
 TextEditingController _descricaoText = TextEditingController();
 
-class ListRecibosPage extends StatefulWidget {
+class PgPaymentList extends StatefulWidget {
   final DADOS item;
-  const ListRecibosPage({Key? key, required this.item}) : super(key: key);
+  final Recived recibos;
+  const PgPaymentList({Key? key, required this.item, required this.recibos}) : super(key: key);
   @override
-  _ListRecibosPage createState() => _ListRecibosPage();
+  _PgPaymentList createState() => _PgPaymentList();
 }
 
 enum Gender{
   comentText,
 }
 
-class _ListRecibosPage extends State<ListRecibosPage> {
+class _PgPaymentList extends State<PgPaymentList> {
   var displayAlert = DisplayAlert();
+  var db = Db();
   var foundPayment = <ObjectPagamentosCliente>[];
   var deleteItems = <ObjectPagamentosCliente>[];
   convert_coin moneyConvert = convert_coin();
@@ -37,15 +41,17 @@ class _ListRecibosPage extends State<ListRecibosPage> {
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
 
+  Future<void> inicialData()async {
+    foundPayment = await db.getListPayment(widget.recibos.ID);
+    setState(() {});
+  }
 
   @override
   initState() {
-    try{
-    }
-    catch (e){
-      print(e);
-    }
     super.initState();
+    setState(() {
+      inicialData();
+    });
   }
 
   @override
@@ -101,9 +107,8 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                 color: Colors.cyan[50],
                 backgroundColor: bgColor,
                 onRefresh: () async {
-
                   setState(() {
-
+                    inicialData();
                   });
                 },
                 child: ListView.builder(
@@ -135,7 +140,7 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                             ),
                           ),
                           subtitle: Text(
-                            "Preço: ${moneyConvert.convertFromDouble(foundPayment[index].PRECO!)}",
+                            "Valor do pagamento: ${moneyConvert.convertFromDouble(foundPayment[index].PRECO!)}",
                             style: const TextStyle(
                               color: bgColor,
                               letterSpacing: 0.5,
@@ -156,40 +161,6 @@ class _ListRecibosPage extends State<ListRecibosPage> {
                                 ),
                                 child: Text(
                                   "Método do pagamento: ${foundPayment[index].METODO}",
-                                  style: const TextStyle(
-                                    color: bgColor,
-                                    letterSpacing: 0.5,
-                                    fontSize: 12.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0,
-                                  vertical: 5.0,
-                                ),
-                                child: Text(
-                                  "Total: ${moneyConvert.convertFromDouble(foundPayment[index].TOTAL!)}",
-                                  style: const TextStyle(
-                                    color: bgColor,
-                                    letterSpacing: 0.5,
-                                    fontSize: 12.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0,
-                                  vertical: 5.0,
-                                ),
-                                child: Text(
-                                  "Quantidade: ${foundPayment[index].QTDDIV}",
                                   style: const TextStyle(
                                     color: bgColor,
                                     letterSpacing: 0.5,
@@ -289,8 +260,6 @@ class _ListRecibosPage extends State<ListRecibosPage> {
           ObjectPagamentosCliente ITENS = ObjectPagamentosCliente();
           ITENS.METODO = '';
           ITENS.id = '';
-          ITENS.QTDDIV = 1;
-          ITENS.TOTAL = 0;
           ITENS.DESCRICAO = 'null';
           ITENS.PRECO = 0;
           Orcamento.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();

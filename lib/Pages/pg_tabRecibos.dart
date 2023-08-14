@@ -1,16 +1,17 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:oflite/Objetos/ObjectRecived.dart';
 import 'package:oflite/Pages/GeradorOrcamento.dart';
 import 'package:oflite/Pages/PdfViewPage.dart';
-import 'package:oflite/Pages/pg_listRecibos.dart';
-import 'package:oflite/Pages/pg_menuPdf.dart';
+import 'package:oflite/Pages/pg_paymentList.dart';
 import '../Objetos/DADOS.dart';
 import '../constants.dart';
-import 'ListaItensOrcamento.dart';
+
 
 class PageTabRecibos extends StatefulWidget {
   final DADOS item;
-  const PageTabRecibos({Key? key, required this.item}) : super(key: key);
+  final Recived recibos;
+  const PageTabRecibos({Key? key, required this.item, required this.recibos}) : super(key: key);
 
   @override
   _PageTabRecibos createState() => _PageTabRecibos();
@@ -22,40 +23,11 @@ class _PageTabRecibos extends State<PageTabRecibos> {
 
   void onTabTapped(int index) {
     setState(() {
-      if(index == 0)
-      {
+      if(index == 0) {
         _currentIndex = index;
       }
-      else
-      {
-        if(widget.item.ID!.isNotEmpty) {
-          _currentIndex = index;
-        }
-        else{
-          AwesomeDialog(
-            width: we * 0.99,
-            context: context,
-            dialogBackgroundColor: Colors.cyan[50],
-            animType: AnimType.leftSlide,
-            headerAnimationLoop: false,
-            dialogType: DialogType.error,
-            showCloseIcon: false,
-            titleTextStyle: const TextStyle(
-              color: Colors.black, // Defina a cor do título
-              fontSize: 24, // Defina o tamanho da fonte do título
-              fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-              // Adicione outros atributos do TextStyle conforme necessário
-            ),
-            descTextStyle: const TextStyle(
-              color: Colors.black, // Defina a cor da descrição
-              fontSize: 18, // Defina o tamanho da fonte da descrição
-              // Adicione outros atributos do TextStyle conforme necessário
-            ),
-            title: 'Erro!',
-            desc: 'Finalize o cadastro do cliente para acessar as demais etapas do orçamento!',
-            btnOkOnPress: () async {},
-            btnOkIcon: Icons.check_circle,).show();
-        }
+      else {
+        _currentIndex = index;
       }
     });
   }
@@ -69,7 +41,7 @@ class _PageTabRecibos extends State<PageTabRecibos> {
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
     final List children = [
-      ListRecibosPage(item: widget.item),
+      PgPaymentList(item: widget.item, recibos: widget.recibos),
       const PdfViewPage(),
     ];
     return Scaffold(

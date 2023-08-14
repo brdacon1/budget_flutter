@@ -508,6 +508,7 @@ class _pg_priceList extends State<pg_priceList>  {
     ).then((value) {
       setState(() {});
     });
+
   }
 
   Future <bool> DeleteDados() async {

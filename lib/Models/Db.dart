@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:supercharged/supercharged.dart';
 import '../Objetos/DADOS.dart';
 import '../Objetos/ItensListBudget.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -7,6 +8,7 @@ import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import '../Objetos/ObjectListItens.dart';
 import '../Objetos/ObjectListObservationPDF.dart';
 import '../Objetos/ObjectPagamentosCliente.dart';
+import '../Objetos/ObjectRecived.dart';
 import '../Objetos/ObjetoUIDUser.dart';
 import '../Objetos/Owner.dart';
 
@@ -122,6 +124,7 @@ class Db{
               'PurchaseToken' : userInfo.PurchaseToken,
         });
   }
+
   Future <void> updateItemsDADOS() async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
@@ -256,13 +259,34 @@ class Db{
   }
 
 
-  Future<List<ObjectPagamentosCliente>> getListPaymentCustomer(String buscaUser) async {
+  Future<List<ObjectPagamentosCliente>> getListPayment(String? id) async {
     var group = await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${id}/PAGAMENTOS")
+        .get();
+    var yourModels = group.docs.map((doc) => ObjectPagamentosCliente.fromMap(doc.data())).toList();
+
+    return yourModels;
+  }
+
+  Future<List<Recived>> getListRecived() async {
+    var group = await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS")
         .get();
 
-    var yourModels = group.docs.map((doc) => ObjectPagamentosCliente.fromMap(doc.data())).toList();
+   var yourModels = group.docs.map<Recived>((doc) {
+      final objectListItens = Recived.fromMap(doc.data()!);
+      objectListItens.ID = doc.id;
+      objectListItens.checkBox = false;
+      return objectListItens;
+    }).toList();
+
     return yourModels;
+  }
+  Future<void> savedRecived(Recived recived) async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS")
+        .doc(recived.ID)
+        .set(recived.toMap());
   }
 
   Future<void> deletePaymentCustomer(String orcamento) async {

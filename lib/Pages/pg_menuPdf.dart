@@ -4,7 +4,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/Pages/pg_TabOrcamento.dart';
 import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_listComment.dart';
-import 'package:oflite/Pages/pg_listRecibos.dart';
+import 'package:oflite/Pages/pg_paymentList.dart';
+import 'package:oflite/Pages/pg_recivedList.dart';
 import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/Services/display_alert.dart';
 import '../Objetos/DADOS.dart';
@@ -30,7 +31,7 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
   final displayAlert = DisplayAlert();
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.comment_outlined, title: 'Inserir comentários'),
-    /*MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),*/
+    MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),
   ];
   BannerAd? _bannerAd;
   final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
@@ -44,15 +45,16 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
               builder: (context) => ListCommentPage(item: widget.item,)),
         );
         break;
-      /*case 1:
+        case 1:
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => PageTabRecibos(item: widget.item)),
+              builder: (context) => PgRecivedList(item: widget.item)),
         );
-        break;*/
+        break;
     }
   }
+
   void _loadAd() async {
     BannerAd(
       adUnitId: _adUnitId,

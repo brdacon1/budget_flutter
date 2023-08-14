@@ -113,7 +113,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: 400,
+                height: he * 0.5,
                 width: we,
                 child: Column(
                   children: <Widget>[

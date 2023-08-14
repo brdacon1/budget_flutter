@@ -150,7 +150,7 @@ class PDFGenerate {
       PdfGridCellStyle headerStyle = PdfGridCellStyle(font: font, textBrush: PdfBrushes.black, textPen: PdfPens.white);
       pdfGrid.headers.applyStyle(headerStyle);
       pdfGrid.columns[0].width = 180;
-      pdfGrid.columns[1].width = 360;
+      pdfGrid.columns[1].width = 620;
       pdfGrid.draw(graphics: page.graphics, bounds: Rect.fromLTWH(sizeWithImage, 0, page.getClientSize().width, page.getClientSize().height));
 
       format = PdfStringFormat(
