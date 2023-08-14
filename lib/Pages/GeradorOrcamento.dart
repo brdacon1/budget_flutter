@@ -833,7 +833,8 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                             style:  TextStyle(color:  selected == Gender.id ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                           ),
                                         ),
-                                      )),
+                                      )
+                                  ),
                                   SizedBox(
                                     height: he * 0.02,
                                   ),

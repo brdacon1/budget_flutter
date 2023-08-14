@@ -9,8 +9,6 @@ import 'package:oflite/Objetos/DADOS.dart';
 import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_masked_text/extended_masked_text.dart';
-import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../constants.dart';
 
@@ -21,6 +19,8 @@ enum Gender{
 }
 
 TextEditingController _descricaoText = TextEditingController();
+TextEditingController _idText = TextEditingController();
+TextEditingController _data = TextEditingController();
 
 class PgGenerateRecived extends StatefulWidget {
   final Recived recibos;
@@ -48,15 +48,19 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
       setState(()  async {
         if(widget.recibos.DESCRICAO.toString() != 'null') {
           nameButton = 'ATUALIZAR';
-          titlePage = 'Editar pagamento';
-
+          titlePage = 'Editar recibo';
+          _descricaoText.text = widget.recibos.DESCRICAO!;
+          _idText.text = widget.recibos.ID!;
+          _data.text = widget.recibos.DATA!;
           fieldVisible = true;
         }
         else {
           nameButton = 'SALVAR';
           titlePage = 'Criar pagamento';
-
-          fieldVisible = true;
+          _descricaoText.text = '';
+          _idText.text = '';
+          _data.text = '';
+          fieldVisible = false;
         }
       });
     }
@@ -167,7 +171,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                   child: Container(
                     alignment: Alignment.topLeft,
                     margin: EdgeInsets.only(left: we * 0.05),
-                    child: Text("Dados do pagamento",style: GoogleFonts.heebo(
+                    child: Text("Dados do recibo",style: GoogleFonts.heebo(
                         color: Colors.grey,
                         letterSpacing: 1),
                     ),
@@ -202,6 +206,77 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                     letterSpacing: 1),
                                 ),
                                 children:  <Widget>[
+                                  Visibility(
+                                      visible: fieldVisible,
+                                      child: FadeAnimation(
+                                        delay: 1,
+                                        child: Container(
+                                          width: we * 0.8,
+                                          height:he * 0.071,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                            color: selected == Gender.descricaoText ?  bgColor : bgColor,
+                                          ),
+                                          padding: const EdgeInsets.all(8.0),
+                                          child:  TextField(
+                                            controller: _idText,
+                                            onTap: (){
+                                              setState(() {
+                                                selected = Gender.descricaoText;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              enabled: false,
+                                              enabledBorder: InputBorder.none,
+                                              border:InputBorder.none,
+                                              prefixIcon: Icon(Icons.confirmation_number_outlined, color: selected == Gender.descricaoText ? enabledtxt : deaible),
+                                              hintText: 'Número do recibo',
+                                              hintStyle: TextStyle(
+                                                color:  selected == Gender.descricaoText ? enabledtxt : deaible,
+                                              ),
+                                            ),
+                                            style:  TextStyle(color:  selected == Gender.descricaoText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                          ),
+                                        ),
+                                      )
+                                  ),
+                                  SizedBox(
+                                    height: he * 0.02,
+                                  ),
+                                  Visibility(
+                                      visible: fieldVisible,
+                                      child: FadeAnimation(
+                                        delay: 1,
+                                        child: Container(
+                                          width: we * 0.8,
+                                          height:he * 0.071,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                            color: selected == Gender.descricaoText ?  bgColor : bgColor,
+                                          ),
+                                          padding: const EdgeInsets.all(8.0),
+                                          child:  TextField(
+                                            controller: _data,
+                                            onTap: (){
+                                              setState(() {
+                                                selected = Gender.descricaoText;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              enabled: false,
+                                              enabledBorder: InputBorder.none,
+                                              border:InputBorder.none,
+                                              prefixIcon: Icon(Icons.calendar_month_outlined, color: selected == Gender.descricaoText ? enabledtxt : deaible),
+                                              hintText: 'Data do recibo',
+                                              hintStyle: TextStyle(
+                                                color:  selected == Gender.descricaoText ? enabledtxt : deaible,
+                                              ),
+                                            ),
+                                            style:  TextStyle(color:  selected == Gender.descricaoText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
+                                          ),
+                                        ),
+                                      )
+                                  ),
                                   Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
                                     child: Container(
                                       width: we * 0.80,

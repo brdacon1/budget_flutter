@@ -357,13 +357,13 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                 await db.savePaymentCustomer(ITENS).then((value) => {
                                       notification(context, "Feito!", "Pagamento criado com sucesso!"),
                                 });
-
                               }
-                              else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
+                              else if(nameButton == 'ATUALIZAR')
                               {
                                 ITENS.METODO = _typeText.text;
                                 ITENS.DESCRICAO = _descricaoText.text;
                                 ITENS.PRECO = cleanAmount;
+                                ITENS.id = widget.item.id;
                                 await db.updatePaymentCustomer(ITENS).then((value) => {
                                   notification(context, "Feito!", "Pagamento atualizado com sucesso!"),
                                 });

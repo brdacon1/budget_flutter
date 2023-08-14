@@ -263,7 +263,12 @@ class Db{
     var group = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${id}/PAGAMENTOS")
         .get();
-    var yourModels = group.docs.map((doc) => ObjectPagamentosCliente.fromMap(doc.data())).toList();
+
+    var yourModels = group.docs.map<ObjectPagamentosCliente>((doc) {
+      final objectListItens = ObjectPagamentosCliente.fromMap(doc.data()!);
+      objectListItens.id = doc.id;
+      return objectListItens;
+    }).toList();
 
     return yourModels;
   }
@@ -289,10 +294,17 @@ class Db{
         .set(recived.toMap());
   }
 
-  Future<void> deletePaymentCustomer(String orcamento) async {
+  Future<void> deleteRecived(Recived recived) async {
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS")
+        .doc(recived.ID)
+        .delete();
+  }
+
+  Future<void> deletePaymentCustomer(String id) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS/${Orcamento.IDRECIBO}/PAGAMENTOS")
-        .doc(orcamento)
+        .doc(id)
         .delete();
   }
 

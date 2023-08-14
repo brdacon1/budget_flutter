@@ -191,9 +191,12 @@ class _PgPaymentList extends State<PgPaymentList> {
                                                 borderRadius: BorderRadius.circular(5.0),
                                               ),
                                             ),
-                                            onPressed: () {
-
-                                              setState(() {});
+                                            onPressed: () async {
+                                              await db.deletePaymentCustomer(foundPayment[index].id!).then((value) => {
+                                                setState(() {
+                                                  inicialData();
+                                                }),
+                                              });
                                             },
                                             child: const Column(
                                               children: <Widget>[
@@ -220,15 +223,16 @@ class _PgPaymentList extends State<PgPaymentList> {
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
                                           ),
-                                          onPressed: () {
-                                            /*Navigator.push(
+                                          onPressed: () async {
+                                            Orcamento.IDRECIBO = widget.recibos.ID;
+                                            await Navigator.push(
                                               context,
-                                              MaterialPageRoute(
-                                                builder: (context) => PgCreateProduct(item: getFilteredData()[index]),
-                                              ),
+                                              MaterialPageRoute(builder: (context) => PgCreatePayment(item: foundPayment[index])),
                                             ).then((value) async => {
-                                              setState(() {}),
-                                            });*/
+                                               setState(() {
+                                                 inicialData();
+                                               }),
+                                            });
                                           },
                                           child: const Column(
                                             children: <Widget>[
@@ -262,12 +266,16 @@ class _PgPaymentList extends State<PgPaymentList> {
           ITENS.id = '';
           ITENS.DESCRICAO = 'null';
           ITENS.PRECO = 0;
-          Orcamento.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();
+          Orcamento.IDRECIBO = widget.recibos.ID;
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => PgCreatePayment(item: ITENS)),
           ).then((value) async => {
             setState(() {}),
+          }).then((value) => {
+              setState(() {
+                inicialData();
+              }),
           });
         },
         backgroundColor: buttonColor,

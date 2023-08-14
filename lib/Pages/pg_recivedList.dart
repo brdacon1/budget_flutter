@@ -42,20 +42,15 @@ class _PgRecivedList extends State<PgRecivedList> {
 
   Future<void> inicialData()async {
     foundPayment = await db.getListRecived();
+    setState(() {});
   }
 
   @override
   initState() {
-    try{
-      setState(() {
-        inicialData();
-      });
-      setState(() {});
-    }
-    catch (e){
-      print(e);
-    }
     super.initState();
+    setState(() {
+      inicialData();
+    });
   }
 
   @override
@@ -244,7 +239,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => PageTabRecibos(item: widget.item, recibos: foundPayment[index]),
+                                                builder: (context) => PgGenerateRecived(item: widget.item, recibos: foundPayment[index]),
                                               ),
                                             ).then((value) async => {
                                               setState(() {}),
