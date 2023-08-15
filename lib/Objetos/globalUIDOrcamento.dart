@@ -1,6 +1,6 @@
 library oflite.globals;
 
-String? IDORCAMENTO;
+String? IDORCAMENTO = '';
 String? IDRECIBO;
 String? ID;
 String? DATA;
@@ -16,3 +16,4 @@ String? NOMECLIENTE;
 String? NOMEEMPRESA;
 String? STATUS;
 double? VALORTOTAL;
+bool? fromListItem = false;

@@ -303,12 +303,12 @@ class _PgPaymentList extends State<PgPaymentList> {
           height: 65.0,
           color: buttonColor,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Alinhar à esquerda
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(padding: const EdgeInsets.only(left: 10),
                 child: Text(
-                  "Total produtos: ${moneyConvert.convertFromDouble(widget.recibos.VALORTOTAL!)}",
+                  "Total pago: ${moneyConvert.convertFromDouble(widget.recibos.VALORTOTAL!)}",
                   style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
                 ),
               ),

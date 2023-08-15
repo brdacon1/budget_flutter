@@ -32,6 +32,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
   var deleteItens = <ObjectListItens>[];
   ObjectListItens novo = ObjectListItens();
   convert_coin moneyConvert = convert_coin();
+  var displayAlert = DisplayAlert();
   var db = Db();
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
@@ -622,20 +623,30 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => pg_priceList(item: widget.item, fromMenu: false,)),
-              ).then((value) => setState(() {
-                try{
-                  setState(()  async {
-                    await getListItens();
-                  });
+              await displayAlert.listNotification(context).then((value) => {
+                if(value == "Criar novo item"){
+                  Orcamento.fromListItem = true,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PgCreateProduct(item: novo)),
+                  ).then((value) => setState(() {
+                      Orcamento.fromListItem = false;
+                      getListItens();
+                  })),
                 }
-                catch (e){
-                  print(e);
+                else if(value == "Adicionar da lista de preço"){
+                  Orcamento.fromListItem = false,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => pg_priceList(item: widget.item, fromMenu: false)),
+                  ).then((value) => setState(()  {
+                     Orcamento.fromListItem = false;
+                     getListItens();
+                  })),
                 }
-              }));
+              });
             },
             backgroundColor: buttonColor,
             child: const Icon(Icons.add, color: Colors.black,),

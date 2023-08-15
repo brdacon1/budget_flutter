@@ -43,15 +43,9 @@ class _pg_priceList extends State<pg_priceList>  {
   @override
   initState() {
     super.initState();
-    try{
-      setState(()  async {
-        await getListItens().then((value) => {
-              setState(() {}),
-        });
-      });
-    }
-    catch (e){
-    }
+    setState(()  {
+      getListItens();
+    });
   }
 
   Future <bool> salvaItensList() async {
@@ -571,6 +565,7 @@ class _pg_priceList extends State<pg_priceList>  {
 
     orcamentos = [];
     orcamentos = list;
+    setState(() {});
     return List<ObjectListItens>.from(orcamentos);
   }
 

@@ -283,6 +283,22 @@ class Db{
     return yourModels;
   }
 
+  Future <bool> salvaItensList(ObjectListItens addItens) async {
+    bool result = false;
+    await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/ITENS")
+        .doc(addItens.id)
+        .set({'CATEGORIA': addItens.CATEGORIA,
+      'DESCRICAO' : addItens.DESCRICAO,
+      'PRECO' : addItens.PRECO,
+      'QTD' : addItens.QTD,
+      'MEDIDA' : addItens.MEDIDA,
+      'TOTAL' : addItens.TOTAL,
+      'IDPRODUCT': addItens.id,}).then((value) async {
+       });
+       return result;
+  }
+
   Future<List<Recived>> getListRecived() async {
     var group = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS/${Orcamento.IDORCAMENTO}/RECIBOS")

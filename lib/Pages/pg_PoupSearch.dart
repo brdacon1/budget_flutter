@@ -47,6 +47,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   @override
   initState() {
     try {
+      Orcamento.IDORCAMENTO = '';
       _loadAd();
       setState(() async {
         await getInformationOrcamento();
@@ -837,6 +838,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                         ),
                                       ).then((value) => setState(() {
                                             try {
+                                              Orcamento.IDORCAMENTO = '';
                                               setState(() async {
                                                 await getInformationOrcamento();
                                                 setState(() {
@@ -985,6 +987,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                   ).then((value) => setState(() {
                     try {
                       setState(() async {
+                        Orcamento.IDORCAMENTO = '';
                         await getInformationOrcamento();
                         setState(() {
                           deleteItens.clear();

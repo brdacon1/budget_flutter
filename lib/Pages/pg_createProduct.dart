@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Models/Db.dart';
 import '../Objetos/ObjectListItens.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
@@ -40,6 +41,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
   String? nameButton;
   String? titlePage;
   bool fieldVisible = false;
+  var db = Db();
   ObjectListItens ITENS = ObjectListItens();
   final controller = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   final controllerTotal = MoneyMaskedTextController(leftSymbol: 'R\$ ');
@@ -47,43 +49,44 @@ class _PgCreateProduct extends State<PgCreateProduct> {
 
   @override
   initState() {
-    super.initState();
-    try{
-      setState(()  async {
-        if(widget.item.DESCRICAO.toString() != 'null')
+    setState(() {
+      if(widget.item.DESCRICAO.toString() != 'null')
+      {
+        nameButton = 'ATUALIZAR';
+        titlePage = 'Editar item';
+        _categoriaText.text = widget.item.CATEGORIA.toString();
+        _unidadeText.text = widget.item.MEDIDA.toString();
+        _qtdText.text = widget.item.QTD.toString();
+        controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
+        _descricaoText.text = widget.item.DESCRICAO.toString();
+        print(widget.item.IDPRODUCT.toString());
+        if(widget.item.IDPRODUCT.toString() == 'null')
         {
-          nameButton = 'ATUALIZAR';
-          titlePage = 'Editar item';
-          _categoriaText.text = widget.item.CATEGORIA.toString();
-          _unidadeText.text = widget.item.MEDIDA.toString();
-          _qtdText.text = widget.item.QTD.toString();
-          controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
-          _descricaoText.text = widget.item.DESCRICAO.toString();
-          print(widget.item.IDPRODUCT.toString());
-          if(widget.item.IDPRODUCT.toString() == 'null')
-          {
-            fieldVisible = false;
-          }
-          else
-          {
-            fieldVisible = true;
-          }
+          fieldVisible = false;
         }
         else
         {
-          nameButton = 'SALVAR';
-          titlePage = 'Criar item';
-          _categoriaText.text = 'Serviços';
-          _unidadeText.text = '';
-          _qtdText.text = '';
-          controller.text = '';
-          _descricaoText.text = '';
+          fieldVisible = true;
+        }
+      }
+      else
+      {
+        if(Orcamento.fromListItem == true) {
+          fieldVisible = true;
+        }
+        else{
           fieldVisible = false;
         }
-      });
-    }
-    catch (e){
-    }
+        nameButton = 'SALVAR';
+        titlePage = 'Criar item';
+        _categoriaText.text = 'Serviços';
+        _unidadeText.text = '';
+        _qtdText.text = '';
+        controller.text = '';
+        _descricaoText.text = '';
+      }
+    });
+    super.initState();
   }
 
   Future <void> UpadateItensInPriceList(ObjectListItens itens) async {
@@ -123,8 +126,8 @@ class _PgCreateProduct extends State<PgCreateProduct> {
     }
   }
 
-  Future <void> SaveItensInPriceList(ObjectListItens itens) async {
-
+  Future <String> SaveItensInPriceList(ObjectListItens itens) async {
+    String id = '';
     try{
       await FirebaseFirestore.instance
           .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/PRICELIST")
@@ -137,12 +140,12 @@ class _PgCreateProduct extends State<PgCreateProduct> {
         'COLOR': 'false',
         'IDPRODUCT': itens.IDPRODUCT,
       }).then((value) async {
-
-      }).then((value) {
+         id = value.id;
       });
     }catch (e){
       notificationError(context, "Erro!", "Não foi possível adicionar um novo item em sua lista de preço");
     }
+    return id;
   }
 
   void notification(BuildContext context, String firstMessage, String secondMessage) {
@@ -499,12 +502,22 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       double cleanAmount = moneyConvert.convertFromString(controller.text);
                                       if(nameButton == 'SALVAR')
                                       {
+                                        double cleanAmount = moneyConvert.convertFromString(controller.text);
+                                        double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = 0;
-                                        await SaveItensInPriceList(ITENS).then((value) => {
+                                        ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        controllerTotal.text = totalPrice.toStringAsFixed(2);
+                                        ITENS.TOTAL = totalPrice;
+                                        await SaveItensInPriceList(ITENS).then((value) async => {
+                                          if(Orcamento.fromListItem == true){
+                                               ITENS.id = value,
+                                               print(ITENS.id),
+                                               await db.salvaItensList(ITENS).then((value) => {
+                                            })
+                                          },
                                           notification(context, "Feito!", "Item adicionado com sucesso!"),
                                         });
                                       }
@@ -558,7 +571,6 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                         ]
                     ),
                   ),
-
               ]
           ),
         ),

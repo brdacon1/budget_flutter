@@ -101,7 +101,7 @@ class _pg_TabOrcamentoState extends State<pg_TabOrcamento> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.more_horiz),
-              label: 'Opções',
+              label: 'Mais',
             ),
           ],
         ),
