@@ -283,6 +283,22 @@ class Db{
     return yourModels;
   }
 
+  Future<int> getNumberItems() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.USER.toString()}/USERS/${UID.USER.toString()}/PRICELIST")
+        .get();
+
+    final list = querySnapshot.docs.map<ObjectListItens>((doc) {
+      final objectListItems = ObjectListItens.fromMap(doc.data()!);
+      objectListItems.id = doc.id;
+      objectListItems.checkBox = false;
+      objectListItems.selectProduct = false;
+      return objectListItems;
+    }).toList();
+
+    return list.length;
+  }
+
   Future <bool> salvaItensList(ObjectListItens addItens) async {
     bool result = false;
     await FirebaseFirestore.instance

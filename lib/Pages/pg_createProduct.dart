@@ -348,9 +348,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                           prefixIcon: Icon(Icons.list_alt,color: selected == Gender.categoriaText ? enabledtxt : deaible),
                                           suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.categoriaText ? enabledtxt : deaible,),
                                           hintText: 'Definir categoria',
-                                          hintStyle: TextStyle(
-                                            color:  selected == Gender.categoriaText ? enabledtxt : deaible,
-                                          ),
+                                          hintStyle: const TextStyle(color: Colors.grey),
                                         ),
                                         style:  TextStyle(color:  selected == Gender.categoriaText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                       ),
@@ -381,9 +379,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                           border:InputBorder.none,
                                           prefixIcon: Icon(Icons.analytics_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
                                           hintText: 'Unidade de medida',
-                                          hintStyle: TextStyle(
-                                            color:  selected == Gender.unidadeText ? enabledtxt : deaible,
-                                          ),
+                                          hintStyle: const TextStyle(color: Colors.grey),
                                         ),
                                         style:  TextStyle(color:  selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
                                       ),
@@ -414,9 +410,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                             border:InputBorder.none,
                                             prefixIcon: Icon(Icons.price_change_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
                                             hintText: 'Preço',
-                                            hintStyle: TextStyle(
-                                                color: selected == Gender.unidadeText ? enabledtxt : deaible
-                                            )
+                                            hintStyle: const TextStyle(color: Colors.grey),
                                         ),
                                         keyboardType: TextInputType.number,
                                         style:  TextStyle(color: selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
@@ -451,9 +445,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                             border:InputBorder.none,
                                             prefixIcon: Icon(Icons.calculate_outlined,color: selected == Gender.qtdText ? enabledtxt : deaible),
                                             hintText: 'Quantidade',
-                                            hintStyle: TextStyle(
-                                              color:  selected == Gender.qtdText ? enabledtxt : deaible,
-                                            ),
+                                            hintStyle: const TextStyle(color: Colors.grey),
                                           ),
                                           style:  TextStyle(color:  selected == Gender.qtdText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                         ),
@@ -514,7 +506,6 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                         await SaveItensInPriceList(ITENS).then((value) async => {
                                           if(Orcamento.fromListItem == true){
                                                ITENS.id = value,
-                                               print(ITENS.id),
                                                await db.salvaItensList(ITENS).then((value) => {
                                             })
                                           },

@@ -623,30 +623,44 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-              await displayAlert.listNotification(context).then((value) => {
-                if(value == "Criar novo item"){
-                  Orcamento.fromListItem = true,
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PgCreateProduct(item: novo)),
-                  ).then((value) => setState(() {
+
+              if(await db.getNumberItems() > 0){
+                await displayAlert.listNotification(context).then((value) => {
+                  if(value == "Criar novo item"){
+                    Orcamento.fromListItem = true,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PgCreateProduct(item: novo)),
+                    ).then((value) => setState(() {
                       Orcamento.fromListItem = false;
                       getListItens();
-                  })),
-                }
-                else if(value == "Adicionar da lista de preço"){
-                  Orcamento.fromListItem = false,
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => pg_priceList(item: widget.item, fromMenu: false)),
-                  ).then((value) => setState(()  {
-                     Orcamento.fromListItem = false;
-                     getListItens();
-                  })),
-                }
-              });
+                    })),
+                  }
+                  else if(value == "Selecionar da lista de preço"){
+                    Orcamento.fromListItem = false,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => pg_priceList(item: widget.item, fromMenu: false)),
+                    ).then((value) => setState(()  {
+                      Orcamento.fromListItem = false;
+                      getListItens();
+                    })),
+                  }
+                });
+              }
+              else{
+                    Orcamento.fromListItem = true;
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PgCreateProduct(item: novo)),
+                            ).then((value) => setState(() {
+                            Orcamento.fromListItem = false;
+                            getListItens();
+                     }));
+              }
             },
             backgroundColor: buttonColor,
             child: const Icon(Icons.add, color: Colors.black,),

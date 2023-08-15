@@ -365,7 +365,7 @@ class DisplayAlert {
   }
 
    Future<String> listNotification(BuildContext context) async {
-     List<String> values = ['Criar novo item', 'Adicionar da lista de preço'];
+     List<String> values = ['Criar novo item', 'Selecionar da lista de preço'];
      String resultText = "";
      await showDialog(
          context: context,
@@ -386,7 +386,7 @@ class DisplayAlert {
                        crossAxisAlignment: CrossAxisAlignment.start,
                        children: [
                          Text(values[index], style: const TextStyle(color: bgColor,
-                             fontSize: 15.0)),
+                             fontSize: 16.0)),
                        ]
                    ),
                  );
