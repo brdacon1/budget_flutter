@@ -215,9 +215,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                           prefixIcon: Icon(Icons.list_alt,color: selected == Gender.typeText ? enabledtxt : deaible),
                                           suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.precoText ? enabledtxt : deaible,),
                                           hintText: 'Definir pagamento',
-                                          hintStyle: TextStyle(
-                                            color:  selected == Gender.typeText ? enabledtxt : deaible,
-                                          ),
+                                          hintStyle: const TextStyle(color: Colors.grey),
                                         ),
                                         style:  TextStyle(color:  selected == Gender.typeText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                       ),
@@ -248,9 +246,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                             border:InputBorder.none,
                                             prefixIcon: Icon(Icons.price_change_outlined,color: selected == Gender.precoText ? enabledtxt : deaible,),
                                             hintText: 'Preço',
-                                            hintStyle: TextStyle(
-                                                color: selected == Gender.precoText ? enabledtxt : deaible
-                                            )
+                                            hintStyle: const TextStyle(color: Colors.grey),
                                         ),
                                         keyboardType: TextInputType.number,
                                         style:  TextStyle(color: selected == Gender.precoText ? enabledtxt : deaible,fontWeight:FontWeight.bold),

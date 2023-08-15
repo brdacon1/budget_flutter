@@ -179,9 +179,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                               border:InputBorder.none,
                                               prefixIcon: Icon(Icons.confirmation_number_outlined, color: selected == Gender.descricaoText ? enabledtxt : deaible),
                                               hintText: 'Número do recibo',
-                                              hintStyle: TextStyle(
-                                                color:  selected == Gender.descricaoText ? enabledtxt : deaible,
-                                              ),
+                                              hintStyle: const TextStyle(color: Colors.grey),
                                             ),
                                             style:  TextStyle(color:  selected == Gender.descricaoText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                           ),
@@ -216,9 +214,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                               border:InputBorder.none,
                                               prefixIcon: Icon(Icons.calendar_month_outlined, color: selected == Gender.descricaoText ? enabledtxt : deaible),
                                               hintText: 'Data do recibo',
-                                              hintStyle: TextStyle(
-                                                color:  selected == Gender.descricaoText ? enabledtxt : deaible,
-                                              ),
+                                              hintStyle: const TextStyle(color: Colors.grey),
                                             ),
                                             style:  TextStyle(color:  selected == Gender.descricaoText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
                                           ),

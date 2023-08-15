@@ -623,7 +623,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-
               if(await db.getNumberItems() > 0){
                 await displayAlert.listNotification(context).then((value) => {
                   if(value == "Criar novo item"){
@@ -660,7 +659,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             Orcamento.fromListItem = false;
                             getListItens();
                      }));
-              }
+                }
             },
             backgroundColor: buttonColor,
             child: const Icon(Icons.add, color: Colors.black,),
@@ -677,7 +676,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
             crossAxisAlignment: CrossAxisAlignment.start, // Alinhar à esquerda
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
               Padding(padding: const EdgeInsets.only(left: 10),
                 child: Text(
                   "Total Serviços: ${moneyConvert.convertFromDouble(totalServices!)}",
