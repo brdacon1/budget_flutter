@@ -508,9 +508,9 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
+                                        ITENS.TOTAL = totalPrice;
                                         ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
                                         controllerTotal.text = totalPrice.toStringAsFixed(2);
-                                        ITENS.TOTAL = totalPrice;
                                         await SaveItensInPriceList(ITENS).then((value) async => {
                                           if(Orcamento.fromListItem == true){
                                                ITENS.id = value,
@@ -523,14 +523,14 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       }
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
                                       {
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = 0;
-                                        await UpadateItensInPriceList(ITENS).then((value) => {
-                                          notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                        });
+                                           ITENS.CATEGORIA = _categoriaText.text;
+                                           ITENS.DESCRICAO = _descricaoText.text;
+                                           ITENS.MEDIDA = _unidadeText.text.toString();
+                                           ITENS.PRECO = cleanAmount;
+                                           ITENS.QTD = 0;
+                                           await UpadateItensInPriceList(ITENS).then((value) => {
+                                               notification(context, "Feito!", "Item atualizado com sucesso!"),
+                                           });
                                       }
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                                       {
