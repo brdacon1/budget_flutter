@@ -67,6 +67,8 @@ dependencies:
   dotted_border: ^2.0.0+3
   shared_preferences: ^2.2.0
   google_mobile_ads: ^3.0.0
+  flutter_local_notifications: ^15.1.0+1
+  firebase_messaging: ^14.6.5
 
 dev_dependencies:
   flutter_test:
