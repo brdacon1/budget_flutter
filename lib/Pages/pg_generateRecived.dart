@@ -160,7 +160,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                         delay: 1,
                                         child: Container(
                                           width: we * 0.8,
-                                          height:he * 0.071,
+                                          height:he * 0.078,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(20.0),
                                             color: selected == Gender.descricaoText ?  bgColor : bgColor,
@@ -195,7 +195,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                         delay: 1,
                                         child: Container(
                                           width: we * 0.8,
-                                          height:he * 0.071,
+                                          height:he * 0.078,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(20.0),
                                             color: selected == Gender.descricaoText ?  bgColor : bgColor,
@@ -224,7 +224,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                   Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.075,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.descricaoText ? bgColor : bgColor,
@@ -242,7 +242,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                         decoration: const InputDecoration(
                                           enabledBorder: InputBorder.none,
                                           border: InputBorder.none,
-                                          hintText: 'Escreva a descrição do recibo...',
+                                          hintText: 'Digite nome do recibo...',
                                           hintStyle: TextStyle(color: Colors.grey),
                                         ),
                                         style: TextStyle(

@@ -537,7 +537,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height: he * 0.071,
+                                      height: he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.fullname ?  bgColor : bgColor,
@@ -560,13 +560,12 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                             headerAnimationLoop: false,
                                             animType: AnimType.bottomSlide,
                                             titleTextStyle: const TextStyle(
-                                              color: Colors.black, // Defina a cor do título
-                                              fontSize: 24, // Defina o tamanho da fonte do título
-                                              fontWeight: FontWeight.bold, // Defina o peso da fonte do título
-                                              // Adicione outros atributos do TextStyle conforme necessário
+                                              color: Colors.black,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                             descTextStyle: const TextStyle(
-                                              color: Colors.black, // Defina a cor da descrição
+                                              color: Colors.black,
                                               fontSize: 18, // Defina o tamanho da fonte da descrição
                                               // Adicione outros atributos do TextStyle conforme necessário
                                             ),
@@ -626,7 +625,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.phone ?  bgColor : bgColor,
@@ -695,7 +694,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.status ?  bgColor : bgColor,
@@ -765,7 +764,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                         delay: 1,
                                         child: Container(
                                           width: we * 0.8,
-                                          height:he * 0.071,
+                                          height:he * 0.078,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(20.0),
                                             color: selected == Gender.data ?  bgColor : bgColor,
@@ -799,7 +798,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                         delay: 1,
                                         child: Container(
                                           width: we * 0.8,
-                                          height:he * 0.071,
+                                          height:he * 0.078,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(20.0),
                                             color: selected == Gender.id ?  bgColor : bgColor,
@@ -864,7 +863,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.cep ?  bgColor : bgColor,
@@ -911,7 +910,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.rua ?  bgColor : bgColor,
@@ -944,7 +943,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.city ?  bgColor : bgColor,
@@ -977,7 +976,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.8,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.bairro ?  bgColor : bgColor,

@@ -111,7 +111,7 @@ class DisplayAlert {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: he * 0.25,
+                height: he * 0.26,
                 width: we,
                 child: Column(
                   children: <Widget>[
@@ -149,13 +149,14 @@ class DisplayAlert {
                       ],
                     ),
                     SizedBox(
-                      height: he * 0.02,
+                      height: he * 0.035,
                     ),
                     Container(
                       width: we * 0.80,
-                      height:he * 0.07,
+                      height:he * 0.082,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: secondaryColor, width: 2),
                           color: selected == Gender.email ? enabled : bgColor
                       ),
                       padding: const EdgeInsets.all(8.0),
@@ -185,7 +186,7 @@ class DisplayAlert {
                             : deaible, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Padding(padding: const EdgeInsets.only(top: 20),
+                    Padding(padding: const EdgeInsets.only(top: 25),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: TextButton(
@@ -254,7 +255,7 @@ class DisplayAlert {
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SizedBox(
-                height: he * 0.25,
+                height: he * 0.27,
                 width: we,
                 child: Column(
                   children: <Widget>[
@@ -296,9 +297,10 @@ class DisplayAlert {
                     ),
                     Container(
                       width: we * 0.80,
-                      height:he * 0.07,
+                      height:he * 0.082,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: secondaryColor, width: 2),
                           color: selected == Gender.name ? enabled : bgColor
                       ),
                       padding: const EdgeInsets.all(8.0),

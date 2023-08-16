@@ -293,7 +293,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.categoriaText ?  bgColor : bgColor,
@@ -361,7 +361,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.unidadeText ?  bgColor : bgColor,
@@ -392,7 +392,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
                                           color: selected == Gender.unidadeText ? bgColor : bgColor
@@ -426,7 +426,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       delay: 1,
                                       child: Container(
                                         width: we * 0.80,
-                                        height:he * 0.071,
+                                        height:he * 0.078,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
                                           color: selected == Gender.qtdText ?  bgColor : bgColor,

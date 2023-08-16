@@ -160,7 +160,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.typeText ?  bgColor : bgColor,
@@ -228,7 +228,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                     delay: 1,
                                     child: Container(
                                       width: we * 0.80,
-                                      height:he * 0.071,
+                                      height:he * 0.078,
                                       decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20.0),
                                           color: selected == Gender.precoText ? bgColor : bgColor
