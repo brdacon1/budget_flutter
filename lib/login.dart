@@ -159,6 +159,7 @@ class _Login extends State<Login> {
         .of(context)
         .size
         .width;
+
     var he = MediaQuery
         .of(context)
         .size
@@ -166,19 +167,26 @@ class _Login extends State<Login> {
 
     return Scaffold(
         backgroundColor: bgColor,
-        body: SingleChildScrollView(
+        body: Center(
+         child: SingleChildScrollView(
           child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                FadeAnimation(delay: 0.8,
+                SizedBox(
+                  height: he * 0.020,
+                ),
+                FadeAnimation(
+                  delay: 0.8,
                   child:  Image.asset(
                     'assets/login-initial-page.png',
-                    width: we * 0.8,
-                    height: he * 0.4,
-                  ),),
+                    width: we * 0.5,
+                    height: he * 0.25,
+                  ),
+                ),
                 FadeAnimation(
                   delay: 1,
                   child: Container(
-                    margin: const EdgeInsets.only(right: 230.0),
+                    margin: const EdgeInsets.only(right: 240.0),
                     child: Text("Entrar", style: GoogleFonts.heebo(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -195,9 +203,10 @@ class _Login extends State<Login> {
                   delay: 1,
                   child: Container(
                     width: we * 0.9,
-                    height: he * 0.071,
+                    height: he * 0.082,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: secondaryColor, width: 2),
                       color: selected == Gender.email
                           ? enabled
                           : bgColor,
@@ -237,9 +246,10 @@ class _Login extends State<Login> {
                   delay: 1,
                   child: Container(
                     width: we * 0.9,
-                    height: he * 0.071,
+                    height: he * 0.082,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: secondaryColor, width: 2),
                         color: selected == Gender.password
                             ? enabled
                             : bgColor
@@ -344,38 +354,75 @@ class _Login extends State<Login> {
                   ),
                 ),
                 SizedBox(
-                    height: he * 0.12
+                    height: he * 0.02
                 ),
                 FadeAnimation(
                   delay: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Quer se cadastrar? ", style: GoogleFonts.heebo(
-                        color: Colors.grey,
-                        letterSpacing: 0.5,
-                      )),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) {
-                                return const Singup();
-                              }
-                              )).then((_) {
-                                  checkAutoLogin();
-                              });
-                        },
-                        child: Text("Clique aqui", style: GoogleFonts.heebo(
-                          color: buttonColor.withOpacity(0.9),
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        )),
+                  child: TextButton(
+                      onPressed: () async {
+                        try
+                        {
+                          alertDisplayLoading.alertLoading(context);
+                          await _emailAndPassword(_emailText.text, _passwordText.text);
+                        } catch(e){
+                          alertDisplayLoading.closeLoading(context);
+                          displayAlert.notificationError(context, "Erro!", "Problemas para realizar seu login verifique sua senha e e-mail");
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 80),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0)
+                          )
                       ),
-                    ],
+                      child: Text("Login com Google", style: GoogleFonts.heebo(
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      )
                   ),
                 ),
               ],
-            ),
           ),
+      ),
+     ),
+      bottomNavigationBar: BottomAppBar(
+        color: bgColor,
+        elevation: 0,
+        child: Container(
+          height: 65.0,
+          color: bgColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Quer se cadastrar? ", style: GoogleFonts.heebo(
+                color: Colors.grey,
+                letterSpacing: 0.5,
+              )),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) {
+                        return const Singup();
+                      }
+                      )).then((_) {
+                    checkAutoLogin();
+                  });
+                },
+                child: Text("Clique aqui", style: GoogleFonts.heebo(
+                  color: buttonColor.withOpacity(0.9),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-  }}
+  }
+}

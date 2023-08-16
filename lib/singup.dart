@@ -142,9 +142,10 @@ class _SingupState extends State<Singup> {
                 delay: 1,
                 child: Container(
                   width: we * 0.9,
-                  height:he * 0.071,
+                  height:he * 0.082,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: secondaryColor, width: 2),
                     color: selected == Gender.name ?  enabled : bgColor,
                   ),
                   padding: const EdgeInsets.all(8.0),
@@ -175,9 +176,10 @@ class _SingupState extends State<Singup> {
                 delay: 1,
                 child: Container(
                   width: we * 0.9,
-                  height:he * 0.071,
+                  height:he * 0.082,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: secondaryColor, width: 2),
                     color: selected == Gender.Email ?  enabled : bgColor,
                   ),
                   padding: const EdgeInsets.all(8.0),
@@ -208,9 +210,10 @@ class _SingupState extends State<Singup> {
                 delay: 1,
                 child: Container(
                   width: we * 0.9,
-                  height:he * 0.071,
+                  height:he * 0.082,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: secondaryColor, width: 2),
                       color: selected == Gender.password ? enabled : bgColor
                   ),
                   padding: const EdgeInsets.all(8.0),
@@ -240,7 +243,7 @@ class _SingupState extends State<Singup> {
                 ),
               ),
               SizedBox(
-                height: he * 0.02,
+                height: he * 0.06,
               ),
               FadeAnimation(
                 delay: 1,
@@ -276,34 +279,36 @@ class _SingupState extends State<Singup> {
                     ),)
                 ),
               ),
-              SizedBox(
-                  height: he * 0.13
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: bgColor,
+        elevation: 0,
+        child: Container(
+          height: 65.0,
+          color: bgColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children:  [
+              Text("Já tem uma conta? ",style: GoogleFonts.heebo(
+                color:   Colors.grey,
+                letterSpacing: 0.5,
+              )),
+              GestureDetector(
+                onTap: (){
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                    return Login();
+                  }
+                  ));
+                },
+                child: Text("Entre",style: GoogleFonts.heebo(
+                  color: buttonColor.withOpacity(0.9),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                )),
               ),
-              FadeAnimation(
-                delay: 1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:  [
-                    Text("Já tem uma conta? ",style: GoogleFonts.heebo(
-                      color:   Colors.grey,
-                      letterSpacing: 0.5,
-                    )),
-                    GestureDetector(
-                      onTap: (){
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                          return Login();
-                        }
-                        ));
-                      },
-                      child: Text("Entre",style: GoogleFonts.heebo(
-                        color: buttonColor.withOpacity(0.9),
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      )),
-                    ),
-                  ],
-                ),
-              )
             ],
           ),
         ),
