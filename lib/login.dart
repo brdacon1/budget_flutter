@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
 import 'Services/display_alert.dart';
@@ -75,6 +76,18 @@ class _Login extends State<Login> {
       }
     } else {
     }
+  }
+
+  Future<void> _signinWithGoogle() async {
+    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    UserCredential userCredential = await _auth.signInWithCredential(credential);
+    print(userCredential.user?.uid);
+
   }
 
   Future<void> _emailAndPassword(String email, String password) async {
@@ -362,11 +375,9 @@ class _Login extends State<Login> {
                       onPressed: () async {
                         try
                         {
-                          alertDisplayLoading.alertLoading(context);
-                          await _emailAndPassword(_emailText.text, _passwordText.text);
+                          _signinWithGoogle();
                         } catch(e){
-                          alertDisplayLoading.closeLoading(context);
-                          displayAlert.notificationError(context, "Erro!", "Problemas para realizar seu login verifique sua senha e e-mail");
+
                         }
                       },
                       style: TextButton.styleFrom(
