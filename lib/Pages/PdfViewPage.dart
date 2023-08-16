@@ -68,7 +68,7 @@ class _PdfViewPageState extends State<PdfViewPage> {
           });
           setState(() {});
         } else {
-          await displayAlert.notificationError(context, "Erro!", "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
+          await displayAlert.notificationWarning(context, "Ops!", "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
         }
       }
     } catch (ex) {}

@@ -59,6 +59,40 @@ class DisplayAlert {
     return completer.future;
   }
 
+  Future<void> notificationWarning(BuildContext context, String firstMessage, String secondMessage) {
+    final width = MediaQuery.of(context).size.width;
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AwesomeDialog(
+        width: width * 0.99,
+        context: context,
+        dialogBackgroundColor: Colors.cyan[50],
+        animType: AnimType.leftSlide,
+        headerAnimationLoop: false,
+        dialogType: DialogType.warning,
+        showCloseIcon: false,
+        title: firstMessage,
+        desc: secondMessage,
+        titleTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor do título
+          fontSize: 24, // Defina o tamanho da fonte do título
+          fontWeight: FontWeight.bold, // Defina o peso da fonte do título
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        descTextStyle: const TextStyle(
+          color: Colors.black, // Defina a cor da descrição
+          fontSize: 18, // Defina o tamanho da fonte da descrição
+          // Adicione outros atributos do TextStyle conforme necessário
+        ),
+        btnOkOnPress: () => completer.complete(),
+        btnOkIcon: Icons.check_circle,
+      ).show();
+    });
+
+    return completer.future;
+  }
+
+
   Future<void> dialogChangePassword(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;

@@ -62,7 +62,7 @@ class _PageTabRecibos extends State<PageTabRecibos> {
           currentIndex: _currentIndex,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.picture_as_pdf),
+              icon: Icon(Icons.receipt_long_rounded),
               label: 'Recibo',
             ),
             BottomNavigationBarItem(

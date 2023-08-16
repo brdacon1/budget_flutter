@@ -224,7 +224,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                   Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
                                     child: Container(
                                       width: we * 0.80,
-                                      height: he * 0.30,
+                                      height:he * 0.071,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20.0),
                                         color: selected == Gender.descricaoText ? bgColor : bgColor,
@@ -233,7 +233,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                       child: TextField(
                                         controller: _descricaoText,
                                         keyboardType: TextInputType.multiline,
-                                        maxLines: 50,
+                                        maxLines: 1,
                                         onTap: () {
                                           setState(() {
                                             selected = Gender.descricaoText;
@@ -272,7 +272,7 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                                 ITENS.VALORTOTAL = 0;
                                 await db.savedRecived(ITENS).then((value) async => {
                                   loadingEvent.closeLoading(context),
-                                  displayAlert.notificationNotCloseScreen(context, "Feito!", "Recibo atualizado com sucesso!"),
+                                  displayAlert.notificationNotCloseScreen(context, "Feito!", "Recibo criado com sucesso!"),
                                   widget.recibos.DATA = ITENS.DATA,
                                   widget.recibos.ID = ITENS.ID,
                                   widget.recibos.VALORTOTAL = ITENS.VALORTOTAL,
