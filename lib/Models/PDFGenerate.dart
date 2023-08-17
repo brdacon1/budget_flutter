@@ -9,10 +9,14 @@ import '../Objetos/ObjectListObservationPDF.dart';
 import '../Objetos/Owner.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as budget;
+import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:path_provider/path_provider.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 
+import 'Db.dart';
+
 class PDFGenerate {
+  var db = Db();
   Future<String> patternPDF(
       int countService,
       int countProduct,
@@ -37,14 +41,23 @@ class PDFGenerate {
       PdfPage page = document.pages.add();
       PdfGraphics graphics = page.graphics;
       double sizeWithImage = 0;
+      String? token = '';
+
       ///Start image
       if (obs3.fotoId!.isNotEmpty) {
         try {
-          var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: globalUIDUser.EMAIL!.trim(),
-            password: globalUIDUser.Senha!.trim(),
-          );
-          var token = await auth.user?.getIdToken();
+
+          if(UID.googleAuth!) {
+            token = await db.authGoogle();
+          }
+          else{
+            var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: globalUIDUser.EMAIL!.trim(),
+              password: globalUIDUser.Senha!.trim(),
+            );
+            token = await auth.user?.getIdToken();
+          }
+
           var endpointUrl =
               'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${obs3.logoName}?alt=media&token=${obs3.fotoId}';
           var response = await http.get(

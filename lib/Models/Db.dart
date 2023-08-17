@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
-import 'package:supercharged/supercharged.dart';
+import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 import '../Objetos/DADOS.dart';
 import '../Objetos/ItensListBudget.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -11,6 +13,9 @@ import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../Objetos/ObjetoUIDUser.dart';
 import '../Objetos/Owner.dart';
+
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class Db{
 
@@ -283,6 +288,42 @@ class Db{
     return yourModels;
   }
 
+  Future<bool> createUserWithGoogle(User? value) async {
+    try{
+      final DADOS = ObjetoUIDUser();
+      final PDF = Owner();
+      DADOS.EMAIL = value!.email;
+      DADOS.FONE = value!.phoneNumber;
+      DADOS.USER = value!.uid;
+      DADOS.NOME = value!.displayName;
+      DADOS.Id = value!.uid;
+      PDF.email = value!.email;
+      PDF.empresa = "Minha Empresa";
+      PDF.fone = '(15) 99111-1111';
+      PDF.cep = '18016-456';
+      PDF.city = 'Sorocaba - SP';
+      PDF.rua = 'Ananias Pires do Amaral';
+      PDF.bairro = 'Jardm Gonçalves';
+      PDF.cnpj = '77.574.778/0001-39';
+      PDF.logoName = '';
+      PDF.fotoId = '';
+      await saveUserAdm(DADOS);
+      globalUIDUser.USER = value!.uid;
+      globalUIDUser.NOME = value!.displayName;
+      globalUIDUser.EMAIL = DADOS.EMAIL;
+      globalUIDUser.FONE = DADOS.FONE;
+      globalUIDUser.Id = DADOS.Id;
+      globalUIDUser.IdPay = "";
+      globalUIDUser.ProductId = "";
+      globalUIDUser.PurchaseToken = "";
+      globalUIDUser.AutoRenewing = false;
+      await savePDF(PDF);
+      return true;
+    } catch (e){
+      return false;
+    }
+  }
+
   Future<int> getNumberItems() async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER.toString()}/USERS/${UID.USER.toString()}/PRICELIST")
@@ -362,6 +403,25 @@ class Db{
       return yourModel;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<String> authGoogle() async {
+    String uid = "";
+    try
+    {
+      GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      await _auth.signInWithCredential(credential).then((userCredential) async => {
+        uid = userCredential.credential!.accessToken!,
+      });
+      return uid;
+    } catch(e){
+      return "NOT_AUTH";
     }
   }
 

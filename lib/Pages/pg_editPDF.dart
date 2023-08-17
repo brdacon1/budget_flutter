@@ -42,6 +42,7 @@ TextEditingController _ruaText = TextEditingController();
 TextEditingController _cityText = TextEditingController();
 TextEditingController _bairroText = TextEditingController();
 
+
 class PgEditPDF extends StatefulWidget {
   const PgEditPDF({Key? key}) : super(key: key);
   @override
@@ -50,6 +51,7 @@ class PgEditPDF extends StatefulWidget {
 
 class _PgEditPDF extends State<PgEditPDF> {
   Owner owner = Owner();
+  var db = Db();
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
@@ -82,14 +84,21 @@ class _PgEditPDF extends State<PgEditPDF> {
 
   Future<Uint8List?> initialData() async {
     try {
-      var db = Db();
-      var ownerInitial = await db.getInformationEnterprise();
-      owner = ownerInitial;
-      var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: globalUIDUser.EMAIL!.trim(),
-        password: globalUIDUser.Senha!.trim(),
-      );
-      var token = await auth.user?.getIdToken();
+      String? token = '';
+
+      owner = await db.getInformationEnterprise();
+
+      if(UID.googleAuth!) {
+        token = await db.authGoogle();
+      }
+      else{
+        var auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: globalUIDUser.EMAIL!.trim(),
+          password: globalUIDUser.Senha!.trim(),
+        );
+        token = await auth.user?.getIdToken();
+      }
+
       var endpointUrl =
           'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
       var response = await http.get(
@@ -254,11 +263,11 @@ class _PgEditPDF extends State<PgEditPDF> {
                       future: fileContentFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(
+                          return const Center(
                             child: CircularProgressIndicator(),
                           );
                         } else if (snapshot.hasError) {
-                          return Center(
+                          return const Center(
                             child: Text('Erro ao carregar a imagem'),
                           );
                         } else {
@@ -352,11 +361,30 @@ class _PgEditPDF extends State<PgEditPDF> {
                                       ),
                                     );
                                   },
-                                  child: Image.asset(
-                                    'assets/login-initial-page.png', // Replace with your resource image path
-                                    width: 100, // Replace with desired width
-                                    height: 100, // Replace with desired height
+                                  child: Align(
+                                  alignment: Alignment.center,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Sem imagem disponível',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(color: Colors.white),
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Text(
+                                        'Toque para incluir nova imagem',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(color: Colors.white),
+                                      ),
+                                    ],
                                   ),
+                                 ),
                                 ),
                               );
                             }

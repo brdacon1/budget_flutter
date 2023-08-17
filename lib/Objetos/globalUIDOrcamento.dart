@@ -17,3 +17,4 @@ String? NOMEEMPRESA;
 String? STATUS;
 double? VALORTOTAL;
 bool? fromListItem = false;
+bool? googleAuth = false;

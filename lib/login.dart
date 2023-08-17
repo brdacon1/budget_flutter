@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:oflite/Models/Db.dart';
 import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
 import 'Services/display_alert.dart';
@@ -40,6 +41,7 @@ class _Login extends State<Login> {
   late String uid;
   final displayAlert = DisplayAlert();
   ObjetoUIDUser users = ObjetoUIDUser();
+  var db = Db();
   final alertDisplayLoading = LoadingEvent();
   late List<PurchasedItem>? resultSubscription = [];
 
@@ -79,15 +81,34 @@ class _Login extends State<Login> {
   }
 
   Future<void> _signinWithGoogle() async {
-    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-    AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-    UserCredential userCredential = await _auth.signInWithCredential(credential);
-    print(userCredential.user?.uid);
+    try
+    {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      await _auth.signInWithCredential(credential).then((userCredential) async => {
+        await prefs.setString('email', userCredential.user!.email!),
+        await prefs.setString('password', 'NO_PASS'),
+        UID.Senha = 'NO_PASS',
+        uid = userCredential.user!.uid.toString(),
+        await getUserInfo().then((value) async => {
+          UID.googleAuth = true,
+          if(UID.USER!.isNotEmpty)
+          {
+             if(await db.createUserWithGoogle(userCredential.user)){
+                Navigator.pushReplacementNamed(context, '/menu'),
+             }
+          }
+        }),
+      });
 
+    } catch(e){
+      //await displayAlert.notificationError(context, "Erro!", e.toString());
+    }
   }
 
   Future<void> _emailAndPassword(String email, String password) async {
@@ -100,9 +121,7 @@ class _Login extends State<Login> {
           await prefs.setString('password', password),
           UID.Senha = password.trim(),
           uid = value.user!.uid.toString(),
-          await getUserInfo().then((value) => {
-
-          }),
+          await getUserInfo(),
      });
   }
 
@@ -373,12 +392,7 @@ class _Login extends State<Login> {
                   delay: 1,
                   child: TextButton(
                       onPressed: () async {
-                        try
-                        {
-                          _signinWithGoogle();
-                        } catch(e){
-
-                        }
+                        _signinWithGoogle();
                       },
                       style: TextButton.styleFrom(
                           backgroundColor: Colors.red,
