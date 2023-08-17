@@ -44,6 +44,7 @@ class _Login extends State<Login> {
   var db = Db();
   final alertDisplayLoading = LoadingEvent();
   late List<PurchasedItem>? resultSubscription = [];
+  UserCredential? userCredential;
 
   final List<String> _productLists = Platform.isAndroid
       ? [
@@ -83,6 +84,7 @@ class _Login extends State<Login> {
   Future<void> _signinWithGoogle() async {
     try
     {
+      alertDisplayLoading.alertLoading(context);
       SharedPreferences prefs = await SharedPreferences.getInstance();
       GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
@@ -90,24 +92,17 @@ class _Login extends State<Login> {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
-      await _auth.signInWithCredential(credential).then((userCredential) async => {
-        await prefs.setString('email', userCredential.user!.email!),
-        await prefs.setString('password', 'NO_PASS'),
-        UID.Senha = 'NO_PASS',
-        uid = userCredential.user!.uid.toString(),
-        await getUserInfo().then((value) async => {
-          UID.googleAuth = true,
-          if(UID.USER!.isNotEmpty)
-          {
-             if(await db.createUserWithGoogle(userCredential.user)){
-                Navigator.pushReplacementNamed(context, '/menu'),
-             }
-          }
-        }),
-      });
+
+      userCredential = await _auth.signInWithCredential(credential);
+      await prefs.setString('email', userCredential!.user!.email!);
+      await prefs.setString('password', 'NO_PASS');
+      UID.Senha = 'NO_PASS';
+      uid = userCredential!.user!.uid.toString();
+      UID.googleAuth = true;
+      await getUserInfo();
 
     } catch(e){
-      //await displayAlert.notificationError(context, "Erro!", e.toString());
+        alertDisplayLoading.closeLoading(context);
     }
   }
 
@@ -179,9 +174,13 @@ class _Login extends State<Login> {
                  }
 
              });
-             alertDisplayLoading.closeLoading(context);
-             Navigator.pushReplacementNamed(context, '/menu');
+
         });
+        if(UID.USER != uid){
+          await db.createUserWithGoogle(userCredential!.user, context);
+        }
+        alertDisplayLoading.closeLoading(context);
+        Navigator.pushReplacementNamed(context, '/menu');
         return users;
   }
 

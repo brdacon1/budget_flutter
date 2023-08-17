@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
@@ -288,7 +289,7 @@ class Db{
     return yourModels;
   }
 
-  Future<bool> createUserWithGoogle(User? value) async {
+  Future<bool> createUserWithGoogle(User? value, BuildContext context) async {
     try{
       final DADOS = ObjetoUIDUser();
       final PDF = Owner();
