@@ -55,7 +55,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.housestudio.oflite"
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         targetSdkVersion flutter.targetSdkVersion
         versionCode 102
         versionName '1.8.7'
