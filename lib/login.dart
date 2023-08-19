@@ -99,7 +99,11 @@ class _Login extends State<Login> {
       UID.Senha = 'NO_PASS';
       uid = userCredential!.user!.uid.toString();
       UID.googleAuth = true;
-      await getUserInfo();
+      await getUserInfo().then((value) async => {
+           if(value.USER != uid && value.USER != '') {
+              await db.createUserWithGoogle(userCredential!.user, context),
+           }
+      });
 
     } catch(e){
         alertDisplayLoading.closeLoading(context);
@@ -176,9 +180,7 @@ class _Login extends State<Login> {
              });
 
         });
-        if(UID.USER != uid){
-          await db.createUserWithGoogle(userCredential!.user, context);
-        }
+
         alertDisplayLoading.closeLoading(context);
         Navigator.pushReplacementNamed(context, '/menu');
         return users;
