@@ -69,11 +69,11 @@ class _Login extends State<Login> {
     String? email = prefs.getString('email');
     String? password = prefs.getString('password');
 
-    if (email != null && password != null) {
+    if (email != null && password != "NO_PASS") {
       try
       {
         alertDisplayLoading.alertLoading(context);
-        await _emailAndPassword(email, password);
+        await _emailAndPassword(email, password!);
       }catch(e){
         alertDisplayLoading.closeLoading(context);
       }
@@ -82,32 +82,42 @@ class _Login extends State<Login> {
   }
 
   Future<void> _signinWithGoogle() async {
-    try
-    {
-      alertDisplayLoading.alertLoading(context);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-      AuthCredential credential = GoogleAuthProvider.credential(
+    GoogleSignInAuthentication? googleAuth;
+    AuthCredential credential;
+    await GoogleSignIn().signIn().then((googleUser) async => {
+      googleAuth = await googleUser?.authentication,
+      credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
-      );
+      ),
 
-      userCredential = await _auth.signInWithCredential(credential);
-      await prefs.setString('email', userCredential!.user!.email!);
-      await prefs.setString('password', 'NO_PASS');
-      UID.Senha = 'NO_PASS';
-      uid = userCredential!.user!.uid.toString();
-      UID.googleAuth = true;
+      await singWithCredential(credential),
+    });
+  }
+
+  Future<void> singWithCredential(AuthCredential credential) async {
+    alertDisplayLoading.alertLoading(context);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _auth.signInWithCredential(credential).then((value) async => {
+      userCredential = value,
+      await prefs.setString('email', value!.user!.email!),
+      await prefs.setString('password', 'NO_PASS'),
+      UID.Senha = 'NO_PASS',
+      UID.googleAuth = true,
+
       await getUserInfo().then((value) async => {
-           if(value.USER != uid && value.USER != '') {
-              await db.createUserWithGoogle(userCredential!.user, context),
-           }
-      });
+        if(value.USER != userCredential!.user!.uid) {
+          await db.createUserWithGoogle(userCredential!.user, context).then((value) => {
+               alertDisplayLoading.closeLoading(context),
+               Navigator.pushReplacementNamed(context, '/menu'),
+          }),
+        } else {
+           alertDisplayLoading.closeLoading(context),
+           Navigator.pushReplacementNamed(context, '/menu'),
+        }
+      }),
 
-    } catch(e){
-        alertDisplayLoading.closeLoading(context);
-    }
+    });
   }
 
   Future<void> _emailAndPassword(String email, String password) async {
@@ -129,7 +139,7 @@ class _Login extends State<Login> {
   }
 
   Future<ObjetoUIDUser> getUserInfo() async {
-        FirebaseFirestore.instance
+      await  FirebaseFirestore.instance
         .collection('USUARIOS')
         .where('USER', isEqualTo: uid)
         .get().then((value) async {
@@ -166,23 +176,17 @@ class _Login extends State<Login> {
                    UID.AutoRenewing = data['autoRenewing'] ?? false;
                    UID.PurchaseToken = data['purchaseToken'];
                    UID.ProductId = data['productId'];
-
                     if(!acknowledgedValue) {
                         await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
-                      }
+                    }
                  }
                  else
                  {
                      UID.AutoRenewing = false;
                      UID.PurchaseToken = '';
                  }
-
              });
-
         });
-
-        alertDisplayLoading.closeLoading(context);
-        Navigator.pushReplacementNamed(context, '/menu');
         return users;
   }
 

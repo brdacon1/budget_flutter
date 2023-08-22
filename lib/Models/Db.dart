@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
-import 'package:oflite/Objetos/globalUIDUser.dart' as globalUIDUser;
 import '../Objetos/DADOS.dart';
 import '../Objetos/ItensListBudget.dart';
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
@@ -14,11 +13,13 @@ import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../Objetos/ObjetoUIDUser.dart';
 import '../Objetos/Owner.dart';
+import '../Services/loading_event.dart';
 
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class Db{
+  final alertDisplayLoading = LoadingEvent();
 
   Future<List<ItensListBudget>> getListItensGerador() async {
     List<ItensListBudget> yourModels = [];
@@ -289,8 +290,9 @@ class Db{
     return yourModels;
   }
 
-  Future<bool> createUserWithGoogle(User? value, BuildContext context) async {
+  Future<void> createUserWithGoogle(User? value, BuildContext context) async {
     try{
+      alertDisplayLoading.alertLoading(context);
       final DADOS = ObjetoUIDUser();
       final PDF = Owner();
       DADOS.EMAIL = value!.email;
@@ -309,19 +311,20 @@ class Db{
       PDF.logoName = '';
       PDF.fotoId = '';
       await saveUserAdm(DADOS);
-      globalUIDUser.USER = value!.uid;
-      globalUIDUser.NOME = value!.displayName;
-      globalUIDUser.EMAIL = DADOS.EMAIL;
-      globalUIDUser.FONE = DADOS.FONE;
-      globalUIDUser.Id = DADOS.Id;
-      globalUIDUser.IdPay = "";
-      globalUIDUser.ProductId = "";
-      globalUIDUser.PurchaseToken = "";
-      globalUIDUser.AutoRenewing = false;
-      await savePDF(PDF);
-      return true;
+      UID.USER = value!.uid;
+      UID.NOME = value!.displayName;
+      UID.EMAIL = DADOS.EMAIL;
+      UID.FONE = DADOS.FONE;
+      UID.Id = DADOS.Id;
+      UID.IdPay = "";
+      UID.ProductId = "";
+      UID.PurchaseToken = "";
+      UID.AutoRenewing = false;
+      await savePDF(PDF).then((value) => {
+            alertDisplayLoading.closeLoading(context),
+      });
     } catch (e){
-      return false;
+      alertDisplayLoading.closeLoading(context);
     }
   }
 
