@@ -495,13 +495,13 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       if(nameButton == 'SALVAR')
                                       {
                                         double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        double totalPrice = cleanAmount * double.parse(_qtdText.text ?? '1');
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
                                         ITENS.TOTAL = totalPrice;
-                                        ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        ITENS.QTD = moneyConvert.convertFromString(_qtdText.text ?? '1');
                                         controllerTotal.text = totalPrice.toStringAsFixed(2);
                                         await SaveItensInPriceList(ITENS).then((value) async => {
                                           if(Orcamento.fromListItem == true){
@@ -526,7 +526,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                                       {
                                         double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        double totalPrice = cleanAmount * double.parse(_qtdText.text);
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();

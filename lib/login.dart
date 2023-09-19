@@ -90,7 +90,6 @@ class _Login extends State<Login> {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       ),
-
       await singWithCredential(credential),
     });
   }
@@ -98,40 +97,42 @@ class _Login extends State<Login> {
   Future<void> singWithCredential(AuthCredential credential) async {
     alertDisplayLoading.alertLoading(context);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await _auth.signInWithCredential(credential).then((value) async => {
-      userCredential = value,
-      await prefs.setString('email', value!.user!.email!),
-      await prefs.setString('password', 'NO_PASS'),
-      UID.Senha = 'NO_PASS',
-      UID.googleAuth = true,
+    var auth = await _auth.signInWithCredential(credential);
 
-      await getUserInfo().then((value) async => {
-        if(value.USER != userCredential!.user!.uid) {
-          await db.createUserWithGoogle(userCredential!.user, context).then((value) => {
-               alertDisplayLoading.closeLoading(context),
-               Navigator.pushReplacementNamed(context, '/menu'),
-          }),
-        } else {
-           alertDisplayLoading.closeLoading(context),
-           Navigator.pushReplacementNamed(context, '/menu'),
-        }
-      }),
+    userCredential = auth;
+    await prefs.setString('email', auth?.user?.email ?? '');
+    await prefs.setString('password', 'NO_PASS');
+    UID.Senha = 'NO_PASS';
+    UID.googleAuth = true;
 
-    });
+    var USER = await getUserInfo();
+    if(USER.Id != userCredential!.user!.uid) {
+      await db.createUserWithGoogle(userCredential!.user, context).then((value) => {
+        alertDisplayLoading.closeLoading(context),
+        Navigator.pushReplacementNamed(context, '/menu'),
+      });
+    } else {
+       alertDisplayLoading.closeLoading(context);
+       await Navigator.pushReplacementNamed(context, '/menu');
+    }
   }
 
   Future<void> _emailAndPassword(String email, String password) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await _auth.signInWithEmailAndPassword(
+     var auth = await _auth.signInWithEmailAndPassword(
       email: email.trim(),
       password: password.trim(),
-     ).then((value) async => {
-          await prefs.setString('email', email),
-          await prefs.setString('password', password),
-          UID.Senha = password.trim(),
-          uid = value.user!.uid.toString(),
-          await getUserInfo(),
-     });
+     );
+     await prefs.setString('email', email);
+     await prefs.setString('password', password);
+     UID.Senha = password.trim();
+     uid = auth.user!.uid.toString();
+     var USER = await getUserInfo();
+    if(USER.Id !=  null) {
+      alertDisplayLoading.closeLoading(context);
+      await Navigator.pushReplacementNamed(context, '/menu');
+    }
+
   }
 
   Future<ObjetoUIDUser> getContacts() async {
@@ -180,8 +181,7 @@ class _Login extends State<Login> {
                         await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
                     }
                  }
-                 else
-                 {
+                 else {
                      UID.AutoRenewing = false;
                      UID.PurchaseToken = '';
                  }
