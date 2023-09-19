@@ -44,7 +44,6 @@ class _Login extends State<Login> {
   var db = Db();
   final alertDisplayLoading = LoadingEvent();
   late List<PurchasedItem>? resultSubscription = [];
-  UserCredential? userCredential;
 
   final List<String> _productLists = Platform.isAndroid
       ? [
@@ -99,15 +98,16 @@ class _Login extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var auth = await _auth.signInWithCredential(credential);
 
-    userCredential = auth;
     await prefs.setString('email', auth?.user?.email ?? '');
     await prefs.setString('password', 'NO_PASS');
     UID.Senha = 'NO_PASS';
     UID.googleAuth = true;
 
+    uid = auth.user?.uid ?? '';
     var USER = await getUserInfo();
-    if(USER.Id != userCredential!.user!.uid) {
-      await db.createUserWithGoogle(userCredential!.user, context).then((value) => {
+
+    if(USER.Id != auth!.user!.uid) {
+      await db.createUserWithGoogle(auth?.user, context).then((value) => {
         alertDisplayLoading.closeLoading(context),
         Navigator.pushReplacementNamed(context, '/menu'),
       });
@@ -128,6 +128,7 @@ class _Login extends State<Login> {
      UID.Senha = password.trim();
      uid = auth.user!.uid.toString();
      var USER = await getUserInfo();
+     UID.googleAuth = false;
     if(USER.Id !=  null) {
       alertDisplayLoading.closeLoading(context);
       await Navigator.pushReplacementNamed(context, '/menu');
