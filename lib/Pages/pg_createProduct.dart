@@ -492,15 +492,15 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                   child: TextButton(
                                     onPressed: () async {
                                       double cleanAmount = moneyConvert.convertFromString(controller.text);
+                                      double totalPrice = cleanAmount * moneyConvert.convertQtdFromString(_qtdText.text);
                                       if(nameButton == 'SALVAR')
                                       {
-                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text);
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
                                         ITENS.TOTAL = totalPrice;
-                                        ITENS.QTD = moneyConvert.convertFromString(_qtdText.text);
+                                        ITENS.QTD = moneyConvert.convertQtdFromString(_qtdText.text);
                                         controllerTotal.text = totalPrice.toStringAsFixed(2);
                                         await SaveItensInPriceList(ITENS).then((value) async => {
                                           if(Orcamento.fromListItem == true){
@@ -524,12 +524,11 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       }
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                                       {
-                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text);
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = double.parse(_qtdText.text.replaceAll(',', '.'));
+                                        ITENS.QTD = moneyConvert.convertQtdFromString(_qtdText.text);
                                         controllerTotal.text = totalPrice.toStringAsFixed(2);
                                         ITENS.TOTAL = totalPrice;
                                         await UpdateItensOrcamentoList(ITENS).then((value) => {

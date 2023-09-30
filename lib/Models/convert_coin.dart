@@ -16,7 +16,16 @@ class convert_coin {
 
     double convertValor = double.parse(valorClean) / 100;
 
-    print(convertValor); // Saída: 1000.5
+    return convertValor;
+  }
+
+  double convertQtdFromString(String? value)
+  {
+    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    String valorClean = value!.replaceAll(formatter.currencySymbol, '')
+        .replaceAll(',', '.');
+
+    double convertValor = double.parse(valorClean);
 
     return convertValor;
   }
