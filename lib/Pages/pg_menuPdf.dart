@@ -172,10 +172,7 @@ class _MenuSelectionPage extends State<MenuPagePdf> {
         ],
       ),
       bottomNavigationBar: _bannerAd != null
-          ? BottomAppBar(color: bgColor,
-            height: _bannerAd!.size.height.toDouble(),
-            child: SizedBox(height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
-        ),
+          ? SizedBox(width: we, height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
       ) : null,
     );
   }

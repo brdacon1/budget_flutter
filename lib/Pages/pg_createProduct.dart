@@ -56,7 +56,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
         titlePage = 'Editar item';
         _categoriaText.text = widget.item.CATEGORIA.toString();
         _unidadeText.text = widget.item.MEDIDA.toString();
-        _qtdText.text = widget.item.QTD.toString();
+        _qtdText.text = widget.item.QTD.toString() ?? '1';
         controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
         _descricaoText.text = widget.item.DESCRICAO.toString();
         print(widget.item.IDPRODUCT.toString());
@@ -81,7 +81,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
         titlePage = 'Criar item';
         _categoriaText.text = 'Serviços';
         _unidadeText.text = '';
-        _qtdText.text = '';
+        _qtdText.text = '1';
         controller.text = '';
         _descricaoText.text = '';
       }
@@ -495,7 +495,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       if(nameButton == 'SALVAR')
                                       {
                                         double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * double.parse(_qtdText.text ?? '1');
+                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text ?? '1');
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
@@ -526,7 +526,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                                       {
                                         double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * double.parse(_qtdText.text);
+                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text ?? '1');
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();

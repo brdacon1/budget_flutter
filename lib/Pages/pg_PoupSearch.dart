@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -592,7 +590,8 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
   @override
   Widget build(BuildContext context) {
-    var he = MediaQuery.of(context).size.height;
+    final he = MediaQuery.of(context).size.height;
+    final we = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: bgColor,
       body: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
@@ -805,7 +804,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                           SizedBox(height: 4),
                                           Icon(Icons.delete_outline_rounded),
                                           SizedBox(height: 2.0),
-                                          Text('Excluir', style: TextStyle(fontSize: 10)),
+                                          Text('Excluir', style: TextStyle(fontSize: 8.5)),
                                         ],
                                       ),
                                     ),
@@ -855,7 +854,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                         SizedBox(height: 4),
                                         Icon(Icons.open_in_new_rounded),
                                         SizedBox(height: 2.0),
-                                        Text('Abrir', style: TextStyle(fontSize: 10)),
+                                        Text('Abrir', style: TextStyle(fontSize: 8.5)),
                                       ],
                                     ),
                                   ),
@@ -897,7 +896,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                         SizedBox(height: 4),
                                         Icon(Icons.copy),
                                         SizedBox(height: 2.0),
-                                        Text('Duplicar', style: TextStyle(fontSize: 10)),
+                                        Text('Duplicar', style: TextStyle(fontSize: 8.5)),
                                       ],
                                     ),
                                   ),
@@ -1010,12 +1009,8 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
         ],
       ),
       bottomNavigationBar: _bannerAd != null
-          ? BottomAppBar(
-           color: bgColor,
-           height: _bannerAd!.size.height.toDouble(),
-           child: SizedBox(height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
-        ),
-      ) : null, // Se o banner não estiver carregado ou não for exibido, não mostrar o bottomNavigationBar
+          ? SizedBox(width: we, height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
+      ) : null,
     );
   }
 }

@@ -530,7 +530,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                               SizedBox(height: 4),
                                               Icon(Icons.delete_outline_rounded),
                                               SizedBox(height: 2.0),
-                                              Text('Excluir'),
+                                              Text('Excluir', style: TextStyle(fontSize: 10)),
                                             ],
                                           ),
                                         ),
@@ -567,7 +567,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                             SizedBox(height: 4),
                                             Icon(Icons.edit),
                                             SizedBox(height: 2.0),
-                                            Text('Editar'),
+                                            Text('Editar', style: TextStyle(fontSize: 10)),
                                           ],
                                         ),
                                       ),
@@ -666,36 +666,32 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: Container(
+        height: 65.0,
         color: buttonColor,
-        elevation: 0,
-        child: Container(
-          height: 65.0,
-          color: buttonColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Alinhar à esquerda
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(padding: const EdgeInsets.only(left: 10),
-                child: Text(
-                  "Total Serviços: ${moneyConvert.convertFromDouble(totalServices!)}",
-                  style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                "Total Serviços: ${moneyConvert.convertFromDouble(totalServices!)}",
+                style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
-              Padding(padding: const EdgeInsets.only(left: 10),
-                      child: Text(
-                        "Total produtos: ${moneyConvert.convertFromDouble(totalProducts!)}",
-                        style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
-                      ),
+            ),
+            Padding(padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                "Total produtos: ${moneyConvert.convertFromDouble(totalProducts!)}",
+                style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
-              Padding(padding: const EdgeInsets.only(left: 10),
-                child: Text(
-                  "Total orçamento: ${moneyConvert.convertFromDouble(totalBudget!)}",
-                  style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
-                ),
+            ),
+            Padding(padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                "Total orçamento: ${moneyConvert.convertFromDouble(totalBudget!)}",
+                style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
