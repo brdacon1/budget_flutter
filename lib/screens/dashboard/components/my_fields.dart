@@ -1,9 +1,5 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Objetos/MyBudgetDashboard.dart';
-import 'package:oflite/Pages/pq_subscription.dart';
 import 'package:oflite/models/MyFiles.dart';
-import 'package:oflite/responsive.dart';
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import 'file_info_card.dart';
@@ -29,7 +25,6 @@ class _MyFiles extends State<MyFiles> {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
     return const Column(
       children: [
         Row(

@@ -2,20 +2,16 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/Models/Db.dart';
-import 'package:oflite/Pages/pg_createPayment.dart';
-import 'package:oflite/Pages/pg_generateRecived.dart';
 import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/constants.dart';
 import '../Models/convert_coin.dart';
 import '../Objetos/DADOS.dart';
-import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 
-TextEditingController _descricaoText = TextEditingController();
 
 class PgRecivedList extends StatefulWidget {
   final DADOS item;

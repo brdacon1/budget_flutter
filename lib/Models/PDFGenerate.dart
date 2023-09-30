@@ -111,32 +111,32 @@ class PDFGenerate {
       pdfGrid.headers.clear();
       PdfGridRow row;
 
-      if (obs3?.empresa?.isNotEmpty ?? false) {
+      if (obs3.empresa?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.empresa;
       }
 
-      if (obs3?.cnpj?.isNotEmpty ?? false) {
+      if (obs3.cnpj?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.cnpj;
       }
 
-      if (obs3?.email?.isNotEmpty ?? false) {
+      if (obs3.email?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.email;
       }
 
-      if (obs3?.fone?.isNotEmpty ?? false) {
+      if (obs3.fone?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.fone;
       }
 
-      if (obs3?.rua?.isNotEmpty ?? false) {
+      if (obs3.rua?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.rua!;
       }
 
-      if (obs3?.city?.isNotEmpty ?? false) {
+      if (obs3.city?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.city!;
       }
@@ -198,60 +198,60 @@ class PDFGenerate {
 
         PdfGridRow row;
 
-        if (obs2?.ID?.isNotEmpty ?? false) {
+        if (obs2.ID?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Número :';
           row.cells[1].value = obs2.ID!;
         }
 
-        if (obs2?.DATA?.isNotEmpty ?? false) {
+        if (obs2.DATA?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Criado em :';
           row.cells[1].value = obs2.DATA!;
         }
 
-        if (obs2?.NOMECLIENTE?.isNotEmpty ?? false) {
+        if (obs2.NOMECLIENTE?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Cliente :';
           row.cells[1].value = obs2.NOMECLIENTE!;
         }
 
-        if (obs2?.FONE?.isNotEmpty ?? false) {
+        if (obs2.FONE?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Telefone :';
           row.cells[1].value = obs2.FONE!;
           count += 10;
         }
 
-        if (obs2?.NOMEEMPRESA?.isNotEmpty ?? false) {
+        if (obs2.NOMEEMPRESA?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Empresa :';
           row.cells[1].value = obs2.NOMEEMPRESA!;
           count += 10;
         }
 
-        if (obs2?.RUA?.isNotEmpty ?? false) {
+        if (obs2.RUA?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Rua :';
           row.cells[1].value = obs2.RUA!;
           count += 10;
         }
 
-        if (obs2?.BAIRRO?.isNotEmpty ?? false) {
+        if (obs2.BAIRRO?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Bairro :';
           row.cells[1].value = obs2.BAIRRO!;
           count += 10;
         }
 
-        if (obs2?.CITY?.isNotEmpty ?? false) {
+        if (obs2.CITY?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Cidade :';
           row.cells[1].value = obs2.CITY!;
           count += 10;
         }
 
-        if (obs2?.CEP?.isNotEmpty ?? false) {
+        if (obs2.CEP?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'CEP :';
           row.cells[1].value = obs2.CEP!;
@@ -583,8 +583,8 @@ class PDFGenerate {
          for (int index = 0; index < obs4.length; index++)
          {
              rowComment = commentPdfGrid.rows.add();
-             rowComment.cells[0].value = obs4[index].data!;
-             rowComment.cells[1].value = obs4[index].observacao!;
+             rowComment.cells[0].value = obs4[index].data;
+             rowComment.cells[1].value = obs4[index].observacao;
          }
 
          PdfGridCellStyle styleComment = PdfGridCellStyle();

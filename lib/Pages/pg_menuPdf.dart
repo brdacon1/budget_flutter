@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:oflite/Pages/pg_TabOrcamento.dart';
-import 'package:oflite/Pages/pg_editPDF.dart';
 import 'package:oflite/Pages/pg_listComment.dart';
-import 'package:oflite/Pages/pg_paymentList.dart';
 import 'package:oflite/Pages/pg_recivedList.dart';
-import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/Services/display_alert.dart';
 import '../Objetos/DADOS.dart';
 import '../anmition/fadeanimation.dart';

@@ -537,12 +537,9 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
 
     for (var questionTmp in querySnapshot.docs) {
       final data = questionTmp.data();
-      if (data != null) {
-        // Verifica se os dados não são nulos antes de criar a instância de DADOS
-        _foundUsers.add(DADOS.fromMap(data));
-        _foundUsers[index].checkBox = false;
-        index++;
-      }
+      _foundUsers.add(DADOS.fromMap(data));
+      _foundUsers[index].checkBox = false;
+      index++;
     }
 
     return _foundUsers;
@@ -920,7 +917,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Visibility(
-            visible: deleteVisible ?? true,
+            visible: deleteVisible,
             child: badges.Badge(
               badgeStyle: badges.BadgeStyle(
                 badgeColor: const Color.fromARGB(255, 231, 15, 87),

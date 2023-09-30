@@ -538,7 +538,7 @@ class _pg_priceList extends State<pg_priceList>  {
         .get();
 
     final list = querySnapshot.docs.map<ObjectListItens>((doc) {
-      final objectListItens = ObjectListItens.fromMap(doc.data()!);
+      final objectListItens = ObjectListItens.fromMap(doc.data());
       objectListItens.id = doc.id;
       objectListItens.checkBox = false;
       objectListItens.selectProduct = false;
@@ -818,7 +818,7 @@ class _pg_priceList extends State<pg_priceList>  {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Visibility(
-            visible: !(widget.fromMenu ?? false) && !(deleteVisible ?? false),
+            visible: !(widget.fromMenu ?? false) && !(deleteVisible),
             child: badges.Badge(
               badgeStyle: badges.BadgeStyle(
                 badgeColor: const Color.fromARGB(255, 231, 15, 87),
@@ -847,7 +847,7 @@ class _pg_priceList extends State<pg_priceList>  {
             ),
           ),
           Visibility(
-            visible: deleteVisible ?? true,
+            visible: deleteVisible,
             child: badges.Badge(
                    badgeStyle: badges.BadgeStyle(
                    badgeColor: const Color.fromARGB(255, 231, 15, 87),

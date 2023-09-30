@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +12,6 @@ import '../Objetos/ObjectPagamentosCliente.dart';
 import '../Services/display_alert.dart';
 import '../Services/loading_event.dart';
 import '../anmition/fadeanimation.dart';
-import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 
 TextEditingController _descricaoText = TextEditingController();

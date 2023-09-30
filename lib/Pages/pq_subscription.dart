@@ -44,7 +44,7 @@ class _pg_subscription extends State<pg_subscription> {
                         ? current
                         : next);
 
-                    Map<String, dynamic> data = jsonDecode(latestSubscription!.transactionReceipt ?? '');
+                    Map<String, dynamic> data = jsonDecode(latestSubscription.transactionReceipt ?? '');
                     bool acknowledgedValue = data['acknowledged'];
                     UID.AutoRenewing = data['autoRenewing'];
                     UID.PurchaseToken = data['purchaseToken'];

@@ -263,7 +263,6 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
 
   Future<void> EventSave() async{
     final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
     if(nameButton == "ATUALIZAR")
     {
       orcamento.VALORTOTAL = widget.item.VALORTOTAL;
@@ -341,7 +340,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
       orcamento.DATA = formatted;
       orcamento.NOMECLIENTE = _nameText.text;
       orcamento.FONE = _phoneText.text;
-      orcamento.STATUS = _statusText.text ?? 'PENDENTE';
+      orcamento.STATUS = _statusText.text;
       orcamento.CEP = _cepText.text;
       orcamento.RUA = _ruaText.text;
       orcamento.CITY = _cityText.text;
@@ -357,7 +356,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           widget.item.NOMEEMPRESA = orcamento.NOMEEMPRESA;
           widget.item.NOMECLIENTE = _nameText.text;
           widget.item.FONE = _phoneText.text;
-          widget.item.STATUS = _statusText.text ?? 'PENDENTE';
+          widget.item.STATUS = _statusText.text;
           widget.item.CEP = _cepText.text;
           widget.item.RUA = _ruaText.text;
           widget.item.CITY = _cityText.text;

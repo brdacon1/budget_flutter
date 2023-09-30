@@ -1,8 +1,6 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
+
 import 'package:flutter/material.dart';
 import 'package:oflite/Objetos/ObjectRecived.dart';
-import 'package:oflite/Pages/GeradorOrcamento.dart';
-import 'package:oflite/Pages/PdfViewPage.dart';
 import 'package:oflite/Pages/pg_generateRecived.dart';
 import 'package:oflite/Pages/pg_paymentList.dart';
 import 'package:oflite/Pages/pg_pdfViewPageRecived.dart';

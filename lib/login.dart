@@ -98,7 +98,7 @@ class _Login extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var auth = await _auth.signInWithCredential(credential);
 
-    await prefs.setString('email', auth?.user?.email ?? '');
+    await prefs.setString('email', auth.user?.email ?? '');
     await prefs.setString('password', 'NO_PASS');
     UID.Senha = 'NO_PASS';
     UID.googleAuth = true;
@@ -106,8 +106,8 @@ class _Login extends State<Login> {
     uid = auth.user?.uid ?? '';
     var USER = await getUserInfo();
 
-    if(USER.Id != auth!.user!.uid) {
-      await db.createUserWithGoogle(auth?.user, context).then((value) => {
+    if(USER.Id != auth.user!.uid) {
+      await db.createUserWithGoogle(auth.user, context).then((value) => {
         alertDisplayLoading.closeLoading(context),
         Navigator.pushReplacementNamed(context, '/menu'),
       });
@@ -173,7 +173,7 @@ class _Login extends State<Login> {
                        ? current
                        : next);
 
-                   Map<String, dynamic> data = jsonDecode(latestSubscription!.transactionReceipt ?? '');
+                   Map<String, dynamic> data = jsonDecode(latestSubscription.transactionReceipt ?? '');
                    bool acknowledgedValue = data['acknowledged'];
                    UID.AutoRenewing = data['autoRenewing'] ?? false;
                    UID.PurchaseToken = data['purchaseToken'];

@@ -56,7 +56,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
         titlePage = 'Editar item';
         _categoriaText.text = widget.item.CATEGORIA.toString();
         _unidadeText.text = widget.item.MEDIDA.toString();
-        _qtdText.text = widget.item.QTD.toString() ?? '1';
+        _qtdText.text = widget.item.QTD.toString();
         controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
         _descricaoText.text = widget.item.DESCRICAO.toString();
         print(widget.item.IDPRODUCT.toString());
@@ -494,14 +494,13 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       double cleanAmount = moneyConvert.convertFromString(controller.text);
                                       if(nameButton == 'SALVAR')
                                       {
-                                        double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text ?? '1');
+                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text);
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();
                                         ITENS.PRECO = cleanAmount;
                                         ITENS.TOTAL = totalPrice;
-                                        ITENS.QTD = moneyConvert.convertFromString(_qtdText.text ?? '1');
+                                        ITENS.QTD = moneyConvert.convertFromString(_qtdText.text);
                                         controllerTotal.text = totalPrice.toStringAsFixed(2);
                                         await SaveItensInPriceList(ITENS).then((value) async => {
                                           if(Orcamento.fromListItem == true){
@@ -525,8 +524,7 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                                       }
                                       else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
                                       {
-                                        double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text ?? '1');
+                                        double totalPrice = cleanAmount * moneyConvert.convertFromString(_qtdText.text);
                                         ITENS.CATEGORIA = _categoriaText.text;
                                         ITENS.DESCRICAO = _descricaoText.text;
                                         ITENS.MEDIDA = _unidadeText.text.toString();

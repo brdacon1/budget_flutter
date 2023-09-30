@@ -1,7 +1,4 @@
-import 'package:oflite/models/RecentFile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-
 import '../../../Objetos/DADOS.dart';
 import '../../../constants.dart';
 

@@ -105,32 +105,32 @@ class PDFGenerateRecived {
       pdfGrid.headers.clear();
       PdfGridRow row;
 
-      if (obs3?.empresa?.isNotEmpty ?? false) {
+      if (obs3.empresa?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.empresa;
       }
 
-      if (obs3?.cnpj?.isNotEmpty ?? false) {
+      if (obs3.cnpj?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.cnpj;
       }
 
-      if (obs3?.email?.isNotEmpty ?? false) {
+      if (obs3.email?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.email;
       }
 
-      if (obs3?.fone?.isNotEmpty ?? false) {
+      if (obs3.fone?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.fone;
       }
 
-      if (obs3?.rua?.isNotEmpty ?? false) {
+      if (obs3.rua?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.rua!;
       }
 
-      if (obs3?.city?.isNotEmpty ?? false) {
+      if (obs3.city?.isNotEmpty ?? false) {
         row = pdfGrid.rows.add();
         row.cells[0].value = obs3.city!;
       }
@@ -192,19 +192,19 @@ class PDFGenerateRecived {
 
         PdfGridRow row;
 
-        if (obs2?.ID?.isNotEmpty ?? false) {
+        if (obs2.ID?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Número do orçamento:';
           row.cells[1].value = obs2.ID!;
         }
 
-        if (obs2?.NOMECLIENTE?.isNotEmpty ?? false) {
+        if (obs2.NOMECLIENTE?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Cliente :';
           row.cells[1].value = obs2.NOMECLIENTE!;
         }
 
-        if (obs2?.FONE?.isNotEmpty ?? false) {
+        if (obs2.FONE?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Telefone :';
           row.cells[1].value = obs2.FONE!;
@@ -246,19 +246,19 @@ class PDFGenerateRecived {
 
         PdfGridRow row;
 
-        if (recived?.ID?.isNotEmpty ?? false) {
+        if (recived.ID?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Número do recibo:';
           row.cells[1].value = recived.ID!;
         }
 
-        if (recived?.DATA?.isNotEmpty ?? false) {
+        if (recived.DATA?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Data do recibo :';
           row.cells[1].value = recived.DATA!;
         }
 
-        if (recived?.DESCRICAO?.isNotEmpty ?? false) {
+        if (recived.DESCRICAO?.isNotEmpty ?? false) {
           row = pdfGrid.rows.add();
           row.cells[0].value = 'Nome do recibo :';
           row.cells[1].value = recived.DESCRICAO!;

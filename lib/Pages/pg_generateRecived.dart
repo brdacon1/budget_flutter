@@ -1,4 +1,3 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:oflite/Models/Db.dart';
 import 'package:oflite/Models/convert_coin.dart';
 import 'package:oflite/Objetos/DADOS.dart';
-import 'package:oflite/Pages/pg_tabRecibos.dart';
 import 'package:oflite/anmition/fadeanimation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Objetos/ObjectRecived.dart';

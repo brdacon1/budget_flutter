@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/screens/dashboard/components/month_evolution.dart';
 import '../../Objetos/DADOS.dart';
 import '../../Objetos/MyBudgetDashboard.dart';
@@ -181,10 +178,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     for (var questionTmp in querySnapshot.docs) {
       final data = questionTmp.data();
-      if (data != null) {
-        // Verifica se os dados não são nulos antes de criar a instância de DADOS
-        _foundUsers.add(DADOS.fromMap(data));
-      }
+      _foundUsers.add(DADOS.fromMap(data));
     }
 
     return _foundUsers;
@@ -216,7 +210,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       const SizedBox(height: defaultPadding),
                       MonthEvolution(item: _monthCalculate),
                       const SizedBox(height: defaultPadding),
-                      RecentFiles(items: _foundUsers!),
+                      RecentFiles(items: _foundUsers),
                     ],
                   ),
                 ),

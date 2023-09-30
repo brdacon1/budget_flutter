@@ -592,7 +592,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           Visibility(
-            visible: deleteVisible ?? true,
+            visible: deleteVisible,
             child: badges.Badge(
               badgeStyle: badges.BadgeStyle(
                 badgeColor: const Color.fromARGB(255, 231, 15, 87),
@@ -675,19 +675,19 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
           children: [
             Padding(padding: const EdgeInsets.only(left: 10),
               child: Text(
-                "Total Serviços: ${moneyConvert.convertFromDouble(totalServices!)}",
+                "Total Serviços: ${moneyConvert.convertFromDouble(totalServices)}",
                 style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
             ),
             Padding(padding: const EdgeInsets.only(left: 10),
               child: Text(
-                "Total produtos: ${moneyConvert.convertFromDouble(totalProducts!)}",
+                "Total produtos: ${moneyConvert.convertFromDouble(totalProducts)}",
                 style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
             ),
             Padding(padding: const EdgeInsets.only(left: 10),
               child: Text(
-                "Total orçamento: ${moneyConvert.convertFromDouble(totalBudget!)}",
+                "Total orçamento: ${moneyConvert.convertFromDouble(totalBudget)}",
                 style: const TextStyle(color: bgColor, fontWeight: FontWeight.bold,),
               ),
             ),

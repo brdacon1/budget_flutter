@@ -273,7 +273,7 @@ class Db{
         .get();
 
     var yourModels = group.docs.map<ObjectPagamentosCliente>((doc) {
-      final objectListItens = ObjectPagamentosCliente.fromMap(doc.data()!);
+      final objectListItens = ObjectPagamentosCliente.fromMap(doc.data());
       objectListItens.id = doc.id;
       return objectListItens;
     }).toList();
@@ -295,12 +295,12 @@ class Db{
       alertDisplayLoading.alertLoading(context);
       final DADOS = ObjetoUIDUser();
       final PDF = Owner();
-      DADOS.EMAIL = value!.email;
-      DADOS.FONE = value!.phoneNumber;
-      DADOS.USER = value!.uid;
-      DADOS.NOME = value!.displayName;
-      DADOS.Id = value!.uid;
-      PDF.email = value!.email;
+      DADOS.EMAIL = value?.email ?? '';
+      DADOS.FONE = value?.phoneNumber ?? '';
+      DADOS.USER = value?.uid ?? '';
+      DADOS.NOME = value?.displayName ?? '';
+      DADOS.Id = value?.uid ?? '';
+      PDF.email = value?.email ?? '';
       PDF.empresa = "Minha Empresa";
       PDF.fone = '(15) 99111-1111';
       PDF.cep = '18016-456';
@@ -311,8 +311,8 @@ class Db{
       PDF.logoName = '';
       PDF.fotoId = '';
       await saveUserAdm(DADOS);
-      UID.USER = value!.uid;
-      UID.NOME = value!.displayName;
+      UID.USER = value?.uid ?? '';
+      UID.NOME = value?.displayName ?? '';
       UID.EMAIL = DADOS.EMAIL;
       UID.FONE = DADOS.FONE;
       UID.Id = DADOS.Id;
@@ -334,7 +334,7 @@ class Db{
         .get();
 
     final list = querySnapshot.docs.map<ObjectListItens>((doc) {
-      final objectListItems = ObjectListItens.fromMap(doc.data()!);
+      final objectListItems = ObjectListItens.fromMap(doc.data());
       objectListItems.id = doc.id;
       objectListItems.checkBox = false;
       objectListItems.selectProduct = false;
@@ -366,7 +366,7 @@ class Db{
         .get();
 
    var yourModels = group.docs.map<Recived>((doc) {
-      final objectListItens = Recived.fromMap(doc.data()!);
+      final objectListItens = Recived.fromMap(doc.data());
       objectListItens.ID = doc.id;
       objectListItens.checkBox = false;
       return objectListItens;

@@ -6,7 +6,6 @@ import 'package:oflite/Models/convert_coin.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../Models/Db.dart';
-import '../Models/PDFGenerate.dart';
 import '../Objetos/DADOS.dart';
 import '../Objetos/ObjectRecived.dart';
 import '../Services/display_alert.dart';

@@ -1,10 +1,6 @@
-import 'package:oflite/models/RecentFile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:oflite/screens/dashboard/components/storage_info_card.dart';
-
 import '../../../Models/convert_coin.dart';
-import '../../../Objetos/DADOS.dart';
 import '../../../Objetos/month_calculate.dart';
 import '../../../constants.dart';
 import 'chart_line.dart';
@@ -77,28 +73,28 @@ class _MonthEvolution extends State<MonthEvolution> {
             svgSrc: Icons.check,
             iconColor: Colors.green,
             title: "Aprovados",
-            amountOfFiles: moneyConvert.convertFromDouble(totalApproved!),
+            amountOfFiles: moneyConvert.convertFromDouble(totalApproved),
             numOfFiles: totalApproved.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.close_sharp,
             iconColor: Colors.red,
             title: "Reprovados",
-            amountOfFiles: moneyConvert.convertFromDouble(totalReproved!),
+            amountOfFiles: moneyConvert.convertFromDouble(totalReproved),
             numOfFiles: totalReproved.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.pending_outlined,
             iconColor: Colors.amberAccent,
             title: "Pendentes",
-            amountOfFiles: moneyConvert.convertFromDouble(totalPending!),
+            amountOfFiles: moneyConvert.convertFromDouble(totalPending),
             numOfFiles: totalPending.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.circle,
             iconColor: Colors.white,
             title: "Finalizados",
-            amountOfFiles: moneyConvert.convertFromDouble(totalFinish!),
+            amountOfFiles: moneyConvert.convertFromDouble(totalFinish),
             numOfFiles: totalFinish.toInt(),
           ),
         ],
