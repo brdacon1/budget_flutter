@@ -175,11 +175,18 @@ class _DashboardScreen extends State<DashboardScreen> {
       lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
     }
 
-    String firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch.toString();
-    String lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch.toString();
+    int firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch;
+    int lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch;
+
+
+    print(firstDayMillis);
+    print(lastDayMillis);
 
     final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
+        .where('ID', isGreaterThanOrEqualTo: firstDayMillis)
+        .where('ID', isLessThanOrEqualTo: lastDayMillis)
+        .orderBy('ID', descending: false)
         .get();
 
     for (var questionTmp in querySnapshot.docs) {
@@ -189,6 +196,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     return _foundUsers;
   }
+
 
 
   @override

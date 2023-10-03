@@ -106,7 +106,7 @@ class _Login extends State<Login> {
     uid = auth.user?.uid ?? '';
     var USER = await getUserInfo();
 
-    if(USER.Id != auth.user!.uid) {
+    if(USER.USER != auth.user!.uid) {
       await db.createUserWithGoogle(auth.user, context).then((value) => {
         alertDisplayLoading.closeLoading(context),
         Navigator.pushReplacementNamed(context, '/menu'),
@@ -129,7 +129,7 @@ class _Login extends State<Login> {
      uid = auth.user!.uid.toString();
      var USER = await getUserInfo();
      UID.googleAuth = false;
-    if(USER.Id !=  null) {
+    if(USER.USER !=  null) {
       alertDisplayLoading.closeLoading(context);
       await Navigator.pushReplacementNamed(context, '/menu');
     }
