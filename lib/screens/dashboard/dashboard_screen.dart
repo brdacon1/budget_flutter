@@ -73,8 +73,10 @@ class _DashboardScreen extends State<DashboardScreen> {
   void startDashBoard() async{
     int millisecondsSinceEpoch = 0;
     double weekNumber = 0;
-    try {
-      var value = await getInformationBudget();
+    await Permission.storage.request();
+    var value = await getInformationBudget();
+
+    setState(() {
       _myBudgetDashboard.qtdTotal = value.length;
       for (int i = 0; i < value.length; i++) {
         weekNumber = 0;
@@ -145,11 +147,7 @@ class _DashboardScreen extends State<DashboardScreen> {
           }
         }
       }
-
-    } catch (e) {
-      print(e);
-    }
-    setState(() {});
+    });
   }
 
   @override
@@ -165,29 +163,22 @@ class _DashboardScreen extends State<DashboardScreen> {
   }
 
   Future<List<DADOS>> getInformationBudget() async {
-    await Permission.storage.request();
+
     _foundUsers.clear();
     DateTime currentDate = DateTime.now();
     DateTime firstDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month, 1);
-
-    DateTime lastDayOfCurrentMonth;
-    if (currentDate.month == 12) {
-      lastDayOfCurrentMonth = DateTime(currentDate.year + 1, 1, 0);
-    } else {
-      lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
-    }
+    DateTime lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
 
     int firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch;
     int lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch;
 
-
-    print(firstDayMillis);
-    print(lastDayMillis);
+    print(firstDayOfCurrentMonth);
+    print(lastDayOfCurrentMonth);
 
     final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
-        .where('ID', isGreaterThanOrEqualTo: firstDayMillis)
-        .where('ID', isLessThanOrEqualTo: lastDayMillis)
+        .where('ID', isGreaterThanOrEqualTo: firstDayMillis.toString())
+        .where('ID', isLessThanOrEqualTo: lastDayMillis.toString())
         .orderBy('ID', descending: false)
         .get();
 
