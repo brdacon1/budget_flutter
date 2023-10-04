@@ -172,9 +172,6 @@ class _DashboardScreen extends State<DashboardScreen> {
     int firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch;
     int lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch;
 
-    print(firstDayOfCurrentMonth);
-    print(lastDayOfCurrentMonth);
-
     final querySnapshot = await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.USER}/USERS/${UID.USER}/ORCAMENTOS")
         .where('ID', isGreaterThanOrEqualTo: firstDayMillis.toString())
@@ -197,7 +194,6 @@ class _DashboardScreen extends State<DashboardScreen> {
         padding: const EdgeInsets.all(defaultPadding),
         child: Column(
           children: [
-            // Restante do seu código permanece inalterado
             const Header(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
