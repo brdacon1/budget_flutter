@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/screens/dashboard/components/month_evolution.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../Objetos/DADOS.dart';
 import '../../Objetos/MyBudgetDashboard.dart';
 import '../../Objetos/month_calculate.dart';
@@ -164,6 +165,8 @@ class _DashboardScreen extends State<DashboardScreen> {
   }
 
   Future<List<DADOS>> getInformationBudget() async {
+    await Permission.storage.request();
+    await Permission.photos.request();
     _foundUsers.clear();
     DateTime currentDate = DateTime.now();
     DateTime firstDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month, 1);
@@ -196,8 +199,6 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     return _foundUsers;
   }
-
-
 
   @override
   Widget build(BuildContext context) {

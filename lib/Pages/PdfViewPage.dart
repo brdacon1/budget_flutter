@@ -9,7 +9,6 @@ import '../Models/PDFGenerate.dart';
 import '../Services/display_alert.dart';
 import '../anmition/fadeanimation.dart';
 import 'package:share/share.dart';
-
 import '../constants.dart';
 
 class PdfViewPage extends StatefulWidget {

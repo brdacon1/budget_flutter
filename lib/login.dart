@@ -95,6 +95,7 @@ class _Login extends State<Login> {
 
   Future<void> singWithCredential(AuthCredential credential) async {
     alertDisplayLoading.alertLoading(context);
+    var USER = await getUserInfo();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var auth = await _auth.signInWithCredential(credential);
 
@@ -102,9 +103,7 @@ class _Login extends State<Login> {
     await prefs.setString('password', 'NO_PASS');
     UID.Senha = 'NO_PASS';
     UID.googleAuth = true;
-
     uid = auth.user?.uid ?? '';
-    var USER = await getUserInfo();
 
     if(USER.USER != auth.user!.uid) {
       await db.createUserWithGoogle(auth.user, context).then((value) => {
