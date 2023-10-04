@@ -610,7 +610,8 @@ class PDFGenerate {
       }
       ///End table comment
 
-      final directory = await getApplicationSupportDirectory();
+      final directory = await getTemporaryDirectory();
+      print(directory);
       final path = directory.path;
       File file = File('$path/${budget.IDORCAMENTO}.pdf');
       await file.writeAsBytes(await document.save(), flush: true);

@@ -37,10 +37,10 @@ dependencies:
   supercharged: ^2.1.1
   cached_network_image: ^3.2.0
   google_fonts: ^6.1.0
-  path_provider: ^2.0.15
-  firebase_core: ^2.14.0
-  firebase_auth: ^4.6.3
-  cloud_firestore: ^4.8.1
+  path_provider: ^2.1.1
+  firebase_core: ^2.17.0
+  firebase_auth: ^4.10.1
+  cloud_firestore: ^4.9.3
   provider: ^6.0.5
   expansion_tile_card: ^3.0.0
   mask_text_input_formatter: ^2.3.0
@@ -66,8 +66,8 @@ dependencies:
   shared_preferences: ^2.2.0
   google_mobile_ads: ^3.0.0
   flutter_local_notifications: ^15.1.0+1
-  firebase_messaging: ^14.6.5
-  google_sign_in: ^6.1.4
+  firebase_messaging: ^14.6.9
+  google_sign_in: ^6.1.5
   flutter_inapp_purchase: ^5.4.2
   share: ^2.0.4
 

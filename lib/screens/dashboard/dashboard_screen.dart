@@ -166,7 +166,6 @@ class _DashboardScreen extends State<DashboardScreen> {
 
   Future<List<DADOS>> getInformationBudget() async {
     await Permission.storage.request();
-    await Permission.photos.request();
     _foundUsers.clear();
     DateTime currentDate = DateTime.now();
     DateTime firstDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month, 1);
