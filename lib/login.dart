@@ -83,28 +83,25 @@ class _Login extends State<Login> {
   Future<void> _signinWithGoogle() async {
     GoogleSignInAuthentication? googleAuth;
     AuthCredential credential;
-    await GoogleSignIn().signIn().then((googleUser) async => {
-      googleAuth = await googleUser?.authentication,
-      credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      ),
-      await singWithCredential(credential),
-    });
+    var googleUser = await GoogleSignIn().signIn();
+    googleAuth = await googleUser?.authentication;
+    credential = GoogleAuthProvider.credential(
+              accessToken: googleAuth?.accessToken,
+              idToken: googleAuth?.idToken,
+    );
+    await singWithCredential(credential);
   }
 
   Future<void> singWithCredential(AuthCredential credential) async {
     alertDisplayLoading.alertLoading(context);
-    var USER = await getUserInfo();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var auth = await _auth.signInWithCredential(credential);
-
     await prefs.setString('email', auth.user?.email ?? '');
     await prefs.setString('password', 'NO_PASS');
     UID.Senha = 'NO_PASS';
     UID.googleAuth = true;
     uid = auth.user?.uid ?? '';
-
+    var USER = await getUserInfo();
     if(USER.USER != auth.user!.uid) {
       await db.createUserWithGoogle(auth.user, context).then((value) => {
         alertDisplayLoading.closeLoading(context),
@@ -164,30 +161,31 @@ class _Login extends State<Login> {
                  UID.ProductId = obj['ProductId'];
                  UID.PurchaseToken = obj['PurchaseToken'];
                  UID.AutoRenewing = obj['AutoRenewing'] ?? false;
-
-                 resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
-                 if(resultSubscription!.isNotEmpty){
-                   var latestSubscription = resultSubscription!.reduce((current, next) =>
-                   current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
-                       ? current
-                       : next);
-
-                   Map<String, dynamic> data = jsonDecode(latestSubscription.transactionReceipt ?? '');
-                   bool acknowledgedValue = data['acknowledged'];
-                   UID.AutoRenewing = data['autoRenewing'] ?? false;
-                   UID.PurchaseToken = data['purchaseToken'];
-                   UID.ProductId = data['productId'];
-                    if(!acknowledgedValue) {
-                        await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
-                    }
-                 }
-                 else {
-                     UID.AutoRenewing = false;
-                     UID.PurchaseToken = '';
-                 }
              });
         });
-        return users;
+
+
+      resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
+      if(resultSubscription!.isNotEmpty){
+        var latestSubscription = resultSubscription!.reduce((current, next) =>
+        current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
+            ? current
+            : next);
+
+        Map<String, dynamic> data = jsonDecode(latestSubscription.transactionReceipt ?? '');
+        bool acknowledgedValue = data['acknowledged'];
+        UID.AutoRenewing = data['autoRenewing'] ?? false;
+        UID.PurchaseToken = data['purchaseToken'];
+        UID.ProductId = data['productId'];
+        if(!acknowledgedValue) {
+          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
+        }
+      }
+      else {
+        UID.AutoRenewing = false;
+        UID.PurchaseToken = '';
+      }
+      return users;
   }
 
   @override
