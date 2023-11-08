@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/Models/Db.dart';
 import 'package:oflite/constants.dart';
 import 'package:oflite/singup.dart';
+import 'Pages/terms_conditions_screen.dart';
 import 'Services/display_alert.dart';
 import 'Services/loading_event.dart';
 import 'anmition/fadeanimation.dart';
@@ -414,10 +415,40 @@ class _Login extends State<Login> {
                       )
                   ),
                 ),
+                SizedBox(
+                    height: he * 0.025
+                ),
+                FadeAnimation(
+                  delay: 1,
+                  child: TextButton(
+                      onPressed: () async {
+                         await  Navigator.of(context).push(
+                             MaterialPageRoute(builder: (context) {
+                               return TermsAndConditionsScreen();
+                             }
+                             ));
+                      },
+                      style: TextButton.styleFrom(
+                          backgroundColor: bgColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 80),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0)
+                          )
+                      ),
+                      child: Text("Politica de privacidade", style: GoogleFonts.heebo(
+                        color: buttonColor,
+                        letterSpacing: 0.5,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                ),
               ],
           ),
+        ),
       ),
-     ),
       bottomNavigationBar: BottomAppBar(
         color: bgColor,
         elevation: 0,

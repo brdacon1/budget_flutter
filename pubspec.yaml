@@ -65,11 +65,12 @@ dependencies:
   dotted_border: ^2.0.0+3
   shared_preferences: ^2.2.0
   google_mobile_ads: ^3.0.0
-  flutter_local_notifications: ^15.1.0+1
   firebase_messaging: ^14.6.9
   google_sign_in: ^6.1.5
   flutter_inapp_purchase: ^5.4.2
   share: ^2.0.4
+  webview_flutter: ^4.4.2
+  webview_flutter_android: ^3.12.1
 
 dependency_overrides:
   http: ^0.13.6
