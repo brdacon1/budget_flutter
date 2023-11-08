@@ -1,13 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
 import '../constants.dart';
-
-
 
 class TermsAndConditionsScreen extends StatefulWidget {
   static const String routeName = '/terms-and-conditions';
+  const TermsAndConditionsScreen({Key? key}) : super(key: key);
 
   @override
   _TermsAndConditionsScreenState createState() =>
