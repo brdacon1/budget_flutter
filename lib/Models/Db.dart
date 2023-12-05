@@ -302,12 +302,6 @@ class Db{
       DADOS.Id = value?.uid ?? '';
       PDF.email = value?.email ?? '';
       PDF.empresa = "Minha Empresa";
-      PDF.fone = '(15) 99111-1111';
-      PDF.cep = '18016-456';
-      PDF.city = 'Sorocaba - SP';
-      PDF.rua = 'Ananias Pires do Amaral';
-      PDF.bairro = 'Jardm Gonçalves';
-      PDF.cnpj = '77.574.778/0001-39';
       PDF.logoName = '';
       PDF.fotoId = '';
       await saveUserAdm(DADOS);

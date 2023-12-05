@@ -1,0 +1,4 @@
+key - sw@key58YTWp
+key Password - sw@key58YTWp
+Alias - swfast sw@key58YTWp
+Name KeyStore Path - swfast sw@key58YTWp.keystore

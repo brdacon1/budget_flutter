@@ -25,16 +25,16 @@ class Owner {
 
   factory Owner.fromJson(Map<String, dynamic>? json) { // Adicione '?' após 'dynamic'
     return Owner(
-      rua: json?['RUA'] ?? '',
-      empresa: json?['EMPRESA'] ?? '',
-      email: json?['EMAIL'] ?? '',
-      cnpj: json?['CNPJ'] ?? '',
-      bairro: json?['BAIRRO'] ?? '',
-      city: json?['CITY'] ?? '',
-      cep: json?['CEP'] ?? '',
-      fotoId: json?['FOTOID'] ?? '',
-      fone: json?['FONE'] ?? '',
-      logoName: json?['LOGONAME'] ?? '',
+      rua: json?['RUA'],
+      empresa: json?['EMPRESA'],
+      email: json?['EMAIL'],
+      cnpj: json?['CNPJ'],
+      bairro: json?['BAIRRO'],
+      city: json?['CITY'],
+      cep: json?['CEP'],
+      fotoId: json?['FOTOID'],
+      fone: json?['FONE'],
+      logoName: json?['LOGONAME'],
     );
   }
 
