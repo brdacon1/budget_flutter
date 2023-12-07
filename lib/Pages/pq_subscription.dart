@@ -287,7 +287,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                                     fontSize: screenAwareSize(26.0, context),
                                     fontFamily: "Montserrat-Medium")),
                             SizedBox(width: screenAwareSize(2.0, context)),
-                            Text("4,99/mês",
+                            Text("3,59/mês",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: screenAwareSize(20.0, context),
