@@ -117,20 +117,20 @@ class _PgRecivedList extends State<PgRecivedList> {
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child:
                       Theme(
-                        data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                         child: ExpansionTileCard(
-                          expandedTextColor: bgColor,
-                          baseColor: Colors.cyan[50],
-                          expandedColor: Colors.blue[50],
+                          expandedTextColor: whiteColor,
+                          baseColor: secondaryColor,
+                          expandedColor: secondaryColor,
                           leading: const CircleAvatar(
                               backgroundColor: bgColor,
-                              child: Icon(Icons.receipt_long_rounded, color: Colors.white,)),
+                              child: Icon(Icons.receipt_long_rounded, color: whiteColor,)),
                           title:
                           Text(
                             foundPayment[index].DESCRICAO!,
                             maxLines: 2,
                             style: const TextStyle(
-                              color: bgColor,
+                              color: whiteColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
@@ -139,7 +139,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                           subtitle: Text(
                             "Valor total do recibo: ${moneyConvert.convertFromDouble(foundPayment[index].VALORTOTAL!)}",
                             style: const TextStyle(
-                              color: bgColor,
+                              color: whiteColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                             ),
@@ -159,7 +159,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                                 child: Text(
                                   "Data do recibo: ${foundPayment[index].DATA}",
                                   style: const TextStyle(
-                                    color: bgColor,
+                                    color: whiteColor,
                                     letterSpacing: 0.5,
                                     fontSize: 12.0,
                                   ),
@@ -176,7 +176,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                                 child: Text(
                                   "Quantidade: ${foundPayment[index].ID}",
                                   style: const TextStyle(
-                                    color: bgColor,
+                                    color: whiteColor,
                                     letterSpacing: 0.5,
                                     fontSize: 12.0,
                                   ),
@@ -200,7 +200,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                                           height: 52.0,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: bgColor,
+                                              backgroundColor: whiteColor,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(5.0),
                                               ),
@@ -224,9 +224,9 @@ class _PgRecivedList extends State<PgRecivedList> {
                                             child: const Column(
                                               children: <Widget>[
                                                 SizedBox(height: 4),
-                                                Icon(Icons.delete_outline_rounded),
+                                                Icon(Icons.delete_outline_rounded, color: bgColor,),
                                                 SizedBox(height: 2.0),
-                                                Text('Excluir', style: TextStyle(fontSize: 8.5)),
+                                                Text('Excluir', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                               ],
                                             ),
                                           ),
@@ -241,7 +241,7 @@ class _PgRecivedList extends State<PgRecivedList> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: bgColor,
+                                            backgroundColor: whiteColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -261,9 +261,9 @@ class _PgRecivedList extends State<PgRecivedList> {
                                           child: const Column(
                                             children: <Widget>[
                                               SizedBox(height: 4),
-                                              Icon(Icons.open_in_new_rounded),
+                                              Icon(Icons.open_in_new_rounded, color: bgColor,),
                                               SizedBox(height: 2.0),
-                                              Text('Abrir', style: TextStyle(fontSize: 8.5)),
+                                              Text('Abrir', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                             ],
                                           ),
                                         ),

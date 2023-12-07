@@ -391,20 +391,20 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child:
                       Theme(
-                          data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                          data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                           child: ExpansionTileCard(
-                          expandedTextColor: bgColor,
-                          baseColor: Colors.cyan[50],
-                          expandedColor: Colors.blue[50],
+                          expandedTextColor: whiteColor,
+                          baseColor: secondaryColor,
+                          expandedColor: secondaryColor,
                           leading: const CircleAvatar(
                             backgroundColor: bgColor,
-                            child: Icon(Icons.production_quantity_limits, color: Colors.white,)),
+                            child: Icon(Icons.production_quantity_limits, color: whiteColor,)),
                            title:
                            Text(
                              getFilteredData()[index].DESCRICAO!,
                           maxLines: 2,
                           style: const TextStyle(
-                            color: bgColor,
+                            color: whiteColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                             fontWeight: FontWeight.bold,
@@ -413,7 +413,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         subtitle: Text(
                           "Preço: ${moneyConvert.convertFromDouble(getFilteredData()[index].PRECO!)}",
                           style: const TextStyle(
-                            color: bgColor,
+                            color: whiteColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                           ),
@@ -433,7 +433,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Categoria: ${getFilteredData()[index].CATEGORIA}",
                                 style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -450,7 +450,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Total: ${moneyConvert.convertFromDouble(getFilteredData()[index].TOTAL!)}",
                                 style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -467,7 +467,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Quantidade: ${getFilteredData()[index].QTD}",
                                 style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -484,7 +484,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               child: Text(
                                 "Unidade de medida: ${getFilteredData()[index].MEDIDA}",
                                 style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -508,7 +508,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: bgColor,
+                                            backgroundColor: whiteColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -528,9 +528,9 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                           child: const Column(
                                             children: <Widget>[
                                               SizedBox(height: 4),
-                                              Icon(Icons.delete_outline_rounded),
+                                              Icon(Icons.delete_outline_rounded, color: bgColor,),
                                               SizedBox(height: 2.0),
-                                              Text('Excluir', style: TextStyle(fontSize: 10)),
+                                              Text('Excluir', style: TextStyle(fontSize: 10, color: bgColor)),
                                             ],
                                           ),
                                         ),
@@ -545,7 +545,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                       height: 52.0,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: bgColor,
+                                          backgroundColor: whiteColor,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                           ),
@@ -565,9 +565,9 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                                         child: const Column(
                                           children: <Widget>[
                                             SizedBox(height: 4),
-                                            Icon(Icons.edit),
+                                            Icon(Icons.edit, color: bgColor,),
                                             SizedBox(height: 2.0),
-                                            Text('Editar', style: TextStyle(fontSize: 10)),
+                                            Text('Editar', style: TextStyle(fontSize: 10, color: bgColor)),
                                           ],
                                         ),
                                       ),

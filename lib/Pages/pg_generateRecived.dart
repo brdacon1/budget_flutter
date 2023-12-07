@@ -130,24 +130,24 @@ class _PgGenerateRecived extends State<PgGenerateRecived> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 0),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
                                 initiallyExpanded: true,
-                                expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.receipt_long_rounded, color: Colors.white,)),
-                                title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 15,
+                                    child: Icon(Icons.receipt_long_rounded, color: whiteColor,)),
+                                title: Text("Insira dados do recibo",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                     letterSpacing: 1),
                                 ),
-                                subtitle: Text("Insira dados do recibo",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.bold,
+                                subtitle: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
                                     fontSize: 13,
                                     letterSpacing: 1),
                                 ),

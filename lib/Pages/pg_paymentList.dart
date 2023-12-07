@@ -121,20 +121,20 @@ class _PgPaymentList extends State<PgPaymentList> {
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child:
                       Theme(
-                        data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                         child: ExpansionTileCard(
-                          expandedTextColor: bgColor,
-                          baseColor: Colors.cyan[50],
-                          expandedColor: Colors.blue[50],
+                          expandedTextColor: whiteColor,
+                          baseColor: secondaryColor,
+                          expandedColor: secondaryColor,
                           leading: const CircleAvatar(
                               backgroundColor: bgColor,
-                              child: Icon(Icons.payments_outlined, color: Colors.white,)),
+                              child: Icon(Icons.payments_outlined, color: whiteColor,)),
                           title:
                           Text(
                             foundPayment[index].DESCRICAO!,
                             maxLines: 2,
                             style: const TextStyle(
-                              color: bgColor,
+                              color: whiteColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _PgPaymentList extends State<PgPaymentList> {
                           subtitle: Text(
                             "Valor do pagamento: ${moneyConvert.convertFromDouble(foundPayment[index].PRECO!)}",
                             style: const TextStyle(
-                              color: bgColor,
+                              color: whiteColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                             ),
@@ -163,7 +163,7 @@ class _PgPaymentList extends State<PgPaymentList> {
                                 child: Text(
                                   "Método do pagamento: ${foundPayment[index].METODO}",
                                   style: const TextStyle(
-                                    color: bgColor,
+                                    color: whiteColor,
                                     letterSpacing: 0.5,
                                     fontSize: 12.0,
                                   ),
@@ -187,7 +187,7 @@ class _PgPaymentList extends State<PgPaymentList> {
                                           height: 52.0,
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: bgColor,
+                                              backgroundColor: whiteColor,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(5.0),
                                               ),
@@ -212,9 +212,9 @@ class _PgPaymentList extends State<PgPaymentList> {
                                             child: const Column(
                                               children: <Widget>[
                                                 SizedBox(height: 4),
-                                                Icon(Icons.delete_outline_rounded),
+                                                Icon(Icons.delete_outline_rounded, color: bgColor),
                                                 SizedBox(height: 2.0),
-                                                Text('Excluir'),
+                                                Text('Editar', style: TextStyle(fontSize: 10, color: bgColor)),
                                               ],
                                             ),
                                           ),
@@ -229,7 +229,7 @@ class _PgPaymentList extends State<PgPaymentList> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: bgColor,
+                                            backgroundColor: whiteColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -248,9 +248,9 @@ class _PgPaymentList extends State<PgPaymentList> {
                                           child: const Column(
                                             children: <Widget>[
                                               SizedBox(height: 4),
-                                              Icon(Icons.edit),
+                                              Icon(Icons.edit, color: bgColor),
                                               SizedBox(height: 2.0),
-                                              Text('Editar'),
+                                              Text('Editar', style: TextStyle(fontSize: 10, color: bgColor)),
                                             ],
                                           ),
                                         ),

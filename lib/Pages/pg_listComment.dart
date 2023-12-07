@@ -357,20 +357,20 @@ class _ListCommentPageState extends State<ListCommentPage> {
                     return  Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Theme(
-                      data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                      data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                       child: ExpansionTileCard(
-                      expandedTextColor: bgColor,
-                        baseColor: Colors.cyan[50],
-                        expandedColor: Colors.blue[50],
+                        expandedTextColor: whiteColor,
+                        baseColor: secondaryColor,
+                        expandedColor: secondaryColor,
                         leading: const CircleAvatar(
                             backgroundColor: bgColor,
-                            child: Icon(Icons.comment, color: Colors.white,)),
+                            child: Icon(Icons.comment, color: whiteColor,)),
                         title:
                         Text(
                           "${foundObservation[index].observacao}",
                           maxLines: 2,
                           style: const TextStyle(
-                            color: bgColor,
+                            color: whiteColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                             fontWeight: FontWeight.bold,
@@ -379,7 +379,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                         subtitle: Text(
                           "Data: ${foundObservation[index].data}",
                           style: const TextStyle(
-                            color: bgColor,
+                            color: whiteColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0,
                           ),
@@ -399,7 +399,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                               child: Text(
                                 "Comentário: ${foundObservation[index].observacao}",
                                 style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0,
                                 ),
@@ -423,7 +423,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                         height: 52.0,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: bgColor,
+                                            backgroundColor: whiteColor,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(5.0),
                                             ),
@@ -439,9 +439,9 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                           child: const Column(
                                             children: <Widget>[
                                               SizedBox(height: 4),
-                                              Icon(Icons.delete_outline_rounded),
+                                              Icon(Icons.delete_outline_rounded, color: bgColor,),
                                               SizedBox(height: 2.0),
-                                              Text('Excluir', style: TextStyle(fontSize: 8.5)),
+                                              Text('Excluir', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                             ],
                                           ),
                                         ),
@@ -456,7 +456,7 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                       height: 52.0,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: bgColor,
+                                          backgroundColor: whiteColor,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5.0),
                                           ),
@@ -467,9 +467,9 @@ class _ListCommentPageState extends State<ListCommentPage> {
                                         child: const Column(
                                           children: <Widget>[
                                             SizedBox(height: 4),
-                                            Icon(Icons.edit),
+                                            Icon(Icons.edit, color: bgColor),
                                             SizedBox(height: 2.0),
-                                            Text('Editar', style: TextStyle(fontSize: 8.5)),
+                                            Text('Editar', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                           ],
                                         ),
                                       ),

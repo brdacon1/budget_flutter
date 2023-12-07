@@ -267,24 +267,24 @@ class _PgCreateProduct extends State<PgCreateProduct> {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
                               child: Theme(
-                                data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                                data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                                 child: ExpansionTileCard(
                                   initiallyExpanded: true,
-                                  expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                  expandedTextColor: whiteColor,
+                                  baseColor: secondaryColor,
+                                  expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.shopping_cart_outlined, color: Colors.white,)),
-                                title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 15,
+                                    child: Icon(Icons.shopping_cart_outlined, color: whiteColor,)),
+                                title: Text("Dados do produto ou serviço",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                     letterSpacing: 1),
                                 ),
-                                subtitle: Text("Dados do produto ou serviço",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.bold,
+                                subtitle:  Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
                                     fontSize: 13,
                                     letterSpacing: 1),
                                 ),

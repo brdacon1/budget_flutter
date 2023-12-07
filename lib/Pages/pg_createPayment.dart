@@ -134,25 +134,25 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 0),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
                                 initiallyExpanded: true,
-                                expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
                                     child: Icon(Icons.payments_outlined, color: Colors.white,)),
-                                title: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 15,
-                                    letterSpacing: 1),
-                                ),
-                                subtitle: Text("Insira dados do pagamento",style: GoogleFonts.heebo(
-                                    color: bgColor,
+                                title: Text("Insira dados do pagamento",style: GoogleFonts.heebo(
+                                    color: whiteColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
+                                    letterSpacing: 1),
+                                ),
+                                subtitle: Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 10,
                                     letterSpacing: 1),
                                 ),
                                 children:  <Widget>[
