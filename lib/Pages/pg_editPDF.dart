@@ -235,7 +235,7 @@ class _PgEditPDF extends State<PgEditPDF> {
                 alignment: Alignment.topLeft,
                 margin: EdgeInsets.only(left: we * 0.05),
                 child: Text('Editar PDF',style: GoogleFonts.heebo(
-                    color: Colors.white,
+                    color: whiteColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 26,
                     letterSpacing: 2
@@ -396,28 +396,28 @@ class _PgEditPDF extends State<PgEditPDF> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
                                 initiallyExpanded: true,
-                                expandedTextColor: bgColor,
-                              baseColor: Colors.cyan[50],
-                              expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                               leading: const CircleAvatar(
                                   backgroundColor: bgColor,
                                   child: Icon(Icons.account_balance, color: Colors.white,)),
-                              title: Text("Clique para editar",style: GoogleFonts.heebo(
-                                  color: bgColor,
+                              title: Text("Informações da empresa",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    letterSpacing: 1
+                                ),
+                              ),
+                              subtitle: Text("Clique para editar",style: GoogleFonts.heebo(
+                                  color: whiteColor,
                                   fontWeight: FontWeight.normal,
-                                  fontSize: 16,
+                                  fontSize: 13,
                                   letterSpacing: 1
-                              ),
-                              ),
-                              subtitle: Text("Informações da empresa",style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  letterSpacing: 1
-                              ),
+                               ),
                               ),
                               children:  <Widget>[
                                 FadeAnimation(
@@ -564,27 +564,27 @@ class _PgEditPDF extends State<PgEditPDF> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
-                                expandedTextColor: bgColor,
-                              baseColor: Colors.cyan[50],
-                              expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                               leading: const CircleAvatar(
                                   backgroundColor: bgColor,
-                                  child: Icon(Icons.location_on_outlined, color: Colors.white,)),
-                              title: Text("Clique para editar",style: GoogleFonts.heebo(
-                                          color: bgColor,
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 16,
-                                          letterSpacing: 1
-                                  ),
+                                  child: Icon(Icons.location_on_outlined, color: whiteColor,)),
+                              title: Text("Informações de endereço",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    letterSpacing: 1
+                                ),
                               ),
-                              subtitle: Text("Informações de endereço",style: GoogleFonts.heebo(
-                                  color: bgColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                              subtitle: Text("Clique para editar",style: GoogleFonts.heebo(
+                                  color: whiteColor,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 13,
                                   letterSpacing: 1
-                              ),
+                               ),
                               ),
                               children:  <Widget>[
                                 FadeAnimation(
