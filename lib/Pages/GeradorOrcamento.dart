@@ -263,7 +263,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
 
   Future<void> EventSave() async{
     final we = MediaQuery.of(context).size.width;
-    if(nameButton == "ATUALIZAR")
+    if(nameButton == "Atualizar")
     {
       orcamento.VALORTOTAL = widget.item.VALORTOTAL;
       orcamento.ID = widget.item.ID;
@@ -326,7 +326,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
         });
       });
     }
-    else if(nameButton == "SALVAR")
+    else if(nameButton == "Continuar")
     {
       final DateTime now = DateTime.now();
       final DateFormat formatter = DateFormat('dd/MM/yyyy');
@@ -375,7 +375,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
           Orcamento.NOMEEMPRESA = widget.item.NOMEEMPRESA;
           Orcamento.STATUS = widget.item.STATUS;
           Orcamento.VALORTOTAL = widget.item.VALORTOTAL;
-          nameButton = 'ATUALIZAR';
+          nameButton = 'Atualizar';
           titlePage = 'Editar orçamento';
           titleBox = 'Clique para editar';
           fieldVisible = true;
@@ -439,7 +439,6 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                   await UserInfo.FlutterContacts.insertContact(newContact);
                 },
               ).show().then((value) {
-
               });
             },
             btnOkIcon: Icons.check_circle,

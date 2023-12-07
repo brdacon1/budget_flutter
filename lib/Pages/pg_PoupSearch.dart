@@ -980,20 +980,14 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => pg_TabOrcamento(item: novo)),
-                  ).then((value) => setState(() {
-                    try {
-                      setState(() async {
-                        Orcamento.IDORCAMENTO = '';
-                        await getInformationOrcamento();
-                        setState(() {
-                          deleteItens.clear();
-                          deleteVisible = false;
-                          checkBoxAppear = false;
-                        });
-                      });
-                    } catch (e) {
-                      print(e);
-                    }
+                  ).then((value) => setState(() async {
+                    Orcamento.IDORCAMENTO = '';
+                    await getInformationOrcamento();
+                    setState(() {
+                      deleteItens.clear();
+                      deleteVisible = false;
+                      checkBoxAppear = false;
+                    });
                   }));
                 }
             },

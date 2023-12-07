@@ -50,8 +50,8 @@ class _pg_TabOrcamentoState extends State<pg_TabOrcamento> {
                    fontSize: 18, // Defina o tamanho da fonte da descrição
                    // Adicione outros atributos do TextStyle conforme necessário
                  ),
-                  title: 'Ops!',
-                  desc: 'Você ainda precisa cadastrar o cliente colocando pelo menos o nome!',
+                  title: 'Ainda não!',
+                  desc: 'É necessário cadastrar o cliente colocando pelo menos o nome e clicar no botão "Continuar"',
                   btnOkOnPress: () async {},
                   btnOkIcon: Icons.check_circle,).show();
             }

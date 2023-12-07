@@ -107,14 +107,28 @@ class _pg_priceList extends State<pg_priceList>  {
                 _valueButtonPopup = 'Cancelar';
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancelar'),
+              child: Text(
+                "Cancelar",
+                style: GoogleFonts.heebo(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
             TextButton(
               onPressed: () {
                 _valueButtonPopup = 'OK';
                 Navigator.of(context).pop(_inputValue);
               },
-              child: const Text('OK'),
+              child: Text(
+                "OK",
+                style: GoogleFonts.heebo(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
           ],
         );
@@ -179,85 +193,69 @@ class _pg_priceList extends State<pg_priceList>  {
                         padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
                         itemCount: addItens.length,
                         itemBuilder: (context, index) {
-                          return SizedBox(
-                            height: 120,
-                            child: Card(
-                              color: Colors.cyan[50],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                          return Card(
+                            color: secondaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                addItens[index].DESCRICAO!,
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  letterSpacing: 0.5,
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              child: ListTile(
-                                title: Text(
-                                  addItens[index].DESCRICAO!,
-                                  maxLines: 2,
-                                  style: const TextStyle(
-                                    color: bgColor,
-                                    letterSpacing: 0.5,
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.bold,
+                              onTap: () async {
+                                double totalPrice = 0;
+                                await _showTextInputDialog().then((value) => {
+                                  if (_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar')
+                                    {
+                                      totalPrice = int.parse(_inputValue) * addItens[index].PRECO!,
+                                      addItens[index].indice = index,
+                                      addItens[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
+                                      addItens[index].TOTAL = totalPrice,
+                                      _inputValue = '',
+                                      _valueButtonPopup = '',
+                                    }
+                                });
+                              },
+                              subtitle: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    addItens[index].CATEGORIA.toString(),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
+                                    ),
                                   ),
-                                ),
-                                onTap: () async {
-                                    double totalPrice = 0;
-                                    await _showTextInputDialog().then((value) => {
-                                      if(_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar')
-                                        {
-                                          totalPrice = int.parse(_inputValue) * addItens[index].PRECO!,
-                                          addItens[index].indice = index,
-                                          addItens[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
-                                          addItens[index].TOTAL = totalPrice,
-                                          _inputValue = '',
-                                          _valueButtonPopup = '',
-                                        }
-                                    });
+                                  Text(
+                                    moneyConvert.convertFromDouble(addItens[index].PRECO!),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    getFilteredData()[addItens[index].indice].selectProduct = false;
+                                    addItens.remove(addItens[index]);
+                                  });
                                 },
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Status:   ${addItens[index].CATEGORIA}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Medida:  ${addItens[index].MEDIDA}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Preço:     R\$ ${moneyConvert.convertFromDouble(addItens[index].PRECO!)}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Transform.scale(
-                                  scale: 1.7,
-                                  alignment: Alignment.topCenter,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        getFilteredData()[addItens[index].indice]
-                                            .selectProduct = false;
-                                            addItens.remove(addItens[index]);
-                                      });
-                                    },
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: bgColor,
-                                      size: 23.0,
-                                    ),
-                                  ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: whiteColor,
+                                  size: 30.0,
                                 ),
                               ),
                             ),
@@ -352,17 +350,14 @@ class _pg_priceList extends State<pg_priceList>  {
                             ),
                           ),
                         ),
-                        FadeAnimation(
-                          delay: 1,
-                          child: Container(
-                            margin: EdgeInsets.only(right: we * 0.15),
-                            child: Text(
-                              "Remover produtos",
-                              style: GoogleFonts.heebo(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
+                        Container(
+                          margin: EdgeInsets.only(right: we * 0.15),
+                          child: Text(
+                            "Remover produtos",
+                            style: GoogleFonts.heebo(
+                              color: whiteColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
                         ),
@@ -372,25 +367,23 @@ class _pg_priceList extends State<pg_priceList>  {
                       height: he * 0.02,
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: deleteItens.length,
-                        padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
-                        itemBuilder: (context, index) {
-                          return SizedBox(
-                            height: 120,
-                            child: Card(
-                              color: Colors.cyan[50],
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start, // Ajuste esta propriedade
+                          children: deleteItens.map((item) {
+                            return Card(
+                              color: secondaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                               child: ListTile(
                                 title: Text(
-                                  deleteItens[index].DESCRICAO!,
-                                  maxLines: 2,
+                                  item.DESCRICAO!,
+                                  maxLines: 1,
                                   style: const TextStyle(
-                                    color: bgColor,
+                                    color: whiteColor,
                                     letterSpacing: 0.5,
-                                    fontSize: 10.0,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -399,25 +392,17 @@ class _pg_priceList extends State<pg_priceList>  {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Status:   ${deleteItens[index].CATEGORIA}",
+                                      item.CATEGORIA.toString(),
                                       style: const TextStyle(
-                                        color: bgColor,
+                                        color: whiteColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
                                     ),
                                     Text(
-                                      "Medida:  ${deleteItens[index].MEDIDA}",
+                                      moneyConvert.convertFromDouble(item.PRECO!),
                                       style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Preço:     ${moneyConvert.convertFromDouble(deleteItens[index].PRECO!)}",
-                                      style: const TextStyle(
-                                        color: bgColor,
+                                        color: whiteColor,
                                         letterSpacing: 0.5,
                                         fontSize: 12.0,
                                       ),
@@ -429,8 +414,8 @@ class _pg_priceList extends State<pg_priceList>  {
                                   alignment: Alignment.topCenter,
                                   child: GestureDetector(
                                     onTap: () {
-                                      getFilteredData()[deleteItens[index].indice].checkBox = false;
-                                      deleteItens.remove(deleteItens[index]);
+                                      getFilteredData()[item.indice].checkBox = false;
+                                      deleteItens.remove(item);
                                       if (deleteItens.isEmpty) {
                                         deleteVisible = false;
                                         checkBoxAppear = false;
@@ -440,15 +425,15 @@ class _pg_priceList extends State<pg_priceList>  {
                                     },
                                     child: const Icon(
                                       Icons.close,
-                                      color: bgColor,
+                                      color: whiteColor,
                                       size: 23.0,
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                     const Padding(padding: EdgeInsets.only(top: 20)),
@@ -575,11 +560,11 @@ class _pg_priceList extends State<pg_priceList>  {
 
   List<ObjectListItens> getFilteredData() {
     if (_searchController.text.isEmpty) {
-      return orcamentos; // Retorna a lista original se não houver texto de busca
+      return orcamentos;
     } else {
       return orcamentos
           .where((x) => x.DESCRICAO!.toLowerCase().contains(_searchController.text.toLowerCase()))
-          .toList(); // Filtra a lista original com base no texto de busca
+          .toList();
     }
   }
 
@@ -640,7 +625,7 @@ class _pg_priceList extends State<pg_priceList>  {
                   placeholder: "Digite a descrição do item...",
                   style:  const TextStyle(color:  Colors.white,fontWeight:FontWeight.bold, fontSize: 18.0),
                   backgroundColor:  Colors.white12,
-                  itemColor: Colors.white,
+                  itemColor: whiteColor,
                   controller: _searchController,
                   onChanged: onSearchTextChanged,
                 ),
@@ -654,160 +639,149 @@ class _pg_priceList extends State<pg_priceList>  {
                   await getListItens();
                   setState(() {});
                 },
-                child: ListView.builder(
+                child:ListView.builder(
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 160, left: 15, right: 15, top: 10),
                   itemCount: getFilteredData().length,
                   itemBuilder: (context, index) {
-                    return SizedBox(
-                      height: 130,
-                      child: Card(
-                        color: Colors.cyan[50],
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)
+                    return Card(
+                      color: secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(10),
+                        title: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              Text(
+                                "${getFilteredData()[index].DESCRICAO}",
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  letterSpacing: 0.5,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child:
-                        ListTile(
-                          title:  Padding(
-                            padding: const EdgeInsets.only(bottom: 5, top:10),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: DecoratedBox(
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: Colors.grey,
-                                          width: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      "${getFilteredData()[index].DESCRICAO}",
-                                      maxLines: 2,
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
+                        subtitle: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                getFilteredData()[index].CATEGORIA.toString(),
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  letterSpacing: 0,
+                                  fontSize: 12.0,
                                 ),
-                              ],
-                            ),
+                              ),
+                              Text(
+                                moneyConvert.convertFromDouble(getFilteredData()[index].PRECO!),
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  letterSpacing: 0,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ],
                           ),
-                          subtitle: Padding( padding: const EdgeInsets.only(bottom: 5,),
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Categoria:   ${getFilteredData()[index].CATEGORIA}", style: const TextStyle(color: bgColor,
-                                        letterSpacing: 0,
-                                        fontSize: 12.0)),
-                                    Text("Medida:       ${getFilteredData()[index].MEDIDA}", style: const TextStyle(color: bgColor,
-                                        letterSpacing: 0,
-                                        fontSize: 12.0)),
-                                    Text("Preço:          ${moneyConvert.convertFromDouble(getFilteredData()[index].PRECO!)}", style: const TextStyle(color: bgColor,
-                                        letterSpacing: 0,
-                                        fontSize: 12.0)),
-                                  ])
-                          ),
-                          onLongPress: () {
-                            checkBoxAppear = !checkBoxAppear;
-                            cheBoxAppearProduct = !checkBoxAppear;
-                            addItens.clear();
-                            if (!checkBoxAppear) {
-                              for (int i = 0; i < getFilteredData().length; i++) {
-                                getFilteredData()[i].checkBox = false;
-                                getFilteredData()[i].selectProduct = false;
-                              }
-                              deleteItens.clear();
-                              deleteVisible = false;
+                        ),
+                        onLongPress: () {
+                          checkBoxAppear = !checkBoxAppear;
+                          cheBoxAppearProduct = !checkBoxAppear;
+                          addItens.clear();
+                          if (!checkBoxAppear) {
+                            for (int i = 0; i < getFilteredData().length; i++) {
+                              getFilteredData()[i].checkBox = false;
+                              getFilteredData()[i].selectProduct = false;
                             }
-                            setState(() {});
-                          },
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => PgCreateProduct(item: getFilteredData()[index])),
-                            ).then((value) async => {
-                              await getListItens(),
-                              setState(() {}),
-                            });
-                          },
-                          trailing: Transform.scale(
-                            scale: 1.7,
-                            child: Visibility(
-                              visible: !(widget.fromMenu ?? false) && cheBoxAppearProduct,
-                              child: Checkbox(
-                                value:  getFilteredData()[index].selectProduct,
-                                side: const BorderSide(
-                                  color: bgColor,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-                                checkColor:  Colors.white,
-                                activeColor: bgColor,
-                                onChanged: (bool? newValue) async
-                                {
-                                  double totalPrice = 0;
-                                  if(getFilteredData()[index].selectProduct == false)
-                                  {
-                                    await _showTextInputDialog().then((value) => {
-                                      if(_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar')
-                                        {
-                                          totalPrice = double.parse(_inputValue.replaceAll(',', '.')) * getFilteredData()[index].PRECO!,
-                                          getFilteredData()[index].selectProduct = true,
-                                          getFilteredData()[index].indice = index,
-                                          getFilteredData()[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
-                                          getFilteredData()[index].IDPRODUCT = getFilteredData()[index].id,
-                                          getFilteredData()[index].TOTAL = totalPrice,
-                                          addItens.add(getFilteredData()[index]),
-                                          _inputValue = '',
-                                          _valueButtonPopup = '',
-                                        }
-                                    });
-                                  }
-                                  setState(() {});
-                                },
+                            deleteItens.clear();
+                            deleteVisible = false;
+                          }
+                          setState(() {});
+                        },
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PgCreateProduct(item: getFilteredData()[index])),
+                          ).then((value) async => {
+                            await getListItens(),
+                            setState(() {}),
+                          });
+                        },
+                        trailing: Transform.scale(
+                          scale: 1.7,
+                          child: Visibility(
+                            visible: !(widget.fromMenu ?? false) && cheBoxAppearProduct,
+                            child: Checkbox(
+                              side: const BorderSide(
+                                color: whiteColor,
                               ),
+                              checkColor:  bgColor,
+                              activeColor: whiteColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                              value: getFilteredData()[index].selectProduct,
+                              onChanged: (bool? newValue) async {
+                                double totalPrice = 0;
+                                if (getFilteredData()[index].selectProduct == false) {
+                                  await _showTextInputDialog().then((value) => {
+                                    if (_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar') {
+                                      totalPrice = double.parse(_inputValue.replaceAll(',', '.')) * getFilteredData()[index].PRECO!,
+                                      getFilteredData()[index].selectProduct = true,
+                                      getFilteredData()[index].indice = index,
+                                      getFilteredData()[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
+                                      getFilteredData()[index].IDPRODUCT = getFilteredData()[index].id,
+                                      getFilteredData()[index].TOTAL = totalPrice,
+                                      addItens.add(getFilteredData()[index]),
+                                      _inputValue = '',
+                                      _valueButtonPopup = '',
+                                    }
+                                  });
+                                }
+                                setState(() {});
+                              },
                             ),
                           ),
-                          leading: Transform.scale(
-                            scale: 1.6,
-                            child: Visibility(
-                              visible: checkBoxAppear,
-                              child: Checkbox(
-                                value:  getFilteredData()[index].checkBox,
-                                side: const BorderSide(
-                                  color: bgColor,
-                                ),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-                                checkColor:  Colors.white,
-                                activeColor: bgColor,
-                                onChanged: (bool? newValue) async {
-                                  if(getFilteredData()[index].checkBox == false)
-                                  {
-                                    cheBoxAppearProduct = false;
-                                    getFilteredData()[index].checkBox = true;
-                                    getFilteredData()[index].selectProduct = false;
-                                    getFilteredData()[index].indice = index;
-                                    deleteItens.add(getFilteredData()[index]);
-                                    if(deleteItens.length == 1)
-                                    {
-                                      deleteVisible = true;
-                                    }
-                                  }
-                                  setState(() {});
-                                },
+                        ),
+                        leading: Transform.scale(
+                          scale: 1.6,
+                          child: Visibility(
+                            visible: checkBoxAppear,
+                            child: Checkbox(
+                              side: const BorderSide(
+                                color: whiteColor,
                               ),
+                              checkColor:  bgColor,
+                              activeColor: whiteColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                              value: getFilteredData()[index].checkBox,
+                              onChanged: (bool? newValue) async {
+                                if (getFilteredData()[index].checkBox == false) {
+                                  cheBoxAppearProduct = false;
+                                  getFilteredData()[index].checkBox = true;
+                                  getFilteredData()[index].selectProduct = false;
+                                  getFilteredData()[index].indice = index;
+                                  deleteItens.add(getFilteredData()[index]);
+                                  if (deleteItens.length == 1) {
+                                    deleteVisible = true;
+                                  }
+                                }
+                                setState(() {});
+                              },
                             ),
                           ),
                         ),
                       ),
                     );
                   },
-                ),
+                )
               ),
             ),
           ]
