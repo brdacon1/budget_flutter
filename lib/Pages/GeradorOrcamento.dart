@@ -136,14 +136,14 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
 
         if(widget.item.ID.toString() != '')
         {
-          nameButton = 'ATUALIZAR';
+          nameButton = 'Atualizar';
           titlePage = 'Editar orçamento';
           titleBox = 'Clique para editar';
           fieldVisible = true;
         }
         else
         {
-          nameButton = 'SALVAR';
+          nameButton = 'Continuar';
           titlePage = 'Criar orçamento';
           titleBox = 'Clique para inserir';
           fieldVisible = false;
@@ -447,8 +447,6 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
         }
       });
     }
-
-
   }
 
   @override
@@ -508,26 +506,26 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor,),
                               child: ExpansionTileCard(
                                 initiallyExpanded: true,
-                                expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.person_outlined, color: Colors.white,)),
-                                title: Text(titleBox!,style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16,
+                                    child: Icon(Icons.person_outlined, color: whiteColor,)),
+                                title: Text("Contato do cliente",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                     letterSpacing: 1
                                 ),
                                 ),
-                                subtitle: Text("Informações do cliente",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
+                                subtitle: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 13,
                                     letterSpacing: 1
                                 ),
                                 ),
@@ -663,25 +661,25 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
                             child:Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
-                                expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.request_page_outlined, color: Colors.white,)),
-                                title: Text(titleBox!,style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16,
+                                    child: Icon(Icons.request_page_outlined, color: whiteColor,)),
+                                title:Text("Informações do orçamento",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                     letterSpacing: 1
                                 ),
                                 ),
-                                subtitle: Text("Informações do orçamento",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
+                                subtitle: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 13,
                                     letterSpacing: 1
                                 ),
                                 ),
@@ -835,25 +833,25 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
                             child: Theme(
-                              data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                              data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                               child: ExpansionTileCard(
-                                expandedTextColor: bgColor,
-                                baseColor: Colors.cyan[50],
-                                expandedColor: Colors.cyan[50],
+                                expandedTextColor: whiteColor,
+                                baseColor: secondaryColor,
+                                expandedColor: secondaryColor,
                                 leading: const CircleAvatar(
                                     backgroundColor: bgColor,
-                                    child: Icon(Icons.location_on_outlined, color: Colors.white,)),
-                                title: Text(titleBox!,style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16,
+                                    child: Icon(Icons.location_on_outlined, color: whiteColor,)),
+                                title: Text("Endereço do cliente",style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                     letterSpacing: 1
                                 ),
                                 ),
-                                subtitle: Text("Informações de endereço",style: GoogleFonts.heebo(
-                                    color: bgColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
+                                subtitle: Text(titleBox!,style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 13,
                                     letterSpacing: 1
                                 ),
                                 ),

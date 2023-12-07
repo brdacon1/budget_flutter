@@ -7,6 +7,6 @@ const greenColor = Color(0xFF1B5E20);
 const redColor = Color(0xFFB71C1C);
 const creamColor = Color(0xFFFFFFFF);
 const snowColor = Color(0xFFFFFAFA);
-
+const whiteColor = Color(0xFFFFFFFF);
 const buttonColor = Color(0xFF0DF5E4);
 const defaultPadding = 16.0;

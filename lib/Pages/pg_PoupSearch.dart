@@ -623,12 +623,12 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
             child: CupertinoSearchTextField(
               placeholder: "Digite o nome do cliente...",
               style: const TextStyle(
-                color: Colors.white,
+                color: whiteColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 18.0,
               ),
               backgroundColor: Colors.white12,
-              itemColor: Colors.white,
+              itemColor: whiteColor,
               controller: _searchController,
               onChanged: onSearchTextChanged,
             ),
@@ -655,22 +655,22 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: Theme(
-                  data: Theme.of(context).copyWith(unselectedWidgetColor: bgColor),
+                  data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
                   child: ExpansionTileCard(
-                  expandedTextColor: bgColor,
-                    baseColor: Colors.cyan[50],
-                    expandedColor: Colors.green[50],
+                    expandedTextColor: whiteColor,
+                    baseColor: secondaryColor,
+                    expandedColor: secondaryColor,
                     leading: const CircleAvatar(
                         backgroundColor: bgColor,
                         child: Icon(
                           Icons.account_balance_wallet_outlined,
-                          color: Colors.white,
+                          color: whiteColor,
                         )),
                     title: Text(
                       "${getFilteredData()[index].NOMECLIENTE}",
                       maxLines: 2,
                       style: const TextStyle(
-                        color: bgColor,
+                        color: whiteColor,
                         letterSpacing: 0.5,
                         fontSize: 12.0,
                         fontWeight: FontWeight.bold,
@@ -678,7 +678,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                     ),
                     subtitle: Text("Nº orçamento: ${getFilteredData()[index].ID}",
                         style: const TextStyle(
-                            color: bgColor,
+                            color: whiteColor,
                             letterSpacing: 0.5,
                             fontSize: 12.0)),
                     children: <Widget>[
@@ -696,7 +696,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           child: Text(
                             "Telefone: ${getFilteredData()[index].FONE}",
                             style: const TextStyle(
-                              color: bgColor,
+                              color: whiteColor,
                               letterSpacing: 0.5,
                               fontSize: 12.0,
                             ),
@@ -713,7 +713,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           child: Text(
                               "Data do orçamento: ${getFilteredData()[index].DATA}",
                               style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -727,7 +727,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           ),
                           child: Text("Status: ${getFilteredData()[index].STATUS}",
                               style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -741,7 +741,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           ),
                           child: Text("Valor total: ${moneyConvert.convertFromDouble(getFilteredData()[index].VALORTOTAL!)}",
                               style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -755,7 +755,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                           ),
                           child: Text("Criado em: ${getFilteredData()[index].DATA}",
                               style: const TextStyle(
-                                  color: bgColor,
+                                  color: whiteColor,
                                   letterSpacing: 0.5,
                                   fontSize: 12.0)),
                         ),
@@ -779,7 +779,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
-                                             bgColor,
+                                        whiteColor,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(5.0),
@@ -799,9 +799,9 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                       child: const Column(
                                         children: <Widget>[
                                           SizedBox(height: 4),
-                                          Icon(Icons.delete_outline_rounded),
+                                          Icon(Icons.delete_outline_rounded, color: bgColor,),
                                           SizedBox(height: 2.0),
-                                          Text('Excluir', style: TextStyle(fontSize: 8.5)),
+                                          Text('Excluir', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                         ],
                                       ),
                                     ),
@@ -817,7 +817,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                   height: 52.0,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: bgColor,
+                                      backgroundColor: whiteColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(5.0),
@@ -849,9 +849,9 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     child: const Column(
                                       children: <Widget>[
                                         SizedBox(height: 4),
-                                        Icon(Icons.open_in_new_rounded),
+                                        Icon(Icons.open_in_new_rounded, color: bgColor,),
                                         SizedBox(height: 2.0),
-                                        Text('Abrir', style: TextStyle(fontSize: 8.5)),
+                                        Text('Abrir', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                       ],
                                     ),
                                   ),
@@ -866,7 +866,7 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                   height: 52.0,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: bgColor,
+                                      backgroundColor: whiteColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(5.0),
@@ -891,9 +891,9 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
                                     child: const Column(
                                       children: <Widget>[
                                         SizedBox(height: 4),
-                                        Icon(Icons.copy),
+                                        Icon(Icons.copy, color: bgColor,),
                                         SizedBox(height: 2.0),
-                                        Text('Duplicar', style: TextStyle(fontSize: 8.5)),
+                                        Text('Duplicar', style: TextStyle(fontSize: 8.5, color: bgColor)),
                                       ],
                                     ),
                                   ),
