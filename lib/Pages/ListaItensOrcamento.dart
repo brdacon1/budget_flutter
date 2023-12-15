@@ -186,7 +186,7 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             var displayAlert = DisplayAlert();
                             var alertDisplayLoading = LoadingEvent();
                             await alertDisplayLoading.alertLoading(context);
-
+                            setState(() {});
                             try {
                               await deleteData();
                               deleteItens.clear();
@@ -200,8 +200,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                               alertDisplayLoading.closeLoading(context);
                               await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro ao remover os orçamentos.");
                             }
-
-                            setState(() {});
                           },
                           style: TextButton.styleFrom(
                                  backgroundColor: const Color(0xFF0DF5E4),
@@ -227,7 +225,10 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
         );
       },
     ).then((value) async {
-        setState(() {});
+      if(deleteItens.isEmpty){
+        getListItens();
+      }
+      setState(() {});
     });
   }
 
