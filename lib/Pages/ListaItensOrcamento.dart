@@ -87,17 +87,14 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                             ),
                           ),
                         ),
-                        FadeAnimation(
-                          delay: 1,
-                          child: Container(
-                            margin: EdgeInsets.only(right: we * 0.15),
-                            child: Text(
-                              "Remover produtos",
-                              style: GoogleFonts.heebo(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
+                        Container(
+                          margin: EdgeInsets.only(right: we * 0.15),
+                          child: Text(
+                            "Remover produtos",
+                            style: GoogleFonts.heebo(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
                         ),
@@ -111,72 +108,68 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
                         itemCount: deleteItens.length,
                         padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
                         itemBuilder: (context, index) {
-                          return SizedBox(
-                            height: 110,
-                            child: Card(
-                              color: Colors.cyan[50],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                          return Card(
+                            color: bgColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                deleteItens[index].DESCRICAO!,
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  letterSpacing: 0.5,
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              child: ListTile(
-                                title: Text(
-                                  deleteItens[index].DESCRICAO!,
-                                  maxLines: 2,
-                                  style: const TextStyle(
-                                    color: bgColor,
-                                    letterSpacing: 0.5,
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.bold,
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    deleteItens[index].CATEGORIA.toString(),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
+                                    ),
                                   ),
-                                ),
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Status:   ${deleteItens[index].CATEGORIA}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
+                                  Text(
+                                    moneyConvert.convertFromDouble(deleteItens[index].PRECO!),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
                                     ),
-                                    Text(
-                                      "Medida:  ${deleteItens[index].MEDIDA}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
+                                  ),
+                                  Text(
+                                    deleteItens[index].QTD.toString(),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
                                     ),
-                                    Text(
-                                      "Preço:     ${moneyConvert.convertFromDouble(deleteItens[index].PRECO!)}",
-                                      style: const TextStyle(
-                                        color: bgColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Transform.scale(
-                                  scale: 1.7,
-                                  alignment: Alignment.topCenter,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      getFilteredData()[deleteItens[index].indice].checkBox = false;
-                                      deleteItens.remove(deleteItens[index]);
-                                      if (deleteItens.isEmpty) {
-                                        deleteVisible = false;
-                                        checkBoxAppear = false;
-                                      }
-                                      setState(() {});
-                                    },
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: bgColor,
-                                      size: 23.0,
-                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: Transform.scale(
+                                scale: 1.7,
+                                alignment: Alignment.center,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    getFilteredData()[deleteItens[index].indice].checkBox = false;
+                                    deleteItens.remove(deleteItens[index]);
+                                    if (deleteItens.isEmpty) {
+                                      deleteVisible = false;
+                                      checkBoxAppear = false;
+                                    }
+                                    setState(() {});
+                                  },
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: whiteColor,
+                                    size: 20.0,
                                   ),
                                 ),
                               ),
@@ -234,10 +227,6 @@ class _ListaItensOrcamento extends State<ListaItensOrcamento> {
         );
       },
     ).then((value) async {
-        deleteItens.clear();
-        orcamentos.clear();
-        deleteVisible = false;
-        await getListItens();
         setState(() {});
     });
   }

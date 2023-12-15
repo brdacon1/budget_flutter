@@ -171,7 +171,7 @@ class _PgCreatePayment extends State<PgCreatePayment> {
                                         enableInteractiveSelection: true,
                                         controller: _typeText,
                                         onTap: () async {
-                                          List<String> values = ['Crédito', 'Débito', 'Dinheiro'];
+                                          List<String> values = ['Crédito', 'Débito', 'Dinheiro', 'PIX'];
                                           await showDialog(
                                             context: context,
                                             builder: (BuildContext context) {

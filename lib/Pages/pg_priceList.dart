@@ -236,6 +236,14 @@ class _pg_priceList extends State<pg_priceList>  {
                                     ),
                                   ),
                                   Text(
+                                    addItens[index].QTD.toString(),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10.0,
+                                    ),
+                                  ),
+                                  Text(
                                     moneyConvert.convertFromDouble(addItens[index].PRECO!),
                                     style: const TextStyle(
                                       color: whiteColor,
@@ -585,8 +593,15 @@ class _pg_priceList extends State<pg_priceList>  {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 GestureDetector(
-                  onTap: (){
-                    Navigator.pop(context, true);
+                  onTap: () async {
+                    setState(() {});
+                    if(addItens.isEmpty) {
+                      Navigator.pop(context, true);
+                    } else {
+
+                      await displayAlert.notificationWarning(context, "Ops!", "Você tem itens no carrinho. "
+                          "Por favor, escolha entre esvaziar o carrinho ou adicionar esses itens ao orçamento.");
+                    }
                   },
                   child: Container(
                     alignment: Alignment.topLeft,
@@ -655,14 +670,15 @@ class _pg_priceList extends State<pg_priceList>  {
                           alignment: Alignment.centerLeft,
                           child: Row(
                             children: [
-                              Text(
-                                "${getFilteredData()[index].DESCRICAO}",
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  color: whiteColor,
-                                  letterSpacing: 0.5,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  "${getFilteredData()[index].DESCRICAO}",
+                                  maxLines: 2,
+                                  style: const TextStyle(
+                                    color: whiteColor,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
