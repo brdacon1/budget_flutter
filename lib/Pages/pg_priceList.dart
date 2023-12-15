@@ -286,7 +286,10 @@ class _pg_priceList extends State<pg_priceList>  {
                               await getListItens();
 
                               alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notification(context, "Feito!", "Itens adicionados na lista do orçamento com sucesso!");
+                              await displayAlert.notification(context, "Feito!",
+                                  "Itens adicionados na lista do orçamento com sucesso!").then((value) => {
+                                   Navigator.pop(context, true),
+                              });
                               setState(() {});
                             } catch (e) {
                               alertDisplayLoading.closeLoading(context);
