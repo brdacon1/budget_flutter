@@ -598,7 +598,6 @@ class _pg_priceList extends State<pg_priceList>  {
                     if(addItens.isEmpty) {
                       Navigator.pop(context, true);
                     } else {
-
                       await displayAlert.notificationWarning(context, "Ops!", "Você tem itens no carrinho. "
                           "Por favor, escolha entre esvaziar o carrinho ou adicionar esses itens ao orçamento.");
                     }
