@@ -16,7 +16,6 @@ import '../Objetos/DADOS.dart';
 import 'package:oflite/Objetos/globalUIDOrcamento.dart' as Orcamento;
 import 'package:oflite/Objetos/globalUIDUser.dart' as UID;
 import 'package:badges/badges.dart' as badges;
-
 import '../constants.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -41,19 +40,23 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
   convert_coin moneyConvert = convert_coin();
   BannerAd? _bannerAd;
   final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
+  final String _adUnitIdInterstitialAd = 'ca-app-pub-5106035309089315/6467754164';
+  InterstitialAd? _interstitialAd;
+  int _numInterstitialLoadAttempts = 0;
+  final int maxFailedLoadAttempts = 3;
 
   @override
   initState() {
-    try {
-      Orcamento.IDORCAMENTO = '';
-      _loadAd();
-      setState(() async {
-        await getInformationOrcamento();
-        setState(() {});
-      });
-    } catch (e) {}
+    Orcamento.IDORCAMENTO = '';
+    _loadAd();
+    _loadInterstitialAd();
+    initialScreen();
     super.initState();
+  }
 
+  void initialScreen() async {
+    await getInformationOrcamento();
+    setState(() {});
   }
 
   Future<void> _duplicateEvent(bool clientData, bool quoteItems, bool comments)async {
@@ -64,7 +67,6 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
       final String formatted = formatter.format(now);
       if(clientData) {
         await db.getInformationOrcamento1().then((value) => {
-          print(value.toJson()),
           if(value.NOMECLIENTE!.isNotEmpty)
             {
               customerBudget.NOMECLIENTE = value.NOMECLIENTE,
@@ -585,6 +587,52 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
     ).load();
   }
 
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId:_adUnitIdInterstitialAd,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            print('$ad loaded');
+            _interstitialAd = ad;
+            _numInterstitialLoadAttempts = 0;
+            _interstitialAd!.setImmersiveMode(true);
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            print('InterstitialAd failed to load: $error.');
+            _numInterstitialLoadAttempts += 1;
+            _interstitialAd = null;
+            if (_numInterstitialLoadAttempts < maxFailedLoadAttempts) {
+              _loadInterstitialAd();
+            }
+          },
+        )
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd == null) {
+      print('Warning: attempt to show interstitial before loaded.');
+      return;
+    }
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) =>
+          print('ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+        _loadInterstitialAd();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+        ad.dispose();
+        _loadInterstitialAd();
+      },
+    );
+    _interstitialAd!.show();
+    _interstitialAd = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final he = MediaQuery.of(context).size.height;
@@ -952,44 +1000,76 @@ class _pg_PoupSearch extends State<pg_PoupSearch> {
           FloatingActionButton(
             heroTag: "adicionar",
             onPressed: () async {
-                if(!UID.AutoRenewing! && getFilteredData().length > 10) {
-                  await displayAlert.notificationError(context, "Erro!", "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados").then((value) => {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => pg_subscription()),
-                    ),
-                  });
-                }
-                else{
-                  novo.FONE = '';
-                  novo.NOMECLIENTE = '';
-                  novo.NOMEEMPRESA = '';
-                  novo.ENDERECO = '';
-                  novo.EMAIL = '';
-                  novo.GERADO = '';
-                  novo.DATA = '';
-                  novo.STATUS = 'PENDENTE';
-                  novo.CEP = '';
-                  novo.CITY = '';
-                  novo.BAIRRO = '';
-                  novo.ID = '';
-                  novo.RUA = '';
-                  Orcamento.IDORCAMENTO = '';
+              if(!UID.AutoRenewing! && getFilteredData().length > 10) {
+                await displayAlert.adsNotification(context).then((value) async => {
+                  if(value == "Ver anuncio") {
+                  _showInterstitialAd(),
+                  novo.FONE = '',
+                  novo.NOMECLIENTE = '',
+                  novo.NOMEEMPRESA = '',
+                  novo.ENDERECO = '',
+                  novo.EMAIL = '',
+                  novo.GERADO = '',
+                  novo.DATA = '',
+                  novo.STATUS = 'PENDENTE',
+                  novo.CEP = '',
+                  novo.CITY = '',
+                  novo.BAIRRO = '',
+                  novo.ID = '',
+                  novo.RUA = '',
+                  Orcamento.IDORCAMENTO = '',
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => pg_TabOrcamento(item: novo)),
-                  ).then((value) => setState(() async {
-                    Orcamento.IDORCAMENTO = '';
-                    await getInformationOrcamento();
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => pg_TabOrcamento(item: novo)),
+                 ).then((value) => setState(() async {
+                  Orcamento.IDORCAMENTO = '';
+                  await getInformationOrcamento();
                     setState(() {
                       deleteItens.clear();
                       deleteVisible = false;
                       checkBoxAppear = false;
                     });
-                  }));
-                }
+                  })),
+                  }
+                  else if(value == "Se tornar premium") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => pg_subscription()),
+                    ),
+                  }
+                });
+              }
+              else{
+                novo.FONE = '';
+                novo.NOMECLIENTE = '';
+                novo.NOMEEMPRESA = '';
+                novo.ENDERECO = '';
+                novo.EMAIL = '';
+                novo.GERADO = '';
+                novo.DATA = '';
+                novo.STATUS = 'PENDENTE';
+                novo.CEP = '';
+                novo.CITY = '';
+                novo.BAIRRO = '';
+                novo.ID = '';
+                novo.RUA = '';
+                Orcamento.IDORCAMENTO = '';
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => pg_TabOrcamento(item: novo)),
+                ).then((value) => setState(() async {
+                  Orcamento.IDORCAMENTO = '';
+                  await getInformationOrcamento();
+                  setState(() {
+                    deleteItens.clear();
+                    deleteVisible = false;
+                    checkBoxAppear = false;
+                  });
+                }));
+              }
             },
             backgroundColor: buttonColor,
             child: const Icon(

@@ -400,6 +400,45 @@ class DisplayAlert {
     });
   }
 
+  Future<String> adsNotification(BuildContext context) async {
+    List<String> values = ['Ver anuncio', 'Se tornar premium'];
+    String resultText = "";
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          backgroundColor: Colors.cyan[50],
+          title: const Text("Escolha uma opção", style: TextStyle(color: Colors.black),),
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemBuilder: (ctx, index) {
+                  return SimpleDialogOption(
+                    onPressed: () => Navigator.pop(context, values[index]),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(values[index], style: const TextStyle(color: bgColor,
+                              fontSize: 16.0)),
+                        ]
+                    ),
+                  );
+                },
+                itemCount: values.length,
+              ),
+            )
+          ],
+        );
+      },
+    ).then((value) => {
+      resultText = value ?? '',
+    });
+    return resultText;
+  }
+
    Future<String> listNotification(BuildContext context) async {
      List<String> values = ['Criar novo item', 'Selecionar da lista de preço'];
      String resultText = "";

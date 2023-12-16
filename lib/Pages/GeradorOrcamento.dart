@@ -118,7 +118,7 @@ class _GeradorOrcamento extends State<GeradorOrcamento> {
     super.initState();
     try{
       _loadAd();
-      setState(()  async {
+      setState(() {
         Orcamento.ID = widget.item.ID;
         Orcamento.DATA = widget.item.DATA;
         Orcamento.RUA = widget.item.RUA;
