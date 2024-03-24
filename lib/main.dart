@@ -5,14 +5,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:oflite/Pages/pg_editPDF.dart';
-import 'package:oflite/Pages/pg_principalTabApp.dart';
-import 'package:oflite/Pages/pq_subscription.dart';
-import 'package:oflite/controllers/MenuControllerApp.dart';
-import 'package:oflite/login.dart';
-import 'package:oflite/Pages/pg_PoupSearch.dart';
+import 'package:oflite/common/controllers/menu_controller_app.dart';
+import 'package:oflite/presentations/pdf/pdf_edit/pdf_edit_view.dart';
+import 'package:oflite/presentations/main_tab/main_tab_view.dart';
+import 'package:oflite/presentations/subscription/subscription_view.dart';
+import 'package:oflite/presentations/login/login_view.dart';
+import 'package:oflite/presentations/budget/budget_list/budget_list_view.dart';
 import 'package:provider/provider.dart';
-import 'constants.dart';
+import 'common/constants/constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,12 +64,12 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
-          home: Login(),
+          home: LoginView(),
           routes: {
-            '/menu_tecnico': (BuildContext _) => pg_PoupSearch(),
-            '/pg-subscription': (BuildContext _) => pg_subscription(),
-            '/menu': (BuildContext _) => pg_PrincipalTabApp(),
-            '/pg-pdf-config': (BuildContext _) => const PgEditPDF(),
+            '/menu_tecnico': (BuildContext _) => BudgetListView(),
+            '/pg-subscription': (BuildContext _) => SubscriptionView(),
+            '/menu': (BuildContext _) => MainTabView(),
+            '/pg-pdf-config': (BuildContext _) => const PdfEditView(),
           },
         ),
       ),

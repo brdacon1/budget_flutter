@@ -1,0 +1,231 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:oflite/presentations/dashboard/components/month_evolution.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../../models/customer_info.dart';
+import '../../models/my_budget_dashboard.dart';
+import '../../models/month_calculate.dart';
+import '../../common/constants/constants.dart';
+import '../../common/widgets/responsive_widget.dart';
+import 'components/header.dart';
+import 'components/recent_files.dart';
+import 'components/storage_details.dart';
+import 'package:oflite/models/global_uid_user.dart' as UID;
+
+class DashboardView extends StatefulWidget {
+  const DashboardView({Key? key}) : super(key: key);
+
+  @override
+  State<DashboardView> createState() => _DashboardView();
+}
+
+class _DashboardView extends State<DashboardView> {
+  final List<CustomerInfo> _foundUsers = <CustomerInfo>[];
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+
+  final MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
+      qtdTotal: 0,
+      qtdIntApproved: 0,
+      qtdIntPending: 0,
+      qtdIntFinish: 0,
+      qtdIntDisapproved: 0,
+      qtdDoubleApproved: 0,
+      qtdDoublePending: 0,
+      qtdDoubleFinish: 0,
+      qtdDoubleDisapproved: 0);
+
+  final MonthCalculate _monthCalculate = MonthCalculate(
+    totalApprovedMonth_0: 0,
+    totalApprovedMonth_1: 0,
+    totalApprovedMonth_2: 0,
+    totalApprovedMonth_3: 0,
+
+    totalReprovedMonth_0: 0,
+    totalReprovedMonth_1: 0,
+    totalReprovedMonth_2: 0,
+    totalReprovedMonth_3: 0,
+
+    totalPendingMonth_0: 0,
+    totalPendingMonth_1: 0,
+    totalPendingMonth_2: 0,
+    totalPendingMonth_3: 0,
+
+    totalFinishMonth_0: 0,
+    totalFinishMonth_1: 0,
+    totalFinishMonth_2: 0,
+    totalFinishMonth_3: 0,
+  );
+
+  double getWeekOfMonthFromMilliseconds(int millisecondsSinceEpoch) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+    int day = dateTime.day;
+    double week = day / 7;
+    return week;
+  }
+
+
+  void startDashBoard() async{
+    int millisecondsSinceEpoch = 0;
+    double weekNumber = 0;
+    await Permission.storage.request();
+    var value = await getInformationBudget();
+
+    setState(() {
+      _myBudgetDashboard.qtdTotal = value.length;
+      for (int i = 0; i < value.length; i++) {
+        weekNumber = 0;
+        if (value[i].status == "APROVADO") {
+          _myBudgetDashboard.qtdIntApproved = _myBudgetDashboard.qtdIntApproved! + 1;
+          _myBudgetDashboard.qtdDoubleApproved = _myBudgetDashboard.qtdDoubleApproved! + 1;
+          millisecondsSinceEpoch = int.parse(value[i].id!);
+          weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+          if (weekNumber <= 1) {
+            _monthCalculate.totalApprovedMonth_0 = (value[i].totalValue! / 1000) + _monthCalculate.totalApprovedMonth_0!;
+          } else if (weekNumber <= 2) {
+            _monthCalculate.totalApprovedMonth_1 = (value[i].totalValue! / 1000) + _monthCalculate.totalApprovedMonth_1!;
+          } else if (weekNumber <= 3) {
+            _monthCalculate.totalApprovedMonth_2 = (value[i].totalValue! / 1000) + _monthCalculate.totalApprovedMonth_2!;
+          } else if (weekNumber <= 4.5) {
+            _monthCalculate.totalApprovedMonth_3 = (value[i].totalValue! / 1000) + _monthCalculate.totalApprovedMonth_3!;
+          }
+
+        } else if (value[i].status == "PENDENTE") {
+          _myBudgetDashboard.qtdIntPending = _myBudgetDashboard.qtdIntPending! + 1;
+          _myBudgetDashboard.qtdDoublePending = _myBudgetDashboard.qtdDoublePending! + 1;
+
+          millisecondsSinceEpoch = int.parse(value[i].id!);
+          weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+          if (weekNumber <= 1) {
+            _monthCalculate.totalPendingMonth_0 = (value[i].totalValue! / 1000) + _monthCalculate.totalPendingMonth_0!;
+          } else if (weekNumber <= 2) {
+            _monthCalculate.totalPendingMonth_1 = (value[i].totalValue! / 1000) + _monthCalculate.totalPendingMonth_1!;
+          } else if  (weekNumber <= 3) {
+            _monthCalculate.totalPendingMonth_2 = (value[i].totalValue! / 1000) + _monthCalculate.totalPendingMonth_2!;
+          } else if (weekNumber <= 4.5) {
+            _monthCalculate.totalPendingMonth_3 = (value[i].totalValue! / 1000) + _monthCalculate.totalPendingMonth_3!;
+          }
+
+        } else if (value[i].status == "REPROVADO") {
+
+          _myBudgetDashboard.qtdIntDisapproved = _myBudgetDashboard.qtdIntDisapproved! + 1;
+          _myBudgetDashboard.qtdDoubleDisapproved = _myBudgetDashboard.qtdDoubleDisapproved! + 1;
+          millisecondsSinceEpoch = int.parse(value[i].id!);
+          weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+          if (weekNumber <= 1) {
+            _monthCalculate.totalReprovedMonth_0 = (value[i].totalValue! / 1000) + _monthCalculate.totalReprovedMonth_0!;
+          } else if (weekNumber <= 2) {
+            _monthCalculate.totalReprovedMonth_1 = (value[i].totalValue! / 1000) + _monthCalculate.totalReprovedMonth_1!;
+          } else if  (weekNumber <= 3) {
+            _monthCalculate.totalReprovedMonth_2 = (value[i].totalValue! / 1000) + _monthCalculate.totalReprovedMonth_2!;
+          } else if (weekNumber <= 4.5) {
+            _monthCalculate.totalReprovedMonth_3 = (value[i].totalValue! / 1000) + _monthCalculate.totalReprovedMonth_3!;
+          }
+        } else if (value[i].status == "FINALIZADO") {
+          _myBudgetDashboard.qtdIntFinish = _myBudgetDashboard.qtdIntFinish! + 1;
+          _myBudgetDashboard.qtdDoubleFinish = _myBudgetDashboard.qtdDoubleFinish! + 1;
+
+          millisecondsSinceEpoch = int.parse(value[i].id!);
+          weekNumber = getWeekOfMonthFromMilliseconds(millisecondsSinceEpoch);
+
+          if (weekNumber <= 1) {
+            _monthCalculate.totalFinishMonth_0 = (value[i].totalValue! / 1000) + _monthCalculate.totalFinishMonth_0!;
+          } else if (weekNumber <= 2) {
+            _monthCalculate.totalFinishMonth_1 = (value[i].totalValue! / 1000) + _monthCalculate.totalFinishMonth_1!;
+          } else if  (weekNumber <= 3) {
+            _monthCalculate.totalFinishMonth_2 = (value[i].totalValue! / 1000) + _monthCalculate.totalFinishMonth_2!;
+          } else if (weekNumber <= 4.5) {
+            _monthCalculate.totalFinishMonth_3 = (value[i].totalValue! / 1000) + _monthCalculate.totalFinishMonth_3!;
+          }
+        }
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    startDashBoard();
+    setState(() {});
+  }
+
+  @override
+  initState() {
+    super.initState();
+  }
+
+  Future<List<CustomerInfo>> getInformationBudget() async {
+
+    _foundUsers.clear();
+    DateTime currentDate = DateTime.now();
+    DateTime firstDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month, 1);
+    DateTime lastDayOfCurrentMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
+
+    int firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch;
+    int lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch;
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
+        .where('ID', isGreaterThanOrEqualTo: firstDayMillis.toString())
+        .where('ID', isLessThanOrEqualTo: lastDayMillis.toString())
+        .orderBy('ID', descending: false)
+        .get();
+
+    for (var questionTmp in querySnapshot.docs) {
+      final data = questionTmp.data();
+      _foundUsers.add(CustomerInfo.fromMap(data));
+    }
+
+    return _foundUsers;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(defaultPadding),
+        child: Column(
+          children: [
+            const Header(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: defaultPadding),
+                      if (ResponsiveWidget.isMobile(context))
+                        const SizedBox(height: defaultPadding),
+                      if (ResponsiveWidget.isMobile(context))
+                        StarageDetails(item: _myBudgetDashboard),
+                      const SizedBox(height: defaultPadding),
+                      MonthEvolution(item: _monthCalculate),
+                      const SizedBox(height: defaultPadding),
+                      RecentFiles(items: _foundUsers),
+                    ],
+                  ),
+                ),
+                if (!ResponsiveWidget.isMobile(context))
+                  const SizedBox(width: defaultPadding),
+                if (!ResponsiveWidget.isMobile(context))
+                  Expanded(
+                    flex: 2,
+                    child: StarageDetails(item: _myBudgetDashboard,),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
