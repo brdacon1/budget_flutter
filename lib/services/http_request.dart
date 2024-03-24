@@ -248,7 +248,6 @@ class HttpRequest{
         throw Exception("Document data is null");
       }
     } catch (e) {
-      print(e);
       rethrow;
     }
   }
@@ -432,7 +431,6 @@ class HttpRequest{
       List<ObservationPdf> yourModels = group.docs.map((doc) => ObservationPdf.fromSnapshot(doc)).toList();
       return yourModels;
     } catch (e) {
-      print(e);
       rethrow;
     }
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/models/receipt.dart';
-import 'package:oflite/presentations/receipt/receipt_creator/receipt_creator_view.dart';
 import 'package:oflite/presentations/payment/payment_list/payment_list_view.dart';
 import 'package:oflite/presentations/pdf/pdf_receipt/pdf_receipt_view.dart';
 import '../../../models/customer_info.dart';

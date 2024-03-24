@@ -24,7 +24,7 @@ Future<void> main() async {
     sound: true,
   );
   await configureForegroundNotificationPresentationOptions();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 
@@ -32,11 +32,11 @@ Future<void> configureForegroundNotificationPresentationOptions() async {
   await FirebaseMessaging.instance.requestPermission();
   FirebaseMessaging firebaseMessage = FirebaseMessaging.instance;
   String? deviceToken = await firebaseMessage.getToken();
-  print(deviceToken);
 }
 
-
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -64,11 +64,11 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
-          home: LoginView(),
+          home: const LoginView(),
           routes: {
-            '/menu_tecnico': (BuildContext _) => BudgetListView(),
-            '/pg-subscription': (BuildContext _) => SubscriptionView(),
-            '/menu': (BuildContext _) => MainTabView(),
+            '/menu_tecnico': (BuildContext _) => const BudgetListView(),
+            '/pg-subscription': (BuildContext _) => const SubscriptionView(),
+            '/menu': (BuildContext _) => const MainTabView(),
             '/pg-pdf-config': (BuildContext _) => const PdfEditView(),
           },
         ),

@@ -7,12 +7,12 @@ List<String> sizeNumlist = [
   "10",
 ];
 List<Color> colors = [
-  Color(0xFFF9362E),
-  Color(0xFF003CFF),
-  Color(0xFFFFB73A),
-  Color(0xFF3AFFFF),
-  Color(0xFF1AD12C),
-  Color(0xFFD66400),
+  const Color(0xFFF9362E),
+  const Color(0xFF003CFF),
+  const Color(0xFFFFB73A),
+  const Color(0xFF3AFFFF),
+  const Color(0xFF1AD12C),
+  const Color(0xFFD66400),
 ];
 
 String desc =
