@@ -80,7 +80,7 @@ flutter:
     - family: Montserrat-Medium
       fonts:
         - asset: assets/Montserrat-Medium.ttf
-          
+
     - family: Montserrat-SemiBold
       fonts:
         - asset: assets/Montserrat-SemiBold.ttf
