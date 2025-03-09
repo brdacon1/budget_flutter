@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="95325d41-648c-472c-a09c-bea5fa502ced" name="Changes" comment="Inserindo ads no projeto" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="developer" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="WARN_ABOUT_DETACHED_HEAD" value="false" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;brdacon1&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/brdacon1/budget_flutter.git&quot;,
+    &quot;accountId&quot;: &quot;41b7f179-3116-4c54-b053-f0d0bf0a8470&quot;
+  }
+}</component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2Z5sPcoRQV8tniXDzRvANSOLTxM" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;melhorias&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Home David/source/budget_flutter&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
+  <component name="Push.Settings">
+    <force-push-targets>
+      <force-push-target remote-path="origin" branch="main" />
+      <force-push-target remote-path="origin" branch="v1.9.1" />
+      <force-push-target remote-path="origin" branch="correcoes" />
+    </force-push-targets>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Home David\source\repos\of-flutter\lib\common" />
+      <recent name="C:\Users\Home David\source\repos\of-flutter\lib\common\constants" />
+      <recent name="C:\Users\Home David\source\repos\of-flutter\lib\presentations\budget\budget_tab" />
+      <recent name="C:\Users\Home David\source\repos\of-flutter\lib\presentations\budget\budget_list" />
+      <recent name="C:\Users\Home David\source\repos\of-flutter\lib\presentations\budget\budget_list_items" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="95325d41-648c-472c-a09c-bea5fa502ced" name="Changes" comment="" />
+      <created>1701723252080</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1701723252080</updated>
+    </task>
+    <task id="LOCAL-00001" summary="alteração screen">
+      <created>1701948603409</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1701948603409</updated>
+    </task>
+    <task id="LOCAL-00002" summary="alteração screen">
+      <created>1701953114208</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1701953114208</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Change colors">
+      <created>1701955603114</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1701955603114</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Change colors">
+      <created>1701956212139</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1701956212139</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Change colors">
+      <created>1701977262885</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1701977262885</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Change colors">
+      <created>1701978620505</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1701978620505</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Change colors">
+      <created>1702649554148</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1702649554148</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Alterações price list">
+      <created>1702652370982</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1702652370982</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Alterações price list">
+      <created>1702652913827</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1702652913827</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Alterações price list">
+      <created>1702653333431</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1702653333431</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Alterações price list">
+      <created>1702653407194</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1702653407194</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Alterações price list">
+      <created>1702653683071</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1702653683071</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Alterações do tamanho do projeto">
+      <created>1702654015240</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1702654015240</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Alterações do tamanho do projeto">
+      <created>1702657633497</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1702657633497</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Inserindo ads no projeto">
+      <created>1702689140689</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1702689140689</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Inserindo ads no projeto">
+      <created>1711315186238</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1711315186238</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Inserindo ads no projeto">
+      <created>1711316231774</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1711316231774</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Inserindo ads no projeto">
+      <option name="closed" value="true" />
+      <created>1741485718743</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1741485718743</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="alteração screen" />
+    <MESSAGE value="Change colors" />
+    <MESSAGE value="Alterações price list" />
+    <MESSAGE value="Alterações do tamanho do projeto" />
+    <MESSAGE value="Inserindo ads no projeto" />
+    <option name="LAST_COMMIT_MESSAGE" value="Inserindo ads no projeto" />
+  </component>
+</project>
