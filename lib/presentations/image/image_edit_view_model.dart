@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -63,8 +65,13 @@ class ImageEditViewModel extends ChangeNotifier {
       final filePath = "${appDir.path}/$fileName";
       final File file = File(filePath);
       
-      final fileToUpload = croppedFile ?? pickedFile;
-      await file.writeAsBytes(await fileToUpload!.readAsBytes());
+      final Uint8List fileBytes;
+      if (croppedFile != null) {
+        fileBytes = await croppedFile.readAsBytes();
+      } else {
+        fileBytes = await pickedFile!.readAsBytes();
+      }
+      await file.writeAsBytes(fileBytes);
 
       final Reference ref = storage.ref().child('$fileName');
       final UploadTask uploadTask = ref.putFile(file);
