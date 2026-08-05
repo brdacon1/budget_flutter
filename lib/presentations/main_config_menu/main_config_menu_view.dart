@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:oflite/presentations/pdf/pdf_edit/pdf_edit_view.dart';
-import 'package:oflite/presentations/product/product_price_list/product_price_list_view.dart';
-import 'package:oflite/Services/display_alert.dart';
-
-import '../../common/constants/constants.dart';
-
-class MenuItem {
-  final IconData icon;
-  final String title;
-
-  MenuItem({required this.icon, required this.title});
-}
+import 'package:oflite/common/constants/constants.dart';
+import 'main_config_menu_view_model.dart';
 
 class MainConfigMenuView extends StatefulWidget {
   const MainConfigMenuView({Key? key}) : super(key: key);
@@ -22,130 +12,96 @@ class MainConfigMenuView extends StatefulWidget {
 }
 
 class _MainConfigMenuView extends State<MainConfigMenuView> {
-  final displayAlert = DisplayAlert();
-  final List<MenuItem> menuItems = [
-    MenuItem(icon: Icons.list, title: 'Lista de preço'),
-    MenuItem(icon: Icons.picture_as_pdf_outlined, title: 'Editar PDF'),
-    MenuItem(icon: Icons.person_pin_outlined, title: 'Trocar nome de usuário'),
-  ];
-  BannerAd? _bannerAd;
-  final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
+  late MainConfigMenuViewModel _viewModel;
 
-  void navigateToPage(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const ProductPriceListView(fromMenu: true,)),
-        );
-        break;
-      case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const PdfEditView()),
-        );
-        break;
-      case 2:
-        displayAlert.dialogChangeName(context);
-        break;
-    }
-  }
-  void _loadAd() async {
-    BannerAd(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {
-          setState(() {
-            _bannerAd = ad as BannerAd;
-          });
-        },
-        // Called when an ad request failed.
-        onAdFailedToLoad: (ad, err) {
-          ad.dispose();
-        },
-        // Called when an ad opens an overlay that covers the screen.
-        onAdOpened: (Ad ad) {},
-        // Called when an ad removes an overlay that covers the screen.
-        onAdClosed: (Ad ad) {},
-        // Called when an impression occurs on the ad.
-        onAdImpression: (Ad ad) {},
-      ),
-    ).load();
-  }
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    _viewModel = MainConfigMenuViewModel();
+    _viewModel.loadAd();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
     super.dispose();
+  }
+
+  void _onViewModelChanged() {
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          SizedBox(height: he * 0.04),
-          SizedBox(height: he * 0.03),
-          Container(
-            margin: const EdgeInsets.only(right: 285.0),
-            child: Text(
-              "Menu",
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-                letterSpacing: 2,
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: menuItems.length,
-              itemBuilder: (context, index) {
-                final menuItem = menuItems[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
-                  child: GestureDetector(
-                    onTap: () => navigateToPage(context, index),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: secondaryColor, width: 2),
-                      ),
-                      child: ListTile(
-                        leading: Icon(menuItem.icon),
-                        title: Text(
-                          menuItem.title,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                        trailing: const Icon(Icons.arrow_right),
-                      ),
-                    ),
+
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: bgColor,
+          body: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              SizedBox(height: he * 0.04),
+              SizedBox(height: he * 0.03),
+              Container(
+                margin: const EdgeInsets.only(right: 285.0),
+                child: Text(
+                  "Menu",
+                  style: GoogleFonts.heebo(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    letterSpacing: 2,
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _viewModel.menuItems.length,
+                  itemBuilder: (context, index) {
+                    final menuItem = _viewModel.menuItems[index];
+                    return Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
+                      child: GestureDetector(
+                        onTap: () => _viewModel.navigateToPage(context, index),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: secondaryColor, width: 2),
+                          ),
+                          child: ListTile(
+                            leading: Icon(menuItem.icon),
+                            title: Text(
+                              menuItem.title,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 14),
+                            ),
+                            trailing: const Icon(Icons.arrow_right),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: _bannerAd != null
-          ? SizedBox(width: we, height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
-      ) : null,
+          bottomNavigationBar: _viewModel.bannerAd != null
+              ? SizedBox(
+                  width: we,
+                  height: _viewModel.bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _viewModel.bannerAd!),
+                )
+              : null,
+        );
+      },
     );
   }
 }
