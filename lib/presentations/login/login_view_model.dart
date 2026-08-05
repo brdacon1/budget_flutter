@@ -119,10 +119,10 @@ class LoginViewModel extends ChangeNotifier {
   Future<void> _signInWithGoogle() async {
     await GoogleSignIn.instance.initialize();
     final googleUser = await GoogleSignIn.instance.authenticate();
-    final googleAuth = await googleUser?.authentication;
+    final googleAuth = googleUser!.authentication;
 
     final credential = GoogleAuthProvider.credential(
-      idToken: googleAuth?.idToken,
+      idToken: googleAuth.idToken,
     );
 
     await _signInWithCredential(credential);
