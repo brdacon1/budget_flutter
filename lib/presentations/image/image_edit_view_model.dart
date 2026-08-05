@@ -80,6 +80,19 @@ class ImageEditViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> deleteImage(String? imageName) async {
+    if (imageName == null || imageName.isEmpty) return;
+
+    try {
+      final FirebaseStorage storage = FirebaseStorage.instance;
+      final Reference ref = storage.ref().child('images/$imageName.jpg');
+      await ref.delete();
+      print('Imagem excluída com sucesso!');
+    } catch (e) {
+      print('Erro ao excluir a imagem: $e');
+    }
+  }
+
   void resetImage() {
     pickedFile = null;
     croppedFile = null;
