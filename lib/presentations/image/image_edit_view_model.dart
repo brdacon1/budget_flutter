@@ -12,8 +12,19 @@ class ImageEditViewModel extends ChangeNotifier {
   XFile? pickedFile;
   CroppedFile? croppedFile;
   String? fileName;
+  String? initialImageUrl;
 
-  bool get hasImage => croppedFile != null || pickedFile != null;
+  bool get hasImage =>
+      croppedFile != null || pickedFile != null || initialImageUrl != null;
+
+  void loadInitialImage(String? fotoId, String? logoName) {
+    if (fotoId == null || fotoId.isEmpty) return;
+    if (logoName == null || logoName.isEmpty) return;
+
+    initialImageUrl =
+        'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${Uri.encodeComponent(logoName)}?alt=media&token=$fotoId';
+    notifyListeners();
+  }
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -22,6 +33,7 @@ class ImageEditViewModel extends ChangeNotifier {
     if (pickedFile != null) {
       this.pickedFile = pickedFile;
       croppedFile = null;
+      initialImageUrl = null;
       notifyListeners();
     }
   }
@@ -105,6 +117,7 @@ class ImageEditViewModel extends ChangeNotifier {
     pickedFile = null;
     croppedFile = null;
     fileName = null;
+    initialImageUrl = null;
     notifyListeners();
   }
 

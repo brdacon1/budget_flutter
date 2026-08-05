@@ -32,6 +32,10 @@ class _ImageEditView extends State<ImageEditView> {
     super.initState();
     _viewModel = ImageEditViewModel();
     _viewModel.addListener(_onViewModelChanged);
+    _viewModel.loadInitialImage(
+      widget.owner.fotoId,
+      widget.owner.logoName,
+    );
   }
 
   @override
@@ -127,12 +131,32 @@ class _ImageEditView extends State<ImageEditView> {
         ),
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
+    } else if (_viewModel.initialImageUrl != null) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 0.8 * screenWidth,
+          maxHeight: 0.7 * screenHeight,
+        ),
+        child: Image.network(_viewModel.initialImageUrl!),
+      );
     } else {
       return const SizedBox.shrink();
     }
   }
 
   Widget _menu() {
+    if (!_viewModel.hasImage) {
+      return FloatingActionButton(
+        heroTag: "Upload",
+        onPressed: () async {
+          await _viewModel.pickImage();
+        },
+        backgroundColor: buttonColor,
+        tooltip: 'Upload',
+        child: const Icon(Icons.cloud_upload_outlined),
+      );
+    }
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
