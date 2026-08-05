@@ -1,15 +1,12 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:oflite/models/owner_pdf.dart';
-import 'package:oflite/services/http_request.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:oflite/models/global_uid_user.dart' as UID;
 
 class ImageEditViewModel extends ChangeNotifier {
-  final HttpRequest _httpRequest = HttpRequest();
-
   XFile? pickedFile;
   CroppedFile? croppedFile;
   String? fileName;
@@ -32,26 +29,18 @@ class ImageEditViewModel extends ChangeNotifier {
 
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: pickedFile!.path,
-      aspectRatioPresets: [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9,
-      ],
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Recortar Imagem',
+          toolbarTitle: 'Cortar imagem',
           toolbarColor: const Color(0xFF2A2D3E),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
         ),
         IOSUiSettings(
-          title: 'Recortar Imagem',
-        ),
-        WebUiSettings(
-          context: null,
+          title: 'Cropper',
         ),
       ],
     );
@@ -62,18 +51,33 @@ class ImageEditViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> uploadImage(OwnerPdf owner) async {
-    if (croppedFile == null && pickedFile == null) return;
+  Future<String> uploadImageToFirebase() async {
+    if (croppedFile == null && pickedFile == null) return '';
 
-    final file = File(croppedFile?.path ?? pickedFile!.path);
-    fileName = file.path.split('/').last;
+    try {
+      final FirebaseStorage storage = FirebaseStorage.instance;
+      final String? userId = UID.user;
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      
+      fileName = "$userId.jpg";
+      final filePath = "${appDir.path}/$fileName";
+      final File file = File(filePath);
+      
+      final fileToUpload = croppedFile ?? pickedFile;
+      await file.writeAsBytes(await fileToUpload!.readAsBytes());
 
-    await _httpRequest.uploadPictureFirebase(
-      file,
-      owner.UID!,
-      fileName!,
-      'logo',
-    );
+      final Reference ref = storage.ref().child('$fileName');
+      final UploadTask uploadTask = ref.putFile(file);
+
+      final TaskSnapshot taskSnapshot = await uploadTask;
+      final String imageUrl = await taskSnapshot.ref.getDownloadURL();
+      
+      file.delete();
+      return imageUrl;
+    } catch (e) {
+      print('Erro ao enviar a imagem: $e');
+      return '';
+    }
   }
 
   void resetImage() {
