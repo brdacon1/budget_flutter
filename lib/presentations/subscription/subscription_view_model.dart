@@ -42,22 +42,32 @@ class SubscriptionViewModel extends ChangeNotifier {
   }
 
   void _onPurchaseUpdated(PurchasedItem? productItem) async {
-    if (productItem == null) return;
+    if (productItem == null) {
+      state = SubscriptionState.error;
+      errorMessage = 'Assinatura não realizada';
+      notifyListeners();
+      return;
+    }
 
     try {
       final data = jsonDecode(productItem.transactionReceipt ?? '{}');
       final acknowledgedValue = data['acknowledged'] ?? false;
+      final purchaseState = data['purchaseState'];
 
       UID.autoRenewing = data['autoRenewing'] ?? false;
       UID.purchaseToken = data['purchaseToken'] ?? '';
       UID.productId = data['productId'] ?? '';
 
-      if (!acknowledgedValue) {
-        await FlutterInappPurchase.instance
-            .acknowledgePurchaseAndroid(productItem.purchaseToken ?? '');
+      if (purchaseState == 1 || purchaseState == null || purchaseState == 4) {
+        if (!acknowledgedValue) {
+          await FlutterInappPurchase.instance
+              .acknowledgePurchaseAndroid(productItem.purchaseToken ?? '');
+        }
+        state = SubscriptionState.success;
+      } else {
+        state = SubscriptionState.error;
+        errorMessage = 'Assinatura não realizada';
       }
-
-      state = SubscriptionState.success;
       notifyListeners();
     } catch (e) {
       state = SubscriptionState.error;

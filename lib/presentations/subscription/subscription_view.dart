@@ -37,6 +37,17 @@ class _SubscriptionView extends State<SubscriptionView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) Navigator.pop(context, true);
       });
+    } else if (_viewModel.state == SubscriptionState.error && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Assinatura não realizada'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
     }
   }
 
