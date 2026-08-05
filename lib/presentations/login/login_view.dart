@@ -41,7 +41,11 @@ class _LoginViewState extends State<LoginView> {
       _loadingEvent.alertLoading(context);
     } else if (state == LoginState.success) {
       _loadingEvent.closeLoading(context);
-      Navigator.pushReplacementNamed(context, '/menu');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/menu');
+        }
+      });
     } else if (state == LoginState.error) {
       _loadingEvent.closeLoading(context);
       _displayAlert.notificationError(
