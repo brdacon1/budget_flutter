@@ -32,6 +32,7 @@ class _ImageEditView extends State<ImageEditView> {
     super.initState();
     _viewModel = ImageEditViewModel();
     _viewModel.addListener(_onViewModelChanged);
+    print('ImageEditView: fotoId=${widget.owner.fotoId}, logoName=${widget.owner.logoName}');
     _viewModel.loadInitialImage(
       widget.owner.fotoId,
       widget.owner.logoName,
@@ -137,7 +138,17 @@ class _ImageEditView extends State<ImageEditView> {
           maxWidth: 0.8 * screenWidth,
           maxHeight: 0.7 * screenHeight,
         ),
-        child: Image.network(_viewModel.initialImageUrl!),
+        child: Image.network(
+          _viewModel.initialImageUrl!,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return const Center(child: CircularProgressIndicator());
+          },
+          errorBuilder: (context, error, stackTrace) {
+            print('ImageEditView: erro ao carregar imagem: $error');
+            return const Icon(Icons.error, color: Colors.red, size: 64);
+          },
+        ),
       );
     } else {
       return const SizedBox.shrink();
