@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:oflite/models/global_uid_user.dart' as UID;
 
@@ -38,10 +39,27 @@ class ImageEditViewModel extends ChangeNotifier {
   }
 
   Future<void> cropImage() async {
-    if (pickedFile == null) return;
+    if (pickedFile == null && initialImageUrl == null) return;
+
+    String sourcePath;
+    if (pickedFile != null) {
+      sourcePath = pickedFile!.path;
+    } else {
+      final response = await http.get(Uri.parse(initialImageUrl!));
+      if (response.statusCode != 200) {
+        print('Erro ao baixar imagem para cortar: ${response.statusCode}');
+        return;
+      }
+
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final tempPath = '${appDir.path}/temp_crop_image.jpg';
+      final File tempFile = File(tempPath);
+      await tempFile.writeAsBytes(response.bodyBytes);
+      sourcePath = tempPath;
+    }
 
     final croppedFile = await ImageCropper().cropImage(
-      sourcePath: pickedFile!.path,
+      sourcePath: sourcePath,
       compressFormat: ImageCompressFormat.jpg,
       compressQuality: 100,
       uiSettings: [
@@ -60,6 +78,7 @@ class ImageEditViewModel extends ChangeNotifier {
 
     if (croppedFile != null) {
       this.croppedFile = croppedFile;
+      initialImageUrl = null;
       notifyListeners();
     }
   }
