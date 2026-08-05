@@ -108,8 +108,10 @@ class LoginViewModel extends ChangeNotifier {
         state = LoginState.loading;
         notifyListeners();
         await _emailAndPassword(email, password);
+        state = LoginState.success;
       } catch (e) {
         state = LoginState.idle;
+      } finally {
         notifyListeners();
       }
     }
