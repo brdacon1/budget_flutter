@@ -46,7 +46,7 @@ dependencies:
   google_mobile_ads: ^6.0.0
   firebase_messaging: ^16.4.3
   google_sign_in: ^7.2.0
-  flutter_inapp_purchase: ^5.4.2
+  flutter_inapp_purchase: ^10.0.1
   share_plus: ^12.0.2
   webview_flutter: ^4.11.0
   webview_flutter_android: ^4.3.2
