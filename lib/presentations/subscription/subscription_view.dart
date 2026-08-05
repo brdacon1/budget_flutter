@@ -1,13 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:oflite/models/global_uid_user.dart' as UID;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import '../../common/utils/height_calculate_utils.dart';
 import '../../common/constants/subscription_constants.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'subscription_view_model.dart';
 
 class SubscriptionView extends StatefulWidget {
   const SubscriptionView({Key? key}) : super(key: key);
@@ -17,79 +15,86 @@ class SubscriptionView extends StatefulWidget {
 }
 
 class _SubscriptionView extends State<SubscriptionView> {
-  late List<PurchasedItem>? resultSubscription = [];
+  late SubscriptionViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = SubscriptionViewModel();
+    _viewModel.addListener(_onViewModelChanged);
+    _viewModel.init();
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _onViewModelChanged() {
+    if (_viewModel.state == SubscriptionState.success && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.pop(context, true);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-                colors: [Color(0xFF696D77), Color(0xFF292C36)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                tileMode: TileMode.clamp)),
-        child: Scaffold(
-            backgroundColor: bgColor,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0.0,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: screenAwareSize(20.0, context),
-                ),
-                onPressed: () async {
-                  resultSubscription  = await FlutterInappPurchase.instance.getAvailablePurchases();
-                  if(resultSubscription!.isNotEmpty){
-                    var latestSubscription = resultSubscription!.reduce((current, next) =>
-                    current.transactionDate!.millisecondsSinceEpoch > next.transactionDate!.millisecondsSinceEpoch
-                        ? current
-                        : next);
-
-                    Map<String, dynamic> data = jsonDecode(latestSubscription.transactionReceipt ?? '');
-                    bool acknowledgedValue = data['acknowledged'];
-                    UID.autoRenewing = data['autoRenewing'];
-                    UID.purchaseToken = data['purchaseToken'];
-                    UID.productId = data['productId'];
-
-                    if(!acknowledgedValue) {
-                      await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
-                    }
-                  }
-                  else
-                  {
-                    UID.autoRenewing = false;
-                    UID.purchaseToken = '';
-                  }
-
-                  Navigator.pop(context, true);
-                },
-              ),
-              title: Text("Premium",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: screenAwareSize(18.0, context),
-                      fontFamily: "Montserrat-Bold")),
-              centerTitle: true,
-
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF696D77), Color(0xFF292C36)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          tileMode: TileMode.clamp,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: bgColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              size: screenAwareSize(20.0, context),
             ),
-            body: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  ProductScreenTopPart(),
-                  ProductScreenBottomPart()
-                ],
+            onPressed: () async {
+              await _viewModel.checkExistingSubscription();
+              if (mounted) Navigator.pop(context, true);
+            },
+          ),
+          title: Text(
+            "Premium",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: screenAwareSize(18.0, context),
+              fontFamily: "Montserrat-Bold",
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              const ProductScreenTopPart(),
+              ProductScreenBottomPart(
+                onSubscribe: () => _viewModel.requestSubscription('newproduct'),
+                isLoading: _viewModel.state == SubscriptionState.loading,
               ),
-            )));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
-class ProductScreenTopPart extends StatefulWidget {
-  @override
-  _ProductScreenTopPartState createState() => _ProductScreenTopPartState();
-}
-
-class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
+class ProductScreenTopPart extends StatelessWidget {
+  const ProductScreenTopPart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -100,10 +105,12 @@ class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
         children: <Widget>[
           Stack(
             children: <Widget>[
-              Image.asset("assets/pintor.png",
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.none),
+              Image.asset(
+                "assets/pintor.png",
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.none,
+              ),
             ],
           ),
           Positioned(
@@ -112,11 +119,14 @@ class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text("Avaliações",
-                    style: TextStyle(
-                        color: const Color(0xFF949598),
-                        fontSize: screenAwareSize(10.0, context),
-                        fontFamily: "Montserrat-SemiBold")),
+                Text(
+                  "Avaliações",
+                  style: TextStyle(
+                    color: const Color(0xFF949598),
+                    fontSize: screenAwareSize(10.0, context),
+                    fontFamily: "Montserrat-SemiBold",
+                  ),
+                ),
                 SizedBox(
                   height: screenAwareSize(8.0, context),
                 ),
@@ -133,8 +143,10 @@ class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
                     SizedBox(
                       width: screenAwareSize(5.0, context),
                     ),
-                    const Text("Melhor preço",
-                        style: TextStyle(color: Colors.white, fontSize: 14.0))
+                    const Text(
+                      "Melhor preço",
+                      style: TextStyle(color: Colors.white, fontSize: 14.0),
+                    )
                   ],
                 )
               ],
@@ -147,6 +159,15 @@ class _ProductScreenTopPartState extends State<ProductScreenTopPart> {
 }
 
 class ProductScreenBottomPart extends StatefulWidget {
+  final VoidCallback onSubscribe;
+  final bool isLoading;
+
+  const ProductScreenBottomPart({
+    Key? key,
+    required this.onSubscribe,
+    required this.isLoading,
+  }) : super(key: key);
+
   @override
   _ProductScreenBottomPartState createState() =>
       _ProductScreenBottomPartState();
@@ -154,40 +175,25 @@ class ProductScreenBottomPart extends StatefulWidget {
 
 class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
   bool isExpanded = false;
-  int currentSizeIndex = 0;
   int currentColorIndex = 0;
   List<Widget> colorItemList = [];
 
-  final List<String> _productLists = Platform.isAndroid
-      ? [
-    'newproduct',
-  ] : ['com.housestudio.oflite', 'com.housestudio.oflite'];
-
-  @override
-  void initState() {
-    super.initState();
-    asyncInitState(); // async is not allowed on initState() directly
-  }
-
-  void asyncInitState() async {
-    await FlutterInappPurchase.instance.initialize();
-    await FlutterInappPurchase.instance.getSubscriptions(_productLists);
-  }
-
   void _expand() {
     setState(() {
-      isExpanded ? isExpanded = false : isExpanded = true;
+      isExpanded = !isExpanded;
     });
   }
 
   List<Widget> colorSelector() {
+    colorItemList.clear();
     for (var i = 0; i < colors.length; i++) {
-      colorItemList
-          .add(colorItem(colors[i], i == currentColorIndex, context, () {
-        setState(() {
-          currentColorIndex = i;
-        });
-      }));
+      colorItemList.add(
+        colorItem(colors[i], i == currentColorIndex, context, () {
+          setState(() {
+            currentColorIndex = i;
+          });
+        }),
+      );
     }
     return colorItemList;
   }
@@ -204,9 +210,10 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
             child: Text(
               "Benefícios",
               style: TextStyle(
-                  color: const Color(0xFF949598),
-                  fontSize: screenAwareSize(12.0, context),
-                  fontFamily: "Montserrat-SemiBold"),
+                color: const Color(0xFF949598),
+                fontSize: screenAwareSize(12.0, context),
+                fontFamily: "Montserrat-SemiBold",
+              ),
             ),
           ),
           SizedBox(
@@ -221,16 +228,18 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                 desc,
                 maxLines: 2,
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenAwareSize(14.0, context),
-                    fontFamily: "Montserrat-Medium"),
+                  color: Colors.white,
+                  fontSize: screenAwareSize(14.0, context),
+                  fontFamily: "Montserrat-Medium",
+                ),
               ),
               secondChild: Text(
                 desc,
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenAwareSize(14.0, context),
-                    fontFamily: "Montserrat-Medium"),
+                  color: Colors.white,
+                  fontSize: screenAwareSize(14.0, context),
+                  fontFamily: "Montserrat-Medium",
+                ),
               ),
               crossFadeState: isExpanded
                   ? CrossFadeState.showSecond
@@ -243,12 +252,15 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                 left: screenAwareSize(26.0, context),
                 right: screenAwareSize(18.0, context)),
             child: GestureDetector(
-                onTap: _expand,
-                child: Text(
-                  isExpanded ? "menos" : "mais..",
-                  style: const TextStyle(
-                      color: Color(0xFFFB382F), fontWeight: FontWeight.w700),
-                )),
+              onTap: _expand,
+              child: Text(
+                isExpanded ? "menos" : "mais..",
+                style: const TextStyle(
+                  color: Color(0xFFFB382F),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
           SizedBox(
             height: screenAwareSize(14.0, context),
@@ -261,10 +273,13 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
           ),
           Padding(
             padding: EdgeInsets.only(left: screenAwareSize(20.0, context)),
-            child: const Text("Preço",
-                style: TextStyle(
-                    color: Color(0xFF949598),
-                    fontFamily: "Montserrat-SemiBold")),
+            child: const Text(
+              "Preço",
+              style: TextStyle(
+                color: Color(0xFF949598),
+                fontFamily: "Montserrat-SemiBold",
+              ),
+            ),
           ),
           SizedBox(
             width: double.infinity,
@@ -283,17 +298,23 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                             left: screenAwareSize(18.0, context)),
                         child: Row(
                           children: <Widget>[
-                            Text("R\$ ",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: screenAwareSize(26.0, context),
-                                    fontFamily: "Montserrat-Medium")),
+                            Text(
+                              "R\$ ",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenAwareSize(26.0, context),
+                                fontFamily: "Montserrat-Medium",
+                              ),
+                            ),
                             SizedBox(width: screenAwareSize(2.0, context)),
-                            Text("3,59/mês",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: screenAwareSize(20.0, context),
-                                    fontFamily: "Montserrat-Medium"))
+                            Text(
+                              "3,59/mês",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenAwareSize(20.0, context),
+                                fontFamily: "Montserrat-Medium",
+                              ),
+                            )
                           ],
                         ),
                       ),
@@ -303,22 +324,32 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                       FadeAnimationWidget(
                         delay: 1,
                         child: TextButton(
-                            onPressed: () async {
-                              await FlutterInappPurchase.instance.requestSubscription("newproduct");
-                            },
-                            style: TextButton.styleFrom(
-                                backgroundColor: buttonColor,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 15.0, horizontal: 125),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.0)
-                                )
+                          onPressed: widget.isLoading ? null : widget.onSubscribe,
+                          style: TextButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15.0, horizontal: 125),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
                             ),
-                            child: Text("ASSINAR", style: GoogleFonts.heebo(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),)
+                          ),
+                          child: widget.isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : Text(
+                                  "ASSINAR",
+                                  style: GoogleFonts.heebo(
+                                    color: Colors.black,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -343,16 +374,17 @@ Widget colorItem(
         width: screenAwareSize(30.0, context),
         height: screenAwareSize(30.0, context),
         decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(5.0),
-            boxShadow: isSelected
-                ? [
-              BoxShadow(
-                  color: Colors.black.withOpacity(.8),
-                  blurRadius: 10.0,
-                  offset: const Offset(0.0, 10.0))
-                 ]
-                : []),
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(5.0),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.8),
+                    blurRadius: 10.0,
+                    offset: const Offset(0.0, 10.0),
+                  )
+                ]
+              : []),
         child: ClipPath(
           clipper: MClipper(),
           child: Container(
@@ -369,7 +401,7 @@ Widget colorItem(
 class MClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    var path = new Path();
+    var path = Path();
 
     path.lineTo(0.0, size.height);
     path.lineTo(size.width * 0.2, size.height);
@@ -385,4 +417,3 @@ class MClipper extends CustomClipper<Path> {
     return true;
   }
 }
-
