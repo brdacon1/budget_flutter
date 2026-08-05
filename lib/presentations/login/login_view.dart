@@ -9,7 +9,7 @@ import '../terms_conditions/terms_conditions_view.dart';
 import 'login_view_model.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({Key? key}) : super(key: key);
+  const LoginView({super.key});
 
   @override
   State<LoginView> createState() => _LoginViewState();
