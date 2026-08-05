@@ -111,7 +111,7 @@ class SubscriptionViewModel extends ChangeNotifier {
   void dispose() {
     _purchaseUpdatedSubscription?.cancel();
     _purchaseErrorSubscription?.cancel();
-    FlutterInappPurchase.instance.endConnection;
+    await FlutterInappPurchase.instance.endConnection();
     super.dispose();
   }
 }
