@@ -47,8 +47,11 @@ class LoginViewModel extends ChangeNotifier {
     if (_initialized) return;
     _initialized = true;
 
-    await FlutterInappPurchase.instance.initialize();
-    await FlutterInappPurchase.instance.getSubscriptions(productLists);
+    await FlutterInappPurchase.instance.initConnection();
+    await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
+      skus: productLists,
+      type: ProductQueryType.Subs,
+    );
 
     await _checkAutoLogin();
   }
@@ -196,23 +199,21 @@ class LoginViewModel extends ChangeNotifier {
     final resultSubscription =
         await FlutterInappPurchase.instance.getAvailablePurchases();
 
-    if (resultSubscription != null && resultSubscription.isNotEmpty) {
+    if (resultSubscription.isNotEmpty) {
       final latestSubscription = resultSubscription.reduce(
         (current, next) =>
-            (current.transactionDate?.millisecondsSinceEpoch ?? 0) >
-                    (next.transactionDate?.millisecondsSinceEpoch ?? 0)
+            (current.transactionDate) > (next.transactionDate)
                 ? current
                 : next,
       );
 
-      final data = jsonDecode(latestSubscription.transactionReceipt ?? '{}');
-      final acknowledgedValue = data['acknowledged'] ?? false;
+      global_uid_user.autoRenewing = latestSubscription.isAutoRenewing;
+      global_uid_user.purchaseToken = latestSubscription.purchaseToken ?? '';
+      global_uid_user.productId = latestSubscription.productId;
 
-      global_uid_user.autoRenewing = data['autoRenewing'] ?? false;
-      global_uid_user.purchaseToken = data['purchaseToken'] ?? '';
-      global_uid_user.productId = data['productId'] ?? '';
-
-      if (!acknowledgedValue) {
+      if (Platform.isAndroid &&
+          latestSubscription is PurchaseAndroid &&
+          latestSubscription.isAcknowledgedAndroid != true) {
         await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
           latestSubscription.purchaseToken ?? '',
         );

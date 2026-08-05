@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
@@ -19,13 +18,18 @@ class SubscriptionViewModel extends ChangeNotifier {
       : ['com.housestudio.oflite', 'com.housestudio.oflite'];
 
   Future<void> init() async {
-    await FlutterInappPurchase.instance.initialize();
-    await FlutterInappPurchase.instance.getSubscriptions(productLists);
+    await FlutterInappPurchase.instance.initConnection();
+    await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
+      skus: productLists,
+      type: ProductQueryType.Subs,
+    );
 
-    _purchaseUpdatedSubscription =
-        FlutterInappPurchase.purchaseUpdated.listen(_onPurchaseUpdated);
-    _purchaseErrorSubscription =
-        FlutterInappPurchase.purchaseError.listen(_onPurchaseError);
+    _purchaseUpdatedSubscription = FlutterInappPurchase
+        .instance.purchaseUpdatedListener
+        .listen(_onPurchaseUpdated);
+    _purchaseErrorSubscription = FlutterInappPurchase
+        .instance.purchaseErrorListener
+        .listen(_onPurchaseError);
   }
 
   Future<void> requestSubscription(String productId) async {
@@ -33,7 +37,14 @@ class SubscriptionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await FlutterInappPurchase.instance.requestSubscription(productId);
+      await FlutterInappPurchase.instance.requestPurchaseWithBuilder(
+        build: (builder) {
+          builder
+            ..type = ProductQueryType.Subs
+            ..android.skus = [productId]
+            ..ios.sku = productId;
+        },
+      );
     } catch (e) {
       state = SubscriptionState.error;
       errorMessage = e.toString();
@@ -41,28 +52,21 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
   }
 
-  void _onPurchaseUpdated(PurchasedItem? productItem) async {
-    if (productItem == null) {
-      state = SubscriptionState.error;
-      errorMessage = 'Assinatura não realizada';
-      notifyListeners();
-      return;
-    }
-
+  void _onPurchaseUpdated(Purchase purchase) async {
     try {
-      final data = jsonDecode(productItem.transactionReceipt ?? '{}');
-      final acknowledgedValue = data['acknowledged'] ?? false;
-      final purchaseState = data['purchaseState'];
+      UID.autoRenewing = purchase.isAutoRenewing;
+      UID.purchaseToken = purchase.purchaseToken ?? '';
+      UID.productId = purchase.productId;
 
-      UID.autoRenewing = data['autoRenewing'] ?? false;
-      UID.purchaseToken = data['purchaseToken'] ?? '';
-      UID.productId = data['productId'] ?? '';
-
-      if (purchaseState == 1 || purchaseState == null || purchaseState == 4) {
-        if (!acknowledgedValue) {
+      if (purchase.purchaseState == PurchaseState.Purchased) {
+        if (Platform.isAndroid &&
+            purchase is PurchaseAndroid &&
+            purchase.isAcknowledgedAndroid != true) {
           await FlutterInappPurchase.instance
-              .acknowledgePurchaseAndroid(productItem.purchaseToken ?? '');
+              .acknowledgePurchaseAndroid(purchase.purchaseToken ?? '');
         }
+        state = SubscriptionState.success;
+      } else if (purchase.purchaseState == PurchaseState.Pending) {
         state = SubscriptionState.success;
       } else {
         state = SubscriptionState.error;
@@ -76,9 +80,14 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
   }
 
-  void _onPurchaseError(dynamic purchaseError) {
-    state = SubscriptionState.error;
-    errorMessage = purchaseError.toString();
+  void _onPurchaseError(PurchaseError purchaseError) {
+    if (purchaseError.code == ErrorCode.UserCancelled) {
+      state = SubscriptionState.idle;
+      errorMessage = null;
+    } else {
+      state = SubscriptionState.error;
+      errorMessage = 'Assinatura não realizada';
+    }
     notifyListeners();
   }
 
@@ -87,23 +96,21 @@ class SubscriptionViewModel extends ChangeNotifier {
       final resultSubscription =
           await FlutterInappPurchase.instance.getAvailablePurchases();
 
-      if (resultSubscription != null && resultSubscription.isNotEmpty) {
+      if (resultSubscription.isNotEmpty) {
         final latestSubscription = resultSubscription.reduce(
           (current, next) =>
-              (current.transactionDate?.millisecondsSinceEpoch ?? 0) >
-                      (next.transactionDate?.millisecondsSinceEpoch ?? 0)
+              (current.transactionDate) > (next.transactionDate)
                   ? current
                   : next,
         );
 
-        final data = jsonDecode(latestSubscription.transactionReceipt ?? '{}');
-        final acknowledgedValue = data['acknowledged'] ?? false;
+        UID.autoRenewing = latestSubscription.isAutoRenewing;
+        UID.purchaseToken = latestSubscription.purchaseToken ?? '';
+        UID.productId = latestSubscription.productId;
 
-        UID.autoRenewing = data['autoRenewing'] ?? false;
-        UID.purchaseToken = data['purchaseToken'] ?? '';
-        UID.productId = data['productId'] ?? '';
-
-        if (!acknowledgedValue) {
+        if (Platform.isAndroid &&
+            latestSubscription is PurchaseAndroid &&
+            latestSubscription.isAcknowledgedAndroid != true) {
           await FlutterInappPurchase.instance
               .acknowledgePurchaseAndroid(latestSubscription.purchaseToken ?? '');
         }
