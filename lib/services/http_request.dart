@@ -289,9 +289,11 @@ class HttpRequest{
     return yourModels;
   }
 
-  Future<void> createUserWithGoogle(User? value, BuildContext context) async {
+  Future<void> createUserWithGoogle(User? value, BuildContext? context) async {
     try{
-      alertDisplayLoading.alertLoading(context);
+      if (context != null) {
+        alertDisplayLoading.alertLoading(context);
+      }
       final DADOS = InfoUser();
       final PDF = OwnerPdf();
       DADOS.EMAIL = value?.email ?? '';
@@ -313,12 +315,15 @@ class HttpRequest{
       uid.productId = "";
       uid.purchaseToken = "";
       uid.autoRenewing = false;
-      await savePDF(PDF).then((value) =>
-      {
-        alertDisplayLoading.closeLoading(context),
+      await savePDF(PDF).then((_) {
+        if (context != null) {
+          alertDisplayLoading.closeLoading(context);
+        }
       });
     } catch (e){
-       alertDisplayLoading.closeLoading(context);
+      if (context != null) {
+        alertDisplayLoading.closeLoading(context);
+      }
     }
   }
  Future<int> getNumberItems() async {
