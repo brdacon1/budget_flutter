@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/common/widgets/ads/banner_ad_widget.dart';
+import 'package:oflite/common/widgets/ads/interstitial_ad_service.dart';
 import 'package:oflite/models/global_uid_budget.dart' as budget;
 import 'package:oflite/models/global_uid_user.dart' as UID;
 import 'package:oflite/presentations/budget/budget_tab/budget_tab_view.dart';
@@ -30,8 +31,8 @@ class _BudgetListView extends State<BudgetListView> {
   @override
   void initState() {
     budget.IDORCAMENTO = '';
-    _viewModel.loadAd(() => setState(() {}));
-    _viewModel.loadInterstitialAd();
+    // Pré-carrega o intersticial em background, sem travar a tela.
+    InterstitialAdService.instance.load();
     _viewModel.initialScreen();
     super.initState();
   }
@@ -85,7 +86,6 @@ class _BudgetListView extends State<BudgetListView> {
   @override
   Widget build(BuildContext context) {
     final he = MediaQuery.of(context).size.height;
-    final we = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
@@ -165,14 +165,11 @@ class _BudgetListView extends State<BudgetListView> {
                           MaterialPageRoute(
                             builder: (context) => BudgetTabView(item: item),
                           ),
-                        ).then((value) => setState(() {
-                              try {
-                                budget.IDORCAMENTO = '';
-                                _viewModel.getInformationOrcamento().then((_) {
-                                  _viewModel.clearDeleteItens();
-                                });
-                              } catch (e) {}
-                            }));
+                        ).then((_) async {
+                          budget.IDORCAMENTO = '';
+                          await _viewModel.getInformationOrcamento();
+                          _viewModel.clearDeleteItens();
+                        });
                       },
                       onDuplicate: () async {
                         if (!UID.autoRenewing! &&
@@ -249,17 +246,17 @@ class _BudgetListView extends State<BudgetListView> {
                         (value) async => {
                               if (value == "Ver anuncio")
                                 {
-                                  _viewModel.showInterstitialAd(),
+                                  InterstitialAdService.instance.show(),
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => BudgetTabView(
                                             item: _viewModel.novoOrcamento())),
-                                  ).then((value) => setState(() async {
-                                        budget.IDORCAMENTO = '';
-                                        await _viewModel.getInformationOrcamento();
-                                        _viewModel.clearDeleteItens();
-                                      })),
+                                  ).then((_) async {
+                                    budget.IDORCAMENTO = '';
+                                    await _viewModel.getInformationOrcamento();
+                                    _viewModel.clearDeleteItens();
+                                  }),
                                 }
                               else if (value == "Se tornar premium")
                                 {
@@ -277,11 +274,11 @@ class _BudgetListView extends State<BudgetListView> {
                       MaterialPageRoute(
                           builder: (context) =>
                               BudgetTabView(item: _viewModel.novoOrcamento())),
-                    ).then((value) => setState(() async {
-                          budget.IDORCAMENTO = '';
-                          await _viewModel.getInformationOrcamento();
-                          _viewModel.clearDeleteItens();
-                        }));
+                    ).then((_) async {
+                      budget.IDORCAMENTO = '';
+                      await _viewModel.getInformationOrcamento();
+                      _viewModel.clearDeleteItens();
+                    });
                   }
                 },
                 backgroundColor: buttonColor,
@@ -294,13 +291,9 @@ class _BudgetListView extends State<BudgetListView> {
           );
         },
       ),
-      bottomNavigationBar: _viewModel.bannerAd != null
-          ? SizedBox(
-              width: we,
-              height: _viewModel.bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _viewModel.bannerAd!),
-            )
-          : null,
+      bottomNavigationBar: BannerAdWidget(
+        adUnitId: 'ca-app-pub-5106035309089315/6550502888',
+      ),
     );
   }
 }

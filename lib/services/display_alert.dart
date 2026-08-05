@@ -48,7 +48,9 @@ class DisplayAlert {
           color: Colors.black,
           fontSize: 18,
         ),
-        btnOkOnPress: () => completer.complete(),
+        btnOkOnPress: () {
+          completer.complete();
+        },
         btnOkIcon: Icons.check_circle,
       ).show();
     });
@@ -81,7 +83,9 @@ class DisplayAlert {
           fontSize: 18, // Defina o tamanho da fonte da descrição
           // Adicione outros atributos do TextStyle conforme necessário
         ),
-        btnOkOnPress: () => completer.complete(),
+        btnOkOnPress: () {
+          completer.complete();
+        },
         btnOkIcon: Icons.check_circle,
       ).show();
     });
@@ -532,7 +536,6 @@ class DisplayAlert {
           fontSize: 18,
         ),
         btnOkOnPress: () {
-          Navigator.pop(context, true);
           completer.complete();
         },
       ).show();

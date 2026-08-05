@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/presentations/comment/comment_list_view.dart';
 import 'package:oflite/presentations/receipt/receipt_list/receipt_list_view.dart';
 import 'package:oflite/Services/display_alert.dart';
@@ -29,8 +29,6 @@ class _PdfMenuView extends State<PdfMenuView> {
     MenuItem(icon: Icons.comment_outlined, title: 'Inserir comentários'),
     MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),
   ];
-  BannerAd? _bannerAd;
-  final String _adUnitId = 'ca-app-pub-5106035309089315/6550502888';
 
   void navigateToPage(BuildContext context, int index) {
     switch (index) {
@@ -51,40 +49,13 @@ class _PdfMenuView extends State<PdfMenuView> {
     }
   }
 
-  void _loadAd() async {
-    BannerAd(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {
-          setState(() {
-            _bannerAd = ad as BannerAd;
-          });
-        },
-        // Called when an ad request failed.
-        onAdFailedToLoad: (ad, err) {
-          ad.dispose();
-        },
-        // Called when an ad opens an overlay that covers the screen.
-        onAdOpened: (Ad ad) {},
-        // Called when an ad removes an overlay that covers the screen.
-        onAdClosed: (Ad ad) {},
-        // Called when an impression occurs on the ad.
-        onAdImpression: (Ad ad) {},
-      ),
-    ).load();
-  }
   @override
   void initState() {
     super.initState();
-    _loadAd();
   }
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -167,9 +138,9 @@ class _PdfMenuView extends State<PdfMenuView> {
           ),
         ],
       ),
-      bottomNavigationBar: _bannerAd != null
-          ? SizedBox(width: we, height: _bannerAd!.size.height.toDouble(), child: AdWidget(ad: _bannerAd!),
-      ) : null,
+      bottomNavigationBar: const BannerAdWidget(
+        adUnitId: 'ca-app-pub-5106035309089315/6550502888',
+      ),
     );
   }
 }

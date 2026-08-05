@@ -30,7 +30,9 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   void initState() {
     super.initState();
     _viewModel = BudgetListItemsViewModel(item: widget.item);
-    _viewModel.getListItens();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.getListItens();
+    });
   }
 
   @override
@@ -53,11 +55,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
           },
         );
       },
-    ).then((value) async {
+    ).then((_) async {
       if (_viewModel.deleteItens.isEmpty) {
         await _viewModel.getListItens();
       }
-      setState(() {});
     });
   }
 
@@ -208,42 +209,36 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                 heroTag: "adicionar",
                 onPressed: () async {
                   if (await _viewModel.db.getNumberItems() > 0) {
-                    await displayAlert.listNotification(context).then((value) => {
-                          if (value == "Criar novo item")
-                            {
-                              budget.fromListItem = true,
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ProductPriceCreatorView(item: _viewModel.novo)),
-                              ),
-                            }
-                          else if (value == "Selecionar da lista de preço")
-                            {
-                              budget.fromListItem = false,
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProductPriceListView(
-                                        item: widget.item, fromMenu: false)),
-                              ),
-                            }
-                        }).then((value) {
+                    final value = await displayAlert.listNotification(context);
+                    if (value == "Criar novo item") {
+                      budget.fromListItem = true;
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                ProductPriceCreatorView(item: _viewModel.novo)),
+                      );
+                    } else if (value == "Selecionar da lista de preço") {
                       budget.fromListItem = false;
-                      _viewModel.getListItens();
-                    });
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProductPriceListView(
+                                item: widget.item, fromMenu: false)),
+                      );
+                    }
+                    budget.fromListItem = false;
+                    await _viewModel.getListItens();
                   } else {
                     budget.fromListItem = true;
-                    Navigator.push(
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
                               ProductPriceCreatorView(item: _viewModel.novo)),
-                    ).then((value) {
-                      budget.fromListItem = false;
-                      _viewModel.getListItens();
-                    });
+                    );
+                    budget.fromListItem = false;
+                    await _viewModel.getListItens();
                   }
                 },
                 backgroundColor: buttonColor,

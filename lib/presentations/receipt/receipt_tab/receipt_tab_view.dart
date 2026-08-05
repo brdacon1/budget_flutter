@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/models/receipt.dart';
 import 'package:oflite/presentations/payment/payment_list/payment_list_view.dart';
 import 'package:oflite/presentations/pdf/pdf_receipt/pdf_receipt_view.dart';
+import 'package:oflite/presentations/receipt/receipt_creator/receipt_creator_view.dart';
 import '../../../models/customer_info.dart';
 import '../../../common/constants/constants.dart';
 
@@ -39,7 +40,7 @@ class _ReceiptTabView extends State<ReceiptTabView> {
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
     final List children = [
-      ReceiptTabView(item: widget.item, recibos: widget.recibos),
+      ReceiptCreatorView(item: widget.item, receipt: widget.recibos),
       PaymentListView(item: widget.item, recibos: widget.recibos),
       PdfReceiptView(item: widget.item, receipt: widget.recibos),
     ];

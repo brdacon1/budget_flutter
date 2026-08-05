@@ -25,6 +25,12 @@ class _BudgetTabView extends State<BudgetTabView> {
   }
 
   @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
     final List children = [
@@ -33,12 +39,12 @@ class _BudgetTabView extends State<BudgetTabView> {
       const PdfBudgetView(),
       PdfMenuView(item: widget.item),
     ];
-    return Scaffold(
-      body: children[_viewModel.currentIndex],
-      bottomNavigationBar: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return Theme(
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return Scaffold(
+          body: children[_viewModel.currentIndex],
+          bottomNavigationBar: Theme(
             data: Theme.of(context).copyWith(
               canvasColor: secondaryColor,
             ),
@@ -70,9 +76,9 @@ class _BudgetTabView extends State<BudgetTabView> {
                 ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -10,7 +10,7 @@ class BudgetTabViewModel extends ChangeNotifier {
     if (index == 0) {
       _currentIndex = index;
     } else {
-      if (item.id!.isNotEmpty) {
+      if (item.id != null && item.id!.isNotEmpty) {
         _currentIndex = index;
       } else {
         AwesomeDialog(

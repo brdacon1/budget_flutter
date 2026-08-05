@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'components/budget_creator_address_section.dart';
 import 'components/budget_creator_contact_section.dart';
@@ -24,7 +24,6 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
   void initState() {
     super.initState();
     _viewModel = BudgetCreatorViewModel(item: widget.item);
-    _viewModel.loadAd(() => setState(() {}));
     _viewModel.init();
   }
 
@@ -127,13 +126,9 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
           );
         },
       ),
-      bottomNavigationBar: _viewModel.bannerAd != null
-          ? SizedBox(
-              width: we,
-              height: _viewModel.bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _viewModel.bannerAd!),
-            )
-          : null,
+      bottomNavigationBar: const BannerAdWidget(
+        adUnitId: 'ca-app-pub-5106035309089315/6550502888',
+      ),
     );
   }
 }

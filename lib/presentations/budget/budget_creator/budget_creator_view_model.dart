@@ -6,7 +6,6 @@ import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
 import 'package:flutter_contacts/properties/name.dart';
 import 'package:flutter_contacts/properties/phone.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/models/customer_info.dart';
@@ -34,8 +33,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   BudgetCreatorViewModel({required this.item});
 
-  BannerAd? bannerAd;
-  final String adUnitId = 'ca-app-pub-5106035309089315/6550502888';
   final nameNode = FocusNode();
   final phoneNode = FocusNode();
   final cepNode = FocusNode();
@@ -78,26 +75,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       type: MaskAutoCompletionType.lazy);
 
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
-
-  void loadAd(VoidCallback onLoaded) async {
-    BannerAd(
-      adUnitId: adUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          bannerAd = ad as BannerAd;
-          onLoaded();
-        },
-        onAdFailedToLoad: (ad, err) {
-          ad.dispose();
-        },
-        onAdOpened: (Ad ad) {},
-        onAdClosed: (Ad ad) {},
-        onAdImpression: (Ad ad) {},
-      ),
-    ).load();
-  }
 
   void init() {
     try {
@@ -467,7 +444,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    bannerAd?.dispose();
     nameNode.dispose();
     phoneNode.dispose();
     cepNode.dispose();

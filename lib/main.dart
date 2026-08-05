@@ -16,14 +16,18 @@ import 'common/constants/constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
-  await Firebase.initializeApp();
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+  // Inicializa o Firebase e os ads em paralelo para não travar a splash.
+  await Future.wait([
+    Firebase.initializeApp(),
+    MobileAds.instance.initialize(),
+  ]);
+  // Configuração de notificações em background (não bloqueia o runApp).
+  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
     sound: true,
   );
-  await configureForegroundNotificationPresentationOptions();
+  configureForegroundNotificationPresentationOptions();
   runApp(const MyApp());
 }
 

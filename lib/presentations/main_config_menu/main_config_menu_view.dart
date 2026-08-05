@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/common/widgets/ads/banner_ad_widget.dart';
 import 'main_config_menu_view_model.dart';
 
 class MainConfigMenuView extends StatefulWidget {
@@ -18,7 +18,6 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
   void initState() {
     super.initState();
     _viewModel = MainConfigMenuViewModel();
-    _viewModel.loadAd();
     _viewModel.addListener(_onViewModelChanged);
   }
 
@@ -35,7 +34,6 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
     var he = MediaQuery.of(context).size.height;
 
     return AnimatedBuilder(
@@ -93,13 +91,9 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
               ),
             ],
           ),
-          bottomNavigationBar: _viewModel.bannerAd != null
-              ? SizedBox(
-                  width: we,
-                  height: _viewModel.bannerAd!.size.height.toDouble(),
-                  child: AdWidget(ad: _viewModel.bannerAd!),
-                )
-              : null,
+          bottomNavigationBar: const BannerAdWidget(
+            adUnitId: 'ca-app-pub-5106035309089315/6550502888',
+          ),
         );
       },
     );
