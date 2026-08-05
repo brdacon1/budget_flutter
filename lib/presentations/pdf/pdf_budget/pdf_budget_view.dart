@@ -30,43 +30,59 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   }
 
   Future<void> startPDF() async {
+    try {
+      var db = HttpRequest();
+      var pdf = PdfGenerate();
+      var budget = await db.getListItensGerador();
+      var customer = await db.getInformationOrcamento1();
+      var owner = await db.getInformationEnterprise();
+      var comment = await db.getListComentarioPDF();
+      if (budget.isNotEmpty) {
+        double totalProducts = 0;
+        double totalServices = 0;
+        double totalBudget = 0;
+        int countProduct = 0;
+        int countService = 0;
 
-    var db = HttpRequest();
-    var pdf = PdfGenerate();
-    var budget = await db.getListItensGerador();
-    var customer = await db.getInformationOrcamento1();
-    var owner = await db.getInformationEnterprise();
-    var comment = await db.getListComentarioPDF();
-    if (budget.isNotEmpty) {
-      double totalProducts = 0;
-      double totalServices = 0;
-      double totalBudget = 0;
-      int countProduct = 0;
-      int countService = 0;
-
-      for (int index = 0; index < budget.length; index++) {
-        double total = budget[index].TOTAL!;
-        if (budget[index].CATEGORIA == 'Produtos') {
-          totalProducts += total;
-          countProduct++;
-        } else if (budget[index].CATEGORIA == 'Serviços') {
-          totalServices += total;
-          countService++;
+        for (int index = 0; index < budget.length; index++) {
+          double total = budget[index].TOTAL!;
+          if (budget[index].CATEGORIA == 'Produtos') {
+            totalProducts += total;
+            countProduct++;
+          } else if (budget[index].CATEGORIA == 'Serviços') {
+            totalServices += total;
+            countService++;
+          }
+          totalBudget += total;
         }
-        totalBudget += total;
-      }
 
-      await pdf.patternPDF(countService, countProduct,
-          moneyConvert.convertFromDouble(totalBudget),
-          moneyConvert.convertFromDouble(totalProducts),
-          moneyConvert.convertFromDouble(totalServices), budget, customer, owner, comment).then((value) {
-        setState(() {
-          _fileBytes = value;
+        await pdf.patternPDF(
+            countService,
+            countProduct,
+            moneyConvert.convertFromDouble(totalBudget),
+            moneyConvert.convertFromDouble(totalProducts),
+            moneyConvert.convertFromDouble(totalServices),
+            budget,
+            customer,
+            owner,
+            comment).then((value) {
+          setState(() {
+            _fileBytes = value;
+          });
         });
-      });
-      setState(() {});
-    } else {
-      await displayAlert.notificationWarning(context, "Ops!", "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
+        setState(() {});
+      } else {
+        await displayAlert.notificationWarning(
+            context,
+            "Ops!",
+            "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
+      }
+    } catch (e) {
+      print('Error generating PDF: $e');
+      if (mounted) {
+        await displayAlert.notificationWarning(
+            context, "Erro", "Não foi possível gerar o PDF: ${e.toString()}");
+      }
     }
   }
 
