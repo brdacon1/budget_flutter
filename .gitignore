@@ -24,7 +24,9 @@ lib/generated/
 # Android
 # =============================================================================
 **/android/**/gradle-wrapper.jar
-**/android/gradle/
+**/android/gradle/*
+!**/android/gradle/wrapper/
+!**/android/gradle/wrapper/**
 **/android/.gradle
 **/android/captures/
 **/android/gradlew
@@ -32,6 +34,18 @@ lib/generated/
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/**/GeneratedPluginRegistrant.kt
+
+# Native build output (CMake / NDK)
+**/android/**/.cxx/
+**/android/**/externalNativeBuild/
+
+# Keystore / signing (NEVER commit)
+**/android/key.properties
+**/*.keystore
+**/*.jks
+
+# Keep Gradle wrapper config versioned
+!**/gradle-wrapper.properties
 
 # Native build output (CMake / NDK)
 **/android/**/.cxx/
