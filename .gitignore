@@ -1,4 +1,7 @@
-# Flutter
+# =============================================================================
+# Flutter / Dart
+# =============================================================================
+# Dart/Flutter tooling & cache
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -6,12 +9,22 @@
 .pub-cache/
 .pub/
 /build/
-/flutter_*.json
+flutter_*.json
 flutter_export_environment.sh
 
+# Generated Dart files
+lib/generated_plugin_registrant.dart
+**/generated_plugin_registrant.dart
+lib/generated/
+*.g.dart
+*.freezed.dart
+*.config.dart
+
+# =============================================================================
 # Android
+# =============================================================================
 **/android/**/gradle-wrapper.jar
-**/android/gradle
+**/android/gradle/
 **/android/.gradle
 **/android/captures/
 **/android/gradlew
@@ -20,7 +33,18 @@ flutter_export_environment.sh
 **/android/**/GeneratedPluginRegistrant.java
 **/android/**/GeneratedPluginRegistrant.kt
 
-# iOS
+# Native build output (CMake / NDK)
+**/android/**/.cxx/
+**/android/**/externalNativeBuild/
+
+# Keystore / signing (NEVER commit)
+**/android/key.properties
+**/*.keystore
+**/*.jks
+
+# =============================================================================
+# iOS / macOS
+# =============================================================================
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -33,9 +57,9 @@ flutter_export_environment.sh
 **/ios/**/DerivedData/
 **/ios/**/Icon?
 **/ios/**/Icon??
-**/ios/**/Icon??
 **/ios/**/Pods/
 **/ios/**/.symlinks/
+**/ios/**/Flutter/App.framework
 **/ios/**/Flutter/Flutter.framework
 **/ios/**/Flutter/Flutter.podspec
 **/ios/**/Flutter/Generated.xcconfig
@@ -45,84 +69,120 @@ flutter_export_environment.sh
 **/ios/**/Flutter/flutter_assets/
 **/ios/**/Flutter/flutter_export_environment.sh
 **/ios/**/ServiceDefinitions.json
-**/ios/**/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+**/ios/**/Runner/GeneratedPluginRegistrant.*
 **/ios/**/coverage/
 
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+
+# =============================================================================
 # Web
+# =============================================================================
 lib/generated_plugin_registrant.dart
 
-# Misc
+# =============================================================================
+# IDE / Editors
+# =============================================================================
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.c9/
+*.codekit
+.codekit3
+.devcontainer/
+.externalNativeBuild/
+.gradle/
+.metadata/
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.project
+.properties
+.settings/
+
+# Android Studio / IntelliJ
+.idea/libraries/
+.idea/caches/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/gradle.xml
+.idea/dictionaries/
+
+# =============================================================================
+# Build outputs
+# =============================================================================
+build/
+coverage/
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
 *.class
+*.so
+*.o
+*.obj
+*.lib
+*.dll
+*.exe
 *.log
+
+# =============================================================================
+# Sensitive / credentials / keys (NEVER commit)
+# =============================================================================
+# Firebase
+**/google-services.json
+**/GoogleService-Info.plist
+firebase_options.dart
+.firebase/
+
+# Keystore / keys
+Key/
+key.properties
+**/*.keystore
+**/*.jks
+**/*.p12
+**/*.pfx
+**/*.pem
+**/*.der
+**/*.p7b
+**/*.key
+**/*.keyInfo
+
+# Generic secrets
+*.secret
+*.secrets
+*.env
+.env.*
+!.env.example
+
+# =============================================================================
+# Misc
+# =============================================================================
 *.pyc
 *.swp
+*.tmp
+*.temp
 .DS_Store
 .atom/
 .buildlog/
 .history
 .svn/
 migrate_working_dir/
-*.jks
-*.p12
-*.p8
-*.p8.key
-*.jf
 
-# IDE
-.idea/
-.classpath
-.c9/
-*.codekit
-.codekit3
-.dart_tool/
-.devcontainer/
-.externalNativeBuild/
-.gradle
-.idea/
-.metadata
-.vs/
-.vscode/
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-local_settings.gradle
-.project
-.properties
-.settings/
+# Version managers
+.fvm/
+.fvmrc
 
-# Build outputs
-build/
-*.apk
-*.aab
-*.aar
-*.so
-*.o
-
-# Sensitive files
-*.keystore
-*.jks
-Key/
-key.properties
-*.pem
-*.der
-*.p7b
-
-# Generated files
-.flutter-plugins-dependencies
-GeneratedPluginRegistrant.java
-GeneratedPluginRegistrant.kt
-lib/generated/
-
-# Dart/Flutter/Pub related
-.dart_tool
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
-
+# =============================================================================
 # Exceptions to above rules
+# =============================================================================
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
