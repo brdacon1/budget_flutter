@@ -10,7 +10,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../../models/customer_info.dart';
 import '../../../models/receipt.dart';
 import '../../../Services/display_alert.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../common/constants/constants.dart';
 
 class PdfReceiptView extends StatefulWidget {
@@ -105,7 +105,8 @@ class _PdfReceiptView extends State<PdfReceiptView> {
                             onPressed: () async {
                               if(_fileBytes != null)
                               {
-                                Share.shareFiles([_fileBytes!], text: 'Compartilhar PDF');
+                                final xFile = XFile(_fileBytes!);
+                                Share.shareXFiles([xFile], text: 'Compartilhar PDF');
                               }
                             },
                             style: TextButton.styleFrom(

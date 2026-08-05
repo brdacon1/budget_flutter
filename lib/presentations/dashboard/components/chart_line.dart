@@ -52,7 +52,7 @@ class _ChartLine extends State<ChartLine> {
   LineTouchData get lineTouchData1 => LineTouchData(
     handleBuiltInTouches: true,
     touchTooltipData: LineTouchTooltipData(
-      tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
+      getTooltipColor: (LineBarSpot touchedSpot) => Colors.blueGrey.withValues(alpha: 0.8),
     ),
   );
 
@@ -159,7 +159,7 @@ class _ChartLine extends State<ChartLine> {
     }
 
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       space: 10,
       child: text,
     );

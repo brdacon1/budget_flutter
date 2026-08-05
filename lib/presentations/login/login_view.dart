@@ -86,10 +86,10 @@ class _LoginView extends State<LoginView> {
   Future<void> _signinWithGoogle() async {
     GoogleSignInAuthentication? googleAuth;
     AuthCredential credential;
-    var googleUser = await GoogleSignIn().signIn();
+    await GoogleSignIn.instance.initialize();
+    var googleUser = await GoogleSignIn.instance.authenticate();
     googleAuth = await googleUser?.authentication;
     credential = GoogleAuthProvider.credential(
-              accessToken: googleAuth?.accessToken,
               idToken: googleAuth?.idToken,
     );
     await singWithCredential(credential);

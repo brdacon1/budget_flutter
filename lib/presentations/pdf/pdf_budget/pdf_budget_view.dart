@@ -7,7 +7,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../../common/widgets/anmition/fade_animation_widget.dart';
 import '../../../services/pdf_generate.dart';
 import '../../../Services/display_alert.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../common/constants/constants.dart';
 
 class PdfBudgetView extends StatefulWidget {
@@ -106,7 +106,8 @@ class _PdfBudgetView extends State<PdfBudgetView> {
                             onPressed: () async {
                               if(_fileBytes != null)
                                 {
-                                  Share.shareFiles([_fileBytes!], text: 'Compartilhar PDF');
+                                  final xFile = XFile(_fileBytes!);
+                                  Share.shareXFiles([xFile], text: 'Compartilhar PDF');
                                 }
                             },
                             style: TextButton.styleFrom(

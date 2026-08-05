@@ -407,10 +407,10 @@ class HttpRequest{
     String uid = "";
     try
     {
-      GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      await GoogleSignIn.instance.initialize();
+      GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
       AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
       await _auth.signInWithCredential(credential).then((userCredential) async => {

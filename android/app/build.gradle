@@ -1,31 +1,8 @@
 plugins {
-    id "com.google.gms.google-services"
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-}
-
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
-}
-
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '73'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.8.2'
+    id "com.google.gms.google-services" version "4.4.2"
 }
 
 def keystoreProperties = new Properties()
@@ -35,31 +12,26 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 34
+    namespace = "com.housestudio.oflite"
+    compileSdk = 35
+    ndkVersion = "26.1.10909125"
 
-    defaultConfig {
-        multiDexEnabled true
-    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        jvmTarget = '17'
     }
 
     defaultConfig {
         applicationId "com.housestudio.oflite"
-        minSdkVersion 22
-        targetSdkVersion 34
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode 132
-        versionName '1.9.6'
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 132
+        versionName = '1.9.6'
+        multiDexEnabled true
     }
 
     signingConfigs {
@@ -70,12 +42,14 @@ android {
             storePassword 'Eminem622315'
         }
     }
+
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
-
 }
 
 flutter {
@@ -83,6 +57,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:multidex:2.0.1'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
