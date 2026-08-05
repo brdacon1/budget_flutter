@@ -66,8 +66,9 @@ class ImageEditViewModel extends ChangeNotifier {
       final File file = File(filePath);
       
       final Uint8List fileBytes;
-      if (croppedFile != null) {
-        fileBytes = await croppedFile.readAsBytes();
+      final cropped = croppedFile;
+      if (cropped != null) {
+        fileBytes = await cropped.readAsBytes();
       } else {
         fileBytes = await pickedFile!.readAsBytes();
       }
