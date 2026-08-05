@@ -44,23 +44,25 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Future<void> _dialogDuplicate() async {
+    final viewContext = context;
     await showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return BudgetListDuplicateDialog(
           onConfirm: (clientData, quoteItems, comments) async {
+            Navigator.of(dialogContext).pop();
             var alertDisplayLoading = LoadingEvent();
-            await alertDisplayLoading.alertLoading(context);
-            await _viewModel.duplicateEvent(clientData, quoteItems, comments);
-            alertDisplayLoading.closeLoading(context);
+            try {
+              await alertDisplayLoading.alertLoading(viewContext);
+              await _viewModel.duplicateEvent(clientData, quoteItems, comments);
+              await _viewModel.getInformationOrcamento();
+            } finally {
+              alertDisplayLoading.closeLoading(viewContext);
+            }
           },
         );
       },
-    ).then((value) async {
-      await _viewModel.getInformationOrcamento().then((value) => {
-            setState(() {}),
-          });
-    });
+    );
   }
 
   Future<void> _dialogDeleteBuilder() async {

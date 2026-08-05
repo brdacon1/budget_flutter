@@ -162,7 +162,6 @@ class BudgetListDuplicateDialog extends StatelessWidget {
                             const SnackBar(content: Text("Por favor selecione alguma opção")),
                           );
                         } else {
-                          Navigator.of(context, rootNavigator: true).pop();
                           await onConfirm(duplicateClientData, duplicateQuoteItems,
                               duplicateComments);
                         }

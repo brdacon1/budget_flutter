@@ -30,46 +30,31 @@ class BudgetListViewModel extends ChangeNotifier {
   Future<void> duplicateEvent(
       bool clientData, bool quoteItems, bool comments) async {
     var db = HttpRequest();
-    String? ID = budget.IDORCAMENTO;
+    String? originalId = budget.IDORCAMENTO;
     final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('dd/MM/yyyy');
     final String formatted = formatter.format(now);
+
+    customerBudget = CustomerInfo();
+
     if (clientData) {
-      await db.getInformationOrcamento1().then((value) => {
-            if (value.customerName!.isNotEmpty)
-              {
-                customerBudget.customerName = value.customerName,
-                customerBudget.phone = value.phone,
-                customerBudget.status = value.status,
-                customerBudget.email = value.email,
-                customerBudget.address = value.address,
-                customerBudget.generated = value.generated,
-                customerBudget.companyName = value.companyName,
-                customerBudget.zip = value.zip,
-                customerBudget.street = value.street,
-                customerBudget.city = value.city,
-                customerBudget.neighborhood = value.neighborhood,
-                customerBudget.data = formatted,
-                customerBudget.id = DateTime.now().millisecondsSinceEpoch.toString(),
-                customerBudget.totalValue = value.totalValue,
-                db.saveBudget(customerBudget).then((value) async {
-                  var quoteItemsObject = await db.getListItemsGenerator(ID);
-                  var commentsObject = await db.getListComment(ID);
-                  if (quoteItems) {
-                    if (quoteItemsObject.isNotEmpty) {
-                      db.saveItemsList(quoteItemsObject);
-                    }
-                  }
-                  if (comments) {
-                    if (commentsObject.isNotEmpty) {
-                      db.addComment(commentsObject);
-                    }
-                  }
-                }),
-              }
-          });
+      final value = await db.getInformationOrcamento1();
+      if (value.customerName?.isNotEmpty ?? false) {
+        customerBudget.customerName = value.customerName;
+        customerBudget.phone = value.phone;
+        customerBudget.status = value.status;
+        customerBudget.email = value.email;
+        customerBudget.address = value.address;
+        customerBudget.generated = value.generated;
+        customerBudget.companyName = value.companyName;
+        customerBudget.zip = value.zip;
+        customerBudget.street = value.street;
+        customerBudget.city = value.city;
+        customerBudget.neighborhood = value.neighborhood;
+        customerBudget.totalValue = value.totalValue;
+      }
     } else {
-      customerBudget.customerName = "Duplicado de: ${ID}";
+      customerBudget.customerName = "Duplicado de: ${originalId}";
       customerBudget.phone = "";
       customerBudget.status = "";
       customerBudget.email = "";
@@ -80,24 +65,29 @@ class BudgetListViewModel extends ChangeNotifier {
       customerBudget.street = "";
       customerBudget.city = "";
       customerBudget.neighborhood = "";
-      customerBudget.data = formatted;
-      customerBudget.id = DateTime.now().millisecondsSinceEpoch.toString();
-
-      db.saveBudget(customerBudget).then((value) async {
-        var quoteItemsObject = await db.getListItemsGenerator(ID);
-        var commentsObject = await db.getListComment(ID);
-        if (quoteItems) {
-          if (quoteItemsObject.isNotEmpty) {
-            db.saveItemsList(quoteItemsObject);
-          }
-        }
-        if (comments) {
-          if (commentsObject.isNotEmpty) {
-            db.addComment(commentsObject);
-          }
-        }
-      });
     }
+
+    customerBudget.data = formatted;
+    customerBudget.id = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await db.saveBudget(customerBudget);
+
+    if (quoteItems) {
+      final quoteItemsObject = await db.getListItemsGenerator(originalId);
+      if (quoteItemsObject.isNotEmpty) {
+        await db.saveItemsList(quoteItemsObject);
+      }
+    }
+
+    if (comments) {
+      final commentsObject = await db.getListComment(originalId);
+      if (commentsObject.isNotEmpty) {
+        await db.addComment(commentsObject);
+      }
+    }
+
+    budget.IDORCAMENTO = '';
+    notifyListeners();
   }
 
   Future<bool> deleteData() async {
