@@ -105,7 +105,7 @@ class _SubscriptionView extends State<SubscriptionView> {
 }
 
 class ProductScreenTopPart extends StatelessWidget {
-  const ProductScreenTopPart({Key? key}) : super(key: key);
+  const ProductScreenTopPart({super.key});
 
   @override
   Widget build(BuildContext context) {
