@@ -19,10 +19,8 @@ class ImageEditViewModel extends ChangeNotifier {
 
   void loadInitialImage(String? fotoId, String? logoName) {
     if (fotoId == null || fotoId.isEmpty) return;
-    if (logoName == null || logoName.isEmpty) return;
 
-    initialImageUrl =
-        'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/$logoName?alt=media&token=$fotoId';
+    initialImageUrl = fotoId;
     print('ImageEditViewModel: initialImageUrl = $initialImageUrl');
     notifyListeners();
   }
