@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
-import '../../common/widgets/anmition/fade_animation_widget.dart';
-import '../singup/singup_view.dart';
 import '../terms_conditions/terms_conditions_view.dart';
+import 'components/login_button.dart';
+import 'components/login_footer.dart';
+import 'components/login_header.dart';
+import 'components/login_text_field.dart';
 import 'login_view_model.dart';
 
 class LoginView extends StatefulWidget {
@@ -72,44 +73,24 @@ class _LoginViewState extends State<LoginView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(height: he * 0.020),
-                  FadeAnimationWidget(
-                    delay: 0.8,
-                    child: Image.asset(
-                      'assets/login-initial-page.png',
-                      width: we * 0.5,
-                      height: he * 0.25,
-                    ),
-                  ),
-                  FadeAnimationWidget(
-                    delay: 1,
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 240.0),
-                      child: Text(
-                        'Entrar',
-                        style: GoogleFonts.heebo(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 35,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ),
-                  ),
+                  LoginHeader(width: we, height: he),
                   SizedBox(height: he * 0.01),
-                  _buildTextField(
+                  LoginTextField(
                     field: LoginField.email,
                     controller: _viewModel.emailController,
                     hintText: 'E-mail',
                     prefixIcon: Icons.email_outlined,
+                    viewModel: _viewModel,
                     width: we,
                     height: he,
                   ),
                   SizedBox(height: he * 0.02),
-                  _buildTextField(
+                  LoginTextField(
                     field: LoginField.password,
                     controller: _viewModel.passwordController,
                     hintText: 'Senha',
                     prefixIcon: Icons.lock_open_outlined,
+                    viewModel: _viewModel,
                     width: we,
                     height: he,
                     obscureText: _viewModel.isPasswordVisible,
@@ -131,209 +112,48 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   SizedBox(height: he * 0.02),
-                  FadeAnimationWidget(
-                    delay: 1,
-                    child: TextButton(
-                      onPressed: () => _viewModel.loginWithEmailAndPassword(context),
-                      style: TextButton.styleFrom(
-                        backgroundColor: buttonColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15.0,
-                          horizontal: 80,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
-                      child: Text(
-                        'Entrar',
-                        style: GoogleFonts.heebo(
-                          color: Colors.black,
-                          letterSpacing: 0.5,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  LoginButton(
+                    label: 'Entrar',
+                    onPressed: () => _viewModel.loginWithEmailAndPassword(context),
                   ),
                   SizedBox(height: he * 0.01),
-                  FadeAnimationWidget(
-                    delay: 1,
-                    child: TextButton(
-                      onPressed: () => _displayAlert.dialogChangePassword(context),
-                      style: TextButton.styleFrom(
-                        backgroundColor: bgColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15.0,
-                          horizontal: 80,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
-                      child: Text(
-                        'Esqueceu sua senha?',
-                        style: GoogleFonts.heebo(
-                          color: buttonColor,
-                          letterSpacing: 0.5,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  LoginButton(
+                    label: 'Esqueceu sua senha?',
+                    onPressed: () => _displayAlert.dialogChangePassword(context),
+                    backgroundColor: bgColor,
+                    textColor: buttonColor,
+                    fontSize: 14.0,
                   ),
                   SizedBox(height: he * 0.02),
-                  FadeAnimationWidget(
-                    delay: 1,
-                    child: TextButton(
-                      onPressed: () => _viewModel.loginWithGoogle(context),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15.0,
-                          horizontal: 80,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
-                      child: Text(
-                        'Login com Google',
-                        style: GoogleFonts.heebo(
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  LoginButton(
+                    label: 'Login com Google',
+                    onPressed: () => _viewModel.loginWithGoogle(context),
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
                   ),
                   SizedBox(height: he * 0.025),
-                  FadeAnimationWidget(
-                    delay: 1,
-                    child: TextButton(
-                      onPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const TermsConditionsView(),
-                          ),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: bgColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15.0,
-                          horizontal: 80,
+                  LoginButton(
+                    label: 'Politica de privacidade',
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const TermsConditionsView(),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
-                      child: Text(
-                        'Politica de privacidade',
-                        style: GoogleFonts.heebo(
-                          color: buttonColor,
-                          letterSpacing: 0.5,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                      );
+                    },
+                    backgroundColor: bgColor,
+                    textColor: buttonColor,
+                    fontSize: 14.0,
                   ),
                 ],
               ),
             ),
           ),
-          bottomNavigationBar: BottomAppBar(
-            color: bgColor,
-            elevation: 0,
-            child: Container(
-              height: 65.0,
-              color: bgColor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Quer se cadastrar? ',
-                    style: GoogleFonts.heebo(
-                      color: Colors.grey,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context)
-                          .push(
-                            MaterialPageRoute(
-                              builder: (context) => const SingUpView(),
-                            ),
-                          )
-                          .then((_) => _viewModel.init());
-                    },
-                    child: Text(
-                      'Clique aqui',
-                      style: GoogleFonts.heebo(
-                        color: buttonColor.withOpacity(0.9),
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          bottomNavigationBar: LoginFooter(
+            onRegisterClosed: () => _viewModel.init(),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildTextField({
-    required LoginField field,
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIcon,
-    required double width,
-    required double height,
-    bool obscureText = false,
-    Widget? suffixIcon,
-  }) {
-    final isSelected = _viewModel.selectedField == field;
-
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        width: width * 0.9,
-        height: height * 0.082,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: secondaryColor, width: 2),
-          color: isSelected ? _viewModel.enabled : bgColor,
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: controller,
-          onTap: () => _viewModel.selectField(field),
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            enabledBorder: InputBorder.none,
-            border: InputBorder.none,
-            prefixIcon: Icon(
-              prefixIcon,
-              color: isSelected ? _viewModel.enabledtxt : _viewModel.deaible,
-            ),
-            suffixIcon: suffixIcon,
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: isSelected ? _viewModel.enabledtxt : _viewModel.deaible,
-            ),
-          ),
-          style: TextStyle(
-            color: isSelected ? _viewModel.enabledtxt : _viewModel.deaible,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
     );
   }
 }
