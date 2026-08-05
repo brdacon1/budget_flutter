@@ -5,7 +5,7 @@ import 'package:oflite/common/constants/constants.dart';
 import 'main_config_menu_view_model.dart';
 
 class MainConfigMenuView extends StatefulWidget {
-  const MainConfigMenuView({Key? key}) : super(key: key);
+  const MainConfigMenuView({super.key});
 
   @override
   State<MainConfigMenuView> createState() => _MainConfigMenuView();

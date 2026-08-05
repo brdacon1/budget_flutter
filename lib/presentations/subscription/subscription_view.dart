@@ -8,7 +8,7 @@ import '../../common/constants/subscription_constants.dart';
 import 'subscription_view_model.dart';
 
 class SubscriptionView extends StatefulWidget {
-  const SubscriptionView({Key? key}) : super(key: key);
+  const SubscriptionView({super.key});
 
   @override
   State<SubscriptionView> createState() => _SubscriptionView();
