@@ -1,61 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../common/constants/constants.dart';
+import 'terms_conditions_view_model.dart';
 
 class TermsConditionsView extends StatefulWidget {
-  static const String routeName = '/terms-and-conditions';
-  const TermsConditionsView({Key? key}) : super(key: key);
+  static const String routeName = TermsConditionsViewModel.routeName;
+
+  const TermsConditionsView({super.key});
 
   @override
-  State<TermsConditionsView> createState() => _TermsConditionsView();
+  State<TermsConditionsView> createState() => _TermsConditionsViewState();
 }
 
-class _TermsConditionsView extends State<TermsConditionsView> {
-  late final WebViewController controller;
-
-
+class _TermsConditionsViewState extends State<TermsConditionsView> {
+  late final TermsConditionsViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://wordpress.com/page/orcamentofacilbr.wordpress.com/6')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse('https://wordpress.com/page/orcamentofacilbr.wordpress.com/6'));
+    _viewModel = TermsConditionsViewModel();
+    _viewModel.addListener(_onViewModelChanged);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Politica de privacidade',
-        ),
-        backgroundColor: bgColor,
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: WebViewWidget(controller: controller),
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(TermsConditionsViewModel.pageTitle),
+            backgroundColor: bgColor,
           ),
-        ],
+          body: _buildBody(),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody() {
+    if (_viewModel.state == TermsConditionsState.error) {
+      return _buildErrorView();
+    }
+
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: WebViewWidget(controller: _viewModel.controller),
+        ),
+        if (_viewModel.state == TermsConditionsState.loading)
+          _buildLoadingIndicator(),
+      ],
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      color: bgColor.withValues(alpha: 0.8),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              '${_viewModel.loadingProgress}%',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Container(
+      color: bgColor,
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              _viewModel.errorMessage ?? 'Erro ao carregar a página.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _viewModel.reload,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
       ),
     );
   }

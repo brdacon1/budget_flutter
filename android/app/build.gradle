@@ -13,8 +13,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.housestudio.oflite"
-    compileSdk = 35
-    ndkVersion = "26.1.10909125"
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -28,7 +28,7 @@ android {
     defaultConfig {
         applicationId "com.housestudio.oflite"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 132
         versionName = '1.9.6'
         multiDexEnabled true
@@ -38,7 +38,7 @@ android {
         release {
             keyAlias 'davidelias1511@gmail.com'
             keyPassword 'Eminem622315'
-            storeFile file('C:\\Users\\Home David\\source\\repos\\of-flutter\\Key\\davidelias1511@gmail.com.keystore')
+            storeFile file('C:\\Users\\Home David\\source\\budget_flutter\\Key\\davidelias1511@gmail.com.keystore')
             storePassword 'Eminem622315'
         }
     }
@@ -48,6 +48,9 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false
+            ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
         }
     }
 }

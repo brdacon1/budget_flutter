@@ -11,6 +11,7 @@ import 'package:oflite/presentations/main_tab/main_tab_view.dart';
 import 'package:oflite/presentations/subscription/subscription_view.dart';
 import 'package:oflite/presentations/login/login_view.dart';
 import 'package:oflite/presentations/budget/budget_list/budget_list_view.dart';
+import 'package:oflite/presentations/terms_conditions/terms_conditions_view.dart';
 import 'package:provider/provider.dart';
 import 'common/constants/constants.dart';
 
@@ -74,6 +75,8 @@ class MyApp extends StatelessWidget {
             '/pg-subscription': (BuildContext _) => const SubscriptionView(),
             '/menu': (BuildContext _) => const MainTabView(),
             '/pg-pdf-config': (BuildContext _) => const PdfEditView(),
+            TermsConditionsView.routeName: (BuildContext _) =>
+                const TermsConditionsView(),
           },
         ),
       ),
