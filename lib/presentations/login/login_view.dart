@@ -40,20 +40,36 @@ class _LoginViewState extends State<LoginView> {
 
     if (state == LoginState.loading) {
       _loadingEvent.alertLoading(context);
-    } else if (state == LoginState.success) {
+      return;
+    }
+
+    if (state == LoginState.success) {
       _loadingEvent.closeLoading(context);
+      // Consome o estado para não reentrar no fluxo de sucesso em
+      // notificações futuras (ex.: interações com os campos).
+      _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Navigator.pushReplacementNamed(context, '/menu');
         }
       });
-    } else if (state == LoginState.error) {
+      return;
+    }
+
+    if (state == LoginState.error) {
       _loadingEvent.closeLoading(context);
-      _displayAlert.notificationError(
-        context,
-        'Erro!',
-        _viewModel.errorMessage ?? 'Problemas para realizar seu login. Verifique sua senha e e-mail.',
-      );
+      // Captura a mensagem e consome o estado ANTES de qualquer chamada
+      // que possa disparar novas notificações, para que o modal de erro
+      // seja exibido apenas uma vez (one-shot).
+      final message =
+          _viewModel.errorMessage ??
+          'Problemas para realizar seu login. Verifique sua senha e e-mail.';
+      _viewModel.consumeState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _displayAlert.notificationError(context, 'Erro!', message);
+        }
+      });
     }
   }
 

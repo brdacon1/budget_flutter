@@ -58,12 +58,30 @@ class LoginViewModel extends ChangeNotifier {
 
   void selectField(LoginField field) {
     selectedField = field;
+    // Qualquer interação manual com os campos cancela um estado
+    // de erro anterior, evitando reexibir o modal de erro.
+    if (state == LoginState.error) {
+      state = LoginState.idle;
+      errorMessage = null;
+    }
     notifyListeners();
   }
 
   void togglePasswordVisibility() {
     isPasswordVisible = !isPasswordVisible;
+    if (state == LoginState.error) {
+      state = LoginState.idle;
+      errorMessage = null;
+    }
     notifyListeners();
+  }
+
+  /// Consome o estado atual de erro/sucesso, voltando para [LoginState.idle]
+  /// **sem** disparar notificação. Usado pela UI para garantir que um
+  /// estado terminal seja tratado apenas uma vez (one-shot).
+  void consumeState() {
+    state = LoginState.idle;
+    errorMessage = null;
   }
 
   Future<void> loginWithEmailAndPassword(BuildContext context) async {
@@ -105,17 +123,36 @@ class LoginViewModel extends ChangeNotifier {
     final email = prefs.getString('email');
     final password = prefs.getString('password');
 
-    if (email != null && password != null && password != 'NO_PASS') {
-      try {
-        state = LoginState.loading;
-        notifyListeners();
+    // Sem credenciais salvas não há sessão para restaurar.
+    if (email == null || password == null) return;
+
+    try {
+      state = LoginState.loading;
+      notifyListeners();
+
+      if (password == 'NO_PASS') {
+        // Login via Google: a sessão do Firebase já fica persistida entre
+        // execuções do app, então reutilizamos o usuário atual em vez de
+        // disparar novamente o fluxo interativo do Google SignIn. Assim o
+        // login com Google permanece logado igual ao de e-mail/senha.
+        final currentUser = _auth.currentUser;
+        if (currentUser == null) {
+          state = LoginState.idle;
+          return;
+        }
+        uid = currentUser.uid;
+        global_uid_user.password = 'NO_PASS';
+        global_uid_user.googleAuth = true;
+        await _getUserInfo();
+      } else {
         await _emailAndPassword(email, password);
-        state = LoginState.success;
-      } catch (e) {
-        state = LoginState.idle;
-      } finally {
-        notifyListeners();
       }
+
+      state = LoginState.success;
+    } catch (e) {
+      state = LoginState.idle;
+    } finally {
+      notifyListeners();
     }
   }
 

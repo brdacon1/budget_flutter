@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/global_uid_user.dart' as uid;
@@ -409,20 +408,19 @@ class HttpRequest{
   }
 
   Future<String> authGoogle() async {
-    String uid = "";
-    try
-    {
-      await GoogleSignIn.instance.initialize();
-      GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
-      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-      AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleAuth?.idToken,
-      );
-      await _auth.signInWithCredential(credential).then((userCredential) async => {
-        uid = userCredential.credential!.accessToken!,
-      });
-      return uid;
-    } catch(e){
+    // O login com o Google já foi feito na tela de login e a sessão do
+    // Firebase permanece persistida entre execuções do app. Por isso,
+    // basta reutilizar o usuário atual para obter um idToken válido,
+    // **sem** disparar novamente o fluxo interativo do Google SignIn
+    // (que abre o seletor de contas em toda requisição de imagem/arquivo).
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        return "NOT_AUTH";
+      }
+      final idToken = await currentUser.getIdToken();
+      return idToken ?? "";
+    } catch (e) {
       return "NOT_AUTH";
     }
   }
