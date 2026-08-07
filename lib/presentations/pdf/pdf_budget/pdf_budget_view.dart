@@ -1,89 +1,34 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/services/convert_coin.dart';
-import 'package:oflite/Services/http_request.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../../common/widgets/anmition/fade_animation_widget.dart';
-import '../../../services/pdf_generate.dart';
-import '../../../Services/display_alert.dart';
-import 'package:share_plus/share_plus.dart';
 import '../../../common/constants/constants.dart';
+import 'pdf_budget_view_model.dart';
 
 class PdfBudgetView extends StatefulWidget {
-  const PdfBudgetView({Key? key}) : super(key: key);
-
+  const PdfBudgetView({super.key});
 
   @override
   State<PdfBudgetView> createState() => _PdfBudgetView();
 }
 
 class _PdfBudgetView extends State<PdfBudgetView> {
-  String? _fileBytes;
-  ConvertCoin moneyConvert = ConvertCoin();
-  var displayAlert = DisplayAlert();
+  late final PdfBudgetViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    startPDF();
+    _viewModel = PdfBudgetViewModel();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _viewModel.initialData(context));
   }
 
-  Future<void> startPDF() async {
-    try {
-      var db = HttpRequest();
-      var pdf = PdfGenerate();
-      var budget = await db.getListItensGerador();
-      var customer = await db.getInformationOrcamento1();
-      var owner = await db.getInformationEnterprise();
-      var comment = await db.getListComentarioPDF();
-      if (budget.isNotEmpty) {
-        double totalProducts = 0;
-        double totalServices = 0;
-        double totalBudget = 0;
-        int countProduct = 0;
-        int countService = 0;
-
-        for (int index = 0; index < budget.length; index++) {
-          double total = budget[index].TOTAL!;
-          if (budget[index].CATEGORIA == 'Produtos') {
-            totalProducts += total;
-            countProduct++;
-          } else if (budget[index].CATEGORIA == 'Serviços') {
-            totalServices += total;
-            countService++;
-          }
-          totalBudget += total;
-        }
-
-        await pdf.patternPDF(
-            countService,
-            countProduct,
-            moneyConvert.convertFromDouble(totalBudget),
-            moneyConvert.convertFromDouble(totalProducts),
-            moneyConvert.convertFromDouble(totalServices),
-            budget,
-            customer,
-            owner,
-            comment).then((value) {
-          setState(() {
-            _fileBytes = value;
-          });
-        });
-        setState(() {});
-      } else {
-        await displayAlert.notificationWarning(
-            context,
-            "Ops!",
-            "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'");
-      }
-    } catch (e) {
-      print('Error generating PDF: $e');
-      if (mounted) {
-        await displayAlert.notificationWarning(
-            context, "Erro", "Não foi possível gerar o PDF: ${e.toString()}");
-      }
-    }
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -98,54 +43,60 @@ class _PdfBudgetView extends State<PdfBudgetView> {
         child: Column(
           children: [
             Expanded(
-              child: Stack(
-                children: [
-                  if (_fileBytes != null)
-                    SfPdfViewer.file(
-                        File(_fileBytes!),
-                    ),
-                  if (_fileBytes == null)
-                    const Align(
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                        strokeWidth: 1,
-                      ),
-                    ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: FadeAnimationWidget(
-                        delay: 1,
-                        child: TextButton(
-                            onPressed: () async {
-                              if(_fileBytes != null)
-                                {
-                                  final xFile = XFile(_fileBytes!);
-                                  Share.shareXFiles([xFile], text: 'Compartilhar PDF');
+              child: AnimatedBuilder(
+                animation: _viewModel,
+                builder: (context, _) {
+                  return Stack(
+                    children: [
+                      if (_viewModel.fileBytes != null)
+                        SfPdfViewer.file(File(_viewModel.fileBytes!)),
+                      if (_viewModel.loading)
+                        const Align(
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.black),
+                            strokeWidth: 1,
+                          ),
+                        ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 25),
+                          child: FadeAnimationWidget(
+                            delay: 1,
+                            child: TextButton(
+                              onPressed: () {
+                                if (_viewModel.fileBytes != null) {
+                                  final xFile = XFile(_viewModel.fileBytes!);
+                                  Share.shareXFiles([xFile],
+                                      text: 'Compartilhar PDF');
                                 }
-                            },
-                            style: TextButton.styleFrom(
+                              },
+                              style: TextButton.styleFrom(
                                 backgroundColor: buttonColor,
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 15.0, horizontal: 80),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.0)
-                                )
+                                    borderRadius:
+                                        BorderRadius.circular(30.0)),
+                              ),
+                              child: Text(
+                                'COMPARTILHAR',
+                                style: GoogleFonts.heebo(
+                                  color: Colors.black,
+                                  letterSpacing: 0.5,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            child: Text("COMPARTILHAR", style: GoogleFonts.heebo(
-                              color: Colors.black,
-                              letterSpacing: 0.5,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
+                          ),
                         ),
                       ),
-                     ),
-                   ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ],
