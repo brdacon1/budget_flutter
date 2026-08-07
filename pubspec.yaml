@@ -72,6 +72,8 @@ flutter:
       - assets/images/
       - assets/icons/
       - assets/login-initial-page.png
+      - env/development_environment.json
+      - env/production_environment.json
   fonts:
     - family: Montserrat-Bold
       fonts:

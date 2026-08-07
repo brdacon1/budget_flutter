@@ -1,0 +1,6 @@
+{
+  "environment": "production",
+  "adMob": {
+    "bannerAdUnitId": "ca-app-pub-5106035309089315/6550502888"
+  }
+}

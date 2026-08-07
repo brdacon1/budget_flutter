@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:oflite/common/constants/environment.dart';
 
 /// Widget reutilizável que carrega um banner do AdMob de forma deferida
 /// (após a primeira frame pintar) e isola seus rebuilds, evitando que o
@@ -12,7 +13,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({
     super.key,
-    required this.adUnitId,
+    this.adUnitId,
     this.size = AdSize.banner,
   });
 
@@ -20,13 +21,14 @@ class BannerAdWidget extends StatefulWidget {
   /// o anúncio não carregou (mantém o comportamento original).
   static Widget? bottom({
     Key? key,
-    required String adUnitId,
+    String? adUnitId,
     AdSize size = AdSize.banner,
   }) {
     return BannerAdWidget(adUnitId: adUnitId, size: size);
   }
 
-  final String adUnitId;
+  /// ID do bloco de anúncios. Se `null`, utiliza [Environment.adMob.bannerAdUnitId].
+  final String? adUnitId;
   final AdSize size;
 
   @override
@@ -48,9 +50,12 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     });
   }
 
+  String get _resolvedAdUnitId =>
+      widget.adUnitId ?? Environment.instance.adMob.bannerAdUnitId;
+
   void _loadAd() {
     BannerAd(
-      adUnitId: widget.adUnitId,
+      adUnitId: _resolvedAdUnitId,
       request: const AdRequest(),
       size: widget.size,
       listener: BannerAdListener(

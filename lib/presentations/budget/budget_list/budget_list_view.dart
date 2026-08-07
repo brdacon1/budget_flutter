@@ -293,9 +293,7 @@ class _BudgetListView extends State<BudgetListView> {
           );
         },
       ),
-      bottomNavigationBar: BannerAdWidget(
-        adUnitId: 'ca-app-pub-5106035309089315/6550502888',
-      ),
+      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }

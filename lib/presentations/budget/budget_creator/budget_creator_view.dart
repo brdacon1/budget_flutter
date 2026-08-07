@@ -126,9 +126,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
           );
         },
       ),
-      bottomNavigationBar: const BannerAdWidget(
-        adUnitId: 'ca-app-pub-5106035309089315/6550502888',
-      ),
+      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }
