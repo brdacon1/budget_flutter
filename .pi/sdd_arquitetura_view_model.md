@@ -35,7 +35,9 @@ lib/presentations/<feature>/<feature>_<context>/
 └── components/                                # subwidgets Stateless
     ├── <feature>_<context>_header.dart
     ├── <feature>_card.dart
-    └── <feature>_total_bar.dart
+    ├── <feature>_total_bar.dart
+    ├── <feature>_field.dart                   # campo de formulário reutilizável
+    └── <feature>_<section>_card.dart          # card/seção repetida (ex.: endereço)
 ```
 
 `<context>` pode ser `list`, `creator`, `tab`, `items`, `list_items`, etc.
@@ -59,6 +61,10 @@ Regras de nomenclatura:
 - Lê o estado **direto do VM** (`_viewModel.foundPayment`, `_viewModel.totalPaid`).
 - Passa **dados + callbacks** para os componentes — nunca o VM inteiro.
 - Não contém lógica de negócio; delega ações ao VM (ex.: `_viewModel.delete(context, index)`).
+- **Mantém o `build` enxuto**: a View só monta a estrutura (Scaffold/Column/AnimatedBuilder)
+  e compõe components. Toda UI repetida (campos, cards, barras, botões, seções) vira
+  um `StatelessWidget` em `components/`. Se a View passar de ~150–200 linhas, é sinal de
+  que falta extrair component.
 
 ### 3.2 ViewModel (`*_view_model.dart`)
 - **`extends ChangeNotifier`** → fornece `notifyListeners()` e o "animation" que o
@@ -80,9 +86,19 @@ Regras de nomenclatura:
 ### 3.3 Components (`components/*`)
 - **`StatelessWidget`** puros. Sem estado, sem `ChangeNotifier`.
 - Recebem tudo por construtor: dados (`item`, `totalPaid`), utilitários (`moneyConvert`)
-  e callbacks (`VoidCallback`).
+  e callbacks (`VoidCallback`, `ValueChanged`).
 - **Não acessam services nem Firebase**. São burros e reutilizáveis.
 - Podem ter sub-widgets privados (ex.: `_ActionButton`) no mesmo arquivo.
+- **Extração é obrigatória** para qualquer bloco visual que se repete ou que passa de
+  poucas dezenas de linhas. Exemplos canônicos: `*_header` (voltar + título),
+  `*_card` (item de lista), `*_total_bar` (rodapé de totais), `*_field` (TextField
+  estilizado reutilizável) e `*_<section>_card` (card/seção de formulário repetido,
+  como endereço/empresa).
+- Um component **não recebe o ViewModel inteiro** — recebe apenas os campos/controllers
+  e callbacks que precisa. Isso mantém o component desacoplado e testável.
+- Métodos auxiliares de widget que precisam de `BuildContext` devem recebê-lo por
+  parâmetro (ex.: `Widget _imageCard(BuildContext context)`); nunca usar `context`
+  fora do `build`.
 
 ### 3.4 Model (`lib/models/*`)
 - POJO com campos nullable e `fromMap`/`toMap`. Sem lógica de negócio.
@@ -117,6 +133,9 @@ Ao criar uma nova feature, validar item por item:
 ### Parte visual
 - [ ] UI quebrada em `components/` `StatelessWidget`.
 - [ ] Componentes recebem dados + callbacks, não o VM.
+- [ ] Componentes não importam services nem Firebase.
+- [ ] Blocos repetidos (campos, cards, seções) extraídos em component próprio.
+- [ ] `build` da View sem lógica de estilo/negócio — só estrutura + composição.
 - [ ] Constantes visuais importadas de `common/constants/constants.dart`
       (`bgColor`, `buttonColor`, `whiteColor`, `secondaryColor`).
 - [ ] `RefreshIndicator.onRefresh` aponta para `_viewModel.refresh`.
@@ -253,6 +272,10 @@ class FeatureViewModel extends ChangeNotifier {
 - ❌ Adicionar Provider/Riverpod/Bloc/GetX "só para essa tela" — quebra o padrão nativo.
 - ❌ Criar dois repositórios para a mesma coleção do Firebase.
 - ❌ Esquecer `_viewModel.dispose()` → vazamento de listeners do `ChangeNotifier`.
+- ❌ View inchada (`build` com centenas de linhas, UI inline duplicada) — extraia em
+  `components/` `StatelessWidget`.
+- ❌ Passar o ViewModel inteiro para um component — passe só dados + callbacks.
+- ❌ Usar `context` em métodos de widget fora do `build` sem recebê-lo por parâmetro.
 
 ---
 
@@ -285,5 +308,7 @@ class FeatureViewModel extends ChangeNotifier {
 - Streams contínuas do Firebase — prefira `StreamBuilder` pontual; se o estado precisar
   ser reativo global, revisar arquitetura antes de introduzir pacotes.
 
-> **Regra de ouro:** em dúvida, replique o formato de `lib/presentations/payment/payment_list/`.
-> Esse diretório é o **contrato de referência** do padrão.
+> **Regra de ouro:** em dúvida, replique o formato de `lib/presentations/payment/payment_list/`
+> (referência de **listagem**) ou `lib/presentations/pdf/pdf_edit/` (referência de
+> **formulário** com components desacoplados). Esses diretórios são o **contrato de
+> referência** do padrão.
