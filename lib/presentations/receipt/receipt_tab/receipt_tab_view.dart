@@ -9,8 +9,8 @@ import '../../../common/constants/constants.dart';
 
 class ReceiptTabView extends StatefulWidget {
   final CustomerInfo item;
-  final Receipt recibos;
-  const ReceiptTabView({Key? key, required this.item, required this.recibos}) : super(key: key);
+  final Receipt receipt;
+  const ReceiptTabView({super.key, required this.item, required this.receipt});
 
   @override
   State<ReceiptTabView> createState() => _ReceiptTabView();
@@ -40,15 +40,15 @@ class _ReceiptTabView extends State<ReceiptTabView> {
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
     final List children = [
-      ReceiptCreatorView(item: widget.item, receipt: widget.recibos),
-      PaymentListView(item: widget.item, recibos: widget.recibos),
-      PdfReceiptView(item: widget.item, receipt: widget.recibos),
+      ReceiptCreatorView(item: widget.item, receipt: widget.receipt),
+      PaymentListView(item: widget.item, receipt: widget.receipt),
+      PdfReceiptView(item: widget.item, receipt: widget.receipt),
     ];
     return Scaffold(
       body: children[_currentIndex],
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: secondaryColor, // Define a cor de fundo do BottomNavigationBar
+          canvasColor: secondaryColor,
         ),
         child: BottomNavigationBar(
           selectedItemColor: Colors.cyan[50],

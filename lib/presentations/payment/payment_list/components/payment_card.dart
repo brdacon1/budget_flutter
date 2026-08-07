@@ -79,10 +79,12 @@ class PaymentCard extends StatelessWidget {
                 children: <Widget>[
                   _ActionButton(
                     icon: Icons.delete_outline_rounded,
+                    label: 'Excluir',
                     onPressed: onDelete,
                   ),
                   _ActionButton(
                     icon: Icons.edit,
+                    label: 'Editar',
                     onPressed: onEdit,
                   ),
                 ],
@@ -97,11 +99,13 @@ class PaymentCard extends StatelessWidget {
 
 class _ActionButton extends StatelessWidget {
   final IconData icon;
+  final String label;
   final VoidCallback onPressed;
 
   const _ActionButton({
     Key? key,
     required this.icon,
+    required this.label,
     required this.onPressed,
   }) : super(key: key);
 
@@ -123,7 +127,7 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(height: 4),
             Icon(icon, color: bgColor),
             const SizedBox(height: 2.0),
-            const Text('Editar', style: TextStyle(fontSize: 10, color: bgColor)),
+            Text(label, style: const TextStyle(fontSize: 10, color: bgColor)),
           ],
         ),
       ),

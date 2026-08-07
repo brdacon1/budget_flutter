@@ -252,7 +252,7 @@ class _ReceiptListView extends State<ReceiptListView> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ReceiptTabView(item: widget.item, recibos: foundPayment[index]),
+                                                builder: (context) => ReceiptTabView(item: widget.item, receipt: foundPayment[index]),
                                               ),
                                             ).then((value) async => {
                                               setState(() {
@@ -295,7 +295,7 @@ class _ReceiptListView extends State<ReceiptListView> {
           budget.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ReceiptTabView(item: widget.item, recibos: ITENS,)),
+            MaterialPageRoute(builder: (context) => ReceiptTabView(item: widget.item, receipt: ITENS,)),
           ).then((value) async => {
             setState(() {
               inicialData();

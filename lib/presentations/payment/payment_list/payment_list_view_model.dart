@@ -9,82 +9,73 @@ import '../../../models/payment_customer.dart';
 import '../../../Services/display_alert.dart';
 import '../../../Services/loading_event.dart';
 
-enum Gender {
-  comentText,
-}
-
 class PaymentListViewModel extends ChangeNotifier {
-  var displayAlert = DisplayAlert();
-  var db = HttpRequest();
-  var loadingEvent = LoadingEvent();
-  var foundPayment = <PaymentCustomer>[];
-  var deleteItems = <PaymentCustomer>[];
-  ConvertCoin moneyConvert = ConvertCoin();
-  Gender? selected;
-  bool deleteVisible = false;
-  bool checkBoxAppear = false;
-  Color enabled = const Color(0xFF827F8A);
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.grey;
+  final DisplayAlert displayAlert = DisplayAlert();
+  final HttpRequest db = HttpRequest();
+  final LoadingEvent loadingEvent = LoadingEvent();
+  final ConvertCoin moneyConvert = ConvertCoin();
 
-  CustomerInfo? item;
-  Receipt? recibos;
+  final CustomerInfo item;
+  final Receipt receipt;
 
+  List<PaymentCustomer> foundPayment = <PaymentCustomer>[];
+  double totalPaid = 0;
+
+  PaymentListViewModel({required this.item, required this.receipt});
+
+  /// Carrega os pagamentos e recalcula o total pago a partir da própria lista,
+  /// garantindo que a label de total reflita imediatamente o estado atual.
   Future<void> inicialData() async {
-    foundPayment = await db.getListPayment(recibos!, item!);
+    foundPayment = await db.getListPayment(receipt, item);
+    _calcTotal();
     notifyListeners();
   }
 
-  void init(CustomerInfo item, Receipt recibos) {
-    this.item = item;
-    this.recibos = recibos;
-    inicialData();
+  void _calcTotal() {
+    totalPaid = 0;
+    for (final payment in foundPayment) {
+      totalPaid += payment.PRECO ?? 0;
+    }
   }
 
-  Future<void> refresh() async {
-    await inicialData();
-  }
+  Future<void> refresh() => inicialData();
 
   Future<void> deletePayment(BuildContext context, int index) async {
     loadingEvent.alertLoading(context);
     try {
-      await db.deletePaymentCustomer(foundPayment[index].id!).then((value) async => {
-            loadingEvent.closeLoading(context),
-            await displayAlert.notificationNotCloseScreen(
-                context, "Feito!", "Pagamento removido com sucesso!"),
-          });
+      await db.deletePaymentCustomer(foundPayment[index].id!);
+      loadingEvent.closeLoading(context);
+      await displayAlert.notificationNotCloseScreen(
+          context, "Feito!", "Pagamento removido com sucesso!");
     } catch (e) {
       loadingEvent.closeLoading(context);
       await displayAlert.notificationError(
           context, "Erro!", "Problemas para remover o pagamento");
     }
-
     await inicialData();
   }
 
   Future<void> editPayment(BuildContext context, int index) async {
-    Orcamento.IDRECIBO = recibos!.ID;
+    Orcamento.IDRECIBO = receipt.ID;
     await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => PaymentCreatorView(item: foundPayment[index])),
-    ).then((value) async => {
-          inicialData(),
-        });
+    );
+    await inicialData();
   }
 
   Future<void> addPayment(BuildContext context) async {
-    PaymentCustomer ITENS = PaymentCustomer();
-    ITENS.METODO = '';
-    ITENS.id = '';
-    ITENS.DESCRICAO = 'null';
-    ITENS.PRECO = 0;
-    Orcamento.IDRECIBO = recibos!.ID;
+    final PaymentCustomer novo = PaymentCustomer()
+      ..METODO = ''
+      ..id = ''
+      ..DESCRICAO = 'null'
+      ..PRECO = 0;
+    Orcamento.IDRECIBO = receipt.ID;
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PaymentCreatorView(item: ITENS)),
-    ).then((value) async => {
-          inicialData(),
-        });
+      MaterialPageRoute(builder: (context) => PaymentCreatorView(item: novo)),
+    );
+    await inicialData();
   }
 }
