@@ -5,7 +5,8 @@ import 'package:flutter/services.dart' show rootBundle;
 
 /// Configurações de ambiente.
 ///
-/// As chaves ficam em arquivos JSON dentro de `env/` na raiz do projeto:
+/// As chaves ficam **exclusivamente** em arquivos JSON dentro de `env/` na
+/// raiz do projeto:
 ///   - `env/development_environment.json`
 ///   - `env/production_environment.json`
 ///
@@ -22,6 +23,10 @@ import 'package:flutter/services.dart' show rootBundle;
 /// Os JSONs são lidos em runtime (declarados como assets no `pubspec.yaml`),
 /// então o [Environment.initialize] precisa ser chamado em `main` antes do
 /// `runApp`. Depois disso os valores ficam disponíveis de forma síncrona.
+///
+/// **Não há chaves hardcoded no código.** Se o JSON do ambiente não puder ser
+/// lido ou faltar uma chave, [initialize] lança um erro explícito — prefira
+/// falhar cedo a servir a chave errada em produção.
 class Environment {
   Environment._();
 
@@ -52,29 +57,50 @@ class Environment {
 
   /// Carrega as chaves do JSON do ambiente atual.
   ///
-  /// Deve ser chamado em `main` antes do `runApp`.
+  /// Deve ser chamado em `main` antes do `runApp`. Lança um [StateError] se
+  /// o JSON não puder ser lido ou se faltar alguma chave obrigatória.
   Future<void> initialize() async {
     if (_initialized) return;
 
-    String bannerAdUnitId;
+    final Map<String, dynamic> json;
     try {
       final raw = await rootBundle.loadString(_environmentFileName);
-      final json = jsonDecode(raw) as Map<String, dynamic>;
-      // Aceita tanto o JSON plano (dart-define-from-file friendly)
-      // quanto o aninhado antigo (adMob.bannerAdUnitId).
-      bannerAdUnitId = (json['ADMOB_BANNER_AD_UNIT_ID'] as String?) ??
-          ((json['adMob'] as Map<String, dynamic>?)?['bannerAdUnitId']
-                  as String?) ??
-              _kTestBannerAdUnitId;
+      json = jsonDecode(raw) as Map<String, dynamic>;
     } catch (e) {
-      // Se o asset não estiver disponível (build sem clean após editar o
-      // pubspec), cai no fallback seguro por modo de build.
-      debugPrint('[Environment] Falha ao ler $_environmentFileName: $e');
-      bannerAdUnitId =
-          kReleaseMode ? _kProdBannerAdUnitId : _kTestBannerAdUnitId;
+      throw StateError(
+        '[Environment] Não foi possível ler "$_environmentFileName". '
+        'Verifique se o arquivo existe e está declarado em assets: no '
+        'pubspec.yaml, e faça `flutter clean` antes de rodar. Erro: $e',
+      );
     }
 
-    adMob = AdMobConfig(bannerAdUnitId: bannerAdUnitId);
+    // Aceita tanto o JSON plano (dart-define-from-file friendly)
+    // quanto o aninhado antigo (adMob.*). Sem fallbacks hardcoded: se uma
+    // chave faltar, lança erro explícito.
+    final adMobJson = json['adMob'] as Map<String, dynamic>?;
+    final bannerAdUnitId = (json['ADMOB_BANNER_AD_UNIT_ID'] as String?) ??
+        (adMobJson?['bannerAdUnitId'] as String?);
+    final interstitialAdUnitId =
+        (json['ADMOB_INTERSTITIAL_AD_UNIT_ID'] as String?) ??
+            (adMobJson?['interstitialAdUnitId'] as String?);
+
+    if (bannerAdUnitId == null || bannerAdUnitId.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "ADMOB_BANNER_AD_UNIT_ID" ausente/vazia em '
+        '"$_environmentFileName".',
+      );
+    }
+    if (interstitialAdUnitId == null || interstitialAdUnitId.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "ADMOB_INTERSTITIAL_AD_UNIT_ID" ausente/vazia '
+        'em "$_environmentFileName".',
+      );
+    }
+
+    adMob = AdMobConfig(
+      bannerAdUnitId: bannerAdUnitId,
+      interstitialAdUnitId: interstitialAdUnitId,
+    );
     _initialized = true;
 
     // Diagnóstico: mostra exatamente qual ambiente/chave foi carregado.
@@ -85,24 +111,22 @@ class Environment {
       '[Environment] ambiente="$environment" '
       'buildMode=${kReleaseMode ? 'release' : 'debug'} '
       'arquivo="$_environmentFileName" '
-      'bannerAdUnitId="$bannerAdUnitId"',
+      'bannerAdUnitId="$bannerAdUnitId" '
+      'interstitialAdUnitId="$interstitialAdUnitId"',
     );
   }
 }
 
 /// Configurações do AdMob por ambiente.
 class AdMobConfig {
-  const AdMobConfig({required this.bannerAdUnitId});
+  const AdMobConfig({
+    required this.bannerAdUnitId,
+    required this.interstitialAdUnitId,
+  });
 
-  /// ID do bloco de anúncios banner. Em desenvolvimento aponta para o bloco
-  /// de teste do Google; em produção aponta para o bloco real.
+  /// ID do bloco de anúncios banner.
   final String bannerAdUnitId;
+
+  /// ID do bloco de anúncios intersticial.
+  final String interstitialAdUnitId;
 }
-
-/// ID de banner de teste do Google — usado em desenvolvimento e como fallback
-/// quando a chave não vier no JSON (evita cliques inválidos).
-const _kTestBannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
-
-/// ID real de produção (fallback em build release caso o asset do JSON não
-/// esteja disponível). Mantenha em sincronia com env/production_environment.json.
-const _kProdBannerAdUnitId = 'ca-app-pub-5106035309089315/6550502888';
