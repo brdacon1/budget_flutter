@@ -23,9 +23,19 @@ Future<void> main() async {
     Firebase.initializeApp(),
     MobileAds.instance.initialize(),
   ]);
-  // Carrega as configurações do ambiente (env/*.json) selecionado por
-  // --dart-define=ENVIRONMENT=development|production.
+  // Carrega as chaves do ambiente (env/*.json). O ambiente é escolhido
+  // automaticamente: release -> produção, debug -> desenvolvimento.
   await Environment.instance.initialize();
+  // Em desenvolvimento, registra os dispositivos de teste para que os blocos
+  // reais do AdMob sirvam anúncios de teste (sem risco de cliques inválidos
+  // e com preenchimento garantido no emulador). O ID de cada aparelho aparece
+  // no logcat na primeira falha de carga (linha "To get test ads on this
+  // device, use: <ID>"). Adicione-o em [_kTestDeviceIds].
+  if (Environment.instance.environment == 'development') {
+    await MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(testDeviceIds: _kTestDeviceIds),
+    );
+  }
   // Configuração de notificações em background (não bloqueia o runApp).
   FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -36,6 +46,17 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+
+/// IDs de dispositivos de teste (hash do AdMob) para servir anúncios de
+/// teste mesmo usando blocos reais em desenvolvimento.
+///
+/// Descubra o ID do seu aparelho rodando em desenvolvimento: o AdMob loga
+/// algo como:
+///   I/Ads: Use RequestConfiguration.Builder(...).setTestDeviceIds(Arrays.asList("33BE2250B43518CC...")) to get test ads on this device.
+/// Copie esse hash e cole na lista abaixo.
+const _kTestDeviceIds = <String>[
+  // 'SEU_DEVICE_ID_AQUI',
+];
 
 Future<void> configureForegroundNotificationPresentationOptions() async {
   await FirebaseMessaging.instance.requestPermission();

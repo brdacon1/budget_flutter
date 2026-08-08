@@ -50,12 +50,12 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
     });
   }
 
-  String get _resolvedAdUnitId =>
+  String get resolvedAdUnitId =>
       widget.adUnitId ?? Environment.instance.adMob.bannerAdUnitId;
 
   void _loadAd() {
     BannerAd(
-      adUnitId: _resolvedAdUnitId,
+      adUnitId: resolvedAdUnitId,
       request: const AdRequest(),
       size: widget.size,
       listener: BannerAdListener(
@@ -70,6 +70,17 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         },
         onAdFailedToLoad: (ad, err) {
           ad.dispose();
+          // Loga o motivo da falha para diagnóstico.
+          //   0 = ERROR_CODE_INTERNAL_ERROR
+          //   1 = ERROR_CODE_INVALID_REQUEST
+          //   2 = ERROR_CODE_NETWORK_ERROR
+          //   3 = ERROR_CODE_NO_FILL  (sem inventário / não serve em emulador)
+          debugPrint(
+            '[BannerAdWidget] Falha ao carregar anúncio '
+            '(adUnitId=$resolvedAdUnitId, code=${err.code}, message=${err.message}). '
+            'Em emulador/dispositivo de dev use o ambiente de desenvolvimento '
+            '(test ad unit) ou registre o dispositivo como teste.',
+          );
         },
         onAdOpened: (Ad ad) {},
         onAdClosed: (Ad ad) {},
