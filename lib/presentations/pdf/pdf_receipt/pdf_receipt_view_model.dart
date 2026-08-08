@@ -5,13 +5,13 @@ import 'package:oflite/models/receipt.dart';
 import 'package:oflite/services/convert_coin.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../Services/display_alert.dart';
-import '../../../Services/pdf_generate_receipt.dart';
+import '../../../usecases/pdf_generate_receipt_usecase.dart';
 
 class PdfReceiptViewModel extends ChangeNotifier {
   final HttpRequest db = HttpRequest();
   final DisplayAlert displayAlert = DisplayAlert();
   final ConvertCoin moneyConvert = ConvertCoin();
-  final PdfGenerateReceipt pdf = PdfGenerateReceipt();
+  final PdfGenerateReceiptUseCase pdf = PdfGenerateReceiptUseCase();
 
   final Receipt receipt;
   final CustomerInfo item;
@@ -60,11 +60,11 @@ class PdfReceiptViewModel extends ChangeNotifier {
       }
 
       final path = await pdf.patternPDF(
-        payment,
-        receipt,
-        moneyConvert.convertFromDouble(totalBudget),
-        item,
-        owner,
+        paymentList: payment,
+        recived: receipt,
+        totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
+        customer: item,
+        owner: owner,
       );
 
       fileBytes = path;
