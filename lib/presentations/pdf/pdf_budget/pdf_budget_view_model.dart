@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:oflite/Services/http_request.dart';
 import 'package:oflite/Services/display_alert.dart';
 import 'package:oflite/services/convert_coin.dart';
-import '../../../services/pdf_generate.dart';
+import '../../../usecases/pdf_generate_usecase.dart';
 
 class PdfBudgetViewModel extends ChangeNotifier {
   final HttpRequest db = HttpRequest();
   final DisplayAlert displayAlert = DisplayAlert();
   final ConvertCoin moneyConvert = ConvertCoin();
-  final PdfGenerate pdf = PdfGenerate();
+  final PdfGenerateUseCase pdf = PdfGenerateUseCase();
   String? fileBytes;
   bool _loading = true;
   bool get loading => _loading;
@@ -43,15 +43,15 @@ class PdfBudgetViewModel extends ChangeNotifier {
         }
 
         final generated = await pdf.patternPDF(
-          countService,
-          countProduct,
-          moneyConvert.convertFromDouble(totalBudget),
-          moneyConvert.convertFromDouble(totalProducts),
-          moneyConvert.convertFromDouble(totalServices),
-          budget,
-          customer,
-          owner,
-          comment,
+          countService: countService,
+          countProduct: countProduct,
+          totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
+          totalPriceProducts: moneyConvert.convertFromDouble(totalProducts),
+          totalPriceServices: moneyConvert.convertFromDouble(totalServices),
+          items: budget,
+          customer: customer,
+          owner: owner,
+          observations: comment,
         );
         fileBytes = generated;
       } else {
