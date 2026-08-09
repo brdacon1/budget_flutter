@@ -3,6 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/presentations/singup/singup_view.dart';
 
+/// Rodapé do login com o atalho de cadastro.
+///
+/// O cadastro agora é um **bottom modal** (`showSingUpBottomModal`) no padrão
+/// do app — não mais uma tela cheia empilhada. Ao fechar o modal, dispara
+/// `onRegisterClosed` para que o login recarregue seu estado.
 class LoginFooter extends StatelessWidget {
   const LoginFooter({super.key, required this.onRegisterClosed});
 
@@ -28,12 +33,7 @@ class LoginFooter extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (context) => const SingUpView(),
-                      ),
-                    )
+                showSingUpBottomModal(context)
                     .then((_) => onRegisterClosed());
               },
               child: Text(

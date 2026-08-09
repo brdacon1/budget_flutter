@@ -45,20 +45,15 @@ class SingUpViewModel extends ChangeNotifier {
   final TextEditingController nomeText = TextEditingController();
 
   // --- Estado visual reativo ---
-  Color enabled = const Color(0xFF827F8A);
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.grey;
   bool ispasswordev = true;
-  SingUpFieldType? selected;
 
   // --- Estado do fluxo (consumido pela View) ---
   SingUpState state = SingUpState.idle;
   String? errorMessage;
 
-  /// Marca um campo como selecionado (foco visual). Qualquer interação manual
-  /// cancela um estado de erro anterior (igual ao login).
+  /// Registra a interação com um campo. Qualquer interação manual cancela
+  /// um estado de erro anterior (igual ao login).
   void selectField(SingUpFieldType field) {
-    selected = field;
     if (state == SingUpState.error) {
       state = SingUpState.idle;
       errorMessage = null;

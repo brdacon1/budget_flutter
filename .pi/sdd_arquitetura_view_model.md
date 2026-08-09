@@ -330,7 +330,40 @@ class FeatureViewModel extends ChangeNotifier {
 
 ---
 
-## 8. Quando ESTE padrão NÃO se aplica
+## 8. Modais complexos (view + view model)
+
+**Modais complexos** — bottom sheets com vários campos, seleção de campo
+focado, fluxo loading/success/error, validação, etc. — **continuam seguindo o
+padrão View + ViewModel**, mesmo sendo exibidos como `showModalBottomSheet`.
+
+A regra é simples: o **tamanho da UI** (tela cheia x modal) **não muda a
+arquitetura**. O que define se uma feature precisa das duas camadas é a
+**complexidade do estado**, não o recipiente visual.
+
+- A **View** é um `StatefulWidget` cujo `build` retorna a base visual do modal
+  (`AppBottomModal` em `lib/common/widgets/modals/`) envolvida num
+  `AnimatedBuilder(animation: _viewModel, ...)`. Cria/descarta o VM em
+  `initState`/`dispose` e trata estados terminais de forma *one-shot*
+  (loading/success/error), igual faria numa tela cheia.
+- O **ViewModel** (`extends ChangeNotifier`) fica **idêntico ao de uma tela**:
+  detém controllers, estado reativo, ações e fala com os services. **Não**
+  guarda `BuildContext`.
+- Os **components** (`components/*` `StatelessWidget`) continuam recebendo
+  dados + callbacks — nunca o VM inteiro.
+- A abertura/fechamento do modal fica num helper ao final do `*_view.dart`
+  (`show<Feature>BottomModal(context)`), no mesmo formato dos demais helpers
+  de modal do app (`showOptionBottomModal`, `showAppBottomModal`).
+- Modais **simples** (confirmação, seleção de opção, input único) continuam
+  sendo `StatelessWidget` puros sobre `AppBottomModal`, sem ViewModel — só
+  precisam de VM quando há estado a gerenciar.
+
+> **Referência canônica de modal complexo:** `lib/presentations/singup/`
+> (`SingUpView` é um bottom modal que mantém `SingUpViewModel`). Antes era uma
+> tela cheia; virou modal **sem perder** a separação View/ViewModel.
+
+---
+
+## 9. Quando ESTE padrão NÃO se aplica
 
 - Telas com estado compartilhado entre múltiplas rotas (precisaria elevar o VM ou usar
   Provider) — discutir antes de mudar a abordagem.
@@ -341,5 +374,6 @@ class FeatureViewModel extends ChangeNotifier {
 > (referência de **listagem**) ou `lib/presentations/pdf/pdf_edit/` (referência de
 > **formulário** com components desacoplados). Para **tela de cadastro/autenticação**
 > use `lib/presentations/singup/` (referência de **signup** com enum em `common/enums`,
-> campo reutilizável, header, botão e link de login desacoplados). Esses diretórios
-> são o **contrato de referência** do padrão.
+> campo reutilizável e link de login desacoplados) — hoje um **bottom modal complexo**
+> que mantém View + ViewModel (ver seção 8). Esses diretórios são o **contrato de
+> referência** do padrão.
