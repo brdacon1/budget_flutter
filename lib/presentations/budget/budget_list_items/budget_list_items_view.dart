@@ -6,6 +6,7 @@ import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/global_uid_budget.dart' as budget;
+import 'package:oflite/presentations/product/model/product_price_model.dart';
 import 'package:oflite/presentations/product/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/presentations/product/product_price_list/product_price_list_view.dart';
 import 'package:oflite/services/display_alert.dart';
@@ -217,8 +218,9 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                ProductPriceCreatorView(item: _viewModel.novo)),
+                            builder: (context) => ProductPriceCreatorView(
+                                item: ProductPriceModel.fromItemsBudget(
+                                    _viewModel.novo))),
                       );
                     } else if (value == "Selecionar da lista de preço") {
                       budget.fromListItem = false;
@@ -236,8 +238,9 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              ProductPriceCreatorView(item: _viewModel.novo)),
+                          builder: (context) => ProductPriceCreatorView(
+                              item: ProductPriceModel.fromItemsBudget(
+                                  _viewModel.novo))),
                     );
                     budget.fromListItem = false;
                     await _viewModel.getListItens();

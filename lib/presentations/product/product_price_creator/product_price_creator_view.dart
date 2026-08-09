@@ -1,172 +1,59 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:oflite/common/widgets/modals/option_bottom_modal_widget.dart';
-import 'package:oflite/services/convert_coin.dart';
-import 'package:oflite/services/display_alert.dart';
-import 'package:oflite/Services/http_request.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/models/items_list_budget.dart';
-import '../../../models/items_budget.dart';
-import 'package:oflite/models/global_uid_user.dart' as UID;
-import 'package:oflite/models/global_uid_budget.dart' as budget;
-import 'package:extended_masked_text/extended_masked_text.dart';
+import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/common/enums/product_price_field_enum.dart';
+import 'package:oflite/common/strings/product_strings.dart';
+import 'package:oflite/presentations/product/model/product_price_model.dart';
 
-import '../../../common/constants/constants.dart';
+import 'components/product_price_creator_header.dart';
+import 'components/product_price_field.dart';
+import 'product_price_creator_view_model.dart';
 
-FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-enum Gender{
-  categoriaText,
-  unidadeText,
-  qtdText,
-  descricaoText,
-}
-
-TextEditingController _categoriaText = TextEditingController();
-TextEditingController _unidadeText = TextEditingController();
-TextEditingController _qtdText = TextEditingController();
-TextEditingController _descricaoText = TextEditingController();
-
+/// Tela de criação/edição de produto ou serviço (lista de preço).
+///
+/// `StatefulWidget` que cria o [ProductPriceCreatorViewModel] em `initState`
+/// e o descarta em `dispose`. A reconstrução reativa acontece via
+/// `AnimatedBuilder(animation: _viewModel, ...)` — **nunca `setState`**. A
+/// View só monta a estrutura (header + card de formulário + botão) e delega
+/// toda a regra de negócio/persistência ao VM (`save`).
+///
+/// Regras seguidas (ver `.pi/sdd_arquitetura_view_model.md`):
+/// - Dado imutável recebido por construtor ([ProductPriceModel item]).
+/// - `dispose` chama `_viewModel.dispose()` **antes** de `super.dispose()`.
+/// - Componentes (`ProductPriceCreatorHeader`, `ProductPriceField`) recebem
+///   dados + callbacks, nunca o VM inteiro.
+/// - Enum de seleção de campo em `lib/common/enums/`.
+/// - Textos visíveis via `lib/common/strings/product_strings.dart`.
 class ProductPriceCreatorView extends StatefulWidget {
-  final ItemsBudget item;
-  const ProductPriceCreatorView({Key? key, required this.item}) : super(key: key);
+  final ProductPriceModel item;
+
+  const ProductPriceCreatorView({super.key, required this.item});
 
   @override
   State<ProductPriceCreatorView> createState() => _ProductPriceCreatorView();
 }
 
 class _ProductPriceCreatorView extends State<ProductPriceCreatorView> {
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.white;
-  Gender? selected;
-  String? nameButton;
-  String? titlePage;
-  bool fieldVisible = false;
-  var db = HttpRequest();
-  ItemsListBudget ITENS = ItemsListBudget();
-  final controller = MoneyMaskedTextController(leftSymbol: 'R\$ ');
-  final controllerTotal = MoneyMaskedTextController(leftSymbol: 'R\$ ');
-  ConvertCoin moneyConvert = ConvertCoin();
-  final DisplayAlert _displayAlert = DisplayAlert();
+  late final ProductPriceCreatorViewModel _viewModel;
 
   @override
-  initState() {
-    setState(() {
-      if(widget.item.DESCRICAO.toString() != 'null')
-      {
-        nameButton = 'ATUALIZAR';
-        titlePage = 'Editar item';
-        _categoriaText.text = widget.item.CATEGORIA.toString();
-        _unidadeText.text = widget.item.MEDIDA.toString();
-        _qtdText.text = widget.item.QTD.toString();
-        controller.text = moneyConvert.convertFromDouble(widget.item.PRECO!);
-        _descricaoText.text = widget.item.DESCRICAO.toString();
-        print(widget.item.IDPRODUCT.toString());
-        if(widget.item.IDPRODUCT.toString() == 'null')
-        {
-          fieldVisible = false;
-        }
-        else
-        {
-          fieldVisible = true;
-        }
-      }
-      else
-      {
-        if(budget.fromListItem == true) {
-          fieldVisible = true;
-        }
-        else{
-          fieldVisible = false;
-        }
-        nameButton = 'SALVAR';
-        titlePage = 'Criar item';
-        _categoriaText.text = 'Serviços';
-        _unidadeText.text = '';
-        _qtdText.text = '1';
-        controller.text = '';
-        _descricaoText.text = '';
-      }
-    });
+  void initState() {
     super.initState();
+    _viewModel = ProductPriceCreatorViewModel(item: widget.item);
   }
 
-  Future <void> UpadateItensInPriceList(ItemsListBudget itens) async {
-    try{
-            await FirebaseFirestore.instance
-                  .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/PRICELIST")
-                  .doc(widget.item.id)
-                  .update({'CATEGORIA': itens.CATEGORIA,
-                  'DESCRICAO' : itens.DESCRICAO,
-                  'PRECO' : itens.PRECO,
-                  'QTD' : itens.QTD,
-                  'MEDIDA' : itens.MEDIDA,
-                  'TOTAL' : itens.TOTAL,
-                  'COLOR': 'false',
-                  'IDPRODUCT': itens.IDPRODUCT,}).then((value) async {});
-    } catch (e) {
-      notificationError(context, "Erro!", "Não foi possível atualizar o item em sua lista de preço");
-    }
-  }
-
-  Future <void> UpdateItensOrcamentoList(ItemsListBudget itens) async {
-    try{
-          await FirebaseFirestore.instance
-                .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS/${budget.IDORCAMENTO}/ITENS")
-                .doc(widget.item.IDPRODUCT)
-                .update({'CATEGORIA': itens.CATEGORIA ?? 'Serviços',
-                'DESCRICAO' : itens.DESCRICAO,
-                'PRECO' : itens.PRECO,
-                'QTD' : itens.QTD,
-                'MEDIDA' : itens.MEDIDA,
-                'TOTAL' : itens.TOTAL,
-                'COLOR': widget.item.checkBox,
-                'IDPRODUCT': widget.item.IDPRODUCT,}).then((value) async {});
-    }
-    catch (e) {
-      notificationError(context, "Erro!", "Não foi possível atualizar o item na lista de orçamentos.");
-    }
-  }
-
-  Future <String> SaveItensInPriceList(ItemsListBudget itens) async {
-    String id = '';
-    try{
-      await FirebaseFirestore.instance
-          .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/PRICELIST")
-          .add({'CATEGORIA': itens.CATEGORIA,
-        'DESCRICAO' : itens.DESCRICAO,
-        'PRECO' : itens.PRECO,
-        'QTD' : itens.QTD,
-        'MEDIDA' : itens.MEDIDA,
-        'TOTAL' : itens.TOTAL,
-        'COLOR': 'false',
-        'IDPRODUCT': itens.IDPRODUCT,
-      }).then((value) async {
-         id = value.id;
-      });
-    }catch (e){
-      notificationError(context, "Erro!", "Não foi possível adicionar um novo item em sua lista de preço");
-    }
-    return id;
-  }
-
-  void notification(BuildContext context, String firstMessage, String secondMessage) {
-    _displayAlert.notification(context, firstMessage, secondMessage);
-    if (mounted) {
-      Navigator.pop(context, true);
-    }
-  }
-
-  void notificationError(BuildContext context, String firstMessage, String secondMessage) {
-    _displayAlert.notificationError(context, firstMessage, secondMessage);
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var we = MediaQuery.of(context).size.width;
-    var he = MediaQuery.of(context).size.height;
+    final we = MediaQuery.of(context).size.width;
+    final he = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: bgColor,
       body: SingleChildScrollView(
@@ -174,325 +61,146 @@ class _ProductPriceCreatorView extends State<ProductPriceCreatorView> {
           width: we,
           height: he,
           child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: he * 0.07,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    Navigator.pop(context);
+            children: <Widget>[
+              ProductPriceCreatorHeader(
+                title: _viewModel.titlePage,
+                onBack: () => Navigator.pop(context),
+              ),
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: _viewModel,
+                  builder: (context, _) {
+                    return ListView(
+                      children: <Widget>[
+                        _formCard(context),
+                        _saveButton(context),
+                        SizedBox(height: he * 0.3),
+                      ],
+                    );
                   },
-                  child: Container(
-                    alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(left: we * 0.04),
-                    child: const Icon(Icons.arrow_back_outlined,color: Colors.white,size: 35.0,),
-                  ),
                 ),
-                SizedBox(
-                  height: he * 0.02,
-                ),
-                FadeAnimationWidget(
-                  delay: 1,
-                  child: Container(
-                    alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(left: we * 0.048),
-                    child: Text(titlePage!,style: GoogleFonts.heebo(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 26,
-                        letterSpacing: 1
-                    ),
-                    ),
-                  ),
-                ),
-                FadeAnimationWidget(
-                  delay: 1,
-                  child: Container(
-                    alignment: Alignment.topLeft,
-                    margin: EdgeInsets.only(left: we * 0.05),
-                    child: Text("Cadastro de produto ou serviço",style: GoogleFonts.heebo(
-                        color: Colors.grey,
-                        letterSpacing: 1),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    height: he * 0.02
-                ),
-                Expanded(
-                  child: ListView(
-                        children: <Widget>[
-                          SizedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20),
-                              child: Theme(
-                                data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-                                child: ExpansionTileCard(
-                                  initiallyExpanded: true,
-                                  expandedTextColor: whiteColor,
-                                  baseColor: secondaryColor,
-                                  expandedColor: secondaryColor,
-                                leading: const CircleAvatar(
-                                    backgroundColor: bgColor,
-                                    child: Icon(Icons.shopping_cart_outlined, color: whiteColor,)),
-                                title: Text("Dados do produto ou serviço",style: GoogleFonts.heebo(
-                                    color: whiteColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    letterSpacing: 1),
-                                ),
-                                subtitle:  Text("Clique para ${titlePage!.toLowerCase()}",style: GoogleFonts.heebo(
-                                    color: whiteColor,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 13,
-                                    letterSpacing: 1),
-                                ),
-                                children:  <Widget>[
-                                  FadeAnimationWidget(
-                                    delay: 1,
-                                    child: Container(
-                                      width: we * 0.80,
-                                      height:he * 0.078,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.categoriaText ?  bgColor : bgColor,
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child:  TextField(
-                                        readOnly: true,
-                                        enableInteractiveSelection: true,
-                                        controller: _categoriaText,
-                                        onTap: () async {
-                                          List<String> values = ['Produtos', 'Serviços'];
-                                          final value = await showOptionBottomModal(
-                                            context,
-                                            title: 'Selecione categoria',
-                                            values: values,
-                                          );
-                                          if (value != null) {
-                                            setState(() {
-                                              _categoriaText.text = value;
-                                            });
-                                          }
-                                        },
-                                        decoration: InputDecoration(
-                                          enabledBorder: InputBorder.none,
-                                          border:InputBorder.none,
-                                          prefixIcon: Icon(Icons.list_alt,color: selected == Gender.categoriaText ? enabledtxt : deaible),
-                                          suffixIcon: Icon(Icons.keyboard_arrow_down_outlined,color: selected == Gender.categoriaText ? enabledtxt : deaible,),
-                                          hintText: 'Definir categoria',
-                                          hintStyle: const TextStyle(color: Colors.grey),
-                                        ),
-                                        style:  TextStyle(color:  selected == Gender.categoriaText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  FadeAnimationWidget(
-                                    delay: 1,
-                                    child: Container(
-                                      width: we * 0.80,
-                                      height:he * 0.078,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                        color: selected == Gender.unidadeText ?  bgColor : bgColor,
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child:  TextField(
-                                        controller: _unidadeText,
-                                        onTap: (){
-                                          setState(() {
-                                            selected = Gender.unidadeText;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          enabledBorder: InputBorder.none,
-                                          border:InputBorder.none,
-                                          prefixIcon: Icon(Icons.analytics_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
-                                          hintText: 'Unidade de medida',
-                                          hintStyle: const TextStyle(color: Colors.grey),
-                                        ),
-                                        style:  TextStyle(color:  selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  FadeAnimationWidget(
-                                    delay: 1,
-                                    child: Container(
-                                      width: we * 0.80,
-                                      height:he * 0.078,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.unidadeText ? bgColor : bgColor
-                                      ),
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: TextField(
-                                        controller: controller,
-                                        onTap: (){
-                                          setState(() {
-                                            selected = Gender.unidadeText;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                            enabledBorder: InputBorder.none,
-                                            border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.price_change_outlined,color: selected == Gender.unidadeText ? enabledtxt : deaible,),
-                                            hintText: 'Preço',
-                                            hintStyle: const TextStyle(color: Colors.grey),
-                                        ),
-                                        keyboardType: TextInputType.number,
-                                        style:  TextStyle(color: selected == Gender.unidadeText ? enabledtxt : deaible,fontWeight:FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: he * 0.02,
-                                  ),
-                                  Visibility(
-                                    visible: fieldVisible,
-                                    child: FadeAnimationWidget(
-                                      delay: 1,
-                                      child: Container(
-                                        width: we * 0.80,
-                                        height:he * 0.078,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          color: selected == Gender.qtdText ?  bgColor : bgColor,
-                                        ),
-                                        padding: const EdgeInsets.all(8.0),
-                                        child:  TextField(
-                                          controller: _qtdText,
-                                          keyboardType: TextInputType.number,
-                                          onTap: (){
-                                            setState(() {
-                                              selected = Gender.qtdText;
-                                            });
-                                          },
-                                          decoration: InputDecoration(
-                                            enabledBorder: InputBorder.none,
-                                            border:InputBorder.none,
-                                            prefixIcon: Icon(Icons.calculate_outlined,color: selected == Gender.qtdText ? enabledtxt : deaible),
-                                            hintText: 'Quantidade',
-                                            hintStyle: const TextStyle(color: Colors.grey),
-                                          ),
-                                          style:  TextStyle(color:  selected == Gender.qtdText ? enabledtxt : deaible, fontWeight:FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(padding: const EdgeInsets.only(top: 10, bottom: 20),
-                                     child: Container(
-                                       width: we * 0.80,
-                                       height: he * 0.30,
-                                       decoration: BoxDecoration(
-                                         borderRadius: BorderRadius.circular(20.0),
-                                         color: selected == Gender.descricaoText ? bgColor : bgColor,
-                                       ),
-                                       padding: const EdgeInsets.all(8.0),
-                                       child: TextField(
-                                         controller: _descricaoText,
-                                         keyboardType: TextInputType.multiline,
-                                         maxLines: 50,
-                                         onTap: () {
-                                           setState(() {
-                                             selected = Gender.descricaoText;
-                                           });
-                                         },
-                                         decoration: const InputDecoration(
-                                           enabledBorder: InputBorder.none,
-                                           border: InputBorder.none,
-                                           hintText: 'Escreva a descrição do produto ou serviço...',
-                                           hintStyle: TextStyle(color: Colors.grey),
-                                         ),
-                                         style: TextStyle(
-                                           color: selected == Gender.descricaoText ? enabledtxt : deaible,
-                                           fontWeight: FontWeight.bold,
-                                         ),
-                                       ),
-                                     ),
-                                  )
-                                ],
-                              ),
-                              ),
-                            ),
-                          ),
-                          Padding(padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                                  child: TextButton(
-                                    onPressed: () async {
-                                      double cleanAmount = moneyConvert.convertFromString(controller.text);
-                                      double totalPrice = cleanAmount * moneyConvert.convertQtdFromString(_qtdText.text);
-                                      if(nameButton == 'SALVAR')
-                                      {
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.TOTAL = totalPrice;
-                                        ITENS.QTD = moneyConvert.convertQtdFromString(_qtdText.text);
-                                        controllerTotal.text = totalPrice.toStringAsFixed(2);
-                                        await SaveItensInPriceList(ITENS).then((value) async => {
-                                          if(budget.fromListItem == true){
-                                               ITENS.id = value,
-                                               await db.salvaItensList(ITENS).then((value) => {
-                                            })
-                                          },
-                                          notification(context, "Feito!", "Item adicionado com sucesso!"),
-                                        });
-                                      }
-                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == false)
-                                      {
-                                           ITENS.CATEGORIA = _categoriaText.text;
-                                           ITENS.DESCRICAO = _descricaoText.text;
-                                           ITENS.MEDIDA = _unidadeText.text.toString();
-                                           ITENS.PRECO = cleanAmount;
-                                           ITENS.QTD = 0;
-                                           await UpadateItensInPriceList(ITENS).then((value) => {
-                                               notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                           });
-                                      }
-                                      else if(nameButton == 'ATUALIZAR' && fieldVisible == true)
-                                      {
-                                        ITENS.CATEGORIA = _categoriaText.text;
-                                        ITENS.DESCRICAO = _descricaoText.text;
-                                        ITENS.MEDIDA = _unidadeText.text.toString();
-                                        ITENS.PRECO = cleanAmount;
-                                        ITENS.QTD = moneyConvert.convertQtdFromString(_qtdText.text);
-                                        controllerTotal.text = totalPrice.toStringAsFixed(2);
-                                        ITENS.TOTAL = totalPrice;
-                                        await UpdateItensOrcamentoList(ITENS).then((value) => {
-                                          notification(context, "Feito!", "Item atualizado com sucesso!"),
-                                        });
-                                      }
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                                    },
-                                    style:  TextButton.styleFrom(
-                                        backgroundColor: buttonColor,
-                                        padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 80),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(30.0)
-                                        )
-                                    ),
-                                    child: Text(nameButton!,style: GoogleFonts.heebo(
-                                      color: Colors.black,
-                                      letterSpacing: 0.5,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    ),
-                                  ),
-                          ),
-                          SizedBox(
-                            height: he * 0.3,
-                          ),
-                        ]
-                    ),
-                  ),
-              ]
+  /// Card expansível com os campos do formulário.
+  Widget _formCard(BuildContext context) {
+    final he = MediaQuery.of(context).size.height;
+    final subtitle = _viewModel.isEditing
+        ? ProductStrings.formCardSubtitleEdit
+        : ProductStrings.formCardSubtitleCreate;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+      child: Theme(
+        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
+        child: ExpansionTileCard(
+          initiallyExpanded: true,
+          expandedTextColor: whiteColor,
+          baseColor: secondaryColor,
+          expandedColor: secondaryColor,
+          leading: const CircleAvatar(
+            backgroundColor: bgColor,
+            child: Icon(Icons.shopping_cart_outlined, color: whiteColor),
+          ),
+          title: Text(
+            ProductStrings.formCardTitle,
+            style: GoogleFonts.heebo(
+              color: whiteColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              letterSpacing: 1,
+            ),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: GoogleFonts.heebo(
+              color: whiteColor,
+              fontWeight: FontWeight.normal,
+              fontSize: 13,
+              letterSpacing: 1,
+            ),
+          ),
+          children: <Widget>[
+            ProductPriceField(
+              controller: _viewModel.categoriaText,
+              hintText: ProductStrings.categoryHint,
+              icon: Icons.list_alt,
+              readOnly: true,
+              onTap: () => _viewModel.selectCategory(context),
+              suffixIcon: const Icon(Icons.keyboard_arrow_down_outlined,
+                  color: whiteColor),
+            ),
+            SizedBox(height: he * 0.02),
+            ProductPriceField(
+              controller: _viewModel.unidadeText,
+              hintText: ProductStrings.unitHint,
+              icon: Icons.analytics_outlined,
+              onTap: () => _viewModel.selectField(ProductPriceFieldType.unidade),
+            ),
+            SizedBox(height: he * 0.02),
+            ProductPriceField(
+              controller: _viewModel.priceController,
+              hintText: ProductStrings.priceHint,
+              icon: Icons.price_change_outlined,
+              keyboardType: TextInputType.number,
+              onTap: () => _viewModel.selectField(ProductPriceFieldType.preco),
+            ),
+            SizedBox(height: he * 0.02),
+            Visibility(
+              visible: _viewModel.fieldVisible,
+              child: ProductPriceField(
+                controller: _viewModel.qtdText,
+                hintText: ProductStrings.qtyHint,
+                icon: Icons.calculate_outlined,
+                keyboardType: TextInputType.number,
+                onTap: () => _viewModel.selectField(ProductPriceFieldType.qtd),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 20),
+              child: ProductPriceField(
+                controller: _viewModel.descricaoText,
+                hintText: ProductStrings.descriptionHint,
+                icon: Icons.edit_note,
+                keyboardType: TextInputType.multiline,
+                maxLines: 50,
+                widthFactor: 0.80,
+                onTap: () =>
+                    _viewModel.selectField(ProductPriceFieldType.descricao),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Botão de salvar/atualizar — delega a ação ao VM.
+  Widget _saveButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+      child: TextButton(
+        onPressed: () => _viewModel.save(context),
+        style: TextButton.styleFrom(
+          backgroundColor: buttonColor,
+          padding:
+              const EdgeInsets.symmetric(vertical: 15.0, horizontal: 80),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
+          ),
+        ),
+        child: Text(
+          _viewModel.nameButton,
+          style: GoogleFonts.heebo(
+            color: Colors.black,
+            letterSpacing: 0.5,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

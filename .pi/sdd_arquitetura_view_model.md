@@ -137,8 +137,11 @@ Regras de nomenclatura:
   parâmetro (ex.: `Widget _imageCard(BuildContext context)`); nunca usar `context`
   fora do `build`.
 
-### 3.4 Model (`lib/models/*`)
-- POJO com campos nullable e `fromMap`/`toMap`. Sem lógica de negócio.
+### 3.4 Model (`lib/models/*` / `lib/presentations/<feature>/model/`)
+- POJO **imutável** (`const`, campos `final`), campos nullable e o **padrão de
+  model do Flutter**: `fromJson(Map<String, dynamic>)`, `toJson()` e `copyWith()`.
+  Sem lógica de negócio (ver seção 10 para o porquê e como migrar os models
+  antigos que ainda usam `fromMap`/`toJson` sem `copyWith`).
 
 ### 3.5 Services (`lib/Services/*`)
 - Acesso a Firebase/HTTP, formatação de moeda, alertas, loading.
@@ -406,3 +409,119 @@ arquitetura**. O que define se uma feature precisa das duas camadas é a
 > campo reutilizável e link de login desacoplados) — hoje um **bottom modal complexo**
 > que mantém View + ViewModel (ver seção 8). Esses diretórios são o **contrato de
 > referência** do padrão.
+
+---
+
+## 10. Recomendação: padronizar TODOS os Models (`fromJson`/`toJson`/`copyWith`)
+
+Ao longo do projeto, vários models de tela foram criados **sem seguir o padrão
+ de model do Flutter**. É comum encontrar classes que:
+
+- têm `fromMap(dynamic json)` (em vez de `fromJson(Map<String, dynamic>)`);
+- têm `toJson()` mas **nenhum `copyWith()`**;
+- expõem **campos públicos mutáveis** (sem `final`), o que leva a reatribuições
+  espalhadas pela View/ViewModel (`item.QTD = ...`, `item.indice = ...`) em vez
+  de cópias imutáveis;
+- usam nomes de campos em `UPPER_CASE` direto no Dart (misturando a chave do
+  Firebase com o nome do atributo).
+
+Isso dificulta testes, gera mutação imprevisível de estado e impede o uso de
+`const`/`copyWith` (base do data-class no Flutter). **Recomenda-se migrar cada
+model de tela para o padrão canônico** e, enquanto a migração não cobre o app
+inteiro, conviver com os models legados via **adapters de fronteira**.
+
+### 10.1 Padrão canônico de Model
+
+```dart
+class FeatureModel {
+  final String? id;
+  final String? nome;
+  final double? valor;
+
+  const FeatureModel({this.id, this.nome, this.valor});
+
+  factory FeatureModel.fromJson(Map<String, dynamic> json) => FeatureModel(
+        id: json['id'] as String?,
+        nome: json['NOME'] as String?,
+        valor: (json['VALOR'] as num?)?.toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'NOME': nome,
+        'VALOR': valor,
+      };
+
+  FeatureModel copyWith({String? id, String? nome, double? valor}) =>
+      FeatureModel(
+        id: id ?? this.id,
+        nome: nome ?? this.nome,
+        valor: valor ?? this.valor,
+      );
+}
+```
+
+Regras:
+- Campos `final`, construtor `const`.
+- `factory fromJson(Map<String, dynamic>)` (não `fromMap(dynamic)`).
+- `toJson()` retorna `Map<String, dynamic>`.
+- `copyWith({...})` sempre presente.
+- As **chaves do Firebase** podem continuar maiúsculas (`NOME`, `VALOR`) para
+  não quebrar documentos já gravados — o que muda é só a nomenclatura Dart
+  (`camelCase`).
+
+### 10.2 Onde o model mora
+
+- Models **compartilhados entre várias features** (orçamento, recibo, usuário):
+  continuam em `lib/models/*` (camada global).
+- Models **específicos de uma feature** (ex.: item de lista de preço):
+  ficam em `lib/presentations/<feature>/model/`, junto da tela que os usa. Isso
+  evita que um model de uma tela vire dependência global e incentiva o uso do
+  padrão canônico desde a criação.
+
+### 10.3 Convivendo com models legados (adapters de fronteira)
+
+Enquanto os models antigos (`ItemsBudget`, `ItemsListBudget`, ...) ainda são
+usados por services compartilhados e por outras telas, **não se reescreve o
+mundo de uma vez**. O novo model feature-scoped expõe **adapters** que
+convertem só na borda:
+
+```dart
+class ProductPriceModel {
+  // ... padrão canônico ...
+
+  factory ProductPriceModel.fromItemsBudget(ItemsBudget item) => ...;
+  ItemsBudget toItemsBudget() => ...;
+  ItemsListBudget toItemsListBudget() => ...;
+}
+```
+
+Assim a View/ViewModel só manipula o model novo; a conversão para o legado
+acontece ao chamar um service compartilhado (`db.salvaItensList(...)`) ou ao
+receber um item de outra tela. Quando os models legados forem migrados de
+fato, basta **remover os adapters**.
+
+### 10.4 Referência canônica da migração
+
+> **Referência:** `lib/presentations/product/` é o **contrato de referência**
+> da migração de models. O `product_price_creator` foi migrado para
+> `ProductPriceModel` (`lib/presentations/product/model/product_price_model.dart`)
+> com `fromJson`/`toJson`/`copyWith` + adapters, e passou a ter
+> `ProductPriceCreatorViewModel` (`extends ChangeNotifier`) + components
+> (`ProductPriceCreatorHeader`, `ProductPriceField`) seguindo este SDD. Ao
+> migrar as demais telas, replique esse formato.
+
+### 10.5 Checklist de migração de Model
+
+- [ ] Campos `final`, construtor `const`.
+- [ ] `factory fromJson(Map<String, dynamic>)`.
+- [ ] `toJson()` retorna `Map<String, dynamic>`.
+- [ ] `copyWith({...})` implementado.
+- [ ] Sem mutação direta de campos na View/ViewModel — usar `copyWith`.
+- [ ] Chaves do Firebase preservadas (para não quebrar dados existentes).
+- [ ] Model feature-scoped em `lib/presentations/<feature>/model/`; global em
+      `lib/models/`.
+- [ ] Adapters de fronteira com models legados, removíveis quando o legado for
+      migrado.
+- [ ] Ajustar todos os call sites que instanciam o model antigo para usar o
+      novo (ou o adapter de entrada).

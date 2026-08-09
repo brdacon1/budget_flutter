@@ -6,6 +6,7 @@ import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/services/convert_coin.dart';
+import 'package:oflite/presentations/product/model/product_price_model.dart';
 import 'package:oflite/presentations/product/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/presentations/subscription/subscription_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -432,7 +433,10 @@ class _ProductPriceListView extends State<ProductPriceListView>  {
                         onTap: () async {
                           await Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ProductPriceCreatorView(item: getFilteredData()[index])),
+                            MaterialPageRoute(
+                                builder: (context) => ProductPriceCreatorView(
+                                    item: ProductPriceModel.fromItemsBudget(
+                                        getFilteredData()[index]))),
                           ).then((value) async => {
                             await getListItens(),
                             setState(() {}),
@@ -586,7 +590,9 @@ class _ProductPriceListView extends State<ProductPriceListView>  {
               } else{
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProductPriceCreatorView(item: novo)),
+                  MaterialPageRoute(
+                      builder: (context) => ProductPriceCreatorView(
+                          item: ProductPriceModel.fromItemsBudget(novo))),
                 ).then((value) async => {
                   await getListItens(),
                   setState(() {}),
