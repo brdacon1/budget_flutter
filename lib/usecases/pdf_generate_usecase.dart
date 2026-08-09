@@ -41,12 +41,17 @@ class PdfGenerateUseCase {
       final double sizeWithImage = await _drawLogo(page, owner);
 
       _drawOwnerGrid(page, graphics, owner, sizeWithImage);
-      final double count = _drawBudgetDataGrid(page, customer);
+      _drawBudgetDataTitle(page, graphics);
+      final double budgetDataBottomY = _drawBudgetDataGrid(page, customer);
 
-      _drawItemsSectionTitle(page, graphics, count);
+      // Posicionamento dinâmico: o título da lista de itens fica logo abaixo
+      // dos dados do orçamento, respeitando a altura real renderizada.
+      final double itemsTitleY = budgetDataBottomY + 10;
+      _drawItemsSectionTitle(page, graphics, itemsTitleY);
+      final double itemsTableY = itemsTitleY + 40;
       final double resultTableProductHeight = _drawProductTable(
         page: page,
-        count: count,
+        topY: itemsTableY,
         countProduct: countProduct,
         countService: countService,
         totalPriceProducts: totalPriceProducts,
@@ -55,8 +60,7 @@ class PdfGenerateUseCase {
       );
       _drawServiceTable(
         page: page,
-        count: count,
-        resultTableProductHeight: resultTableProductHeight,
+        topY: itemsTableY + resultTableProductHeight,
         countService: countService,
         totalPriceServices: totalPriceServices,
         totalPriceBudget: totalPriceBudget,
@@ -228,82 +232,10 @@ class PdfGenerateUseCase {
   }
 
   // ---------------------------------------------------------------------------
-  // Budget data grid
+  // Budget data section title
   // ---------------------------------------------------------------------------
 
-  double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer) {
-    double count = 0;
-    try {
-      final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
-      pdfGrid.headers.clear();
-
-      void addRow(String label, String? value) {
-        if (value == null || value.isEmpty) return;
-        final PdfGridRow row = pdfGrid.rows.add();
-        row.cells[0].value = label;
-        row.cells[1].value = value;
-      }
-
-      addRow('Número :', customer.id);
-      addRow('Criado em :', customer.data);
-      addRow('Cliente :', customer.customerName);
-
-      void addCountedRow(String label, String? value) {
-        if (value == null || value.isEmpty) return;
-        addRow(label, value);
-        count += 10;
-      }
-
-      addCountedRow('Telefone :', customer.phone);
-      addCountedRow('Empresa :', customer.companyName);
-      addCountedRow('Rua :', customer.street);
-      addCountedRow('Bairro :', customer.neighborhood);
-      addCountedRow('Cidade :', customer.city);
-      addCountedRow('CEP :', customer.zip);
-
-      final PdfGridCellStyle style = PdfGridCellStyle()
-        ..borders.all = PdfPens.transparent;
-
-      for (int i = 0; i < pdfGrid.rows.count; i++) {
-        final PdfGridRow row = pdfGrid.rows[i];
-        for (int j = 0; j < row.cells.count; j++) {
-          row.cells[j].style = style;
-        }
-      }
-
-      final PdfFont font = PdfStandardFont(
-        PdfFontFamily.helvetica,
-        9,
-        style: PdfFontStyle.regular,
-      );
-      final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-        font: font,
-        textBrush: PdfBrushes.black,
-        textPen: PdfPens.white,
-      );
-      pdfGrid.headers.applyStyle(headerStyle);
-      pdfGrid.columns[0].width = 70;
-      pdfGrid.columns[1].width = 360;
-      pdfGrid.draw(
-        graphics: page.graphics,
-        bounds: Rect.fromLTWH(
-          0,
-          135,
-          page.getClientSize().width,
-          page.getClientSize().height,
-        ),
-      );
-    } catch (_) {
-      rethrow;
-    }
-    return count;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Section titles
-  // ---------------------------------------------------------------------------
-
-  void _drawItemsSectionTitle(PdfPage page, PdfGraphics graphics, double count) {
+  void _drawBudgetDataTitle(PdfPage page, PdfGraphics graphics) {
     final PdfFont font1 = PdfStandardFont(
       PdfFontFamily.helvetica,
       13,
@@ -317,7 +249,161 @@ class PdfGenerateUseCase {
     graphics.drawRectangle(
       brush: PdfSolidBrush(PdfColor(255, 255, 255)),
       pen: PdfPen(PdfColor(211, 211, 211)),
-      bounds: Rect.fromLTWH(0, 200 + count, page.getClientSize().width, 30),
+      bounds: Rect.fromLTWH(0, 95, page.getClientSize().width, 30),
+    );
+
+    graphics.drawString(
+      '\nDADOS DO ORÇAMENTO',
+      font1,
+      brush: PdfBrushes.black,
+      bounds: Rect.fromLTWH(
+        0,
+        86.5,
+        page.getClientSize().width,
+        page.getClientSize().height,
+      ),
+      format: format,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Budget data grid
+  // ---------------------------------------------------------------------------
+
+  double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer) {
+    const double startY = 135;
+
+    // Fonte/padding explícitos nas células => altura de linha previsível e
+    // texto sempre visível (não depende da fonte padrão do PdfGrid).
+    final PdfFont rowFont = PdfStandardFont(
+      PdfFontFamily.helvetica,
+      9,
+      style: PdfFontStyle.regular,
+    );
+    final PdfGridCellStyle style = PdfGridCellStyle(
+      font: rowFont,
+      cellPadding: PdfPaddings(top: 2, bottom: 2, left: 0, right: 2),
+    )..borders.all = PdfPens.transparent;
+
+    // Coluna esquerda: dados do orçamento e do cliente.
+    final PdfGrid leftGrid = PdfGrid()..columns.add(count: 2);
+    leftGrid.headers.clear();
+
+    void addLeftRow(String label, String? value) {
+      if (value == null || value.isEmpty) return;
+      final PdfGridRow row = leftGrid.rows.add();
+      row.cells[0].value = label;
+      row.cells[1].value = value;
+    }
+
+    addLeftRow('Número :', customer.id);
+    addLeftRow('Criado em :', customer.data);
+    addLeftRow('Cliente :', customer.customerName);
+    addLeftRow('Telefone :', customer.phone);
+    addLeftRow('Empresa :', customer.companyName);
+
+    // Coluna direita: apenas o endereço do cliente (apenas os preenchidos
+    // aparecem, dinamicamente).
+    final PdfGrid rightGrid = PdfGrid()..columns.add(count: 2);
+    rightGrid.headers.clear();
+
+    void addRightRow(String label, String? value) {
+      if (value == null || value.isEmpty) return;
+      final PdfGridRow row = rightGrid.rows.add();
+      row.cells[0].value = label;
+      row.cells[1].value = value;
+    }
+
+    addRightRow('Rua :', customer.street);
+    addRightRow('Bairro :', customer.neighborhood);
+    addRightRow('Cidade :', customer.city);
+    addRightRow('CEP :', customer.zip);
+
+    for (final PdfGrid grid in <PdfGrid>[leftGrid, rightGrid]) {
+      for (int i = 0; i < grid.rows.count; i++) {
+        final PdfGridRow row = grid.rows[i];
+        for (int j = 0; j < row.cells.count; j++) {
+          row.cells[j].style = style;
+        }
+      }
+    }
+
+    final PdfGridCellStyle headerStyle = PdfGridCellStyle(
+      font: rowFont,
+      textBrush: PdfBrushes.black,
+      textPen: PdfPens.white,
+    );
+    leftGrid.headers.applyStyle(headerStyle);
+    rightGrid.headers.applyStyle(headerStyle);
+
+    final double pageWidth = page.getClientSize().width;
+    final double halfWidth = pageWidth / 2;
+    leftGrid.columns[0].width = 70;
+    leftGrid.columns[1].width = halfWidth - 70;
+    rightGrid.columns[0].width = 70;
+    rightGrid.columns[1].width = halfWidth - 70;
+
+    // Layout em uma única página: o overload `page:` devolve um
+    // PdfLayoutResult cujo `bounds` é a área REAL consumida pelo grid (ao
+    // contrário do overload `graphics:`, que devolve a altura total passada).
+    // Usar a base real evita que o título da lista de itens seja desenhado
+    // por cima das últimas linhas dos dados do cliente.
+    final PdfLayoutFormat onePageFormat = PdfLayoutFormat(
+      breakType: PdfLayoutBreakType.fitPage,
+      layoutType: PdfLayoutType.onePage,
+    );
+
+    double bottomY = startY;
+
+    if (leftGrid.rows.count > 0) {
+      final PdfLayoutResult? result = leftGrid.draw(
+        page: page,
+        bounds: Rect.fromLTWH(0, startY, halfWidth, page.getClientSize().height),
+        format: onePageFormat,
+      );
+      if (result != null && result.bounds.bottom > bottomY) {
+        bottomY = result.bounds.bottom;
+      }
+    }
+
+    if (rightGrid.rows.count > 0) {
+      final PdfLayoutResult? result = rightGrid.draw(
+        page: page,
+        bounds: Rect.fromLTWH(
+          halfWidth,
+          startY,
+          halfWidth,
+          page.getClientSize().height,
+        ),
+        format: onePageFormat,
+      );
+      if (result != null && result.bounds.bottom > bottomY) {
+        bottomY = result.bounds.bottom;
+      }
+    }
+
+    return bottomY;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Section titles
+  // ---------------------------------------------------------------------------
+
+  void _drawItemsSectionTitle(PdfPage page, PdfGraphics graphics, double topY) {
+    final PdfFont font1 = PdfStandardFont(
+      PdfFontFamily.helvetica,
+      13,
+      style: PdfFontStyle.bold,
+    );
+    final PdfStringFormat format = PdfStringFormat(
+      textDirection: PdfTextDirection.rightToLeft,
+      alignment: PdfTextAlignment.center,
+    );
+
+    graphics.drawRectangle(
+      brush: PdfSolidBrush(PdfColor(255, 255, 255)),
+      pen: PdfPen(PdfColor(211, 211, 211)),
+      bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, 30),
     );
 
     graphics.drawString(
@@ -326,7 +412,7 @@ class PdfGenerateUseCase {
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
         0,
-        207 + count,
+        topY + 7,
         page.getClientSize().width,
         page.getClientSize().height,
       ),
@@ -340,7 +426,7 @@ class PdfGenerateUseCase {
 
   double _drawProductTable({
     required PdfPage page,
-    required double count,
+    required double topY,
     required int countProduct,
     required int countService,
     required String totalPriceProducts,
@@ -420,7 +506,7 @@ class PdfGenerateUseCase {
       format: _paginateLayoutFormat(),
       bounds: Rect.fromLTWH(
         0,
-        240 + count,
+        topY,
         page.getClientSize().width,
         page.getClientSize().height,
       ),
@@ -431,8 +517,7 @@ class PdfGenerateUseCase {
 
   void _drawServiceTable({
     required PdfPage page,
-    required double count,
-    required double resultTableProductHeight,
+    required double topY,
     required int countService,
     required String totalPriceServices,
     required String totalPriceBudget,
@@ -509,7 +594,7 @@ class PdfGenerateUseCase {
       format: _paginateLayoutFormat(),
       bounds: Rect.fromLTWH(
         0,
-        240 + count + resultTableProductHeight,
+        topY,
         page.getClientSize().width,
         page.getClientSize().height,
       ),
