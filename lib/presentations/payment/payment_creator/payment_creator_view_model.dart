@@ -2,9 +2,9 @@ import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/Services/display_alert.dart';
 import 'package:oflite/Services/http_request.dart';
+import 'package:oflite/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/services/convert_coin.dart';
 import '../../../Services/loading_event.dart';
-import '../../../common/constants/constants.dart';
 import '../../../models/payment_customer.dart';
 
 enum Gender {
@@ -62,45 +62,15 @@ class PaymentCreatorViewModel extends ChangeNotifier {
 
   Future<void> selectType(BuildContext context) async {
     List<String> values = ['Crédito', 'Débito', 'Dinheiro', 'PIX'];
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          backgroundColor: Colors.cyan[50],
-          title: const Text(
-            "Tipo do pagamento",
-            style: TextStyle(color: Colors.black),
-          ),
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemBuilder: (ctx, index) {
-                  return SimpleDialogOption(
-                    onPressed: () => Navigator.pop(context, values[index]),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          values[index],
-                          style: const TextStyle(color: bgColor, fontSize: 15.0),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                itemCount: values.length,
-              ),
-            )
-          ],
-        );
-      },
-    ).then((value) => {
-          typeText.text = value,
-          notifyListeners(),
-        });
+    final value = await showOptionBottomModal(
+      context,
+      title: 'Tipo do pagamento',
+      values: values,
+    );
+    if (value != null) {
+      typeText.text = value;
+      notifyListeners();
+    }
   }
 
   Future<void> save(BuildContext context, PaymentCustomer item) async {

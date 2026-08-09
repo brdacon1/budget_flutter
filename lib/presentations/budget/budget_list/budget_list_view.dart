@@ -45,8 +45,10 @@ class _BudgetListView extends State<BudgetListView> {
 
   Future<void> _dialogDuplicate() async {
     final viewContext = context;
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext dialogContext) {
         return BudgetListDuplicateDialog(
           onConfirm: (clientData, quoteItems, comments) async {
@@ -66,8 +68,10 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Future<void> _dialogDeleteBuilder() async {
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return BudgetListDeleteDialog(
           deleteItens: _viewModel.deleteItens,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/common/widgets/ads/banner_ad_widget.dart';
+import 'package:oflite/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'components/budget_creator_address_section.dart';
 import 'components/budget_creator_contact_section.dart';
@@ -35,44 +36,14 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
 
   Future<void> _selectStatus() async {
     List<String> values = ['APROVADO', 'PENDENTE', 'REPROVADO', 'FINALIZADO'];
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          backgroundColor: Colors.cyan[50],
-          title: const Text(
-            "Selecione status",
-            style: TextStyle(color: Colors.black),
-          ),
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemBuilder: (ctx, index) {
-                  return SimpleDialogOption(
-                    onPressed: () => Navigator.pop(context, values[index]),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          values[index],
-                          style: const TextStyle(color: bgColor, fontSize: 15.0),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                itemCount: values.length,
-              ),
-            )
-          ],
-        );
-      },
-    ).then((value) => {
-          if (value != null) {_viewModel.setStatus(value)},
-        });
+    final value = await showOptionBottomModal(
+      context,
+      title: 'Selecione status',
+      values: values,
+    );
+    if (value != null && mounted) {
+      _viewModel.setStatus(value);
+    }
   }
 
   @override

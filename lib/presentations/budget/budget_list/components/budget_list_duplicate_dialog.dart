@@ -1,198 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/common/widgets/modals/app_bottom_modal_widget.dart';
 
-class BudgetListDuplicateDialog extends StatelessWidget {
+class BudgetListDuplicateDialog extends StatefulWidget {
   const BudgetListDuplicateDialog({super.key, required this.onConfirm});
 
   final Future<void> Function(bool clientData, bool quoteItems, bool comments)
       onConfirm;
 
   @override
+  State<BudgetListDuplicateDialog> createState() =>
+      _BudgetListDuplicateDialogState();
+}
+
+class _BudgetListDuplicateDialogState extends State<BudgetListDuplicateDialog> {
+  bool duplicateClientData = false;
+  bool duplicateQuoteItems = false;
+  bool duplicateComments = false;
+  bool _processing = false;
+
+  Future<void> _confirm() async {
+    if (!duplicateClientData &&
+        !duplicateQuoteItems &&
+        !duplicateComments) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor selecione alguma opção')),
+      );
+      return;
+    }
+    if (_processing) return;
+    setState(() => _processing = true);
+    await widget.onConfirm(
+        duplicateClientData, duplicateQuoteItems, duplicateComments);
+    if (mounted) {
+      setState(() => _processing = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool duplicateClientData = false;
-    bool duplicateQuoteItems = false;
-    bool duplicateComments = false;
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
-    return AlertDialog(
-      insetPadding: const EdgeInsets.all(15),
-      backgroundColor: bgColor,
-      content: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return SizedBox(
-            height: 360,
-            width: we,
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          Navigator.pop(context, true);
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.topLeft,
-                        margin: EdgeInsets.only(left: we * 0.0),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 30.0,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: we * 0.22),
-                      child: Text(
-                        "Duplicar orçamento",
-                        style: GoogleFonts.heebo(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: he * 0.02,
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: 100,
-                    child: Card(
-                      color: Colors.cyan[50],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          CheckboxListTile(
-                            side: const BorderSide(
-                              color: bgColor,
-                            ),
-                            checkColor: Colors.white,
-                            activeColor: bgColor,
-                            title: Text(
-                              "Duplicar dados do cliente",
-                              style: GoogleFonts.heebo(
-                                color: Colors.black,
-                                letterSpacing: 0.5,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            value: duplicateClientData,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                duplicateClientData = value!;
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: he * 0.02,
-                          ),
-                          CheckboxListTile(
-                            side: const BorderSide(
-                              color: bgColor,
-                            ),
-                            checkColor: Colors.white,
-                            activeColor: bgColor,
-                            title: Text(
-                              "Duplicar itens do orçamento",
-                              style: GoogleFonts.heebo(
-                                color: Colors.black,
-                                letterSpacing: 0.5,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            value: duplicateQuoteItems,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                duplicateQuoteItems = value!;
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: he * 0.02,
-                          ),
-                          CheckboxListTile(
-                            side: const BorderSide(
-                              color: bgColor,
-                            ),
-                            checkColor: Colors.white,
-                            activeColor: bgColor,
-                            title: Text(
-                              "Duplicar comentários",
-                              style: GoogleFonts.heebo(
-                                color: Colors.black,
-                                letterSpacing: 0.5,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            value: duplicateComments,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                duplicateComments = value!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: TextButton(
-                      onPressed: () async {
-                        if (!duplicateClientData &
-                            !duplicateQuoteItems &
-                            !duplicateComments) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Por favor selecione alguma opção")),
-                          );
-                        } else {
-                          await onConfirm(duplicateClientData, duplicateQuoteItems,
-                              duplicateComments);
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: buttonColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15.0,
-                          horizontal: 70,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
-                      child: Text(
-                        "DUPLICAR",
-                        style: GoogleFonts.heebo(
-                          color: Colors.black,
-                          letterSpacing: 0.5,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              ],
+    return AppBottomModal(
+      title: 'Duplicar orçamento',
+      buttonLabel: _processing ? 'Aguarde...' : 'DUPLICAR',
+      onButtonPressed: _processing ? () {} : _confirm,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _CheckTile(
+              title: 'Duplicar dados do cliente',
+              value: duplicateClientData,
+              onChanged: (v) => setState(() => duplicateClientData = v ?? false),
             ),
-          );
-        },
+            _CheckTile(
+              title: 'Duplicar itens do orçamento',
+              value: duplicateQuoteItems,
+              onChanged: (v) => setState(() => duplicateQuoteItems = v ?? false),
+            ),
+            _CheckTile(
+              title: 'Duplicar comentários',
+              value: duplicateComments,
+              onChanged: (v) => setState(() => duplicateComments = v ?? false),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _CheckTile extends StatelessWidget {
+  const _CheckTile({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String title;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      side: const BorderSide(color: Color(0xFF9E9E9E)),
+      checkColor: Colors.white,
+      activeColor: AppBottomModal.grayColor,
+      title: Text(
+        title,
+        style: GoogleFonts.heebo(
+          color: AppBottomModal.grayColor,
+          letterSpacing: 0.5,
+          fontSize: 14.0,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      value: value,
+      onChanged: onChanged,
     );
   }
 }

@@ -1,9 +1,10 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/services/convert_coin.dart';
+import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/Services/http_request.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oflite/models/items_list_budget.dart';
@@ -48,6 +49,7 @@ class _ProductPriceCreatorView extends State<ProductPriceCreatorView> {
   final controller = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   final controllerTotal = MoneyMaskedTextController(leftSymbol: 'R\$ ');
   ConvertCoin moneyConvert = ConvertCoin();
+  final DisplayAlert _displayAlert = DisplayAlert();
 
   @override
   initState() {
@@ -151,55 +153,14 @@ class _ProductPriceCreatorView extends State<ProductPriceCreatorView> {
   }
 
   void notification(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      headerAnimationLoop: false,
-      dialogType: DialogType.success,
-      showCloseIcon: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 18,
-      ),
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkIcon: Icons.check_circle,
-      btnOkOnPress: () {
-        Navigator.pop(context, true);
-      },
-    ).show();
+    _displayAlert.notification(context, firstMessage, secondMessage);
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   void notificationError(BuildContext context, String firstMessage, String secondMessage) {
-    final width = MediaQuery.of(context).size.width;
-    AwesomeDialog(
-      width: width * 0.99,
-      context: context,
-      dialogBackgroundColor: Colors.cyan[50],
-      animType: AnimType.leftSlide,
-      headerAnimationLoop: false,
-      titleTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 18,
-      ),
-      dialogType: DialogType.error,
-      showCloseIcon: false,
-      title: firstMessage,
-      desc: secondMessage,
-      btnOkOnPress: () async {},
-      btnOkIcon: Icons.check_circle,).show();
+    _displayAlert.notificationError(context, firstMessage, secondMessage);
   }
 
   @override
@@ -303,42 +264,16 @@ class _ProductPriceCreatorView extends State<ProductPriceCreatorView> {
                                         controller: _categoriaText,
                                         onTap: () async {
                                           List<String> values = ['Produtos', 'Serviços'];
-                                          await showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return SimpleDialog(
-                                                backgroundColor: Colors.cyan[50],
-                                                title: const Text("Selecione categoria", style: TextStyle(color: Colors.black),),
-                                                children: [
-                                                  SizedBox(
-                                                    width: MediaQuery.of(context).size.width,
-                                                    child: ListView.builder(
-                                                      shrinkWrap: true,
-                                                      itemBuilder: (ctx, index) {
-                                                        return SimpleDialogOption(
-                                                          onPressed: () => Navigator.pop(context, values[index]),
-                                                          child: Column(
-                                                              mainAxisAlignment: MainAxisAlignment.start,
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(values[index], style: const TextStyle(color: bgColor,
-                                                                    fontSize: 15.0)),
-                                                              ]
-                                                          ),
-                                                        );
-                                                      },
-                                                      itemCount: values.length,
-                                                    ),
-                                                  )
-                                                ],
-                                              );
-                                            },
-                                          ).then((value) => {
+                                          final value = await showOptionBottomModal(
+                                            context,
+                                            title: 'Selecione categoria',
+                                            values: values,
+                                          );
+                                          if (value != null) {
                                             setState(() {
                                               _categoriaText.text = value;
-                                            }),
-
-                                          });
+                                            });
+                                          }
                                         },
                                         decoration: InputDecoration(
                                           enabledBorder: InputBorder.none,

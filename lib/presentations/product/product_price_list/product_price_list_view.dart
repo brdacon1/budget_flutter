@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/common/widgets/modals/items_list_bottom_modal_widget.dart';
+import 'package:oflite/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/services/convert_coin.dart';
 import 'package:oflite/presentations/product/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/presentations/subscription/subscription_view.dart';
@@ -85,421 +87,122 @@ class _ProductPriceListView extends State<ProductPriceListView>  {
   String _valueButtonPopup = '';
 
   Future<void> _showTextInputDialog() async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Defina quantidade'),
-          content: TextField(
-            onChanged: (value) {
-              setState(() {
-                _inputValue = value;
-              });
-            },
-            keyboardType: TextInputType.number,
-            maxLength: 10,
-            decoration: const InputDecoration(
-              hintText: 'Digite a quantidade',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _valueButtonPopup = 'Cancelar';
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Cancelar",
-                style: GoogleFonts.heebo(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                _valueButtonPopup = 'OK';
-                Navigator.of(context).pop(_inputValue);
-              },
-              child: Text(
-                "OK",
-                style: GoogleFonts.heebo(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+    final value = await showTextInputBottomModal(
+      context,
+      title: 'Defina quantidade',
+      hintText: 'Digite a quantidade',
     );
+    setState(() {
+      _inputValue = value ?? '';
+      _valueButtonPopup = (value == null) ? 'Cancelar' : 'OK';
+    });
   }
 
   Future<void> _dialogBuilder() {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
-    return showDialog<void>(
+    return showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          insetPadding: const EdgeInsets.all(19),
-          backgroundColor: bgColor,
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SizedBox(
-                height: 400,
-                width: we,
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              Navigator.pop(context, true);
-                            });
-                          },
-                          child: Container(
-                            alignment: Alignment.topLeft,
-                            margin: EdgeInsets.only(left: we * 0.0),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 30.0,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(right: we * 0.15),
-                          child: Text(
-                            "Carrinho de produtos",
-                            style: GoogleFonts.heebo(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: he * 0.025,
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(right: 0, left: 0, bottom: 40),
-                        itemCount: addItens.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            color: secondaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                addItens[index].DESCRICAO!,
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  color: whiteColor,
-                                  letterSpacing: 0.5,
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              onTap: () async {
-                                double totalPrice = 0;
-                                await _showTextInputDialog().then((value) => {
-                                  if (_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar')
-                                    {
-                                      totalPrice = int.parse(_inputValue) * addItens[index].PRECO!,
-                                      addItens[index].indice = index,
-                                      addItens[index].QTD = double.parse(_inputValue.replaceAll(',', '.')),
-                                      addItens[index].TOTAL = totalPrice,
-                                      _inputValue = '',
-                                      _valueButtonPopup = '',
-                                    }
-                                });
-                              },
-                              subtitle: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    addItens[index].CATEGORIA.toString(),
-                                    style: const TextStyle(
-                                      color: whiteColor,
-                                      letterSpacing: 0.5,
-                                      fontSize: 10.0,
-                                    ),
-                                  ),
-                                  Text(
-                                    addItens[index].QTD.toString(),
-                                    style: const TextStyle(
-                                      color: whiteColor,
-                                      letterSpacing: 0.5,
-                                      fontSize: 10.0,
-                                    ),
-                                  ),
-                                  Text(
-                                    moneyConvert.convertFromDouble(addItens[index].PRECO!),
-                                    style: const TextStyle(
-                                      color: whiteColor,
-                                      letterSpacing: 0.5,
-                                      fontSize: 10.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    getFilteredData()[addItens[index].indice].selectProduct = false;
-                                    addItens.remove(addItens[index]);
-                                  });
-                                },
-                                child: const Icon(
-                                  Icons.close,
-                                  color: whiteColor,
-                                  size: 30.0,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.only(top: 20)),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: TextButton(
-                          onPressed: () async {
-                            var displayAlert = DisplayAlert();
-                            var alertDisplayLoading = LoadingEvent();
-                            await alertDisplayLoading.alertLoading(context);
-
-                            try {
-                              await salvaItensList();
-                              addItens.clear();
-                              await getListItens();
-
-                              alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notification(context, "Feito!",
-                                  "Itens adicionados na lista do orçamento com sucesso!").then((value) => {
-                                   Navigator.pop(context, true),
-                              });
-                              setState(() {});
-                            } catch (e) {
-                              alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro para adicionar os itens na lista do orçamento");
-                            }
-                            setState(() {});
-                          },
-                          style:  TextButton.styleFrom(
-                              backgroundColor: const Color(0xFF0DF5E4),
-                              padding: const EdgeInsets.symmetric(vertical: 15.0,horizontal: 90),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0)
-                              )
-                          ),
-                          child: Text("ADICIONAR",style: GoogleFonts.heebo(
-                            color: Colors.black,
-                            letterSpacing: 0,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          )
-                      ),
-                    ),
-                  ],
-                ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ItemsListBottomModalWidget(
+        title: 'Carrinho de produtos',
+        items: addItens,
+        moneyConvert: moneyConvert,
+        buttonLabel: 'ADICIONAR',
+        onRemove: (item, index) {
+          setState(() {
+            getFilteredData()[item.indice].selectProduct = false;
+            addItens.remove(item);
+          });
+        },
+        onItemTap: (item, index) async {
+          await _showTextInputDialog();
+          if (_inputValue.isNotEmpty && _valueButtonPopup != 'Cancelar') {
+            double totalPrice = int.parse(_inputValue) * item.PRECO!;
+            item.indice = index;
+            item.QTD = double.parse(_inputValue.replaceAll(',', '.'));
+            item.TOTAL = totalPrice;
+            _inputValue = '';
+            _valueButtonPopup = '';
+            setState(() {});
+          }
+        },
+        onButtonPressed: () async {
+          var alertDisplayLoading = LoadingEvent();
+          await alertDisplayLoading.alertLoading(context);
+          try {
+            await salvaItensList();
+            addItens.clear();
+            await getListItens();
+            alertDisplayLoading.closeLoading(context);
+            if (context.mounted) {
+              Navigator.pop(context, true);
+              await displayAlert.notification(
+                context,
+                'Feito!',
+                'Itens adicionados na lista do orçamento com sucesso!',
               );
-            },
-          ),
-        );
-      },
+            }
+            setState(() {});
+          } catch (e) {
+            alertDisplayLoading.closeLoading(context);
+            if (context.mounted) {
+              await displayAlert.notificationError(
+                  context, 'Erro!', 'Ocorreu um erro para adicionar os itens na lista do orçamento');
+            }
+            setState(() {});
+          }
+        },
+      ),
     ).then((value) {
       setState(() {});
     });
   }
 
   Future<void> _dialogDeleteBuilder() {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
-    return showDialog<void>(
+    return showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          insetPadding: const EdgeInsets.all(19),
-          backgroundColor: bgColor,
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return SizedBox(
-                height: 400,
-                width: we,
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              Navigator.pop(context, true);
-                            });
-                          },
-                          child: Container(
-                            alignment: Alignment.topLeft,
-                            margin: EdgeInsets.only(left: we * 0.0),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 30.0,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(right: we * 0.15),
-                          child: Text(
-                            "Remover produtos",
-                            style: GoogleFonts.heebo(
-                              color: whiteColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: he * 0.02,
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start, // Ajuste esta propriedade
-                          children: deleteItens.map((item) {
-                            return Card(
-                              color: secondaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: ListTile(
-                                title: Text(
-                                  item.DESCRICAO!,
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    color: whiteColor,
-                                    letterSpacing: 0.5,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.CATEGORIA.toString(),
-                                      style: const TextStyle(
-                                        color: whiteColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      moneyConvert.convertFromDouble(item.PRECO!),
-                                      style: const TextStyle(
-                                        color: whiteColor,
-                                        letterSpacing: 0.5,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Transform.scale(
-                                  scale: 1.7,
-                                  alignment: Alignment.topCenter,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      getFilteredData()[item.indice].checkBox = false;
-                                      deleteItens.remove(item);
-                                      if (deleteItens.isEmpty) {
-                                        deleteVisible = false;
-                                        checkBoxAppear = false;
-                                        cheBoxAppearProduct = true;
-                                      }
-                                      setState(() {});
-                                    },
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: whiteColor,
-                                      size: 23.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.only(top: 20)),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: TextButton(
-                          onPressed: () async {
-                            var displayAlert = DisplayAlert();
-                            var alertDisplayLoading = LoadingEvent();
-                            await alertDisplayLoading.alertLoading(context);
-
-                            try {
-                              await DeleteDados();
-                              deleteItens.clear();
-                              deleteVisible = false;
-                              checkBoxAppear = false;
-
-                              alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notification(context, "Feito!", "Itens removidos com sucesso!");
-                              setState(() {});
-                            } catch (e) {
-                              alertDisplayLoading.closeLoading(context);
-                              await displayAlert.notificationError(context, "Erro!", "Ocorreu um erro ao remover os itens.");
-                            }
-
-                            setState(() {});
-                          },
-                          style:  TextButton.styleFrom(
-                              backgroundColor: buttonColor,
-                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 70),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0)
-                              )
-                          ),
-                          child: Text("EXCLUIR ITENS",style: GoogleFonts.heebo(
-                              color: Colors.black,
-                              letterSpacing: 0.5,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ItemsListBottomModalWidget(
+        title: 'Remover produtos',
+        items: deleteItens,
+        moneyConvert: moneyConvert,
+        buttonLabel: 'EXCLUIR ITENS',
+        onRemove: (item, index) {
+          getFilteredData()[item.indice].checkBox = false;
+          deleteItens.remove(item);
+          if (deleteItens.isEmpty) {
+            deleteVisible = false;
+            checkBoxAppear = false;
+            cheBoxAppearProduct = true;
+          }
+          setState(() {});
+        },
+        onButtonPressed: () async {
+          var alertDisplayLoading = LoadingEvent();
+          await alertDisplayLoading.alertLoading(context);
+          try {
+            await DeleteDados();
+            deleteItens.clear();
+            deleteVisible = false;
+            checkBoxAppear = false;
+            alertDisplayLoading.closeLoading(context);
+            if (context.mounted) {
+              await displayAlert.notification(context, 'Feito!', 'Itens removidos com sucesso!');
+            }
+            setState(() {});
+          } catch (e) {
+            alertDisplayLoading.closeLoading(context);
+            if (context.mounted) {
+              await displayAlert.notificationError(context, 'Erro!', 'Ocorreu um erro ao remover os itens.');
+            }
+            setState(() {});
+          }
+        },
+      ),
     ).then((value) {
       setState(() {});
     });
-
   }
 
   Future <bool> DeleteDados() async {

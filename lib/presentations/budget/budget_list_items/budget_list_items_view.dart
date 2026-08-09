@@ -42,8 +42,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Future<void> _dialogDeleteBuilder() async {
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return BudgetListItemsDeleteDialog(
           deleteItens: _viewModel.deleteItens,

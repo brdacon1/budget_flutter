@@ -1,8 +1,9 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/models/customer_info.dart';
+import 'package:oflite/services/display_alert.dart';
 
 class BudgetTabViewModel extends ChangeNotifier {
+  final DisplayAlert _displayAlert = DisplayAlert();
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 
@@ -13,29 +14,11 @@ class BudgetTabViewModel extends ChangeNotifier {
       if (item.id != null && item.id!.isNotEmpty) {
         _currentIndex = index;
       } else {
-        AwesomeDialog(
-          width: we * 0.99,
-          context: context,
-          dialogBackgroundColor: Colors.cyan[50],
-          animType: AnimType.leftSlide,
-          headerAnimationLoop: false,
-          dialogType: DialogType.warning,
-          showCloseIcon: false,
-          titleTextStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          descTextStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-          ),
-          title: 'Ainda não!',
-          desc:
-              'É necessário cadastrar o cliente colocando pelo menos o nome e clicar no botão "Continuar"',
-          btnOkOnPress: () async {},
-          btnOkIcon: Icons.check_circle,
-        ).show();
+        _displayAlert.notificationWarning(
+          context,
+          'Ainda não!',
+          'É necessário cadastrar o cliente colocando pelo menos o nome e clicar no botão "Continuar"',
+        );
       }
     }
     notifyListeners();

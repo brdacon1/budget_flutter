@@ -1,4 +1,3 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +7,11 @@ import 'package:flutter_contacts/properties/phone.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:oflite/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/models/global_uid_user.dart' as UID;
+import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/via_cep_service.dart' as CEP;
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -30,6 +31,7 @@ enum Gender {
 
 class BudgetCreatorViewModel extends ChangeNotifier {
   final CustomerInfo item;
+  final DisplayAlert displayAlert = DisplayAlert();
 
   BudgetCreatorViewModel({required this.item});
 
@@ -217,57 +219,36 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   Future<void> pickContact(double we, BuildContext context) async {
     nameNode.requestFocus();
-    AwesomeDialog(
-      context: context,
-      width: we * 0.99,
-      dialogBackgroundColor: Colors.cyan[50],
-      dialogType: DialogType.infoReverse,
-      buttonsBorderRadius: const BorderRadius.all(
-        Radius.circular(10),
-      ),
-      headerAnimationLoop: false,
-      animType: AnimType.bottomSlide,
-      titleTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-      descTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 18,
-      ),
+    final confirm = await showConfirmBottomModal(
+      context,
       title: 'Lista de contatos',
-      desc: 'Gostaria de buscar cliente em sua lista de contatos?',
-      showCloseIcon: false,
-      btnCancelText: "Não",
-      btnOkText: "Sim",
-      btnCancelOnPress: () {
-        fieldFone = false;
-        notifyListeners();
-      },
-      btnOkOnPress: () async {
-        fieldFone = true;
-        notifyListeners();
-        int index = 0;
-        String? nome;
-        String? tel;
-        await FlutterContactPicker.pickFullContact().then((value) {
-          final FullContact contact = value;
-          contact.phones.forEach((result) {
-            if (index == 0) {
-              nome = contact.name?.nickName;
-              tel = result.number;
-              tel = tel?.replaceAll('+55', '');
-              tel = tel?.replaceAll('+', '');
-              nameController.text = nome!;
-              phoneController.text = maskFormatter.maskText(tel!);
-              notifyListeners();
-            }
-            index++;
-          });
-        });
-      },
-    ).show();
+      message: 'Gostaria de buscar cliente em sua lista de contatos?',
+    );
+    if (!confirm) {
+      fieldFone = false;
+      notifyListeners();
+      return;
+    }
+    fieldFone = true;
+    notifyListeners();
+    int index = 0;
+    String? nome;
+    String? tel;
+    await FlutterContactPicker.pickFullContact().then((value) {
+      final FullContact contact = value;
+      contact.phones.forEach((result) {
+        if (index == 0) {
+          nome = contact.name?.nickName;
+          tel = result.number;
+          tel = tel?.replaceAll('+55', '');
+          tel = tel?.replaceAll('+', '');
+          nameController.text = nome!;
+          phoneController.text = maskFormatter.maskText(tel!);
+          notifyListeners();
+        }
+        index++;
+      });
+    });
   }
 
   Future<void> eventSave(BuildContext context, double we) async {
@@ -286,7 +267,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       orcamento.street = ruaController.text;
       orcamento.city = cityController.text;
       orcamento.neighborhood = bairroController.text;
-      updateItensDADOS(orcamento).then((value) {
+      updateItensDADOS(orcamento).then((value) async {
         item.totalValue = orcamento.totalValue;
         item.id = orcamento.id;
         item.data = orcamento.data;
@@ -302,28 +283,13 @@ class BudgetCreatorViewModel extends ChangeNotifier {
         item.city = cityController.text;
         item.neighborhood = bairroController.text;
         notifyListeners();
-        AwesomeDialog(
-          width: we * 0.99,
-          context: context,
-          dialogBackgroundColor: Colors.cyan[50],
-          animType: AnimType.scale,
-          headerAnimationLoop: false,
-          dialogType: DialogType.success,
-          titleTextStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          descTextStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-          ),
-          showCloseIcon: false,
-          title: 'Feito!',
-          desc: 'Dados do orçamento atualizado com sucesso!',
-          btnOkOnPress: () {},
-          btnOkIcon: Icons.check_circle,
-        ).show();
+        if (context.mounted) {
+          await displayAlert.notification(
+            context,
+            'Feito!',
+            'Dados do orçamento atualizado com sucesso!',
+          );
+        }
       });
     } else if (nameButton == "Continuar") {
       final DateTime now = DateTime.now();
@@ -380,63 +346,30 @@ class BudgetCreatorViewModel extends ChangeNotifier {
         idController.text = orcamento.id.toString();
         notifyListeners();
         if (await UserInfo.FlutterContacts.requestPermission()) {
-          await AwesomeDialog(
-            width: we * 0.99,
-            context: context,
-            dialogBackgroundColor: Colors.cyan[50],
-            animType: AnimType.topSlide,
-            headerAnimationLoop: false,
-            dialogType: DialogType.success,
-            showCloseIcon: false,
-            titleTextStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-            descTextStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-            ),
-            title: 'Feito!',
-            desc: 'Orçamento criado com sucesso!',
-            btnOkOnPress: () async {
-              await AwesomeDialog(
-                context: context,
-                width: we * 0.99,
-                dialogBackgroundColor: Colors.cyan[50],
-                buttonsBorderRadius: const BorderRadius.all(
-                  Radius.circular(10),
-                ),
-                headerAnimationLoop: false,
-                animType: AnimType.bottomSlide,
-                titleTextStyle: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                descTextStyle: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                ),
-                title: 'Salvar contato',
-                desc: 'Gostaria de salvar o telefone em sua lista de contatos?',
-                showCloseIcon: false,
-                btnCancelText: "Não",
-                btnOkText: "Sim",
-                btnCancelOnPress: () {},
-                btnOkOnPress: () async {
-                  UserInfo.Contact newContact = UserInfo.Contact()
-                    ..name = Name(first: orcamento.customerName.toString())
-                    ..phones = [
-                      Phone(orcamento.phone.toString()),
-                      Phone(orcamento.phone.toString(), label: PhoneLabel.work)
-                    ];
-                  await UserInfo.FlutterContacts.insertContact(newContact);
-                },
-              ).show();
-            },
-            btnOkIcon: Icons.check_circle,
-          ).show();
+          if (context.mounted) {
+            await displayAlert.notification(
+              context,
+              'Feito!',
+              'Orçamento criado com sucesso!',
+            );
+          }
+          if (context.mounted) {
+            final saveContact = await showConfirmBottomModal(
+              context,
+              title: 'Salvar contato',
+              message:
+                  'Gostaria de salvar o telefone em sua lista de contatos?',
+            );
+            if (saveContact) {
+              UserInfo.Contact newContact = UserInfo.Contact()
+                ..name = Name(first: orcamento.customerName.toString())
+                ..phones = [
+                  Phone(orcamento.phone.toString()),
+                  Phone(orcamento.phone.toString(), label: PhoneLabel.work)
+                ];
+              await UserInfo.FlutterContacts.insertContact(newContact);
+            }
+          }
         }
       });
     }
