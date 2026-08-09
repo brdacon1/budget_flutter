@@ -13,8 +13,8 @@ import 'package:oflite/services/convert_coin.dart';
 import 'package:oflite/services/loading_event.dart';
 import 'package:badges/badges.dart' as badges;
 import 'components/budget_list_card.dart';
-import 'components/budget_list_delete_dialog.dart';
-import 'components/budget_list_duplicate_dialog.dart';
+import 'components/modals/budget_list_delete_bottom_modal_widget.dart';
+import 'components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'budget_list_view_model.dart';
 
 class BudgetListView extends StatefulWidget {
@@ -50,7 +50,7 @@ class _BudgetListView extends State<BudgetListView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext dialogContext) {
-        return BudgetListDuplicateDialog(
+        return BudgetListDuplicateBottomModalWidget(
           onConfirm: (clientData, quoteItems, comments) async {
             Navigator.of(dialogContext).pop();
             var alertDisplayLoading = LoadingEvent();
@@ -73,7 +73,7 @@ class _BudgetListView extends State<BudgetListView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return BudgetListDeleteDialog(
+        return BudgetListDeleteBottomModalWidget(
           deleteItens: _viewModel.deleteItens,
           onRemove: (item) => _viewModel.removeDeleteItem(item),
           onConfirm: () async {

@@ -10,7 +10,7 @@ import 'package:oflite/presentations/product/product_price_creator/product_price
 import 'package:oflite/presentations/product/product_price_list/product_price_list_view.dart';
 import 'package:oflite/services/display_alert.dart';
 import '../../budget/budget_list_items/components/budget_list_items_card.dart';
-import '../../budget/budget_list_items/components/budget_list_items_delete_dialog.dart';
+import '../../budget/budget_list_items/components/modals/budget_list_items_delete_bottom_modal_widget.dart';
 import '../../budget/budget_list_items/components/budget_list_items_total_bar.dart';
 import 'budget_list_items_view_model.dart';
 
@@ -47,7 +47,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return BudgetListItemsDeleteDialog(
+        return BudgetListItemsDeleteBottomModalWidget(
           deleteItens: _viewModel.deleteItens,
           moneyConvert: _viewModel.moneyConvert,
           onRemove: (item) => _viewModel.removeDeleteItem(item),

@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/widgets/modals/app_bottom_modal_widget.dart';
 
-class BudgetListDuplicateDialog extends StatefulWidget {
-  const BudgetListDuplicateDialog({super.key, required this.onConfirm});
+class BudgetListDuplicateBottomModalWidget extends StatefulWidget {
+  const BudgetListDuplicateBottomModalWidget({super.key, required this.onConfirm});
 
   final Future<void> Function(bool clientData, bool quoteItems, bool comments)
       onConfirm;
 
   @override
-  State<BudgetListDuplicateDialog> createState() =>
-      _BudgetListDuplicateDialogState();
+  State<BudgetListDuplicateBottomModalWidget> createState() =>
+      _BudgetListDuplicateBottomModalWidgetState();
 }
 
-class _BudgetListDuplicateDialogState extends State<BudgetListDuplicateDialog> {
+class _BudgetListDuplicateBottomModalWidgetState
+    extends State<BudgetListDuplicateBottomModalWidget> {
   bool duplicateClientData = false;
   bool duplicateQuoteItems = false;
   bool duplicateComments = false;
