@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/presentations/singup/singup_view.dart';
 
 /// Rodapé do login com o atalho de cadastro.
@@ -25,7 +26,7 @@ class LoginFooter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Quer se cadastrar? ',
+              AuthStrings.loginRegisterPrompt,
               style: GoogleFonts.heebo(
                 color: Colors.grey,
                 letterSpacing: 0.5,
@@ -37,7 +38,7 @@ class LoginFooter extends StatelessWidget {
                     .then((_) => onRegisterClosed());
               },
               child: Text(
-                'Clique aqui',
+                AuthStrings.loginRegisterAction,
                 style: GoogleFonts.heebo(
                   color: buttonColor.withOpacity(0.9),
                   fontWeight: FontWeight.bold,

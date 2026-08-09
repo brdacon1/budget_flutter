@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/common/enums/singup_field_enum.dart';
+import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
@@ -73,10 +74,10 @@ class _SingUpViewState extends State<SingUpView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cadastro realizado com sucesso!'),
+          SnackBar(
+            content: Text(AuthStrings.signUpSuccess),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
         // O modal é a rota atual: substitui-o pelo `/menu`, deixando a
@@ -91,12 +92,15 @@ class _SingUpViewState extends State<SingUpView> {
       // Captura a mensagem e consome o estado ANTES de qualquer chamada
       // que possa disparar novas notificações, para que o modal de erro
       // seja exibido apenas uma vez (one-shot).
-      final message =
-          _viewModel.errorMessage ?? 'Problemas para registrar usuário!';
+      final message = _viewModel.errorMessage ?? AuthStrings.signUpErrorDefault;
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _displayAlert.notificationError(context, 'Erro!', message);
+        _displayAlert.notificationError(
+          context,
+          AuthStrings.errorTitle,
+          message,
+        );
       });
     }
   }
@@ -111,8 +115,10 @@ class _SingUpViewState extends State<SingUpView> {
         final registering = _viewModel.state == SingUpState.loading;
 
         return AppBottomModal(
-          title: 'Criar uma conta',
-          buttonLabel: registering ? 'Registrando...' : 'REGISTRAR',
+          title: AuthStrings.signUpTitle,
+          buttonLabel: registering
+              ? AuthStrings.signUpButtonLoading
+              : AuthStrings.signUpButton,
           onButtonPressed: registering ? () {} : _viewModel.register,
           child: SingleChildScrollView(
             child: Column(
@@ -121,7 +127,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.01),
                 SingUpField(
                   controller: _viewModel.nomeText,
-                  hintText: 'SEU NOME',
+                  hintText: AuthStrings.signUpNameHint,
                   icon: Icons.person_pin_outlined,
                   field: SingUpFieldType.name,
                   onTap: () => _viewModel.selectField(SingUpFieldType.name),
@@ -129,7 +135,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.02),
                 SingUpField(
                   controller: _viewModel.emailText,
-                  hintText: 'E-MAIL',
+                  hintText: AuthStrings.signUpEmailHint,
                   icon: Icons.email_outlined,
                   field: SingUpFieldType.email,
                   onTap: () => _viewModel.selectField(SingUpFieldType.email),
@@ -137,7 +143,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.02),
                 SingUpField(
                   controller: _viewModel.passwordText,
-                  hintText: 'SENHA',
+                  hintText: AuthStrings.signUpPasswordHint,
                   icon: Icons.lock_open_outlined,
                   field: SingUpFieldType.password,
                   isPassword: true,

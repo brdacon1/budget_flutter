@@ -53,6 +53,20 @@ lib/common/enums/
 └── <feature>_field_enum.dart                # ex.: enum SingUpFieldType { name, email, password, ... }
 ```
 
+Strings internacionalizadas (texto visível ao usuário) vão em:
+
+```
+lib/common/strings/
+└── <area>_strings.dart                       # ex.: auth_strings.dart (login + cadastro)
+```
+
+Nenhum texto visível ao usuário fica solto como literal na View/ViewModel —
+todos passam por uma classe de strings em `lib/common/strings/`. A classe
+resolve o idioma a partir da localidade do dispositivo
+(`WidgetsBinding.instance.platformDispatcher.locale`) e expõe getters
+`static` (ex.: `AuthStrings.loginButton`). Assim a tradução fica centralizada
+num arquivo só por área, usável tanto pela View quanto pelo ViewModel (que só
+precisa de `package:flutter/widgets.dart`).
 `<context>` pode ser `list`, `creator`, `tab`, `items`, `list_items`, etc.
 
 Regras de nomenclatura:
@@ -67,6 +81,8 @@ Regras de nomenclatura:
   `lib/common/models/<feature>_model.dart`.
   Isso evita colisão de nome entre o enum e o widget de campo (ex.: `SingUpFieldType`
   x `SingUpField`) e deixa claro, só pelo nome do arquivo, qual o seu papel.
+- **Arquivos de strings** (`lib/common/strings/`) levam o sufixo `_strings`
+  (`<area>_strings.dart`, ex.: `auth_strings.dart`).
 
 ---
 
@@ -159,6 +175,8 @@ Ao criar uma nova feature, validar item por item:
 - [ ] `build` da View sem lógica de estilo/negócio — só estrutura + composição.
 - [ ] Constantes visuais importadas de `common/constants/constants.dart`
       (`bgColor`, `buttonColor`, `whiteColor`, `secondaryColor`).
+- [ ] Nenhum texto visível ao usuário como literal na View/ViewModel — todos
+      via `common/strings/<area>_strings.dart` (ex.: `AuthStrings.loginButton`).
 - [ ] `RefreshIndicator.onRefresh` aponta para `_viewModel.refresh`.
 - [ ] `ListView.builder` com `itemCount`/`itemBuilder` lendo o VM.
 - [ ] `FloatingActionButton` delega ação ao VM.
@@ -176,6 +194,17 @@ Ao criar uma nova feature, validar item por item:
       não soltos na View/ViewModel.
 - [ ] Nome do enum não colide com o nome do widget de campo reutilizável
       (ex.: `SingUpFieldType` + widget `SingUpField`).
+
+### Strings / Internacionalização
+- [ ] Texto visível ao usuário não fica como literal — vai para
+      `lib/common/strings/<area>_strings.dart`.
+- [ ] A classe resolve o idioma pela localidade do dispositivo
+      (`WidgetsBinding.instance.platformDispatcher.locale`) e expõe getters
+      `static`.
+- [ ] Mensagens de erro/sucesso do ViewModel também usam as strings
+      (nenhum literal em `_mapFirebaseAuthError`/`errorMessage`).
+- [ ] Arquivo da classe segue `<area>_strings.dart`
+      (ex.: `lib/common/strings/auth_strings.dart`).
 - [ ] Arquivo do enum segue `<feature>_field_enum.dart`
       (ex.: `lib/common/enums/singup_field_enum.dart`).
 

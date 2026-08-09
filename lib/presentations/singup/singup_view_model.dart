@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/models/global_uid_user.dart' as globalUIDUser;
+import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/services/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../common/enums/singup_field_enum.dart';
@@ -93,7 +94,7 @@ class SingUpViewModel extends ChangeNotifier {
   Future<void> register() async {
     if (!isValid) {
       state = SingUpState.error;
-      errorMessage = 'Por favor preencha todos os campos!';
+      errorMessage = AuthStrings.signUpErrorFillAll;
       notifyListeners();
       return;
     }
@@ -160,7 +161,7 @@ class SingUpViewModel extends ChangeNotifier {
       errorMessage = _mapFirebaseAuthError(e);
     } catch (e) {
       state = SingUpState.error;
-      errorMessage = 'Problemas para registrar usuário!';
+      errorMessage = AuthStrings.signUpErrorDefault;
     } finally {
       notifyListeners();
     }
@@ -232,15 +233,15 @@ class SingUpViewModel extends ChangeNotifier {
   String _mapFirebaseAuthError(FirebaseAuthException error) {
     switch (error.code) {
       case 'email-already-in-use':
-        return 'E-mail já cadastrado.';
+        return AuthStrings.signUpErrorEmailInUse;
       case 'invalid-email':
-        return 'E-mail inválido.';
+        return AuthStrings.signUpErrorInvalidEmail;
       case 'weak-password':
-        return 'Senha muito fraca.';
+        return AuthStrings.signUpErrorWeakPassword;
       case 'operation-not-allowed':
-        return 'Cadastro desativado.';
+        return AuthStrings.signUpErrorDisabled;
       default:
-        return 'Problemas para registrar usuário!';
+        return AuthStrings.signUpErrorDefault;
     }
   }
 

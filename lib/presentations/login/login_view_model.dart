@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/models/global_uid_user.dart' as global_uid_user;
+import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/models/info_user.dart';
 import 'package:oflite/services/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,8 +112,7 @@ class LoginViewModel extends ChangeNotifier {
       errorMessage = _mapFirebaseAuthError(e);
     } catch (e) {
       state = LoginState.error;
-      errorMessage =
-          'Problemas para realizar seu login. Verifique sua senha e e-mail.';
+      errorMessage = AuthStrings.loginErrorDefault;
     } finally {
       notifyListeners();
     }
@@ -266,15 +266,15 @@ class LoginViewModel extends ChangeNotifier {
   String _mapFirebaseAuthError(FirebaseAuthException error) {
     switch (error.code) {
       case 'user-not-found':
-        return 'Usuário não encontrado.';
+        return AuthStrings.loginErrorUserNotFound;
       case 'wrong-password':
-        return 'Senha incorreta.';
+        return AuthStrings.loginErrorWrongPassword;
       case 'invalid-email':
-        return 'E-mail inválido.';
+        return AuthStrings.loginErrorInvalidEmail;
       case 'user-disabled':
-        return 'Usuário desativado.';
+        return AuthStrings.loginErrorUserDisabled;
       default:
-        return 'Problemas para realizar seu login. Verifique sua senha e e-mail.';
+        return AuthStrings.loginErrorDefault;
     }
   }
 

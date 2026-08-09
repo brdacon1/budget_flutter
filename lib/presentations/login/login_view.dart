@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
@@ -61,13 +62,15 @@ class _LoginViewState extends State<LoginView> {
       // Captura a mensagem e consome o estado ANTES de qualquer chamada
       // que possa disparar novas notificações, para que o modal de erro
       // seja exibido apenas uma vez (one-shot).
-      final message =
-          _viewModel.errorMessage ??
-          'Problemas para realizar seu login. Verifique sua senha e e-mail.';
+      final message = _viewModel.errorMessage ?? AuthStrings.loginErrorDefault;
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _displayAlert.notificationError(context, 'Erro!', message);
+          _displayAlert.notificationError(
+            context,
+            AuthStrings.errorTitle,
+            message,
+          );
         }
       });
     }
@@ -94,7 +97,7 @@ class _LoginViewState extends State<LoginView> {
                   LoginTextField(
                     field: LoginField.email,
                     controller: _viewModel.emailController,
-                    hintText: 'E-mail',
+                    hintText: AuthStrings.loginEmailHint,
                     prefixIcon: Icons.email_outlined,
                     viewModel: _viewModel,
                     width: we,
@@ -104,7 +107,7 @@ class _LoginViewState extends State<LoginView> {
                   LoginTextField(
                     field: LoginField.password,
                     controller: _viewModel.passwordController,
-                    hintText: 'Senha',
+                    hintText: AuthStrings.loginPasswordHint,
                     prefixIcon: Icons.lock_open_outlined,
                     viewModel: _viewModel,
                     width: we,
@@ -129,12 +132,12 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: he * 0.02),
                   LoginButton(
-                    label: 'Entrar',
+                    label: AuthStrings.loginButton,
                     onPressed: () => _viewModel.loginWithEmailAndPassword(context),
                   ),
                   SizedBox(height: he * 0.01),
                   LoginButton(
-                    label: 'Esqueceu sua senha?',
+                    label: AuthStrings.loginForgotPassword,
                     onPressed: () => _displayAlert.dialogChangePassword(context),
                     backgroundColor: bgColor,
                     textColor: buttonColor,
@@ -142,14 +145,14 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: he * 0.02),
                   LoginButton(
-                    label: 'Login com Google',
+                    label: AuthStrings.loginWithGoogle,
                     onPressed: () => _viewModel.loginWithGoogle(context),
                     backgroundColor: Colors.red,
                     textColor: Colors.white,
                   ),
                   SizedBox(height: he * 0.025),
                   LoginButton(
-                    label: 'Politica de privacidade',
+                    label: AuthStrings.loginPrivacyPolicy,
                     onPressed: () async {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
