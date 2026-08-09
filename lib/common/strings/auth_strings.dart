@@ -35,6 +35,9 @@ class AuthStrings {
   static String get loginPrivacyPolicy =>
       _isPt ? 'Política de privacidade' : 'Privacy policy';
 
+  // --- Login: botão de cadastro em destaque ---
+  static String get loginRegisterButton => _isPt ? 'Cadastrar' : 'Sign up';
+
   // --- Login: rodapé ---
   static String get loginRegisterPrompt =>
       _isPt ? 'Quer se cadastrar? ' : 'No account yet? ';

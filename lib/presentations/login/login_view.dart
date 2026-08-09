@@ -3,6 +3,7 @@ import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
+import 'package:oflite/presentations/singup/singup_view.dart';
 import '../terms_conditions/terms_conditions_view.dart';
 import 'components/login_button.dart';
 import 'components/login_footer.dart';
@@ -135,6 +136,18 @@ class _LoginViewState extends State<LoginView> {
                     label: AuthStrings.loginButton,
                     onPressed: () => _viewModel.loginWithEmailAndPassword(context),
                   ),
+                  SizedBox(height: he * 0.015),
+                  // Botão de cadastro em destaque: abre o modal de cadastro
+                  // (bottom modal) no padrão do app.
+                  LoginButton(
+                    label: AuthStrings.loginRegisterButton,
+                    onPressed: () {
+                      showSingUpBottomModal(context)
+                          .then((_) => _viewModel.init());
+                    },
+                    backgroundColor: Colors.white,
+                    textColor: bgColor,
+                  ),
                   SizedBox(height: he * 0.01),
                   LoginButton(
                     label: AuthStrings.loginForgotPassword,
@@ -150,26 +163,18 @@ class _LoginViewState extends State<LoginView> {
                     backgroundColor: Colors.red,
                     textColor: Colors.white,
                   ),
-                  SizedBox(height: he * 0.025),
-                  LoginButton(
-                    label: AuthStrings.loginPrivacyPolicy,
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const TermsConditionsView(),
-                        ),
-                      );
-                    },
-                    backgroundColor: bgColor,
-                    textColor: buttonColor,
-                    fontSize: 14.0,
-                  ),
                 ],
               ),
             ),
           ),
           bottomNavigationBar: LoginFooter(
-            onRegisterClosed: () => _viewModel.init(),
+            onPrivacyPolicy: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const TermsConditionsView(),
+                ),
+              );
+            },
           ),
         );
       },
