@@ -22,6 +22,12 @@ A arquitetura adotada é uma variação enxuta de MVVM baseada **somente em recu
 Não há injeção de dependência externa nem pacotes de estado (Provider/Riverpod/Bloc/GetX).
 O estado é **local à tela** e descartado no `dispose()`.
 
+> **Enums compartilhados** (ex.: `Gender`/`*FieldType`) que selecionam campo focado
+> **não** ficam soltos dentro de cada View/ViewModel. São movidos para
+> `lib/common/enums/` (`snake_case`), importados por quem precisar — View,
+> ViewModel e components. Isso evita duplicação e colisão de nome entre o enum
+> e o widget de campo reutilizável (ex.: `SingUpFieldType` x `SingUpField`).
+
 ---
 
 ## 2. Estrutura de Pastas (obrigatória)
@@ -40,12 +46,27 @@ lib/presentations/<feature>/<feature>_<context>/
     └── <feature>_<section>_card.dart          # card/seção repetida (ex.: endereço)
 ```
 
+Enums de seleção de campo (quando existirem) vão em:
+
+```
+lib/common/enums/
+└── <feature>_field_enum.dart                # ex.: enum SingUpFieldType { name, email, password, ... }
+```
+
 `<context>` pode ser `list`, `creator`, `tab`, `items`, `list_items`, etc.
 
 Regras de nomenclatura:
 - Pasta e arquivos em **snake_case**.
 - Sufixo `_view` para a tela, `_view_model` para o VM.
 - Componentes com prefixo do feature.
+- **Arquivos de `lib/common/`** devem levar como **sufixo o papel da pasta**
+  (forma singular): `enums` → `_enum`, `models` → `_model`, `widgets` → `_widget`,
+  `controllers` → `_controller`, `utils` → `_util`, `constants` → `_constant`.
+  O nome do arquivo é `<feature>_<contexto>_<papel>.dart`.
+  Ex.: `lib/common/enums/singup_field_enum.dart`,
+  `lib/common/models/<feature>_model.dart`.
+  Isso evita colisão de nome entre o enum e o widget de campo (ex.: `SingUpFieldType`
+  x `SingUpField`) e deixa claro, só pelo nome do arquivo, qual o seu papel.
 
 ---
 
@@ -149,6 +170,14 @@ Ao criar uma nova feature, validar item por item:
       `EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{id}/...`.
 - [ ] Variáveis globais (`uid.user`, `budget.IDORCAMENTO`, `budget.IDRECIBO`)
       atualizadas conforme o fluxo existente.
+
+### Enums compartilhados
+- [ ] Enums de seleção de campo (`Gender`/`*FieldType`) em `lib/common/enums/`,
+      não soltos na View/ViewModel.
+- [ ] Nome do enum não colide com o nome do widget de campo reutilizável
+      (ex.: `SingUpFieldType` + widget `SingUpField`).
+- [ ] Arquivo do enum segue `<feature>_field_enum.dart`
+      (ex.: `lib/common/enums/singup_field_enum.dart`).
 
 ---
 
@@ -310,5 +339,7 @@ class FeatureViewModel extends ChangeNotifier {
 
 > **Regra de ouro:** em dúvida, replique o formato de `lib/presentations/payment/payment_list/`
 > (referência de **listagem**) ou `lib/presentations/pdf/pdf_edit/` (referência de
-> **formulário** com components desacoplados). Esses diretórios são o **contrato de
-> referência** do padrão.
+> **formulário** com components desacoplados). Para **tela de cadastro/autenticação**
+> use `lib/presentations/singup/` (referência de **signup** com enum em `common/enums`,
+> campo reutilizável, header, botão e link de login desacoplados). Esses diretórios
+> são o **contrato de referência** do padrão.
