@@ -74,4 +74,46 @@ class ProductStrings {
       : 'Could not update the item in the budget list.';
   static String get defaultError =>
       _isPt ? 'Ocorreu um erro. Tente novamente.' : 'An error occurred. Try again.';
+
+  // --- Lista de preço ---
+  static String get listTitle => _isPt ? 'Lista de preço' : 'Price list';
+  static String get searchHint => _isPt
+      ? 'Digite a descrição do item...'
+      : 'Type the item description...';
+
+  // --- Carrinho (adicionar ao orçamento) ---
+  static String get cartTitle =>
+      _isPt ? 'Carrinho de produtos' : 'Product cart';
+  static String get cartButton => _isPt ? 'ADICIONAR' : 'ADD';
+  static String get cartAddSuccess => _isPt
+      ? 'Itens adicionados na lista do orçamento com sucesso!'
+      : 'Items added to the budget list successfully!';
+  static String get cartAddError => _isPt
+      ? 'Ocorreu um erro para adicionar os itens na lista do orçamento'
+      : 'An error occurred while adding the items to the budget list';
+  static String get cartWarningTitle => _isPt ? 'Ops!' : 'Oops!';
+  static String get cartWarning => _isPt
+      ? 'Você tem itens no carrinho. Por favor, escolha entre esvaziar o carrinho ou adicionar esses itens ao orçamento.'
+      : 'You have items in the cart. Please choose between emptying the cart or adding these items to the budget.';
+
+  // --- Remoção de itens ---
+  static String get deleteListTitle =>
+      _isPt ? 'Remover produtos' : 'Remove products';
+  static String get deleteButton => _isPt ? 'EXCLUIR ITENS' : 'DELETE ITEMS';
+  static String get deleteSuccess =>
+      _isPt ? 'Itens removidos com sucesso!' : 'Items removed successfully!';
+  static String get deleteError => _isPt
+      ? 'Ocorreu um erro ao remover os itens.'
+      : 'An error occurred while removing the items.';
+
+  // --- Quantidade (modal de input) ---
+  static String get qtyTitle =>
+      _isPt ? 'Defina quantidade' : 'Set quantity';
+  static String get qtyInputHint =>
+      _isPt ? 'Digite a quantidade' : 'Type the quantity';
+
+  // --- Plano premium ---
+  static String get premiumError => _isPt
+      ? 'Você não possuí o plano premium onde é possível cadastrar produtos ilimitados'
+      : "You don't have the premium plan which allows registering unlimited products";
 }

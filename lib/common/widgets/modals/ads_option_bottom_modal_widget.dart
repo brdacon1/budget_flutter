@@ -24,20 +24,26 @@ class AdsOptionBottomModalWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: _values.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            leading: Icon(
-              index == 0 ? Icons.play_circle_outline : Icons.star_outline,
-              color: AppBottomModal.grayColor,
-            ),
-            title: Text(
-              _values[index],
-              style: GoogleFonts.heebo(
+          // Envolve o ListTile num Material próprio para o ink splash ficar
+          // visível — o Container branco do AppBottomModal (DecoratedBox)
+          // pintaria por cima do splash do Material ancestral sem isto.
+          return Material(
+            color: Colors.transparent,
+            child: ListTile(
+              leading: Icon(
+                index == 0 ? Icons.play_circle_outline : Icons.star_outline,
                 color: AppBottomModal.grayColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
               ),
+              title: Text(
+                _values[index],
+                style: GoogleFonts.heebo(
+                  color: AppBottomModal.grayColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () => Navigator.of(context).pop(_values[index]),
             ),
-            onTap: () => Navigator.of(context).pop(_values[index]),
           );
         },
       ),

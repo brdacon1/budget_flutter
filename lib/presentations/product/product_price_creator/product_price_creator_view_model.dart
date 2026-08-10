@@ -55,6 +55,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   late bool fieldVisible;
   late String nameButton;
   late String titlePage;
+  bool isSaving = false;
 
   ProductPriceCreatorViewModel({required this.item}) {
     _initFromItem();
@@ -113,6 +114,10 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   /// Persiste o item (criação ou atualização). Recebe `BuildContext` apenas
   /// para UI (loading/alertas/navegação) — não o guarda como campo.
   Future<void> save(BuildContext context) async {
+    if (isSaving) return;
+    isSaving = true;
+    notifyListeners();
+
     final cleanAmount = moneyConvert.convertFromString(priceController.text);
     final qtd = moneyConvert.convertQtdFromString(qtdText.text);
     final totalPrice = cleanAmount * qtd;
@@ -133,6 +138,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
     if (!context.mounted) return;
     loadingEvent.closeLoading(context);
+
+    isSaving = false;
+    notifyListeners();
 
     if (error != null) {
       if (!context.mounted) return;

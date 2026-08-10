@@ -12,11 +12,23 @@ class PdfBudgetViewModel extends ChangeNotifier {
   String? fileBytes;
   bool _loading = true;
   bool get loading => _loading;
+  /// `true` após [dispose] — evita chamar `notifyListeners()` (e usar o VM)
+  /// depois que a View foi descartada, o que lançaria
+  /// `A PdfBudgetViewModel was used after being disposed`.
+  bool _disposed = false;
   PdfBudgetViewModel();
+
+  /// Notifica apenas se o VM ainda estiver vivo. Silenciosamente ignora
+  /// notificações que chegam após [dispose] (ex.: retornos de `await` de uma
+  /// `initialData` que ainda estava rodando quando a tela foi fechada).
+  void _safeNotify() {
+    if (_disposed) return;
+    notifyListeners();
+  }
 
   Future<void> initialData(BuildContext context) async {
     _loading = true;
-    notifyListeners();
+    _safeNotify();
     try {
       final budget = await db.getListItensGerador();
       final customer = await db.getInformationOrcamento1();
@@ -73,9 +85,15 @@ class PdfBudgetViewModel extends ChangeNotifier {
       }
     } finally {
       _loading = false;
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   Future<void> refresh(BuildContext context) => initialData(context);
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 }

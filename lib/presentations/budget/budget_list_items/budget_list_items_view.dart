@@ -215,12 +215,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                     final value = await displayAlert.listNotification(context);
                     if (value == "Criar novo item") {
                       budget.fromListItem = true;
-                      await Navigator.push(
+                      await showProductPriceCreatorBottomModal(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => ProductPriceCreatorView(
-                                item: ProductPriceModel.fromItemsBudget(
-                                    _viewModel.novo))),
+                        item: ProductPriceModel.fromItemsBudget(
+                            _viewModel.novo),
                       );
                     } else if (value == "Selecionar da lista de preço") {
                       budget.fromListItem = false;
@@ -235,12 +233,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                     await _viewModel.getListItens();
                   } else {
                     budget.fromListItem = true;
-                    await Navigator.push(
+                    await showProductPriceCreatorBottomModal(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => ProductPriceCreatorView(
-                              item: ProductPriceModel.fromItemsBudget(
-                                  _viewModel.novo))),
+                      item: ProductPriceModel.fromItemsBudget(
+                          _viewModel.novo),
                     );
                     budget.fromListItem = false;
                     await _viewModel.getListItens();

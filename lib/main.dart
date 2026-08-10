@@ -1,12 +1,12 @@
 import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/common/constants/environment.dart';
 import 'package:oflite/common/controllers/menu_controller_app.dart';
+import 'package:oflite/services/notification_service.dart';
 import 'package:oflite/presentations/pdf/pdf_edit/pdf_edit_view.dart';
 import 'package:oflite/presentations/main_tab/main_tab_view.dart';
 import 'package:oflite/presentations/subscription/subscription_view.dart';
@@ -36,13 +36,9 @@ Future<void> main() async {
       RequestConfiguration(testDeviceIds: _kTestDeviceIds),
     );
   }
-  // Configuração de notificações em background (não bloqueia o runApp).
-  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-  configureForegroundNotificationPresentationOptions();
+  // Inicializa notificações push (FCM + canal Android + listener de
+  // foreground). Não bloqueia o runApp — falhas aqui não impedem o app.
+  await NotificationService.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -58,14 +54,10 @@ const _kTestDeviceIds = <String>[
   // 'SEU_DEVICE_ID_AQUI',
 ];
 
-Future<void> configureForegroundNotificationPresentationOptions() async {
-  await FirebaseMessaging.instance.requestPermission();
-  FirebaseMessaging firebaseMessage = FirebaseMessaging.instance;
-  String? deviceToken = await firebaseMessage.getToken();
-}
+
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

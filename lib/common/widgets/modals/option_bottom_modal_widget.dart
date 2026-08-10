@@ -29,20 +29,26 @@ class OptionBottomModalWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: values.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            leading: Icon(
-              Icons.chevron_right,
-              color: AppBottomModal.grayColor,
-            ),
-            title: Text(
-              values[index],
-              style: GoogleFonts.heebo(
+          // Envolve o ListTile num Material próprio para o ink splash ficar
+          // visível — o Container branco do AppBottomModal (DecoratedBox)
+          // pintaria por cima do splash do Material ancestral sem isto.
+          return Material(
+            color: Colors.transparent,
+            child: ListTile(
+              leading: Icon(
+                Icons.chevron_right,
                 color: AppBottomModal.grayColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
               ),
+              title: Text(
+                values[index],
+                style: GoogleFonts.heebo(
+                  color: AppBottomModal.grayColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () => Navigator.of(context).pop(values[index]),
             ),
-            onTap: () => Navigator.of(context).pop(values[index]),
           );
         },
       ),

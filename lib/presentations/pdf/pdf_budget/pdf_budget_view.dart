@@ -21,8 +21,14 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   void initState() {
     super.initState();
     _viewModel = PdfBudgetViewModel();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _viewModel.initialData(context));
+    // Dispara o carregamento no próximo frame. Poderia rodar depois de
+    // `dispose` se a tela fosse fechada muito rápido — o VM agora ignora
+    // notificações pós-dispose, mas mesmo assim só disparamos se a View
+    // ainda estiver montada.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _viewModel.initialData(context);
+    });
   }
 
   @override
