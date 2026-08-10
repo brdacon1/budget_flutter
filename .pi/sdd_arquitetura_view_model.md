@@ -501,27 +501,84 @@ acontece ao chamar um service compartilhado (`db.salvaItensList(...)`) ou ao
 receber um item de outra tela. Quando os models legados forem migrados de
 fato, basta **remover os adapters**.
 
-### 10.4 Referência canônica da migração
+### 10.4 Regra obrigatória: ao tocar numa feature, migrar o model
 
-> **Referência:** `lib/presentations/product/` é o **contrato de referência**
-> da migração de models. O `product_price_creator` foi migrado para
-> `ProductPriceModel` (`lib/presentations/product/model/product_price_model.dart`)
-> com `fromJson`/`toJson`/`copyWith` + adapters, e passou a ter
-> `ProductPriceCreatorViewModel` (`extends ChangeNotifier`) + components
-> (`ProductPriceCreatorHeader`, `ProductPriceField`) seguindo este SDD. Ao
-> migrar as demais telas, replique esse formato.
+Os models antigos do projeto são **feios** e **fora do padrão Flutter**:
+`fromMap(dynamic)` (em vez de `fromJson(Map<String, dynamic>)`), `toMap()`
+sem `copyWith`, campos públicos **mutáveis** (sem `final`) e nomes em
+`UPPER_CASE` direto no Dart (misturando a chave do Firebase com o nome do
+atributo). Isso gera mutação imprevisível de estado espalhada pela View/VM e
+impede o uso de `const`/`copyWith`.
 
-### 10.5 Checklist de migração de Model
+**Regra:** **toda vez que uma feature for refatorada para View+ViewModel
+(este SDD), o model que ela usa deve ser migrado junto** para o padrão
+ canônico da seção 10.1. Não existe “migrar a tela e deixar o model feio”.
+ A migração do model é parte da migração da feature.
+
+Boas práticas durante a migração:
+- **Chaves do Firebase preservadas** (maiúsculas, `ID`/`DATA`/`DESCRICAO`/
+  `VALORTOTAL`/...) para não quebrar documentos já gravados — só a
+  nomenclatura Dart muda para `camelCase` (`id`/`data`/`descricao`/...
+  ).
+- **Sem mutação direta de campos** — substituir `item.CAMPO = x` por
+  `item = item.copyWith(campo: x)` e, quando o objeto precisa ser
+  propagado para uma tela pai/abas irmãs, fazê-lo via callback
+  (`ValueChanged<Model>`), não via mutação de um objeto compartilhado.
+- **Estado só de UI** (checkbox/índice que não vai pro Firebase) pode ficar
+  no model como campo `final`, mas **não entra no `toJson()`** — assim o que
+  é gravado no Firebase não muda.
+- **Atualizar todos os call sites** (services, usecases, outras features)
+  que acessavam `campo.UPPER_CASE` para `campo.camelCase` e que mutavam o
+  objeto para usar `copyWith`.
+
+### 10.5 Referências canônicas da migração
+
+> **Referência (model feature-scoped + adapters):** `lib/presentations/product/`
+> é o **contrato de referência** da migração de models. O `product_price_creator`
+> foi migrado para `ProductPriceModel`
+> (`lib/presentations/product/model/product_price_model.dart`) com
+> `fromJson`/`toJson`/`copyWith` + adapters (`fromItemsBudget`/
+> `toItemsListBudget`), e passou a ter `ProductPriceCreatorViewModel`
+> (`extends ChangeNotifier`) + components seguindo este SDD.
+>
+> **Referência (model global compartilhado, migrado no lugar):** `lib/models/receipt.dart`
+> é o **contrato de referência** da migração de um model **compartilhado entre
+> várias features** (recibo, pagamento, PDF). O legado `Receipt` (`fromMap`/
+> `toMap` + campos mutáveis em `UPPER_CASE`, sem `copyWith`) foi migrado
+> **no próprio arquivo** para o padrão canônico (`final` + `const` +
+> `fromJson`/`toJson`/`copyWith`, Dart `camelCase`, chaves Firebase maiúsculas
+> preservadas), e **todos os call sites** foram atualizados:
+> - `lib/services/http_request.dart` (`getListRecived`/`savedRecived`/
+>   `deleteRecived`/`getListPayment` — este último converteu a mutação
+>   `recived.VALORTOTAL = total` em `recived.copyWith(valorTotal: total)`);
+> - `lib/usecases/pdf_generate_receipt_usecase.dart`;
+> - `lib/presentations/payment/payment_list/payment_list_view_model.dart`;
+> - `lib/presentations/receipt/*` (View + ViewModel + components).
+> A propagação do recibo recém-criado entre as abas irmãs (Recibo/Pagamentos/
+> PDF) antes feita por **mutação do objeto compartilhado** passou a ser via
+> **callback** `onReceiptCreated`/`updateReceipt` no `ReceiptTabViewModel`
+> (imutabilidade preservada, mesmo comportamento). Ao migrar os demais models
+> compartilhados, replique esse formato.
+
+### 10.6 Checklist de migração de Model
 
 - [ ] Campos `final`, construtor `const`.
 - [ ] `factory fromJson(Map<String, dynamic>)`.
 - [ ] `toJson()` retorna `Map<String, dynamic>`.
 - [ ] `copyWith({...})` implementado.
 - [ ] Sem mutação direta de campos na View/ViewModel — usar `copyWith`.
+- [ ] Propagação de um model atualizado para tela pai/abas irmãs feita via
+      callback (`ValueChanged<Model>`), **não** via mutação de objeto
+      compartilhado (modelo imutável).
+- [ ] Estado só de UI (checkbox/índice) pode ser campo `final` do model, mas
+      **não entra no `toJson()`** (não muda o que é gravado no Firebase).
 - [ ] Chaves do Firebase preservadas (para não quebrar dados existentes).
 - [ ] Model feature-scoped em `lib/presentations/<feature>/model/`; global em
       `lib/models/`.
 - [ ] Adapters de fronteira com models legados, removíveis quando o legado for
       migrado.
-- [ ] Ajustar todos os call sites que instanciam o model antigo para usar o
-      novo (ou o adapter de entrada).
+- [ ] Ajustar **todos os call sites** (services, usecases, outras features)
+      que acessavam `campo.UPPER_CASE` para `campo.camelCase` e que mutavam o
+      objeto para usar `copyWith`.
+- [ ] Ao tocar numa feature, migrar o model junto (regra da seção 10.4) —
+      não deixar model “feio” para trás.

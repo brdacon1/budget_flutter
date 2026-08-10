@@ -56,7 +56,7 @@ class PaymentListViewModel extends ChangeNotifier {
   }
 
   Future<void> editPayment(BuildContext context, int index) async {
-    Orcamento.IDRECIBO = receipt.ID;
+    Orcamento.IDRECIBO = receipt.id;
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -71,7 +71,7 @@ class PaymentListViewModel extends ChangeNotifier {
       ..id = ''
       ..DESCRICAO = 'null'
       ..PRECO = 0;
-    Orcamento.IDRECIBO = receipt.ID;
+    Orcamento.IDRECIBO = receipt.id;
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PaymentCreatorView(item: novo)),

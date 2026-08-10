@@ -319,9 +319,9 @@ class PdfGenerateReceiptUseCase {
         row.cells[1].value = value;
       }
 
-      addRow('Número do recibo:', recived.ID);
-      addRow('Data do recibo :', recived.DATA);
-      addRow('Nome do recibo :', recived.DESCRICAO);
+      addRow('Número do recibo:', recived.id);
+      addRow('Data do recibo :', recived.data);
+      addRow('Nome do recibo :', recived.descricao);
 
       final PdfGridCellStyle style = PdfGridCellStyle()
         ..borders.all = PdfPens.transparent;

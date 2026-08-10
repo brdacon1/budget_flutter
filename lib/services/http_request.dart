@@ -267,7 +267,7 @@ class HttpRequest{
   Future<List<PaymentCustomer>> getListPayment(Receipt recived, CustomerInfo dados) async {
     double totalProducts = 0;
     var group = await FirebaseFirestore.instance
-        .collection("EMPRESAS/${uid.user}/USERS/${uid.user}/ORCAMENTOS/${budget.IDORCAMENTO}/RECIBOS/${recived.ID}/PAGAMENTOS")
+        .collection("EMPRESAS/${uid.user}/USERS/${uid.user}/ORCAMENTOS/${budget.IDORCAMENTO}/RECIBOS/${recived.id}/PAGAMENTOS")
         .get();
 
     var yourModels = group.docs.map<PaymentCustomer>((doc) {
@@ -279,10 +279,9 @@ class HttpRequest{
     for (int index = 0; index < yourModels.length; index++) {
       totalProducts += yourModels[index].PRECO!;
     }
-    if(recived.VALORTOTAL != totalProducts)
+    if(recived.valorTotal != totalProducts)
     {
-      recived.VALORTOTAL = totalProducts;
-      await savedRecived(recived);
+      await savedRecived(recived.copyWith(valorTotal: totalProducts));
     }
 
     return yourModels;
@@ -363,10 +362,8 @@ class HttpRequest{
         .get();
 
    var yourModels = group.docs.map<Receipt>((doc) {
-      final objectListItens = Receipt.fromMap(doc.data());
-      objectListItens.ID = doc.id;
-      objectListItens.checkBox = false;
-      return objectListItens;
+      return Receipt.fromJson(doc.data())
+          .copyWith(id: doc.id, checkBox: false);
     }).toList();
 
     return yourModels;
@@ -375,14 +372,14 @@ class HttpRequest{
   Future<void> savedRecived(Receipt recived) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${uid.user}/USERS/${uid.user}/ORCAMENTOS/${budget.IDORCAMENTO}/RECIBOS")
-        .doc(recived.ID)
-        .set(recived.toMap());
+        .doc(recived.id)
+        .set(recived.toJson());
   }
 
   Future<void> deleteRecived(Receipt recived) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${uid.user}/USERS/${uid.user}/ORCAMENTOS/${budget.IDORCAMENTO}/RECIBOS")
-        .doc(recived.ID)
+        .doc(recived.id)
         .delete();
   }
 
