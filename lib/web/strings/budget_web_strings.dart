@@ -102,9 +102,6 @@ class BudgetWebStrings {
       ? 'Orçamento reprovado'
       : 'Budget rejected';
   static String get approvalTitle => 'Aprovação do orçamento';
-  static String get approvalMessage => _locale.languageCode == 'pt'
-      ? 'Selecione o status do orçamento'
-      : 'Select the budget status';
   static String get statusApproved => 'Aprovado';
   static String get statusRejected => 'Reprovado';
   static String get approvalSuccess => _locale.languageCode == 'pt'

@@ -251,9 +251,10 @@ class NotificationService {
 
   /// Chamado depois que o dono faz login (quando `global_uid_user.user` fica
   /// disponível). Persiste o token FCM atual em
-  /// `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN` (lido pela Cloud Function) e
-  /// observa renovações do token para manter o path sempre atualizado.
-  /// Idempotente: chamar de novo só re-vincula.
+  /// `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}` (um documento por
+  /// dispositivo — lido pela Cloud Function para fan-out a todos os devices)
+  /// e observa renovações do token para manter o path sempre atualizado.
+  /// Idempotente: chamar de novo só re-vincula (mesmo token = mesmo id de doc).
   void startBudgetApprovalListener(String ownerUid) {
     // Não roda no Web público (lá só há o fluxo do cliente, não o do dono).
     if (kIsWeb) return;
@@ -273,14 +274,55 @@ class NotificationService {
     _tokenRefreshSub = null;
   }
 
+  /// Lê a lista de tokens FCM cadastrados para o dono (um por dispositivo)
+  /// em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS`. Usado em `_getUserInfo` para
+  /// expor a lista em `InfoUser.TOKENS` / `global_uid_user.tokens` — os
+  /// "dados do usuário" passam a conter cada token push cadastrado.
+  Future<List<String>> loadFcmTokens(String ownerUid) async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKENS')
+          .get();
+      return snap.docs.map((d) => d.id).toList(growable: false);
+    } catch (e) {
+      if (kDebugMode) debugPrint('load FCM tokens failed: $e');
+      return const <String>[];
+    }
+  }
+
+  /// Persiste o token FCM atual do dono em duas estruturas (idempotente):
+  /// - `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}`: um doc por
+  ///   dispositivo. A Cloud Function lê essa subcoleção e envia o push a
+  ///   **todos** os devices do dono (multi-device). Mesmo token = mesmo id
+  ///   de documento, então reescrever nunca duplica.
+  /// - `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN`: doc legado do token mais
+  ///   recente, mantido por compatibilidade com versões antigas da Cloud
+  ///   Function ainda não redeployadas.
   Future<void> _persistFcmToken(String ownerUid) async {
     try {
       final String? token = await FirebaseMessaging.instance.getToken();
       if (token == null || token.isEmpty) return;
-      await FirebaseFirestore.instance
-          .doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKEN')
-          .set({'TOKEN': token, 'ATUALIZADO_EM': FieldValue.serverTimestamp()},
-              SetOptions(merge: true));
+      final db = FirebaseFirestore.instance;
+      final batch = db.batch();
+      // Lista de tokens (multi-device) — fonte de verdade da Cloud Function.
+      batch.set(
+        db.doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKENS/$token'),
+        {
+          'TOKEN': token,
+          'ATUALIZADO_EM': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+      // Compat: token mais recente num doc único.
+      batch.set(
+        db.doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKEN'),
+        {
+          'TOKEN': token,
+          'ATUALIZADO_EM': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+      await batch.commit();
     } catch (e) {
       if (kDebugMode) debugPrint('persist FCM token failed: $e');
     }

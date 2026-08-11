@@ -205,6 +205,12 @@ class SingUpViewModel extends ChangeNotifier {
     // aprovação/reprovação vindas do fluxo Web (push ao dono). Aditivo.
     final ownerUid = globalUIDUser.user;
     if (ownerUid != null && ownerUid.isNotEmpty) {
+      // Lista de tokens FCM push do dono (um por dispositivo). Expõe nos
+      // "dados do usuário" (`InfoUser.TOKENS` / `global_uid_user.tokens`).
+      final tokens =
+          await NotificationService.instance.loadFcmTokens(ownerUid);
+      DADOS.TOKENS = tokens;
+      globalUIDUser.tokens = tokens;
       NotificationService.instance.startBudgetApprovalListener(ownerUid);
     }
 

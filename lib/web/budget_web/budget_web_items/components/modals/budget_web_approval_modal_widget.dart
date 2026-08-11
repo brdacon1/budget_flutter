@@ -31,16 +31,6 @@ class BudgetWebApprovalModalWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12, top: 4),
-              child: Text(
-                BudgetWebStrings.approvalMessage,
-                style: GoogleFonts.heebo(
-                  color: AppBottomModal.grayColor,
-                  fontSize: 15,
-                ),
-              ),
-            ),
             _OptionTile(
               icon: Icons.check_circle_outline,
               label: BudgetWebStrings.statusApproved,

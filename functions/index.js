@@ -8,12 +8,17 @@
  * Solução: sempre que o fluxo Web grava um documento em
  *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/NOTIFICACOES/{notifId}
  * (documento com TITULO, MENSAGEM, ORCAMENTO_ID, STATUS), esta função
- * dispara, lê o token FCM do dono em
- *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/TOKEN
- * e envia uma mensagem FCM com `notification` + `data`. Assim o Android
- * exibe a notificação na bandeja do sistema MESMO com o app fechado, e ao
- * tocar o dono é levado ao orçamento (deep-link via `data.ORCAMENTO_ID`,
+ * dispara, lê a LISTA de tokens FCM do dono em
+ *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/TOKENS/{token}
+ * (um documento por dispositivo, gravado pelo app a cada login/início) e
+ * envia uma mensagem FCM v1 (`notification` + `data`) para TODOS os tokens —
+ * assim o Android exibe a notificação na bandeja do sistema MESMO com o app
+ * fechado, em TODOS os dispositivos onde o dono fez login (multi-device), e
+ * ao tocar o dono é levado ao orçamento (deep-link via `data.ORCAMENTO_ID`,
  * tratado no app por getInitialMessage / onMessageOpenedApp).
+ *
+ * Tokens inválidos/expirados (FCM v1 retorna `UNREGISTERED` etc.) são
+ * removidos da lista automaticamente, mantendo-a limpa.
  *
  * IMPORTANTE:
  *  - Cloud Functions gen2 exige o plano Blaze (pay-as-you-go) do Firebase.
@@ -35,6 +40,19 @@ const admin = require("firebase-admin");
 const REGION = "southamerica-east1";
 
 admin.initializeApp();
+
+/**
+ * Códigos de erro do FCM v1 que indicam token inválido/expirado e que o
+ * token deve ser removido da lista (a pessoa desinstalou o app, limpou
+ * dados, ou o token expirou). Referência:
+ *   https://firebase.google.com/docs/cloud-messaging/manage-tokens#detect-invalid-client-tokens
+ */
+const INVALID_TOKEN_CODES = [
+  "UNREGISTERED",
+  "registration-token-not-registered",
+  "INVALID_ARGUMENT",
+  "invalid-argument",
+];
 
 exports.onBudgetApprovalNotification = onDocumentCreated(
   {
@@ -61,30 +79,49 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
       return;
     }
 
-    // Lê o token FCM mais recente do dono (gravado pelo app em FCM/TOKEN).
-    const tokenRef = admin
+    // Lê a LISTA de tokens FCM do dono (um por dispositivo) em
+    // EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/TOKENS. O app grava um doc
+    // por token (id do doc = token) a cada login/início — assim o push
+    // chega a TODOS os devices conectados, não importa quantos sejam.
+    const tokensCol = admin
       .firestore()
-      .doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKEN`);
+      .collection(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKENS`);
 
-    let token = "";
+    let tokens = [];
     try {
-      const tokenDoc = await tokenRef.get();
-      if (tokenDoc.exists) {
-        token = String(tokenDoc.get("TOKEN") || "");
-      }
+      const colSnap = await tokensCol.get();
+      tokens = colSnap.docs
+        .map((d) => String(d.id))
+        .filter((t) => t && t.length > 0);
     } catch (e) {
-      logger.error("erro ao ler token FCM", e);
+      logger.error("erro ao ler lista de tokens FCM", e);
     }
 
-    if (!token) {
+    // Fallback: doc legado de token único (versões antigas do app que ainda
+    // não migraram para a lista). Mantém compatibilidade durante a transição.
+    if (tokens.length === 0) {
+      try {
+        const tokenDoc = await admin
+          .firestore()
+          .doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKEN`)
+          .get();
+        if (tokenDoc.exists) {
+          const t = String(tokenDoc.get("TOKEN") || "");
+          if (t) tokens.push(t);
+        }
+      } catch (e) {
+        logger.error("erro ao ler token FCM (legacy)", e);
+      }
+    }
+
+    if (tokens.length === 0) {
       logger.info("dono sem token FCM cadastrado", { ownerUid });
       return;
     }
 
-    // Monta a mensagem FCM. `notification` faz o Android exibir na bandeja
+    // Monta a mensagem FCM v1. `notification` faz o Android exibir na bandeja
     // mesmo com o app fechado; `data` carrega o ORCAMENTO_ID para deep-link.
-    const message = {
-      token,
+    const baseMessage = {
       notification: { title, body },
       data: {
         ORCAMENTO_ID: orcamentoId,
@@ -102,15 +139,68 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
       },
     };
 
+    // Envio em lote para TODOS os tokens (FCM v1 multicast). O
+    // `sendEachForMulticast` usa a FCM v1 HTTP API por baixo dos panos
+    // (https://fcm.googleapis.com/v1/...) via Admin SDK, e retorna uma
+    // resposta por token — permitindo remover tokens inválidos da lista.
+    let successCount = 0;
+    const invalidTokens = [];
     try {
-      const resp = await admin.messaging().send(message);
-      logger.info("FCM enviado", {
-        ownerUid,
-        orcamentoId,
-        messageId: resp,
+      const resp = await admin.messaging().sendEachForMulticast({
+        ...baseMessage,
+        tokens,
       });
+      successCount = resp.successCount;
+      for (let i = 0; i < resp.responses.length; i++) {
+        const r = resp.responses[i];
+        if (r.success) continue;
+        const code = String(
+          (r.error && (r.error.code || (r.error.errorInfo && r.error.errorInfo.code))) || ""
+        );
+        const shouldRemove = INVALID_TOKEN_CODES.some((c) =>
+          code.toUpperCase().includes(c.toUpperCase())
+        );
+        if (shouldRemove) {
+          invalidTokens.push(tokens[i]);
+        } else {
+          logger.error("falha ao enviar FCM (transitória?)", {
+            token: tokens[i],
+            code,
+            message: r.error && r.error.message,
+          });
+        }
+      }
     } catch (e) {
-      logger.error("falha ao enviar FCM", e);
+      logger.error("falha ao enviar FCM multicast", e);
     }
+
+    // Remove tokens inválidos da lista para mantê-la limpa (best-effort).
+    if (invalidTokens.length > 0) {
+      const db = admin.firestore();
+      const batch = db.batch();
+      for (const t of invalidTokens) {
+        batch.delete(
+          db.doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKENS/${t}`)
+        );
+      }
+      try {
+        await batch.commit();
+        logger.info("tokens inválidos removidos da lista", {
+          ownerUid,
+          removidos: invalidTokens.length,
+        });
+      } catch (e) {
+        logger.error("erro ao remover tokens inválidos", e);
+      }
+    }
+
+    logger.info("FCM fan-out concluído", {
+      ownerUid,
+      orcamentoId,
+      status,
+      total: tokens.length,
+      enviados: successCount,
+      invalidos: invalidTokens.length,
+    });
   }
 );

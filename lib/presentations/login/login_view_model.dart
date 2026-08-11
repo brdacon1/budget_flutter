@@ -240,6 +240,16 @@ class LoginViewModel extends ChangeNotifier {
     // o fluxo de login existente.
     final ownerUid = global_uid_user.user;
     if (ownerUid != null && ownerUid.isNotEmpty) {
+      // Lista de tokens FCM push do dono (um por dispositivo). Expõe nos
+      // "dados do usuário" (`InfoUser.TOKENS` / `global_uid_user.tokens`).
+      // A persistência do token atual (idempotente) acontece dentro de
+      // `startBudgetApprovalListener` -> `_persistFcmToken`, que grava em
+      // `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}`. Assim, sempre que
+      // o app inicia/faz login, o token atual vai para a lista — não
+      // importa em quantos devices a pessoa esteja conectada.
+      final tokens = await NotificationService.instance.loadFcmTokens(ownerUid);
+      users.TOKENS = tokens;
+      global_uid_user.tokens = tokens;
       NotificationService.instance.startBudgetApprovalListener(ownerUid);
     }
     // Após o login (manual ou auto-login), o dono está autenticado e o
