@@ -53,10 +53,8 @@ class BudgetWebStrings {
       ? 'Aguarde...'
       : 'Please wait...';
 
-  // Tabs (espelham o app mobile: Cliente, Itens, PDF)
+  // Tab "Meus dados" (espelha o app mobile: Cliente).
   static String get tabData => _locale.languageCode == 'pt' ? 'Meus dados' : 'My data';
-  static String get tabItems => _locale.languageCode == 'pt' ? 'Itens' : 'Items';
-  static String get tabPdf => 'PDF';
 
   // "Meus dados" — read-only. Labels idênticas às do app mobile.
   static String get sectionContact => 'Contato do cliente';
@@ -116,23 +114,12 @@ class BudgetWebStrings {
   static String get pdfEmpty => _locale.languageCode == 'pt'
       ? "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'"
       : 'To view the budget PDF, at least one product or service must be included';
-  static String get pdfDownloadButton => _locale.languageCode == 'pt'
-      ? 'BAIXAR PDF'
-      : 'DOWNLOAD PDF';
   static String get pdfPreviewButton => _locale.languageCode == 'pt'
       ? 'PRÉ-VISUALIZAR PDF'
       : 'PREVIEW PDF';
   static String get pdfError => _locale.languageCode == 'pt'
       ? 'Não foi possível gerar o PDF.'
       : 'Could not generate the PDF.';
-
-  // Botão extra do AppBar do PDF: abre o visualizador nativo do navegador
-  // em uma nova aba. No mobile o <iframe> embutido costuma ser limitado
-  // (página travada, sem scroll entre páginas); a nova aba dá a UX
-  // completa do navegador (scroll/zoom entre todas as páginas).
-  static String get pdfOpenNewTab => _locale.languageCode == 'pt'
-      ? 'Abrir em nova aba'
-      : 'Open in new tab';
 
   // Notificação push enviada ao DONO do orçamento quando o cliente
   // aprova/reprova pelo fluxo Web. Mensagem do ponto de vista do dono.
