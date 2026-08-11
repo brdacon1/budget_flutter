@@ -59,9 +59,9 @@ class BudgetWebApproveButton extends StatelessWidget {
           backgroundColor: color,
           foregroundColor: textColor,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30.0),
           ),
         ),
         onPressed: onPressed,

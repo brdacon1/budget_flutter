@@ -27,9 +27,6 @@ class BudgetWebItemsCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
         child: ExpansionTileCard(
-          // Sombra em cada item, recolhido ou expandido, para que cada card
-          // fique visualmente separado do vizinho (antes a lista era um
-          // bloco só, sem divisão entre itens).
           initialElevation: 3,
           elevation: 6,
           shadowColor: Colors.black87,

@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/web/budget_web/budget_web_data/budget_web_data_view.dart';
-import 'package:oflite/web/budget_web/budget_web_pdf/budget_web_pdf_view.dart';
 import 'budget_web_budget_view_model.dart';
 
-/// Orçamento liberado no fluxo Web — abas "Meus dados" e "PDF".
+/// Orçamento liberado no fluxo Web — tela única "Meus dados".
 ///
-/// A antiga aba "Itens" foi **removida**: a lista de itens (e a de
-/// comentários) agora vive dentro da aba "Meus dados", logo abaixo dos
-/// dados do cliente, em seções colapsáveis. O `BudgetWebBudgetViewModel`
-/// carrega o orçamento, itens, titular e observações uma única vez; as
-/// abas consomem esses dados.
+/// A antiga aba "Itens" foi removida (a lista de itens vive dentro de "Meus
+/// dados"). A antiga aba "PDF" também foi **removida**: o `<iframe>`
+/// embutido só mostrava a primeira página de forma confiável; agora o
+/// botão "Pré-visualizar PDF" da tela "Meus dados" abre o PDF no
+/// visualizador nativo do navegador em uma **nova aba** (scroll/zoom entre
+/// todas as páginas), reutilizando a mesma regra de geração do PDF
+/// (`BudgetWebPdfViewModel`/`PdfGenerateUseCase`). O `BudgetWebBudgetViewModel`
+/// carrega o orçamento, itens, titular e observações uma única vez.
 class BudgetWebBudgetView extends StatefulWidget {
   const BudgetWebBudgetView({
     super.key,
@@ -30,7 +32,6 @@ class BudgetWebBudgetView extends StatefulWidget {
 
 class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
   late final BudgetWebBudgetViewModel _viewModel;
-  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -73,52 +74,19 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
               ),
             );
           }
-          switch (_currentIndex) {
-            case 0:
-              return BudgetWebDataView(
-                budget: _viewModel.budget!,
-                items: _viewModel.items,
-                observations: _viewModel.observations,
-                moneyConvert: _viewModel.moneyConvert,
-                totalProducts: _viewModel.totalProducts,
-                totalServices: _viewModel.totalServices,
-                totalBudget: _viewModel.totalBudget,
-                onApprove: (status) =>
-                    _viewModel.updateStatus(context, status),
-                onPreview: () => setState(() => _currentIndex = 1),
-              );
-            case 1:
-              return BudgetWebPdfView(
-                items: _viewModel.items,
-                customer: _viewModel.budget!,
-                owner: _viewModel.owner!,
-                observations: _viewModel.observations,
-                token: widget.token,
-              );
-            default:
-              return const SizedBox.shrink();
-          }
+          return BudgetWebDataView(
+            budget: _viewModel.budget!,
+            items: _viewModel.items,
+            observations: _viewModel.observations,
+            owner: _viewModel.owner!,
+            token: widget.token,
+            moneyConvert: _viewModel.moneyConvert,
+            totalProducts: _viewModel.totalProducts,
+            totalServices: _viewModel.totalServices,
+            totalBudget: _viewModel.totalBudget,
+            onApprove: (status) => _viewModel.updateStatus(context, status),
+          );
         },
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(canvasColor: secondaryColor),
-        child: BottomNavigationBar(
-          selectedItemColor: Colors.cyan[50],
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
-          currentIndex: _currentIndex,
-          onTap: (i) => setState(() => _currentIndex = i),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Meus dados',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.picture_as_pdf),
-              label: 'PDF',
-            ),
-          ],
-        ),
       ),
     );
   }
