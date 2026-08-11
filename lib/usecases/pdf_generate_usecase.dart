@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -32,47 +33,22 @@ class PdfGenerateUseCase {
     required CustomerInfo customer,
     required OwnerPdf owner,
     required List<ObservationPdf> observations,
+    String? authToken,
   }) async {
     try {
-      final PdfDocument document = _createDocument();
-      final PdfPage page = document.pages.add();
-      final PdfGraphics graphics = page.graphics;
-
-      final double sizeWithImage = await _drawLogo(page, owner);
-
-      _drawOwnerGrid(page, graphics, owner, sizeWithImage);
-      _drawBudgetDataTitle(page, graphics);
-      final double budgetDataBottomY = _drawBudgetDataGrid(page, customer);
-
-      // Posicionamento dinâmico: o título da lista de itens fica logo abaixo
-      // dos dados do orçamento, respeitando a altura real renderizada.
-      final double itemsTitleY = budgetDataBottomY + 10;
-      _drawItemsSectionTitle(page, graphics, itemsTitleY);
-      final double itemsTableY = itemsTitleY + 40;
-      final double resultTableProductHeight = _drawProductTable(
-        page: page,
-        topY: itemsTableY,
+      final PdfDocument document = await _buildDocument(
+        countService: countService,
         countProduct: countProduct,
-        countService: countService,
+        totalPriceBudget: totalPriceBudget,
         totalPriceProducts: totalPriceProducts,
-        totalPriceBudget: totalPriceBudget,
-        items: items,
-      );
-      _drawServiceTable(
-        page: page,
-        topY: itemsTableY + resultTableProductHeight,
-        countService: countService,
         totalPriceServices: totalPriceServices,
-        totalPriceBudget: totalPriceBudget,
         items: items,
+        customer: customer,
+        owner: owner,
+        observations: observations,
+        authToken: authToken,
       );
-
-      if (observations.isNotEmpty) {
-        _drawObservationsTable(document, observations);
-      }
-
       final String localFile = await _saveDocument(document);
-
       items.clear();
       observations.clear();
       document.dispose();
@@ -80,6 +56,101 @@ class PdfGenerateUseCase {
     } catch (_) {
       rethrow;
     }
+  }
+
+  /// Versão Web do [patternPDF]: retorna os bytes do PDF em memória em vez de
+  /// gravar num arquivo (no navegador `dart:io` File não funciona). Reaproveita
+  /// **exatamente** o mesmo desenho/regra de negócio do PDF — apenas a
+  /// persistência final muda. O [authToken] opcional, quando fornecido, é
+  /// usado para baixar o logo do Storage em vez de reautenticar o usuário
+  /// (no Web não há login do dono).
+  Future<Uint8List> patternPDFBytes({
+    required int countService,
+    required int countProduct,
+    required String totalPriceBudget,
+    required String totalPriceProducts,
+    required String totalPriceServices,
+    required List<ItemsBudget> items,
+    required CustomerInfo customer,
+    required OwnerPdf owner,
+    required List<ObservationPdf> observations,
+    String? authToken,
+  }) async {
+    try {
+      final PdfDocument document = await _buildDocument(
+        countService: countService,
+        countProduct: countProduct,
+        totalPriceBudget: totalPriceBudget,
+        totalPriceProducts: totalPriceProducts,
+        totalPriceServices: totalPriceServices,
+        items: items,
+        customer: customer,
+        owner: owner,
+        observations: observations,
+        authToken: authToken,
+      );
+      final List<int> bytes = await document.save();
+      items.clear();
+      observations.clear();
+      document.dispose();
+      return Uint8List.fromList(bytes);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// Constrói e popula o [PdfDocument] com todo o conteúdo do orçamento.
+  /// Extraído de [patternPDF] para ser reaproveitado pela versão Web
+  /// ([patternPDFBytes]) sem duplicar a regra de negócio do desenho.
+  Future<PdfDocument> _buildDocument({
+    required int countService,
+    required int countProduct,
+    required String totalPriceBudget,
+    required String totalPriceProducts,
+    required String totalPriceServices,
+    required List<ItemsBudget> items,
+    required CustomerInfo customer,
+    required OwnerPdf owner,
+    required List<ObservationPdf> observations,
+    String? authToken,
+  }) async {
+    final PdfDocument document = _createDocument();
+    final PdfPage page = document.pages.add();
+    final PdfGraphics graphics = page.graphics;
+
+    final double sizeWithImage = await _drawLogo(page, owner, authToken);
+
+    _drawOwnerGrid(page, graphics, owner, sizeWithImage);
+    _drawBudgetDataTitle(page, graphics);
+    final double budgetDataBottomY = _drawBudgetDataGrid(page, customer);
+
+    // Posicionamento dinâmico: o título da lista de itens fica logo abaixo
+    // dos dados do orçamento, respeitando a altura real renderizada.
+    final double itemsTitleY = budgetDataBottomY + 10;
+    _drawItemsSectionTitle(page, graphics, itemsTitleY);
+    final double itemsTableY = itemsTitleY + 40;
+    final double resultTableProductHeight = _drawProductTable(
+      page: page,
+      topY: itemsTableY,
+      countProduct: countProduct,
+      countService: countService,
+      totalPriceProducts: totalPriceProducts,
+      totalPriceBudget: totalPriceBudget,
+      items: items,
+    );
+    _drawServiceTable(
+      page: page,
+      topY: itemsTableY + resultTableProductHeight,
+      countService: countService,
+      totalPriceServices: totalPriceServices,
+      totalPriceBudget: totalPriceBudget,
+      items: items,
+    );
+
+    if (observations.isNotEmpty) {
+      _drawObservationsTable(document, observations);
+    }
+    return document;
   }
 
   // ---------------------------------------------------------------------------
@@ -100,13 +171,13 @@ class PdfGenerateUseCase {
   // Logo / image
   // ---------------------------------------------------------------------------
 
-  Future<double> _drawLogo(PdfPage page, OwnerPdf owner) async {
+  Future<double> _drawLogo(PdfPage page, OwnerPdf owner, String? authToken) async {
     if (owner.fotoId == null || owner.fotoId!.isEmpty) {
       return 0;
     }
 
     try {
-      final String token = await _getAuthToken();
+      final String token = await _getAuthToken(authToken);
 
       final String endpointUrl =
           'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
@@ -153,7 +224,12 @@ class PdfGenerateUseCase {
     }
   }
 
-  Future<String> _getAuthToken() async {
+  Future<String> _getAuthToken(String? authToken) async {
+    // Web: o token provisório do Firebase chega pela URL — não há login do
+    // dono no navegador. Reutiliza-o direto.
+    if (authToken != null && authToken.isNotEmpty) {
+      return authToken;
+    }
     if (uid.googleAuth!) {
       return _db.authGoogle();
     }

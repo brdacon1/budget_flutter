@@ -106,6 +106,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
         builder: (context, _) {
           final he = MediaQuery.of(context).size.height;
           return Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               // Carrinho de produtos (adicionar ao orçamento).

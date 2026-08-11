@@ -13,7 +13,6 @@ flutter_*.json
 flutter_export_environment.sh
 
 # Generated Dart files
-lib/generated_plugin_registrant.dart
 **/generated_plugin_registrant.dart
 lib/generated/
 *.g.dart
@@ -93,7 +92,6 @@ lib/generated/
 # =============================================================================
 # Web
 # =============================================================================
-lib/generated_plugin_registrant.dart
 
 # =============================================================================
 # IDE / Editors
