@@ -6,3 +6,8 @@ import 'dart:typed_data';
 void savePdfBytesWeb(Uint8List bytes, String fileName) {
   throw UnsupportedError('savePdfBytesWeb só é suportado no Flutter Web.');
 }
+
+/// Stub não-Web de `openPdfInNewTabWeb`. Nunca é chamado no fluxo mobile.
+void openPdfInNewTabWeb(Uint8List bytes) {
+  throw UnsupportedError('openPdfInNewTabWeb só é suportado no Flutter Web.');
+}

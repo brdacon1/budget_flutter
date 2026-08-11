@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/models/customer_info.dart';
@@ -123,6 +125,11 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
 
   /// Aprova/reprova reutilizando o campo `STATUS` do orçamento (mesmos
   /// valores usados pelo app mobile). Não cria regra paralela.
+  ///
+  /// Depois de gravar o status, grava também um documento em
+  /// `NOTIFICACOES` do dono — o app mobile do dono escuta essa coleção e
+  /// dispara a **notificação push** avisando que o cliente aprovou/reprovou
+  /// o orçamento. O envio é best-effort: falha aqui não reverte o status.
   Future<void> updateStatus(BuildContext context, String status) async {
     _loadingEvent.alertLoading(context);
     try {
@@ -136,6 +143,21 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
       // Atualiza localmente (imutável onde possível; CustomerInfo é legado).
       _budget?.status = status;
       _safeNotify();
+      // Notifica o dono (quem criou/enviou o orçamento) — push via Firestore.
+      final isApproved = status.toUpperCase() == 'APROVADO';
+      final id = _budget?.id ?? enderecoNumero;
+      unawaited(_service.sendApprovalNotification(
+        ownerUid: ownerUid,
+        enderecoNumero: enderecoNumero,
+        token: token,
+        status: status,
+        title: isApproved
+            ? BudgetWebStrings.notificationTitleApproved(id)
+            : BudgetWebStrings.notificationTitleRejected(id),
+        message: isApproved
+            ? BudgetWebStrings.notificationMessageApproved(id)
+            : BudgetWebStrings.notificationMessageRejected(id),
+      ));
       if (context.mounted) {
         await _displayAlert.notification(
           context,

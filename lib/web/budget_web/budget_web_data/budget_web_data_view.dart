@@ -143,7 +143,7 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                 // (além do download). Exclusivo da versão Web.
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 2.0, vertical: 8),
                   child: SizedBox(
                     width: double.infinity,
                     height: 48,

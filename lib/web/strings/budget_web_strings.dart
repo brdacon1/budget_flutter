@@ -128,4 +128,31 @@ class BudgetWebStrings {
   static String get pdfError => _locale.languageCode == 'pt'
       ? 'Não foi possível gerar o PDF.'
       : 'Could not generate the PDF.';
+
+  // Botão extra do AppBar do PDF: abre o visualizador nativo do navegador
+  // em uma nova aba. No mobile o <iframe> embutido costuma ser limitado
+  // (página travada, sem scroll entre páginas); a nova aba dá a UX
+  // completa do navegador (scroll/zoom entre todas as páginas).
+  static String get pdfOpenNewTab => _locale.languageCode == 'pt'
+      ? 'Abrir em nova aba'
+      : 'Open in new tab';
+
+  // Notificação push enviada ao DONO do orçamento quando o cliente
+  // aprova/reprova pelo fluxo Web. Mensagem do ponto de vista do dono.
+  static String notificationTitleApproved(String budgetId) =>
+      _locale.languageCode == 'pt'
+          ? 'Orçamento #$budgetId aprovado'
+          : 'Budget #$budgetId approved';
+  static String notificationMessageApproved(String budgetId) =>
+      _locale.languageCode == 'pt'
+          ? 'O cliente aprovou o orçamento #$budgetId.'
+          : 'The customer approved budget #$budgetId.';
+  static String notificationTitleRejected(String budgetId) =>
+      _locale.languageCode == 'pt'
+          ? 'Orçamento #$budgetId reprovado'
+          : 'Budget #$budgetId rejected';
+  static String notificationMessageRejected(String budgetId) =>
+      _locale.languageCode == 'pt'
+          ? 'O cliente reprovou o orçamento #$budgetId.'
+          : 'The customer rejected budget #$budgetId.';
 }

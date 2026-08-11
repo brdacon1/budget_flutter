@@ -77,6 +77,25 @@ class _BudgetWebPdfViewState extends State<BudgetWebPdfView> {
             builder: (context, _) {
               final ready =
                   _viewModel.bytes != null && !_viewModel.loading;
+              // "Abrir em nova aba": usa o visualizador nativo cheio do
+              // navegador. No mobile é o jeito confiável de ver/todas as
+              // páginas do orçamento (scroll + zoom nativos), já que o
+              // <iframe> embutido costuma ser limitado em telas estreitas.
+              return IconButton(
+                tooltip: BudgetWebStrings.pdfOpenNewTab,
+                onPressed: ready
+                    ? () => openPdfInNewTabWeb(_viewModel.bytes!)
+                    : null,
+                icon: const Icon(Icons.open_in_new),
+                color: whiteColor,
+              );
+            },
+          ),
+          AnimatedBuilder(
+            animation: _viewModel,
+            builder: (context, _) {
+              final ready =
+                  _viewModel.bytes != null && !_viewModel.loading;
               return TextButton.icon(
                 onPressed: ready
                     ? () => savePdfBytesWeb(

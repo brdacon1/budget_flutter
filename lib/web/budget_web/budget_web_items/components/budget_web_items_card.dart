@@ -23,10 +23,16 @@ class BudgetWebItemsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Theme(
         data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
         child: ExpansionTileCard(
+          // Sombra em cada item, recolhido ou expandido, para que cada card
+          // fique visualmente separado do vizinho (antes a lista era um
+          // bloco só, sem divisão entre itens).
+          initialElevation: 3,
+          elevation: 6,
+          shadowColor: Colors.black87,
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
@@ -55,15 +61,28 @@ class BudgetWebItemsCard extends StatelessWidget {
           children: <Widget>[
             const Divider(thickness: 1.0, height: 1.0),
             _row(BudgetWebStrings.labelCategory, item.CATEGORIA ?? '-'),
+            _divider(),
             _row(
                 BudgetWebStrings.labelTotal,
                 moneyConvert.convertFromDouble(item.TOTAL ?? 0)),
+            _divider(),
             _row(BudgetWebStrings.labelQuantity, '${item.QTD ?? 0}'),
+            _divider(),
             _row(BudgetWebStrings.labelMeasure, item.MEDIDA ?? '-'),
             const SizedBox(height: 10),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _divider() {
+    return const Divider(
+      height: 1,
+      thickness: 0.5,
+      indent: 20,
+      endIndent: 20,
+      color: Color(0x33FFFFFF),
     );
   }
 

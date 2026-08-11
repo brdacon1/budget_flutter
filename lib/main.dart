@@ -16,6 +16,13 @@ import 'package:oflite/presentations/terms_conditions/terms_conditions_view.dart
 import 'package:provider/provider.dart';
 import 'common/constants/constants.dart';
 
+/// Chave global do navigator do app. Compartilhada com o
+/// `NotificationService` para que, ao tocar no banner de uma notificação de
+/// aprovação/reprovação vinda do fluxo Web, o app abra o orçamento
+/// correspondente (`BudgetTabView`).
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Inicializa o Firebase e os ads em paralelo para não travar a splash.
@@ -39,6 +46,9 @@ Future<void> main() async {
   // Inicializa notificações push (FCM + canal Android + listener de
   // foreground). Não bloqueia o runApp — falhas aqui não impedem o app.
   await NotificationService.instance.initialize();
+  // Registra a chave do navigator no serviço de notificações para que o
+  // toque no banner (ou o cold-start pelo banner) consiga abrir o orçamento.
+  NotificationService.instance.setNavigatorKey(globalNavigatorKey);
   runApp(const MyApp());
 }
 
@@ -86,6 +96,7 @@ class MyApp extends StatelessWidget {
           theme: theme,
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
+          navigatorKey: globalNavigatorKey,
           home: const LoginView(),
           routes: {
             '/menu_tecnico': (BuildContext _) => const BudgetListView(),

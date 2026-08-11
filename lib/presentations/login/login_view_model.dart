@@ -11,6 +11,7 @@ import 'package:oflite/models/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/models/info_user.dart';
 import 'package:oflite/services/http_request.dart';
+import 'package:oflite/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum LoginField { email, password }
@@ -232,6 +233,19 @@ class LoginViewModel extends ChangeNotifier {
       global_uid_user.purchaseToken = obj['PurchaseToken'];
       global_uid_user.autoRenewing = obj['AutoRenewing'] ?? false;
     }
+
+    // Inicia a escuta de notificações de aprovação/reprovação vindas do
+    // fluxo Web: o dono é notificado (push local) quando um cliente
+    // aprova/reprova um orçamento pela URL compartilhada. Aditivo, não muda
+    // o fluxo de login existente.
+    final ownerUid = global_uid_user.user;
+    if (ownerUid != null && ownerUid.isNotEmpty) {
+      NotificationService.instance.startBudgetApprovalListener(ownerUid);
+    }
+    // Após o login (manual ou auto-login), o dono está autenticado e o
+    // navigator/logo em seguida estará pronto: tenta consumir um orçamento
+    // pendente de abrir (cold-start pelo toque no banner da notificação).
+    NotificationService.instance.tryOpenPendingBudget();
 
     final resultSubscription =
         await FlutterInappPurchase.instance.getAvailablePurchases();

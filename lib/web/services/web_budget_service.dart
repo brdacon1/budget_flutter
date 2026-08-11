@@ -212,6 +212,64 @@ class WebBudgetService {
   }
 
   // ---------------------------------------------------------------------------
+  // Notificação push ao DONO do orçamento (quem criou/enviou o orçamento)
+  // ---------------------------------------------------------------------------
+
+  /// Grava um documento em `EMPRESAS/{ownerUid}/USERS/{ownerUid}/NOTIFICACOES`
+  /// avisando que o cliente acabou de aprovar/reprovar o orçamento pela Web.
+  ///
+  /// O app mobile (do dono) escuta essa coleção em tempo real via Firestore
+  /// (`NotificationService`) e exibe uma **notificação local** ao receber um
+  /// novo documento — é o "push" que avisa quem criou o orçamento.
+  ///
+  /// Reutiliza o **mesmo token provisório do Firebase** do dono já usado no
+  /// fluxo (camada de segurança do link) e a **mesma coleção base do dono**
+  /// já usada pelo app — não cria uma segunda arquitetura de autenticação nem
+  /// um novo sistema de push paralelo. A escrita cumpre as regras de segurança
+  /// do Firestore (o dono escreve no próprio path com o próprio token).
+  ///
+  /// Falhas aqui são silenciosas (log only): a aprovação em si já foi gravada
+  /// por [updateStatus]; a notificação é best-effort e não deve reverter o
+  /// status aprovado.
+  Future<void> sendApprovalNotification({
+    required String ownerUid,
+    required String enderecoNumero,
+    required String token,
+    required String status,
+    required String title,
+    required String message,
+  }) async {
+    try {
+      final url = Uri.parse(
+        '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/NOTIFICACOES',
+      );
+      final body = jsonEncode({
+        'fields': {
+          'TITULO': {'stringValue': title},
+          'MENSAGEM': {'stringValue': message},
+          'STATUS': {'stringValue': status},
+          'ORCAMENTO_ID': {'stringValue': enderecoNumero},
+          'CRIADO_EM': {
+            'timestampValue': DateTime.now().toUtc().toIso8601String()
+          },
+          'LIDO': {'booleanValue': false},
+        },
+      });
+      final response =
+          await http.post(url, headers: _headers(token), body: body);
+      // 200 = criado com ID gerado pelo servidor. Não lança em falha para não
+      // reverter a aprovação já gravada.
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        debugPrint(
+            '[WebBudgetService] sendApprovalNotification falhou: '
+            '${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('[WebBudgetService] sendApprovalNotification erro: $e');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Helpers REST -> map plano (compatível com os `fromMap` dos models)
   // ---------------------------------------------------------------------------
 

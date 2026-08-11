@@ -34,11 +34,17 @@ class BudgetWebItemsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+      // Header ocupa a largura toda da tela (padding de 2 só), sem recuo
+      // lateral — solicitado na spec do Web.
+      padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 10),
       child: Theme(
         data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
         child: ExpansionTileCard(
           initiallyExpanded: true,
+          // Sombra para separar esta seção das demais (Contato/Endereço/...).
+          initialElevation: 2,
+          elevation: 4,
+          shadowColor: Colors.black54,
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,

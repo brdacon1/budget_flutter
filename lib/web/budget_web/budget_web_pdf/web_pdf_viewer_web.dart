@@ -44,12 +44,16 @@ class _WebPdfViewerState extends State<WebPdfViewer> {
     _blobUrl = web.URL.createObjectURL(blob);
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
       final iframe = web.HTMLIFrameElement()
-        // `#zoom=page-fit` pede ao visualizador nativo de PDF do navegador
-        // que abra já encaixando a página na tela — evita o "zoom absurdo"
-        // (PDF enorme, só aparecendo um pedaço) especialmente em telas de
-        // celular. Suportado pelo visualizador do Chrome/Edge (e Firefox);
-        // onde não for suportado, é simplesmente ignorado (não quebra).
-        ..src = '$_blobUrl#zoom=page-fit'
+        // `#view=FitH` pede ao visualizador nativo de PDF do navegador que
+        // encaixe cada página na **largura** do <iframe>, empilhando as
+        // páginas verticalmente. Assim, no celular, o cliente rola para baixo
+        // e vê **todas as páginas** do orçamento (com `page-fit` o texto ficava
+        // minúsculo/travado numa página só em telas estreitas). Suportado pelo
+        // visualizador do Chrome/Edge/Firefox; onde não for, é ignorado.
+        // Em complemento, a aba PDF oferece o botão "Abrir em nova aba",
+        // que usa o visualizador nativo cheio do navegador (mais robusto no
+        // mobile) — ver `openPdfInNewTabWeb`.
+        ..src = '$_blobUrl#view=FitH'
         ..title = 'PDF'
         // O iframe ocupa toda a área do HtmlElementView (que recebe
         // constraints tight do Stack/Positioned.fill no view pai).

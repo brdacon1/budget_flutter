@@ -7,6 +7,7 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/models/global_uid_user.dart' as globalUIDUser;
 import 'package:oflite/common/strings/auth_strings.dart';
 import 'package:oflite/services/http_request.dart';
+import 'package:oflite/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../common/enums/singup_field_enum.dart';
 import '../../models/info_user.dart';
@@ -198,6 +199,13 @@ class SingUpViewModel extends ChangeNotifier {
       globalUIDUser.productId = obj['ProductId'];
       globalUIDUser.purchaseToken = obj['PurchaseToken'];
       globalUIDUser.autoRenewing = obj['AutoRenewing'] ?? false;
+    }
+
+    // Pós-cadastro igual ao pós-login: começa a escutar as notificações de
+    // aprovação/reprovação vindas do fluxo Web (push ao dono). Aditivo.
+    final ownerUid = globalUIDUser.user;
+    if (ownerUid != null && ownerUid.isNotEmpty) {
+      NotificationService.instance.startBudgetApprovalListener(ownerUid);
     }
 
     final resultSubscription =

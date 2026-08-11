@@ -32,3 +32,23 @@ void savePdfBytesWeb(Uint8List bytes, String fileName) {
     web.URL.revokeObjectURL(url);
   });
 }
+
+/// Abre o PDF em uma **nova aba** do navegador, usando o visualizador nativo
+/// cheio do browser. É o caminho mais confiável no mobile, onde o `<iframe>`
+/// embutido (platform view) costuma limitar a navegação entre páginas.
+///
+/// Cria um Blob URL temporário e chama `window.open`. Como é disparado por
+/// um toque no botão (gesto do usuário), o bloqueador de pop-ups não
+/// bloqueia. O Blob URL é revogado depois de alguns segundos (a aba aberta
+/// já carregou o conteúdo até lá).
+void openPdfInNewTabWeb(Uint8List bytes) {
+  final blob = web.Blob(
+    <JSAny>[bytes.toJS].toJS,
+    web.BlobPropertyBag(type: 'application/pdf'),
+  );
+  final url = web.URL.createObjectURL(blob);
+  web.window.open(url, '_blank');
+  Future.delayed(const Duration(seconds: 6), () {
+    web.URL.revokeObjectURL(url);
+  });
+}

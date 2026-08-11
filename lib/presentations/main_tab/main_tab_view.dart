@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/presentations/budget/budget_list/budget_list_view.dart';
 import 'package:oflite/presentations/main_config_menu/main_config_menu_view.dart';
 import 'package:oflite/presentations/dashboard/dashboard_view.dart';
+import 'package:oflite/services/notification_service.dart';
 import '../../common/constants/constants.dart';
 import 'main_tab_view_model.dart';
 
@@ -14,6 +15,17 @@ class MainTabView extends StatefulWidget {
 
 class _MainTabView extends State<MainTabView> {
   final MainTabViewModel _viewModel = MainTabViewModel();
+
+  @override
+  void initState() {
+    super.initState();
+    // Após o login (auto-login ou manual), a tela principal está pronta e o
+    // dono está autenticado: consome um possível orçamento pendente de abrir
+    // (caso de cold-start pelo toque no banner da notificação).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.instance.tryOpenPendingBudget();
+    });
+  }
 
   @override
   void dispose() {

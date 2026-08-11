@@ -21,11 +21,14 @@ class BudgetWebCommentsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 10),
       child: Theme(
         data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
         child: ExpansionTileCard(
           initiallyExpanded: false,
+          initialElevation: 2,
+          elevation: 4,
+          shadowColor: Colors.black54,
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
