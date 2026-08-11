@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:web/web.dart' as web;
@@ -22,5 +23,12 @@ void savePdfBytesWeb(Uint8List bytes, String fileName) {
   web.document.body?.append(anchor);
   anchor.click();
   anchor.remove();
-  web.URL.revokeObjectURL(url);
+  // Atrasa a revogação do Blob URL: alguns navegadores iniciam o download
+  // de forma assíncrona e, se o URL for revogado logo após o `click()`, o
+  // download pode abortar. Usar `Future.delayed` (timer normal do Dart,
+  // funciona no Web) dá uma janela curta antes de liberar o blob — sem vazar
+  // memória por muito tempo.
+  Future.delayed(const Duration(seconds: 4), () {
+    web.URL.revokeObjectURL(url);
+  });
 }

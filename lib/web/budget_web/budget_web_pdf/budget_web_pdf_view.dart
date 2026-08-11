@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/web/strings/budget_web_strings.dart';
-import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
-
 import '../utils/web_pdf_saver.dart';
 import 'budget_web_pdf_view_model.dart';
 import 'web_pdf_viewer.dart';
@@ -66,6 +64,39 @@ class _BudgetWebPdfViewState extends State<BudgetWebPdfView> {
         title: Text(BudgetWebStrings.pdfTitle),
         backgroundColor: bgColor,
         foregroundColor: whiteColor,
+        // Botão de download no AppBar (e não sobre o iframe). No Flutter Web,
+        // o `WebPdfViewer` é um `<iframe>` (HtmlElementView/platform view)
+        // renderizado como elemento HTML por cima do canvas do Flutter, que
+        // intercepta os toques na sua área. Um botão `Positioned` por cima do
+        // iframe ficava visível mas encoberto — o clique caía no visualizador
+        // de PDF do navegador (o tal "zoom absurdo") em vez de baixar. No
+        // AppBar, fora da área do iframe, o botão é clicável de verdade.
+        actions: [
+          AnimatedBuilder(
+            animation: _viewModel,
+            builder: (context, _) {
+              final ready =
+                  _viewModel.bytes != null && !_viewModel.loading;
+              return TextButton.icon(
+                onPressed: ready
+                    ? () => savePdfBytesWeb(
+                          _viewModel.bytes!,
+                          'orcamento.pdf',
+                        )
+                    : null,
+                icon: const Icon(Icons.download_outlined),
+                label: Text(
+                  BudgetWebStrings.pdfDownloadButton,
+                  style: GoogleFonts.heebo(
+                    color: whiteColor,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         color: Colors.white,
@@ -100,39 +131,6 @@ class _BudgetWebPdfViewState extends State<BudgetWebPdfView> {
                           'Nenhum PDF disponível para este orçamento.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (_viewModel.bytes != null)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 25,
-                    child: Center(
-                      child: FadeAnimationWidget(
-                        delay: 1,
-                        child: TextButton(
-                          onPressed: () => savePdfBytesWeb(
-                            _viewModel.bytes!,
-                            'orcamento.pdf',
-                          ),
-                          style: TextButton.styleFrom(
-                            backgroundColor: buttonColor,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15.0, horizontal: 60),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0)),
-                          ),
-                          child: Text(
-                            BudgetWebStrings.pdfDownloadButton,
-                            style: GoogleFonts.heebo(
-                              color: bgColor,
-                              letterSpacing: 0.5,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                         ),
                       ),
                     ),

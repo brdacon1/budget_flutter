@@ -77,16 +77,24 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
           }
           totalBudget += total;
         }
+        // O `PdfGenerateUseCase` chama `items.clear()` / `observations.clear()`
+        // ao final da geração (comportamento legado do app mobile, onde a
+        // lista passada é local e descartável). No Web, porém, `items` e
+        // `observations` são a **mesma referência** da lista viva da aba
+        // "Meus dados" (vinda do `BudgetWebBudgetViewModel`) — se deixarmos o
+        // use case limpá-las, a aba de dados fica sem itens após gerar o PDF
+        // e a pré-visualização só funciona na 1ª vez. Passamos **cópias**, sem
+        // tocar na regra do use case (mobile permanece idêntico).
         _bytes = await _pdf.patternPDFBytes(
           countService: countService,
           countProduct: countProduct,
           totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
           totalPriceProducts: moneyConvert.convertFromDouble(totalProducts),
           totalPriceServices: moneyConvert.convertFromDouble(totalServices),
-          items: items,
+          items: List<ItemsBudget>.from(items),
           customer: customer,
           owner: owner,
-          observations: observations,
+          observations: List<ObservationPdf>.from(observations),
           authToken: token,
         );
       }
