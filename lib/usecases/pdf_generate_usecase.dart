@@ -178,19 +178,37 @@ class PdfGenerateUseCase {
     }
 
     try {
-      final String token = await _getAuthToken(authToken);
+      // `owner.fotoId` NÃO é apenas o token de download: é a URL completa
+      // retornada pelo `getDownloadURL()` do Firebase Storage (o mesmo valor
+      // usado em `Image.network`/`http.get` na edição do logo). Antes o código
+      // montava `...?alt=media&token=${fotoId}`, anexando a URL inteira como
+      // parâmetro `token=` — o que produzia uma URL inválida. No mobile isso
+      // ainda funcionava porque o header `Authorization: Bearer` do dono
+      // autenticava o acesso (o `token=` inválido era ignorado); no Web, sem o
+      // header, o Firebase Storage rejeitava (403) e o logo sumia do PDF.
+      //
+      // Usar a URL completa direto resolve nas duas plataformas: o token
+      // real embutido nela já concede o download público, então no Web não
+      // precisa de auth (e nem de preflight CORS). O caminho legado montado a
+      // partir do `logoName` continua disponível para dados antigos onde o
+      // `fotoId` não seja uma URL completa.
+      final String fotoId = owner.fotoId ?? '';
+      final String endpointUrl = fotoId.startsWith('http')
+          ? fotoId
+          : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
 
-      final String endpointUrl =
-          'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
       // No Flutter Web, enviar um header `Authorization: Bearer` dispara um
       // preflight CORS que o Firebase Storage pode rejeitar, fazendo a
       // geração do PDF (e portanto a pré-visualização) falhar inteira. Como
-      // o `token=` na URL já concede o download público do logo, no Web
-      // omitimos o header. No mobile mantemos o comportamento existente.
+      // a URL de download já carrega o token público, no Web omitimos o
+      // header. No mobile mantemos o comportamento existente (auth do dono).
       final Map<String, String> headers = <String, String>{
         'Accept': 'application/json;odata=verbose',
       };
-      if (!kIsWeb) headers['Authorization'] = 'Bearer $token';
+      if (!kIsWeb) {
+        final String token = await _getAuthToken(authToken);
+        headers['Authorization'] = 'Bearer $token';
+      }
       final http.Response response = await http.get(
         Uri.parse(endpointUrl),
         headers: headers,
