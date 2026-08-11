@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/common/constants/constants.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
-import 'package:oflite/presentations/budget_web/budget_web_auth/budget_web_auth_view.dart';
-import 'package:oflite/presentations/budget_web/budget_web_app/budget_web_app_view_model.dart';
-import 'package:oflite/presentations/budget_web/budget_web_budget/budget_web_budget_view.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
+import 'package:oflite/web/budget_web/budget_web_auth/budget_web_auth_view.dart';
+import 'package:oflite/web/budget_web/budget_web_app/budget_web_app_view_model.dart';
+import 'package:oflite/web/budget_web/budget_web_budget/budget_web_budget_view.dart';
 import 'components/budget_web_app_blocked_view.dart';
 
 /// Raiz do fluxo Web de orçamento.

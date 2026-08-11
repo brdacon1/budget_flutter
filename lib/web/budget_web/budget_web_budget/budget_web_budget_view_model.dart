@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/items_budget.dart';
 import 'package:oflite/models/observation_pdf.dart';
@@ -7,7 +7,7 @@ import 'package:oflite/models/owner_pdf.dart';
 import 'package:oflite/services/convert_coin.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
-import 'package:oflite/services/web_budget_service.dart';
+import 'package:oflite/web/services/web_budget_service.dart';
 
 /// Estado do orçamento liberado no fluxo Web.
 ///

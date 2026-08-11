@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/common/constants/constants.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
-import 'package:oflite/presentations/budget_web/budget_web_data/budget_web_data_view.dart';
-import 'package:oflite/presentations/budget_web/budget_web_items/budget_web_items_view.dart';
-import 'package:oflite/presentations/budget_web/budget_web_pdf/budget_web_pdf_view.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
+import 'package:oflite/web/budget_web/budget_web_data/budget_web_data_view.dart';
+import 'package:oflite/web/budget_web/budget_web_pdf/budget_web_pdf_view.dart';
 import 'budget_web_budget_view_model.dart';
 
-/// Orçamento liberado no fluxo Web — abas "Meus dados", "Itens" e "PDF".
+/// Orçamento liberado no fluxo Web — abas "Meus dados" e "PDF".
 ///
-/// O `BudgetWebBudgetViewModel` carrega o orçamento, itens, titular e
-/// observações uma única vez. As abas são componentes que consomem esses
-/// dados (data/itens) ou reutilizam o usecase de PDF.
+/// A antiga aba "Itens" foi **removida**: a lista de itens (e a de
+/// comentários) agora vive dentro da aba "Meus dados", logo abaixo dos
+/// dados do cliente, em seções colapsáveis. O `BudgetWebBudgetViewModel`
+/// carrega o orçamento, itens, titular e observações uma única vez; as
+/// abas consomem esses dados.
 class BudgetWebBudgetView extends StatefulWidget {
   const BudgetWebBudgetView({
     super.key,
@@ -74,10 +75,10 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
           }
           switch (_currentIndex) {
             case 0:
-              return BudgetWebDataView(budget: _viewModel.budget!);
-            case 1:
-              return BudgetWebItemsView(
+              return BudgetWebDataView(
+                budget: _viewModel.budget!,
                 items: _viewModel.items,
+                observations: _viewModel.observations,
                 moneyConvert: _viewModel.moneyConvert,
                 totalProducts: _viewModel.totalProducts,
                 totalServices: _viewModel.totalServices,
@@ -85,7 +86,7 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
                 onApprove: (status) =>
                     _viewModel.updateStatus(context, status),
               );
-            case 2:
+            case 1:
               return BudgetWebPdfView(
                 items: _viewModel.items,
                 customer: _viewModel.budget!,
@@ -110,10 +111,6 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Meus dados',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Itens',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.picture_as_pdf),

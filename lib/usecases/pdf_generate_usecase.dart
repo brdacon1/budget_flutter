@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/Services/convert_coin.dart';
@@ -181,12 +182,18 @@ class PdfGenerateUseCase {
 
       final String endpointUrl =
           'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
+      // No Flutter Web, enviar um header `Authorization: Bearer` dispara um
+      // preflight CORS que o Firebase Storage pode rejeitar, fazendo a
+      // geração do PDF (e portanto a pré-visualização) falhar inteira. Como
+      // o `token=` na URL já concede o download público do logo, no Web
+      // omitimos o header. No mobile mantemos o comportamento existente.
+      final Map<String, String> headers = <String, String>{
+        'Accept': 'application/json;odata=verbose',
+      };
+      if (!kIsWeb) headers['Authorization'] = 'Bearer $token';
       final http.Response response = await http.get(
         Uri.parse(endpointUrl),
-        headers: <String, String>{
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json;odata=verbose',
-        },
+        headers: headers,
       );
 
       if (response.statusCode != 200) {
@@ -220,6 +227,11 @@ class PdfGenerateUseCase {
       );
       return sizeWithImage;
     } catch (_) {
+      // Web: o download do logo pode falhar (CORS/rede). Em vez de derrubar
+      // toda a geração do PDF — o que impede a pré-visualização —, simplesmente
+      // pulamos o logo e seguimos com o documento. No mobile mantemos o
+      // comportamento existente (repropaga o erro).
+      if (kIsWeb) return 0;
       rethrow;
     }
   }

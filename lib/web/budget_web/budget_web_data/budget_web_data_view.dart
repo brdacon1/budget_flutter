@@ -1,0 +1,147 @@
+import 'package:flutter/material.dart';
+import 'package:oflite/common/constants/constants.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
+import 'package:oflite/models/customer_info.dart';
+import 'package:oflite/models/items_budget.dart';
+import 'package:oflite/models/observation_pdf.dart';
+import 'package:oflite/services/convert_coin.dart';
+import 'components/budget_web_approve_button.dart';
+import 'components/budget_web_comments_section.dart';
+import 'components/budget_web_data_section.dart';
+import 'components/budget_web_items_section.dart';
+import '../budget_web_items/components/modals/budget_web_approval_modal_widget.dart';
+
+/// Tab "Meus dados" do orçamento Web — agora centraliza **tudo** o que o
+/// cliente precisa ver num único scroll:
+///
+/// 1. Dados do cliente/orçamento (contato, informações, endereço) — read-only,
+///    reutilizando as mesmas labels do app mobile.
+/// 2. Lista de itens do orçamento (seção colapsável, com busca + cards
+///    expansíveis por item + barra de totais).
+/// 3. Lista de comentários/observações (seção colapsável, read-only).
+///
+/// O botão flutuante "Aprovar orçamento" reflete o status atual (verde =
+/// aprovado, vermelho = reprovado) e abre o modal de aprovação — exclusivo da
+/// versão Web, sem alterar o app mobile.
+///
+/// A antiga aba "Itens" foi removida: sua lista agora vive aqui, abaixo dos
+/// dados do cliente, como pedido na spec.
+class BudgetWebDataView extends StatefulWidget {
+  const BudgetWebDataView({
+    super.key,
+    required this.budget,
+    required this.items,
+    required this.observations,
+    required this.moneyConvert,
+    required this.totalProducts,
+    required this.totalServices,
+    required this.totalBudget,
+    required this.onApprove,
+  });
+
+  final CustomerInfo budget;
+  final List<ItemsBudget> items;
+  final List<ObservationPdf> observations;
+  final ConvertCoin moneyConvert;
+  final double totalProducts;
+  final double totalServices;
+  final double totalBudget;
+
+  /// Callback de aprovação/reprovação (gravado pelo ViewModel do orçamento).
+  final ValueChanged<String> onApprove;
+
+  @override
+  State<BudgetWebDataView> createState() => _BudgetWebDataViewState();
+}
+
+class _BudgetWebDataViewState extends State<BudgetWebDataView> {
+  final TextEditingController _searchController = TextEditingController();
+
+  List<ItemsBudget> get _filteredItems {
+    final q = _searchController.text.toLowerCase();
+    if (q.isEmpty) return widget.items;
+    return widget.items
+        .where((i) => (i.DESCRICAO ?? '').toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: ListView(
+        padding: const EdgeInsets.only(top: 16, bottom: 120),
+        children: [
+          BudgetWebDataSection(
+            title: BudgetWebStrings.sectionContact,
+            icon: Icons.person_outlined,
+            rows: [
+              BudgetWebDataRow(BudgetWebStrings.labelCustomerName,
+                  _orEmpty(widget.budget.customerName)),
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelPhone, _orEmpty(widget.budget.phone)),
+            ],
+          ),
+          BudgetWebDataSection(
+            title: BudgetWebStrings.sectionInfo,
+            icon: Icons.request_page_outlined,
+            rows: [
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelStatus, _orEmpty(widget.budget.status)),
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelDate, _orEmpty(widget.budget.data)),
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelNumber, _orEmpty(widget.budget.id)),
+            ],
+          ),
+          BudgetWebDataSection(
+            title: BudgetWebStrings.sectionAddress,
+            icon: Icons.location_on_outlined,
+            rows: [
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelCep, _orEmpty(widget.budget.zip)),
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelStreet, _orEmpty(widget.budget.street)),
+              BudgetWebDataRow(
+                  BudgetWebStrings.labelCity, _orEmpty(widget.budget.city)),
+              BudgetWebDataRow(BudgetWebStrings.labelNeighborhood,
+                  _orEmpty(widget.budget.neighborhood)),
+            ],
+          ),
+          BudgetWebItemsSection(
+            items: _filteredItems,
+            moneyConvert: widget.moneyConvert,
+            totalProducts: widget.totalProducts,
+            totalServices: widget.totalServices,
+            totalBudget: widget.totalBudget,
+            searchController: _searchController,
+            onSearchChanged: () => setState(() {}),
+          ),
+          BudgetWebCommentsSection(observations: widget.observations),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: BudgetWebApproveButton(
+        status: widget.budget.status,
+        onPressed: () async {
+          await showBudgetWebApprovalModal(
+            context,
+            onSelect: (status) => widget.onApprove(status),
+          );
+        },
+      ),
+    );
+  }
+
+  String _orEmpty(String? v) {
+    final s = v?.toString();
+    if (s == null || s.isEmpty || s == 'null') return '-';
+    return s;
+  }
+}

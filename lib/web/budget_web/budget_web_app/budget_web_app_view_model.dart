@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
-import 'package:oflite/services/web_budget_service.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
+import 'package:oflite/web/services/web_budget_service.dart';
 
 /// Estado de alto nível do fluxo Web de orçamento.
 ///

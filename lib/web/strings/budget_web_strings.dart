@@ -76,6 +76,14 @@ class BudgetWebStrings {
   // Itens
   static String get itemsTitle => 'Itens orçamentos';
   static String get itemsSearchHint => 'Digite a descrição do item...';
+
+  // Seções colapsáveis na aba "Meus dados" (itens + comentários)
+  static String get sectionItems => 'Itens do orçamento';
+  static String get sectionComments => 'Comentários';
+  static String get itemsEmpty => 'Nenhum item neste orçamento.';
+  static String get commentsEmpty => 'Nenhum comentário neste orçamento.';
+  static String get labelCommentDate => 'Data';
+  static String get labelCommentText => 'Comentário';
   static String get labelPrice => 'Preço';
   static String get labelCategory => 'Categoria';
   static String get labelTotal => 'Total';
@@ -87,6 +95,12 @@ class BudgetWebStrings {
 
   // Aprovação
   static String get approveButton => 'Aprovar orçamento';
+  static String get approveButtonApproved => _locale.languageCode == 'pt'
+      ? 'Orçamento aprovado'
+      : 'Budget approved';
+  static String get approveButtonRejected => _locale.languageCode == 'pt'
+      ? 'Orçamento reprovado'
+      : 'Budget rejected';
   static String get approvalTitle => 'Aprovação do orçamento';
   static String get approvalMessage => _locale.languageCode == 'pt'
       ? 'Selecione o status do orçamento'

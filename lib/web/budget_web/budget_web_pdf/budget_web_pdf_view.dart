@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/items_budget.dart';
 import 'package:oflite/models/observation_pdf.dart';

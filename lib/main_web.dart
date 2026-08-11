@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/common/constants/environment.dart';
-import 'package:oflite/presentations/budget_web/budget_web_app/budget_web_app_view.dart';
+import 'package:oflite/web/budget_web/budget_web_app/budget_web_app_view.dart';
 
 /// Entry point **Web** do fluxo público de orçamento.
 ///

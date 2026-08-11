@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Modal de aprovação do orçamento Web.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/common/widgets/responsive_widget.dart';
 import 'budget_web_auth_view_model.dart';
 import 'components/budget_web_auth_field.dart';

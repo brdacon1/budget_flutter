@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/loading_event.dart';
-import 'package:oflite/services/web_budget_service.dart';
+import 'package:oflite/web/services/web_budget_service.dart';
 
 import '../budget_web_app/budget_web_app_view_model.dart';
 

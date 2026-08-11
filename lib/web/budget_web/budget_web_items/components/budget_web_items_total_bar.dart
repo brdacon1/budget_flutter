@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/common/constants/constants.dart';
-import 'package:oflite/common/strings/budget_web_strings.dart';
+import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/services/convert_coin.dart';
 
 /// Barra de totais do orçamento Web — mesmo visual/labels da versão mobile.
