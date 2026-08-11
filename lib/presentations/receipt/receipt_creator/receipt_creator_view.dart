@@ -65,47 +65,42 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
 
   @override
   Widget build(BuildContext context) {
-    final double we = MediaQuery.of(context).size.width;
-    final double he = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
         animation: _viewModel,
         builder: (context, _) {
-          return SingleChildScrollView(
-            child: SizedBox(
-              width: we,
-              height: he,
-              child: Column(
-                children: <Widget>[
-                  ReceiptCreatorHeader(
-                    titlePage: _viewModel.titlePage,
-                    onBack: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: <Widget>[
-                        ReceiptCreatorForm(
-                          descricaoController: _viewModel.descricaoText,
-                          idController: _viewModel.idText,
-                          dataController: _viewModel.dataText,
-                          fieldVisible: _viewModel.fieldVisible,
-                          subtitle: _viewModel.formSubtitle,
-                          selectedField: _viewModel.selectedField,
-                          onSelectField: _viewModel.selectField,
-                        ),
-                        ReceiptCreatorSaveButton(
-                          label: _viewModel.nameButton,
-                          onPressed: () => _viewModel.save(context),
-                        ),
-                        SizedBox(height: he * 0.3),
-                      ],
-                    ),
-                  ),
-                ],
+          // O conteúdo preenche apenas a área do body do Scaffold pai (a aba
+          // atual dentro do ReceiptTabView). Antes havia um SizedBox(height: he)
+          // forçando a altura cheia da tela dentro de um SingleChildScrollView,
+          // o que fazia o formulário/botão extrapolarem por cima da tab bar.
+          return Column(
+            children: <Widget>[
+              ReceiptCreatorHeader(
+                titlePage: _viewModel.titlePage,
+                onBack: () => Navigator.pop(context),
               ),
-            ),
+              Expanded(
+                child: ListView(
+                  children: <Widget>[
+                    ReceiptCreatorForm(
+                      descricaoController: _viewModel.descricaoText,
+                      idController: _viewModel.idText,
+                      dataController: _viewModel.dataText,
+                      fieldVisible: _viewModel.fieldVisible,
+                      subtitle: _viewModel.formSubtitle,
+                      selectedField: _viewModel.selectedField,
+                      onSelectField: _viewModel.selectField,
+                    ),
+                    ReceiptCreatorSaveButton(
+                      label: _viewModel.nameButton,
+                      onPressed: () => _viewModel.save(context),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),

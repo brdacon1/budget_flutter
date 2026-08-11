@@ -122,6 +122,9 @@ class BudgetWebStrings {
   static String get pdfDownloadButton => _locale.languageCode == 'pt'
       ? 'BAIXAR PDF'
       : 'DOWNLOAD PDF';
+  static String get pdfPreviewButton => _locale.languageCode == 'pt'
+      ? 'PRÉ-VISUALIZAR PDF'
+      : 'PREVIEW PDF';
   static String get pdfError => _locale.languageCode == 'pt'
       ? 'Não foi possível gerar o PDF.'
       : 'Could not generate the PDF.';

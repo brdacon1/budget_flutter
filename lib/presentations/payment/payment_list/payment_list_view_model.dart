@@ -66,6 +66,16 @@ class PaymentListViewModel extends ChangeNotifier {
   }
 
   Future<void> addPayment(BuildContext context) async {
+    // Não permite adicionar pagamento a um recibo que ainda não foi salvo:
+    // o id vazio geraria um caminho "RECIBOS//PAGAMENTOS" no Firestore.
+    if (receipt.id == null || receipt.id!.isEmpty) {
+      await displayAlert.notificationWarning(
+        context,
+        'Recibo não salvo',
+        'Salve o recibo na aba "Recibo" antes de adicionar pagamentos.',
+      );
+      return;
+    }
     final PaymentCustomer novo = PaymentCustomer()
       ..METODO = ''
       ..id = ''

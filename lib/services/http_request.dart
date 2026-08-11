@@ -265,6 +265,14 @@ class HttpRequest{
 
 
   Future<List<PaymentCustomer>> getListPayment(Receipt recived, CustomerInfo dados) async {
+    // Se o recibo ainda não foi persistido (id vazio) ou o orçamento não foi
+    // definido, não há pagamentos a carregar — evita caminho com "//" no
+    // Firestore ("A collection path must not contain '//'"), que ocorria ao
+    // abrir a aba de Pagamentos antes de salvar um recibo recém-criado.
+    if (recived.id == null || recived.id!.isEmpty ||
+        budget.IDORCAMENTO == null || budget.IDORCAMENTO!.isEmpty) {
+      return <PaymentCustomer>[];
+    }
     double totalProducts = 0;
     var group = await FirebaseFirestore.instance
         .collection("EMPRESAS/${uid.user}/USERS/${uid.user}/ORCAMENTOS/${budget.IDORCAMENTO}/RECIBOS/${recived.id}/PAGAMENTOS")

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/models/customer_info.dart';
@@ -37,6 +38,7 @@ class BudgetWebDataView extends StatefulWidget {
     required this.totalServices,
     required this.totalBudget,
     required this.onApprove,
+    required this.onPreview,
   });
 
   final CustomerInfo budget;
@@ -49,6 +51,11 @@ class BudgetWebDataView extends StatefulWidget {
 
   /// Callback de aprovação/reprovação (gravado pelo ViewModel do orçamento).
   final ValueChanged<String> onApprove;
+
+  /// Callback que abre a pré-visualização do PDF do orçamento (vai para a
+  /// aba "PDF"). Torna a pré-visualização acessível sem sair da aba
+  /// "Meus dados".
+  final VoidCallback onPreview;
 
   @override
   State<BudgetWebDataView> createState() => _BudgetWebDataViewState();
@@ -124,6 +131,36 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
             onSearchChanged: () => setState(() {}),
           ),
           BudgetWebCommentsSection(observations: widget.observations),
+          // Botão de pré-visualização do PDF: leva o cliente direto para a
+          // aba "PDF", onde o orçamento é mostrado no navegador (além do
+          // download). Exclusivo da versão Web.
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: whiteColor,
+                  side: const BorderSide(color: buttonColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+                onPressed: widget.onPreview,
+                icon: const Icon(Icons.picture_as_pdf_outlined),
+                label: Text(
+                  BudgetWebStrings.pdfPreviewButton,
+                  style: GoogleFonts.heebo(
+                    color: whiteColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

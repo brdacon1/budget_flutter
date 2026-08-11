@@ -85,6 +85,7 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
                 totalBudget: _viewModel.totalBudget,
                 onApprove: (status) =>
                     _viewModel.updateStatus(context, status),
+                onPreview: () => setState(() => _currentIndex = 1),
               );
             case 1:
               return BudgetWebPdfView(
