@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/Services/display_alert.dart';
+import 'package:oflite/common/widgets/ads/interstitial_ad_service.dart';
+import 'package:oflite/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/presentations/comment/comment_list_view.dart';
 import 'package:oflite/presentations/receipt/receipt_list/receipt_list_view.dart';
+import 'package:oflite/presentations/subscription/subscription_view.dart';
 import 'package:oflite/services/budget_share_link_service.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:oflite/models/global_uid_user.dart' as UID;
 
 class MenuItem {
   final IconData icon;
@@ -51,10 +55,45 @@ class PdfMenuViewModel extends ChangeNotifier {
         );
         break;
       case 2:
-        await shareBudget(context);
+        if (!UID.autoRenewing!) {
+          await displayAlert.adsNotification(context).then(
+                  (value) async => {
+                if (value == "Ver anuncio")
+                  {
+                    await shareBudget(context),
+                    Future.delayed(const Duration(milliseconds: 2), ()  {
+                      InterstitialAdService.instance.show();
+                    }),
+                  }
+                else if (value == "Se tornar premium")
+                  {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SubscriptionView()),
+                    ),
+                  }
+              });
+        } else {
+          await shareBudget(context);
+        }
         break;
     }
     await inicialData();
+  }
+
+  Future<String> adsNotification(BuildContext context) async {
+    String resultText = '';
+    await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AdsOptionBottomModalWidget(),
+    ).then((value) {
+      resultText = value ?? '';
+    });
+    return resultText;
   }
 
   /// Gera o link público Web do orçamento (número do endereço + token
