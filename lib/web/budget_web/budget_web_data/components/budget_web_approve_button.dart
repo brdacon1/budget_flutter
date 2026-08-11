@@ -14,7 +14,9 @@ import 'package:oflite/web/strings/budget_web_strings.dart';
 /// Ao tocar, abre o modal de aprovação (callback `onPressed`). Reutiliza os
 /// mesmos valores de status do app mobile — nenhuma regra paralela.
 ///
-/// Component **Stateless** puro.
+/// Renderizado como `ElevatedButton` full-width para viver no painel fixo do
+/// rodapé (não é mais um FAB flutuante) — assim o botão encosta na borda
+/// inferior, sem padding sob ele.
 class BudgetWebApproveButton extends StatelessWidget {
   const BudgetWebApproveButton({
     super.key,
@@ -27,7 +29,6 @@ class BudgetWebApproveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
     final normalized = (status ?? '').toUpperCase();
     final Color color;
     final String label;
@@ -51,11 +52,18 @@ class BudgetWebApproveButton extends StatelessWidget {
     }
 
     return SizedBox(
-      width: we * 0.7,
+      width: double.infinity,
       height: 52,
-      child: FloatingActionButton.extended(
-        heroTag: 'approve',
-        backgroundColor: color,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: textColor,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+        ),
         onPressed: onPressed,
         icon: Icon(icon, color: textColor),
         label: Text(
@@ -66,7 +74,7 @@ class BudgetWebApproveButton extends StatelessWidget {
           style: GoogleFonts.heebo(
             color: textColor,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 15,
             letterSpacing: 0.5,
           ),
         ),

@@ -10,6 +10,7 @@ import 'components/budget_web_approve_button.dart';
 import 'components/budget_web_comments_section.dart';
 import 'components/budget_web_data_section.dart';
 import 'components/budget_web_items_section.dart';
+import '../budget_web_items/components/budget_web_items_total_bar.dart';
 import '../budget_web_items/components/modals/budget_web_approval_modal_widget.dart';
 
 /// Tab "Meus dados" do orçamento Web — agora centraliza **tudo** o que o
@@ -18,12 +19,15 @@ import '../budget_web_items/components/modals/budget_web_approval_modal_widget.d
 /// 1. Dados do cliente/orçamento (contato, informações, endereço) — read-only,
 ///    reutilizando as mesmas labels do app mobile.
 /// 2. Lista de itens do orçamento (seção colapsável, com busca + cards
-///    expansíveis por item + barra de totais).
+///    expansíveis por item).
 /// 3. Lista de comentários/observações (seção colapsável, read-only).
 ///
-/// O botão flutuante "Aprovar orçamento" reflete o status atual (verde =
-/// aprovado, vermelho = reprovado) e abre o modal de aprovação — exclusivo da
-/// versão Web, sem alterar o app mobile.
+/// No rodapé fixo (sempre visível durante o scroll) ficam:
+/// - A **barra de totais** (full-width, sem padding lateral) — não rola mais
+///   junto com a lista.
+/// - O botão **Aprovar/Reprovar**, que reflete o status atual (verde =
+///   aprovado, vermelho = reprovado) e abre o modal de aprovação. Sem padding
+///   sob o botão (encosta na borda inferior).
 ///
 /// A antiga aba "Itens" foi removida: sua lista agora vive aqui, abaixo dos
 /// dados do cliente, como pedido na spec.
@@ -82,96 +86,118 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: ListView(
-        padding: const EdgeInsets.only(top: 16, bottom: 120),
+      // Layout em coluna: conteúdo rolável em cima, painel fixo (totais +
+      // botão de aprovar) embaixo. Assim a barra de totais fica sempre visível
+      // (não rola junto) e o botão encosta na borda inferior, sem padding.
+      body: Column(
         children: [
-          BudgetWebDataSection(
-            title: BudgetWebStrings.sectionContact,
-            icon: Icons.person_outlined,
-            rows: [
-              BudgetWebDataRow(BudgetWebStrings.labelCustomerName,
-                  _orEmpty(widget.budget.customerName)),
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelPhone, _orEmpty(widget.budget.phone)),
-            ],
-          ),
-          BudgetWebDataSection(
-            title: BudgetWebStrings.sectionInfo,
-            icon: Icons.request_page_outlined,
-            rows: [
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelStatus, _orEmpty(widget.budget.status)),
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelDate, _orEmpty(widget.budget.data)),
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelNumber, _orEmpty(widget.budget.id)),
-            ],
-          ),
-          BudgetWebDataSection(
-            title: BudgetWebStrings.sectionAddress,
-            icon: Icons.location_on_outlined,
-            rows: [
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelCep, _orEmpty(widget.budget.zip)),
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelStreet, _orEmpty(widget.budget.street)),
-              BudgetWebDataRow(
-                  BudgetWebStrings.labelCity, _orEmpty(widget.budget.city)),
-              BudgetWebDataRow(BudgetWebStrings.labelNeighborhood,
-                  _orEmpty(widget.budget.neighborhood)),
-            ],
-          ),
-          BudgetWebItemsSection(
-            items: _filteredItems,
-            moneyConvert: widget.moneyConvert,
-            totalProducts: widget.totalProducts,
-            totalServices: widget.totalServices,
-            totalBudget: widget.totalBudget,
-            searchController: _searchController,
-            onSearchChanged: () => setState(() {}),
-          ),
-          BudgetWebCommentsSection(observations: widget.observations),
-          // Botão de pré-visualização do PDF: leva o cliente direto para a
-          // aba "PDF", onde o orçamento é mostrado no navegador (além do
-          // download). Exclusivo da versão Web.
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: whiteColor,
-                  side: const BorderSide(color: buttonColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(top: 16, bottom: 16),
+              children: [
+                BudgetWebDataSection(
+                  title: BudgetWebStrings.sectionContact,
+                  icon: Icons.person_outlined,
+                  rows: [
+                    BudgetWebDataRow(BudgetWebStrings.labelCustomerName,
+                        _orEmpty(widget.budget.customerName)),
+                    BudgetWebDataRow(
+                        BudgetWebStrings.labelPhone, _orEmpty(widget.budget.phone)),
+                  ],
+                ),
+                BudgetWebDataSection(
+                  title: BudgetWebStrings.sectionInfo,
+                  icon: Icons.request_page_outlined,
+                  rows: [
+                    BudgetWebDataRow(BudgetWebStrings.labelStatus,
+                        _orEmpty(widget.budget.status)),
+                    BudgetWebDataRow(
+                        BudgetWebStrings.labelDate, _orEmpty(widget.budget.data)),
+                    BudgetWebDataRow(BudgetWebStrings.labelNumber,
+                        _orEmpty(widget.budget.id)),
+                  ],
+                ),
+                BudgetWebDataSection(
+                  title: BudgetWebStrings.sectionAddress,
+                  icon: Icons.location_on_outlined,
+                  rows: [
+                    BudgetWebDataRow(
+                        BudgetWebStrings.labelCep, _orEmpty(widget.budget.zip)),
+                    BudgetWebDataRow(BudgetWebStrings.labelStreet,
+                        _orEmpty(widget.budget.street)),
+                    BudgetWebDataRow(
+                        BudgetWebStrings.labelCity, _orEmpty(widget.budget.city)),
+                    BudgetWebDataRow(BudgetWebStrings.labelNeighborhood,
+                        _orEmpty(widget.budget.neighborhood)),
+                  ],
+                ),
+                BudgetWebItemsSection(
+                  items: _filteredItems,
+                  moneyConvert: widget.moneyConvert,
+                  searchController: _searchController,
+                  onSearchChanged: () => setState(() {}),
+                ),
+                BudgetWebCommentsSection(observations: widget.observations),
+                // Botão de pré-visualização do PDF: leva o cliente direto
+                // para a aba "PDF", onde o orçamento é mostrado no navegador
+                // (além do download). Exclusivo da versão Web.
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: whiteColor,
+                        side: const BorderSide(color: buttonColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
+                      onPressed: widget.onPreview,
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: Text(
+                        BudgetWebStrings.pdfPreviewButton,
+                        style: GoogleFonts.heebo(
+                          color: whiteColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                onPressed: widget.onPreview,
-                icon: const Icon(Icons.picture_as_pdf_outlined),
-                label: Text(
-                  BudgetWebStrings.pdfPreviewButton,
-                  style: GoogleFonts.heebo(
-                    color: whiteColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    letterSpacing: 0.5,
-                  ),
+              ],
+            ),
+          ),
+          // Painel fixo do rodapé: totais (full-width) + botão de aprovar
+          // (full-width, encostado na borda inferior, sem padding sob ele).
+          Material(
+            color: bgColor,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BudgetWebItemsTotalBar(
+                  moneyConvert: widget.moneyConvert,
+                  totalProducts: widget.totalProducts,
+                  totalServices: widget.totalServices,
+                  totalBudget: widget.totalBudget,
                 ),
-              ),
+                BudgetWebApproveButton(
+                  status: widget.budget.status,
+                  onPressed: () async {
+                    await showBudgetWebApprovalModal(
+                      context,
+                      onSelect: (status) => widget.onApprove(status),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: BudgetWebApproveButton(
-        status: widget.budget.status,
-        onPressed: () async {
-          await showBudgetWebApprovalModal(
-            context,
-            onSelect: (status) => widget.onApprove(status),
-          );
-        },
       ),
     );
   }

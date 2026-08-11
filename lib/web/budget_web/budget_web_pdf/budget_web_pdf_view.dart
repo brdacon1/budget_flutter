@@ -3,15 +3,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/constants/constants.dart';
 import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../utils/web_pdf_saver.dart';
 import 'budget_web_pdf_view_model.dart';
+import 'web_pdf_viewer.dart';
 
 /// Tab "PDF" do orçamento Web.
 ///
 /// Reutiliza a regra de negócio do PDF (`PdfGenerateUseCase`) e apresenta o
-/// documento no navegador (`SfPdfViewer.memory`) com botão de download.
+/// documento no navegador via `WebPdfViewer` (no Web, um `<iframe>` com o
+/// visualizador nativo do navegador — scroll/zoom/download nativos) com
+/// botão de download explícito.
 class BudgetWebPdfView extends StatefulWidget {
   const BudgetWebPdfView({
     super.key,
@@ -70,16 +72,14 @@ class _BudgetWebPdfViewState extends State<BudgetWebPdfView> {
         child: AnimatedBuilder(
           animation: _viewModel,
           builder: (context, _) {
-            // O `SfPdfViewer.memory` precisa de restrições "tight" para
-            // renderizar no Flutter Web — solto num Stack ele pode sizear a
-            // 0 e a pré-visualização fica em branco (resta apenas o botão de
-            // download). Por isso o viewer e os estados ficam com
-            // `Positioned.fill`.
+            // O `WebPdfViewer` (iframe no Web) precisa de restrições
+            // "tight" para preencher a área — por isso fica com
+            // `Positioned.fill`. Os estados de loading/empty também.
             return Stack(
               children: [
                 if (_viewModel.bytes != null)
                   Positioned.fill(
-                    child: SfPdfViewer.memory(_viewModel.bytes!),
+                    child: WebPdfViewer(bytes: _viewModel.bytes!),
                   ),
                 if (_viewModel.loading)
                   const Positioned.fill(

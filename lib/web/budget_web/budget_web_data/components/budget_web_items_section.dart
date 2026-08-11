@@ -6,14 +6,14 @@ import 'package:oflite/web/strings/budget_web_strings.dart';
 import 'package:oflite/models/items_budget.dart';
 import 'package:oflite/services/convert_coin.dart';
 import '../../budget_web_items/components/budget_web_items_card.dart';
-import '../../budget_web_items/components/budget_web_items_total_bar.dart';
 
 /// Seção colapsável "Itens do orçamento" exibida na aba "Meus dados".
 ///
 /// Ao expandir, mostra o campo de busca + os cards de item (cada um com seu
-/// próprio expand/collapse, reutilizando `BudgetWebItemsCard`) + a barra de
-/// totais. Ao recolher, oculta a **lista inteira** — comportamento pedido na
-/// spec: "ocultar ou mostrar a lista toda".
+/// próprio expand/collapse, reutilizando `BudgetWebItemsCard`). Ao recolher,
+/// oculta a **lista inteira** — comportamento pedido na spec: "ocultar ou
+/// mostrar a lista toda". A barra de totais agora é fixa no rodapé da aba
+/// (fora desta seção), então ela não aparece mais aqui.
 ///
 /// Component **Stateless** puro — recebe a lista já filtrada, o controller
 /// de busca (de dono da View) e callbacks. Não acessa services nem Firebase.
@@ -22,18 +22,12 @@ class BudgetWebItemsSection extends StatelessWidget {
     super.key,
     required this.items,
     required this.moneyConvert,
-    required this.totalProducts,
-    required this.totalServices,
-    required this.totalBudget,
     required this.searchController,
     required this.onSearchChanged,
   });
 
   final List<ItemsBudget> items;
   final ConvertCoin moneyConvert;
-  final double totalProducts;
-  final double totalServices;
-  final double totalBudget;
   final TextEditingController searchController;
   final VoidCallback onSearchChanged;
 
@@ -97,13 +91,6 @@ class BudgetWebItemsSection extends StatelessWidget {
                   moneyConvert: moneyConvert,
                 ),
               ),
-            const SizedBox(height: 8),
-            BudgetWebItemsTotalBar(
-              moneyConvert: moneyConvert,
-              totalProducts: totalProducts,
-              totalServices: totalServices,
-              totalBudget: totalBudget,
-            ),
             const SizedBox(height: 10),
           ],
         ),
