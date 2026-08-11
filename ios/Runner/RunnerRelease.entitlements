@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Necessário para o APNs entregar push no iOS em builds de release
+	     (App Store / TestFlight / ad-hoc). O ambiente 'production' bate com o
+	     certificado/chave de produção cadastrada no Console do Firebase. -->
+	<key>aps-environment</key>
+	<string>production</string>
+</dict>
+</plist>

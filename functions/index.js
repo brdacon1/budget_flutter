@@ -9,7 +9,7 @@
  *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/NOTIFICACOES/{notifId}
  * (documento com TITULO, MENSAGEM, ORCAMENTO_ID, STATUS), esta função
  * dispara, lê a LISTA de tokens FCM do dono em
- *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/TOKENS/{token}
+ *   EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/{token}
  * (um documento por dispositivo, gravado pelo app a cada login/início) e
  * envia uma mensagem FCM v1 (`notification` + `data`) para TODOS os tokens —
  * assim o Android exibe a notificação na bandeja do sistema MESMO com o app
@@ -80,12 +80,12 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
     }
 
     // Lê a LISTA de tokens FCM do dono (um por dispositivo) em
-    // EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM/TOKENS. O app grava um doc
-    // por token (id do doc = token) a cada login/início — assim o push
-    // chega a TODOS os devices conectados, não importa quantos sejam.
+    // EMPRESAS/{ownerUid}/USERS/{ownerUid}/FCM. O app grava um doc
+    // por token (id do doc = token) a cada login — assim o push chega a
+    // TODOS os devices conectados, não importa quantos sejam.
     const tokensCol = admin
       .firestore()
-      .collection(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKENS`);
+      .collection(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM`);
 
     let tokens = [];
     try {
@@ -95,23 +95,6 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
         .filter((t) => t && t.length > 0);
     } catch (e) {
       logger.error("erro ao ler lista de tokens FCM", e);
-    }
-
-    // Fallback: doc legado de token único (versões antigas do app que ainda
-    // não migraram para a lista). Mantém compatibilidade durante a transição.
-    if (tokens.length === 0) {
-      try {
-        const tokenDoc = await admin
-          .firestore()
-          .doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKEN`)
-          .get();
-        if (tokenDoc.exists) {
-          const t = String(tokenDoc.get("TOKEN") || "");
-          if (t) tokens.push(t);
-        }
-      } catch (e) {
-        logger.error("erro ao ler token FCM (legacy)", e);
-      }
     }
 
     if (tokens.length === 0) {
@@ -180,7 +163,7 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
       const batch = db.batch();
       for (const t of invalidTokens) {
         batch.delete(
-          db.doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/TOKENS/${t}`)
+          db.doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/${t}`)
         );
       }
       try {

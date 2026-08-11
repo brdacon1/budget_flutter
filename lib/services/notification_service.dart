@@ -24,7 +24,7 @@ import 'package:oflite/services/http_request.dart';
 ///     ao tocar, `FirebaseMessaging.onMessageOpenedApp` abre o orçamento.
 ///   - terminated (app fechado): o sistema exibe a notificação; ao tocar,
 ///     `FirebaseMessaging.getInitialMessage` abre o orçamento (deep-link).
-/// - Persiste o token FCM do dono em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN`,
+/// - Persiste o token FCM do dono em `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}`,
 ///   lido pela Cloud Function `onBudgetApprovalNotification` para enviar o
 ///   push real (necessário para notificar com o app **fechado**).
 ///
@@ -125,8 +125,53 @@ class NotificationService {
     //    O token é obtido aqui no startup, ANTES do login, e guardado em
     //    `_fcmToken`. A persistência no Firestore só acontece DEPOIS do
     //    login (precisa do `uid` do dono) — ver `startBudgetApprovalListener`.
-    await FirebaseMessaging.instance.requestPermission();
-    final String? token = await FirebaseMessaging.instance.getToken();
+    //
+    //    Permissão de notificação:
+    //    - Android 13+ (API 33): exige POST_NOTIFICATIONS em runtime. Já
+    //      declarado no AndroidManifest. O `requestPermission()` do FCM
+    //      pede essa permissão nessas versões, mas o caminho canônico e
+    //      mais robusto é pedir também via `flutter_local_notifications`
+    //      (`requestNotificationsPermission()`), que retorna o status real
+    //      concedido/negado. Sem isso, em Android 13/14/15/16 o push pode
+    //      chegar do FCM mas **não ser exibido** na bandeja se o usuário
+    //      negou a permissão.
+    //    - iOS: `requestPermission()` pede alert/badge/som. O token APNs
+    //      é obtido automaticamente pelo FCM quando o entitlement
+    //      `aps-environment` + `UIBackgroundModes: remote-notification`
+    //      estão configurados (ver Info.plist e Runner*.entitlements).
+    if (kIsWeb) {
+      await FirebaseMessaging.instance.requestPermission();
+    } else {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
+        // Android: pede POST_NOTIFICATIONS (API 33+) explicitamente via
+        // flutter_local_notifications e, como fallback, também via FCM.
+        final androidPlugin = _localNotifications
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        final bool? granted =
+            await androidPlugin?.requestNotificationsPermission();
+        if (kDebugMode) {
+          debugPrint('Android POST_NOTIFICATIONS concedido? $granted');
+        }
+        await FirebaseMessaging.instance.requestPermission();
+      }
+    }
+    // iOS: garante que o token APNs esteja disponível (o FCM só consegue
+    // entregar push no Apple se houver token APNs + chave APNs Auth no
+    // Console do Firebase). Best-effort; em Android/Web isto é no-op.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      if (kDebugMode) {
+        debugPrint('APNs token: $apnsToken');
+      }
+    }
+    final String? token = await _acquireTokenWithRetry();
     _fcmToken = token;
     if (kDebugMode) {
       debugPrint('FCM token (memória volátil): $token');
@@ -147,9 +192,55 @@ class NotificationService {
   /// foi obtido no startup; caso contrário, busca agora (fallback) e cacheia.
   Future<String?> currentToken() async {
     if (_fcmToken != null && _fcmToken!.isNotEmpty) return _fcmToken;
-    final t = await FirebaseMessaging.instance.getToken();
+    final t = await _acquireTokenWithRetry();
     _fcmToken = t;
     return t;
+  }
+
+  /// Busca o token FCM com **retry**. No Android (especialmente 13+/15) o
+  /// `getToken()` pode retornar `null` na primeira tentativa se o Google
+  /// Play Services ainda não estiver pronto (o handshake de registro é
+  /// assíncrono) — daí o token nunca seria persistido e o push não chegaria
+  /// naquele device. Aqui tentamos algumas vezes com um pequeno delay entre
+  /// cada; assim que o token aparece, cacheamos e retornamos.
+  ///
+  /// Se mesmo após todas as tentativas vier `null`, o problema é quase
+  /// sempre de **configuração** (não de código): o SHA-1 do certificado de
+  /// assinatura do app (debug e/ou release) não está cadastrado no projeto
+  /// Firebase → o Play Services recusa com `DEVELOPER_ERROR` (log visível:
+  /// `Phenotype.API is not available on this device`). Nesse caso é preciso
+  /// adicionar o SHA-1 no Console do Firebase e baixar um `google-services
+  /// .json` atualizado — nenhuma quantidade de retry resolve isso.
+  Future<String?> _acquireTokenWithRetry({
+    int maxAttempts = 6,
+    Duration delay = const Duration(seconds: 2),
+  }) async {
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final t = await FirebaseMessaging.instance.getToken();
+        if (t != null && t.isNotEmpty) {
+          if (kDebugMode && attempt > 1) {
+            debugPrint('FCM token obtido na tentativa $attempt');
+          }
+          return t;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('FCM getToken() falhou (tentativa $attempt): $e');
+        }
+      }
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(delay);
+      }
+    }
+    if (kDebugMode) {
+      debugPrint(
+          'FCM token NULO após $maxAttempts tentativas. Verifique: '
+          '(1) SHA-1 do certificado cadastrado no Console do Firebase; '
+          '(2) google-services.json atualizado; '
+          '(3) Play Services no dispositivo.');
+    }
+    return null;
   }
 
   // ---------------------------------------------------------------------------
@@ -288,7 +379,7 @@ class NotificationService {
 
   /// Chamado depois que o dono faz login (quando `global_uid_user.user` fica
   /// disponível). **Salva** o token FCM (que já está em memória volátil desde o
-  /// startup) em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}` — um doc
+  /// startup) em `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}` — um doc
   /// por dispositivo, lido pela Cloud Function para fan-out a todos os
   /// devices. Idempotente: mesmo token = mesmo id de doc, nunca duplica.
   ///
@@ -298,8 +389,20 @@ class NotificationService {
   void startBudgetApprovalListener(String ownerUid) {
     // Não roda no Web público (lá só há o fluxo do cliente, não o do dono).
     if (kIsWeb) return;
-    _boundOwnerUid = ownerUid;
-    unawaited(_persistFcmToken(ownerUid));
+    // Defesa de fronteira: uid vazio/nulo geria path inválido no Firestore
+    // (`EMPRESAS//USERS//FCM/...`) e quebraria a persistência. Nunca chama
+    // `_persistFcmToken` sem um uid válido.
+    if (ownerUid.trim().isEmpty) {
+      if (kDebugMode) {
+        debugPrint('startBudgetApprovalListener ignorado: ownerUid vazio');
+      }
+      return;
+    }
+    _boundOwnerUid = ownerUid.trim();
+    // Persiste o token que JÁ está em memória volátil desde o startup
+    // (`_fcmToken`, obtido em `initialize()` ANTES do login). Não gera um
+    // token novo aqui — só grava no Firebase o que já temos em memória.
+    unawaited(_persistFcmToken(_boundOwnerUid!));
     // Após o login o dono está autenticado: tenta consumir um orçamento
     // pendente de abrir (cold-start pelo toque no banner).
     tryOpenPendingBudget();
@@ -313,13 +416,25 @@ class NotificationService {
   }
 
   /// Lê a lista de tokens FCM cadastrados para o dono (um por dispositivo)
-  /// em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS`. Usado em `_getUserInfo` para
-  /// expor a lista em `InfoUser.TOKENS` / `global_uid_user.tokens` — os
-  /// "dados do usuário" passam a conter cada token push cadastrado.
+  /// em `EMPRESAS/{uid}/USERS/{uid}/FCM` (coleção onde cada doc tem id = token).
+  /// Usado em `_getUserInfo` para expor a lista em `InfoUser.TOKENS` /
+  /// `global_uid_user.tokens` — os "dados do usuário" passam a conter cada
+  /// token push cadastrado.
   Future<List<String>> loadFcmTokens(String ownerUid) async {
+    // Defesa de fronteira: uid vazio/nulo geraria path de coleção inválido
+    // (`EMPRESAS//USERS//FCM`) e lançaria `Invalid argument(s):
+    // A collection path must point to a valid collection`. Retorna lista
+    // vazia em vez de tentar o acesso.
+    if (ownerUid.trim().isEmpty) {
+      if (kDebugMode) {
+        debugPrint('loadFcmTokens ignorado: ownerUid vazio');
+      }
+      return const <String>[];
+    }
+    final uid = ownerUid.trim();
     try {
       final snap = await FirebaseFirestore.instance
-          .collection('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKENS')
+          .collection('EMPRESAS/$uid/USERS/$uid/FCM')
           .get();
       return snap.docs.map((d) => d.id).toList(growable: false);
     } catch (e) {
@@ -328,49 +443,70 @@ class NotificationService {
     }
   }
 
-  /// Persiste o token FCM atual do dono em duas estruturas (idempotente):
-  /// - `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}`: um doc por
-  ///   dispositivo. A Cloud Function lê essa subcoleção e envia o push a
-  ///   **todos** os devices do dono (multi-device). Mesmo token = mesmo id
-  ///   de documento, então reescrever nunca duplica.
-  /// - `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN`: doc legado do token mais
-  ///   recente, mantido por compatibilidade com versões antigas da Cloud
-  ///   Function ainda não redeployadas.
+  /// Persiste o token FCM atual do dono na LISTA de tokens
+  /// `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}` — **um doc por
+  /// dispositivo**, id do doc = próprio token (idempotente: mesmo token
+  /// = mesmo doc, nunca duplica). A Cloud Function lê essa coleção e
+  /// envia o push a **todos** os devices do dono (multi-device).
+  ///
+  /// Só o token, sem `ATUALIZADO_EM` nem outros campos — o doc existe só
+  /// pra marcar "este device está logado e quer receber push".
+  ///
+  /// Este é o método **público** (chamado tanto no pós-login quanto no
+  /// dashboard como redundância) — o trabalho real está em [_persistFcmToken].
+  /// Idempotente: pode chamar quantas vezes quiser.
+  Future<void> persistCurrentTokenToFirebase(String ownerUid) =>
+      _persistFcmToken(ownerUid);
+
   Future<void> _persistFcmToken(String ownerUid) async {
+    // Defesa de fronteira: uid vazio/nulo geraria path de documento inválido
+    // (`EMPRESAS//USERS//FCM/{token}`) e lançaria `Invalid
+    // argument(s): A document path must point to a valid document`.
+    if (ownerUid.trim().isEmpty) {
+      if (kDebugMode) {
+        debugPrint('persist FCM token ignorado: ownerUid vazio');
+      }
+      return;
+    }
+    final uid = ownerUid.trim();
+    if (kDebugMode) {
+      debugPrint('[_persistFcmToken] inicio — uid=$uid');
+    }
     try {
-      // Usa o token que já está em memória volátil (obtido no startup). Se
-      // por algum motivo ainda não tiver, busca agora (fallback) e cacheia.
+      // Token obtido no startup (memória volátil `_fcmToken`). Se ainda
+      // não houver, `currentToken()` busca agora com retry. Sem token =
+      // nada a salvar (e o push não chegaria neste device de qq forma).
       final String? token = await currentToken();
+      if (kDebugMode) {
+        debugPrint('[_persistFcmToken] token obtido: '
+            '${token == null ? "NULL" : (token.isEmpty ? "VAZIO" : token)}');
+      }
       if (token == null || token.isEmpty) {
-        if (kDebugMode) debugPrint('persist FCM token: sem token disponível');
+        if (kDebugMode) {
+          debugPrint('persist FCM token: SEM TOKEN — não vai salvar nada. '
+              'Provável causa: SHA-1 do certificado não cadastrado no '
+              'Firebase / google-services.json desatualizado.');
+        }
         return;
       }
       final db = FirebaseFirestore.instance;
-      final batch = db.batch();
-      // Lista de tokens (multi-device) — fonte de verdade da Cloud Function.
-      batch.set(
-        db.doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKENS/$token'),
-        {
-          'TOKEN': token,
-          'ATUALIZADO_EM': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
-      // Compat: token mais recente num doc único.
-      batch.set(
-        db.doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/TOKEN'),
-        {
-          'TOKEN': token,
-          'ATUALIZADO_EM': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
-      await batch.commit();
+      final docRef = db.doc('EMPRESAS/$uid/USERS/$uid/FCM/$token');
       if (kDebugMode) {
-        debugPrint('FCM token persistido pós-login: $token em FCM/TOKENS');
+        debugPrint('[_persistFcmToken] gravando em: ${docRef.path}');
       }
-    } catch (e) {
-      if (kDebugMode) debugPrint('persist FCM token failed: $e');
+      // Grava na coleção `FCM`. Sem `ATUALIZADO_EM`, sem doc legado
+      // `TOKEN`. O id do documento é o próprio token — gravação
+      // idempotente: cada device logado cria/existe um doc.
+      await docRef.set({'TOKEN': token}, SetOptions(merge: true));
+      if (kDebugMode) {
+        debugPrint('FCM token SALVO na lista: '
+            'EMPRESAS/$uid/USERS/$uid/FCM/$token');
+      }
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('persist FCM token failed: $e');
+        debugPrint('stack: $st');
+      }
     }
   }
 }
