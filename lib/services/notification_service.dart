@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/models/customer_info.dart';
 import 'package:oflite/models/global_uid_budget.dart' as budget;
 import 'package:oflite/models/global_uid_user.dart' as uid;
@@ -17,15 +16,22 @@ import 'package:oflite/services/http_request.dart';
 /// Responsabilidades:
 /// - Inicializa o `flutter_local_notifications` e cria o canal Android
 ///   `high_importance_channel` em runtime (obrigatório no Android 8+ para que
-///   FCM consiga exibir notificações que referenciem esse canal).
+///   o FCM consiga exibir notificações que referenciem esse canal).
 /// - Configura a apresentação de notificações em foreground (iOS).
-/// - Registra um listener `FirebaseMessaging.onMessage` que mostra a
-///   notificação localmente quando o app está aberto (no Android, FCM **não**
-///   exibe notificações em foreground sozinho — é preciso este listener).
-/// - Solicita permissão e recupera o token FCM do dispositivo.
+/// - Registra handlers para os **três estados** do app:
+///   - foreground: `FirebaseMessaging.onMessage` → notificação local.
+///   - background: o sistema exibe a notificação (`notification` payload);
+///     ao tocar, `FirebaseMessaging.onMessageOpenedApp` abre o orçamento.
+///   - terminated (app fechado): o sistema exibe a notificação; ao tocar,
+///     `FirebaseMessaging.getInitialMessage` abre o orçamento (deep-link).
+/// - Persiste o token FCM do dono em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN`,
+///   lido pela Cloud Function `onBudgetApprovalNotification` para enviar o
+///   push real (necessário para notificar com o app **fechado**).
 ///
-/// O token atualmente é apenas logado em debug. Se o backend precisar enviar
-/// push por dispositivo, envie `token` para a sua API aqui.
+/// O push real é disparado por uma Cloud Function (ver `functions/index.js`)
+/// que escuta a escrita em `EMPRESAS/{uid}/USERS/{uid}/NOTIFICACOES` (mesmo
+/// documento gravado pelo fluxo Web quando o cliente aprova/reprova) e envia
+/// uma mensagem FCM com `notification` + `data` para o token do dono.
 class NotificationService {
   NotificationService._();
 
@@ -43,14 +49,13 @@ class NotificationService {
   GlobalKey<NavigatorState>? _navigatorKey;
 
   /// Id do orçamento pendente de abertura: preenchido quando o toque na
-  // notificação chega antes do navigator estar pronto (ex.: cold-start do
-  // app pelo toque). Processado assim que [setNavigatorKey] é chamado.
+  // notificação chega antes do navigator/dono estarem prontos (ex.: cold-
+  // start pelo toque no banner). Processado por [tryOpenPendingBudget].
   String? _pendingBudgetId;
 
-  // Listener em tempo real das notificações de aprovação/reprovação de
-  // orçamento que chegam pelo fluxo Web (escrita em
-  // `EMPRESAS/{uid}/USERS/{uid}/NOTIFICACOES`). Ver [startBudgetApprovalListener].
-  StreamSubscription<QuerySnapshot>? _budgetApprovalSub;
+  /// Observa renovações do token FCM para manter persistido o token atual
+  // do dono (a Cloud Function precisa do token válido para enviar o push).
+  StreamSubscription<String>? _tokenRefreshSub;
 
   /// Inicializa tudo. Deve ser chamado após `Firebase.initializeApp()`.
   Future<void> initialize() async {
@@ -59,20 +64,12 @@ class NotificationService {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     // O callback `onDidReceiveNotificationResponse` dispara quando o usuário
-    // **toca** numa notificação local enquanto o app está em foreground ou é
-    // retomado da background. É aqui que abrimos o orçamento aprovado/
-    // reprovado a partir do payload (`ORCAMENTO_ID`) gravado no `.show()`.
+    // **toca** numa notificação local (as que nós mesmos mostramos em
+    // foreground) — abre o orçamento a partir do payload (`ORCAMENTO_ID`).
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
-
-    // Cold-start: se o app foi aberto pelo toque numa notificação, o payload
-    // não passa pelo `onDidReceiveNotificationResponse` — é preciso ler os
-    // launch details. Aguardamos aqui (chamada nativa rápida) para garantir
-    // que `_pendingBudgetId` esteja preenchido antes de `setNavigatorKey`/
-    // `MainTabView` tentarem consumi-lo.
-    await _handleLaunchNotification();
 
     // 2) Cria o canal de alta importância em runtime (Android 8+ exige canal).
     await _localNotifications
@@ -91,38 +88,85 @@ class NotificationService {
       sound: true,
     );
 
-    // 4) Listener de mensagens em foreground. No Android é a única forma de
-    //    exibir notificações com `notification` payload enquanto o app está
-    //    aberto.
+    // 4) Registra o handler de background (mensagens data-only / processamento
+    //    em isolate). Para mensagens com `notification` payload o próprio
+    //    sistema exibe; este handler garante robustez para `data`.
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
+
+    // 5) Foreground: chega via onMessage. No Android o FCM **não** exibe
+    //    notificações `notification` em foreground sozinho, então mostramos
+    //    uma notificação local nós mesmos.
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // 5) Permissão + token.
+    // 6) Background -> usuário toca no banner: o sistema abriu o app e o FCM
+    //    entrega a mensagem aqui. Abre o orçamento.
+    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+
+    // 7) Terminated (app fechado) -> usuário toca no banner: precisamos ler
+    //    a mensagem inicial que abriu o app. Best-effort; o deep-link é
+    //    consumido depois do login via [tryOpenPendingBudget].
+    unawaited(_handleInitialMessage());
+
+    // 8) Permissão + token.
     await FirebaseMessaging.instance.requestPermission();
     final String? token = await FirebaseMessaging.instance.getToken();
     if (kDebugMode) {
       debugPrint('FCM token: $token');
-      // TODO: enviar `token` para o backend se a API envia push por dispositivo.
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Foreground (app aberto)
+  // ---------------------------------------------------------------------------
 
   void _handleForegroundMessage(RemoteMessage message) {
     final notification = message.notification;
     final android = message.notification?.android;
+    final orcamentoId = message.data['ORCAMENTO_ID']?.toString() ?? '';
 
-    if (notification == null) return;
+    // Título/corpo vindos do payload `notification` (enviado pela Cloud
+    // Function) ou, fallback, do `data`.
+    final title = notification?.title ?? message.data['TITULO']?.toString();
+    final body = notification?.body ?? message.data['MENSAGEM']?.toString();
+    if (title == null && body == null) return;
 
     _localNotifications.show(
-      id: notification.hashCode,
-      title: notification.title,
-      body: notification.body,
+      id: message.hashCode,
+      title: title,
+      body: body,
+      payload: orcamentoId.isEmpty ? null : orcamentoId,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
           icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+          priority: Priority.high,
+          importance: Importance.high,
         ),
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Background (app minimizado) e Terminated (app fechado)
+  // ---------------------------------------------------------------------------
+
+  void _onMessageOpenedApp(RemoteMessage message) {
+    final orcamentoId = message.data['ORCAMENTO_ID']?.toString();
+    if (orcamentoId != null && orcamentoId.isNotEmpty) {
+      unawaited(_openBudget(orcamentoId));
+    }
+  }
+
+  Future<void> _handleInitialMessage() async {
+    final message = await FirebaseMessaging.instance.getInitialMessage();
+    if (message == null) return;
+    final orcamentoId = message.data['ORCAMENTO_ID']?.toString();
+    if (orcamentoId != null && orcamentoId.isNotEmpty) {
+      // O dono pode não estar logado ainda neste momento (auto-login ainda
+      // não rodou). Guarda como pendente; [tryOpenPendingBudget] abre depois.
+      _pendingBudgetId = orcamentoId;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -137,10 +181,10 @@ class NotificationService {
     tryOpenPendingBudget();
   }
 
-  /// Tenta abrir um orçamento pendente (cold-start pelo toque na notificação
-  /// antes do navigator/dono estarem prontos). Deve ser chamado em momentos
-  /// seguros: após o login (quando `uid.user` está disponível) e/ou quando a
-  /// tela principal (`MainTabView`) é construída. Idempotente.
+  /// Tenta abrir um orçamento pendente (toque no banner antes do navigator/
+  /// dono estarem prontos — cold-start pelo toque). Deve ser chamado em
+  /// momentos seguros: após o login (quando `uid.user` está disponível) e/ou
+  /// quando a tela principal (`MainTabView`) é construída. Idempotente.
   void tryOpenPendingBudget() {
     final pending = _pendingBudgetId;
     if (pending == null || pending.isEmpty) return;
@@ -156,20 +200,6 @@ class NotificationService {
     final budgetId = response.payload;
     if (budgetId == null || budgetId.isEmpty) return;
     unawaited(_openBudget(budgetId));
-  }
-
-  /// Cold-start: o app foi aberto pelo toque numa notificação local. O
-  /// `onDidReceiveNotificationResponse` não dispara nesse caso, então lemos
-  /// os launch details do plugin. Se o payload for um id de orçamento,
-  /// abrimos ele (depois que o navigator estiver pronto).
-  Future<void> _handleLaunchNotification() async {
-    if (kIsWeb) return;
-    final details =
-        await _localNotifications.getNotificationAppLaunchDetails();
-    final payload = details?.notificationResponse?.payload;
-    if (payload != null && payload.isNotEmpty) {
-      _pendingBudgetId = payload;
-    }
   }
 
   /// Abre o orçamento [budgetId] (mesmo id gravado em `ORCAMENTO_ID` no
@@ -216,49 +246,31 @@ class NotificationService {
   }
 
   // ---------------------------------------------------------------------------
-  // Notificações de aprovação/reprovação vindas do fluxo Web
+  // Token FCM do dono (usado pela Cloud Function para enviar o push)
   // ---------------------------------------------------------------------------
-  //
-  // Quando o cliente aprova/reprova um orçamento pela Web, o fluxo Web grava
-  // um documento em `EMPRESAS/{uid}/USERS/{uid}/NOTIFICACOES` (mesmo path já
-  // usado pelo app, mesmo dono). Aqui o app do dono escuta essa coleção em
-  // tempo real e dispara uma **notificação local** (push visual no aparelho)
-  // avisando que o cliente aprovou/reprovou o orçamento. O payload da
-  // notificação local é o `ORCAMENTO_ID`, usado para abrir o orçamento quando
-  // o dono toca no banner.
-  //
-  // É **aditivo**: só acrescenta a escuta; não muda regras de negócio nem o
-  // comportamento das telas mobile existentes. O último timestamp visto é
-  // guardado em SharedPreferences, então aprovações que chegaram enquanto o
-  // app estava fechado também geram um aviso ao reabrir (catch-up).
 
-  static const String _lastSeenKey = 'budget_web_notif_last_seen';
-
-  /// Inicia a escuta de notificações de aprovação para o dono [ownerUid].
-  /// Deve ser chamado depois que o dono faz login (quando `global_uid_user.user`
-  // fica disponível). Idempotente: chamar de novo só troca o dono.
+  /// Chamado depois que o dono faz login (quando `global_uid_user.user` fica
+  /// disponível). Persiste o token FCM atual em
+  /// `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKEN` (lido pela Cloud Function) e
+  /// observa renovações do token para manter o path sempre atualizado.
+  /// Idempotente: chamar de novo só re-vincula.
   void startBudgetApprovalListener(String ownerUid) {
     // Não roda no Web público (lá só há o fluxo do cliente, não o do dono).
     if (kIsWeb) return;
-    _budgetApprovalSub?.cancel();
-    _budgetApprovalSub = FirebaseFirestore.instance
-        .collection('EMPRESAS/$ownerUid/USERS/$ownerUid/NOTIFICACOES')
-        .orderBy('CRIADO_EM', descending: true)
-        .limit(20)
-        .snapshots()
-        .listen(_onBudgetApprovalSnapshot, onError: (Object e) {
-      if (kDebugMode) debugPrint('budget approval listener error: $e');
-    });
-
-    // Best-effort: guarda o token FCM atual do dono no próprio path, para um
-    // futuro backend/Cloud Function poder enviar push real por dispositivo.
     unawaited(_persistFcmToken(ownerUid));
+    _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = FirebaseMessaging.instance.onTokenRefresh.listen(
+      (_) => unawaited(_persistFcmToken(ownerUid)),
+    );
+    // Após o login o dono está autenticado: tenta consumir um orçamento
+    // pendente de abrir (cold-start pelo toque no banner).
+    tryOpenPendingBudget();
   }
 
-  /// Encerra a escuta (ex.: logout). Idempotente.
+  /// Encerra vínculos (ex.: logout). Idempotente.
   void stopBudgetApprovalListener() {
-    _budgetApprovalSub?.cancel();
-    _budgetApprovalSub = null;
+    _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = null;
   }
 
   Future<void> _persistFcmToken(String ownerUid) async {
@@ -273,64 +285,19 @@ class NotificationService {
       if (kDebugMode) debugPrint('persist FCM token failed: $e');
     }
   }
+}
 
-  Future<void> _onBudgetApprovalSnapshot(QuerySnapshot snap) async {
-    if (snap.docs.isEmpty) {
-      return;
-    }
-    final prefs = await SharedPreferences.getInstance();
-    final lastSeenStr = prefs.getString(_lastSeenKey);
-    DateTime lastSeen = lastSeenStr == null
-        ? DateTime.now().toUtc()
-        : DateTime.parse(lastSeenStr).toUtc();
-    DateTime newest = lastSeen;
-
-    // snap vem ordenado desc (mais novo primeiro). Percorre e avisa os
-    // documentos mais novos que o último visto.
-    final docs = snap.docs.toList();
-    // Inverter para processar do mais antigo -> mais novo (ordem cronológica).
-    docs.sort((a, b) =>
-        _created(a).compareTo(_created(b)));
-
-    for (final doc in docs) {
-      final created = _created(doc);
-      if (!created.isAfter(lastSeen)) continue;
-      final data = doc.data() as Map<String, dynamic>?;
-      if (data == null) continue;
-      final title = (data['TITULO'] ?? '').toString();
-      final body = (data['MENSAGEM'] ?? '').toString();
-      if (title.isEmpty && body.isEmpty) continue;
-      // Payload = id do orçamento, usado pelo `onDidReceiveNotificationResponse`
-      // para abrir o orçamento quando o dono toca no banner da notificação.
-      final orcamentoId = (data['ORCAMENTO_ID'] ?? '').toString();
-      await _localNotifications.show(
-        id: doc.id.hashCode,
-        title: title,
-        body: body,
-        payload: orcamentoId.isEmpty ? null : orcamentoId,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _channelId,
-            _channelName,
-            icon: '@mipmap/ic_launcher',
-            priority: Priority.high,
-            importance: Importance.high,
-          ),
-        ),
-      );
-      if (created.isAfter(newest)) newest = created;
-    }
-
-    await prefs.setString(_lastSeenKey, newest.toUtc().toIso8601String());
-  }
-
-  DateTime _created(QueryDocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>?;
-    if (data == null) return DateTime.now().toUtc();
-    final v = data['CRIADO_EM'];
-    if (v is Timestamp) return v.toDate().toUtc();
-    if (v is DateTime) return v.toUtc();
-    if (v is String) return DateTime.tryParse(v)?.toUtc() ?? DateTime.now().toUtc();
-    return DateTime.now().toUtc();
+/// Handler top-level (obrigatório ser top-level, não método de instância)
+/// para mensagens FCM em background, registrado via
+/// `FirebaseMessaging.onBackgroundMessage`. Anotado com
+/// `@pragma('vm:entry-point')` para o Flutter conseguir recriar o entry-point
+/// num isolate separado. Para mensagens com `notification` payload, o
+/// próprio sistema exibe a notificação na bandeja; este handler garante
+/// processamento de `data` (e logging em debug).
+@pragma('vm:entry-point')
+Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
+  if (kDebugMode) {
+    debugPrint('FCM background message: ${message.messageId} '
+        'orcamento=${message.data['ORCAMENTO_ID']}');
   }
 }

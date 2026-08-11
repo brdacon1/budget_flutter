@@ -1,0 +1,11 @@
+{
+  "name": "oflite-functions",
+  "description": "Cloud Functions do OfLite (notificações de aprovação/reprovação de orçamento)",
+  "engines": { "node": "20" },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^5.1.1"
+  },
+  "private": true
+}

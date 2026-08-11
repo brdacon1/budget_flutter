@@ -6,6 +6,7 @@ import 'package:oflite/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../common/constants/constants.dart';
 import 'package:oflite/models/global_uid_user.dart' as global_uid_user;
+import 'package:oflite/services/notification_service.dart';
 import '../../login/login_view.dart';
 import '../../../common/widgets/responsive_widget.dart';
 
@@ -95,6 +96,7 @@ class _ProfileCard extends State<ProfileCard> {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             if(newValue! == 'Sair')
             {
+              NotificationService.instance.stopBudgetApprovalListener();
               await _logout();
               await prefs.remove('email');
               await prefs.remove('password');
