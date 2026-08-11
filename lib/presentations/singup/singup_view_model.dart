@@ -214,29 +214,40 @@ class SingUpViewModel extends ChangeNotifier {
       NotificationService.instance.startBudgetApprovalListener(ownerUid);
     }
 
-    final resultSubscription =
-        await FlutterInappPurchase.instance.getAvailablePurchases();
+    // A consulta de assinaturas (`getAvailablePurchases`) pode falhar
+    // (sem Play Services, emulador, rede) exatamente como `fetchProducts`.
+    // Isolamos em try/catch para que a falha NUNCA quebre o fluxo de
+    // cadastro — o usuário já foi criado/autenticado no Firebase e seu
+    // documento já foi lido; a assinatura é complementar.
+    try {
+      final resultSubscription =
+          await FlutterInappPurchase.instance.getAvailablePurchases();
 
-    if (resultSubscription.isNotEmpty) {
-      final latestSubscription = resultSubscription.reduce(
-        (current, next) =>
-            (current.transactionDate) > (next.transactionDate)
-                ? current
-                : next,
-      );
-
-      globalUIDUser.autoRenewing = latestSubscription.isAutoRenewing;
-      globalUIDUser.purchaseToken = latestSubscription.purchaseToken ?? '';
-      globalUIDUser.productId = latestSubscription.productId;
-
-      if (Platform.isAndroid &&
-          latestSubscription is PurchaseAndroid &&
-          latestSubscription.isAcknowledgedAndroid != true) {
-        await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
-          latestSubscription.purchaseToken ?? '',
+      if (resultSubscription.isNotEmpty) {
+        final latestSubscription = resultSubscription.reduce(
+          (current, next) =>
+              (current.transactionDate) > (next.transactionDate)
+                  ? current
+                  : next,
         );
+
+        globalUIDUser.autoRenewing = latestSubscription.isAutoRenewing;
+        globalUIDUser.purchaseToken = latestSubscription.purchaseToken ?? '';
+        globalUIDUser.productId = latestSubscription.productId;
+
+        if (Platform.isAndroid &&
+            latestSubscription is PurchaseAndroid &&
+            latestSubscription.isAcknowledgedAndroid != true) {
+          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
+            latestSubscription.purchaseToken ?? '',
+          );
+        }
+      } else {
+        globalUIDUser.autoRenewing = false;
+        globalUIDUser.purchaseToken = '';
       }
-    } else {
+    } catch (_) {
+      // Falha ao consultar assinatura não impede o cadastro/login.
       globalUIDUser.autoRenewing = false;
       globalUIDUser.purchaseToken = '';
     }

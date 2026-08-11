@@ -49,11 +49,21 @@ class LoginViewModel extends ChangeNotifier {
     if (_initialized) return;
     _initialized = true;
 
-    await FlutterInappPurchase.instance.initConnection();
-    await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
-      skus: productLists,
-      type: ProductQueryType.Subs,
-    );
+    // A consulta de produtos de assinatura pode falhar (ex.: dispositivo
+    // sem Google Play Services, emulador, rede indisponível) e lança
+    // `[query-product]: Failed to query product`. Isolamos essas chamadas
+    // em try/catch para que a falha NUNCA bloqueie o auto-login abaixo —
+    // manter o usuário conectado (e-mail/senha, Google, cadastro) é mais
+    // importante e independe das compras in-app.
+    try {
+      await FlutterInappPurchase.instance.initConnection();
+      await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
+        skus: productLists,
+        type: ProductQueryType.Subs,
+      );
+    } catch (_) {
+      // Falha ao consultar produtos não deve impedir o login automático.
+    }
 
     await _checkAutoLogin();
   }
@@ -120,35 +130,55 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> _checkAutoLogin() async {
+    // 1) Sessão do Firebase ainda ativa? O Firebase persiste o usuário
+    //    autenticado entre execuções do app (e-mail/senha, Google e cadastro).
+    //    Reutilizar `currentUser` é o caminho mais confiável para manter a
+    //    pessoa conectada — funciona igual para os três fluxos de login.
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      try {
+        state = LoginState.loading;
+        notifyListeners();
+
+        uid = currentUser.uid;
+
+        // Descobre se a sessão veio de um login Google (senha "NO_PASS" ou
+        // inexistente) para espelhar as flags que o login manual populava.
+        final prefs = await SharedPreferences.getInstance();
+        final storedPassword = prefs.getString('password');
+        final isGoogle =
+            storedPassword == null || storedPassword == 'NO_PASS';
+
+        global_uid_user.password = isGoogle ? 'NO_PASS' : storedPassword;
+        global_uid_user.googleAuth = isGoogle;
+        if (!isGoogle) {
+          global_uid_user.email =
+              currentUser.email ?? prefs.getString('email') ?? '';
+        }
+
+        await _getUserInfo();
+        state = LoginState.success;
+      } catch (e) {
+        state = LoginState.idle;
+      } finally {
+        notifyListeners();
+      }
+      return;
+    }
+
+    // 2) Sessão do Firebase expirou: tenta re-autenticar com e-mail/senha
+    //    salvos. (Login Google não guarda senha, então só re-autentica se
+    //    houver senha real — o `NO_PASS` é ignorado aqui.)
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('email');
     final password = prefs.getString('password');
 
-    // Sem credenciais salvas não há sessão para restaurar.
-    if (email == null || password == null) return;
+    if (email == null || password == null || password == 'NO_PASS') return;
 
     try {
       state = LoginState.loading;
       notifyListeners();
-
-      if (password == 'NO_PASS') {
-        // Login via Google: a sessão do Firebase já fica persistida entre
-        // execuções do app, então reutilizamos o usuário atual em vez de
-        // disparar novamente o fluxo interativo do Google SignIn. Assim o
-        // login com Google permanece logado igual ao de e-mail/senha.
-        final currentUser = _auth.currentUser;
-        if (currentUser == null) {
-          state = LoginState.idle;
-          return;
-        }
-        uid = currentUser.uid;
-        global_uid_user.password = 'NO_PASS';
-        global_uid_user.googleAuth = true;
-        await _getUserInfo();
-      } else {
-        await _emailAndPassword(email, password);
-      }
-
+      await _emailAndPassword(email, password);
       state = LoginState.success;
     } catch (e) {
       state = LoginState.idle;
@@ -257,29 +287,40 @@ class LoginViewModel extends ChangeNotifier {
     // pendente de abrir (cold-start pelo toque no banner da notificação).
     NotificationService.instance.tryOpenPendingBudget();
 
-    final resultSubscription =
-        await FlutterInappPurchase.instance.getAvailablePurchases();
+    // A consulta de assinaturas (`getAvailablePurchases`) pode falhar
+    // (sem Play Services, emulador, rede) exatamente como `fetchProducts`.
+    // Isolamos em try/catch para que a falha NUNCA quebre o fluxo de
+    // login/cadastro/auto-login — o usuário já está autenticado no Firebase
+    // e com o documento lido; a assinatura é complementar.
+    try {
+      final resultSubscription =
+          await FlutterInappPurchase.instance.getAvailablePurchases();
 
-    if (resultSubscription.isNotEmpty) {
-      final latestSubscription = resultSubscription.reduce(
-        (current, next) =>
-            (current.transactionDate) > (next.transactionDate)
-                ? current
-                : next,
-      );
-
-      global_uid_user.autoRenewing = latestSubscription.isAutoRenewing;
-      global_uid_user.purchaseToken = latestSubscription.purchaseToken ?? '';
-      global_uid_user.productId = latestSubscription.productId;
-
-      if (Platform.isAndroid &&
-          latestSubscription is PurchaseAndroid &&
-          latestSubscription.isAcknowledgedAndroid != true) {
-        await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
-          latestSubscription.purchaseToken ?? '',
+      if (resultSubscription.isNotEmpty) {
+        final latestSubscription = resultSubscription.reduce(
+          (current, next) =>
+              (current.transactionDate) > (next.transactionDate)
+                  ? current
+                  : next,
         );
+
+        global_uid_user.autoRenewing = latestSubscription.isAutoRenewing;
+        global_uid_user.purchaseToken = latestSubscription.purchaseToken ?? '';
+        global_uid_user.productId = latestSubscription.productId;
+
+        if (Platform.isAndroid &&
+            latestSubscription is PurchaseAndroid &&
+            latestSubscription.isAcknowledgedAndroid != true) {
+          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
+            latestSubscription.purchaseToken ?? '',
+          );
+        }
+      } else {
+        global_uid_user.autoRenewing = false;
+        global_uid_user.purchaseToken = '';
       }
-    } else {
+    } catch (_) {
+      // Falha ao consultar assinatura não impede o login/cadastro.
       global_uid_user.autoRenewing = false;
       global_uid_user.purchaseToken = '';
     }

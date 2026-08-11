@@ -53,6 +53,20 @@ class NotificationService {
   // start pelo toque no banner). Processado por [tryOpenPendingBudget].
   String? _pendingBudgetId;
 
+  /// Token FCM atual em **memória volátil**. Obtido já no `initialize()`
+  // (startup do app), ANTES do login — o FCM só precisa do Firebase
+  // inicializado, não do usuário. Guardar aqui desacopla "pegar o token"
+  // de "salvar o token": só salvamos no Firestore **depois do login",
+  // quando já sabemos o `uid` do dono. Sobrevive em memória entre o
+  // startup e o login (e entre logins) mas some se o app é fechado —
+  // por isso mesmo, no próximo startup ele é re-obtido e re-salvo.
+  String? _fcmToken;
+
+  /// `uid` do dono atualmente vinculado (setado em
+  // `startBudgetApprovalListener`). Usado para re-persistir o token
+  // automaticamente quando ele renova via `onTokenRefresh`.
+  String? _boundOwnerUid;
+
   /// Observa renovações do token FCM para manter persistido o token atual
   // do dono (a Cloud Function precisa do token válido para enviar o push).
   StreamSubscription<String>? _tokenRefreshSub;
@@ -107,12 +121,35 @@ class NotificationService {
     //    consumido depois do login via [tryOpenPendingBudget].
     unawaited(_handleInitialMessage());
 
-    // 8) Permissão + token.
+    // 8) Permissão + token (memória volátil).
+    //    O token é obtido aqui no startup, ANTES do login, e guardado em
+    //    `_fcmToken`. A persistência no Firestore só acontece DEPOIS do
+    //    login (precisa do `uid` do dono) — ver `startBudgetApprovalListener`.
     await FirebaseMessaging.instance.requestPermission();
     final String? token = await FirebaseMessaging.instance.getToken();
+    _fcmToken = token;
     if (kDebugMode) {
-      debugPrint('FCM token: $token');
+      debugPrint('FCM token (memória volátil): $token');
     }
+    // Observa renovações: atualiza a memória e, se já houver dono vinculado,
+    // re-salva no Firestore (token mudou → a Cloud Function precisa do novo).
+    _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = FirebaseMessaging.instance.onTokenRefresh.listen((t) {
+      _fcmToken = t;
+      final owner = _boundOwnerUid;
+      if (owner != null && owner.isNotEmpty) {
+        unawaited(_persistFcmToken(owner));
+      }
+    });
+  }
+
+  /// Token FCM atual (em memória volátil). Retorna o token em cache se já
+  /// foi obtido no startup; caso contrário, busca agora (fallback) e cacheia.
+  Future<String?> currentToken() async {
+    if (_fcmToken != null && _fcmToken!.isNotEmpty) return _fcmToken;
+    final t = await FirebaseMessaging.instance.getToken();
+    _fcmToken = t;
+    return t;
   }
 
   // ---------------------------------------------------------------------------
@@ -250,19 +287,19 @@ class NotificationService {
   // ---------------------------------------------------------------------------
 
   /// Chamado depois que o dono faz login (quando `global_uid_user.user` fica
-  /// disponível). Persiste o token FCM atual em
-  /// `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}` (um documento por
-  /// dispositivo — lido pela Cloud Function para fan-out a todos os devices)
-  /// e observa renovações do token para manter o path sempre atualizado.
-  /// Idempotente: chamar de novo só re-vincula (mesmo token = mesmo id de doc).
+  /// disponível). **Salva** o token FCM (que já está em memória volátil desde o
+  /// startup) em `EMPRESAS/{uid}/USERS/{uid}/FCM/TOKENS/{token}` — um doc
+  /// por dispositivo, lido pela Cloud Function para fan-out a todos os
+  /// devices. Idempotente: mesmo token = mesmo id de doc, nunca duplica.
+  ///
+  /// O token é obtido no `initialize()` (antes do login) e guardado em
+  /// `_fcmToken`; aqui só persistimos o que já temos em memória. Se ainda
+  /// não houver token em memória (caso raro), busca agora como fallback.
   void startBudgetApprovalListener(String ownerUid) {
     // Não roda no Web público (lá só há o fluxo do cliente, não o do dono).
     if (kIsWeb) return;
+    _boundOwnerUid = ownerUid;
     unawaited(_persistFcmToken(ownerUid));
-    _tokenRefreshSub?.cancel();
-    _tokenRefreshSub = FirebaseMessaging.instance.onTokenRefresh.listen(
-      (_) => unawaited(_persistFcmToken(ownerUid)),
-    );
     // Após o login o dono está autenticado: tenta consumir um orçamento
     // pendente de abrir (cold-start pelo toque no banner).
     tryOpenPendingBudget();
@@ -270,6 +307,7 @@ class NotificationService {
 
   /// Encerra vínculos (ex.: logout). Idempotente.
   void stopBudgetApprovalListener() {
+    _boundOwnerUid = null;
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = null;
   }
@@ -300,8 +338,13 @@ class NotificationService {
   ///   Function ainda não redeployadas.
   Future<void> _persistFcmToken(String ownerUid) async {
     try {
-      final String? token = await FirebaseMessaging.instance.getToken();
-      if (token == null || token.isEmpty) return;
+      // Usa o token que já está em memória volátil (obtido no startup). Se
+      // por algum motivo ainda não tiver, busca agora (fallback) e cacheia.
+      final String? token = await currentToken();
+      if (token == null || token.isEmpty) {
+        if (kDebugMode) debugPrint('persist FCM token: sem token disponível');
+        return;
+      }
       final db = FirebaseFirestore.instance;
       final batch = db.batch();
       // Lista de tokens (multi-device) — fonte de verdade da Cloud Function.
@@ -323,6 +366,9 @@ class NotificationService {
         SetOptions(merge: true),
       );
       await batch.commit();
+      if (kDebugMode) {
+        debugPrint('FCM token persistido pós-login: $token em FCM/TOKENS');
+      }
     } catch (e) {
       if (kDebugMode) debugPrint('persist FCM token failed: $e');
     }
