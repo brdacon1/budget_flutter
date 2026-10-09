@@ -20,10 +20,6 @@ import 'package:oflite/web/budget_web/budget_web_app/budget_web_app_view.dart';
 /// ```
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Configuração Web do Firebase (orçamento compartilhável). No Web é
-  // obrigatório passar o [FirebaseOptions] — o app mobile continua usando
-  // `Firebase.initializeApp()` sem options (config via google-services /
-  // Info.plist). Como este entry point é Web-only, isto não afeta o mobile.
   assert(kIsWeb, 'main_web.dart só deve ser usado no Flutter Web');
   await Firebase.initializeApp(options: _webFirebaseOptions);
   await Environment.instance.initialize();
@@ -68,7 +64,6 @@ class BudgetWebApp extends StatelessWidget {
       builder: (theme, darkTheme) => MaterialApp(
         title: 'Orçamento',
         debugShowCheckedModeBanner: false,
-        // Sem rotas nomeadas do app mobile — somente o fluxo de orçamento.
         home: const BudgetWebAppView(),
       ),
     );
