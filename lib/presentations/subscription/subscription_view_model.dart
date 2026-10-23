@@ -18,11 +18,17 @@ class SubscriptionViewModel extends ChangeNotifier {
       : ['com.housestudio.oflite', 'com.housestudio.oflite'];
 
   Future<void> init() async {
-    await FlutterInappPurchase.instance.initConnection();
-    await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
-      skus: productLists,
-      type: ProductQueryType.Subs,
-    );
+    try {
+      await FlutterInappPurchase.instance.initConnection();
+      await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
+        skus: productLists,
+        type: ProductQueryType.Subs,
+      );
+    } catch (_) {
+      // Falha ao consultar produtos de assinatura é esperada no emulador
+      // iOS (StoreKit não disponível) ou sem conectividade. Continua sem
+      // interromper o fluxo — a UI já lida com estados vazios.
+    }
 
     _purchaseUpdatedSubscription = FlutterInappPurchase
         .instance.purchaseUpdatedListener

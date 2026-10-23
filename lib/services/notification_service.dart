@@ -76,7 +76,11 @@ class NotificationService {
     // 1) Inicializa o plugin de notificações locais (Android usa o ícone do app).
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+    const iosSettings = IOSInitializationSettings();
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
     // O callback `onDidReceiveNotificationResponse` dispara quando o usuário
     // **toca** numa notificação local (as que nós mesmos mostramos em
     // foreground) — abre o orçamento a partir do payload (`ORCAMENTO_ID`).

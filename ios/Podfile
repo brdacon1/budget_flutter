@@ -1,7 +1,7 @@
 # Define a global platform for this project. firebase_messaging 16 exige
 # iOS 13.0+ (push/APNs). Mantenha alinhado ao IPHONEOS_DEPLOYMENT_TARGET
 # do projeto (13.0) no Runner.xcodeproj.
-platform :ios, '13.0'
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
