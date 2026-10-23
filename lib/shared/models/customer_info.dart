@@ -50,6 +50,40 @@ class CustomerInfo {
     totalValue = json['VALORTOTAL'] ?? 0;
   }
 
+  CustomerInfo copyWith({
+    String? id,
+    String? data,
+    String? street,
+    String? generated,
+    String? neighborhood,
+    String? city,
+    String? email,
+    String? address,
+    String? phone,
+    String? customerName,
+    String? companyName,
+    String? status,
+    String? zip,
+    double? totalValue,
+  }) {
+    return CustomerInfo(
+      id: id ?? this.id,
+      data: data ?? this.data,
+      street: street ?? this.street,
+      generated: generated ?? this.generated,
+      neighborhood: neighborhood ?? this.neighborhood,
+      city: city ?? this.city,
+      email: email ?? this.email,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      customerName: customerName ?? this.customerName,
+      companyName: companyName ?? this.companyName,
+      status: status ?? this.status,
+      zip: zip ?? this.zip,
+      totalValue: totalValue ?? this.totalValue,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['ID'] = id;

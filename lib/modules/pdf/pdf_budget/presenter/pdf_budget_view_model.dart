@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/usecases/data/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
+import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfBudgetViewModel extends ChangeNotifier {
-  final HttpRequest db = HttpRequest();
+  final PdfRepository _pdfRepository = getIt<PdfRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
   final ConvertCoin moneyConvert = ConvertCoin();
   final PdfGenerateUseCase pdf = PdfGenerateUseCase();
   String? fileBytes;
   bool _loading = true;
   bool get loading => _loading;
-  /// `true` após [dispose] — evita chamar `notifyListeners()` (e usar o VM)
-  /// depois que a View foi descartada, o que lançaria
-  /// `A PdfBudgetViewModel was used after being disposed`.
   bool _disposed = false;
+
   PdfBudgetViewModel();
 
-  /// Notifica apenas se o VM ainda estiver vivo. Silenciosamente ignora
-  /// notificações que chegam após [dispose] (ex.: retornos de `await` de uma
-  /// `initialData` que ainda estava rodando quando a tela foi fechada).
   void _safeNotify() {
     if (_disposed) return;
     notifyListeners();
@@ -30,24 +32,49 @@ class PdfBudgetViewModel extends ChangeNotifier {
     _loading = true;
     _safeNotify();
     try {
-      final budget = await db.getListItensGerador();
-      final customer = await db.getInformationOrcamento1();
-      final owner = await db.getInformationEnterprise();
-      final comment = await db.getListComentarioPDF();
+      List<ItemsBudget> budgetItems = [];
+      CustomerInfo? customer;
+      OwnerPdf? owner;
+      List<ObservationPdf> comments = [];
 
-      if (budget.isNotEmpty) {
+      final itemsResult = await _pdfRepository
+          .fetchBudgetItems(budget.IDORCAMENTO ?? '', forceRefresh: true);
+      if (itemsResult is Ok<List<ItemsBudget>>) {
+        budgetItems = itemsResult.value;
+      }
+
+      final customerResult = await _pdfRepository
+          .fetchBudgetById(budget.IDORCAMENTO ?? '', forceRefresh: true);
+      if (customerResult is Ok<CustomerInfo>) {
+        customer = customerResult.value;
+      }
+
+      final ownerResult =
+          await _pdfRepository.fetchInformationEnterprise(forceRefresh: true);
+      if (ownerResult is Ok<OwnerPdf>) {
+        owner = ownerResult.value;
+      }
+
+      final commentResult = await _pdfRepository
+          .fetchBudgetComments(budget.IDORCAMENTO ?? '', forceRefresh: true);
+      if (commentResult is Ok<List<ObservationPdf>>) {
+        comments = commentResult.value;
+      }
+
+      if (budgetItems.isNotEmpty && customer != null && owner != null) {
         double totalProducts = 0;
         double totalServices = 0;
         double totalBudget = 0;
         int countProduct = 0;
         int countService = 0;
 
-        for (int index = 0; index < budget.length; index++) {
-          final total = budget[index].TOTAL ?? 0;
-          if (budget[index].CATEGORIA == 'Produtos') {
+        for (int index = 0; index < budgetItems.length; index++) {
+          final item = budgetItems[index];
+          final total = item.TOTAL ?? 0;
+          if (item.CATEGORIA == 'Produtos') {
             totalProducts += total;
             countProduct++;
-          } else if (budget[index].CATEGORIA == 'Serviços') {
+          } else if (item.CATEGORIA == 'Serviços') {
             totalServices += total;
             countService++;
           }
@@ -60,10 +87,10 @@ class PdfBudgetViewModel extends ChangeNotifier {
           totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
           totalPriceProducts: moneyConvert.convertFromDouble(totalProducts),
           totalPriceServices: moneyConvert.convertFromDouble(totalServices),
-          items: budget,
+          items: budgetItems,
           customer: customer,
           owner: owner,
-          observations: comment,
+          observations: comments,
         );
         fileBytes = generated;
       } else {

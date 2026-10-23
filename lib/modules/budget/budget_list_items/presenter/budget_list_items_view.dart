@@ -211,7 +211,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
               FloatingActionButton(
                 heroTag: "adicionar",
                 onPressed: () async {
-                  if (await _viewModel.db.getNumberItems() > 0) {
+                  if (await _viewModel.getProductCount() > 0) {
                     final value = await displayAlert.listNotification(context);
                     if (value == "Criar novo item") {
                       budget.fromListItem = true;

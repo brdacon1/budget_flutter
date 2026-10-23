@@ -1,12 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/shared/models/month_calculate.dart';
 import 'package:oflite/shared/models/my_budget_dashboard.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 class DashboardViewModel extends ChangeNotifier {
+  final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
+
   final List<CustomerInfo> _foundUsers = <CustomerInfo>[];
   List<CustomerInfo> get foundUsers => _foundUsers;
 
@@ -46,7 +49,6 @@ class DashboardViewModel extends ChangeNotifier {
   bool _loading = false;
   bool get isLoading => _loading;
 
-  /// Calcula a semana do mês (1 a ~4.5) a partir de um timestamp.
   double getWeekOfMonthFromMilliseconds(int millisecondsSinceEpoch) {
     DateTime dateTime =
         DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
@@ -55,8 +57,6 @@ class DashboardViewModel extends ChangeNotifier {
     return week;
   }
 
-  /// Inicializa o dashboard: pede permissão de storage, busca os orçamentos
-  /// do mês corrente e recalcula os totais/quantidades por status e semana.
   Future<void> startDashboard() async {
     _loading = true;
     notifyListeners();
@@ -65,7 +65,6 @@ class DashboardViewModel extends ChangeNotifier {
       await Permission.storage.request();
       final value = await getInformationBudget();
 
-      // Reinicia os acumuladores antes de recalcular.
       _myBudgetDashboard = MyBudgetDashboard(
         qtdTotal: value.length,
         qtdIntApproved: 0,
@@ -182,7 +181,6 @@ class DashboardViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Distribui o valor [value] para o acumulador da semana correspondente.
   void _accumulateByWeek(
     double weekNumber,
     double value,
@@ -202,28 +200,23 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  /// Busca no Firestore os orçamentos do mês corrente.
+  /// Busca no Firestore os orçamentos do mês corrente via query no backend.
   Future<List<CustomerInfo>> getInformationBudget() async {
     _foundUsers.clear();
+
     DateTime currentDate = DateTime.now();
     DateTime firstDayOfCurrentMonth =
         DateTime(currentDate.year, currentDate.month, 1);
     DateTime lastDayOfCurrentMonth =
         DateTime(currentDate.year, currentDate.month + 1, 0);
 
-    int firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch;
-    int lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch;
+    String firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch.toString();
+    String lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch.toString();
 
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-        .where('ID', isGreaterThanOrEqualTo: firstDayMillis.toString())
-        .where('ID', isLessThanOrEqualTo: lastDayMillis.toString())
-        .orderBy('ID', descending: false)
-        .get();
-
-    for (var questionTmp in querySnapshot.docs) {
-      final data = questionTmp.data();
-      _foundUsers.add(CustomerInfo.fromMap(data));
+    final result = await _budgetRepository.fetchBudgetsByMonthRange(
+        firstDayMillis, lastDayMillis);
+    if (result is Ok<List<CustomerInfo>>) {
+      _foundUsers.addAll(result.value);
     }
 
     return _foundUsers;

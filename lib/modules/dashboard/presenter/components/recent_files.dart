@@ -51,7 +51,7 @@ class _RecentFiles extends State<RecentFiles> {
               ],
               rows: List.generate(
                 widget.items.length >= 5 ? 5 : widget.items.length,
-                    (index) => recentFileDataRow(widget.items[widget.items.length - index - 1]),
+                    (index) => recentFileDataRow(widget.items[index]),
               ),
             ),
           ),

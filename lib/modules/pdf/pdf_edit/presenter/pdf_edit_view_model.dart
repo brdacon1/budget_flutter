@@ -3,23 +3,39 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
-import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/image/presenter/image_edit_view.dart';
-import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/core/services/data/service/via_cep_service.dart' as CEP;
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/image/presenter/image_edit_view.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/modules/core/services/data/service/via_cep_service.dart' as CEP;
+import 'package:oflite/shared/design_pattern/result.dart';
 
+enum Gender {
+  fullname,
+  email,
+  phone,
+  site,
+  cpf,
+  cep,
+  rua,
+  data,
+  city,
+  bairro,
+}
 
 class PdfEditViewModel extends ChangeNotifier {
-  final Color enabledtxt = Colors.white;
-  final Color deaible = Colors.white;
-
-  final HttpRequest db = HttpRequest();
+  final PdfRepository _pdfRepository = getIt<PdfRepository>();
+  final UserRepository _userRepository = getIt<UserRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
   final LoadingEvent loadingEvent = LoadingEvent();
+
+  final Color enabledtxt = Colors.white;
+  final Color deaible = Colors.white;
 
   OwnerPdf owner = OwnerPdf();
   Uint8List? fileContent;
@@ -60,17 +76,24 @@ class PdfEditViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      owner = await db.getInformationEnterprise();
+      final result = await _pdfRepository.fetchInformationEnterprise();
+      if (result is Ok<OwnerPdf>) {
+        owner = result.value;
+      }
 
       String? token;
-      if (UID.googleAuth!) {
-        token = await db.authGoogle();
-      } else {
-        final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: UID.email!.trim(),
-          password: UID.password!.trim(),
-        );
-        token = await auth.user?.getIdToken();
+      final tokenResult = await _userRepository.getIdToken();
+      if (tokenResult is Ok<String>) {
+        token = tokenResult.value;
+      }
+      if (token == 'NOT_AUTH' || token == null) {
+        if (UID.googleAuth != true) {
+          final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: UID.email!.trim(),
+            password: UID.password!.trim(),
+          );
+          token = await auth.user?.getIdToken();
+        }
       }
 
       _syncFormFromOwner();
@@ -126,7 +149,7 @@ class PdfEditViewModel extends ChangeNotifier {
         ..empresa = nameText.text
         ..logoName = owner.logoName;
 
-      await db.savePDF(localOwner);
+      await _pdfRepository.saveInformationEnterprise(localOwner);
       owner = localOwner;
 
       loadingEvent.closeLoading(context);
@@ -148,8 +171,7 @@ class PdfEditViewModel extends ChangeNotifier {
       cityText.text = adress.localidade?.toUpperCase() ?? '';
       bairroText.text = adress.bairro?.toUpperCase() ?? '';
       notifyListeners();
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   void selectField(Gender field) {
@@ -187,17 +209,4 @@ class PdfEditViewModel extends ChangeNotifier {
     bairroText.dispose();
     super.dispose();
   }
-}
-
-enum Gender {
-  fullname,
-  email,
-  phone,
-  site,
-  cpf,
-  cep,
-  rua,
-  data,
-  city,
-  bairro,
 }

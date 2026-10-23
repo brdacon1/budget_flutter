@@ -65,16 +65,24 @@ String capitalizeFirstLetter(String text) {
   return text[0].toUpperCase() + text.substring(1).toLowerCase();
 }
 class _ProfileCard extends State<ProfileCard> {
-  final String _selectedItem = capitalizeFirstLetter(global_uid_user.name!.split(' ')[0]);
-  final List<String> _dropdownItems = [
-    capitalizeFirstLetter(global_uid_user.name!.split(' ')[0]),
-    'Sair',
-  ];
+  late String _selectedItem;
+  late final List<String> _dropdownItems;
 
   final List<IconData> _dropdownIcons = [
     Icons.person,
     Icons.logout,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    final name = global_uid_user.name ?? 'Usuário';
+    _selectedItem = capitalizeFirstLetter(name.split(' ')[0]);
+    _dropdownItems = [
+      _selectedItem,
+      'Sair',
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

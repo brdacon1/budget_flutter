@@ -1,21 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
-FirebaseFirestore firestore = FirebaseFirestore.instance;
 TextEditingController searchController = TextEditingController();
 
 class BudgetListItemsViewModel extends ChangeNotifier {
+  final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
+  final ProductPriceRepository _productRepository = getIt<ProductPriceRepository>();
+
   var orcamentos = <ItemsBudget>[];
   var deleteItens = <ItemsBudget>[];
   ItemsBudget novo = ItemsBudget();
   ConvertCoin moneyConvert = ConvertCoin();
-  var db = HttpRequest();
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;
@@ -36,21 +38,20 @@ class BudgetListItemsViewModel extends ChangeNotifier {
     totalProducts = 0;
     totalServices = 0;
     totalBudget = 0;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection(
-            "EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS/${item.id}/ITENS")
-        .orderBy('CATEGORIA', descending: false)
-        .get();
-    List<QueryDocumentSnapshot> documents = querySnapshot.docs;
-    for (var document in documents) {
-      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-      ItemsBudget item = ItemsBudget.fromMap(data);
-      item.checkBox = false;
-      item.id = document.id; // Obter o doc.id e atribuir ao item.id
-      orcamentos.add(item);
+    countProduct = 0;
+    countService = 0;
+
+    final result = await _budgetRepository.fetchBudgetItems(item.id!,
+        forceRefresh: true);
+    if (result is Ok<List<ItemsBudget>>) {
+      orcamentos = result.value;
+      for (var o in orcamentos) {
+        o.checkBox = false;
+      }
     }
+
     for (int index = 0; index < orcamentos.length; index++) {
-      double total = orcamentos[index].TOTAL!;
+      double total = orcamentos[index].TOTAL ?? 0;
       if (orcamentos[index].CATEGORIA == 'Produtos') {
         totalProducts += total;
         countProduct++;
@@ -62,24 +63,22 @@ class BudgetListItemsViewModel extends ChangeNotifier {
     }
     if (budget.VALORTOTAL != totalBudget) {
       budget.VALORTOTAL = totalBudget;
-      await db.updateItemsDADOS();
+      // Atualiza o orçamento com o total recalculado
+      final budgetUpdate = item.copyWith(totalValue: totalBudget);
+      await _budgetRepository.updateBudget(budgetUpdate);
     }
 
     notifyListeners();
   }
 
   Future<bool> deleteData() async {
-    bool result = false;
-
-    for (int i = 0; i < deleteItens.length; i++) {
-      await FirebaseFirestore.instance
-          .collection(
-              "EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS/${item.id}/ITENS")
-          .doc(deleteItens[i].id)
-          .delete();
+    final result = await _budgetRepository.deleteBudgetItems(
+        item.id!, deleteItens);
+    if (result is Ok<void>) {
+      deleteItens.clear();
+      deleteVisible = false;
     }
-    result = true;
-    return result;
+    return result is Ok<void>;
   }
 
   void onSearchTextChanged(String value) {
@@ -88,13 +87,13 @@ class BudgetListItemsViewModel extends ChangeNotifier {
 
   List<ItemsBudget> getFilteredData() {
     if (searchController.text.isEmpty) {
-      return orcamentos; // Retorna a lista original se não houver texto de busca
+      return orcamentos;
     } else {
       return orcamentos
           .where((x) => x.DESCRICAO!
               .toLowerCase()
               .contains(searchController.text.toLowerCase()))
-          .toList(); // Filtra a lista original com base no texto de busca
+          .toList();
     }
   }
 
@@ -126,5 +125,10 @@ class BudgetListItemsViewModel extends ChangeNotifier {
     deleteVisible = false;
     checkBoxAppear = false;
     notifyListeners();
+  }
+
+  Future<int> getProductCount() async {
+    final result = await _productRepository.getProductCount();
+    return result;
   }
 }

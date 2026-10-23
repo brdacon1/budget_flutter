@@ -1,10 +1,17 @@
 import 'package:get_it/get_it.dart';
+import 'package:oflite/modules/budget/budget_binds.dart';
+import 'package:oflite/modules/comment/comment_binds.dart';
+import 'package:oflite/modules/login/login_binds.dart';
+import 'package:oflite/modules/payment/payment_binds.dart';
+import 'package:oflite/modules/pdf/pdf_binds.dart';
+import 'package:oflite/modules/product/product_binds.dart';
+import 'package:oflite/modules/receipt/receipt_binds.dart';
 
 /// Instância global do GetIt para injeção de dependências.
 ///
 /// Regras de registro:
-/// - Services externos / compartilhados → `registerLazySingleton`
-/// - Repositories (abstrações + impl)   → `registerLazySingleton`
+/// - DataSources externos / compartilhados → `registerLazySingleton`
+/// - Repositories (abstrações + impl)   → `registerLazySingleton` (mantêm cache em memória)
 /// - ViewModels                         → `registerFactory` (sempre nova instância)
 ///
 /// ViewModels devem aceitar dependências opcionais no construtor com
@@ -18,18 +25,21 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
   // Core Services (stateless ou com estado próprio, custosos de recriar)
   // ------------------------------------------------------------------
-  // Exemplo:
-  // getIt.registerLazySingleton<HttpRequest>(() => HttpRequest());
 
   // ------------------------------------------------------------------
-  // Core Repositories
+  // Feature Binds (Datasource -> RepositoryImpl exposta como interface)
   // ------------------------------------------------------------------
-  // Exemplo:
-  // getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
+  registerBudgetDependencies(getIt);
+  registerReceiptDependencies(getIt);
+  registerPaymentDependencies(getIt);
+  registerProductDependencies(getIt);
+  registerCommentDependencies(getIt);
+  registerPdfDependencies(getIt);
+  registerLoginDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)
   // ------------------------------------------------------------------
-  // Exemplo:
-  // getIt.registerFactory<LoginViewModel>(() => LoginViewModel());
+  // Cada ViewModel é registrado no binds do próprio módulo ou aqui
+  // caso precise ser centralizado.
 }

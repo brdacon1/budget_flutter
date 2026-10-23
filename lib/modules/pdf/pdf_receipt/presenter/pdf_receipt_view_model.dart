@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/usecases/data/usecase/pdf_generate_receipt_usecase.dart';
+import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/shared/models/payment_customer.dart';
+import 'package:oflite/shared/models/receipt.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfReceiptViewModel extends ChangeNotifier {
-  final HttpRequest db = HttpRequest();
+  final PdfRepository _pdfRepository = getIt<PdfRepository>();
+  final PaymentRepository _paymentRepository = getIt<PaymentRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
   final ConvertCoin moneyConvert = ConvertCoin();
   final PdfGenerateReceiptUseCase pdf = PdfGenerateReceiptUseCase();
@@ -37,30 +43,31 @@ class PdfReceiptViewModel extends ChangeNotifier {
         return;
       }
 
-      final recived = await db.getListRecived();
-      final payment = await db.getListPayment(receipt, item);
-      final owner = await db.getInformationEnterprise();
+      final paymentResult =
+          await _paymentRepository.fetchPayments(receipt, forceRefresh: true);
+      List<PaymentCustomer> paymentList = [];
+      if (paymentResult is Ok<List<PaymentCustomer>>) {
+        paymentList = paymentResult.value;
+      }
 
-      if (recived.isEmpty) {
-        fileBytes = null;
-        empty = true;
-        loading = false;
-        notifyListeners();
-        await displayAlert.notificationError(
-          context,
-          'Erro!',
-          "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'",
-        );
-        return;
+      final ownerResult =
+          await _pdfRepository.fetchInformationEnterprise(forceRefresh: true);
+      OwnerPdf? owner;
+      if (ownerResult is Ok<OwnerPdf>) {
+        owner = ownerResult.value;
+      }
+
+      if (owner == null) {
+        throw Exception('Owner info not found');
       }
 
       double totalBudget = 0;
-      for (final p in payment) {
-        totalBudget += p.PRECO!;
+      for (final p in paymentList) {
+        totalBudget += p.PRECO ?? 0;
       }
 
       final path = await pdf.patternPDF(
-        paymentList: payment,
+        paymentList: paymentList,
         recived: receipt,
         totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
         customer: item,

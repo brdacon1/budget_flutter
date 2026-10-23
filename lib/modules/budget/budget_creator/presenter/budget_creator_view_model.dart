@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
@@ -7,12 +6,14 @@ import 'package:flutter_contacts/properties/phone.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/services/data/service/via_cep_service.dart' as CEP;
+import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender {
   fullname,
@@ -28,6 +29,7 @@ enum Gender {
 }
 
 class BudgetCreatorViewModel extends ChangeNotifier {
+  final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final CustomerInfo item;
   final DisplayAlert displayAlert = DisplayAlert();
 
@@ -75,10 +77,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
 
-  // ------------------------------------------------------------------
-  // Estado de UI derivado do `item` recebido (novo x edição).
-  // ------------------------------------------------------------------
-
   bool get _isEditing => (item.id ?? '').isNotEmpty;
 
   void _setupUiState() {
@@ -89,7 +87,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     fieldVisible = editing;
   }
 
-  /// Preenche um controller com texto opcional, tratando `null`/`'null'`.
   void _setNullableController(TextEditingController controller, String? value) {
     controller.text = (value == null || value == 'null') ? '' : value;
   }
@@ -107,12 +104,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     cepController.text =
         (item.zip == null) ? '' : maskCep.maskText(item.zip.toString());
   }
-
-  // ------------------------------------------------------------------
-  // Propagação de estado (item compartilhado + globals).
-  // A mutação in-place do `item` é intencional: ela reflete o orçamento
-  // salvo de volta para a tela pai/abas irmãs que seguram a mesma referência.
-  // ------------------------------------------------------------------
 
   void _applyToItem(CustomerInfo source) {
     item
@@ -158,8 +149,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     idController.text = budget.id ?? '';
   }
 
-  /// Monta o orçamento a partir do `item` + campos editáveis dos controllers.
-  /// Em edição mantém id/data/total; na criação gera novo id/data e zera o total.
   CustomerInfo _buildBudget(bool isUpdate, String formattedDate) {
     return CustomerInfo(
       id: isUpdate ? item.id : DateTime.now().millisecondsSinceEpoch.toString(),
@@ -179,10 +168,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     );
   }
 
-  // ------------------------------------------------------------------
-  // Ações
-  // ------------------------------------------------------------------
-
   void init() {
     try {
       _applyToGlobals(item);
@@ -193,49 +178,15 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   }
 
   Future<void> saveBudget(CustomerInfo budget) async {
-    await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-        .doc(budget.id)
-        .set({
-      'ID': budget.id,
-      'DATA': budget.data,
-      'RUA': budget.street,
-      'GERADO': budget.generated,
-      'BAIRRO': budget.neighborhood,
-      'CITY': budget.city,
-      'EMAIL': budget.email,
-      'ENDERECO': budget.address,
-      'FONE': budget.phone,
-      'NOMECLIENTE': budget.customerName,
-      'NOMEEMPRESA': budget.companyName,
-      'STATUS': budget.status,
-      'CEP': budget.zip,
-      'VALORTOTAL': budget.totalValue,
-    });
-    Orcamento.IDORCAMENTO = budget.id;
-    Orcamento.VALORTOTAL = budget.totalValue ?? 0;
+    final result = await _budgetRepository.saveBudget(budget);
+    if (result is Ok<void>) {
+      Orcamento.IDORCAMENTO = budget.id;
+      Orcamento.VALORTOTAL = budget.totalValue ?? 0;
+    }
   }
 
   Future<void> updateItensDADOS(CustomerInfo budget) async {
-    await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-        .doc(item.id)
-        .update({
-      'ID': budget.id,
-      'DATA': budget.data,
-      'RUA': budget.street,
-      'GERADO': budget.generated,
-      'BAIRRO': budget.neighborhood,
-      'CITY': budget.city,
-      'EMAIL': budget.email,
-      'ENDERECO': budget.address,
-      'FONE': budget.phone,
-      'NOMECLIENTE': budget.customerName,
-      'NOMEEMPRESA': budget.companyName,
-      'STATUS': budget.status,
-      'CEP': budget.zip,
-      'VALORTOTAL': budget.totalValue,
-    });
+    await _budgetRepository.updateBudget(budget);
   }
 
   void selectField(Gender field) {
@@ -307,16 +258,13 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       await saveBudget(budget);
     }
 
-    // Reflete o orçamento salvo de volta no item compartilhado (tela pai/abas).
     _applyToItem(budget);
-    // Na criação, atualiza também os globals e entra em modo de edição.
     if (!isUpdate) {
       _applyToGlobals(budget);
       _enterEditMode(budget);
     }
     notifyListeners();
 
-    // Feedback / fluxo de contato (preserva comportamento original por modo).
     if (isUpdate) {
       if (context.mounted) {
         await displayAlert.notification(

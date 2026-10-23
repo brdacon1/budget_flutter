@@ -1,10 +1,11 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
+import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 
 enum Gender {
@@ -14,6 +15,11 @@ enum Gender {
 }
 
 class PaymentCreatorViewModel extends ChangeNotifier {
+  final PaymentRepository _paymentRepository = getIt<PaymentRepository>();
+  final ConvertCoin moneyConvert = ConvertCoin();
+  final LoadingEvent loadingEvent = LoadingEvent();
+  final DisplayAlert displayAlert = DisplayAlert();
+
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
@@ -27,11 +33,6 @@ class PaymentCreatorViewModel extends ChangeNotifier {
   final TextEditingController descricaoText = TextEditingController();
   final MoneyMaskedTextController controller =
       MoneyMaskedTextController(leftSymbol: 'R\$ ');
-
-  final ConvertCoin moneyConvert = ConvertCoin();
-  final db = HttpRequest();
-  final loadingEvent = LoadingEvent();
-  final displayAlert = DisplayAlert();
 
   void init(PaymentCustomer item) {
     try {
@@ -80,21 +81,19 @@ class PaymentCreatorViewModel extends ChangeNotifier {
       ITENS.METODO = typeText.text;
       ITENS.DESCRICAO = descricaoText.text;
       ITENS.PRECO = cleanAmount;
-      await db.savePaymentCustomer(ITENS).then((value) => {
-            loadingEvent.closeLoading(context),
-            displayAlert.notification(
-                context, "Feito!", "Pagamento criado com sucesso!"),
-          });
+      await _paymentRepository.savePayment(ITENS);
+      loadingEvent.closeLoading(context);
+      await displayAlert.notification(
+          context, "Feito!", "Pagamento criado com sucesso!");
     } else if (nameButton == 'ATUALIZAR') {
       ITENS.METODO = typeText.text;
       ITENS.DESCRICAO = descricaoText.text;
       ITENS.PRECO = cleanAmount;
       ITENS.id = item.id;
-      await db.updatePaymentCustomer(ITENS).then((value) => {
-            loadingEvent.closeLoading(context),
-            displayAlert.notification(
-                context, "Feito!", "Pagamento atualizado com sucesso!"),
-          });
+      await _paymentRepository.updatePayment(ITENS);
+      loadingEvent.closeLoading(context);
+      await displayAlert.notification(
+          context, "Feito!", "Pagamento atualizado com sucesso!");
     }
   }
 }

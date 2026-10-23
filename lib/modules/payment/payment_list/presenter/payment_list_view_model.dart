@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-import 'package:oflite/shared/models/receipt.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
-import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/payment_customer.dart';
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
 import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
+import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
+import 'package:oflite/shared/models/payment_customer.dart';
+import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentListViewModel extends ChangeNotifier {
+  final PaymentRepository _paymentRepository = getIt<PaymentRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
-  final HttpRequest db = HttpRequest();
   final LoadingEvent loadingEvent = LoadingEvent();
   final ConvertCoin moneyConvert = ConvertCoin();
 
@@ -23,19 +25,17 @@ class PaymentListViewModel extends ChangeNotifier {
 
   PaymentListViewModel({required this.item, required this.receipt});
 
-  /// Carrega os pagamentos e recalcula o total pago a partir da própria lista,
-  /// garantindo que a label de total reflita imediatamente o estado atual.
   Future<void> inicialData() async {
-    foundPayment = await db.getListPayment(receipt, item);
+    final result = await _paymentRepository.fetchPayments(receipt);
+    if (result is Ok<List<PaymentCustomer>>) {
+      foundPayment = result.value;
+    }
     _calcTotal();
     notifyListeners();
   }
 
   void _calcTotal() {
-    totalPaid = 0;
-    for (final payment in foundPayment) {
-      totalPaid += payment.PRECO ?? 0;
-    }
+    totalPaid = _paymentRepository.totalPaid;
   }
 
   Future<void> refresh() => inicialData();
@@ -43,10 +43,13 @@ class PaymentListViewModel extends ChangeNotifier {
   Future<void> deletePayment(BuildContext context, int index) async {
     loadingEvent.alertLoading(context);
     try {
-      await db.deletePaymentCustomer(foundPayment[index].id!);
+      final result =
+          await _paymentRepository.deletePayment(foundPayment[index].id!);
       loadingEvent.closeLoading(context);
-      await displayAlert.notificationNotCloseScreen(
-          context, "Feito!", "Pagamento removido com sucesso!");
+      if (result is Ok<void>) {
+        await displayAlert.notificationNotCloseScreen(
+            context, "Feito!", "Pagamento removido com sucesso!");
+      }
     } catch (e) {
       loadingEvent.closeLoading(context);
       await displayAlert.notificationError(
@@ -66,8 +69,6 @@ class PaymentListViewModel extends ChangeNotifier {
   }
 
   Future<void> addPayment(BuildContext context) async {
-    // Não permite adicionar pagamento a um recibo que ainda não foi salvo:
-    // o id vazio geraria um caminho "RECIBOS//PAGAMENTOS" no Firestore.
     if (receipt.id == null || receipt.id!.isEmpty) {
       await displayAlert.notificationWarning(
         context,

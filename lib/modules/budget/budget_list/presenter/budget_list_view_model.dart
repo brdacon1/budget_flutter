@@ -1,16 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
-FirebaseFirestore firestore = FirebaseFirestore.instance;
 TextEditingController searchController = TextEditingController();
 
 class BudgetListViewModel extends ChangeNotifier {
+  final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
+  final DisplayAlert displayAlert = DisplayAlert();
+
   CustomerInfo customerBudget = CustomerInfo();
   Color enabled = const Color(0xFF827F8A);
   final _foundUsers = <CustomerInfo>[];
@@ -20,112 +22,50 @@ class BudgetListViewModel extends ChangeNotifier {
   Color deaible = Colors.grey;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
-  var displayAlert = DisplayAlert();
 
   Future<void> initialScreen() async {
     await getInformationOrcamento();
-    notifyListeners();
   }
 
   Future<void> duplicateEvent(
       bool clientData, bool quoteItems, bool comments) async {
-    var db = HttpRequest();
-    String? originalId = budget.IDORCAMENTO;
-    final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('dd/MM/yyyy');
-    final String formatted = formatter.format(now);
+    final String? originalId = budget.IDORCAMENTO;
+    if (originalId == null || originalId.isEmpty) return;
 
-    customerBudget = CustomerInfo();
+    final result = await _budgetRepository.duplicateBudget(
+      sourceId: originalId,
+      copyClientData: clientData,
+      copyItems: quoteItems,
+      copyComments: comments,
+    );
 
-    if (clientData) {
-      final value = await db.getInformationOrcamento1();
-      if (value.customerName?.isNotEmpty ?? false) {
-        customerBudget.customerName = value.customerName;
-        customerBudget.phone = value.phone;
-        customerBudget.status = value.status;
-        customerBudget.email = value.email;
-        customerBudget.address = value.address;
-        customerBudget.generated = value.generated;
-        customerBudget.companyName = value.companyName;
-        customerBudget.zip = value.zip;
-        customerBudget.street = value.street;
-        customerBudget.city = value.city;
-        customerBudget.neighborhood = value.neighborhood;
-        customerBudget.totalValue = value.totalValue;
-      }
-    } else {
-      customerBudget.customerName = "Duplicado de: ${originalId}";
-      customerBudget.phone = "";
-      customerBudget.status = "";
-      customerBudget.email = "";
-      customerBudget.address = "";
-      customerBudget.generated = "";
-      customerBudget.companyName = "";
-      customerBudget.zip = "";
-      customerBudget.street = "";
-      customerBudget.city = "";
-      customerBudget.neighborhood = "";
+    if (result is Ok<CustomerInfo>) {
+      customerBudget = result.value;
+      budget.IDORCAMENTO = '';
+      await getInformationOrcamento();
     }
-
-    customerBudget.data = formatted;
-    customerBudget.id = DateTime.now().millisecondsSinceEpoch.toString();
-
-    await db.saveBudget(customerBudget);
-
-    if (quoteItems) {
-      final quoteItemsObject = await db.getListItemsGenerator(originalId);
-      if (quoteItemsObject.isNotEmpty) {
-        await db.saveItemsList(quoteItemsObject);
-      }
-    }
-
-    if (comments) {
-      final commentsObject = await db.getListComment(originalId);
-      if (commentsObject.isNotEmpty) {
-        await db.addComment(commentsObject);
-      }
-    }
-
-    budget.IDORCAMENTO = '';
-    notifyListeners();
   }
 
   Future<bool> deleteData() async {
-    bool result = false;
-    int count = deleteItens.length - 1;
-    for (int i = 0; i < deleteItens.length; i++) {
-      await FirebaseFirestore.instance
-          .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-          .doc(deleteItens[i].id)
-          .delete()
-          .then((value) async {
-        if (i == count) {
-          deleteItens.clear();
-          deleteVisible = false;
-          await getInformationOrcamento();
-          notifyListeners();
-        }
-      });
+    final result = await _budgetRepository.deleteBudgets(deleteItens);
+    if (result is Ok<void>) {
+      deleteItens.clear();
+      deleteVisible = false;
+      await getInformationOrcamento();
+      return true;
     }
-    return result;
+    return false;
   }
 
   Future<List<CustomerInfo>> getInformationOrcamento() async {
-    int index = 0;
+    final result = await _budgetRepository.fetchBudgets();
     _foundUsers.clear();
-
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-        .orderBy('ID', descending: true)
-        .get();
-
-    for (var questionTmp in querySnapshot.docs) {
-      final data = questionTmp.data();
-      _foundUsers.add(CustomerInfo.fromMap(data));
-      _foundUsers[index].checkBox = false;
-      index++;
+    if (result is Ok<List<CustomerInfo>>) {
+      for (final b in result.value) {
+        b.checkBox = false;
+        _foundUsers.add(b);
+      }
     }
-
     notifyListeners();
     return _foundUsers;
   }
@@ -176,19 +116,21 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   CustomerInfo novoOrcamento() {
-    novo.phone = '';
-    novo.customerName = '';
-    novo.companyName = '';
-    novo.address = '';
-    novo.email = '';
-    novo.generated = '';
-    novo.data = '';
-    novo.status = 'PENDENTE';
-    novo.zip = '';
-    novo.city = '';
-    novo.neighborhood = '';
-    novo.id = '';
-    novo.street = '';
+    novo = CustomerInfo(
+      phone: '',
+      customerName: '',
+      companyName: '',
+      address: '',
+      email: '',
+      generated: '',
+      data: '',
+      status: 'PENDENTE',
+      zip: '',
+      city: '',
+      neighborhood: '',
+      id: '',
+      street: '',
+    );
     budget.IDORCAMENTO = '';
     return novo;
   }
