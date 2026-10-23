@@ -14,8 +14,6 @@ import 'package:oflite/models/global_uid_user.dart' as UID;
 import 'package:oflite/services/display_alert.dart';
 import 'package:oflite/services/via_cep_service.dart' as CEP;
 
-FirebaseFirestore firestore = FirebaseFirestore.instance;
-
 enum Gender {
   fullname,
   Email,
@@ -41,7 +39,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final ruaNode = FocusNode();
   final cityNode = FocusNode();
   final bairroNode = FocusNode();
-  CustomerInfo orcamento = CustomerInfo();
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
   Gender? selected;
@@ -78,117 +75,167 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
 
+  // ------------------------------------------------------------------
+  // Estado de UI derivado do `item` recebido (novo x edição).
+  // ------------------------------------------------------------------
+
+  bool get _isEditing => (item.id ?? '').isNotEmpty;
+
+  void _setupUiState() {
+    final editing = _isEditing;
+    nameButton = editing ? 'Atualizar' : 'Continuar';
+    titlePage = editing ? 'Editar orçamento' : 'Criar orçamento';
+    titleBox = editing ? 'Clique para editar' : 'Clique para inserir';
+    fieldVisible = editing;
+  }
+
+  /// Preenche um controller com texto opcional, tratando `null`/`'null'`.
+  void _setNullableController(TextEditingController controller, String? value) {
+    controller.text = (value == null || value == 'null') ? '' : value;
+  }
+
+  void _fillControllers() {
+    nameController.text = item.customerName ?? '';
+    dataController.text = item.data ?? '';
+    idController.text = item.id ?? '';
+    _setNullableController(ruaController, item.street);
+    _setNullableController(cityController, item.city);
+    _setNullableController(bairroController, item.neighborhood);
+    _setNullableController(statusController, item.status);
+    phoneController.text =
+        (item.phone == null) ? '' : maskFormatter.maskText(item.phone.toString());
+    cepController.text =
+        (item.zip == null) ? '' : maskCep.maskText(item.zip.toString());
+  }
+
+  // ------------------------------------------------------------------
+  // Propagação de estado (item compartilhado + globals).
+  // A mutação in-place do `item` é intencional: ela reflete o orçamento
+  // salvo de volta para a tela pai/abas irmãs que seguram a mesma referência.
+  // ------------------------------------------------------------------
+
+  void _applyToItem(CustomerInfo source) {
+    item
+      ..id = source.id
+      ..data = source.data
+      ..email = source.email
+      ..address = source.address
+      ..generated = source.generated
+      ..companyName = source.companyName
+      ..customerName = source.customerName
+      ..phone = source.phone
+      ..status = source.status
+      ..zip = source.zip
+      ..street = source.street
+      ..city = source.city
+      ..neighborhood = source.neighborhood
+      ..totalValue = source.totalValue;
+  }
+
+  void _applyToGlobals(CustomerInfo source) {
+    Orcamento.ID = source.id;
+    Orcamento.DATA = source.data;
+    Orcamento.RUA = source.street;
+    Orcamento.GERADO = source.generated;
+    Orcamento.BAIRRO = source.neighborhood;
+    Orcamento.CITY = source.city;
+    Orcamento.CEP = source.zip;
+    Orcamento.EMAIL = source.email;
+    Orcamento.ENDERECO = source.address;
+    Orcamento.FONE = source.phone;
+    Orcamento.NOMECLIENTE = source.customerName;
+    Orcamento.NOMEEMPRESA = source.companyName;
+    Orcamento.STATUS = source.status;
+    Orcamento.VALORTOTAL = source.totalValue;
+  }
+
+  void _enterEditMode(CustomerInfo budget) {
+    nameButton = 'Atualizar';
+    titlePage = 'Editar orçamento';
+    titleBox = 'Clique para editar';
+    fieldVisible = true;
+    dataController.text = budget.data ?? '';
+    idController.text = budget.id ?? '';
+  }
+
+  /// Monta o orçamento a partir do `item` + campos editáveis dos controllers.
+  /// Em edição mantém id/data/total; na criação gera novo id/data e zera o total.
+  CustomerInfo _buildBudget(bool isUpdate, String formattedDate) {
+    return CustomerInfo(
+      id: isUpdate ? item.id : DateTime.now().millisecondsSinceEpoch.toString(),
+      data: isUpdate ? item.data : formattedDate,
+      totalValue: isUpdate ? item.totalValue : 0,
+      email: item.email,
+      address: item.address,
+      generated: item.generated,
+      companyName: item.companyName,
+      customerName: nameController.text,
+      phone: phoneController.text,
+      status: statusController.text,
+      zip: cepController.text,
+      street: ruaController.text,
+      city: cityController.text,
+      neighborhood: bairroController.text,
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Ações
+  // ------------------------------------------------------------------
+
   void init() {
     try {
-      Orcamento.ID = item.id;
-      Orcamento.DATA = item.data;
-      Orcamento.RUA = item.street;
-      Orcamento.GERADO = item.generated;
-      Orcamento.BAIRRO = item.neighborhood;
-      Orcamento.CITY = item.city;
-      Orcamento.CEP = item.zip;
-      Orcamento.EMAIL = item.email;
-      Orcamento.ENDERECO = item.address;
-      Orcamento.FONE = item.phone;
-      Orcamento.NOMECLIENTE = item.customerName;
-      Orcamento.NOMEEMPRESA = item.companyName;
-      Orcamento.STATUS = item.status;
-      Orcamento.VALORTOTAL = item.totalValue;
-
-      if (item.id.toString() != '') {
-        nameButton = 'Atualizar';
-        titlePage = 'Editar orçamento';
-        titleBox = 'Clique para editar';
-        fieldVisible = true;
-      } else {
-        nameButton = 'Continuar';
-        titlePage = 'Criar orçamento';
-        titleBox = 'Clique para inserir';
-        fieldVisible = false;
-      }
-      nameController.text = item.customerName.toString();
-      dataController.text = item.data.toString();
-      idController.text = item.id.toString();
-
-      if (item.street.toString() != 'null') {
-        ruaController.text = item.street.toString();
-      } else {
-        ruaController.text = '';
-      }
-      if (item.city.toString() != 'null') {
-        cityController.text = item.city.toString();
-      } else {
-        cityController.text = '';
-      }
-      if (item.phone.toString() != 'null') {
-        phoneController.text = maskFormatter.maskText(item.phone.toString());
-      } else {
-        phoneController.text = '';
-      }
-      if (item.neighborhood.toString() != 'null') {
-        bairroController.text = item.neighborhood.toString();
-      } else {
-        bairroController.text = '';
-      }
-      if (item.status.toString() != 'null') {
-        statusController.text = item.status.toString();
-      } else {
-        statusController.text = '';
-      }
-      if (item.zip.toString() != 'null') {
-        cepController.text = maskCep.maskText(item.zip.toString());
-      } else {
-        cepController.text = '';
-      }
+      _applyToGlobals(item);
+      _setupUiState();
+      _fillControllers();
       notifyListeners();
-    } catch (e) {}
+    } catch (_) {}
   }
 
-  Future<void> saveBudget(CustomerInfo orcamento) async {
+  Future<void> saveBudget(CustomerInfo budget) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
-        .doc(orcamento.id)
+        .doc(budget.id)
         .set({
-      'ID': orcamento.id,
-      'DATA': orcamento.data,
-      'RUA': orcamento.street,
-      'GERADO': orcamento.generated,
-      'BAIRRO': orcamento.neighborhood,
-      'CITY': orcamento.city,
-      'EMAIL': orcamento.email,
-      'ENDERECO': orcamento.address,
-      'FONE': orcamento.phone,
-      'NOMECLIENTE': orcamento.customerName,
-      'NOMEEMPRESA': orcamento.companyName,
-      'STATUS': orcamento.status,
-      'CEP': orcamento.zip,
-      'VALORTOTAL': orcamento.totalValue
-    }).then((value) async {}).then((value) {
-      Orcamento.IDORCAMENTO = orcamento.id;
-      Orcamento.VALORTOTAL = orcamento.totalValue ?? 0;
+      'ID': budget.id,
+      'DATA': budget.data,
+      'RUA': budget.street,
+      'GERADO': budget.generated,
+      'BAIRRO': budget.neighborhood,
+      'CITY': budget.city,
+      'EMAIL': budget.email,
+      'ENDERECO': budget.address,
+      'FONE': budget.phone,
+      'NOMECLIENTE': budget.customerName,
+      'NOMEEMPRESA': budget.companyName,
+      'STATUS': budget.status,
+      'CEP': budget.zip,
+      'VALORTOTAL': budget.totalValue,
     });
+    Orcamento.IDORCAMENTO = budget.id;
+    Orcamento.VALORTOTAL = budget.totalValue ?? 0;
   }
 
-  Future<void> updateItensDADOS(CustomerInfo orcamento) async {
+  Future<void> updateItensDADOS(CustomerInfo budget) async {
     await FirebaseFirestore.instance
         .collection("EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS")
         .doc(item.id)
         .update({
-      'ID': orcamento.id,
-      'DATA': orcamento.data,
-      'RUA': orcamento.street,
-      'GERADO': orcamento.generated,
-      'BAIRRO': orcamento.neighborhood,
-      'CITY': orcamento.city,
-      'EMAIL': orcamento.email,
-      'ENDERECO': orcamento.address,
-      'FONE': orcamento.phone,
-      'NOMECLIENTE': orcamento.customerName,
-      'NOMEEMPRESA': orcamento.companyName,
-      'STATUS': orcamento.status,
-      'CEP': orcamento.zip,
-      'VALORTOTAL': orcamento.totalValue
-    }).then((value) async {}).then((value) {});
+      'ID': budget.id,
+      'DATA': budget.data,
+      'RUA': budget.street,
+      'GERADO': budget.generated,
+      'BAIRRO': budget.neighborhood,
+      'CITY': budget.city,
+      'EMAIL': budget.email,
+      'ENDERECO': budget.address,
+      'FONE': budget.phone,
+      'NOMECLIENTE': budget.customerName,
+      'NOMEEMPRESA': budget.companyName,
+      'STATUS': budget.status,
+      'CEP': budget.zip,
+      'VALORTOTAL': budget.totalValue,
+    });
   }
 
   void selectField(Gender field) {
@@ -202,9 +249,8 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   }
 
   Future<void> onCepChanged(String value) async {
-    var findAdress = CEP.ViaCepService();
     if (value.length == 9) {
-      var adress = await findAdress.getAdress(value);
+      final adress = await CEP.ViaCepService().getAdress(value);
       ruaController.text = adress.logradouro!.toUpperCase();
       cityController.text = adress.localidade!.toUpperCase();
       bairroController.text = adress.bairro!.toUpperCase();
@@ -231,147 +277,81 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     }
     fieldFone = true;
     notifyListeners();
-    int index = 0;
-    String? nome;
-    String? tel;
     await FlutterContactPicker.pickFullContact().then((value) {
       final FullContact contact = value;
-      contact.phones.forEach((result) {
+      var index = 0;
+      String? nome;
+      String? tel;
+      for (final result in contact.phones) {
         if (index == 0) {
           nome = contact.name?.nickName;
-          tel = result.number;
-          tel = tel?.replaceAll('+55', '');
-          tel = tel?.replaceAll('+', '');
+          tel = result.number?.replaceAll('+55', '').replaceAll('+', '');
           nameController.text = nome!;
           phoneController.text = maskFormatter.maskText(tel!);
           notifyListeners();
         }
         index++;
-      });
+      }
     });
   }
 
   Future<void> eventSave(BuildContext context, double we) async {
-    if (nameButton == "Atualizar") {
-      orcamento.totalValue = item.totalValue;
-      orcamento.id = item.id;
-      orcamento.data = item.data;
-      orcamento.email = item.email;
-      orcamento.address = item.address;
-      orcamento.generated = item.generated;
-      orcamento.companyName = item.companyName;
-      orcamento.customerName = nameController.text;
-      orcamento.phone = phoneController.text;
-      orcamento.status = statusController.text;
-      orcamento.zip = cepController.text;
-      orcamento.street = ruaController.text;
-      orcamento.city = cityController.text;
-      orcamento.neighborhood = bairroController.text;
-      updateItensDADOS(orcamento).then((value) async {
-        item.totalValue = orcamento.totalValue;
-        item.id = orcamento.id;
-        item.data = orcamento.data;
-        item.email = orcamento.email;
-        item.address = orcamento.address;
-        item.generated = orcamento.generated;
-        item.companyName = orcamento.companyName;
-        item.customerName = nameController.text;
-        item.phone = phoneController.text;
-        item.status = statusController.text;
-        item.zip = cepController.text;
-        item.street = ruaController.text;
-        item.city = cityController.text;
-        item.neighborhood = bairroController.text;
-        notifyListeners();
-        if (context.mounted) {
-          await displayAlert.notification(
-            context,
-            'Feito!',
-            'Dados do orçamento atualizado com sucesso!',
-          );
+    final isUpdate = nameButton == 'Atualizar';
+    final formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+
+    final CustomerInfo budget = _buildBudget(isUpdate, formattedDate);
+
+    if (isUpdate) {
+      await updateItensDADOS(budget);
+    } else {
+      await saveBudget(budget);
+    }
+
+    // Reflete o orçamento salvo de volta no item compartilhado (tela pai/abas).
+    _applyToItem(budget);
+    // Na criação, atualiza também os globals e entra em modo de edição.
+    if (!isUpdate) {
+      _applyToGlobals(budget);
+      _enterEditMode(budget);
+    }
+    notifyListeners();
+
+    // Feedback / fluxo de contato (preserva comportamento original por modo).
+    if (isUpdate) {
+      if (context.mounted) {
+        await displayAlert.notification(
+          context,
+          'Feito!',
+          'Dados do orçamento atualizado com sucesso!',
+        );
+      }
+      return;
+    }
+
+    if (await UserInfo.FlutterContacts.requestPermission()) {
+      if (context.mounted) {
+        await displayAlert.notification(
+          context,
+          'Feito!',
+          'Orçamento criado com sucesso!',
+        );
+      }
+      if (context.mounted) {
+        final saveContact = await showConfirmBottomModal(
+          context,
+          title: 'Salvar contato',
+          message: 'Gostaria de salvar o telefone em sua lista de contatos?',
+        );
+        if (saveContact) {
+          final newContact = UserInfo.Contact()
+            ..name = Name(first: budget.customerName ?? '')
+            ..phones = [
+              Phone(budget.phone ?? ''),
+              Phone(budget.phone ?? '', label: PhoneLabel.work),
+            ];
+          await UserInfo.FlutterContacts.insertContact(newContact);
         }
-      });
-    } else if (nameButton == "Continuar") {
-      final DateTime now = DateTime.now();
-      final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      final String formatted = formatter.format(now);
-      orcamento.totalValue = 0;
-      orcamento.email = item.email;
-      orcamento.address = item.address;
-      orcamento.generated = item.generated;
-      orcamento.companyName = item.companyName;
-      orcamento.id = DateTime.now().millisecondsSinceEpoch.toString();
-      orcamento.data = formatted;
-      orcamento.customerName = nameController.text;
-      orcamento.phone = phoneController.text;
-      orcamento.status = statusController.text;
-      orcamento.zip = cepController.text;
-      orcamento.street = ruaController.text;
-      orcamento.city = cityController.text;
-      orcamento.neighborhood = bairroController.text;
-      saveBudget(orcamento).then((value) async {
-        item.totalValue = orcamento.totalValue;
-        item.id = orcamento.id;
-        item.data = orcamento.data;
-        item.email = orcamento.email;
-        item.address = orcamento.address;
-        item.generated = orcamento.generated;
-        item.companyName = orcamento.companyName;
-        item.customerName = nameController.text;
-        item.phone = phoneController.text;
-        item.status = statusController.text;
-        item.zip = orcamento.zip;
-        item.street = ruaController.text;
-        item.city = cityController.text;
-        item.neighborhood = bairroController.text;
-        Orcamento.ID = item.id;
-        Orcamento.DATA = item.data;
-        Orcamento.RUA = item.street;
-        Orcamento.GERADO = item.generated;
-        Orcamento.BAIRRO = item.neighborhood;
-        Orcamento.CITY = item.city;
-        Orcamento.CEP = item.zip;
-        Orcamento.EMAIL = item.email;
-        Orcamento.ENDERECO = item.address;
-        Orcamento.FONE = item.phone;
-        Orcamento.NOMECLIENTE = item.customerName;
-        Orcamento.NOMEEMPRESA = item.companyName;
-        Orcamento.STATUS = item.status;
-        Orcamento.VALORTOTAL = item.totalValue;
-        nameButton = 'Atualizar';
-        titlePage = 'Editar orçamento';
-        titleBox = 'Clique para editar';
-        fieldVisible = true;
-        dataController.text = orcamento.data.toString();
-        idController.text = orcamento.id.toString();
-        notifyListeners();
-        if (await UserInfo.FlutterContacts.requestPermission()) {
-          if (context.mounted) {
-            await displayAlert.notification(
-              context,
-              'Feito!',
-              'Orçamento criado com sucesso!',
-            );
-          }
-          if (context.mounted) {
-            final saveContact = await showConfirmBottomModal(
-              context,
-              title: 'Salvar contato',
-              message:
-                  'Gostaria de salvar o telefone em sua lista de contatos?',
-            );
-            if (saveContact) {
-              UserInfo.Contact newContact = UserInfo.Contact()
-                ..name = Name(first: orcamento.customerName.toString())
-                ..phones = [
-                  Phone(orcamento.phone.toString()),
-                  Phone(orcamento.phone.toString(), label: PhoneLabel.work)
-                ];
-              await UserInfo.FlutterContacts.insertContact(newContact);
-            }
-          }
-        }
-      });
+      }
     }
   }
 
