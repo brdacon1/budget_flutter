@@ -4,17 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:oflite/common/constants/environment.dart';
-import 'package:oflite/common/controllers/menu_controller_app.dart';
-import 'package:oflite/services/notification_service.dart';
-import 'package:oflite/presentations/pdf/pdf_edit/pdf_edit_view.dart';
-import 'package:oflite/presentations/main_tab/main_tab_view.dart';
-import 'package:oflite/presentations/subscription/subscription_view.dart';
-import 'package:oflite/presentations/login/login_view.dart';
-import 'package:oflite/presentations/budget/budget_list/budget_list_view.dart';
-import 'package:oflite/presentations/terms_conditions/terms_conditions_view.dart';
+import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
+import 'package:oflite/modules/core/services/data/service/notification_service.dart';
 import 'package:provider/provider.dart';
-import 'common/constants/constants.dart';
+import 'app_routes.dart';
+import 'injection.dart';
+import 'shared/common/constants/constants.dart';
 
 /// Chave global do navigator do app. Compartilhada com o
 /// `NotificationService` para que, ao tocar no banner de uma notificação de
@@ -25,6 +21,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  setupDependencyInjection();
   // Inicializa o Firebase e os ads em paralelo para não travar a splash.
   await Future.wait([
     Firebase.initializeApp(),
@@ -97,15 +94,8 @@ class MyApp extends StatelessWidget {
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
           navigatorKey: globalNavigatorKey,
-          home: const LoginView(),
-          routes: {
-            '/menu_tecnico': (BuildContext _) => const BudgetListView(),
-            '/pg-subscription': (BuildContext _) => const SubscriptionView(),
-            '/menu': (BuildContext _) => const MainTabView(),
-            '/pg-pdf-config': (BuildContext _) => const PdfEditView(),
-            TermsConditionsView.routeName: (BuildContext _) =>
-                const TermsConditionsView(),
-          },
+          initialRoute: AppRoute.login.path,
+          routes: appRoutes,
         ),
       ),
     );
