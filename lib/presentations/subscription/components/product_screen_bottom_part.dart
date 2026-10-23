@@ -6,12 +6,16 @@ import '../../../common/constants/subscription_constants.dart';
 import '../../../common/utils/height_calculate_utils.dart';
 
 class ProductScreenBottomPart extends StatefulWidget {
+  final String? price;
   final VoidCallback onSubscribe;
+  final VoidCallback onRestore;
   final bool isLoading;
 
   const ProductScreenBottomPart({
     super.key,
+    this.price,
     required this.onSubscribe,
+    required this.onRestore,
     required this.isLoading,
   });
 
@@ -146,19 +150,10 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                         child: Row(
                           children: <Widget>[
                             Text(
-                              "R\$ ",
+                              widget.price ?? "R\$ 3,59/mês",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: screenAwareSize(26.0, context),
-                                fontFamily: "Montserrat-Medium",
-                              ),
-                            ),
-                            SizedBox(width: screenAwareSize(2.0, context)),
-                            Text(
-                              "3,59/mês",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenAwareSize(20.0, context),
+                                fontSize: screenAwareSize(22.0, context),
                                 fontFamily: "Montserrat-Medium",
                               ),
                             )
@@ -197,6 +192,20 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                        ),
+                      ),
+                      SizedBox(height: screenAwareSize(10.0, context)),
+                      Center(
+                        child: TextButton(
+                          onPressed: widget.isLoading ? null : widget.onRestore,
+                          child: Text(
+                            "Restaurar Compras",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: screenAwareSize(12.0, context),
+                              fontFamily: "Montserrat-Medium",
+                            ),
+                          ),
                         ),
                       ),
                     ],

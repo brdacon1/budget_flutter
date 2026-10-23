@@ -39,8 +39,8 @@ class _SubscriptionView extends State<SubscriptionView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Assinatura não realizada'),
+            SnackBar(
+              content: Text(_viewModel.errorMessage ?? 'Assinatura não realizada'),
               backgroundColor: Colors.red,
             ),
           );
@@ -91,7 +91,9 @@ class _SubscriptionView extends State<SubscriptionView> {
             children: <Widget>[
               const ProductScreenTopPart(),
               ProductScreenBottomPart(
-                onSubscribe: () => _viewModel.requestSubscription('newproduct'),
+                price: _viewModel.displayPrice,
+                onSubscribe: _viewModel.requestSubscription,
+                onRestore: _viewModel.restorePurchases,
                 isLoading: _viewModel.state == SubscriptionState.loading,
               ),
             ],
