@@ -120,7 +120,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       UID.purchaseToken = purchase.purchaseToken ?? '';
       UID.productId = purchase.productId;
 
-      if (purchase.purchaseState == PurchaseState.purchased) {
+      if (purchase.purchaseState == PurchaseState.Purchased) {
         // Android: acknowledge obrigatório em até 3 dias
         if (Platform.isAndroid &&
             purchase is PurchaseAndroid &&
@@ -138,7 +138,7 @@ class SubscriptionViewModel extends ChangeNotifier {
         }
 
         state = SubscriptionState.success;
-      } else if (purchase.purchaseState == PurchaseState.pending) {
+      } else if (purchase.purchaseState == PurchaseState.Pending) {
         state = SubscriptionState.success;
       } else {
         state = SubscriptionState.error;

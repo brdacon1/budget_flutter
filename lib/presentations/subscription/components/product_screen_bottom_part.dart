@@ -134,13 +134,14 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
           ),
           SizedBox(
             width: double.infinity,
-            height: screenAwareSize(120.0, context),
+            height: screenAwareSize(145.0, context),
             child: Stack(
               alignment: Alignment.topCenter,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: screenAwareSize(22.0, context)),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[

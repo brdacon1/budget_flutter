@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/common/strings/product_strings.dart';
 import 'package:oflite/models/items_budget.dart';
 import 'package:oflite/services/convert_coin.dart';
 
@@ -38,6 +39,22 @@ class ItemsListBottomModalWidget extends StatefulWidget {
 
 class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget> {
   bool _processing = false;
+  late List<ItemsBudget> _items;
+
+  @override
+  void initState() {
+    super.initState();
+    _items = List<ItemsBudget>.from(widget.items);
+  }
+
+  @override
+  void didUpdateWidget(covariant ItemsListBottomModalWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items.length != oldWidget.items.length ||
+        !identical(widget.items, oldWidget.items)) {
+      _items = List<ItemsBudget>.from(widget.items);
+    }
+  }
 
   Future<void> _handleButton() async {
     if (_processing) return;
@@ -58,78 +75,94 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
-        child: ListView.builder(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: widget.items.length,
-          itemBuilder: (context, index) {
-            final item = widget.items[index];
-            return Card(
-              color: const Color(0xFFF5F5F5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: ListTile(
-                title: Text(
-                  item.DESCRICAO ?? '',
-                  maxLines: 1,
-                  style: GoogleFonts.heebo(
-                    color: AppBottomModal.grayColor,
-                    letterSpacing: 0.5,
-                    fontSize: 13.0,
-                    fontWeight: FontWeight.bold,
+        child: _items.isEmpty
+            ? SizedBox(
+                height: MediaQuery.of(context).size.height * 0.15,
+                child: Center(
+                  child: Text(
+                    ProductStrings.cartEmptyLabel,
+                    style: GoogleFonts.heebo(
+                      color: AppBottomModal.grayColor,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                onTap: widget.onItemTap == null
-                    ? null
-                    : () => widget.onItemTap!(item, index),
-                subtitle: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.CATEGORIA.toString(),
-                      style: GoogleFonts.heebo(
-                        color: AppBottomModal.grayColor,
-                        letterSpacing: 0.5,
-                        fontSize: 10.0,
+              )
+            : ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: _items.length,
+                itemBuilder: (context, index) {
+                  final item = _items[index];
+                  return Card(
+                    color: const Color(0xFFF5F5F5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        item.DESCRICAO ?? '',
+                        maxLines: 1,
+                        style: GoogleFonts.heebo(
+                          color: AppBottomModal.grayColor,
+                          letterSpacing: 0.5,
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: widget.onItemTap == null
+                          ? null
+                          : () => widget.onItemTap!(item, index),
+                      subtitle: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.CATEGORIA.toString(),
+                            style: GoogleFonts.heebo(
+                              color: AppBottomModal.grayColor,
+                              letterSpacing: 0.5,
+                              fontSize: 10.0,
+                            ),
+                          ),
+                          if (item.QTD != null)
+                            Text(
+                              item.QTD.toString(),
+                              style: GoogleFonts.heebo(
+                                color: AppBottomModal.grayColor,
+                                letterSpacing: 0.5,
+                                fontSize: 10.0,
+                              ),
+                            ),
+                          if (item.PRECO != null)
+                            Text(
+                              widget.moneyConvert.convertFromDouble(item.PRECO!),
+                              style: GoogleFonts.heebo(
+                                color: AppBottomModal.grayColor,
+                                letterSpacing: 0.5,
+                                fontSize: 10.0,
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: GestureDetector(
+                        onTap: () {
+                          widget.onRemove(item, index);
+                          setState(() {
+                            _items.removeAt(index);
+                          });
+                        },
+                        child: const Icon(
+                          Icons.close,
+                          color: AppBottomModal.grayColor,
+                          size: 23.0,
+                        ),
                       ),
                     ),
-                    if (item.QTD != null)
-                      Text(
-                        item.QTD.toString(),
-                        style: GoogleFonts.heebo(
-                          color: AppBottomModal.grayColor,
-                          letterSpacing: 0.5,
-                          fontSize: 10.0,
-                        ),
-                      ),
-                    if (item.PRECO != null)
-                      Text(
-                        widget.moneyConvert.convertFromDouble(item.PRECO!),
-                        style: GoogleFonts.heebo(
-                          color: AppBottomModal.grayColor,
-                          letterSpacing: 0.5,
-                          fontSize: 10.0,
-                        ),
-                      ),
-                  ],
-                ),
-                trailing: GestureDetector(
-                  onTap: () {
-                    widget.onRemove(item, index);
-                    setState(() {});
-                  },
-                  child: const Icon(
-                    Icons.close,
-                    color: AppBottomModal.grayColor,
-                    size: 23.0,
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }

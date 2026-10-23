@@ -85,6 +85,8 @@ class ProductStrings {
   static String get cartTitle =>
       _isPt ? 'Carrinho de produtos' : 'Product cart';
   static String get cartButton => _isPt ? 'ADICIONAR' : 'ADD';
+  static String get cartEmptyLabel =>
+      _isPt ? 'Carrinho vazio' : 'Cart is empty';
   static String get cartAddSuccess => _isPt
       ? 'Itens adicionados na lista do orçamento com sucesso!'
       : 'Items added to the budget list successfully!';
