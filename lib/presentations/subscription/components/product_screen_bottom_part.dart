@@ -10,13 +10,13 @@ class ProductScreenBottomPart extends StatefulWidget {
   final bool isLoading;
 
   const ProductScreenBottomPart({
-    Key? key,
+    super.key,
     required this.onSubscribe,
     required this.isLoading,
-  }) : super(key: key);
+  });
 
   @override
-  _ProductScreenBottomPartState createState() =>
+  State<ProductScreenBottomPart> createState() =>
       _ProductScreenBottomPartState();
 }
 
