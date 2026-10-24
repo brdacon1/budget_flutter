@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -22,30 +23,30 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupDependencyInjection();
-  // Inicializa o Firebase e os ads em paralelo para não travar a splash.
-  await Future.wait([
-    Firebase.initializeApp(),
-    MobileAds.instance.initialize(),
-  ]);
+
+  // Inicializa o Firebase sempre (mobile e web).
+  await Firebase.initializeApp();
+
+  // Ads e notificações são mobile-only. No web esses plugins não existem
+  // e lançam exceção, causando tela branca se o entry point mobile for
+  // compilado para web por engano.
+  if (!kIsWeb) {
+    await MobileAds.instance.initialize();
+
+    if (Environment.instance.environment == 'development') {
+      await MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: _kTestDeviceIds),
+      );
+    }
+
+    await NotificationService.instance.initialize();
+    NotificationService.instance.setNavigatorKey(globalNavigatorKey);
+  }
+
   // Carrega as chaves do ambiente (env/*.json). O ambiente é escolhido
   // automaticamente: release -> produção, debug -> desenvolvimento.
   await Environment.instance.initialize();
-  // Em desenvolvimento, registra os dispositivos de teste para que os blocos
-  // reais do AdMob sirvam anúncios de teste (sem risco de cliques inválidos
-  // e com preenchimento garantido no emulador). O ID de cada aparelho aparece
-  // no logcat na primeira falha de carga (linha "To get test ads on this
-  // device, use: <ID>"). Adicione-o em [_kTestDeviceIds].
-  if (Environment.instance.environment == 'development') {
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: _kTestDeviceIds),
-    );
-  }
-  // Inicializa notificações push (FCM + canal Android + listener de
-  // foreground). Não bloqueia o runApp — falhas aqui não impedem o app.
-  await NotificationService.instance.initialize();
-  // Registra a chave do navigator no serviço de notificações para que o
-  // toque no banner (ou o cold-start pelo banner) consiga abrir o orçamento.
-  NotificationService.instance.setNavigatorKey(globalNavigatorKey);
+
   runApp(const MyApp());
 }
 

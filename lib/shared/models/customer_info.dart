@@ -88,10 +88,10 @@ class CustomerInfo {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['ID'] = id;
     data['DATA'] = this.data;
-    data['odata.etag'] = street;
-    data['RUA'] = generated;
+    data['RUA'] = street;
+    data['GERADO'] = generated;
     data['BAIRRO'] = neighborhood;
-    data['Id'] = city;
+    data['CITY'] = city;
     data['EMAIL'] = email;
     data['ENDERECO'] = address;
     data['FONE'] = phone;

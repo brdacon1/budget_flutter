@@ -140,7 +140,7 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
               children: [
                 BudgetWebDataSection(
                   title: BudgetWebStrings.sectionContact,
-                  icon: Icons.person_outlined,
+                  icon: Icons.person,
                   rows: [
                     BudgetWebDataRow(BudgetWebStrings.labelCustomerName,
                         _orEmpty(widget.budget.customerName)),
@@ -150,7 +150,7 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                 ),
                 BudgetWebDataSection(
                   title: BudgetWebStrings.sectionInfo,
-                  icon: Icons.request_page_outlined,
+                  icon: Icons.request_page,
                   rows: [
                     BudgetWebDataRow(BudgetWebStrings.labelStatus,
                         _orEmpty(widget.budget.status)),
@@ -162,7 +162,7 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                 ),
                 BudgetWebDataSection(
                   title: BudgetWebStrings.sectionAddress,
-                  icon: Icons.location_on_outlined,
+                  icon: Icons.location_on,
                   rows: [
                     BudgetWebDataRow(
                         BudgetWebStrings.labelCep, _orEmpty(widget.budget.zip)),

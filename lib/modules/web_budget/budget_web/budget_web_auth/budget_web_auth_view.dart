@@ -72,7 +72,7 @@ class _BudgetWebAuthViewState extends State<BudgetWebAuthView> {
                     const CircleAvatar(
                       radius: 36,
                       backgroundColor: secondaryColor,
-                      child: Icon(Icons.lock_person_outlined,
+                      child: Icon(Icons.lock_outline,
                           color: buttonColor, size: 36),
                     ),
                     const SizedBox(height: 20),

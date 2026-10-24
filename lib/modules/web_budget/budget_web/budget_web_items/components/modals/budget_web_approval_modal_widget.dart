@@ -32,7 +32,7 @@ class BudgetWebApprovalModalWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _OptionTile(
-              icon: Icons.check_circle_outline,
+              icon: Icons.check_circle,
               label: BudgetWebStrings.statusApproved,
               onTap: () {
                 Navigator.of(context).pop();
@@ -40,7 +40,7 @@ class BudgetWebApprovalModalWidget extends StatelessWidget {
               },
             ),
             _OptionTile(
-              icon: Icons.highlight_off_outlined,
+              icon: Icons.highlight_off,
               label: BudgetWebStrings.statusRejected,
               onTap: () {
                 Navigator.of(context).pop();
