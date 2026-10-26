@@ -24,6 +24,9 @@ class ReceiptListViewModel extends ChangeNotifier {
   ReceiptListViewModel({required this.item});
 
   Future<void> inicialData() async {
+    // Path do Firestore depende da global budget.IDORCAMENTO.
+    // Garante que está setada antes de buscar recibos.
+    budget.IDORCAMENTO = item.id;
     final result = await _receiptRepository.fetchReceipts();
     if (result is Ok<List<Receipt>>) {
       foundPayment = result.value;
