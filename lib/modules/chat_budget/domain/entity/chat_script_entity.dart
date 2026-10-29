@@ -7,7 +7,9 @@ class ChatScriptEntity {
   final String askClientName;
   final String askPhone;
   final String askAddress;
+  final String askHasCep;
   final String askCep;
+  final String cepNotFound;
   final String askStreetFallback;
   final String askProducts;
   final String finalMessage;
@@ -18,7 +20,9 @@ class ChatScriptEntity {
     required this.askClientName,
     required this.askPhone,
     required this.askAddress,
+    required this.askHasCep,
     required this.askCep,
+    required this.cepNotFound,
     required this.askStreetFallback,
     required this.askProducts,
     required this.finalMessage,
@@ -31,8 +35,10 @@ class ChatScriptEntity {
         'Olá! Sou seu assistente de orçamentos. Para quem você quer criar um orçamento?',
     askClientName: 'Para quem você quer criar um orçamento?',
     askPhone: 'Qual o telefone do cliente?',
-    askAddress: 'Quer cadastrar o endereço do cliente?',
+    askAddress: 'Você quer incluir o endereço do cliente?',
+    askHasCep: 'Você tem o CEP do endereço do cliente?',
     askCep: 'Qual o CEP?',
+    cepNotFound: 'Não encontrei esse CEP. Vou pedir os dados manualmente.',
     askStreetFallback: 'Informe a rua, número e cidade:',
     askProducts: 'Selecione os produtos do orçamento:',
     finalMessage: 'Orçamento gerado com sucesso!',

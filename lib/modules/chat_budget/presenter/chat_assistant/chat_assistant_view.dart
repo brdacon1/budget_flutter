@@ -216,6 +216,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case 'edit_products':
         await _openProductSelection(isEdit: true);
         break;
+      default:
+        // Delega para o ViewModel ações que não precisam de interação com a UI
+        // (ex: Confirmar endereço, Corrigir endereço, etc.)
+        await _vm.handleAction(action);
+        break;
     }
   }
 }

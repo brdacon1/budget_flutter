@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:fluttercontactpicker/fluttercontactpicker.dart';
+import 'package:fluttercontactpicker/fluttercontactpicker.dart' hide Address;
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
@@ -13,6 +13,7 @@ import 'package:oflite/modules/core/services/data/service/budget_share_link_serv
 import 'package:oflite/modules/core/services/data/service/via_cep_service.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/shared/models/address.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:share_plus/share_plus.dart';
@@ -24,7 +25,9 @@ enum ChatFlowStep {
   askClient,
   askPhone,
   askAddress,
+  askHasCep,
   askCep,
+  confirmCepAddress,
   askStreetManual,
   askProducts,
   reviewProducts,
@@ -77,6 +80,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   String _pendingClientName = '';
   String _pendingPhone = '';
 
+  // Endereço retornado pelo ViaCEP, aguardando confirmação do usuário
+  Address? _pendingAddress;
+
   // Itens atualmente no rascunho (para permitir edição).
   final List<ItemsBudget> _currentDraftItems = [];
 
@@ -96,6 +102,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   late final Command0<void> createDraftCommand = Command0(_createDraftFromName);
   late final Command0<void> skipAddressCommand = Command0(_skipAddress);
   late final Command1<void, String> submitCepCommand = Command1(_submitCep);
+  late final Command0<void> confirmCepAddressCommand = Command0(_confirmCepAddress);
   late final Command0<void> submitManualAddressCommand =
       Command0(_submitManualAddress);
   late final Command0<void> openProductSelectionCommand = Command0(_noop);
@@ -113,6 +120,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _step = ChatFlowStep.welcome;
     _pendingClientName = '';
     _pendingPhone = '';
+    _pendingAddress = null;
     _shareErrorMessage = null;
 
     // Carrega script
@@ -286,11 +294,31 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
+  /// Usuário respondeu "SIM" em "Você tem o CEP?" → pede o CEP.
+  Future<Result<void>> _askForCep() async {
+    _step = ChatFlowStep.askCep;
+    await _addBotMessage(
+      _script?.askCep ?? ChatScriptEntity.fallback.askCep,
+      type: ChatMessageType.text,
+    );
+    return Result.ok(null);
+  }
+
+  /// Usuário respondeu "NÃO" em "Você tem o CEP?" → vai para manual.
+  Future<Result<void>> _goToManualAddress() async {
+    _step = ChatFlowStep.askStreetManual;
+    await _addBotMessage(
+      _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
+      type: ChatMessageType.text,
+    );
+    return Result.ok(null);
+  }
+
   Future<Result<void>> _submitCep(String cep) async {
     final cleanCep = cep.replaceAll(RegExp(r'\D'), '');
     if (cleanCep.length != 8) {
       await _addBotMessage(
-        'CEP inválido. Digite 8 números ou pule.',
+        'CEP inválido. Digite 8 números.',
         type: ChatMessageType.text,
       );
       return Result.ok(null);
@@ -300,27 +328,51 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final address = await viaCep.getAdress(cep);
 
     if (address.logradouro == null || address.logradouro!.isEmpty) {
-      // Não encontrou CEP, pede dados manuais
+      // CEP não encontrado → avisa e vai para manual
       _step = ChatFlowStep.askStreetManual;
       await _addBotMessage(
-        _script?.askStreetFallback ??
-            ChatScriptEntity.fallback.askStreetFallback,
+        _script?.cepNotFound ?? ChatScriptEntity.fallback.cepNotFound,
+        type: ChatMessageType.text,
+      );
+      await _addBotMessage(
+        _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
         type: ChatMessageType.text,
       );
       return Result.ok(null);
     }
 
-    // Atualiza endereço via CEP
-    await _usecase.updateAddress(
-      zip: cep,
-      street: address.logradouro,
-      city: address.localidade,
-      neighborhood: address.bairro,
+    // Guarda o endereço encontrado e espera confirmação
+    _pendingAddress = address;
+    _pendingAddress!.cep = cep;
+
+    _step = ChatFlowStep.confirmCepAddress;
+    await _addBotMessage(
+      'Encontrei o endereço:\n'
+      '${address.logradouro}\n'
+      '${address.bairro != null && address.bairro!.isNotEmpty ? '${address.bairro}\n' : ''}'
+      '${address.localidade}',
+      type: ChatMessageType.inlineButtons,
+      payload: {'actions': ['Confirmar endereço', 'Corrigir endereço']},
     );
+    return Result.ok(null);
+  }
+
+  /// Usuário confirmou o endereço retornado pelo ViaCEP.
+  Future<Result<void>> _confirmCepAddress() async {
+    if (_pendingAddress == null) return Result.ok(null);
+
+    await _usecase.updateAddress(
+      zip: _pendingAddress!.cep,
+      street: _pendingAddress!.logradouro,
+      city: _pendingAddress!.localidade,
+      neighborhood: _pendingAddress!.bairro,
+    );
+
+    _pendingAddress = null;
 
     _step = ChatFlowStep.askProducts;
     await _addBotMessage(
-      'Endereço cadastrado: ${address.logradouro}, ${address.bairro}, ${address.localidade}.',
+      'Endereço cadastrado com sucesso.',
       type: ChatMessageType.text,
     );
     await _addBotMessage(
@@ -456,6 +508,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _currentDraftItems.clear();
     _pendingClientName = '';
     _pendingPhone = '';
+    _pendingAddress = null;
     _shareErrorMessage = null;
     textController.clear();
     cepController.clear();
@@ -502,8 +555,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
   void _onRepoChanged() => notifyListeners();
 
   void _onCommandDone() {
-    // Quando o comando termina (sucesso ou erro), notifica a View
-    // para que ela possa reagir (ex: mostrar SnackBar de erro).
     if (shareLinkCommand.error || shareLinkCommand.completed) {
       notifyListeners();
     }
@@ -525,14 +576,41 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await pickContactCommand.execute();
         break;
       case 'SIM':
-        _step = ChatFlowStep.askCep;
-        await _addBotMessage(
-          _script?.askCep ?? ChatScriptEntity.fallback.askCep,
-          type: ChatMessageType.text,
-        );
+        if (_step == ChatFlowStep.askAddress) {
+          // SIM para "quer incluir endereço?" → pergunta se tem CEP
+          _step = ChatFlowStep.askHasCep;
+          await _addBotMessage(
+            _script?.askHasCep ?? ChatScriptEntity.fallback.askHasCep,
+            type: ChatMessageType.inlineButtons,
+            payload: {'actions': ['SIM', 'NÃO']},
+          );
+        } else if (_step == ChatFlowStep.askHasCep) {
+          // SIM tem CEP → pede o CEP
+          await _askForCep();
+        }
         break;
       case 'NÃO':
-        await skipAddressCommand.execute();
+        if (_step == ChatFlowStep.askAddress) {
+          // NÃO quer endereço → pula
+          await skipAddressCommand.execute();
+        } else if (_step == ChatFlowStep.askHasCep) {
+          // NÃO tem CEP → vai para manual
+          await _goToManualAddress();
+        }
+        break;
+      case 'has_cep_yes':
+        await _askForCep();
+        break;
+      case 'has_cep_no':
+        await _goToManualAddress();
+        break;
+      case 'Confirmar endereço':
+        await confirmCepAddressCommand.execute();
+        break;
+      case 'Corrigir endereço':
+        // Limpa endereço pendente e vai para manual
+        _pendingAddress = null;
+        await _goToManualAddress();
         break;
       case 'open_products':
         // A view abre a tela de produtos

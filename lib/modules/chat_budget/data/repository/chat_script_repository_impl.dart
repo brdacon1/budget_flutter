@@ -33,8 +33,12 @@ class ChatScriptRepositoryImpl extends ChatScriptRepository {
               ChatScriptEntity.fallback.askPhone,
           askAddress: raw['askAddress'] as String? ??
               ChatScriptEntity.fallback.askAddress,
+          askHasCep: raw['askHasCep'] as String? ??
+              ChatScriptEntity.fallback.askHasCep,
           askCep: raw['askCep'] as String? ??
               ChatScriptEntity.fallback.askCep,
+          cepNotFound: raw['cepNotFound'] as String? ??
+              ChatScriptEntity.fallback.cepNotFound,
           askStreetFallback: raw['askStreetFallback'] as String? ??
               ChatScriptEntity.fallback.askStreetFallback,
           askProducts: raw['askProducts'] as String? ??
