@@ -29,7 +29,7 @@ class PdfReceiptViewModel extends ChangeNotifier {
 
   PdfReceiptViewModel({required this.receipt, required this.item});
 
-  Future<void> inicialData(BuildContext context) async {
+  Future<void> initialData(BuildContext context) async {
     loading = true;
     hasError = false;
     empty = false;
@@ -85,5 +85,5 @@ class PdfReceiptViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> refresh(BuildContext context) => inicialData(context);
+  Future<void> refresh(BuildContext context) => initialData(context);
 }

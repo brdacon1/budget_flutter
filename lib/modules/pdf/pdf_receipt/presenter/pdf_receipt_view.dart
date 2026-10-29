@@ -24,7 +24,7 @@ class _PdfReceiptView extends State<PdfReceiptView> {
     super.initState();
     _viewModel =
         PdfReceiptViewModel(receipt: widget.receipt, item: widget.item);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData(context));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.initialData(context));
   }
 
   @override
