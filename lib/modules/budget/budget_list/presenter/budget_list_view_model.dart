@@ -13,6 +13,8 @@ class BudgetListViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
 
+  bool _disposed = false;
+
   BudgetListViewModel() {
     _budgetRepository.addListener(_onBudgetRepoChanged);
   }
@@ -29,7 +31,7 @@ class BudgetListViewModel extends ChangeNotifier {
   bool _isRefreshing = false;
 
   void _onBudgetRepoChanged() {
-    if (_isRefreshing) return;
+    if (_disposed || _isRefreshing) return;
     getInformationOrcamento();
   }
 
@@ -78,12 +80,12 @@ class BudgetListViewModel extends ChangeNotifier {
       }
     }
     _isRefreshing = false;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
     return _foundUsers;
   }
 
   void onSearchTextChanged(String value) {
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   List<CustomerInfo> getFilteredData() {
@@ -107,7 +109,7 @@ class BudgetListViewModel extends ChangeNotifier {
         deleteVisible = true;
       }
     }
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   void removeDeleteItem(CustomerInfo item) {
@@ -117,14 +119,14 @@ class BudgetListViewModel extends ChangeNotifier {
       deleteVisible = false;
       checkBoxAppear = false;
     }
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   void clearDeleteItens() {
     deleteItens.clear();
     deleteVisible = false;
     checkBoxAppear = false;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   CustomerInfo novoOrcamento() {
@@ -149,6 +151,7 @@ class BudgetListViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _budgetRepository.removeListener(_onBudgetRepoChanged);
     super.dispose();
   }

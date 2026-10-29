@@ -41,6 +41,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final CreateBudgetFromChatUsecase _usecase;
   final FetchChatScriptUsecase _fetchScriptUsecase;
 
+  bool _disposed = false;
+
   ChatAssistantViewModel(
     this._chatRepo,
     this._scriptRepo,
@@ -100,6 +102,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // (permitem remover/re-enviar quando o usuário edita produtos).
   String? _reviewMsgId;
   String? _commentQuestionMsgId;
+
+  // ID da mensagem de feedback após edição de comentários.
+  // Evita duplicar o balão "Comentários atualizados..." quando o usuário
+  // edita comentários, volta, edita de novo e volta novamente.
+  String? _commentsFeedbackMsgId;
 
   // Endereço retornado pelo ViaCEP, aguardando confirmação do usuário
   Address? _pendingAddress;
@@ -761,6 +768,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _editingField = null;
     _reviewMsgId = null;
     _commentQuestionMsgId = null;
+    _commentsFeedbackMsgId = null;
     _chatRepo.setCurrentFlowStep(null);
     _step = ChatFlowStep.idle;
     return await _initialize();
@@ -825,10 +833,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _noop() async => Result.ok(null);
 
-  void _onRepoChanged() => notifyListeners();
+  void _onRepoChanged() {
+    if (!_disposed) notifyListeners();
+  }
 
   void _onCommandDone() {
-    if (shareLinkCommand.error || shareLinkCommand.completed) {
+    if (!_disposed && (shareLinkCommand.error || shareLinkCommand.completed)) {
       notifyListeners();
     }
   }
@@ -927,10 +937,23 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   /// Chamado pela View após o usuário voltar da tela de comentários.
+  /// Envia o feedback de comentários atualizados com botões de ação,
+  /// mas garante que não haja duplicatas se o balão já existe.
   Future<void> finalizeAfterComments() async {
-    // Ao voltar da tela de comentários, mostra opções de editar novamente ou finalizar.
     _setStep(ChatFlowStep.askComments);
-    await _addBotMessage(
+
+    // Se o balão de feedback já foi enviado anteriormente e ainda existe
+    // no histórico, simplesmente mantém a mensagem atual — não repete.
+    if (_commentsFeedbackMsgId != null &&
+        _chatRepo.messages.any((m) => m.id == _commentsFeedbackMsgId)) {
+      return;
+    }
+
+    final msgId = _generateMessageId();
+    _commentsFeedbackMsgId = msgId;
+
+    await _sendBotMessageWithId(
+      msgId,
       'Comentários atualizados com sucesso. Deseja editar novamente ou finalizar o orçamento?',
       type: ChatMessageType.inlineButtons,
       payload: {
@@ -941,6 +964,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _chatRepo.removeListener(_onRepoChanged);
     _scriptRepo.removeListener(_onRepoChanged);
     shareLinkCommand.removeListener(_onCommandDone);
