@@ -9,14 +9,22 @@ import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dar
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessageEntity message;
   final void Function(String action)? onAction;
+  final void Function(String field, String currentText, String messageId)? onEditMessage;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     this.onAction,
+    this.onEditMessage,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
+
+  String? get _editableField {
+    final p = message.payload;
+    if (p == null) return null;
+    return p['editableField'] as String?;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,43 +38,65 @@ class ChatMessageBubble extends StatelessWidget {
           if (!_isUser) _buildAvatar(),
           const SizedBox(width: 6),
           Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: _isUser
-                    ? const Color(0xFF075E54)
-                    : const Color(0xFF2A2D3E),
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(_isUser ? 16 : 4),
-                  bottomRight: Radius.circular(_isUser ? 4 : 16),
+            child: GestureDetector(
+              onLongPress: _isUser && _editableField != null
+                  ? () => onEditMessage?.call(_editableField!, message.content, message.id)
+                  : null,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75,
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!_isUser) ...[
-                    const Text(
-                      'Assistente',
-                      style: TextStyle(
-                        color: Colors.cyanAccent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-                  Text(
-                    message.content,
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: _isUser
+                      ? const Color(0xFF075E54)
+                      : const Color(0xFF2A2D3E),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft: Radius.circular(_isUser ? 16 : 4),
+                    bottomRight: Radius.circular(_isUser ? 4 : 16),
                   ),
-                  const SizedBox(height: 6),
-                  _buildExtraContent(),
-                ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!_isUser) ...[
+                      const Text(
+                        'Assistente',
+                        style: TextStyle(
+                          color: Colors.cyanAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                    Text(
+                      message.content,
+                      style: const TextStyle(color: Colors.white, fontSize: 15),
+                    ),
+                    if (_isUser && _editableField != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.edit, size: 12, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Toque e segure para editar',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(179),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else
+                      const SizedBox(height: 6),
+                    _buildExtraContent(),
+                  ],
+                ),
               ),
             ),
           ),

@@ -41,9 +41,21 @@ abstract class ChatBudgetRepository extends ChangeNotifier {
   /// Salva uma mensagem na sessão ativa (localmente + remoto opcional).
   Future<Result<void>> sendMessage(ChatMessageEntity message);
 
+  /// Atualiza o texto de uma mensagem existente pelo ID.
+  Future<Result<void>> updateMessage(String id, String newContent);
+
   /// Marca sessão como completa e devolve o orçamento final.
   Future<Result<CustomerInfo>> finalizeDraft();
 
   /// Limpa sessão atual e cache de mensagens.
   void clearSession();
+
+  /// Deleta o orçamento rascunho atual e limpa caches relacionados.
+  Future<Result<void>> deleteDraft();
+
+  /// Step atual do fluxo conversacional (persistido para restaurar estado).
+  String? get currentFlowStep;
+
+  /// Atualiza o step do fluxo conversacional.
+  void setCurrentFlowStep(String? step);
 }

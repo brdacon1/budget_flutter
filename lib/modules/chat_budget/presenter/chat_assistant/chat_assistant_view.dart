@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view_model.dart';
-import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/chat_input_bar.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/chat_message_bubble.dart';
+import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
-import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
@@ -19,6 +18,7 @@ class ChatAssistantView extends StatefulWidget {
 class _ChatAssistantViewState extends State<ChatAssistantView> {
   late final ChatAssistantViewModel _vm;
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -33,6 +33,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   void dispose() {
     _vm.dispose();
     _scrollController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
@@ -70,6 +71,21 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _vm.confirmProductsCommand.execute(result);
       }
     }
+  }
+
+  Future<void> _openComments() async {
+    final budget = _vm.draftBudget;
+    if (budget == null) return;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CommentListView(item: budget),
+      ),
+    );
+
+    // Ao voltar da tela de comentários, finaliza o orçamento
+    await _vm.finalizeAfterComments();
   }
 
   @override
@@ -156,6 +172,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                     return ChatMessageBubble(
                       message: msg,
                       onAction: (action) => _handleAction(action, msg),
+                      onEditMessage: (field, text, msgId) => _vm.prepareEditMessage(field, text, msgId),
                     );
                   },
                 ),
@@ -180,8 +197,18 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       );
     }
 
-    return ChatInputBar(
+    // Dá foco automático no input quando entra em modo de edição
+    if (_vm.isEditingMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _inputFocusNode.requestFocus();
+      });
+    }
+
+    return _EditAwareInputBar(
       controller: _vm.textController,
+      focusNode: _inputFocusNode,
+      isEditing: _vm.isEditingMessage,
+      onCancelEdit: () => _vm.cancelEdit(),
       enabled: !_vm.isLoading &&
           step != ChatFlowStep.askAddress &&
           step != ChatFlowStep.reviewProducts &&
@@ -202,10 +229,18 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _vm.pickContactCommand.execute();
         break;
       case 'SIM':
-        await _vm.handleAction('SIM');
+        if (_vm.step == ChatFlowStep.askComments) {
+          await _openComments();
+        } else {
+          await _vm.handleAction('SIM');
+        }
         break;
       case 'NÃO':
-        await _vm.skipAddressCommand.execute();
+        if (_vm.step == ChatFlowStep.askComments) {
+          await _vm.handleAction('NÃO');
+        } else {
+          await _vm.skipAddressCommand.execute();
+        }
         break;
       case 'open_products':
         await _openProductSelection();
@@ -216,12 +251,127 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case 'edit_products':
         await _openProductSelection(isEdit: true);
         break;
+      case 'edit_comments':
+      case 'Editar comentários':
+        await _openComments();
+        break;
+      case 'finalize_budget':
+      case 'Finalizar e gerar link':
+        await _vm.handleAction('finalize_budget');
+        break;
       default:
         // Delega para o ViewModel ações que não precisam de interação com a UI
         // (ex: Confirmar endereço, Corrigir endereço, etc.)
         await _vm.handleAction(action);
         break;
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Input que mostra estado de edição inline (estilo WhatsApp)
+// ---------------------------------------------------------------------------
+
+class _EditAwareInputBar extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode? focusNode;
+  final VoidCallback onSend;
+  final VoidCallback onCancelEdit;
+  final bool enabled;
+  final bool isEditing;
+
+  const _EditAwareInputBar({
+    required this.controller,
+    required this.onSend,
+    required this.onCancelEdit,
+    this.focusNode,
+    this.enabled = true,
+    this.isEditing = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1E1E2C),
+        border: Border(top: BorderSide(color: Colors.white12)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isEditing)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                margin: const EdgeInsets.only(bottom: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A2D3E),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit, size: 14, color: Colors.cyanAccent),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Editando mensagem',
+                        style: TextStyle(
+                          color: Colors.cyanAccent,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: onCancelEdit,
+                      child: const Icon(Icons.close, size: 18, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    enabled: enabled,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: isEditing ? 'Edite a mensagem...' : 'Digite uma mensagem...',
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      filled: true,
+                      fillColor: const Color(0xFF2A2D3E),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onSubmitted: (_) => onSend(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Material(
+                  color: const Color(0xFF00BFA5),
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: enabled ? onSend : null,
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(Icons.send, color: Colors.black, size: 20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

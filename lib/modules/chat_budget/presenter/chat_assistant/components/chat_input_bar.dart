@@ -5,12 +5,14 @@ class ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final bool enabled;
+  final FocusNode? focusNode;
 
   const ChatInputBar({
     super.key,
     required this.controller,
     required this.onSend,
     this.enabled = true,
+    this.focusNode,
   });
 
   @override
@@ -33,6 +35,7 @@ class ChatInputBar extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
                 enabled: enabled,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(

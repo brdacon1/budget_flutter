@@ -20,6 +20,7 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Gerenciamento de estado da tela de **lista de preço** (produtos/serviços).
 class ProductPriceListViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository = getIt<ProductPriceRepository>();
+  final BudgetRepository _budgetRepo = getIt<BudgetRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
   final LoadingEvent loadingEvent = LoadingEvent();
   final ConvertCoin moneyConvert = ConvertCoin();
@@ -61,7 +62,23 @@ class ProductPriceListViewModel extends ChangeNotifier {
     try {
       final result = await _productRepository.fetchProducts();
       if (result is Ok<List<ProductPriceModel>>) {
-        var list = result.value;
+        // Clona a lista para não contaminar o cache singleton do repositório
+        var list = List<ProductPriceModel>.from(result.value);
+
+        // Se estiver em modo seleção com um orçamento ativo,
+        // carrega os itens já salvos para manter o cache da conversa.
+        if (selectionMode && item?.id != null) {
+          final itemsResult = await _budgetRepo.fetchBudgetItems(
+            item!.id!,
+            forceRefresh: true,
+          );
+          if (itemsResult is Ok<List<ItemsBudget>>) {
+            for (final it in itemsResult.value) {
+              addItems.add(ProductPriceModel.fromItemsBudget(it));
+            }
+          }
+        }
+
         for (final cart in addItems) {
           final i = list.indexWhere((e) => e.id == cart.id);
           if (i != -1) {

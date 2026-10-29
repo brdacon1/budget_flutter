@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart' hide Address;
-import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart';
@@ -24,6 +23,7 @@ enum ChatFlowStep {
   welcome,
   askClient,
   askPhone,
+  confirmClientData,
   askAddress,
   askHasCep,
   askCep,
@@ -31,6 +31,7 @@ enum ChatFlowStep {
   askStreetManual,
   askProducts,
   reviewProducts,
+  askComments,
   shareLink,
 }
 
@@ -57,6 +58,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
   ChatFlowStep _step = ChatFlowStep.idle;
   ChatFlowStep get step => _step;
 
+  void _setStep(ChatFlowStep value) {
+    _step = value;
+    _chatRepo.setCurrentFlowStep(value.name);
+  }
+
   List<ChatMessageEntity> get messages => _chatRepo.messages;
 
   CustomerInfo? get draftBudget => _chatRepo.draftBudget;
@@ -79,6 +85,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Armazena dados temporários enquanto o usuário responde passo a passo
   String _pendingClientName = '';
   String _pendingPhone = '';
+
+  // IDs das mensagens de nome e telefone para permitir edição
+  String? _clientNameMsgId;
+  String? _clientPhoneMsgId;
+
+  // Flag de edição inline (mensagem específica sendo editada)
+  String? _editingMsgId;   // id da mensagem que está sendo editada
+  String? _editingField;    // 'clientName' | 'clientPhone'
+
+  bool get isEditingMessage => _editingMsgId != null;
 
   // Endereço retornado pelo ViaCEP, aguardando confirmação do usuário
   Address? _pendingAddress;
@@ -117,11 +133,50 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Inicialização
   // ------------------------------------------------------------------
   Future<Result<void>> _initialize() async {
-    _step = ChatFlowStep.welcome;
+    final saved = _chatRepo.currentFlowStep;
+
+    // Se a conversa anterior já foi finalizada (link compartilhado),
+    // limpa tudo e inicia uma nova conversa do zero.
+    if (saved == ChatFlowStep.shareLink.name) {
+      // Conversa já finalizada: limpa apenas o estado LOCAL do chat.
+      // NÃO deleta o orçamento do banco — ele já existe para o cliente.
+      _clientNameMsgId = null;
+      _clientPhoneMsgId = null;
+      _editingMsgId = null;
+      _editingField = null;
+      _chatRepo.clearSession();
+      _chatRepo.setCurrentFlowStep(null);
+      _currentDraftItems.clear();
+      _pendingClientName = '';
+      _pendingPhone = '';
+      _pendingAddress = null;
+      _shareErrorMessage = null;
+      textController.clear();
+      cepController.clear();
+      streetController.clear();
+      cityController.clear();
+      neighborhoodController.clear();
+      _step = ChatFlowStep.idle;
+      // cai no fluxo de inicialização abaixo
+    } else if (_chatRepo.messages.isNotEmpty && saved != null) {
+      // Restaura conversa em andamento sem duplicar mensagens
+      _step = ChatFlowStep.values.firstWhere(
+        (e) => e.name == saved,
+        orElse: () => ChatFlowStep.askClient,
+      );
+      notifyListeners();
+      return Result.ok(null);
+    }
+
+    _setStep(ChatFlowStep.welcome);
     _pendingClientName = '';
     _pendingPhone = '';
     _pendingAddress = null;
     _shareErrorMessage = null;
+    _clientNameMsgId = null;
+    _clientPhoneMsgId = null;
+    _editingMsgId = null;
+    _editingField = null;
 
     // Carrega script
     final scriptResult = await _fetchScriptUsecase.call();
@@ -140,8 +195,28 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _script?.askClientName ?? ChatScriptEntity.fallback.askClientName,
       type: ChatMessageType.contactPicker,
     );
-    _step = ChatFlowStep.askClient;
+    _setStep(ChatFlowStep.askClient);
     return Result.ok(null);
+  }
+
+  // ------------------------------------------------------------------
+  // Validação de telefone
+  // ------------------------------------------------------------------
+  bool _isValidPhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    return digits.length >= 10 && digits.length <= 11;
+  }
+
+  String _normalizePhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    return _phoneMask.maskText(digits);
+  }
+
+  /// Retorna texto formatado ou vazio se inválido
+  String? _tryFormatPhone(String raw) {
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10 || digits.length > 11) return null;
+    return _phoneMask.maskText(digits);
   }
 
   // ------------------------------------------------------------------
@@ -152,15 +227,55 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (text.trim().isEmpty) return Result.ok(null);
     final clean = text.trim();
 
-    // Adiciona mensagem do usuário
-    await _addUserMessage(clean);
+    // ----------------------------------------------------------------
+    // MODO EDIÇÃO: atualiza a mensagem existente SEM criar nova
+    // ----------------------------------------------------------------
+    if (_editingMsgId != null && _editingField != null) {
+      await _chatRepo.updateMessage(_editingMsgId!, clean);
+
+      if (_editingField == 'clientName') {
+        _pendingClientName = clean;
+        // atualiza referência se o ID mudou (não muda, é o mesmo)
+      } else if (_editingField == 'clientPhone') {
+        final formatted = _tryFormatPhone(clean);
+        if (formatted != null) {
+          _pendingPhone = formatted;
+        } else {
+          _pendingPhone = clean;
+        }
+      }
+
+      textController.clear();
+      _editingMsgId = null;
+      _editingField = null;
+      notifyListeners();
+      return Result.ok(null);
+    }
+
+    // ---------------------------------------------------------------
+    // FLUXO NORMAL: envia nova mensagem do usuário
+    // ---------------------------------------------------------------
+    final msgId = _generateMessageId();
+    final userPayload = switch (_step) {
+      ChatFlowStep.askClient => {'editableField': 'clientName'},
+      ChatFlowStep.askPhone => {'editableField': 'clientPhone'},
+      _ => null,
+    };
+    await _sendUserMessageWithId(msgId, clean, payload: userPayload);
+
+    // Guarda ID da mensagem para edição futura
+    if (_step == ChatFlowStep.askClient) {
+      _clientNameMsgId = msgId;
+    } else if (_step == ChatFlowStep.askPhone) {
+      _clientPhoneMsgId = msgId;
+    }
 
     switch (_step) {
       case ChatFlowStep.welcome:
       case ChatFlowStep.askClient:
         // Guarda nome e pede telefone
         _pendingClientName = clean;
-        _step = ChatFlowStep.askPhone;
+        _setStep(ChatFlowStep.askPhone);
         await _addBotMessage(
           _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
           type: ChatMessageType.text,
@@ -168,12 +283,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
 
       case ChatFlowStep.askPhone:
-        // Recebe telefone e cria orçamento
-        _pendingPhone = _phoneMask.maskText(clean);
-        await _createDraftAndGoToAddress(
-          _pendingClientName,
-          phone: _pendingPhone,
-        );
+        // Valida telefone obrigatório
+        if (!_isValidPhone(clean)) {
+          await _addBotMessage(
+            'Telefone inválido. Informe apenas números com DDD. Ex: (11) 99999-9999 ou 11999999999.',
+            type: ChatMessageType.text,
+          );
+          // Permanece no mesmo step pedindo telefone novamente
+          break;
+        }
+        _pendingPhone = _normalizePhone(clean);
+        await _showClientDataConfirmation();
         break;
 
       case ChatFlowStep.askCep:
@@ -220,16 +340,23 @@ class ChatAssistantViewModel extends ChangeNotifier {
             .replaceAll('+', '')
             .replaceAll(RegExp(r'\D'), '');
         if (phone != null && phone.isNotEmpty) {
-          phone = _phoneMask.maskText(phone);
+          // valida quantidade de dígitos
+          if (phone.length < 10 || phone.length > 11) {
+            phone = null; // inválido, vai pedir manualmente
+          } else {
+            phone = _phoneMask.maskText(phone);
+          }
         }
       }
 
-      await _addUserMessage(name);
+      final nameMsgId = _generateMessageId();
+      await _sendUserMessageWithId(nameMsgId, name, payload: {'editableField': 'clientName'});
+      _clientNameMsgId = nameMsgId;
+      _pendingClientName = name;
 
-      // Se não tiver telefone no contato, pede
+      // Se não tiver telefone válido no contato, pede
       if (phone == null || phone.isEmpty) {
-        _pendingClientName = name;
-        _step = ChatFlowStep.askPhone;
+        _setStep(ChatFlowStep.askPhone);
         await _addBotMessage(
           _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
           type: ChatMessageType.text,
@@ -237,7 +364,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         return Result.ok(null);
       }
 
-      return await _createDraftAndGoToAddress(name, phone: phone);
+      _pendingPhone = phone;
+      return await _showClientDataConfirmation();
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -247,15 +375,68 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final name = textController.text.trim();
     if (name.isEmpty) return Result.ok(null);
     textController.clear();
-    await _addUserMessage(name);
+
+    final msgId = _generateMessageId();
+    await _sendUserMessageWithId(msgId, name, payload: {'editableField': 'clientName'});
+    _clientNameMsgId = msgId;
 
     _pendingClientName = name;
-    _step = ChatFlowStep.askPhone;
+    _setStep(ChatFlowStep.askPhone);
     await _addBotMessage(
       _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
       type: ChatMessageType.text,
     );
     return Result.ok(null);
+  }
+
+  /// Mostra os dados do cliente para confirmação antes de criar o rascunho.
+  Future<Result<void>> _showClientDataConfirmation() async {
+    _setStep(ChatFlowStep.confirmClientData);
+    await _addBotMessage(
+      'Confirme os dados do cliente:\n'
+      'Nome: $_pendingClientName\n'
+      'Telefone: ${_pendingPhone.isEmpty ? '—' : _pendingPhone}',
+      type: ChatMessageType.inlineButtons,
+      payload: {
+        'actions': ['Confirmar dados', 'Editar nome', 'Editar telefone']
+      },
+    );
+    return Result.ok(null);
+  }
+
+  /// Prepara modo de edição inline (tipo WhatsApp).
+  void prepareEditMessage(String field, String currentText, String messageId) {
+    textController.text = currentText;
+    _editingMsgId = messageId;
+    _editingField = field;
+    notifyListeners();
+  }
+
+  Future<Result<void>> _askEditName() async {
+    if (_clientNameMsgId == null) return Result.ok(null);
+    _prepareEditField('clientName', _pendingClientName, _clientNameMsgId!);
+    return Result.ok(null);
+  }
+
+  Future<Result<void>> _askEditPhone() async {
+    if (_clientPhoneMsgId == null) return Result.ok(null);
+    _prepareEditField('clientPhone', _pendingPhone, _clientPhoneMsgId!);
+    return Result.ok(null);
+  }
+
+  void _prepareEditField(String field, String currentText, String msgId) {
+    textController.text = currentText;
+    _editingMsgId = msgId;
+    _editingField = field;
+    notifyListeners();
+  }
+
+  /// Cancela o modo de edição (ex: ao tocar fora)
+  void cancelEdit() {
+    _editingMsgId = null;
+    _editingField = null;
+    textController.clear();
+    notifyListeners();
   }
 
   /// Cria o orçamento e avança para perguntar o endereço.
@@ -266,7 +447,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final result = await _usecase.createDraft(clientName, phone: phone);
 
     if (result is Ok<CustomerInfo>) {
-      _step = ChatFlowStep.askAddress;
+      _setStep(ChatFlowStep.askAddress);
       await _addBotMessage(
         _script?.askAddress ?? ChatScriptEntity.fallback.askAddress,
         type: ChatMessageType.inlineButtons,
@@ -282,7 +463,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _skipAddress() async {
-    _step = ChatFlowStep.askProducts;
+    _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
@@ -296,7 +477,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Usuário respondeu "SIM" em "Você tem o CEP?" → pede o CEP.
   Future<Result<void>> _askForCep() async {
-    _step = ChatFlowStep.askCep;
+    _setStep(ChatFlowStep.askCep);
     await _addBotMessage(
       _script?.askCep ?? ChatScriptEntity.fallback.askCep,
       type: ChatMessageType.text,
@@ -306,7 +487,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Usuário respondeu "NÃO" em "Você tem o CEP?" → vai para manual.
   Future<Result<void>> _goToManualAddress() async {
-    _step = ChatFlowStep.askStreetManual;
+    _setStep(ChatFlowStep.askStreetManual);
     await _addBotMessage(
       _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
       type: ChatMessageType.text,
@@ -329,7 +510,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     if (address.logradouro == null || address.logradouro!.isEmpty) {
       // CEP não encontrado → avisa e vai para manual
-      _step = ChatFlowStep.askStreetManual;
+      _setStep(ChatFlowStep.askStreetManual);
       await _addBotMessage(
         _script?.cepNotFound ?? ChatScriptEntity.fallback.cepNotFound,
         type: ChatMessageType.text,
@@ -345,7 +526,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pendingAddress = address;
     _pendingAddress!.cep = cep;
 
-    _step = ChatFlowStep.confirmCepAddress;
+    _setStep(ChatFlowStep.confirmCepAddress);
     await _addBotMessage(
       'Encontrei o endereço:\n'
       '${address.logradouro}\n'
@@ -370,7 +551,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _pendingAddress = null;
 
-    _step = ChatFlowStep.askProducts;
+    _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
       'Endereço cadastrado com sucesso.',
       type: ChatMessageType.text,
@@ -409,7 +590,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     cityController.clear();
     neighborhoodController.clear();
 
-    _step = ChatFlowStep.askProducts;
+    _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
       'Endereço cadastrado com sucesso.',
       type: ChatMessageType.text,
@@ -445,14 +626,20 @@ class ChatAssistantViewModel extends ChangeNotifier {
           '• ${it.DESCRICAO} — ${it.QTD?.toInt() ?? 1}x R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)}');
     }
 
-    _step = ChatFlowStep.reviewProducts;
+    _setStep(ChatFlowStep.reviewProducts);
     await _addBotMessage(
       buffer.toString(),
       type: ChatMessageType.productList,
     );
 
-    // Finaliza e mostra link
-    return await _finalizeAndShare();
+    // Pergunta se quer adicionar comentários
+    _setStep(ChatFlowStep.askComments);
+    await _addBotMessage(
+      'Deseja adicionar algum comentário ou observação ao orçamento?',
+      type: ChatMessageType.inlineButtons,
+      payload: {'actions': ['SIM', 'NÃO']},
+    );
+    return Result.ok(null);
   }
 
   Future<Result<void>> _editProducts(List<ItemsBudget> items) async {
@@ -463,7 +650,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final result = await _usecase.finalize();
 
     if (result is Ok<CustomerInfo>) {
-      _step = ChatFlowStep.shareLink;
+      _setStep(ChatFlowStep.shareLink);
       await _addBotMessage(
         _script?.finalMessage ?? ChatScriptEntity.fallback.finalMessage,
         type: ChatMessageType.action,
@@ -504,6 +691,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _resetChat() async {
+    // Se a conversa já foi finalizada (shareLink), apaga apenas estado LOCAL.
+    // NÃO deleta o orçamento do banco — ele já é um orçamento válido e salvo
+    // para o cliente.
+    if (_step != ChatFlowStep.shareLink) {
+      await _chatRepo.deleteDraft();
+    }
     _chatRepo.clearSession();
     _currentDraftItems.clear();
     _pendingClientName = '';
@@ -515,6 +708,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
     streetController.clear();
     cityController.clear();
     neighborhoodController.clear();
+    _clientNameMsgId = null;
+    _clientPhoneMsgId = null;
+    _editingMsgId = null;
+    _editingField = null;
+    _chatRepo.setCurrentFlowStep(null);
     _step = ChatFlowStep.idle;
     return await _initialize();
   }
@@ -523,13 +721,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Helpers de mensagens
   // ------------------------------------------------------------------
 
+  String _generateMessageId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
+
   Future<void> _addBotMessage(
     String text, {
     ChatMessageType type = ChatMessageType.text,
     Map<String, dynamic>? payload,
   }) async {
     final msg = ChatMessageEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _generateMessageId(),
       sender: ChatSender.bot,
       type: type,
       content: text,
@@ -539,12 +741,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _chatRepo.sendMessage(msg);
   }
 
-  Future<void> _addUserMessage(String text) async {
+  Future<void> _sendUserMessageWithId(
+    String id,
+    String text, {
+    Map<String, dynamic>? payload,
+  }) async {
     final msg = ChatMessageEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: id,
       sender: ChatSender.user,
       type: ChatMessageType.text,
       content: text,
+      payload: payload,
       timestamp: DateTime.now(),
     );
     await _chatRepo.sendMessage(msg);
@@ -578,7 +785,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       case 'SIM':
         if (_step == ChatFlowStep.askAddress) {
           // SIM para "quer incluir endereço?" → pergunta se tem CEP
-          _step = ChatFlowStep.askHasCep;
+          _setStep(ChatFlowStep.askHasCep);
           await _addBotMessage(
             _script?.askHasCep ?? ChatScriptEntity.fallback.askHasCep,
             type: ChatMessageType.inlineButtons,
@@ -587,6 +794,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         } else if (_step == ChatFlowStep.askHasCep) {
           // SIM tem CEP → pede o CEP
           await _askForCep();
+        } else if (_step == ChatFlowStep.askComments) {
+          // SIM quer comentários → view abre tela de comentários
+          // Ação é tratada pela View via onAction
         }
         break;
       case 'NÃO':
@@ -596,6 +806,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         } else if (_step == ChatFlowStep.askHasCep) {
           // NÃO tem CEP → vai para manual
           await _goToManualAddress();
+        } else if (_step == ChatFlowStep.askComments) {
+          // NÃO quer comentários → pula e finaliza
+          await _finalizeAndShare();
         }
         break;
       case 'has_cep_yes':
@@ -612,16 +825,44 @@ class ChatAssistantViewModel extends ChangeNotifier {
         _pendingAddress = null;
         await _goToManualAddress();
         break;
+      case 'Confirmar dados':
+        await _createDraftAndGoToAddress(
+          _pendingClientName,
+          phone: _pendingPhone,
+        );
+        break;
+      case 'Editar nome':
+        await _askEditName();
+        break;
+      case 'Editar telefone':
+        await _askEditPhone();
+        break;
       case 'open_products':
         // A view abre a tela de produtos
         break;
       case 'share_link':
         await shareLinkCommand.execute();
         break;
+      case 'finalize_budget':
+        await _finalizeAndShare();
+        break;
       case 'edit_products':
         // A view abre a tela de produtos em modo edição
         break;
     }
+  }
+
+  /// Chamado pela View após o usuário voltar da tela de comentários.
+  Future<void> finalizeAfterComments() async {
+    // Ao voltar da tela de comentários, mostra opções de editar novamente ou finalizar.
+    _setStep(ChatFlowStep.askComments);
+    await _addBotMessage(
+      'Comentários atualizados com sucesso. Deseja editar novamente ou finalizar o orçamento?',
+      type: ChatMessageType.inlineButtons,
+      payload: {
+        'actions': ['Editar comentários', 'Finalizar e gerar link']
+      },
+    );
   }
 
   @override

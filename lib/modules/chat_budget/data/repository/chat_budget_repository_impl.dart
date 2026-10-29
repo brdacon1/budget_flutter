@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_budget/data/datasource/chat_budget_remote_datasource.dart';
@@ -21,6 +22,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   String? _sessionId;
   CustomerInfo? _draft;
   final List<ChatMessageEntity> _messages = [];
+  String? _currentFlowStep;
 
   ChatBudgetRepositoryImpl(this._chatRemote, this._budgetRepo);
 
@@ -33,8 +35,19 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   @override
   List<ChatMessageEntity> get messages => List.unmodifiable(_messages);
 
-  String _generateSessionId() =>
-      DateTime.now().millisecondsSinceEpoch.toString();
+  @override
+  String? get currentFlowStep => _currentFlowStep;
+
+  @override
+  void setCurrentFlowStep(String? step) {
+    _currentFlowStep = step;
+  }
+
+  String _generateSessionId() {
+    final now = DateTime.now();
+    final randomPart = Random().nextInt(9999999).toString().padLeft(7, '0');
+    return '${now.millisecondsSinceEpoch}-$randomPart';
+  }
 
   @override
   Future<Result<CustomerInfo>> createDraftBudget(
@@ -43,7 +56,8 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   }) async {
     try {
       final now = DateTime.now();
-      final id = now.millisecondsSinceEpoch.toString();
+      final randomPart = Random().nextInt(9999999).toString().padLeft(7, '0');
+      final id = '${now.millisecondsSinceEpoch}-$randomPart';
       final formattedDate = DateFormat('dd/MM/yyyy').format(now);
 
       final budget = CustomerInfo(
@@ -156,6 +170,17 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   }
 
   @override
+  Future<Result<void>> updateMessage(String id, String newContent) async {
+    final i = _messages.indexWhere((m) => m.id == id);
+    if (i == -1) {
+      return Result.error(Exception('Mensagem não encontrada'));
+    }
+    _messages[i] = _messages[i].copyWith(content: newContent);
+    notifyListeners();
+    return Result.ok(null);
+  }
+
+  @override
   Future<Result<CustomerInfo>> finalizeDraft() async {
     if (_draft == null) {
       return Result.error(Exception('Rascunho não iniciado'));
@@ -193,5 +218,23 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
     _draft = null;
     _messages.clear();
     notifyListeners();
+  }
+
+  @override
+  Future<Result<void>> deleteDraft() async {
+    if (_draft == null || _draft!.id == null) {
+      return Result.ok(null);
+    }
+    try {
+      // Limpa cache de itens do BudgetRepository para este draft
+      _budgetRepo.clearItemsCache(_draft!.id!);
+      // Deleta o orçamento do banco
+      await _budgetRepo.deleteBudgets([_draft!]);
+      _draft = null;
+      notifyListeners();
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
   }
 }
