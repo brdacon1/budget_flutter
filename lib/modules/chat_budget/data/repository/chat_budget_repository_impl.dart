@@ -56,8 +56,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   }) async {
     try {
       final now = DateTime.now();
-      final randomPart = Random().nextInt(9999999).toString().padLeft(7, '0');
-      final id = '${now.millisecondsSinceEpoch}-$randomPart';
+      final id = now.millisecondsSinceEpoch.toString();
       final formattedDate = DateFormat('dd/MM/yyyy').format(now);
 
       final budget = CustomerInfo(
@@ -181,12 +180,35 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   }
 
   @override
-  Future<Result<CustomerInfo>> finalizeDraft() async {
-    if (_draft == null) {
+  Future<Result<void>> removeMessageById(String id) async {
+    _messages.removeWhere((m) => m.id == id);
+    notifyListeners();
+    return Result.ok(null);
+  }
+
+  @override
+  Future<Result<List<ItemsBudget>>> fetchDraftItems() async {
+    if (_draft?.id == null) {
       return Result.error(Exception('Rascunho não iniciado'));
     }
     try {
-      // Recalcula total se necessário
+      final result = await _budgetRepo.fetchBudgetItems(
+        _draft!.id!,
+        forceRefresh: true,
+      );
+      notifyListeners();
+      return result;
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> refreshDraftTotal() async {
+    if (_draft?.id == null) {
+      return Result.error(Exception('Rascunho não iniciado'));
+    }
+    try {
       final itemsResult = await _budgetRepo.fetchBudgetItems(
         _draft!.id!,
         forceRefresh: true,
@@ -197,9 +219,33 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
           total += it.TOTAL ?? 0;
         }
       }
+      final updated = _draft!.copyWith(totalValue: total);
+      await _budgetRepo.updateBudget(updated);
+      _draft = updated;
+      budgetGlobals.VALORTOTAL = total;
+      notifyListeners();
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<CustomerInfo>> finalizeDraft() async {
+    if (_draft == null) {
+      return Result.error(Exception('Rascunho não iniciado'));
+    }
+    try {
+      // Reutiliza o recálculo já implementado
+      final totalResult = await refreshDraftTotal();
+      if (totalResult is Error<void>) {
+        return Result.error(totalResult.error);
+      }
+
+      // Mantém o status que já estava; se vazio, força 'PENDENTE' igual à tela
+      final currentStatus = _draft!.status;
       final finalized = _draft!.copyWith(
-        status: 'PENDENTE',
-        totalValue: total,
+        status: (currentStatus == null || currentStatus.isEmpty) ? 'PENDENTE' : currentStatus,
       );
       await _budgetRepo.updateBudget(finalized);
       _draft = finalized;

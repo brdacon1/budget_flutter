@@ -4,8 +4,8 @@ import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dar
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
-import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
+
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
 class ChatAssistantView extends StatefulWidget {
@@ -49,28 +49,21 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     });
   }
 
-  Future<void> _openProductSelection({bool isEdit = false}) async {
+  /// Abre a tela de itens do orçamento (edita/exclui/adiciona itens).
+  Future<void> _openBudgetItems() async {
     final budget = _vm.draftBudget;
     if (budget == null) return;
 
-    final result = await Navigator.push<List<ItemsBudget>>(
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ProductPriceListView(
-          item: budget,
-          fromMenu: false,
-          selectionMode: true,
-        ),
+        builder: (_) => BudgetListItemsView(item: budget),
       ),
     );
 
-    if (result != null && result.isNotEmpty) {
-      if (isEdit) {
-        await _vm.editProductsCommand.execute(result);
-      } else {
-        await _vm.confirmProductsCommand.execute(result);
-      }
-    }
+    // Ao voltar, os itens já foram salvos/editados na tela nativa.
+    // Avança direto para a pergunta de comentários.
+    await _vm.goToCommentsAfterProductEdit();
   }
 
   Future<void> _openComments() async {
@@ -243,13 +236,13 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         }
         break;
       case 'open_products':
-        await _openProductSelection();
+        await _openBudgetItems();
         break;
       case 'share_link':
         await _vm.shareLinkCommand.execute();
         break;
       case 'edit_products':
-        await _openProductSelection(isEdit: true);
+        await _openBudgetItems();
         break;
       case 'edit_comments':
       case 'Editar comentários':

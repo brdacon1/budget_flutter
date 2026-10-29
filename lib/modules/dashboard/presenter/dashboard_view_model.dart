@@ -57,6 +57,18 @@ class DashboardViewModel extends ChangeNotifier {
     return week;
   }
 
+  double getWeekOfMonthFromId(String? rawId) {
+    if (rawId == null || rawId.isEmpty) return 0;
+    // Remove qualquer sufixo não numérico (ex: hífen, letras)
+    final sanitized = rawId.replaceAll(RegExp(r'[^0-9]'), '');
+    if (sanitized.isEmpty) return 0;
+    final ms = int.tryParse(sanitized);
+    if (ms == null) return 0;
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(ms);
+    final day = dateTime.day;
+    return day / 7;
+  }
+
   Future<void> startDashboard() async {
     _loading = true;
     notifyListeners();
@@ -104,7 +116,7 @@ class DashboardViewModel extends ChangeNotifier {
               _myBudgetDashboard.qtdIntApproved! + 1;
           _myBudgetDashboard.qtdDoubleApproved =
               _myBudgetDashboard.qtdDoubleApproved! + 1;
-          weekNumber = getWeekOfMonthFromMilliseconds(int.parse(item.id!));
+          weekNumber = getWeekOfMonthFromId(item.id);
           _accumulateByWeek(
             weekNumber,
             item.totalValue! / 1000,
@@ -122,7 +134,7 @@ class DashboardViewModel extends ChangeNotifier {
               _myBudgetDashboard.qtdIntPending! + 1;
           _myBudgetDashboard.qtdDoublePending =
               _myBudgetDashboard.qtdDoublePending! + 1;
-          weekNumber = getWeekOfMonthFromMilliseconds(int.parse(item.id!));
+          weekNumber = getWeekOfMonthFromId(item.id);
           _accumulateByWeek(
             weekNumber,
             item.totalValue! / 1000,
@@ -140,7 +152,7 @@ class DashboardViewModel extends ChangeNotifier {
               _myBudgetDashboard.qtdIntDisapproved! + 1;
           _myBudgetDashboard.qtdDoubleDisapproved =
               _myBudgetDashboard.qtdDoubleDisapproved! + 1;
-          weekNumber = getWeekOfMonthFromMilliseconds(int.parse(item.id!));
+          weekNumber = getWeekOfMonthFromId(item.id);
           _accumulateByWeek(
             weekNumber,
             item.totalValue! / 1000,
@@ -158,7 +170,7 @@ class DashboardViewModel extends ChangeNotifier {
               _myBudgetDashboard.qtdIntFinish! + 1;
           _myBudgetDashboard.qtdDoubleFinish =
               _myBudgetDashboard.qtdDoubleFinish! + 1;
-          weekNumber = getWeekOfMonthFromMilliseconds(int.parse(item.id!));
+          weekNumber = getWeekOfMonthFromId(item.id);
           _accumulateByWeek(
             weekNumber,
             item.totalValue! / 1000,

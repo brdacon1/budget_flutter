@@ -44,11 +44,20 @@ abstract class ChatBudgetRepository extends ChangeNotifier {
   /// Atualiza o texto de uma mensagem existente pelo ID.
   Future<Result<void>> updateMessage(String id, String newContent);
 
+  /// Remove uma mensagem da sessão pelo ID.
+  Future<Result<void>> removeMessageById(String id);
+
+  /// Busca os itens salvos no orçamento rascunho atual.
+  Future<Result<List<ItemsBudget>>> fetchDraftItems();
+
   /// Marca sessão como completa e devolve o orçamento final.
   Future<Result<CustomerInfo>> finalizeDraft();
 
   /// Limpa sessão atual e cache de mensagens.
   void clearSession();
+
+  /// Recalcula o total do rascunho com base nos itens salvos no Firestore.
+  Future<Result<void>> refreshDraftTotal();
 
   /// Deleta o orçamento rascunho atual e limpa caches relacionados.
   Future<Result<void>> deleteDraft();

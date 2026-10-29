@@ -71,15 +71,16 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
-      body: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              SizedBox(
-                height: he * 0.07,
-              ),
+      body: SafeArea(
+        child: AnimatedBuilder(
+          animation: _viewModel,
+          builder: (context, _) {
+            return Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(
+                  height: he * 0.02,
+                ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
@@ -167,6 +168,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
             ],
           );
         },
+      ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: AnimatedBuilder(

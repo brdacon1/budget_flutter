@@ -96,6 +96,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   bool get isEditingMessage => _editingMsgId != null;
 
+  // IDs das mensagens de review e pergunta de comentários
+  // (permitem remover/re-enviar quando o usuário edita produtos).
+  String? _reviewMsgId;
+  String? _commentQuestionMsgId;
+
   // Endereço retornado pelo ViaCEP, aguardando confirmação do usuário
   Address? _pendingAddress;
 
@@ -618,32 +623,74 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _usecase.addProducts(items);
     _currentDraftItems.addAll(items);
 
-    // Monta resumo
-    final buffer = StringBuffer();
-    buffer.writeln('Produtos selecionados:');
-    for (final it in items) {
-      buffer.writeln(
-          '• ${it.DESCRICAO} — ${it.QTD?.toInt() ?? 1}x R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)}');
-    }
-
-    _setStep(ChatFlowStep.reviewProducts);
-    await _addBotMessage(
-      buffer.toString(),
-      type: ChatMessageType.productList,
-    );
-
-    // Pergunta se quer adicionar comentários
-    _setStep(ChatFlowStep.askComments);
-    await _addBotMessage(
-      'Deseja adicionar algum comentário ou observação ao orçamento?',
-      type: ChatMessageType.inlineButtons,
-      payload: {'actions': ['SIM', 'NÃO']},
-    );
-    return Result.ok(null);
+    // Mostra resumo atualizado com os itens do banco
+    return await _showProductReviewAndComments();
   }
 
   Future<Result<void>> _editProducts(List<ItemsBudget> items) async {
     return _confirmProducts(items, isEdit: true);
+  }
+
+  /// Busca os itens atuais do draft no banco e exibe o resumo + pergunta comentários.
+  /// Remove as mensagens anteriores para evitar duplicação no chat.
+  Future<Result<void>> _showProductReviewAndComments() async {
+    // Remove mensagens anteriores de review e comentários (já exibidas)
+    if (_reviewMsgId != null) {
+      await _chatRepo.removeMessageById(_reviewMsgId!);
+      _reviewMsgId = null;
+    }
+    if (_commentQuestionMsgId != null) {
+      await _chatRepo.removeMessageById(_commentQuestionMsgId!);
+      _commentQuestionMsgId = null;
+    }
+
+    // Busca itens atualizados do draft
+    final result = await _chatRepo.fetchDraftItems();
+    final List<ItemsBudget> items;
+    if (result is Ok<List<ItemsBudget>>) {
+      items = result.value;
+    } else {
+      items = List<ItemsBudget>.from(_currentDraftItems);
+    }
+
+    // Monta resumo
+    final buffer = StringBuffer();
+    double grandTotal = 0;
+    if (items.isEmpty) {
+      buffer.writeln('Nenhum item no orçamento.');
+    } else {
+      buffer.writeln('Itens do orçamento:');
+      for (final it in items) {
+        final lineTotal = it.TOTAL ?? ((it.QTD ?? 0) * (it.PRECO ?? 0));
+        grandTotal += lineTotal;
+        buffer.writeln(
+          '• ${it.DESCRICAO} — ${(it.QTD ?? 1).toInt()}x R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)} = R\$ ${lineTotal.toStringAsFixed(2)}',
+        );
+      }
+      buffer.writeln('');
+      buffer.writeln('Total: R\$ ${grandTotal.toStringAsFixed(2)}');
+    }
+
+    _setStep(ChatFlowStep.askComments);
+
+    // Envia resumo e guarda ID
+    _reviewMsgId = _generateMessageId();
+    await _sendBotMessageWithId(
+      _reviewMsgId!,
+      buffer.toString(),
+      type: ChatMessageType.productList,
+    );
+
+    // Envia pergunta de comentários e guarda ID
+    _commentQuestionMsgId = _generateMessageId();
+    await _sendBotMessageWithId(
+      _commentQuestionMsgId!,
+      'Deseja adicionar algum comentário ou observação ao orçamento?',
+      type: ChatMessageType.inlineButtons,
+      payload: {'actions': ['SIM', 'NÃO']},
+    );
+
+    return Result.ok(null);
   }
 
   Future<Result<void>> _finalizeAndShare() async {
@@ -712,6 +759,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _clientPhoneMsgId = null;
     _editingMsgId = null;
     _editingField = null;
+    _reviewMsgId = null;
+    _commentQuestionMsgId = null;
     _chatRepo.setCurrentFlowStep(null);
     _step = ChatFlowStep.idle;
     return await _initialize();
@@ -732,6 +781,23 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }) async {
     final msg = ChatMessageEntity(
       id: _generateMessageId(),
+      sender: ChatSender.bot,
+      type: type,
+      content: text,
+      payload: payload,
+      timestamp: DateTime.now(),
+    );
+    await _chatRepo.sendMessage(msg);
+  }
+
+  Future<void> _sendBotMessageWithId(
+    String id,
+    String text, {
+    ChatMessageType type = ChatMessageType.text,
+    Map<String, dynamic>? payload,
+  }) async {
+    final msg = ChatMessageEntity(
+      id: id,
       sender: ChatSender.bot,
       type: type,
       content: text,
@@ -850,6 +916,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
         // A view abre a tela de produtos em modo edição
         break;
     }
+  }
+
+  /// Chamado pela View após o usuário voltar da tela de itens do orçamento.
+  Future<void> goToCommentsAfterProductEdit() async {
+    // Sincroniza o total recalculado pela BudgetListItemsViewModel
+    await _chatRepo.refreshDraftTotal();
+    // Mostra resumo atualizado e pergunta de comentários
+    await _showProductReviewAndComments();
   }
 
   /// Chamado pela View após o usuário voltar da tela de comentários.
