@@ -175,6 +175,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
         animation: _viewModel,
         builder: (context, _) {
           return Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Visibility(
@@ -257,7 +258,12 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       bottomNavigationBar: AnimatedBuilder(
         animation: _viewModel,
         builder: (context, _) {
-          return BudgetListItemsTotalBar(viewModel: _viewModel);
+          final bottomInset = MediaQuery.of(context).viewPadding.bottom;
+          return Container(
+            color: buttonColor,
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: BudgetListItemsTotalBar(viewModel: _viewModel),
+          );
         },
       ),
     );
