@@ -10,7 +10,7 @@ import 'package:oflite/shared/models/observation_pdf.dart';
 /// Camada de acesso aos dados do orçamento no fluxo **Web público**.
 ///
 /// O aplicativo mobile lê/gravar o orçamento via `cloud_firestore`
-/// autenticado como o próprio dono (`HttpRequest`). No fluxo Web, o cliente
+/// autenticado como o próprio dono (`cloud_firestore`). No fluxo Web, o cliente
 /// **não** é o usuário autenticado — ele recebe apenas um *token provisório
 /// do Firebase* (Firebase ID Token do dono, ~1h de validade) embutido na URL.
 ///

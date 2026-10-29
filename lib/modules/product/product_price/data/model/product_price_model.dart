@@ -16,7 +16,7 @@ import 'package:oflite/shared/models/items_list_budget.dart';
 /// no Firebase (`CATEGORIA`, `DESCRICAO`, `PRECO`, ...) para não quebrar os
 /// documentos existentes — apenas a nomenclatura Dart muda para `camelCase`.
 ///
-/// Como os services compartilhados (`HttpRequest.salvaItensList`) e outras
+/// Como o `BudgetRemoteDataSource.saveBudgetItem` e outras
 /// telas (`budget_list_items`, `product_price_list`, `ItemsListBottomModal`)
 /// ainda usam os models legados, este model expõe **adapters de fronteira**
 /// (`fromItemsBudget`/`toItemsListBudget`) para converter nas bordas sem
@@ -148,7 +148,7 @@ class ProductPriceModel {
   }
 
   /// Converte para o model legado usado pelo service
-  /// `HttpRequest.salvaItensList(ItemsListBudget)`.
+  /// `BudgetRemoteDataSource.saveBudgetItem(ItemsListBudget)`.
   ItemsListBudget toItemsListBudget() {
     return ItemsListBudget(
       id: id,

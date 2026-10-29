@@ -11,14 +11,12 @@ import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 /// Geração do PDF do recibo (dados do titular, dados do orçamento,
 /// dados do recibo e tabela de pagamentos realizados).
 class PdfGenerateReceiptUseCase {
-  final HttpRequest _db = HttpRequest();
   final ConvertCoin _moneyConvert = ConvertCoin();
 
   Future<String> patternPDF({
@@ -132,7 +130,7 @@ class PdfGenerateReceiptUseCase {
 
   Future<String> _getAuthToken() async {
     if (uid.googleAuth!) {
-      return _db.authGoogle();
+      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
     }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: user_global.email!.trim(),

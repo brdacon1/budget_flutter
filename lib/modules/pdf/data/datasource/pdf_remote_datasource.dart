@@ -14,7 +14,7 @@ class PdfRemoteDataSource {
     final data = doc.data();
     // Se o usuário ainda não possui INFOPDF, retorna map vazio para que
     // OwnerPdf.fromJson(null) monte um objeto com campos em branco
-    // (preserva comportamento original do HttpRequest).
+    // (preserva comportamento anterior ao refatoramento do datasource legado).
     if (data == null) return <String, dynamic>{};
     return Map<String, dynamic>.from(data);
   }

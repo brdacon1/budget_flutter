@@ -27,6 +27,9 @@ class ProductPriceListViewModel extends ChangeNotifier {
   final CustomerInfo? item;
   final bool fromMenu;
 
+  /// Quando true a tela funciona como picker e devolve [List<ItemsBudget>].
+  final bool selectionMode;
+
   final TextEditingController searchController = TextEditingController();
 
   List<ProductPriceModel> _all = <ProductPriceModel>[];
@@ -39,7 +42,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   bool checkBoxAppear = false;
   bool checkBoxProductVisible = true;
 
-  ProductPriceListViewModel({this.item, this.fromMenu = false});
+  ProductPriceListViewModel({this.item, this.fromMenu = false, this.selectionMode = false});
 
   List<ProductPriceModel> get found {
     final query = searchController.text;
@@ -87,6 +90,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
   Future<void> refresh() => inicialData();
 
   Future<void> onBack(BuildContext context) async {
+    if (selectionMode) {
+      Navigator.pop(context, null);
+      return;
+    }
     if (addItems.isEmpty) {
       Navigator.pop(context, true);
       return;
@@ -216,6 +223,12 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> saveCart(BuildContext context) async {
+    // Em modo seleção não salva no Firestore — retorna os itens selecionados.
+    if (selectionMode) {
+      finalizeSelection(context);
+      return;
+    }
+
     await loadingEvent.alertLoading(context);
     try {
       final budgetRepo = getIt<BudgetRepository>();
@@ -257,6 +270,22 @@ class ProductPriceListViewModel extends ChangeNotifier {
         ProductStrings.cartAddError,
       );
     }
+  }
+
+  /// Converte os itens do carrinho para [ItemsBudget] e popa o resultado.
+  /// Usado apenas quando [selectionMode] é true.
+  void finalizeSelection(BuildContext context) {
+    final result = addItems.map((cart) => ItemsBudget(
+      id: cart.id,
+      CATEGORIA: cart.categoria,
+      DESCRICAO: cart.descricao,
+      PRECO: cart.preco,
+      QTD: cart.qtd,
+      MEDIDA: cart.medida,
+      TOTAL: cart.total,
+      IDPRODUCT: cart.id,
+    )).toList();
+    Navigator.pop(context, result);
   }
 
   Future<void> openDeleteModal(BuildContext context) async {

@@ -11,7 +11,8 @@ import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_wid
 import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/shared/models/info_user.dart';
 
-import 'http_request.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
 import 'loading_event.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,7 +29,6 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 /// negócio (Firebase Auth, `updateUserAdm`, etc.) continua aqui — apenas a
 /// camada visual foi refatorada.
 class DisplayAlert {
-  final HttpRequest db = HttpRequest();
   final InfoUser DADOS = InfoUser();
   final LoadingEvent alertDisplayLoading = LoadingEvent();
 
@@ -151,18 +151,17 @@ class DisplayAlert {
               DADOS.PurchaseToken = global_uid_user.purchaseToken;
               DADOS.USER = global_uid_user.user;
 
-              await db.updateUserAdm(DADOS).then((value) async {
-                global_uid_user.name = name;
-                alertDisplayLoading.closeLoading(modalContext);
-                if (modalContext.mounted) {
-                  Navigator.of(modalContext).pop();
-                  await notification(
-                    modalContext,
-                    'Feito!',
-                    'Nome atualizado com sucesso!',
-                  );
-                }
-              });
+              await getIt<UserRemoteDataSource>().updateUser(DADOS);
+              global_uid_user.name = name;
+              alertDisplayLoading.closeLoading(modalContext);
+              if (modalContext.mounted) {
+                Navigator.of(modalContext).pop();
+                await notification(
+                  modalContext,
+                  'Feito!',
+                  'Nome atualizado com sucesso!',
+                );
+              }
             } else {
               alertDisplayLoading.closeLoading(modalContext);
               if (modalContext.mounted) {

@@ -13,6 +13,10 @@ class BudgetListViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final DisplayAlert displayAlert = DisplayAlert();
 
+  BudgetListViewModel() {
+    _budgetRepository.addListener(_onBudgetRepoChanged);
+  }
+
   CustomerInfo customerBudget = CustomerInfo();
   Color enabled = const Color(0xFF827F8A);
   final _foundUsers = <CustomerInfo>[];
@@ -22,6 +26,12 @@ class BudgetListViewModel extends ChangeNotifier {
   Color deaible = Colors.grey;
   bool deleteVisible = false;
   bool checkBoxAppear = false;
+  bool _isRefreshing = false;
+
+  void _onBudgetRepoChanged() {
+    if (_isRefreshing) return;
+    getInformationOrcamento();
+  }
 
   Future<void> initialScreen() async {
     await getInformationOrcamento();
@@ -58,7 +68,8 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   Future<List<CustomerInfo>> getInformationOrcamento() async {
-    final result = await _budgetRepository.fetchBudgets();
+    _isRefreshing = true;
+    final result = await _budgetRepository.fetchBudgets(forceRefresh: true);
     _foundUsers.clear();
     if (result is Ok<List<CustomerInfo>>) {
       for (final b in result.value) {
@@ -66,6 +77,7 @@ class BudgetListViewModel extends ChangeNotifier {
         _foundUsers.add(b);
       }
     }
+    _isRefreshing = false;
     notifyListeners();
     return _foundUsers;
   }
@@ -133,5 +145,11 @@ class BudgetListViewModel extends ChangeNotifier {
     );
     budget.IDORCAMENTO = '';
     return novo;
+  }
+
+  @override
+  void dispose() {
+    _budgetRepository.removeListener(_onBudgetRepoChanged);
+    super.dispose();
   }
 }

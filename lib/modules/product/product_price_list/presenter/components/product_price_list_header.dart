@@ -18,11 +18,13 @@ class ProductPriceListHeader extends StatelessWidget {
     required this.searchController,
     required this.onBack,
     required this.onSearchChanged,
+    this.title,
   });
 
   final TextEditingController searchController;
   final VoidCallback onBack;
   final ValueChanged<String> onSearchChanged;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class ProductPriceListHeader extends StatelessWidget {
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: we * 0.04),
             child: Text(
-              ProductStrings.listTitle,
+              title ?? ProductStrings.listTitle,
               style: GoogleFonts.heebo(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

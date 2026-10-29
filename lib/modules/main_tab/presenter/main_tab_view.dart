@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as uid;
 import 'package:oflite/modules/budget/budget_list/presenter/budget_list_view.dart';
+import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view.dart';
 import 'package:oflite/modules/main_config_menu/presenter/main_config_menu_view.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/core/services/data/service/notification_service.dart';
@@ -48,6 +49,7 @@ class _MainTabView extends State<MainTabView> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = [
+      const ChatAssistantView(),
       const DashboardView(),
       const BudgetListView(),
       const MainConfigMenuView(),

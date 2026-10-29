@@ -16,12 +16,9 @@ import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
-
 /// Geração do PDF do orçamento (dados do titular, dados do orçamento,
 /// tabela de produtos, tabela de serviços e observações).
 class PdfGenerateUseCase {
-  final HttpRequest _db = HttpRequest();
   final ConvertCoin _moneyConvert = ConvertCoin();
 
   Future<String> patternPDF({
@@ -261,7 +258,7 @@ class PdfGenerateUseCase {
       return authToken;
     }
     if (uid.googleAuth!) {
-      return _db.authGoogle();
+      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
     }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: user_global.email!.trim(),

@@ -8,8 +8,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/global_uid_user.dart' as uid;
+import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
+import 'package:oflite/injection.dart';
 
 /// Inicializa e gerencia as notificações push (FCM) do app.
 ///
@@ -336,7 +337,7 @@ class NotificationService {
 
   /// Abre o orçamento [budgetId] (mesmo id gravado em `ORCAMENTO_ID` no
   /// documento de notificação) na tela `BudgetTabView`, reutilizando o
-  /// `HttpRequest.getInformationOrcamento1` do app mobile — nenhuma regra
+  /// `BudgetRemoteDataSource.getBudgetById` do app mobile — nenhuma regra
   /// paralela. Se o navigator ainda não estiver pronto, guarda como pendente.
   Future<void> _openBudget(String budgetId) async {
     final key = _navigatorKey;
@@ -353,7 +354,8 @@ class NotificationService {
     }
     try {
       budget.IDORCAMENTO = budgetId;
-      final customer = await HttpRequest().getInformationOrcamento1();
+      final raw = await getIt<BudgetRemoteDataSource>().getBudgetById(budgetId);
+      final customer = CustomerInfo.fromMap(raw);
       customer.id ??= budgetId;
       final context = key.currentContext!;
       if (!context.mounted) {

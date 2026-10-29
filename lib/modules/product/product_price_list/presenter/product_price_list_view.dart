@@ -26,7 +26,16 @@ import 'product_price_list_view_model.dart';
 class ProductPriceListView extends StatefulWidget {
   final CustomerInfo? item;
   final bool? fromMenu;
-  const ProductPriceListView({super.key, this.item, this.fromMenu});
+  final bool selectionMode;
+
+  /// Quando [selectionMode] é true, a tela funciona como picker multi-seleção
+  /// e retorna [List<ItemsBudget>] via Navigator.pop.
+  const ProductPriceListView({
+    super.key,
+    this.item,
+    this.fromMenu,
+    this.selectionMode = false,
+  });
 
   @override
   State<ProductPriceListView> createState() => _ProductPriceListView();
@@ -41,6 +50,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
     _viewModel = ProductPriceListViewModel(
       item: widget.item,
       fromMenu: widget.fromMenu ?? false,
+      selectionMode: widget.selectionMode,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData());
   }
@@ -64,6 +74,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
             children: <Widget>[
               ProductPriceListHeader(
                 searchController: _viewModel.searchController,
+                title: _viewModel.selectionMode ? 'Selecionar produtos' : null,
                 onBack: () => _viewModel.onBack(context),
                 onSearchChanged: (_) => _viewModel.onSearchChanged(),
               ),
@@ -83,10 +94,11 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                         moneyConvert: _viewModel.moneyConvert,
                         fromMenu: _viewModel.fromMenu,
                         checkBoxAppear: _viewModel.checkBoxAppear,
-                        checkBoxProductVisible: _viewModel.checkBoxProductVisible,
-                        onLongPress: _viewModel.onLongPress,
-                        onTap: () =>
-                            _viewModel.openCreator(context, item: found[index]),
+                        checkBoxProductVisible: _viewModel.checkBoxProductVisible || _viewModel.selectionMode,
+                        onLongPress: _viewModel.selectionMode ? () {} : _viewModel.onLongPress,
+                        onTap: _viewModel.selectionMode
+                            ? () => _viewModel.toggleSelectProduct(context, index)
+                            : () => _viewModel.openCreator(context, item: found[index]),
                         onToggleSelectProduct: () =>
                             _viewModel.toggleSelectProduct(context, index),
                         onToggleDelete: () =>
@@ -105,6 +117,10 @@ class _ProductPriceListView extends State<ProductPriceListView> {
         animation: _viewModel,
         builder: (context, _) {
           final he = MediaQuery.of(context).size.height;
+
+          // Em modo seleção escondemos os FABs padrão e usamos BottomAppBar
+          if (_viewModel.selectionMode) return const SizedBox.shrink();
+
           return Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -137,6 +153,37 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                 child: const Icon(Icons.add, color: Colors.black),
               ),
             ],
+          );
+        },
+      ),
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _viewModel,
+        builder: (context, _) {
+          if (!_viewModel.selectionMode || _viewModel.addItems.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return BottomAppBar(
+            color: const Color(0xFF1E1E2C),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00BFA5),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  onPressed: () => _viewModel.finalizeSelection(context),
+                  child: Text(
+                    'Finalizar seleção (${_viewModel.addItems.length})',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
           );
         },
       ),

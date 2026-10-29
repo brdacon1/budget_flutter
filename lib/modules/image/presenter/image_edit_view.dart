@@ -3,7 +3,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/core/services/data/service/http_request.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/modules/core/services/data/service/loading_event.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
@@ -175,7 +176,6 @@ class _ImageEditView extends State<ImageEditView> {
           heroTag: "Save",
           onPressed: () async {
             alertDisplayLoading.alertLoading(context);
-            var db = HttpRequest();
             var localOwner = OwnerPdf();
             try {
               if (widget.owner.fotoId!.isNotEmpty &&
@@ -199,7 +199,7 @@ class _ImageEditView extends State<ImageEditView> {
                 localOwner.logoName = _viewModel.fileName;
                 widget.owner.logoName = _viewModel.fileName;
 
-                await db.savePDF(localOwner);
+                await getIt<PdfRemoteDataSource>().saveInformationEnterprise(localOwner.toJson());
 
                 if (mounted) {
                   alertDisplayLoading.closeLoading(context);

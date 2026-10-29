@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
+import 'package:oflite/modules/chat_budget/chat_budget_binds.dart';
 import 'package:oflite/modules/comment/comment_binds.dart';
+import 'package:oflite/modules/core/core_binds.dart';
 import 'package:oflite/modules/login/login_binds.dart';
 import 'package:oflite/modules/payment/payment_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
@@ -25,6 +27,7 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
   // Core Services (stateless ou com estado próprio, custosos de recriar)
   // ------------------------------------------------------------------
+  registerCoreDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature Binds (Datasource -> RepositoryImpl exposta como interface)
@@ -36,6 +39,7 @@ void setupDependencyInjection() {
   registerCommentDependencies(getIt);
   registerPdfDependencies(getIt);
   registerLoginDependencies(getIt);
+  registerChatBudgetDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)
