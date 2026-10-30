@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
@@ -64,13 +64,13 @@ class _LoginViewState extends State<LoginView> {
       // Captura a mensagem e consome o estado ANTES de qualquer chamada
       // que possa disparar novas notificações, para que o modal de erro
       // seja exibido apenas uma vez (one-shot).
-      final message = _viewModel.errorMessage ?? AuthStrings.loginErrorDefault;
+      final message = _viewModel.errorMessage ?? LoginStrings.loginErrorDefault;
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _displayAlert.notificationError(
             context,
-            AuthStrings.errorTitle,
+            LoginStrings.errorTitle,
             message,
           );
         }
@@ -99,7 +99,7 @@ class _LoginViewState extends State<LoginView> {
                   LoginTextField(
                     field: LoginField.email,
                     controller: _viewModel.emailController,
-                    hintText: AuthStrings.loginEmailHint,
+                    hintText: LoginStrings.loginEmailHint,
                     prefixIcon: Icons.email_outlined,
                     viewModel: _viewModel,
                     width: we,
@@ -109,7 +109,7 @@ class _LoginViewState extends State<LoginView> {
                   LoginTextField(
                     field: LoginField.password,
                     controller: _viewModel.passwordController,
-                    hintText: AuthStrings.loginPasswordHint,
+                    hintText: LoginStrings.loginPasswordHint,
                     prefixIcon: Icons.lock_open_outlined,
                     viewModel: _viewModel,
                     width: we,
@@ -134,14 +134,14 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: he * 0.02),
                   LoginButton(
-                    label: AuthStrings.loginButton,
+                    label: LoginStrings.loginButton,
                     onPressed: () => _viewModel.loginWithEmailAndPassword(context),
                   ),
                   SizedBox(height: he * 0.015),
                   // Botão de cadastro em destaque: abre o modal de cadastro
                   // (bottom modal) no padrão do app.
                   LoginButton(
-                    label: AuthStrings.loginRegisterButton,
+                    label: LoginStrings.loginRegisterButton,
                     onPressed: () {
                       showSingUpBottomModal(context)
                           .then((_) => _viewModel.init());
@@ -151,7 +151,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: he * 0.01),
                   LoginButton(
-                    label: AuthStrings.loginForgotPassword,
+                    label: LoginStrings.loginForgotPassword,
                     onPressed: () => _displayAlert.dialogChangePassword(context),
                     backgroundColor: bgColor,
                     textColor: buttonColor,
@@ -159,7 +159,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: he * 0.02),
                   LoginButton(
-                    label: AuthStrings.loginWithGoogle,
+                    label: LoginStrings.loginWithGoogle,
                     onPressed: () => _viewModel.loginWithGoogle(context),
                     backgroundColor: Colors.red,
                     textColor: Colors.white,

@@ -104,12 +104,14 @@ lib/
 | ViewModel | `{feature}_view_model.dart` | `budget_list_view_model.dart` |
 | Componente | `{feature}_{nome}.dart` | `budget_list_card.dart` |
 | Modal | `{feature}_{acao}_bottom_modal_widget.dart` | `budget_list_delete_bottom_modal_widget.dart` |
+| Strings do módulo | `{modulo}_pt_string.dart` | `login_pt_string.dart` |
 | DataSource | `{feature}_remote_datasource.dart` | `budget_remote_datasource.dart` |
 | Repository (impl) | `{feature}_repository_impl.dart` | `budget_repository_impl.dart` |
 | Repository (interface) | `{feature}_repository.dart` | `budget_repository.dart` |
 | UseCase | `{acao}_{feature}_usecase.dart` | `create_budget_from_chat_usecase.dart` |
 | Binds | `{module}_binds.dart` | `budget_binds.dart` |
 | Routes | `{module}_routes.dart` | `budget_routes.dart` |
+| Strings do módulo | `{module}_pt_string.dart` | `login_pt_string.dart` |
 
 ---
 
@@ -278,6 +280,7 @@ class BudgetRemoteDataSource {
 mkdir -p lib/modules/invoice/data/datasource
 mkdir -p lib/modules/invoice/data/repository
 mkdir -p lib/modules/invoice/domain/repository
+mkdir -p lib/modules/invoice/presenter/strings
 mkdir -p lib/modules/invoice/presenter/invoice_list/components
 mkdir -p lib/modules/invoice/presenter/invoice_creator/components
 ```
@@ -863,7 +866,7 @@ core/convert_coin/
 | 9 | Usar `Result<T, E>` (quando aplicável) para fluxos de erro |
 | 10 | Componentes (widgets) ficam em `presenter/components/` ou subpastas |
 | 11 | Modais ficam em `presenter/components/modals/` |
-| 12 | Strings centralizadas em `shared/common/strings/` |
+| 12 | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`** |
 | 13 | Modelos compartilhados em `shared/models/` |
 | **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`** |
 | **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`** |
@@ -931,6 +934,16 @@ core/convert_coin/
 4. Retornar `Result<T, E>` quando houver fluxo de erro
 5. Registrar no `{modulo}_binds.dart`
 6. Injetar no ViewModel via `getIt<MeuUseCase>()`
+
+### Criar strings de um módulo
+1. Criar pasta `presenter/strings/` dentro do módulo
+2. Criar arquivo `{modulo}_pt_string.dart`
+3. Criar classe `static` com getters `static String get ...` (igual ao padrão de internacionalização)
+4. Mover **todas** as strings literais das Views, ViewModels e componentes do módulo para esse arquivo
+5. Importar no View, ViewModel e componentes usando `import 'package:oflite/modules/{modulo}/presenter/strings/{modulo}_pt_string.dart'`
+6. **Nunca colocar strings literais (hardcoded) diretamente em Views, ViewModels ou componentes.**
+
+> **IMPORTANTE**: strings usadas por mais de um módulo (ex: `errorTitle`) ficam no módulo dono do contexto. Se todos os módulos precisam, use o módulo mais baixo na hierarquia (ex: login → signup usa o `errorTitle` do login). Evite `shared/common/strings/` — strings são **próprias de cada módulo**.
 
 ### Criar um módulo core com datasource
 1. Criar `data/datasource/{service}_remote_datasource.dart`

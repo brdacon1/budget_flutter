@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
 
 /// Rodapé "Já tem uma conta? Entre" da tela de cadastro.
 ///
@@ -18,7 +18,7 @@ class SingUpLoginLink extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          AuthStrings.signUpLoginPrompt,
+          SingUpStrings.signUpLoginPrompt,
           style: GoogleFonts.heebo(
             color: Colors.grey,
             letterSpacing: 0.5,
@@ -27,7 +27,7 @@ class SingUpLoginLink extends StatelessWidget {
         GestureDetector(
           onTap: onLogin,
           child: Text(
-            AuthStrings.signUpLoginAction,
+            SingUpStrings.signUpLoginAction,
             style: GoogleFonts.heebo(
               color: buttonColor.withOpacity(0.9),
               fontWeight: FontWeight.bold,

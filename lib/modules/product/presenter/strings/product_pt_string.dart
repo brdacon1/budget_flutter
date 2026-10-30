@@ -1,20 +1,19 @@
 import 'package:flutter/widgets.dart';
 
-/// Textos da área de produto/serviço (lista de preço + cadastro de item)
-/// internacionalizados.
+/// Textos do módulo Product (produto/serviço) internacionalizados.
 ///
 /// Resolve o idioma a partir da **localidade do dispositivo**
 /// ([WidgetsBinding.instance.platformDispatcher.locale]) e devolve a string
 /// em `pt` (Português) ou `en` (Inglês, fallback para qualquer outra
 /// localidade).
 ///
-/// Uso: `ProductStrings.saveButton`, `ProductStrings.editTitle`, etc. Todos os
+/// Uso: `ProductPtString.saveButton`, `ProductPtString.editTitle`, etc. Todos os
 /// getters são `static`, então podem ser usados tanto na View quanto no
 /// ViewModel (que só precisa de `package:flutter/widgets.dart`). Nenhum texto
 /// visível ao usuário fica solto como literal nas telas de produto — todos
 /// passam por aqui, centralizando a tradução num arquivo só.
-class ProductStrings {
-  const ProductStrings._();
+class ProductPtString {
+  const ProductPtString._();
 
   static Locale get _locale =>
       WidgetsBinding.instance.platformDispatcher.locale;

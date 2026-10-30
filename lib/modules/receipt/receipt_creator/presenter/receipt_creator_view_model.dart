@@ -5,7 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -36,15 +36,15 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
   void _initFromReceipt() {
     if (receipt.descricao.toString() != 'null') {
-      nameButton = ReceiptStrings.updateButton;
-      titlePage = ReceiptStrings.editTitle;
+      nameButton = ReceiptPtString.updateButton;
+      titlePage = ReceiptPtString.editTitle;
       descricaoText.text = receipt.descricao!;
       idText.text = receipt.id!;
       dataText.text = receipt.data!;
       fieldVisible = true;
     } else {
-      nameButton = ReceiptStrings.saveButton;
-      titlePage = ReceiptStrings.createTitle;
+      nameButton = ReceiptPtString.saveButton;
+      titlePage = ReceiptPtString.createTitle;
       descricaoText.text = '';
       idText.text = '';
       dataText.text = '';
@@ -53,9 +53,9 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   }
 
   String get formSubtitle =>
-      fieldVisible && nameButton == ReceiptStrings.updateButton
-          ? ReceiptStrings.formCardSubtitleEdit
-          : ReceiptStrings.formCardSubtitleCreate;
+      fieldVisible && nameButton == ReceiptPtString.updateButton
+          ? ReceiptPtString.formCardSubtitleEdit
+          : ReceiptPtString.formCardSubtitleCreate;
 
   void selectField(ReceiptFieldType field) {
     selectedField = field;
@@ -65,7 +65,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   Future<void> save(BuildContext context) async {
     loadingEvent.alertLoading(context);
 
-    if (nameButton == ReceiptStrings.saveButton) {
+    if (nameButton == ReceiptPtString.saveButton) {
       final DateTime now = DateTime.now();
       final DateFormat formatter = DateFormat('dd/MM/yyyy');
       final String formatted = formatter.format(now);
@@ -83,7 +83,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
       if (result is Ok<void>) {
         await displayAlert.notificationNotCloseScreen(
-            context, ReceiptStrings.doneTitle, ReceiptStrings.createSuccess);
+            context, ReceiptPtString.doneTitle, ReceiptPtString.createSuccess);
         onReceiptCreated?.call(novo);
         dataText.text = novo.data!;
         descricaoText.text = novo.descricao!;
@@ -92,12 +92,12 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
         notifyListeners();
       } else if (result is Error<void>) {
         await displayAlert.notificationError(
-            context, ReceiptStrings.errorTitle, 'Erro ao salvar recibo');
+            context, ReceiptPtString.errorTitle, 'Erro ao salvar recibo');
       }
       return;
     }
 
-    if (nameButton == ReceiptStrings.updateButton && fieldVisible) {
+    if (nameButton == ReceiptPtString.updateButton && fieldVisible) {
       final Receipt atualizado = receipt.copyWith(descricao: descricaoText.text);
       final result = await _receiptRepository.saveReceipt(atualizado);
       if (!context.mounted) return;
@@ -105,11 +105,11 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
       if (result is Ok<void>) {
         await displayAlert.notificationNotCloseScreen(
-            context, ReceiptStrings.doneTitle, ReceiptStrings.updateSuccess);
+            context, ReceiptPtString.doneTitle, ReceiptPtString.updateSuccess);
         notifyListeners();
       } else if (result is Error<void>) {
         await displayAlert.notificationError(
-            context, ReceiptStrings.errorTitle, 'Erro ao atualizar recibo');
+            context, ReceiptPtString.errorTitle, 'Erro ao atualizar recibo');
       }
     }
   }

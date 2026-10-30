@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/modules/payment/payment_list/presenter/payment_list_view.dart';
 import 'package:oflite/modules/pdf/pdf_receipt/presenter/pdf_receipt_view.dart';
@@ -23,7 +23,7 @@ import 'receipt_tab_view_model.dart';
 /// Regras seguidas (ver `.pi/sdd_arquitetura_view_model.md`):
 /// - `BuildContext` não guardado como campo do VM.
 /// - Nenhum texto visível ao usuário como literal — todos via
-///   [ReceiptStrings].
+///   [ReceiptPtString].
 class ReceiptTabView extends StatefulWidget {
   final CustomerInfo item;
   final Receipt receipt;

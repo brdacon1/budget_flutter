@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as globalUIDUser;
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/models/info_user.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
@@ -66,7 +66,7 @@ class SingUpViewModel extends ChangeNotifier {
   Future<void> register() async {
     if (!isValid) {
       state = SingUpState.error;
-      errorMessage = AuthStrings.signUpErrorFillAll;
+      errorMessage = SingUpStrings.signUpErrorFillAll;
       notifyListeners();
       return;
     }
@@ -128,7 +128,7 @@ class SingUpViewModel extends ChangeNotifier {
       errorMessage = _mapFirebaseAuthError(e);
     } catch (e) {
       state = SingUpState.error;
-      errorMessage = AuthStrings.signUpErrorDefault;
+      errorMessage = SingUpStrings.signUpErrorDefault;
     } finally {
       notifyListeners();
     }
@@ -213,15 +213,15 @@ class SingUpViewModel extends ChangeNotifier {
   String _mapFirebaseAuthError(FirebaseAuthException error) {
     switch (error.code) {
       case 'email-already-in-use':
-        return AuthStrings.signUpErrorEmailInUse;
+        return SingUpStrings.signUpErrorEmailInUse;
       case 'invalid-email':
-        return AuthStrings.signUpErrorInvalidEmail;
+        return SingUpStrings.signUpErrorInvalidEmail;
       case 'weak-password':
-        return AuthStrings.signUpErrorWeakPassword;
+        return SingUpStrings.signUpErrorWeakPassword;
       case 'operation-not-allowed':
-        return AuthStrings.signUpErrorDisabled;
+        return SingUpStrings.signUpErrorDisabled;
       default:
-        return AuthStrings.signUpErrorDefault;
+        return SingUpStrings.signUpErrorDefault;
     }
   }
 

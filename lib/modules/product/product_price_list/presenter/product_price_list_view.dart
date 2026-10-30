@@ -22,7 +22,7 @@ import 'product_price_list_view_model.dart';
 /// - Componentes recebem dados + callbacks, nunca o VM inteiro.
 /// - `BuildContext` recebido por parâmetro nos métodos do VM (não guardado).
 /// - Nenhum texto visível ao usuário como literal — todos via
-///   `ProductStrings`.
+///   `ProductPtString`.
 class ProductPriceListView extends StatefulWidget {
   final CustomerInfo? item;
   final bool? fromMenu;

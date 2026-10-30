@@ -2,7 +2,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
@@ -61,7 +61,7 @@ class ReceiptCreatorForm extends StatelessWidget {
             child: Icon(Icons.receipt_long_rounded, color: whiteColor),
           ),
           title: Text(
-            ReceiptStrings.formCardTitle,
+            ReceiptPtString.formCardTitle,
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class ReceiptCreatorForm extends StatelessWidget {
                         Icons.confirmation_number_outlined,
                         color: isDescricao ? enabledtxt : deaible,
                       ),
-                      hintText: ReceiptStrings.numberHint,
+                      hintText: ReceiptPtString.numberHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
@@ -137,7 +137,7 @@ class ReceiptCreatorForm extends StatelessWidget {
                         Icons.calendar_month_outlined,
                         color: isDescricao ? enabledtxt : deaible,
                       ),
-                      hintText: ReceiptStrings.dateHint,
+                      hintText: ReceiptPtString.dateHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
@@ -166,7 +166,7 @@ class ReceiptCreatorForm extends StatelessWidget {
                   decoration: InputDecoration(
                     enabledBorder: InputBorder.none,
                     border: InputBorder.none,
-                    hintText: ReceiptStrings.descriptionHint,
+                    hintText: ReceiptPtString.descriptionHint,
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(

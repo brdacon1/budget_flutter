@@ -25,7 +25,7 @@ import 'receipt_creator_view_model.dart';
 /// - Componentes recebem dados + callbacks, nunca o VM inteiro.
 /// - `BuildContext` recebido por parâmetro nos métodos do VM (não guardado).
 /// - Nenhum texto visível ao usuário como literal — todos via
-///   [ReceiptStrings].
+///   [ReceiptPtString].
 class ReceiptCreatorView extends StatefulWidget {
   final Receipt receipt;
   final CustomerInfo item;

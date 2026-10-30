@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/shared/models/info_user.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
@@ -114,7 +114,7 @@ class LoginViewModel extends ChangeNotifier {
       errorMessage = _mapFirebaseAuthError(e);
     } catch (e) {
       state = LoginState.error;
-      errorMessage = AuthStrings.loginErrorDefault;
+      errorMessage = LoginStrings.loginErrorDefault;
     } finally {
       notifyListeners();
     }
@@ -304,15 +304,15 @@ class LoginViewModel extends ChangeNotifier {
   String _mapFirebaseAuthError(FirebaseAuthException error) {
     switch (error.code) {
       case 'user-not-found':
-        return AuthStrings.loginErrorUserNotFound;
+        return LoginStrings.loginErrorUserNotFound;
       case 'wrong-password':
-        return AuthStrings.loginErrorWrongPassword;
+        return LoginStrings.loginErrorWrongPassword;
       case 'invalid-email':
-        return AuthStrings.loginErrorInvalidEmail;
+        return LoginStrings.loginErrorInvalidEmail;
       case 'user-disabled':
-        return AuthStrings.loginErrorUserDisabled;
+        return LoginStrings.loginErrorUserDisabled;
       default:
-        return AuthStrings.loginErrorDefault;
+        return LoginStrings.loginErrorDefault;
     }
   }
 

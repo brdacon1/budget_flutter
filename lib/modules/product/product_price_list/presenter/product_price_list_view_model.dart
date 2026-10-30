@@ -8,7 +8,7 @@ import 'package:oflite/modules/product/domain/repository/product_price_repositor
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/common/strings/product_strings.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/customer_info.dart';
@@ -117,8 +117,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
     }
     await displayAlert.notificationWarning(
       context,
-      ProductStrings.cartWarningTitle,
-      ProductStrings.cartWarning,
+      ProductPtString.cartWarningTitle,
+      ProductPtString.cartWarning,
     );
   }
 
@@ -144,8 +144,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
 
     final value = await showTextInputBottomModal(
       context,
-      title: ProductStrings.qtyTitle,
-      hintText: ProductStrings.qtyInputHint,
+      title: ProductPtString.qtyTitle,
+      hintText: ProductPtString.qtyInputHint,
     );
     if (value == null || value.isEmpty) return;
 
@@ -195,8 +195,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
     if (index < 0 || index >= addItems.length) return;
     final value = await showTextInputBottomModal(
       context,
-      title: ProductStrings.qtyTitle,
-      hintText: ProductStrings.qtyInputHint,
+      title: ProductPtString.qtyTitle,
+      hintText: ProductPtString.qtyInputHint,
     );
     if (value == null || value.isEmpty) return;
     final qtd = double.tryParse(value.replaceAll(',', '.')) ?? 0;
@@ -227,10 +227,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ItemsListBottomModalWidget(
-        title: ProductStrings.cartTitle,
+        title: ProductPtString.cartTitle,
         items: addItems.map((e) => e.toItemsBudget()).toList(),
         moneyConvert: moneyConvert,
-        buttonLabel: ProductStrings.cartButton,
+        buttonLabel: ProductPtString.cartButton,
         onRemove: (item, index) => removeFromCart(index),
         onItemTap: (item, index) async => await editCartQty(context, index),
         onButtonPressed: () => saveCart(context),
@@ -273,8 +273,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
       if (!context.mounted) return;
       await displayAlert.notification(
         context,
-        ProductStrings.doneTitle,
-        ProductStrings.cartAddSuccess,
+        ProductPtString.doneTitle,
+        ProductPtString.cartAddSuccess,
       );
       await inicialData();
     } catch (_) {
@@ -283,8 +283,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
       if (!context.mounted) return;
       await displayAlert.notificationError(
         context,
-        ProductStrings.errorTitle,
-        ProductStrings.cartAddError,
+        ProductPtString.errorTitle,
+        ProductPtString.cartAddError,
       );
     }
   }
@@ -311,10 +311,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ItemsListBottomModalWidget(
-        title: ProductStrings.deleteListTitle,
+        title: ProductPtString.deleteListTitle,
         items: deleteItems.map((e) => e.toItemsBudget()).toList(),
         moneyConvert: moneyConvert,
-        buttonLabel: ProductStrings.deleteButton,
+        buttonLabel: ProductPtString.deleteButton,
         onRemove: (item, index) => removeFromDeleteList(index),
         onButtonPressed: () => deleteSelected(context),
       ),
@@ -341,8 +341,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
       if (!context.mounted) return;
       await displayAlert.notification(
         context,
-        ProductStrings.doneTitle,
-        ProductStrings.deleteSuccess,
+        ProductPtString.doneTitle,
+        ProductPtString.deleteSuccess,
       );
       await inicialData();
     } catch (_) {
@@ -351,8 +351,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
       if (!context.mounted) return;
       await displayAlert.notificationError(
         context,
-        ProductStrings.errorTitle,
-        ProductStrings.deleteError,
+        ProductPtString.errorTitle,
+        ProductPtString.deleteError,
       );
     }
   }
@@ -373,8 +373,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,
-        ProductStrings.errorTitle,
-        ProductStrings.premiumError,
+        ProductPtString.errorTitle,
+        ProductPtString.premiumError,
       );
       if (!context.mounted) return;
       await Navigator.push(

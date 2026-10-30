@@ -5,7 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/receipt.dart';
@@ -43,7 +43,7 @@ class ReceiptListViewModel extends ChangeNotifier {
       loadingEvent.closeLoading(context);
       if (result is Ok<void>) {
         await displayAlert.notificationNotCloseScreen(
-            context, ReceiptStrings.doneTitle, ReceiptStrings.deleteSuccess);
+            context, ReceiptPtString.doneTitle, ReceiptPtString.deleteSuccess);
         await inicialData();
       } else if (result is Error<void>) {
         throw result.error;
@@ -51,7 +51,7 @@ class ReceiptListViewModel extends ChangeNotifier {
     } catch (e) {
       loadingEvent.closeLoading(context);
       await displayAlert.notificationError(
-          context, ReceiptStrings.errorTitle, ReceiptStrings.deleteError);
+          context, ReceiptPtString.errorTitle, ReceiptPtString.deleteError);
     }
   }
 

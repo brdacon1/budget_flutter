@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
+import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
@@ -76,7 +77,7 @@ class _SingUpViewState extends State<SingUpView> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AuthStrings.signUpSuccess),
+            content: Text(SingUpStrings.signUpSuccess),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -93,13 +94,13 @@ class _SingUpViewState extends State<SingUpView> {
       // Captura a mensagem e consome o estado ANTES de qualquer chamada
       // que possa disparar novas notificações, para que o modal de erro
       // seja exibido apenas uma vez (one-shot).
-      final message = _viewModel.errorMessage ?? AuthStrings.signUpErrorDefault;
+      final message = _viewModel.errorMessage ?? SingUpStrings.signUpErrorDefault;
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _displayAlert.notificationError(
           context,
-          AuthStrings.errorTitle,
+          LoginStrings.errorTitle,
           message,
         );
       });
@@ -116,10 +117,10 @@ class _SingUpViewState extends State<SingUpView> {
         final registering = _viewModel.state == SingUpState.loading;
 
         return AppBottomModal(
-          title: AuthStrings.signUpTitle,
+          title: SingUpStrings.signUpTitle,
           buttonLabel: registering
-              ? AuthStrings.signUpButtonLoading
-              : AuthStrings.signUpButton,
+              ? SingUpStrings.signUpButtonLoading
+              : SingUpStrings.signUpButton,
           onButtonPressed: registering ? () {} : _viewModel.register,
           child: SingleChildScrollView(
             child: Column(
@@ -128,7 +129,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.01),
                 SingUpField(
                   controller: _viewModel.nomeText,
-                  hintText: AuthStrings.signUpNameHint,
+                  hintText: SingUpStrings.signUpNameHint,
                   icon: Icons.person_pin_outlined,
                   field: SingUpFieldType.name,
                   onTap: () => _viewModel.selectField(SingUpFieldType.name),
@@ -136,7 +137,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.02),
                 SingUpField(
                   controller: _viewModel.emailText,
-                  hintText: AuthStrings.signUpEmailHint,
+                  hintText: SingUpStrings.signUpEmailHint,
                   icon: Icons.email_outlined,
                   field: SingUpFieldType.email,
                   onTap: () => _viewModel.selectField(SingUpFieldType.email),
@@ -144,7 +145,7 @@ class _SingUpViewState extends State<SingUpView> {
                 SizedBox(height: he * 0.02),
                 SingUpField(
                   controller: _viewModel.passwordText,
-                  hintText: AuthStrings.signUpPasswordHint,
+                  hintText: SingUpStrings.signUpPasswordHint,
                   icon: Icons.lock_open_outlined,
                   field: SingUpFieldType.password,
                   isPassword: true,

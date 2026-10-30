@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/strings/auth_strings.dart';
+import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class LoginHeader extends StatelessWidget {
@@ -27,7 +27,7 @@ class LoginHeader extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(right: 240.0),
             child: Text(
-              AuthStrings.loginTitle,
+              LoginStrings.loginTitle,
               style: GoogleFonts.heebo(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

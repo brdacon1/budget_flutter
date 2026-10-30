@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 /// Header da tela de criação/edição de recibo (voltar + título + subtítulo).
@@ -61,7 +61,7 @@ class ReceiptCreatorHeader extends StatelessWidget {
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: we * 0.05),
             child: Text(
-              ReceiptStrings.subtitle,
+              ReceiptPtString.subtitle,
               style: GoogleFonts.heebo(
                 color: Colors.grey,
                 letterSpacing: 1,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
-import 'package:oflite/shared/common/strings/product_strings.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
@@ -80,7 +80,7 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
                 height: MediaQuery.of(context).size.height * 0.15,
                 child: Center(
                   child: Text(
-                    ProductStrings.cartEmptyLabel,
+                    ProductPtString.cartEmptyLabel,
                     style: GoogleFonts.heebo(
                       color: AppBottomModal.grayColor,
                       fontSize: 14.0,

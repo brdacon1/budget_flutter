@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/shared/common/strings/product_strings.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 
@@ -77,7 +77,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                 SizedBox(height: he * 0.01),
                 ProductPriceField(
                   controller: _viewModel.categoriaText,
-                  hintText: ProductStrings.categoryHint,
+                  hintText: ProductPtString.categoryHint,
                   icon: Icons.list_alt,
                   readOnly: true,
                   onTap: () => _viewModel.selectCategory(context),
@@ -87,7 +87,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                 SizedBox(height: he * 0.02),
                 ProductPriceField(
                   controller: _viewModel.unidadeText,
-                  hintText: ProductStrings.unitHint,
+                  hintText: ProductPtString.unitHint,
                   icon: Icons.analytics_outlined,
                   onTap: () =>
                       _viewModel.selectField(ProductPriceFieldType.unidade),
@@ -95,7 +95,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                 SizedBox(height: he * 0.02),
                 ProductPriceField(
                   controller: _viewModel.priceController,
-                  hintText: ProductStrings.priceHint,
+                  hintText: ProductPtString.priceHint,
                   icon: Icons.price_change_outlined,
                   keyboardType: TextInputType.number,
                   onTap: () =>
@@ -110,7 +110,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                     children: <Widget>[
                       ProductPriceField(
                         controller: _viewModel.qtdText,
-                        hintText: ProductStrings.qtyHint,
+                        hintText: ProductPtString.qtyHint,
                         icon: Icons.calculate_outlined,
                         keyboardType: TextInputType.number,
                         onTap: () => _viewModel
@@ -122,7 +122,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                 ),
                 ProductPriceField(
                   controller: _viewModel.descricaoText,
-                  hintText: ProductStrings.descriptionHint,
+                  hintText: ProductPtString.descriptionHint,
                   icon: Icons.edit_note,
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,

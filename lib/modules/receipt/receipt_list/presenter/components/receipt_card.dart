@@ -1,6 +1,6 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
@@ -50,7 +50,7 @@ class ReceiptCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            '${ReceiptStrings.totalValueLabel}'
+            '${ReceiptPtString.totalValueLabel}'
             '${moneyConvert.convertFromDouble(item.valorTotal!)}',
             style: const TextStyle(
               color: whiteColor,
@@ -71,7 +71,7 @@ class ReceiptCard extends StatelessWidget {
                   vertical: 5.0,
                 ),
                 child: Text(
-                  '${ReceiptStrings.dateLabel}${item.data}',
+                  '${ReceiptPtString.dateLabel}${item.data}',
                   style: const TextStyle(
                     color: whiteColor,
                     letterSpacing: 0.5,
@@ -88,7 +88,7 @@ class ReceiptCard extends StatelessWidget {
                   vertical: 5.0,
                 ),
                 child: Text(
-                  '${ReceiptStrings.quantityLabel}${item.id}',
+                  '${ReceiptPtString.quantityLabel}${item.id}',
                   style: const TextStyle(
                     color: whiteColor,
                     letterSpacing: 0.5,
@@ -104,12 +104,12 @@ class ReceiptCard extends StatelessWidget {
                 children: <Widget>[
                   _ActionButton(
                     icon: Icons.delete_outline_rounded,
-                    label: ReceiptStrings.deleteLabel,
+                    label: ReceiptPtString.deleteLabel,
                     onPressed: onDelete,
                   ),
                   _ActionButton(
                     icon: Icons.open_in_new_rounded,
-                    label: ReceiptStrings.openLabel,
+                    label: ReceiptPtString.openLabel,
                     onPressed: onOpen,
                   ),
                 ],

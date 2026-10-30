@@ -7,7 +7,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/shared/common/strings/product_strings.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
@@ -48,8 +48,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
     isEditing = hasDescricao;
     if (isEditing) {
-      nameButton = ProductStrings.updateButton;
-      titlePage = ProductStrings.editTitle;
+      nameButton = ProductPtString.updateButton;
+      titlePage = ProductPtString.editTitle;
       categoriaText.text = item.categoria ?? '';
       unidadeText.text = item.medida ?? '';
       qtdText.text = (item.qtd ?? 0).toString();
@@ -60,8 +60,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
           item.idProduct!.isNotEmpty;
     } else {
       fieldVisible = budget.fromListItem == true;
-      nameButton = ProductStrings.saveButton;
-      titlePage = ProductStrings.createTitle;
+      nameButton = ProductPtString.saveButton;
+      titlePage = ProductPtString.createTitle;
       categoriaText.text = 'Serviços';
       unidadeText.text = '';
       qtdText.text = '1';
@@ -78,8 +78,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   Future<void> selectCategory(BuildContext context) async {
     final value = await showOptionBottomModal(
       context,
-      title: ProductStrings.selectCategoryTitle,
-      values: ProductStrings.categoryOptions,
+      title: ProductPtString.selectCategoryTitle,
+      values: ProductPtString.categoryOptions,
     );
     if (value != null) {
       categoriaText.text = value;
@@ -100,9 +100,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     if (!context.mounted) return;
     String? error;
 
-    if (nameButton == ProductStrings.saveButton) {
+    if (nameButton == ProductPtString.saveButton) {
       error = await _create(model: _buildModel(cleanAmount, qtd, totalPrice));
-    } else if (nameButton == ProductStrings.updateButton && !fieldVisible) {
+    } else if (nameButton == ProductPtString.updateButton && !fieldVisible) {
       error =
           await _updatePriceList(model: _buildModel(cleanAmount, 0, null));
     } else {
@@ -119,15 +119,15 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     if (error != null) {
       if (!context.mounted) return;
       await displayAlert.notificationError(
-          context, ProductStrings.errorTitle, error);
+          context, ProductPtString.errorTitle, error);
       return;
     }
 
-    final successMessage = nameButton == ProductStrings.saveButton
-        ? ProductStrings.addSuccess
-        : ProductStrings.updateSuccess;
+    final successMessage = nameButton == ProductPtString.saveButton
+        ? ProductPtString.addSuccess
+        : ProductPtString.updateSuccess;
     if (!context.mounted) return;
-    displayAlert.notification(context, ProductStrings.doneTitle, successMessage);
+    displayAlert.notification(context, ProductPtString.doneTitle, successMessage);
     if (context.mounted) {
       Navigator.pop(context, true);
     }
@@ -166,7 +166,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
       }
       return null;
     } catch (e) {
-      return ProductStrings.addError;
+      return ProductPtString.addError;
     }
   }
 
@@ -178,7 +178,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
       if (result is Error<void>) throw result.error;
       return null;
     } catch (e) {
-      return ProductStrings.updatePriceListError;
+      return ProductPtString.updatePriceListError;
     }
   }
 
@@ -199,7 +199,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
           budget.IDORCAMENTO ?? '', budgetItem);
       return null;
     } catch (e) {
-      return ProductStrings.updateOrcamentoError;
+      return ProductPtString.updateOrcamentoError;
     }
   }
 

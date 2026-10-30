@@ -1,19 +1,19 @@
 import 'package:flutter/widgets.dart';
 
-/// Textos da área de recibo (lista + cadastro + abas) internacionalizados.
+/// Textos do módulo Receipt (recibo) internacionalizados.
 ///
 /// Resolve o idioma a partir da **localidade do dispositivo**
 /// ([WidgetsBinding.instance.platformDispatcher.locale]) e devolve a string
 /// em `pt` (Português) ou `en` (Inglês, fallback para qualquer outra
 /// localidade).
 ///
-/// Uso: `ReceiptStrings.saveButton`, `ReceiptStrings.editTitle`, etc. Todos os
+/// Uso: `ReceiptPtString.saveButton`, `ReceiptPtString.editTitle`, etc. Todos os
 /// getters são `static`, então podem ser usados tanto na View quanto no
 /// ViewModel (que só precisa de `package:flutter/widgets.dart`). Nenhum texto
 /// visível ao usuário fica solto como literal nas telas de recibo — todos
 /// passam por aqui, centralizando a tradução num arquivo só.
-class ReceiptStrings {
-  const ReceiptStrings._();
+class ReceiptPtString {
+  const ReceiptPtString._();
 
   static Locale get _locale =>
       WidgetsBinding.instance.platformDispatcher.locale;

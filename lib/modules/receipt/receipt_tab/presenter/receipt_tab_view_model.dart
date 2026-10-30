@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/strings/receipt_strings.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/models/receipt.dart';
 
 /// Gerenciamento de estado da tela de **abas de recibo**.
@@ -43,10 +43,10 @@ class ReceiptTabViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Rótulos das abas, centralizados em [ReceiptStrings].
+  /// Rótulos das abas, centralizados em [ReceiptPtString].
   List<String> get tabLabels => <String>[
-        ReceiptStrings.tabReceipt,
-        ReceiptStrings.tabPayments,
-        ReceiptStrings.tabPdf,
+        ReceiptPtString.tabReceipt,
+        ReceiptPtString.tabPayments,
+        ReceiptPtString.tabPdf,
       ];
 }
