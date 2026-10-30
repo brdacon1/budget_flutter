@@ -25,7 +25,6 @@ dependencies:
   provider: ^6.1.4
   expansion_tile_card: ^3.0.0
   mask_text_input_formatter: ^2.9.0
-  fluttercontactpicker: 4.7.0
   permission_handler: ^13.0.0
   flutter_contacts: ^1.1.9+2
   badges: ^3.1.2

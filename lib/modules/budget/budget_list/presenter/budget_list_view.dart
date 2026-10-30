@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
@@ -18,7 +17,7 @@ import 'components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'budget_list_view_model.dart';
 
 class BudgetListView extends StatefulWidget {
-  const BudgetListView({Key? key}) : super(key: key);
+  const BudgetListView({super.key});
 
   @override
   State<BudgetListView> createState() => _BudgetListView();
@@ -246,6 +245,59 @@ class _BudgetListView extends State<BudgetListView> {
     );
   }
 
+  Widget _searchBar() {
+    return Container(
+      height: 50.0,
+      margin:
+      const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
+      child: CupertinoSearchTextField(
+        placeholder: "Digite o nome do cliente...",
+        style: const TextStyle(
+          color: whiteColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 18.0,
+        ),
+        backgroundColor: Colors.white12,
+        itemColor: whiteColor,
+        controller: searchController,
+        onChanged: _viewModel.onSearchTextChanged,
+      ),
+    );
+  }
+
+  Widget _buildHeaderScreen({required double height})  {
+    return Column(children: [
+      SizedBox(
+        height: height * 0.04,
+      ),
+      SizedBox(
+        height: height * 0.03,
+      ),
+      Container(
+        margin: const EdgeInsets.only(right: 125.0),
+        child: Text(
+          "Meus orçamentos",
+          style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 2),
+        ),
+      ),
+    ],);
+  }
+
+  Widget _buildScreen({required double height}) {
+    return Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
+      _buildHeaderScreen(height: height),
+      SizedBox(
+        height: height * 0.03,
+      ),
+      _searchBar(),
+      _listView(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final he = MediaQuery.of(context).size.height;
@@ -254,46 +306,7 @@ class _BudgetListView extends State<BudgetListView> {
       body: AnimatedBuilder(
         animation: _viewModel,
         builder: (context, _) {
-          return Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
-            SizedBox(
-              height: he * 0.04,
-            ),
-            SizedBox(
-              height: he * 0.03,
-            ),
-            Container(
-              margin: const EdgeInsets.only(right: 125.0),
-              child: Text(
-                "Meus orçamentos",
-                style: GoogleFonts.heebo(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
-                    letterSpacing: 2),
-              ),
-            ),
-            SizedBox(
-              height: he * 0.03,
-            ),
-            Container(
-              height: 50.0,
-              margin:
-              const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
-              child: CupertinoSearchTextField(
-                placeholder: "Digite o nome do cliente...",
-                style: const TextStyle(
-                  color: whiteColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                ),
-                backgroundColor: Colors.white12,
-                itemColor: whiteColor,
-                controller: searchController,
-                onChanged: _viewModel.onSearchTextChanged,
-              ),
-            ),
-            _listView(),
-          ]);
+         return _buildScreen(height: he);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

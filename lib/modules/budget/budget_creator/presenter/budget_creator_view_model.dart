@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
 import 'package:flutter_contacts/properties/name.dart';
 import 'package:flutter_contacts/properties/phone.dart';
-import 'package:fluttercontactpicker/fluttercontactpicker.dart';
+
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/injection.dart';
@@ -228,22 +228,29 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     }
     fieldFone = true;
     notifyListeners();
-    await FlutterContactPicker.pickFullContact().then((value) {
-      final FullContact contact = value;
-      var index = 0;
-      String? nome;
-      String? tel;
-      for (final result in contact.phones) {
-        if (index == 0) {
-          nome = contact.name?.nickName;
-          tel = result.number?.replaceAll('+55', '').replaceAll('+', '');
-          nameController.text = nome!;
-          phoneController.text = maskFormatter.maskText(tel!);
-          notifyListeners();
-        }
-        index++;
-      }
-    });
+
+    final hasPermission = await UserInfo.FlutterContacts.requestPermission();
+    if (!hasPermission) return;
+
+    final contact = await UserInfo.FlutterContacts.openExternalPick();
+    if (contact == null) return;
+
+    String name = contact.displayName.trim();
+    if (name.isEmpty) {
+      name = '${contact.name.first.trim()} ${contact.name.last.trim()}'.trim();
+    }
+    String? tel;
+    if (contact.phones.isNotEmpty) {
+      tel = contact.phones.first.number
+          .replaceAll('+55', '')
+          .replaceAll('+', '');
+    }
+
+    nameController.text = name;
+    if (tel != null && tel.isNotEmpty) {
+      phoneController.text = maskFormatter.maskText(tel);
+    }
+    notifyListeners();
   }
 
   Future<void> eventSave(BuildContext context, double we) async {

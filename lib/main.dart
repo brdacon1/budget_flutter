@@ -43,13 +43,10 @@ Future<void> main() async {
     NotificationService.instance.setNavigatorKey(globalNavigatorKey);
   }
 
-  // Carrega as chaves do ambiente (env/*.json). O ambiente é escolhido
-  // automaticamente: release -> produção, debug -> desenvolvimento.
   await Environment.instance.initialize();
 
   runApp(const MyApp());
 }
-
 
 /// IDs de dispositivos de teste (hash do AdMob) para servir anúncios de
 /// teste mesmo usando blocos reais em desenvolvimento.
@@ -61,8 +58,6 @@ Future<void> main() async {
 const _kTestDeviceIds = <String>[
   // 'SEU_DEVICE_ID_AQUI',
 ];
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

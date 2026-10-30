@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class BudgetCreatorHeader extends StatelessWidget {
   const BudgetCreatorHeader({
@@ -34,19 +33,16 @@ class BudgetCreatorHeader extends StatelessWidget {
           ),
         ),
         SizedBox(height: he * 0.03),
-        FadeAnimationWidget(
-          delay: 1,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.05),
-            child: Text(
-              titlePage,
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                letterSpacing: 2,
-              ),
+        Container(
+          alignment: Alignment.topLeft,
+          margin: EdgeInsets.only(left: we * 0.05),
+          child: Text(
+            titlePage,
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 2,
             ),
           ),
         ),

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:fluttercontactpicker/fluttercontactpicker.dart' hide Address;
+import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart';
@@ -196,18 +196,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.error(scriptResult.error);
     }
 
-    // Mensagem de boas-vindas
+    // Mensagem inicial com boas-vindas + botão de escolher contato em um só balão
+    _setStep(ChatFlowStep.askClient);
     await _addBotMessage(
       _script?.welcomeMessage ?? ChatScriptEntity.fallback.welcomeMessage,
-      type: ChatMessageType.text,
-    );
-
-    // Pergunta nome do cliente
-    await _addBotMessage(
-      _script?.askClientName ?? ChatScriptEntity.fallback.askClientName,
       type: ChatMessageType.contactPicker,
     );
-    _setStep(ChatFlowStep.askClient);
     return Result.ok(null);
   }
 
@@ -324,34 +318,30 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _pickContact() async {
     try {
-      final hasPermission = await FlutterContactPicker.requestPermission();
+      final hasPermission = await UserInfo.FlutterContacts.requestPermission();
       if (!hasPermission) return Result.ok(null);
 
-      final contact = await FlutterContactPicker.pickFullContact();
+      final contact = await UserInfo.FlutterContacts.openExternalPick();
+      if (contact == null) return Result.ok(null);
 
       // Extrai nome
-      String name = 'Cliente';
-      if (contact.name != null) {
-        final nick = contact.name?.nickName ?? '';
-        if (nick.isNotEmpty) {
-          name = nick;
-        } else {
-          final first = contact.name?.firstName ?? '';
-          final last = contact.name?.lastName ?? '';
-          name = '$first $last'.trim();
-          if (name.isEmpty) name = 'Cliente';
-        }
+      String name = contact.displayName.trim();
+      if (name.isEmpty) {
+        final first = contact.name.first.trim();
+        final last = contact.name.last.trim();
+        name = '$first $last'.trim();
       }
+      if (name.isEmpty) name = 'Cliente';
 
       // Extrai telefone
       String? phone;
       final phones = contact.phones;
-      if (phones != null && phones.isNotEmpty) {
+      if (phones.isNotEmpty) {
         phone = phones.first.number
-            ?.replaceAll('+55', '')
+            .replaceAll('+55', '')
             .replaceAll('+', '')
             .replaceAll(RegExp(r'\D'), '');
-        if (phone != null && phone.isNotEmpty) {
+        if (phone.isNotEmpty) {
           // valida quantidade de dígitos
           if (phone.length < 10 || phone.length > 11) {
             phone = null; // inválido, vai pedir manualmente
