@@ -14,8 +14,8 @@ import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/shared/models/address.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Passos do fluxo conversacional.

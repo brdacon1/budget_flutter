@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:oflite/modules/core/notification/data/datasource/notification_remote_datasource.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/global_uid_user.dart' as uid;
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';

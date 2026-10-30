@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/global_uid_user.dart' as uid;
 import 'package:oflite/shared/models/global_uid_user.dart' as user_global;

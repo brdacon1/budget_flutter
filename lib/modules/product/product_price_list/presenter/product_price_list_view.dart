@@ -1,7 +1,7 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/components/product_price_card.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/components/product_price_list_header.dart';
 

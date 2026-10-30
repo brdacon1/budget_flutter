@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'components/pdf_menu_header.dart';
 import 'components/pdf_menu_card.dart';

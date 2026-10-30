@@ -3,8 +3,8 @@ import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart
 import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_budget/domain/repository/chat_script_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 
 /// Orquestra a criação completa de um orçamento via chat.
 ///

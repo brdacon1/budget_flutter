@@ -11,7 +11,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';

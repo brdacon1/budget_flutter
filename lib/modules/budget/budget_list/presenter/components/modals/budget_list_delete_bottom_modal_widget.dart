@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 
 /// Bottom modal para confirmar a remoção de orçamentos marcados.
 ///

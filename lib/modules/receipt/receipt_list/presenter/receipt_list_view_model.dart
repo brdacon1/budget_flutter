@@ -6,7 +6,7 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';

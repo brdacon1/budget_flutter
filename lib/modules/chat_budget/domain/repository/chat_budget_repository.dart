@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 
 /// Contrato que une:
 /// 1) CRUD de mensagens de sessão

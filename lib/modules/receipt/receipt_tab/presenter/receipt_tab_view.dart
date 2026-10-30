@@ -5,7 +5,7 @@ import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/modules/payment/payment_list/presenter/payment_list_view.dart';
 import 'package:oflite/modules/pdf/pdf_receipt/presenter/pdf_receipt_view.dart';
 import 'package:oflite/modules/receipt/receipt_creator/presenter/receipt_creator_view.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'receipt_tab_view_model.dart';
 
 /// Tela de **abas de recibo** (Recibo / Pagamentos / PDF).

@@ -4,7 +4,7 @@ import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/pdf_menu/presenter/pdf_menu_view.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import '../../budget_list_items/presenter/budget_list_items_view.dart';
 import 'budget_tab_view_model.dart';
 

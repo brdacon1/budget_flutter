@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/month_calculate.dart';
 import 'package:oflite/shared/models/my_budget_dashboard.dart';
 import 'package:permission_handler/permission_handler.dart';

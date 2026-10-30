@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'components/receipt_card.dart';
 import 'components/receipt_list_header.dart';
 import 'receipt_list_view_model.dart';

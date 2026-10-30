@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 
 /// Camada de acesso aos dados do orçamento no fluxo **Web público**.
 ///

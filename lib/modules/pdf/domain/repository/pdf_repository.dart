@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/shared/models/observation_pdf.dart';
-import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 abstract class PdfRepository extends ChangeNotifier {

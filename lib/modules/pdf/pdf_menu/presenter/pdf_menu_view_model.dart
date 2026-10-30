@@ -5,7 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
 import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';

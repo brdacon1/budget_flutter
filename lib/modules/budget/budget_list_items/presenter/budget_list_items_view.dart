@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';

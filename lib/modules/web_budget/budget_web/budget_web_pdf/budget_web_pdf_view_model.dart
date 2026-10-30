@@ -6,9 +6,9 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
 
 /// Geração/visualização do PDF no fluxo Web.

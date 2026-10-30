@@ -1,5 +1,4 @@
 
-
 class ObservationBudget {
   String? id;
   String? observacao;

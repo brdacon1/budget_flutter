@@ -1,7 +1,7 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
 class BudgetListCard extends StatelessWidget {

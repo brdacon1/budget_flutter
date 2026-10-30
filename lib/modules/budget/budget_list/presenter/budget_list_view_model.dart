@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';

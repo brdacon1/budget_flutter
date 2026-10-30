@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/shared/models/items_list_budget.dart';
-import 'package:oflite/shared/models/observation_budget.dart';
-import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/items_list_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budgetGlobals;
 

@@ -2,7 +2,7 @@ import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';

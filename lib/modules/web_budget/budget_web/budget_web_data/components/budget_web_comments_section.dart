@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 
 /// Seção colapsável "Comentários" exibida na aba "Meus dados".
 ///

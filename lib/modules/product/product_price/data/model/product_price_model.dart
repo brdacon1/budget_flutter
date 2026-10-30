@@ -1,5 +1,5 @@
-import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/shared/models/items_list_budget.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/data/model/items_list_budget_model.dart';
 
 /// Model de item de produto/serviço da feature de **lista de preço**.
 ///

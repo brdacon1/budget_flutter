@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/observation_budget.dart';
+import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
 import '../comment_list_view_model.dart';

@@ -6,7 +6,7 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
-import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/shared/models/payment_customer.dart';
 import 'package:oflite/shared/models/receipt.dart';

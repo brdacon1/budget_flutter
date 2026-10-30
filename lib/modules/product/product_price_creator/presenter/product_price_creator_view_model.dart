@@ -11,7 +11,7 @@ import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart'
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceCreatorViewModel extends ChangeNotifier {
