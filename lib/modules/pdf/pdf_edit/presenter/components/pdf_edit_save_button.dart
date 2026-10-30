@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfEditSaveButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -23,7 +24,7 @@ class PdfEditSaveButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          "Atualizar",
+          PdfStrings.updateButton,
           style: GoogleFonts.heebo(
             color: Colors.black,
             letterSpacing: 0.5,

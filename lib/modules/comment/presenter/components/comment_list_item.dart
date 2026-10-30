@@ -2,6 +2,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/models/observation_budget.dart';
+import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
 
 /// Item da lista de comentários, exibido em um [ExpansionTileCard].
 class CommentListItem extends StatelessWidget {
@@ -77,12 +78,12 @@ class CommentListItem extends StatelessWidget {
                 children: <Widget>[
                   _ActionButton(
                     icon: Icons.delete_outline_rounded,
-                    label: 'Excluir',
+                    label: CommentStrings.deleteLabel,
                     onTap: () => onDelete(comment),
                   ),
                   _ActionButton(
                     icon: Icons.edit,
-                    label: 'Editar',
+                    label: CommentStrings.editLabel,
                     onTap: () => onEdit(comment),
                   ),
                 ],

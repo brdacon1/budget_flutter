@@ -5,6 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/shared/models/payment_customer.dart';
@@ -63,12 +64,12 @@ class PaymentListViewModel extends ChangeNotifier {
       _loadingEvent.closeLoading(context);
       if (result is Ok<void>) {
         await _displayAlert.notificationNotCloseScreen(
-            context, "Feito!", "Pagamento removido com sucesso!");
+            context, PaymentStrings.doneTitle, PaymentStrings.paymentRemoved);
       }
     } catch (e) {
       _loadingEvent.closeLoading(context);
       await _displayAlert.notificationError(
-          context, "Erro!", "Problemas para remover o pagamento");
+          context, PaymentStrings.errorTitle, PaymentStrings.errorRemovePayment);
     }
     await inicialData();
   }
@@ -87,8 +88,8 @@ class PaymentListViewModel extends ChangeNotifier {
     if (receipt.id == null || receipt.id!.isEmpty) {
       await _displayAlert.notificationWarning(
         context,
-        'Recibo não salvo',
-        'Salve o recibo na aba "Recibo" antes de adicionar pagamentos.',
+        PaymentStrings.receiptNotSaved,
+        PaymentStrings.receiptNotSavedMessage,
       );
       return;
     }

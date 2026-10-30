@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/month_calculate.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 
 class ChartLine extends StatefulWidget {
   final MonthCalculate item;
@@ -142,16 +143,16 @@ class _ChartLine extends State<ChartLine> {
     Widget text;
     switch (value.toInt()) {
       case 0:
-        text = const Text('Sem. 1', style: style);
+        text = Text(DashboardStrings.weekLabel(1), style: style);
         break;
       case 1:
-        text = const Text('Sem. 2', style: style);
+        text = Text(DashboardStrings.weekLabel(2), style: style);
         break;
       case 2:
-        text = const Text('Sem. 3', style: style);
+        text = Text(DashboardStrings.weekLabel(3), style: style);
         break;
       case 3:
-        text = const Text('Sem. 4', style: style);
+        text = Text(DashboardStrings.weekLabel(4), style: style);
         break;
       default:
         text = const Text('');
@@ -332,8 +333,8 @@ class _ChartLine extends State<ChartLine> {
               const SizedBox(
                 height: 5,
               ),
-              const Text(
-                'Progresso semanal',
+              Text(
+                DashboardStrings.weeklyProgress,
                 style: TextStyle(
                   color: creamColor,
                   fontSize: 17,

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import '../payment_creator_view_model.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 
 class PaymentDataForm extends StatelessWidget {
   final PaymentCreatorViewModel viewModel;
@@ -32,7 +33,7 @@ class PaymentDataForm extends StatelessWidget {
             child: Icon(Icons.payments_outlined, color: Colors.white),
           ),
           title: Text(
-            "Insira dados do pagamento",
+            "${PaymentStrings.insertPaymentData}",
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.bold,
@@ -80,7 +81,7 @@ class PaymentDataForm extends StatelessWidget {
                           ? viewModel.enabledtxt
                           : viewModel.deaible,
                     ),
-                    hintText: 'Definir pagamento',
+                    hintText: PaymentStrings.paymentHint,
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(
@@ -115,7 +116,7 @@ class PaymentDataForm extends StatelessWidget {
                           ? viewModel.enabledtxt
                           : viewModel.deaible,
                     ),
-                    hintText: 'Preço',
+                    hintText: PaymentStrings.priceHint,
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   keyboardType: TextInputType.number,
@@ -145,10 +146,10 @@ class PaymentDataForm extends StatelessWidget {
                   keyboardType: TextInputType.multiline,
                   maxLines: 50,
                   onTap: () => viewModel.selectField(Gender.descricaoText),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     enabledBorder: InputBorder.none,
                     border: InputBorder.none,
-                    hintText: 'Escreva a descrição do pagamento...',
+                    hintText: PaymentStrings.paymentDescriptionHint,
                     hintStyle: TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(

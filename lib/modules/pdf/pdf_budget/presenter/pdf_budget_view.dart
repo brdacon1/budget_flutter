@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'pdf_budget_view_model.dart';
 
 class PdfBudgetView extends StatefulWidget {
@@ -42,7 +43,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF'),
+        title: Text(PdfStrings.pdfTitle),
         backgroundColor: bgColor,
       ),
       body: Container(
@@ -76,8 +77,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
                               onPressed: () {
                                 if (_viewModel.fileBytes != null) {
                                   final xFile = XFile(_viewModel.fileBytes!);
-                                  Share.shareXFiles([xFile],
-                                      text: 'Compartilhar PDF');
+                                  Share.shareXFiles([xFile], text: PdfStrings.sharePdf);
                                 }
                               },
                               style: TextButton.styleFrom(
@@ -89,7 +89,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
                                         BorderRadius.circular(30.0)),
                               ),
                               child: Text(
-                                'COMPARTILHAR',
+                                PdfStrings.shareButton,
                                 style: GoogleFonts.heebo(
                                   color: Colors.black,
                                   letterSpacing: 0.5,

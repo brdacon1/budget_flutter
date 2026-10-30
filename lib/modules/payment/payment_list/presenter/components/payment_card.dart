@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 
 class PaymentCard extends StatelessWidget {
   final PaymentCustomer item;
@@ -43,7 +44,7 @@ class PaymentCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            "Valor do pagamento: ${moneyConvert.convertFromDouble(item.PRECO!)}",
+            PaymentStrings.paymentValueLabel(moneyConvert.convertFromDouble(item.PRECO!)),
             style: const TextStyle(
               color: whiteColor,
               letterSpacing: 0.5,
@@ -63,7 +64,7 @@ class PaymentCard extends StatelessWidget {
                   vertical: 5.0,
                 ),
                 child: Text(
-                  "Método do pagamento: ${item.METODO}",
+                  PaymentStrings.paymentMethodLabel("${item.METODO}"),
                   style: const TextStyle(
                     color: whiteColor,
                     letterSpacing: 0.5,
@@ -79,12 +80,12 @@ class PaymentCard extends StatelessWidget {
                 children: <Widget>[
                   _ActionButton(
                     icon: Icons.delete_outline_rounded,
-                    label: 'Excluir',
+                    label: PaymentStrings.deleteLabel,
                     onPressed: onDelete,
                   ),
                   _ActionButton(
                     icon: Icons.edit,
-                    label: 'Editar',
+                    label: PaymentStrings.editLabel,
                     onPressed: onEdit,
                   ),
                 ],

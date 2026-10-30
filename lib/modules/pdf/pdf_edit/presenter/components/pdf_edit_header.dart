@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 class PdfEditHeader extends StatelessWidget {
@@ -32,7 +33,7 @@ class PdfEditHeader extends StatelessWidget {
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: we * 0.05),
             child: Text(
-              'Editar PDF',
+              PdfStrings.editPdfTitle,
               style: GoogleFonts.heebo(
                 color: whiteColor,
                 fontWeight: FontWeight.bold,
@@ -46,7 +47,7 @@ class PdfEditHeader extends StatelessWidget {
           alignment: Alignment.topLeft,
           margin: EdgeInsets.only(left: we * 0.05),
           child: Text(
-            "Informações do PDF",
+            PdfStrings.pdfInfoTitle,
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
           ),
         ),

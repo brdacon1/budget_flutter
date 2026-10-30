@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 
 enum SubscriptionState { idle, loading, success, error }
@@ -90,8 +91,8 @@ class SubscriptionViewModel extends ChangeNotifier {
 
         if (offerToken == null) {
           throw Exception(
-            'Offer token não encontrado. Verifique se o produto "$sku" está configurado com base plan na Play Console.',
-          );
+          SubscriptionStrings.offerTokenError(sku),
+        );
         }
       }
 
@@ -143,7 +144,7 @@ class SubscriptionViewModel extends ChangeNotifier {
         state = SubscriptionState.success;
       } else {
         state = SubscriptionState.error;
-        errorMessage = 'Assinatura não realizada';
+        errorMessage = SubscriptionStrings.subscriptionNotCompleted;
       }
       notifyListeners();
     } catch (e) {
@@ -159,7 +160,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       errorMessage = null;
     } else {
       state = SubscriptionState.error;
-      errorMessage = purchaseError.message ?? 'Assinatura não realizada';
+      errorMessage = purchaseError.message ?? SubscriptionStrings.subscriptionNotCompleted;
     }
     notifyListeners();
   }

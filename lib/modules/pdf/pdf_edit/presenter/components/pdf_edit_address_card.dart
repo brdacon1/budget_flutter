@@ -5,6 +5,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
 import 'pdf_edit_field.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfEditAddressCard extends StatelessWidget {
   final TextEditingController cepText;
@@ -47,7 +48,7 @@ class PdfEditAddressCard extends StatelessWidget {
             child: Icon(Icons.location_on_outlined, color: whiteColor),
           ),
           title: Text(
-            "Informações de endereço",
+            PdfStrings.addressInfo,
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.bold,
@@ -56,7 +57,7 @@ class PdfEditAddressCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            "Clique para editar",
+            PdfStrings.clickToEdit,
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.normal,
@@ -67,7 +68,7 @@ class PdfEditAddressCard extends StatelessWidget {
           children: <Widget>[
             PdfEditField(
               controller: cepText,
-              hintText: 'CEP',
+              hintText: PdfStrings.cepHint,
               icon: Icons.add_location_outlined,
               gender: Gender.cep,
               selected: selected,
@@ -81,7 +82,7 @@ class PdfEditAddressCard extends StatelessWidget {
             const SizedBox(height: 12),
             PdfEditField(
               controller: ruaText,
-              hintText: 'Rua',
+              hintText: PdfStrings.streetHint,
               icon: Icons.location_on_outlined,
               gender: Gender.rua,
               selected: selected,
@@ -92,7 +93,7 @@ class PdfEditAddressCard extends StatelessWidget {
             const SizedBox(height: 12),
             PdfEditField(
               controller: cityText,
-              hintText: 'Cidade',
+              hintText: PdfStrings.cityHint,
               icon: Icons.location_city_outlined,
               gender: Gender.city,
               selected: selected,
@@ -103,7 +104,7 @@ class PdfEditAddressCard extends StatelessWidget {
             const SizedBox(height: 12),
             PdfEditField(
               controller: bairroText,
-              hintText: 'Bairro',
+              hintText: PdfStrings.neighborhoodHint,
               icon: Icons.location_searching,
               gender: Gender.bairro,
               selected: selected,

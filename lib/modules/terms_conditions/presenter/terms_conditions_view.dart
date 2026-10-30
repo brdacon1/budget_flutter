@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
 import 'terms_conditions_view_model.dart';
 
 class TermsConditionsView extends StatefulWidget {
@@ -43,7 +44,7 @@ class _TermsConditionsViewState extends State<TermsConditionsView> {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text(TermsConditionsViewModel.pageTitle),
+            title: Text(TermsConditionsStrings.pageTitle),
             backgroundColor: bgColor,
           ),
           body: _buildBody(),
@@ -99,14 +100,14 @@ class _TermsConditionsViewState extends State<TermsConditionsView> {
             const Icon(Icons.error_outline, color: Colors.white, size: 48),
             const SizedBox(height: 16),
             Text(
-              _viewModel.errorMessage ?? 'Erro ao carregar a página.',
+              _viewModel.errorMessage ?? TermsConditionsStrings.errorFallback,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _viewModel.reload,
-              child: const Text('Tentar novamente'),
+              child: Text(TermsConditionsStrings.retryButton),
             ),
           ],
         ),

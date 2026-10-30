@@ -5,6 +5,7 @@ import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 import 'package:oflite/shared/models/receipt.dart';
@@ -50,6 +51,10 @@ class PdfReceiptViewModel extends ChangeNotifier {
         notifyListeners();
         return;
       }
+
+      // Garante que o path do Firestore no datasource esteja correto
+      budget.IDORCAMENTO = item.id;
+      budget.IDRECIBO = receipt.id;
 
       final paymentResult =
           await _paymentRepository.fetchPayments(receipt, forceRefresh: true);

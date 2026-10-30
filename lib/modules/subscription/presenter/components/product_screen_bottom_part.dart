@@ -4,6 +4,7 @@ import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/constants/subscription_constants.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
+import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 
 class ProductScreenBottomPart extends StatefulWidget {
   final String? price;
@@ -131,7 +132,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
       child: GestureDetector(
         onTap: _expand,
         child: Text(
-          isExpanded ? "menos" : "mais..",
+          isExpanded ? SubscriptionStrings.expandLess : SubscriptionStrings.expandMore,
           style: const TextStyle(
             color: Color(0xFFFB382F),
             fontWeight: FontWeight.w700,
@@ -175,7 +176,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
         horizontal: screenAwareSize(20.0, context),
       ),
       child: Text(
-        widget.price ?? "R\$ 3,59/mês",
+        widget.price ?? SubscriptionStrings.defaultPrice,
         style: TextStyle(
           color: Colors.white,
           fontSize: screenAwareSize(22.0, context),
@@ -214,7 +215,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                     ),
                   )
                 : Text(
-                    "ASSINAR",
+                    SubscriptionStrings.subscribeButton,
                     style: GoogleFonts.heebo(
                       color: Colors.black,
                       fontSize: 20.0,
@@ -232,7 +233,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
       child: TextButton(
         onPressed: widget.isLoading ? null : widget.onRestore,
         child: Text(
-          "Restaurar Compras",
+          SubscriptionStrings.restoreButton,
           style: TextStyle(
             color: buttonColor,
             fontSize: screenAwareSize(12.0, context),

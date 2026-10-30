@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 
 class RecentFiles extends StatefulWidget {
   final List<CustomerInfo> items;
@@ -23,8 +24,8 @@ class _RecentFiles extends State<RecentFiles> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
-            'Orçamentos recentes',
+          Text(
+            DashboardStrings.recentBudgets,
             style: TextStyle(
               color: creamColor,
               fontSize: 17,
@@ -38,15 +39,15 @@ class _RecentFiles extends State<RecentFiles> {
             width: double.infinity,
             child: DataTable(
               columnSpacing: defaultPadding,
-              columns: const [
+              columns: [
                 DataColumn(
-                  label: Text("Cliente"),
+                  label: Text(DashboardStrings.clientColumn),
                 ),
                 DataColumn(
-                  label: Text("Data"),
+                  label: Text(DashboardStrings.dateColumn),
                 ),
                 DataColumn(
-                label: Text("Número"),
+                label: Text(DashboardStrings.numberColumn),
                 ),
               ],
               rows: List.generate(

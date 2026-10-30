@@ -9,6 +9,7 @@ import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 
@@ -34,10 +35,10 @@ class PdfMenuViewModel extends ChangeNotifier {
         _shareLinkRepository = shareLinkRepository ?? getIt<ShareLinkRepository>();
 
   Future<void> inicialData() async {
-    menuItems = const <MenuItem>[
-      MenuItem(icon: Icons.comment_outlined, title: 'Inserir comentários'),
-      MenuItem(icon: Icons.payments_outlined, title: 'Recibo de pagamentos'),
-      MenuItem(icon: Icons.share_outlined, title: 'Compartilhar link do orçamento'),
+    menuItems = <MenuItem>[
+      MenuItem(icon: Icons.comment_outlined, title: PdfStrings.menuComments),
+      MenuItem(icon: Icons.payments_outlined, title: PdfStrings.menuReceipt),
+      MenuItem(icon: Icons.share_outlined, title: PdfStrings.menuShareLink),
     ];
     notifyListeners();
   }
@@ -66,14 +67,14 @@ class PdfMenuViewModel extends ChangeNotifier {
         if (!UID.autoRenewing!) {
           await _displayAlert.adsNotification(context).then(
                   (value) async => {
-                if (value == "Ver anuncio")
+                if (value == PdfStrings.watchAd)
                   {
                     await shareBudget(context),
                     Future.delayed(const Duration(milliseconds: 2), ()  {
                       getIt<AdsRepository>().showInterstitial();
                     }),
                   }
-                else if (value == "Se tornar premium")
+                else if (value == PdfStrings.goPremium)
                   {
                     Navigator.push(
                       context,
@@ -115,8 +116,8 @@ class PdfMenuViewModel extends ChangeNotifier {
     if (enderecoNumero == null || enderecoNumero.isEmpty) {
       await _displayAlert.notificationWarning(
         context,
-        'Ainda não!',
-        'Salve o orçamento antes de compartilhar o link.',
+        PdfStrings.notYet,
+        PdfStrings.saveBeforeShare,
       );
       return;
     }
@@ -129,20 +130,20 @@ class PdfMenuViewModel extends ChangeNotifier {
         if (!context.mounted) return;
         await _displayAlert.notificationError(
           context,
-          'Erro!',
-          'Não foi possível gerar o link. Verifique sua conexão e tente novamente.',
+          PdfStrings.errorTitle,
+          PdfStrings.errorGenerateLink,
         );
         return;
       }
       await SharePlus.instance.share(
-        ShareParams(text: url, subject: 'Orçamento'),
+        ShareParams(text: url, subject: PdfStrings.pdfTitle),
       );
     } catch (_) {
       if (context.mounted) {
         await _displayAlert.notificationError(
           context,
-          'Erro!',
-          'Não foi possível compartilhar o link agora.',
+          PdfStrings.errorTitle,
+          PdfStrings.errorShareLink,
         );
       }
     }

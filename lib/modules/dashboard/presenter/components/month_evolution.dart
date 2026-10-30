@@ -4,6 +4,7 @@ import 'package:oflite/modules/dashboard/presenter/components/storage_info_card.
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/models/month_calculate.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'chart_line.dart';
 
 class MonthEvolution extends StatefulWidget {
@@ -59,8 +60,8 @@ class _MonthEvolution extends State<MonthEvolution> {
         children: [
           ChartLine(item: widget.item),
           const SizedBox(height: 30),
-          const Text(
-            'Resultado semanal',
+          Text(
+            DashboardStrings.weeklyResult,
             style: TextStyle(
               color: creamColor,
               fontSize: 17,
@@ -73,28 +74,28 @@ class _MonthEvolution extends State<MonthEvolution> {
           StorageInfoCard(
             svgSrc: Icons.check,
             iconColor: Colors.green,
-            title: "Aprovados",
+            title: DashboardStrings.approved,
             amountOfFiles: moneyConvert.convertFromDouble(totalApproved),
             numOfFiles: totalApproved.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.close_sharp,
             iconColor: Colors.red,
-            title: "Reprovados",
+            title: DashboardStrings.disapproved,
             amountOfFiles: moneyConvert.convertFromDouble(totalReproved),
             numOfFiles: totalReproved.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.pending_outlined,
             iconColor: Colors.amberAccent,
-            title: "Pendentes",
+            title: DashboardStrings.pending,
             amountOfFiles: moneyConvert.convertFromDouble(totalPending),
             numOfFiles: totalPending.toInt(),
           ),
           StorageInfoCard(
             svgSrc: Icons.circle,
             iconColor: Colors.white,
-            title: "Finalizados",
+            title: DashboardStrings.finished,
             amountOfFiles: moneyConvert.convertFromDouble(totalFinish),
             numOfFiles: totalFinish.toInt(),
           ),

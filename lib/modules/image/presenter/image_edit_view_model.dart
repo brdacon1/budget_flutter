@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 
 class ImageEditViewModel extends ChangeNotifier {
   XFile? pickedFile;
@@ -64,14 +65,14 @@ class ImageEditViewModel extends ChangeNotifier {
       compressQuality: 100,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Cortar imagem',
+          toolbarTitle: ImageStrings.cropImageTitle,
           toolbarColor: const Color(0xFF2A2D3E),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
         ),
         IOSUiSettings(
-          title: 'Cropper',
+          title: ImageStrings.cropperTitle,
         ),
       ],
     );

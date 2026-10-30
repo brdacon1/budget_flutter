@@ -10,6 +10,7 @@ import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'image_edit_view_model.dart';
+import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 
 
 class ImageEditView extends StatefulWidget {
@@ -165,7 +166,7 @@ class _ImageEditView extends State<ImageEditView> {
           await _viewModel.pickImage();
         },
         backgroundColor: buttonColor,
-        tooltip: 'Upload',
+        tooltip: ImageStrings.tooltipUpload,
         child: const Icon(Icons.cloud_upload_outlined),
       );
     }
@@ -214,7 +215,7 @@ class _ImageEditView extends State<ImageEditView> {
             }
           },
           backgroundColor: Colors.green,
-          tooltip: 'Save',
+          tooltip: ImageStrings.tooltipSave,
           child: const Icon(Icons.save),
         ),
         if (_viewModel.croppedFile == null)
@@ -226,7 +227,7 @@ class _ImageEditView extends State<ImageEditView> {
                 await _viewModel.cropImage();
               },
               backgroundColor: buttonColor,
-              tooltip: 'Crop',
+              tooltip: ImageStrings.tooltipCrop,
               child: const Icon(Icons.crop),
             ),
           ),
@@ -238,7 +239,7 @@ class _ImageEditView extends State<ImageEditView> {
               _viewModel.resetImage();
             },
             backgroundColor: Colors.redAccent,
-            tooltip: 'Delete',
+            tooltip: ImageStrings.tooltipDelete,
             child: const Icon(Icons.delete),
           ),
         ),
@@ -279,7 +280,7 @@ class _ImageEditView extends State<ImageEditView> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Selecione a imagem para fazer upload',
+                ImageStrings.uploadPrompt,
                 style: GoogleFonts.heebo(
                   fontSize: 14,
                 ),
@@ -299,7 +300,7 @@ class _ImageEditView extends State<ImageEditView> {
                     ),
                   ),
                   child: Text(
-                    "Selecionar foto",
+                    ImageStrings.selectPhotoButton,
                     style: GoogleFonts.heebo(
                       color: Colors.black,
                       letterSpacing: 0.5,

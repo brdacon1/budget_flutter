@@ -10,6 +10,7 @@ import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/login/presenter/login_view.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
+import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -30,7 +31,7 @@ class Header extends StatelessWidget {
             delay: 1,
             child: Container(
               alignment: Alignment.topLeft,
-              child: Text("Dashboard",style: GoogleFonts.heebo(
+              child: Text(DashboardStrings.pageTitle,style: GoogleFonts.heebo(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 26,
@@ -77,11 +78,11 @@ class _ProfileCard extends State<ProfileCard> {
   @override
   void initState() {
     super.initState();
-    final name = global_uid_user.name ?? 'Usuário';
+    final name = global_uid_user.name ?? DashboardStrings.userFallback;
     _selectedItem = capitalizeFirstLetter(name.split(' ')[0]);
     _dropdownItems = [
       _selectedItem,
-      'Sair',
+      DashboardStrings.logout,
     ];
   }
 
@@ -103,7 +104,7 @@ class _ProfileCard extends State<ProfileCard> {
         value: _selectedItem,
         onChanged: (String? newValue)  async {
             SharedPreferences prefs = await SharedPreferences.getInstance();
-            if(newValue! == 'Sair')
+            if(newValue! == DashboardStrings.logout)
             {
               getIt<NotificationRepository>().stopBudgetApprovalListener();
               await _logout();

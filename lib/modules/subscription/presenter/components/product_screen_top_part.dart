@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
+import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 
 class ProductScreenTopPart extends StatelessWidget {
   const ProductScreenTopPart({super.key});
@@ -28,7 +29,7 @@ class ProductScreenTopPart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  "Avaliações",
+                  SubscriptionStrings.ratingTitle,
                   style: TextStyle(
                     color: const Color(0xFF949598),
                     fontSize: screenAwareSize(10.0, context),
@@ -47,12 +48,12 @@ class ProductScreenTopPart extends StatelessWidget {
                     SizedBox(
                       width: screenAwareSize(5.0, context),
                     ),
-                    const Text("5.0", style: TextStyle(color: Color(0xFFFFE600))),
+                    Text(SubscriptionStrings.ratingValue, style: TextStyle(color: Color(0xFFFFE600))),
                     SizedBox(
                       width: screenAwareSize(5.0, context),
                     ),
-                    const Text(
-                      "Melhor preço",
+                    Text(
+                      SubscriptionStrings.bestPrice,
                       style: TextStyle(color: Colors.white, fontSize: 14.0),
                     )
                   ],

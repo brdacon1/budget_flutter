@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
 
 enum TermsConditionsState { idle, loading, loaded, error }
 
 class TermsConditionsViewModel extends ChangeNotifier {
   static const String routeName = '/terms-and-conditions';
-  static const String pageTitle = 'Política de privacidade';
   static const String _pageUrl = 'https://orcamentofacilbr.wordpress.com/';
 
   late final WebViewController controller;
@@ -54,8 +54,7 @@ class TermsConditionsViewModel extends ChangeNotifier {
 
   void _onWebResourceError(WebResourceError error) {
     state = TermsConditionsState.error;
-    errorMessage =
-        'Não foi possível carregar a página. Verifique sua conexão com a internet.';
+    errorMessage = TermsConditionsStrings.errorLoadPage;
     notifyListeners();
   }
 

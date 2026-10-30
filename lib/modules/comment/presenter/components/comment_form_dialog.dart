@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/observation_budget.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
 import '../comment_list_view_model.dart';
 
 /// Exibe o bottom modal de adicionar/editar comentário.
@@ -21,7 +22,7 @@ Future<bool?> showCommentFormDialog({
   descricaoController.text = comment.observacao ?? '';
 
   final bool isNew = comment.id == null || comment.id!.isEmpty;
-  final String textButtonName = isNew ? 'ADICIONAR' : 'ATUALIZAR';
+  final String textButtonName = isNew ? CommentStrings.addButton : CommentStrings.updateButton;
 
   return showModalBottomSheet<bool>(
     context: context,
@@ -78,12 +79,12 @@ class _CommentFormModalState extends State<_CommentFormModal> {
         await widget.viewModel.loadComments();
         if (mounted) {
           await widget.displayAlert.notification(
-              context, 'Feito!', 'Comentário adicionado com sucesso!');
+              context, CommentStrings.successTitle, CommentStrings.successAddMessage);
         }
       } else {
         if (mounted) {
           await widget.displayAlert.notificationError(
-              context, 'Erro!', 'Não foi possível adicionar o comentário');
+              context, CommentStrings.errorTitle, CommentStrings.errorAddMessage);
         }
       }
     } else {
@@ -92,12 +93,12 @@ class _CommentFormModalState extends State<_CommentFormModal> {
       if (success) {
         if (mounted) {
           await widget.displayAlert.notification(
-              context, 'Feito!', 'Comentário atualizado com sucesso!');
+              context, CommentStrings.successTitle, CommentStrings.successUpdateMessage);
         }
       } else {
         if (mounted) {
           await widget.displayAlert.notificationError(
-              context, 'Erro!', 'Não foi possível atualizar o comentário');
+              context, CommentStrings.errorTitle, CommentStrings.errorUpdateMessage);
         }
       }
     }
@@ -109,8 +110,8 @@ class _CommentFormModalState extends State<_CommentFormModal> {
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
-      title: 'Comentário',
-      buttonLabel: _submitting ? 'Salvando...' : widget.buttonLabel,
+      title: CommentStrings.title,
+      buttonLabel: _submitting ? CommentStrings.saving : widget.buttonLabel,
       onButtonPressed: _submitting ? () {} : _submit,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -131,7 +132,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
             decoration: InputDecoration(
               enabledBorder: InputBorder.none,
               border: InputBorder.none,
-              hintText: 'Escreva o comentário...',
+              hintText: CommentStrings.hint,
               hintStyle: TextStyle(color: Colors.grey[600]),
             ),
             style: GoogleFonts.heebo(

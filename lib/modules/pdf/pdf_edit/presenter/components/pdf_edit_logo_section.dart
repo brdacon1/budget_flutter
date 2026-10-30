@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfEditLogoSection extends StatelessWidget {
   final Uint8List? fileContent;
@@ -73,7 +74,7 @@ class PdfEditLogoSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Sem imagem disponível',
+              PdfStrings.noImage,
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!
@@ -81,7 +82,7 @@ class PdfEditLogoSection extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Toque para incluir nova imagem',
+              PdfStrings.tapToAddImage,
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!
@@ -102,7 +103,7 @@ class PdfEditLogoSection extends StatelessWidget {
         if (loading)
           const Center(child: CircularProgressIndicator())
         else if (hasError)
-          const Center(child: Text('Erro ao carregar a imagem'))
+          Center(child: Text(PdfStrings.errorLoadImage))
         else
           GestureDetector(
             onTap: autoRenewing ? onEditLogo : onOpenSubscription,

@@ -4,6 +4,7 @@ import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/receipt.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'components/pdf_receipt_share_button.dart';
 import 'pdf_receipt_view_model.dart';
 
@@ -37,7 +38,7 @@ class _PdfReceiptView extends State<PdfReceiptView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF'),
+        title: Text(PdfStrings.pdfTitle),
         backgroundColor: bgColor,
       ),
       body: Container(

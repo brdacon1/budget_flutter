@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 
 class PaymentListHeader extends StatelessWidget {
   final VoidCallback onBack;
@@ -43,7 +44,7 @@ class PaymentListHeader extends StatelessWidget {
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: we * 0.028),
             child: Text(
-              "Pagamentos",
+              PaymentStrings.paymentsTitle,
               style: GoogleFonts.heebo(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

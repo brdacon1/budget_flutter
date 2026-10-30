@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
+import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 import 'components/product_screen_bottom_part.dart';
 import 'components/product_screen_top_part.dart';
 import 'subscription_view_model.dart';
@@ -41,7 +42,7 @@ class _SubscriptionView extends State<SubscriptionView> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_viewModel.errorMessage ?? 'Assinatura não realizada'),
+              content: Text(_viewModel.errorMessage ?? SubscriptionStrings.subscriptionNotCompleted),
               backgroundColor: Colors.red,
             ),
           );
@@ -78,7 +79,7 @@ class _SubscriptionView extends State<SubscriptionView> {
             },
           ),
           title: Text(
-            "Premium",
+            SubscriptionStrings.pageTitle,
             style: TextStyle(
               color: Colors.white,
               fontSize: screenAwareSize(18.0, context),

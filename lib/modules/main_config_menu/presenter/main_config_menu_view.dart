@@ -4,6 +4,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'main_config_menu_view_model.dart';
+import 'package:oflite/modules/main_config_menu/presenter/strings/main_config_menu_pt_string.dart';
 
 class MainConfigMenuView extends StatefulWidget {
   const MainConfigMenuView({super.key});
@@ -50,7 +51,7 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
               Container(
                 margin: const EdgeInsets.only(right: 285.0),
                 child: Text(
-                  "Menu",
+                  MainConfigMenuStrings.pageTitle,
                   style: GoogleFonts.heebo(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

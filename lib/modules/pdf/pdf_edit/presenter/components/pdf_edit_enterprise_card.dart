@@ -5,6 +5,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
 import 'pdf_edit_field.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfEditEnterpriseCard extends StatelessWidget {
   final TextEditingController nameText;
@@ -48,7 +49,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
             child: Icon(Icons.account_balance, color: Colors.white),
           ),
           title: Text(
-            "Informações da empresa",
+            PdfStrings.enterpriseInfo,
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.bold,
@@ -57,7 +58,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            "Clique para editar",
+            PdfStrings.clickToEdit,
             style: GoogleFonts.heebo(
               color: whiteColor,
               fontWeight: FontWeight.normal,
@@ -68,7 +69,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
           children: <Widget>[
             PdfEditField(
               controller: nameText,
-              hintText: 'Nome da empresa',
+              hintText: PdfStrings.companyNameHint,
               icon: Icons.account_balance,
               gender: Gender.fullname,
               selected: selected,
@@ -78,7 +79,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
             const SizedBox(height: 12),
             PdfEditField(
               controller: phoneText,
-              hintText: 'Telefone',
+              hintText: PdfStrings.phoneHint,
               icon: Icons.phone_android_outlined,
               gender: Gender.phone,
               selected: selected,
@@ -102,7 +103,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
             const SizedBox(height: 12),
             PdfEditField(
               controller: cnpjText,
-              hintText: 'CNPJ',
+              hintText: PdfStrings.cnpjHint,
               icon: Icons.contact_page_outlined,
               gender: Gender.cpf,
               selected: selected,

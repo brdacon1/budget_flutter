@@ -5,6 +5,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 
@@ -47,16 +48,16 @@ class PaymentCreatorViewModel extends ChangeNotifier {
   void init(PaymentCustomer item) {
     try {
       if (item.DESCRICAO.toString() != 'null') {
-        nameButton = 'ATUALIZAR';
-        titlePage = 'Editar pagamento';
+        nameButton = PaymentStrings.updateButton;
+        titlePage = PaymentStrings.editPaymentTitle;
         typeText.text = item.METODO.toString();
         controller.text = _moneyConvert.convertFromDouble(item.PRECO!);
         descricaoText.text = item.DESCRICAO.toString();
         fieldVisible = true;
       } else {
-        nameButton = 'SALVAR';
-        titlePage = 'Criar pagamento';
-        typeText.text = 'Dinheiro';
+        nameButton = PaymentStrings.saveButton;
+        titlePage = PaymentStrings.createPaymentTitle;
+        typeText.text = PaymentStrings.defaultPaymentType;
         controller.text = '';
         descricaoText.text = '';
         precoText.text = '1';
@@ -72,10 +73,10 @@ class PaymentCreatorViewModel extends ChangeNotifier {
   }
 
   Future<void> selectType(BuildContext context) async {
-    List<String> values = ['Crédito', 'Débito', 'Dinheiro', 'PIX'];
+    List<String> values = PaymentStrings.paymentTypeOptions;
     final value = await showOptionBottomModal(
       context,
-      title: 'Tipo do pagamento',
+      title: PaymentStrings.selectPaymentTypeTitle,
       values: values,
     );
     if (value != null) {
@@ -87,15 +88,15 @@ class PaymentCreatorViewModel extends ChangeNotifier {
   Future<void> save(BuildContext context, PaymentCustomer item) async {
     double cleanAmount = _moneyConvert.convertFromString(controller.text);
     _loadingEvent.alertLoading(context);
-    if (nameButton == 'SALVAR') {
+    if (nameButton == PaymentStrings.saveButton) {
       ITENS.METODO = typeText.text;
       ITENS.DESCRICAO = descricaoText.text;
       ITENS.PRECO = cleanAmount;
       await _paymentRepository.savePayment(ITENS);
       _loadingEvent.closeLoading(context);
       await _displayAlert.notification(
-          context, "Feito!", "Pagamento criado com sucesso!");
-    } else if (nameButton == 'ATUALIZAR') {
+          context, PaymentStrings.doneTitle, PaymentStrings.paymentCreated);
+    } else if (nameButton == PaymentStrings.updateButton) {
       ITENS.METODO = typeText.text;
       ITENS.DESCRICAO = descricaoText.text;
       ITENS.PRECO = cleanAmount;
@@ -103,7 +104,7 @@ class PaymentCreatorViewModel extends ChangeNotifier {
       await _paymentRepository.updatePayment(ITENS);
       _loadingEvent.closeLoading(context);
       await _displayAlert.notification(
-          context, "Feito!", "Pagamento atualizado com sucesso!");
+          context, PaymentStrings.doneTitle, PaymentStrings.paymentUpdated);
     }
   }
 }

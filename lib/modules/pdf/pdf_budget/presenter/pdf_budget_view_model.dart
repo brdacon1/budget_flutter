@@ -10,6 +10,7 @@ import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/shared/models/observation_pdf.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfBudgetViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
@@ -115,8 +116,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
       if (context.mounted) {
         await _displayAlert.notificationWarning(
           context,
-          'Erro',
-          'Não foi possível gerar o PDF: ${e.toString()}',
+          PdfStrings.errorTitle,
+          '${PdfStrings.notPossibleGeneratePdf}: ${e.toString()}',
         );
       }
     } finally {
