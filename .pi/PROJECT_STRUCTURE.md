@@ -6,6 +6,19 @@
 
 ---
 
+## 0. Ponytail — Regra de Ouro do Projeto
+
+Este projeto segue o modo **ponytail full**: *o menor código completo que resolve o problema*.
+
+- **Não** adicionamos abstração, wrapper, conversão de tipo ou configuração que ninguém pediu.
+- **Não** criamos datasource em core que é puramente local (ex: `display_alert`, `loading_event`).
+- **Criamos** datasource em core que acessa **fonte externa** (SDK de terceiros, Firebase, API REST).
+- O shortest working diff vence. Deletar > adicionar.
+
+Para detalhes completos: <https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md>
+
+---
+
 ## 1. Árvore de Diretórios (resumida — apenas `lib/`)
 
 ```
@@ -35,6 +48,28 @@ lib/
 │   │       └── ...
 │   │
 │   ├── core/                          # 🔷 Serviços transversais (sem UI)
+│   │   ├── ads/                       # Google Mobile Ads (tem datasource — SDK externo)
+│   │   │   ├── ads_binds.dart
+│   │   │   ├── domain/repository/ads_repository.dart
+│   │   │   └── data/
+│   │   │       ├── datasource/ads_remote_datasource.dart
+│   │   │       └── repository/ads_repository_impl.dart
+│   │   ├── convert_coin/              # Formatação local (sem datasource)
+│   │   ├── display_alert/             # Snackbar/Alert local (sem datasource)
+│   │   ├── loading_event/             # Loading local (sem datasource)
+│   │   ├── in_app_purchase/           # Loja Google/Apple (tem datasource — SDK externo)
+│   │   ├── notification/              # FCM + local notifications (tem datasource — SDK externo)
+│   │   ├── cep/                       # Consulta externa (tem datasource)
+│   │   ├── share_link/                # Compartilhamento (tem datasource)
+│   │   └── ...
+│   │
+│   ├── dashboard/                     # Dashboard com gráficos
+│   │   ├── dashboard_binds.dart
+│   │   ├── dashboard_routes.dart      # ← obrigatório: tem view
+│   │   └── presenter/
+│   │       ├── dashboard_view.dart
+│   │       └── dashboard_view_model.dart
+│   │
 │   ├── login/
 │   ├── payment/
 │   ├── pdf/
@@ -42,7 +77,14 @@ lib/
 │   ├── receipt/
 │   ├── subscription/
 │   ├── chat_budget/
-│   ├── dashboard/
+│   ├── main_config_menu/              # Menu de configurações
+│   │   ├── main_config_menu_binds.dart
+│   │   ├── main_config_menu_routes.dart   # ← obrigatório: tem view
+│   │   └── presenter/
+│   │       ├── main_config_menu_view.dart
+│   │       └── main_config_menu_view_model.dart
+│   ├── main_tab/
+│   ├── terms_conditions/
 │   ├── web_budget/
 │   └── ...
 │
@@ -76,7 +118,7 @@ lib/
 ### 3.1 O que é o DataSource?
 
 O **DataSource** é a classe que **fala diretamente com o mundo externo**:</br>
-`FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`, `FirebaseStorage`, sensores do celular, etc.
+`FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`, `FirebaseStorage`, SDKs de terceiros (Google Mobile Ads, FlutterInappPurchase, etc.), sensores do celular.
 
 Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua única responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`, `Uint8List`, etc.) com a fonte externa.
 
@@ -97,7 +139,22 @@ Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua ú
 3. **É injetado no RepositoryImpl** — a ViewModel nunca vê o DataSource.
 4. **Permite mock no construtor** — aceitar a instância externa (ex: `FirebaseFirestore? firestore`) facilita testes unitários.
 
-### 3.4 Exemplo Real — `BudgetRemoteDataSource`
+### 3.4 Quando um módulo `core/` PRECISA de DataSource?
+
+| Módulo | Fonte externa? | DataSource? |
+|--------|---------------|------------|
+| `core/cep` | Sim (API ViaCep) | ✅ Sim |
+| `core/share_link` | Sim (Firebase Dynamic Links / SDK) | ✅ Sim |
+| `core/ads` | Sim (Google Mobile Ads SDK) | ✅ Sim |
+| `core/in_app_purchase` | Sim (Google Play / App Store SDK) | ✅ Sim |
+| `core/notification` | Sim (FCM + Firestore) | ✅ Sim |
+| `core/convert_coin` | Não (pura formatação `intl`) | ❌ Não |
+| `core/display_alert` | Não (snackbar local) | ❌ Não |
+| `core/loading_event` | Não (dialog local) | ❌ Não |
+
+> **Regra**: se o módulo `core/` acessa qualquer SDK externo, Firebase, HTTP ou storage, ele **deve** ter `data/datasource/`.
+
+### 3.5 Exemplo Real — `BudgetRemoteDataSource`
 
 **Arquivo**: `lib/modules/budget/data/datasource/budget_remote_datasource.dart`
 
@@ -450,6 +507,8 @@ void registerInvoiceDependencies(GetIt sl) {
 
 **Arquivo**: `lib/modules/invoice/invoice_routes.dart`
 
+> **Obrigatório para todo módulo que possui `presenter/` (View).**
+
 ```dart
 import 'package:flutter/material.dart';
 import 'presenter/invoice_list/invoice_list_view.dart';
@@ -763,10 +822,9 @@ Eles expõem apenas:
 - `{service}_binds.dart`
 - `domain/repository/{service}_repository.dart`
 - `data/repository/{service}_repository_impl.dart`
+- **`data/datasource/{service}_remote_datasource.dart` quando acessam fonte externa** (SDKs, Firebase, HTTP)
 
-> Exceções raras: `data/datasource/` se houver fonte externa (ex: `cep_remote_datasource.dart`).
-
-### Exemplo: `share_link`
+### Exemplo: `share_link` (tem datasource — fonte externa)
 
 ```
 core/share_link/
@@ -775,6 +833,15 @@ core/share_link/
 └── data/
     ├── datasource/share_link_datasource.dart
     └── repository/share_link_repository_impl.dart
+```
+
+### Exemplo: `convert_coin` (sem datasource — pura lógica local)
+
+```
+core/convert_coin/
+├── convert_coin_binds.dart
+├── domain/repository/convert_coin_repository.dart
+└── data/repository/convert_coin_repository_impl.dart
 ```
 
 **Quando usar `core/`**: serviços reutilizáveis por vários módulos — anúncios, conversão de moeda, loading global, alerts, CEP, notificações, compras in-app, etc.
@@ -798,11 +865,14 @@ core/share_link/
 | 11 | Modais ficam em `presenter/components/modals/` |
 | 12 | Strings centralizadas em `shared/common/strings/` |
 | 13 | Modelos compartilhados em `shared/models/` |
+| **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`** |
+| **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`** |
 
 ---
 
 ## 9. Módulos Existentes (checklist)
 
+### Features com Router + ViewModel + View
 - [x] `budget` — Orçamentos (list, creator, items, tab)
 - [x] `chat_budget` — Assistente de orçamento por chat
 - [x] `comment` — Comentários nos orçamentos
@@ -819,14 +889,18 @@ core/share_link/
 - [x] `subscription` — Assinaturas/Planos
 - [x] `terms_conditions` — Termos de uso
 - [x] `web_budget` — Orçamento público web (compartilhável)
+
+### Core — com DataSource (fonte externa)
 - [x] `core/ads` — Google Mobile Ads
 - [x] `core/cep` — Consulta de CEP
-- [x] `core/convert_coin` — Conversão de moeda
-- [x] `core/display_alert` — SnackBars/Alerts globais
 - [x] `core/in_app_purchase` — Compras dentro do app
-- [x] `core/loading_event` — Loading global
 - [x] `core/notification` — Push/local notifications
 - [x] `core/share_link` — Compartilhamento de links
+
+### Core — sem DataSource (lógica local / pura)
+- [x] `core/convert_coin` — Conversão de moeda (formatação `intl`)
+- [x] `core/display_alert` — SnackBars/Alerts globais
+- [x] `core/loading_event` — Loading global
 
 ---
 
@@ -857,6 +931,13 @@ core/share_link/
 4. Retornar `Result<T, E>` quando houver fluxo de erro
 5. Registrar no `{modulo}_binds.dart`
 6. Injetar no ViewModel via `getIt<MeuUseCase>()`
+
+### Criar um módulo core com datasource
+1. Criar `data/datasource/{service}_remote_datasource.dart`
+2. Mover todo acesso ao SDK externo (Firebase, HTTP, plugin) para o DataSource
+3. Manter o RepositoryImpl como orquestrador (estado, callbacks, regras)
+4. Registrar DataSource antes do Repository no `{service}_binds.dart`
+5. Injetar DataSource no RepositoryImpl via construtor
 
 ---
 

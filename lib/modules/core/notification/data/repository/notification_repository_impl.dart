@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:oflite/modules/core/notification/data/datasource/notification_remote_datasource.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
@@ -30,8 +30,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
   static const String _channelId = 'high_importance_channel';
   static const String _channelName = 'High Importance Notifications';
 
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+  final NotificationRemoteDataSource _dataSource;
+
+  NotificationRepositoryImpl(this._dataSource);
 
   GlobalKey<NavigatorState>? _navigatorKey;
   String? _pendingBudgetId;
@@ -53,55 +54,49 @@ class NotificationRepositoryImpl implements NotificationRepository {
       iOS: iosSettings,
     );
 
-    await _localNotifications.initialize(
-      settings: initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTap,
+    await _dataSource.initializeLocalNotifications(
+      initSettings,
+      _onNotificationTap,
     );
 
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(const AndroidNotificationChannel(
-          _channelId,
-          _channelName,
-          importance: Importance.high,
-        ));
+    await _dataSource.createNotificationChannel(
+      _channelId,
+      _channelName,
+      Importance.high,
+    );
 
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    await _dataSource.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
 
     FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+    _dataSource.onMessage.listen(_handleForegroundMessage);
+    _dataSource.onMessageOpenedApp.listen(_onMessageOpenedApp);
     unawaited(_handleInitialMessage());
 
     if (kIsWeb) {
-      await FirebaseMessaging.instance.requestPermission();
+      await _dataSource.requestFcmPermission();
     } else {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await FirebaseMessaging.instance.requestPermission(
+        await _dataSource.requestFcmPermission(
           alert: true,
           badge: true,
           sound: true,
         );
       } else if (defaultTargetPlatform == TargetPlatform.android) {
-        final androidPlugin = _localNotifications
-            .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>();
         final bool? granted =
-            await androidPlugin?.requestNotificationsPermission();
+            await _dataSource.requestAndroidNotificationPermission();
         if (kDebugMode) {
           debugPrint('Android POST_NOTIFICATIONS concedido? $granted');
         }
-        await FirebaseMessaging.instance.requestPermission();
+        await _dataSource.requestFcmPermission();
       }
     }
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      final apnsToken = await _dataSource.getApnsToken();
       if (kDebugMode) {
         debugPrint('APNs token: $apnsToken');
       }
@@ -114,7 +109,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
 
     _tokenRefreshSub?.cancel();
-    _tokenRefreshSub = FirebaseMessaging.instance.onTokenRefresh.listen((t) {
+    _tokenRefreshSub = _dataSource.fcmTokenRefresh.listen((t) {
       _fcmToken = t;
       final owner = _boundOwnerUid;
       if (owner != null && owner.isNotEmpty) {
@@ -141,7 +136,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }) async {
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        final t = await FirebaseMessaging.instance.getToken();
+        final t = await _dataSource.getFcmToken();
         if (t != null && t.isNotEmpty) {
           if (kDebugMode && attempt > 1) {
             debugPrint('FCM token obtido na tentativa $attempt');
@@ -244,7 +239,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     final body = notification?.body ?? message.data['MENSAGEM']?.toString();
     if (title == null && body == null) return;
 
-    _localNotifications.show(
+    _dataSource.showLocalNotification(
       id: message.hashCode,
       title: title,
       body: body,
@@ -269,7 +264,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   Future<void> _handleInitialMessage() async {
-    final message = await FirebaseMessaging.instance.getInitialMessage();
+    final message = await _dataSource.getInitialMessage();
     if (message == null) return;
     final orcamentoId = message.data['ORCAMENTO_ID']?.toString();
     if (orcamentoId != null && orcamentoId.isNotEmpty) {
@@ -312,10 +307,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
     final uid = ownerUid.trim();
     try {
-      final snap = await FirebaseFirestore.instance
-          .collection('EMPRESAS/$uid/USERS/$uid/FCM')
-          .get();
-      return snap.docs.map((d) => d.id).toList(growable: false);
+      return await _dataSource.loadFcmTokens(uid);
     } catch (e) {
       if (kDebugMode) debugPrint('load FCM tokens failed: $e');
       return const <String>[];
@@ -351,12 +343,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         }
         return;
       }
-      final db = FirebaseFirestore.instance;
-      final docRef = db.doc('EMPRESAS/$uid/USERS/$uid/FCM/$token');
-      if (kDebugMode) {
-        debugPrint('[_persistFcmToken] gravando em: ${docRef.path}');
-      }
-      await docRef.set({'TOKEN': token}, SetOptions(merge: true));
+      await _dataSource.persistFcmToken(uid, token);
       if (kDebugMode) {
         debugPrint('FCM token SALVO na lista: '
             'EMPRESAS/$uid/USERS/$uid/FCM/$token');

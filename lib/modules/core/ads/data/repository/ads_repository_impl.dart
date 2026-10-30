@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:oflite/modules/core/ads/data/datasource/ads_remote_datasource.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 
@@ -8,6 +9,10 @@ import 'package:oflite/shared/common/constants/environment.dart';
 /// Mantém um intersticial compartilhado em memória, recarregando
 /// automaticamente após ser exibido ou em caso de falha (até 3 tentativas).
 class AdsRepositoryImpl implements AdsRepository {
+  final AdsRemoteDataSource _dataSource;
+
+  AdsRepositoryImpl(this._dataSource);
+
   InterstitialAd? _interstitialAd;
   int _numInterstitialLoadAttempts = 0;
   static const int _maxFailedLoadAttempts = 3;
@@ -22,44 +27,39 @@ class AdsRepositoryImpl implements AdsRepository {
 
   @override
   Future<void> initialize() async {
-    await MobileAds.instance.initialize();
+    await _dataSource.initialize();
   }
 
   @override
   Future<void> setTestDevices(List<String> testDeviceIds) async {
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: testDeviceIds),
-    );
+    await _dataSource.setTestDevices(testDeviceIds);
   }
 
   @override
   void loadInterstitial() {
     if (_interstitialAd != null || _isLoading) return;
     _isLoading = true;
-    InterstitialAd.load(
+    _dataSource.loadInterstitial(
       adUnitId: interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          _isLoading = false;
-          _interstitialAd = ad;
-          _numInterstitialLoadAttempts = 0;
-          ad.setImmersiveMode(true);
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _isLoading = false;
-          _numInterstitialLoadAttempts += 1;
-          _interstitialAd = null;
-          debugPrint(
-            '[AdsRepositoryImpl] Falha ao carregar intersticial '
-            '(adUnitId=$interstitialAdUnitId, code=${error.code}, '
-            'message=${error.message}).',
-          );
-          if (_numInterstitialLoadAttempts < _maxFailedLoadAttempts) {
-            loadInterstitial();
-          }
-        },
-      ),
+      onAdLoaded: (InterstitialAd ad) {
+        _isLoading = false;
+        _interstitialAd = ad;
+        _numInterstitialLoadAttempts = 0;
+        ad.setImmersiveMode(true);
+      },
+      onAdFailedToLoad: (LoadAdError error) {
+        _isLoading = false;
+        _numInterstitialLoadAttempts += 1;
+        _interstitialAd = null;
+        debugPrint(
+          '[AdsRepositoryImpl] Falha ao carregar intersticial '
+          '(adUnitId=$interstitialAdUnitId, code=${error.code}, '
+          'message=${error.message}).',
+        );
+        if (_numInterstitialLoadAttempts < _maxFailedLoadAttempts) {
+          loadInterstitial();
+        }
+      },
     );
   }
 

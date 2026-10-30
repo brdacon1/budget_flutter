@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'modules/budget/budget_routes.dart';
 import 'modules/chat_budget/chat_budget_routes.dart';
+import 'modules/dashboard/dashboard_routes.dart';
 import 'modules/image/image_routes.dart';
 import 'modules/login/login_routes.dart';
+import 'modules/main_config_menu/main_config_menu_routes.dart';
 import 'modules/main_tab/main_tab_routes.dart';
 import 'modules/payment/payment_routes.dart';
 import 'modules/pdf/pdf_routes.dart';
@@ -30,6 +32,8 @@ enum AppRoute {
   productPriceList,
   singup,
   webBudgetApp,
+  dashboard,
+  mainConfigMenu,
 }
 
 extension AppRouteExtension on AppRoute {
@@ -57,6 +61,10 @@ extension AppRouteExtension on AppRoute {
         return SingupRoute.singup.path;
       case AppRoute.webBudgetApp:
         return WebBudgetRoute.webBudgetApp.path;
+      case AppRoute.dashboard:
+        return DashboardRoute.dashboard.path;
+      case AppRoute.mainConfigMenu:
+        return MainConfigMenuRoute.mainConfigMenu.path;
     }
   }
 }
@@ -77,4 +85,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   ...receiptRoutes,
   ...singupRoutes,
   ...webBudgetRoutes,
+  ...dashboardRoutes,
+  ...mainConfigMenuRoutes,
 };

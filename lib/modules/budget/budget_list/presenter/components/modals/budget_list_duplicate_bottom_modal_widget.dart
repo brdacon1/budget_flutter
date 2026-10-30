@@ -84,21 +84,24 @@ class _CheckTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CheckboxListTile(
-      side: const BorderSide(color: Color(0xFF9E9E9E)),
-      checkColor: Colors.white,
-      activeColor: AppBottomModal.grayColor,
-      title: Text(
-        title,
-        style: GoogleFonts.heebo(
-          color: AppBottomModal.grayColor,
-          letterSpacing: 0.5,
-          fontSize: 14.0,
-          fontWeight: FontWeight.bold,
+    return Material(
+      type: MaterialType.transparency,
+      child: CheckboxListTile(
+        side: const BorderSide(color: Color(0xFF9E9E9E)),
+        checkColor: Colors.white,
+        activeColor: AppBottomModal.grayColor,
+        title: Text(
+          title,
+          style: GoogleFonts.heebo(
+            color: AppBottomModal.grayColor,
+            letterSpacing: 0.5,
+            fontSize: 14.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        value: value,
+        onChanged: onChanged,
       ),
-      value: value,
-      onChanged: onChanged,
     );
   }
 }
