@@ -270,6 +270,161 @@ class BudgetRemoteDataSource {
 
 ---
 
+## 4.4 Padrão Command para Ações Assíncronas
+
+> Quando um botão (ou qualquer interação da UI) dispara uma operação **assíncrona** que depende de espera (ex: salvar no Firestore, chamar API, gerar PDF), o ViewModel **não expõe o `Future` cru** para a View. Em vez disso, encapsula essa ação em um **`Command`**.
+
+O `Command` é um `ChangeNotifier` especializado que controla o ciclo de vida de uma ação async, evitando cliques duplos e expondo estados reativos:
+
+| Estado | Tipo | Significado |
+|--------|------|-------------|
+| `running` | `bool` | A ação está em execução (bloqueia novo disparo) |
+| `completed` | `bool` | A ação terminou com sucesso (`Result` é `Ok`) |
+| `error` | `bool` | A ação terminou com erro (`Result` é `Error`) |
+| `result` | `Result<T>?` | O resultado embrulhado em `Result<T>` |
+
+### Implementação na ViewModel
+
+A ViewModel declara o `Command` no construtor, apontando-o para um método protegido que retorna `Future<Result<T>>`:
+
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
+
+// --- na ViewModel ---
+class BudgetCreateViewModel extends ChangeNotifier {
+  final BudgetRepository _repository;
+
+  BudgetCreateViewModel(this._repository) {
+    saveBudgetCommand = Command0(_executeSaveBudget);
+  }
+
+  late final Command0<void> saveBudgetCommand;
+
+  Future<Result<void>> _executeSaveBudget() async {
+    // lógica de negócio + chamada ao repository
+    return _repository.createBudget(/* dados */);
+  }
+}
+```
+
+> **Regra**: o método executado pelo `Command` (ex: `_executeSaveBudget`) deve ser **protegido** (`private`) e retornar sempre `Future<Result<T>>`. A ViewModel pode expor outros métodos `public` para manipular estado local, mas **a ação que dispara espera deve passar pelo `Command`**.
+
+### Implementação na View
+
+Na View, escutamos o `Command` via `addListener` e reagimos aos estados (loading, sucesso, erro):
+
+```dart
+class _BudgetCreateViewState extends State<BudgetCreateView> {
+  late final BudgetCreateViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = getIt<BudgetCreateViewModel>();
+    _viewModel.saveBudgetCommand.addListener(_onSaveBudgetChanged);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.saveBudgetCommand.removeListener(_onSaveBudgetChanged);
+    super.dispose();
+  }
+
+  void _onSaveBudgetChanged() {
+    final cmd = _viewModel.saveBudgetCommand;
+
+    if (cmd.completed) {
+      // sucesso: navegar, mostrar snackbar, etc.
+      Navigator.pop(context);
+    } else if (cmd.error) {
+      // erro: extrair mensagem de cmd.result
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar: ${cmd.result}')),
+      );
+    }
+    // quando running == true, o próprio build mostra loading no botão
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: /* ... */,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _viewModel.saveBudgetCommand.running
+            ? null // bloqueia clique enquanto executa
+            : _viewModel.saveBudgetCommand.execute,
+        child: _viewModel.saveBudgetCommand.running
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.save),
+      ),
+    );
+  }
+}
+```
+
+### Regras de Ouro do Command
+
+1. **Todo botão que dispara operação async deve usar `Command`** — nunca exponha `Future<void> metodo()` direto para a View.
+2. **A View escuta o `Command`, não chama `await` diretamente** — o `addListener` permite reação desacoplada.
+3. **O `Command` impede cliques duplos** — enquanto `running == true`, novas chamadas a `execute()` são ignoradas.
+4. **O `Command` sempre retorna `Result<T>`** — sucesso (`Ok`) e erro (`Error`) são estados reativos, não exceções lançadas.
+5. **Dispose dos listeners do `Command` na View** — assim como o `ViewModel`, o `Command` é um `ChangeNotifier` e precisa ter seus listeners removidos no `dispose()`.
+6. **Use `Command0<T>` para ações sem parâmetro; `Command1<T, A>` para ações com 1 argumento.** (Comandos com múltiplos argumentos devem usar um objeto/dto no lugar.)
+
+### Exemplo de classe Command (referência)
+
+```dart
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
+
+typedef CommandAction0<T> = Future<Result<T>> Function();
+
+abstract class Command<T> extends ChangeNotifier {
+  bool _running = false;
+  bool get running => _running;
+
+  Result<T>? _result;
+  bool get error => _result is Error;
+  bool get completed => _result is Ok;
+  Result? get result => _result;
+
+  void clearResult() {
+    _result = null;
+    notifyListeners();
+  }
+
+  Future<void> _execute(CommandAction0<T> action) async {
+    if (_running) return;
+    _running = true;
+    _result = null;
+    notifyListeners();
+
+    try {
+      _result = await action();
+    } finally {
+      _running = false;
+      notifyListeners();
+    }
+  }
+}
+
+class Command0<T> extends Command<T> {
+  Command0(this._action);
+  final CommandAction0<T> _action;
+
+  Future<void> execute() async => _execute(_action);
+}
+```
+
+---
+
 ## 5. Como Criar um Módulo (passo a passo)
 
 > Exemplo criando um módulo fictício chamado `invoice` (notas fiscais).
