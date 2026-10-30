@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/models/payment_customer.dart';
 import 'components/payment_creator_header.dart';
@@ -15,7 +16,7 @@ class PaymentCreatorView extends StatefulWidget {
 }
 
 class _PaymentCreatorView extends State<PaymentCreatorView> {
-  final PaymentCreatorViewModel _viewModel = PaymentCreatorViewModel();
+  final PaymentCreatorViewModel _viewModel = getIt<PaymentCreatorViewModel>();
 
   @override
   void initState() {

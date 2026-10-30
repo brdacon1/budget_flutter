@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'main_config_menu_view_model.dart';
@@ -17,7 +18,7 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = MainConfigMenuViewModel();
+    _viewModel = getIt<MainConfigMenuViewModel>();
     _viewModel.addListener(_onViewModelChanged);
   }
 

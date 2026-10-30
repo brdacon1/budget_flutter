@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
@@ -16,7 +17,7 @@ class BudgetTabView extends StatefulWidget {
 }
 
 class _BudgetTabView extends State<BudgetTabView> {
-  final BudgetTabViewModel _viewModel = BudgetTabViewModel();
+  final BudgetTabViewModel _viewModel = getIt<BudgetTabViewModel>();
   double we = 0;
 
   @override

@@ -31,7 +31,7 @@ class _ImageEditView extends State<ImageEditView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ImageEditViewModel();
+    _viewModel = getIt<ImageEditViewModel>();
     _viewModel.addListener(_onViewModelChanged);
     print('ImageEditView: fotoId=${widget.owner.fotoId}, logoName=${widget.owner.logoName}');
     _viewModel.loadInitialImage(

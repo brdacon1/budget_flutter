@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'modules/budget/budget_routes.dart';
+import 'modules/chat_budget/chat_budget_routes.dart';
+import 'modules/image/image_routes.dart';
 import 'modules/login/login_routes.dart';
 import 'modules/main_tab/main_tab_routes.dart';
+import 'modules/payment/payment_routes.dart';
 import 'modules/pdf/pdf_routes.dart';
+import 'modules/product/product_routes.dart';
+import 'modules/receipt/receipt_routes.dart';
+import 'modules/singup/singup_routes.dart';
 import 'modules/subscription/subscription_routes.dart';
 import 'modules/terms_conditions/terms_conditions_routes.dart';
+import 'modules/web_budget/web_budget_routes.dart';
 
 /// Enum central de rotas do aplicativo.
 ///
@@ -18,6 +25,11 @@ enum AppRoute {
   mainTab,
   pdfConfig,
   termsConditions,
+  chatAssistant,
+  paymentCreator,
+  productPriceList,
+  singup,
+  webBudgetApp,
 }
 
 extension AppRouteExtension on AppRoute {
@@ -35,6 +47,16 @@ extension AppRouteExtension on AppRoute {
         return PdfRoute.pdfConfig.path;
       case AppRoute.termsConditions:
         return TermsConditionsRoute.termsConditions.path;
+      case AppRoute.chatAssistant:
+        return ChatBudgetRoute.chatAssistant.path;
+      case AppRoute.paymentCreator:
+        return PaymentRoute.paymentCreator.path;
+      case AppRoute.productPriceList:
+        return ProductRoute.productPriceList.path;
+      case AppRoute.singup:
+        return SingupRoute.singup.path;
+      case AppRoute.webBudgetApp:
+        return WebBudgetRoute.webBudgetApp.path;
     }
   }
 }
@@ -48,4 +70,11 @@ final Map<String, WidgetBuilder> appRoutes = {
   ...mainTabRoutes,
   ...pdfRoutes,
   ...termsConditionsRoutes,
+  ...chatBudgetRoutes,
+  ...imageRoutes,
+  ...paymentRoutes,
+  ...productRoutes,
+  ...receiptRoutes,
+  ...singupRoutes,
+  ...webBudgetRoutes,
 };

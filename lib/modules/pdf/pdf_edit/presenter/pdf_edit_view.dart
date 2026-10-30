@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'components/pdf_edit_header.dart';
@@ -21,7 +22,7 @@ class _PdfEditView extends State<PdfEditView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = PdfEditViewModel();
+    _viewModel = getIt<PdfEditViewModel>();
     WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData());
   }
 

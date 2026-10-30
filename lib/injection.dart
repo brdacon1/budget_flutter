@@ -3,11 +3,19 @@ import 'package:oflite/modules/budget/budget_binds.dart';
 import 'package:oflite/modules/chat_budget/chat_budget_binds.dart';
 import 'package:oflite/modules/comment/comment_binds.dart';
 import 'package:oflite/modules/core/core_binds.dart';
+import 'package:oflite/modules/dashboard/dashboard_binds.dart';
+import 'package:oflite/modules/image/image_binds.dart';
 import 'package:oflite/modules/login/login_binds.dart';
+import 'package:oflite/modules/main_config_menu/main_config_menu_binds.dart';
+import 'package:oflite/modules/main_tab/main_tab_binds.dart';
 import 'package:oflite/modules/payment/payment_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
 import 'package:oflite/modules/product/product_binds.dart';
 import 'package:oflite/modules/receipt/receipt_binds.dart';
+import 'package:oflite/modules/singup/singup_binds.dart';
+import 'package:oflite/modules/subscription/subscription_binds.dart';
+import 'package:oflite/modules/terms_conditions/terms_conditions_binds.dart';
+import 'package:oflite/modules/web_budget/web_budget_binds.dart';
 
 /// Instância global do GetIt para injeção de dependências.
 ///
@@ -40,6 +48,16 @@ void setupDependencyInjection() {
   registerPdfDependencies(getIt);
   registerLoginDependencies(getIt);
   registerChatBudgetDependencies(getIt);
+
+  // ViewModels e binds de módulos que antes não tinham registro estruturado
+  registerDashboardDependencies(getIt);
+  registerImageDependencies(getIt);
+  registerMainConfigMenuDependencies(getIt);
+  registerMainTabDependencies(getIt);
+  registerSingupDependencies(getIt);
+  registerSubscriptionDependencies(getIt);
+  registerTermsConditionsDependencies(getIt);
+  registerWebBudgetDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)

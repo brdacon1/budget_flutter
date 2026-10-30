@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
 import 'components/product_screen_bottom_part.dart';
@@ -18,7 +19,7 @@ class _SubscriptionView extends State<SubscriptionView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = SubscriptionViewModel();
+    _viewModel = getIt<SubscriptionViewModel>();
     _viewModel.addListener(_onViewModelChanged);
     _viewModel.init();
   }

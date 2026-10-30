@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
@@ -24,7 +25,7 @@ class BudgetListView extends StatefulWidget {
 }
 
 class _BudgetListView extends State<BudgetListView> {
-  final BudgetListViewModel _viewModel = BudgetListViewModel();
+  final BudgetListViewModel _viewModel = getIt<BudgetListViewModel>();
   ConvertCoin moneyConvert = ConvertCoin();
 
   @override

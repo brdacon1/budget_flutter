@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -21,7 +22,7 @@ class _DashboardView extends State<DashboardView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = DashboardViewModel();
+    _viewModel = getIt<DashboardViewModel>();
     _viewModel.addListener(_onViewModelChanged);
   }
 

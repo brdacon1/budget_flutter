@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/strings/auth_strings.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/core/services/data/service/display_alert.dart';
@@ -19,7 +20,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final LoginViewModel _viewModel = LoginViewModel();
+  final LoginViewModel _viewModel = getIt<LoginViewModel>();
   final DisplayAlert _displayAlert = DisplayAlert();
   final LoadingEvent _loadingEvent = LoadingEvent();
 

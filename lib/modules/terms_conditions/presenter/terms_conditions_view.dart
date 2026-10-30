@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'terms_conditions_view_model.dart';
@@ -18,7 +19,7 @@ class _TermsConditionsViewState extends State<TermsConditionsView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = TermsConditionsViewModel();
+    _viewModel = getIt<TermsConditionsViewModel>();
     _viewModel.addListener(_onViewModelChanged);
   }
 

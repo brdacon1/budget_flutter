@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_auth/budget_web_auth_view.dart';
@@ -26,7 +27,7 @@ class BudgetWebAppView extends StatefulWidget {
 }
 
 class _BudgetWebAppViewState extends State<BudgetWebAppView> {
-  final BudgetWebAppViewModel _viewModel = BudgetWebAppViewModel();
+  final BudgetWebAppViewModel _viewModel = getIt<BudgetWebAppViewModel>();
 
   @override
   void initState() {

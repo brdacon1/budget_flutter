@@ -3,6 +3,8 @@ import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.d
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
+import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
 
 void registerPdfDependencies(GetIt sl) {
   sl.registerLazySingleton<PdfRemoteDataSource>(
@@ -15,4 +17,8 @@ void registerPdfDependencies(GetIt sl) {
       sl<BudgetRemoteDataSource>(),
     ),
   );
+
+  // ViewModels
+  sl.registerFactory<PdfEditViewModel>(() => PdfEditViewModel());
+  sl.registerFactory<PdfBudgetViewModel>(() => PdfBudgetViewModel());
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/injection.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
@@ -20,7 +21,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = PdfBudgetViewModel();
+    _viewModel = getIt<PdfBudgetViewModel>();
     // Dispara o carregamento no próximo frame. Poderia rodar depois de
     // `dispose` se a tela fosse fechada muito rápido — o VM agora ignora
     // notificações pós-dispose, mas mesmo assim só disparamos se a View

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
 import 'package:oflite/shared/common/strings/auth_strings.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
@@ -44,7 +45,7 @@ class _SingUpViewState extends State<SingUpView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = SingUpViewModel();
+    _viewModel = getIt<SingUpViewModel>();
     _viewModel.addListener(_onViewModelChanged);
   }
 
