@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
 ///
@@ -76,6 +77,17 @@ class ChatMessageBubble extends StatelessWidget {
                       message.content,
                       style: const TextStyle(color: Colors.white, fontSize: 15),
                     ),
+                    if (message.type == ChatMessageType.contactPicker) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        ChatBudgetStrings.contactPickerHint,
+                        style: TextStyle(
+                          color: Colors.white.withAlpha(200),
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
                     if (_isUser && _editableField != null) ...[
                       const SizedBox(height: 4),
                       Row(
@@ -92,7 +104,7 @@ class ChatMessageBubble extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ] else
+                    ] else if (message.type != ChatMessageType.contactPicker)
                       const SizedBox(height: 6),
                     _buildExtraContent(),
                   ],

@@ -44,4 +44,8 @@ class ChatBudgetStrings {
   static String get tapAndHoldToEdit => _isPt
       ? 'Toque e segure para editar'
       : 'Tap and hold to edit';
+
+  static String get contactPickerHint => _isPt
+      ? 'Selecione nos contatos ou escreva no campo abaixo e me envie'
+      : 'Select from contacts or type in the field below and send me';
 }
