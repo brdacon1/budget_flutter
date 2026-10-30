@@ -1022,7 +1022,7 @@ core/convert_coin/
 | 10 | Componentes (widgets) ficam em `presenter/components/` ou subpastas |
 | 11 | Modais ficam em `presenter/components/modals/` |
 | 12 | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`** |
-| 13 | Modelos compartilhados em `shared/models/` |
+| 13 | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |
 | **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`** |
 | **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`** |
 
@@ -1062,10 +1062,110 @@ core/convert_coin/
 
 ---
 
-## 10. Dicas Rápidas
+## 10. Regra de Ouro — Models e Entities SEMPRE Dentro do Módulo Dono
+
+> **ESTA É A REGRA MAIS QUEBRADA DO PROJETO. SIGA À RISCA.**
+
+### 10.1 Onde ficam
+
+Seguindo o padrão do projeto de referência (Clean Architecture modular):
+
+| Tipo | Pasta no módulo | Exemplo |
+|------|----------------|---------|
+| **Entity** (domínio puro) | `domain/entity/` | `budget_entity.dart` |
+| **Model** (DTO/JSON) | `data/model/` | `budget_response_model.dart` |
+| **Model local** (estado simples) | `presenter/` | `budget_list_state.dart` |
+
+```
+lib/modules/budget/
+├── data/
+│   ├── model/           ← DTOs do budget (fromJson/toJson)
+│   │   └── budget_response_model.dart
+│   └── repository/
+├── domain/
+│   ├── entity/          ← Entidades puras do budget
+│   │   └── budget_entity.dart
+│   ├── repository/
+│   ├── usecase/
+│   └── ...
+└── presenter/
+```
+
+### 10.2 Regras
+
+| # | Regra |
+|---|-------|
+| 1 | **Model/Entity de feature = dentro do módulo**. NUNCA em `shared/models/`. |
+| 2 | Se `pdf` precisa de `CustomerInfo`, importa de `modules/budget/domain/entity/` (ou consome via UseCase/Repository). |
+| 3 | `shared/models/` é **reservada para infraestrutura genuinamente global** (`Result<T>`, patterns, etc.). |
+| 4 | Não invente abstração: se tem `fromJson`/`toJson`, é **Model** em `data/model/`. Se é pura classe de negócio sem JSON, é **Entity** em `domain/entity/`. |
+| 5 | Se um `core/` retorna dados, o model fica em `modules/core/{servico}/data/model/` ou `domain/entity/`. |
+
+### 10.3 Model "usado por mais de um módulo"
+
+Isso **NÃO** significa que ele vai para `shared/models/`.
+
+> **Quem é o DONO do conceito?** `CustomerInfo` descreve o cliente de um orçamento → módulo `budget` é o dono. Os outros importam de `budget`. Se houver dependência circular, crie `core/customer/` ou use interface no domain do consumidor.
+
+### 10.4 Diretriz para o Agente (Ponytail)
+
+> **Quando o usuário pedir para criar um model, entity, DTO ou classe de dados, o agente DEVE perguntar: "Qual é o módulo dono?" e colocar o arquivo em `modules/{modulo}/data/model/` ou `modules/{modulo}/domain/entity/` — NUNCA em `shared/models/`.**
+>
+> Se o agente não souber o módulo, ele deve **perguntar ao usuário antes de criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
+
+---
+
+## 11. Plano de Migração — Models de `shared/models/` para Módulos
+
+> **Instrução ponytail: migrar um módulo por vez. NUNCA o projeto todo.**
+
+### Inventário atual
+
+| Arquivo | Módulo Dono | Justificativa |
+|---------|-------------|---------------|
+| `address.dart` | `core/cep` | Retorno da API ViaCep |
+| `customer_info.dart` | `budget` | Cliente do orçamento — usado por `budget`, `pdf`, `payment`, `web_budget`, `product` como dependente |
+| `global_uid_budget.dart` | `shared/common/constants/` | Não é model de negócio; é constante de path do Firestore |
+| `global_uid_user.dart` | `shared/common/constants/` | Idem — constante de path do Firestore |
+| `info_user.dart` | `login` | Dados do usuário logado — usado em `login` e `singup` |
+| `items_budget.dart` | `budget` | Item de orçamento — usado por `budget`, `product`, `chat_budget`, `pdf` |
+| `items_list_budget.dart` | `budget` | Extensão/variante de itens de orçamento |
+| `month_calculate.dart` | `dashboard` | Cálculo de evolução mensal — usado só em `dashboard` |
+| `my_budget_dashboard.dart` | `dashboard` | Resumo de orçamentos para dashboard |
+| `observation_budget.dart` | `budget` | Observação do orçamento — usada em `budget` e `comment` (comment consome) |
+| `observation_pdf.dart` | `budget` | Observação para PDF — deriva do conceito de budget |
+| `owner_info.dart` | **DELETAR** | Não é importado por ninguém |
+| `owner_pdf.dart` | `login` | Dados do titular/empresa — usado em `login`, `singup`, `pdf`, `image` |
+| `payment_customer.dart` | `payment` | Pagamento do cliente — usado em `payment`, `pdf`, `receipt` (receipt consome) |
+| `receipt.dart` | `receipt` | Recibo — usado em `receipt`, `payment`, `pdf` (os outros consomem) |
+| `recent_file.dart` | **DELETAR** | Não é importado por ninguém |
+
+### Ordem de migração sugerida (do mais isolado para o mais acoplado)
+
+1. **`dashboard`** — `month_calculate.dart`, `my_budget_dashboard.dart` (isolados, zero impacto externo)
+2. **`core/cep`** — `address.dart` (isolado)
+3. **`login`** — `info_user.dart`, `owner_pdf.dart` (acoplado a `singup`, `pdf`, `image`)
+4. **`receipt`** — `receipt.dart` (acoplado a `payment`, `pdf`)
+5. **`payment`** — `payment_customer.dart` (acoplado a `pdf`, `receipt`)
+6. **`budget`** — `customer_info.dart`, `items_budget.dart`, `items_list_budget.dart`, `observation_budget.dart`, `observation_pdf.dart` (acoplado a quase todo mundo — **por último**)
+7. **Limpeza** — mover `global_uid_*.dart` para `shared/common/constants/`, deletar `owner_info.dart` e `recent_file.dart`
+
+### Checklist por módulo (aplicar a cada migração)
+
+- [ ] Mover o arquivo de `shared/models/` para a pasta correta no módulo (`data/model/` ou `domain/entity/`)
+- [ ] Atualizar o `import` interno do próprio módulo
+- [ ] Atualizar os `import` de **todos** os arquivos que consumiam de `shared/models/` para apontar para o novo caminho
+- [ ] Se o arquivo era importado por módulos que NÃO são o dono, **anotar a dependência cruzada** (futura refatoração de desacoplamento via UseCase/Repository)
+- [ ] Rodar `flutter analyze` para validar imports quebrados
+- [ ] Rodar build/run para validar funcionamento
+- [ ] Remover o arquivo antigo de `shared/models/` **só depois** de confirmar que nada mais referencia
+
+---
+
+## 12. Dicas Rápidas
 
 ### Adicionar um novo campo no formulário
-1. Atualizar o modelo em `shared/models/`
+1. Atualizar o modelo no **módulo dono** (`modules/{modulo}/data/model/` ou `domain/entity/`)
 2. Atualizar o DataSource para persistir o novo campo
 3. Atualizar o ViewModel (validação/lógica)
 4. Atualizar a View (novo widget de input)
