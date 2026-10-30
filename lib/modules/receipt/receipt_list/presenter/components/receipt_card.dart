@@ -2,7 +2,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/strings/receipt_strings.dart';
 import 'package:oflite/shared/models/receipt.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 /// Card de recibo (ExpansionTileCard) da lista de recibos.
@@ -21,7 +21,7 @@ class ReceiptCard extends StatelessWidget {
   });
 
   final Receipt item;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
   final VoidCallback onOpen;
 

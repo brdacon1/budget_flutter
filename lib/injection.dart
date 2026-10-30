@@ -2,7 +2,14 @@ import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
 import 'package:oflite/modules/chat_budget/chat_budget_binds.dart';
 import 'package:oflite/modules/comment/comment_binds.dart';
-import 'package:oflite/modules/core/core_binds.dart';
+import 'package:oflite/modules/core/ads/ads_binds.dart';
+import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
+import 'package:oflite/modules/core/display_alert/display_alert_binds.dart';
+import 'package:oflite/modules/core/in_app_purchase/in_app_purchase_binds.dart';
+import 'package:oflite/modules/core/loading_event/loading_event_binds.dart';
+import 'package:oflite/modules/core/notification/notification_binds.dart';
+import 'package:oflite/modules/core/cep/cep_binds.dart';
+import 'package:oflite/modules/core/share_link/share_link_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
 import 'package:oflite/modules/login/login_binds.dart';
@@ -33,9 +40,17 @@ final GetIt getIt = GetIt.instance;
 /// Chamado uma única vez no `main()` antes de `runApp`.
 void setupDependencyInjection() {
   // ------------------------------------------------------------------
-  // Core Services (stateless ou com estado próprio, custosos de recriar)
+  // Core Modules (serviços transversais — sem presenter, sem tela)
   // ------------------------------------------------------------------
-  registerCoreDependencies(getIt);
+  
+  registerConvertCoinDependencies(getIt);
+  registerLoadingEventDependencies(getIt);
+  registerDisplayAlertDependencies(getIt);
+  registerNotificationDependencies(getIt);
+  registerCepDependencies(getIt);
+  registerShareLinkDependencies(getIt);
+  registerAdsDependencies(getIt);
+  registerInAppPurchaseDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature Binds (Datasource -> RepositoryImpl exposta como interface)

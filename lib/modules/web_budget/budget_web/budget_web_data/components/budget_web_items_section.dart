@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
 /// Seção colapsável "Itens do orçamento" exibida na aba "Meus dados".
 ///
@@ -29,7 +29,7 @@ class BudgetWebItemsSection extends StatelessWidget {
   });
 
   final List<ItemsBudget> items;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
   final TextEditingController searchController;
   final VoidCallback onSearchChanged;
 
@@ -112,7 +112,7 @@ class _ItemsTable extends StatelessWidget {
   const _ItemsTable({required this.items, required this.moneyConvert});
 
   final List<ItemsBudget> items;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
 
   @override
   Widget build(BuildContext context) {

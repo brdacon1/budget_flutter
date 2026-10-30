@@ -1,3 +1,4 @@
+import 'package:oflite/injection.dart';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
@@ -6,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'image_edit_view_model.dart';
 
@@ -26,7 +27,7 @@ class ImageEditView extends StatefulWidget {
 
 class _ImageEditView extends State<ImageEditView> {
   late ImageEditViewModel _viewModel;
-  final alertDisplayLoading = LoadingEvent();
+  final alertDisplayLoading = getIt<LoadingEventRepository>();
 
   @override
   void initState() {

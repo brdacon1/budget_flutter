@@ -1,3 +1,4 @@
+import 'package:oflite/injection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,7 +7,7 @@ import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
-import 'package:oflite/modules/core/services/data/service/notification_service.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/login/presenter/login_view.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
@@ -104,7 +105,7 @@ class _ProfileCard extends State<ProfileCard> {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             if(newValue! == 'Sair')
             {
-              NotificationService.instance.stopBudgetApprovalListener();
+              getIt<NotificationRepository>().stopBudgetApprovalListener();
               await _logout();
               await prefs.remove('email');
               await prefs.remove('password');

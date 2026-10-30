@@ -1,3 +1,4 @@
+import 'package:oflite/injection.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'components/budget_list_items_card.dart';
 import 'components/modals/budget_list_items_delete_bottom_modal_widget.dart';
 import 'components/budget_list_items_total_bar.dart';
@@ -25,7 +26,7 @@ class BudgetListItemsView extends StatefulWidget {
 
 class _BudgetListItemsView extends State<BudgetListItemsView> {
   late final BudgetListItemsViewModel _viewModel;
-  var displayAlert = DisplayAlert();
+  var displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {

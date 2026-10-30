@@ -5,7 +5,7 @@ import 'package:oflite/modules/budget/budget_list/presenter/budget_list_view.dar
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view.dart';
 import 'package:oflite/modules/main_config_menu/presenter/main_config_menu_view.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
-import 'package:oflite/modules/core/services/data/service/notification_service.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'main_tab_view_model.dart';
 
@@ -26,7 +26,7 @@ class _MainTabView extends State<MainTabView> {
     // dono está autenticado: consome um possível orçamento pendente de abrir
     // (caso de cold-start pelo toque no banner da notificação).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      NotificationService.instance.tryOpenPendingBudget();
+      getIt<NotificationRepository>().tryOpenPendingBudget();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
       // token já foi obtido no startup. Se por algum motivo o save do login
@@ -35,7 +35,7 @@ class _MainTabView extends State<MainTabView> {
       // `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}`. Idempotente.
       final ownerUid = uid.user;
       if (ownerUid != null && ownerUid.trim().isNotEmpty) {
-        NotificationService.instance
+        getIt<NotificationRepository>()
             .persistCurrentTokenToFirebase(ownerUid);
       }
     });

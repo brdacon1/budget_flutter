@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/shared/models/customer_info.dart';
@@ -12,10 +12,10 @@ import 'package:oflite/shared/models/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentListViewModel extends ChangeNotifier {
-  final PaymentRepository _paymentRepository = getIt<PaymentRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final LoadingEvent loadingEvent = LoadingEvent();
-  final ConvertCoin moneyConvert = ConvertCoin();
+  final PaymentRepository _paymentRepository;
+  final DisplayAlertRepository _displayAlert;
+  final LoadingEventRepository _loadingEvent;
+  final ConvertCoinRepository _moneyConvert;
 
   final CustomerInfo item;
   final Receipt receipt;
@@ -23,7 +23,19 @@ class PaymentListViewModel extends ChangeNotifier {
   List<PaymentCustomer> foundPayment = <PaymentCustomer>[];
   double totalPaid = 0;
 
-  PaymentListViewModel({required this.item, required this.receipt});
+  PaymentListViewModel({
+    required this.item,
+    required this.receipt,
+    PaymentRepository? paymentRepository,
+    DisplayAlertRepository? displayAlertRepository,
+    LoadingEventRepository? loadingEventRepository,
+    ConvertCoinRepository? convertCoinRepository,
+  })  : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
+        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+        _loadingEvent = loadingEventRepository ?? getIt<LoadingEventRepository>(),
+        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
+
+  ConvertCoinRepository get moneyConvert => _moneyConvert;
 
   Future<void> inicialData() async {
     // Path do Firestore depende das globais budget.IDORCAMENTO e budget.IDRECIBO.
@@ -44,18 +56,18 @@ class PaymentListViewModel extends ChangeNotifier {
   Future<void> refresh() => inicialData();
 
   Future<void> deletePayment(BuildContext context, int index) async {
-    loadingEvent.alertLoading(context);
+    _loadingEvent.alertLoading(context);
     try {
       final result =
           await _paymentRepository.deletePayment(foundPayment[index].id!);
-      loadingEvent.closeLoading(context);
+      _loadingEvent.closeLoading(context);
       if (result is Ok<void>) {
-        await displayAlert.notificationNotCloseScreen(
+        await _displayAlert.notificationNotCloseScreen(
             context, "Feito!", "Pagamento removido com sucesso!");
       }
     } catch (e) {
-      loadingEvent.closeLoading(context);
-      await displayAlert.notificationError(
+      _loadingEvent.closeLoading(context);
+      await _displayAlert.notificationError(
           context, "Erro!", "Problemas para remover o pagamento");
     }
     await inicialData();
@@ -73,7 +85,7 @@ class PaymentListViewModel extends ChangeNotifier {
 
   Future<void> addPayment(BuildContext context) async {
     if (receipt.id == null || receipt.id!.isEmpty) {
-      await displayAlert.notificationWarning(
+      await _displayAlert.notificationWarning(
         context,
         'Recibo não salvo',
         'Salve o recibo na aba "Recibo" antes de adicionar pagamentos.',

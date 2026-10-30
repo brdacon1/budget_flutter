@@ -2,11 +2,18 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 
 enum SubscriptionState { idle, loading, success, error }
 
 class SubscriptionViewModel extends ChangeNotifier {
+  final InAppPurchaseRepository _iap;
+
+  SubscriptionViewModel({InAppPurchaseRepository? iapRepository})
+      : _iap = iapRepository ?? getIt<InAppPurchaseRepository>();
+
   SubscriptionState state = SubscriptionState.idle;
   String? errorMessage;
 
@@ -34,12 +41,10 @@ class SubscriptionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await FlutterInappPurchase.instance.initConnection();
+      await _iap.initConnection();
 
-      final products =
-          await FlutterInappPurchase.instance.fetchProducts<ProductSubscription>(
+      final products = await _iap.fetchProducts<ProductSubscription>(
         skus: [sku],
-        type: ProductQueryType.Subs,
       );
 
       _availableProducts = products;
@@ -60,12 +65,8 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Não quebra o flow para não travar a UI no emulador
     }
 
-    _purchaseUpdatedSubscription = FlutterInappPurchase
-        .instance.purchaseUpdatedListener
-        .listen(_onPurchaseUpdated);
-    _purchaseErrorSubscription = FlutterInappPurchase
-        .instance.purchaseErrorListener
-        .listen(_onPurchaseError);
+    _purchaseUpdatedSubscription = _iap.purchaseUpdatedStream.listen(_onPurchaseUpdated);
+    _purchaseErrorSubscription = _iap.purchaseErrorStream.listen(_onPurchaseError);
   }
 
   Future<void> requestSubscription() async {
@@ -94,15 +95,15 @@ class SubscriptionViewModel extends ChangeNotifier {
         }
       }
 
-      await FlutterInappPurchase.instance.requestPurchaseWithBuilder(
-        build: (builder) {
-          builder.type = ProductQueryType.Subs;
+      await _iap.requestPurchaseWithBuilder(
+        (builder) {
+          builder!.type = ProductQueryType.Subs;
 
           if (Platform.isAndroid) {
-            builder.android.skus = [sku];
-            builder.android.offerToken = offerToken;
+            builder!.android.skus = [sku];
+            builder!.android.offerToken = offerToken;
           } else {
-            builder.ios.sku = sku;
+            builder!.ios.sku = sku;
           }
         },
       );
@@ -131,7 +132,7 @@ class SubscriptionViewModel extends ChangeNotifier {
 
         // iOS: FINALIZAR TRANSAÇÃO é obrigatório!
         if (Platform.isIOS) {
-          await FlutterInappPurchase.instance.finishTransaction(
+          await _iap.finishTransaction(
             purchase: purchase,
             isConsumable: false,
           );
@@ -170,7 +171,7 @@ class SubscriptionViewModel extends ChangeNotifier {
 
     try {
       // iOS: restorePurchases dispara as transações pelo listener
-      await FlutterInappPurchase.instance.restorePurchases();
+      await _iap.restorePurchases();
       // O resultado vem pelo _purchaseUpdatedListener
     } catch (e) {
       state = SubscriptionState.error;
@@ -182,7 +183,7 @@ class SubscriptionViewModel extends ChangeNotifier {
   Future<void> checkExistingSubscription() async {
     try {
       final result =
-          await FlutterInappPurchase.instance.getAvailablePurchases();
+          await _iap.getAvailablePurchases();
 
       if (result.isNotEmpty) {
         final latest = result.reduce(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
 import 'package:oflite/shared/common/strings/receipt_strings.dart';
@@ -14,9 +14,9 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Gerenciamento de estado da tela de **lista de recibos**.
 class ReceiptListViewModel extends ChangeNotifier {
   final ReceiptRepository _receiptRepository = getIt<ReceiptRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final LoadingEvent loadingEvent = LoadingEvent();
-  final ConvertCoin moneyConvert = ConvertCoin();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
+  final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   final CustomerInfo item;
   List<Receipt> foundPayment = <Receipt>[];

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/observation_budget.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import '../comment_list_view_model.dart';
 
 /// Exibe o bottom modal de adicionar/editar comentário.
@@ -15,7 +15,7 @@ Future<bool?> showCommentFormDialog({
   required BuildContext context,
   required CommentListViewModel viewModel,
   required ObservationBudget comment,
-  required DisplayAlert displayAlert,
+  required DisplayAlertRepository displayAlert,
 }) {
   final TextEditingController descricaoController = TextEditingController();
   descricaoController.text = comment.observacao ?? '';
@@ -53,7 +53,7 @@ class _CommentFormModal extends StatefulWidget {
   final bool isNew;
   final ObservationBudget comment;
   final CommentListViewModel viewModel;
-  final DisplayAlert displayAlert;
+  final DisplayAlertRepository displayAlert;
 
   @override
   State<_CommentFormModal> createState() => _CommentFormModalState();

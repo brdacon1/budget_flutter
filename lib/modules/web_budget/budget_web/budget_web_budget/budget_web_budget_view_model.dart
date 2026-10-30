@@ -1,3 +1,4 @@
+import 'package:oflite/injection.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,9 +7,9 @@ import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/shared/models/observation_pdf.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 
 /// Estado do orçamento liberado no fluxo Web.
@@ -30,9 +31,9 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
   final String token;
 
   final WebBudgetService _service = WebBudgetService();
-  final DisplayAlert _displayAlert = DisplayAlert();
-  final LoadingEvent _loadingEvent = LoadingEvent();
-  final ConvertCoin moneyConvert = ConvertCoin();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
+  final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   bool _loading = true;
   bool get loading => _loading;

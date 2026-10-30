@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/strings/auth_strings.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/singup/presenter/singup_view.dart';
 import '../../terms_conditions/presenter/terms_conditions_view.dart';
 import 'components/login_button.dart';
@@ -21,8 +21,8 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final LoginViewModel _viewModel = getIt<LoginViewModel>();
-  final DisplayAlert _displayAlert = DisplayAlert();
-  final LoadingEvent _loadingEvent = LoadingEvent();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
 
   @override
   void initState() {

@@ -5,7 +5,7 @@ import 'package:oflite/modules/product/domain/repository/product_price_repositor
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -17,7 +17,7 @@ class BudgetListItemsViewModel extends ChangeNotifier {
   var orcamentos = <ItemsBudget>[];
   var deleteItens = <ItemsBudget>[];
   ItemsBudget novo = ItemsBudget();
-  ConvertCoin moneyConvert = ConvertCoin();
+  ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
   Color deaible = Colors.grey;

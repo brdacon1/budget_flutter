@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/strings/product_strings.dart';
 import 'package:oflite/shared/models/items_budget.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
 /// Modal inferior com uma lista de itens (carrinho/exclusão) removíveis.
 ///
@@ -26,7 +26,7 @@ class ItemsListBottomModalWidget extends StatefulWidget {
 
   final String title;
   final List<ItemsBudget> items;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
   final String buttonLabel;
   final Future<void> Function() onButtonPressed;
   final void Function(ItemsBudget item, int index) onRemove;

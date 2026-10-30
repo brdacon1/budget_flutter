@@ -219,7 +219,7 @@ class WebBudgetService {
   /// avisando que o cliente acabou de aprovar/reprovar o orçamento pela Web.
   ///
   /// O app mobile (do dono) escuta essa coleção em tempo real via Firestore
-  /// (`NotificationService`) e exibe uma **notificação local** ao receber um
+  /// (`NotificationRepository`) e exibe uma **notificação local** ao receber um
   /// novo documento — é o "push" que avisa quem criou o orçamento.
   ///
   /// Reutiliza o **mesmo token provisório do Firebase** do dono já usado no

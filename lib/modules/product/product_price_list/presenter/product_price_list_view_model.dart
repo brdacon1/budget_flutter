@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
@@ -21,9 +21,9 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class ProductPriceListViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository = getIt<ProductPriceRepository>();
   final BudgetRepository _budgetRepo = getIt<BudgetRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final LoadingEvent loadingEvent = LoadingEvent();
-  final ConvertCoin moneyConvert = ConvertCoin();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
+  final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   final CustomerInfo? item;
   final bool fromMenu;

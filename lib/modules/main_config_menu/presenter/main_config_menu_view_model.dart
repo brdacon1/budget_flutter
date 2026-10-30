@@ -1,5 +1,6 @@
+import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
 
@@ -11,7 +12,7 @@ class MenuItem {
 }
 
 class MainConfigMenuViewModel extends ChangeNotifier {
-  final DisplayAlert _displayAlert = DisplayAlert();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: 'Lista de preço'),

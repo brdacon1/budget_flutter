@@ -1,8 +1,9 @@
+import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 
 import '../budget_web_app/budget_web_app_view_model.dart';
@@ -19,8 +20,8 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
   final BudgetWebAppViewModel appViewModel;
   final VoidCallback onGranted;
 
-  final DisplayAlert _displayAlert = DisplayAlert();
-  final LoadingEvent _loadingEvent = LoadingEvent();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
   final WebBudgetService _service = WebBudgetService();
 
   final phoneController = TextEditingController();

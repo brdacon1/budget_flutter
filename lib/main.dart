@@ -1,20 +1,21 @@
+import 'package:oflite/injection.dart';
 import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
-import 'package:oflite/modules/core/services/data/service/notification_service.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:provider/provider.dart';
 import 'app_routes.dart';
 import 'injection.dart';
 import 'shared/common/constants/constants.dart';
 
 /// Chave global do navigator do app. Compartilhada com o
-/// `NotificationService` para que, ao tocar no banner de uma notificação de
+/// `NotificationRepository` para que, ao tocar no banner de uma notificação de
 /// aprovação/reprovação vinda do fluxo Web, o app abra o orçamento
 /// correspondente (`BudgetTabView`).
 final GlobalKey<NavigatorState> globalNavigatorKey =
@@ -31,16 +32,16 @@ Future<void> main() async {
   // e lançam exceção, causando tela branca se o entry point mobile for
   // compilado para web por engano.
   if (!kIsWeb) {
-    await MobileAds.instance.initialize();
+    await getIt<AdsRepository>().initialize();
 
     if (Environment.instance.environment == 'development') {
-      await MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: _kTestDeviceIds),
+      await getIt<AdsRepository>().setTestDevices(
+        _kTestDeviceIds,
       );
     }
 
-    await NotificationService.instance.initialize();
-    NotificationService.instance.setNavigatorKey(globalNavigatorKey);
+    await getIt<NotificationRepository>().initialize();
+    getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
   }
 
   await Environment.instance.initialize();

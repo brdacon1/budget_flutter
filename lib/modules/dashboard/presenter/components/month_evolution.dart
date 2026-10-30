@@ -1,6 +1,7 @@
+import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/dashboard/presenter/components/storage_info_card.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/models/month_calculate.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'chart_line.dart';
@@ -13,7 +14,7 @@ class MonthEvolution extends StatefulWidget {
 }
 
 class _MonthEvolution extends State<MonthEvolution> {
-  ConvertCoin moneyConvert = ConvertCoin();
+  ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   late double totalApproved = 0;
   late double totalReproved = 0;
   late double totalPending = 0;

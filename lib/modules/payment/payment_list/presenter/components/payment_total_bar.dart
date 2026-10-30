@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 class PaymentTotalBar extends StatelessWidget {
   final double totalPaid;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
 
   const PaymentTotalBar({
     Key? key,

@@ -1,12 +1,14 @@
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
 import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/core/services/data/service/budget_share_link_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 
@@ -18,12 +20,18 @@ class MenuItem {
 }
 
 class PdfMenuViewModel extends ChangeNotifier {
-  final DisplayAlert displayAlert = DisplayAlert();
+  final DisplayAlertRepository _displayAlert;
+  final ShareLinkRepository _shareLinkRepository;
   final CustomerInfo item;
 
   List<MenuItem> menuItems = <MenuItem>[];
 
-  PdfMenuViewModel({required this.item});
+  PdfMenuViewModel({
+    required this.item,
+    DisplayAlertRepository? displayAlertRepository,
+    ShareLinkRepository? shareLinkRepository,
+  })  : _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+        _shareLinkRepository = shareLinkRepository ?? getIt<ShareLinkRepository>();
 
   Future<void> inicialData() async {
     menuItems = const <MenuItem>[
@@ -56,13 +64,13 @@ class PdfMenuViewModel extends ChangeNotifier {
         break;
       case 2:
         if (!UID.autoRenewing!) {
-          await displayAlert.adsNotification(context).then(
+          await _displayAlert.adsNotification(context).then(
                   (value) async => {
                 if (value == "Ver anuncio")
                   {
                     await shareBudget(context),
                     Future.delayed(const Duration(milliseconds: 2), ()  {
-                      InterstitialAdService.instance.show();
+                      getIt<AdsRepository>().showInterstitial();
                     }),
                   }
                 else if (value == "Se tornar premium")
@@ -105,7 +113,7 @@ class PdfMenuViewModel extends ChangeNotifier {
   Future<void> shareBudget(BuildContext context) async {
     final enderecoNumero = item.id;
     if (enderecoNumero == null || enderecoNumero.isEmpty) {
-      await displayAlert.notificationWarning(
+      await _displayAlert.notificationWarning(
         context,
         'Ainda não!',
         'Salve o orçamento antes de compartilhar o link.',
@@ -114,12 +122,12 @@ class PdfMenuViewModel extends ChangeNotifier {
     }
 
     try {
-      final url = await BudgetShareLinkService.buildShareUrl(
+      final url = await _shareLinkRepository.buildShareUrl(
         enderecoNumero: enderecoNumero,
       );
       if (url == null) {
         if (!context.mounted) return;
-        await displayAlert.notificationError(
+        await _displayAlert.notificationError(
           context,
           'Erro!',
           'Não foi possível gerar o link. Verifique sua conexão e tente novamente.',
@@ -131,7 +139,7 @@ class PdfMenuViewModel extends ChangeNotifier {
       );
     } catch (_) {
       if (context.mounted) {
-        await displayAlert.notificationError(
+        await _displayAlert.notificationError(
           context,
           'Erro!',
           'Não foi possível compartilhar o link agora.',

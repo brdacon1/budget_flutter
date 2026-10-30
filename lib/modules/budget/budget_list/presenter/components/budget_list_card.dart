@@ -2,7 +2,7 @@ import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
 class BudgetListCard extends StatelessWidget {
   const BudgetListCard({
@@ -15,7 +15,7 @@ class BudgetListCard extends StatelessWidget {
   });
 
   final CustomerInfo item;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
   final VoidCallback onOpen;
   final VoidCallback onDuplicate;

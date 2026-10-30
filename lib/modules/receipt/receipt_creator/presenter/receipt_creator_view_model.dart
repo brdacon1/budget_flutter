@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
 import 'package:oflite/shared/common/strings/receipt_strings.dart';
@@ -12,8 +12,8 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Gerenciamento de estado da tela de criação/edição de recibo.
 class ReceiptCreatorViewModel extends ChangeNotifier {
   final ReceiptRepository _receiptRepository = getIt<ReceiptRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final LoadingEvent loadingEvent = LoadingEvent();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
+  final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
 
   final Receipt receipt;
   final ValueChanged<Receipt>? onReceiptCreated;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/usecases/data/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/items_budget.dart';
@@ -12,16 +12,25 @@ import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfBudgetViewModel extends ChangeNotifier {
-  final PdfRepository _pdfRepository = getIt<PdfRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final ConvertCoin moneyConvert = ConvertCoin();
-  final PdfGenerateUseCase pdf = PdfGenerateUseCase();
+  final PdfRepository _pdfRepository;
+  final DisplayAlertRepository _displayAlert;
+  final ConvertCoinRepository _moneyConvert;
+  final PdfGenerateUseCase _pdfGenerateUseCase;
+
   String? fileBytes;
   bool _loading = true;
   bool get loading => _loading;
   bool _disposed = false;
 
-  PdfBudgetViewModel();
+  PdfBudgetViewModel({
+    PdfRepository? pdfRepository,
+    DisplayAlertRepository? displayAlertRepository,
+    ConvertCoinRepository? convertCoinRepository,
+    PdfGenerateUseCase? pdfGenerateUseCase,
+  })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
+        _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>();
 
   void _safeNotify() {
     if (_disposed) return;
@@ -81,12 +90,12 @@ class PdfBudgetViewModel extends ChangeNotifier {
           totalBudget += total;
         }
 
-        final generated = await pdf.patternPDF(
+        final generated = await _pdfGenerateUseCase.patternPDF(
           countService: countService,
           countProduct: countProduct,
-          totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
-          totalPriceProducts: moneyConvert.convertFromDouble(totalProducts),
-          totalPriceServices: moneyConvert.convertFromDouble(totalServices),
+          totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+          totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+          totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
           items: budgetItems,
           customer: customer,
           owner: owner,
@@ -95,7 +104,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
         fileBytes = generated;
       } else {
         if (context.mounted) {
-          await displayAlert.notificationWarning(
+          await _displayAlert.notificationWarning(
             context,
             'Ops!',
             "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'",
@@ -104,7 +113,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        await displayAlert.notificationWarning(
+        await _displayAlert.notificationWarning(
           context,
           'Erro',
           'Não foi possível gerar o PDF: ${e.toString()}',

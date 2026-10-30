@@ -1,12 +1,13 @@
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as globalUIDUser;
 import 'package:oflite/shared/common/strings/auth_strings.dart';
-import 'package:oflite/modules/core/services/data/service/notification_service.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/models/info_user.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
 import 'package:oflite/injection.dart';
@@ -165,15 +166,15 @@ class SingUpViewModel extends ChangeNotifier {
       final ownerUid = globalUIDUser.user;
       if (ownerUid != null && ownerUid.isNotEmpty) {
         final tokens =
-            await NotificationService.instance.loadFcmTokens(ownerUid);
+            await getIt<NotificationRepository>().loadFcmTokens(ownerUid);
         DADOS.TOKENS = tokens;
         globalUIDUser.tokens = tokens;
-        NotificationService.instance.startBudgetApprovalListener(ownerUid);
+        getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
 
       try {
         final resultSubscription =
-            await FlutterInappPurchase.instance.getAvailablePurchases();
+            await getIt<InAppPurchaseRepository>().getAvailablePurchases();
 
         if (resultSubscription.isNotEmpty) {
           final latestSubscription = resultSubscription.reduce(
@@ -191,7 +192,7 @@ class SingUpViewModel extends ChangeNotifier {
           if (Platform.isAndroid &&
               latestSubscription is PurchaseAndroid &&
               latestSubscription.isAcknowledgedAndroid != true) {
-            await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
+            await getIt<InAppPurchaseRepository>().acknowledgePurchaseAndroid(
               latestSubscription.purchaseToken ?? '',
             );
           }

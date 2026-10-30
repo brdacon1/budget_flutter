@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/core/services/data/service/via_cep_service.dart' as CEP;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender {
@@ -29,10 +29,10 @@ enum Gender {
 }
 
 class PdfEditViewModel extends ChangeNotifier {
-  final PdfRepository _pdfRepository = getIt<PdfRepository>();
-  final UserRepository _userRepository = getIt<UserRepository>();
-  final DisplayAlert displayAlert = DisplayAlert();
-  final LoadingEvent loadingEvent = LoadingEvent();
+  final PdfRepository _pdfRepository;
+  final UserRepository _userRepository;
+  final DisplayAlertRepository _displayAlert;
+  final LoadingEventRepository _loadingEvent;
 
   final Color enabledtxt = Colors.white;
   final Color deaible = Colors.white;
@@ -68,7 +68,15 @@ class PdfEditViewModel extends ChangeNotifier {
     type: MaskAutoCompletionType.lazy,
   );
 
-  PdfEditViewModel();
+  PdfEditViewModel({
+    PdfRepository? pdfRepository,
+    UserRepository? userRepository,
+    DisplayAlertRepository? displayAlertRepository,
+    LoadingEventRepository? loadingEventRepository,
+  })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+        _userRepository = userRepository ?? getIt<UserRepository>(),
+        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+        _loadingEvent = loadingEventRepository ?? getIt<LoadingEventRepository>();
 
   Future<void> inicialData() async {
     loading = true;
@@ -135,7 +143,7 @@ class PdfEditViewModel extends ChangeNotifier {
   }
 
   Future<void> save(BuildContext context) async {
-    loadingEvent.alertLoading(context);
+    _loadingEvent.alertLoading(context);
     try {
       final localOwner = OwnerPdf()
         ..bairro = bairroText.text
@@ -152,12 +160,12 @@ class PdfEditViewModel extends ChangeNotifier {
       await _pdfRepository.saveInformationEnterprise(localOwner);
       owner = localOwner;
 
-      loadingEvent.closeLoading(context);
-      await displayAlert.notification(
+      _loadingEvent.closeLoading(context);
+      await _displayAlert.notification(
           context, "Feito!", "Dados do PDF atualizados com sucesso!");
     } catch (_) {
-      loadingEvent.closeLoading(context);
-      await displayAlert.notificationError(
+      _loadingEvent.closeLoading(context);
+      await _displayAlert.notificationError(
           context, "Erro!", "Problemas ao atualizar os dados do PDF");
     }
   }
@@ -165,8 +173,8 @@ class PdfEditViewModel extends ChangeNotifier {
   Future<void> lookupCep(String value) async {
     if (value.length != 9) return;
     try {
-      final findAdress = CEP.ViaCepService();
-      final adress = await findAdress.getAdress(value);
+      final findAdress = getIt<CepRepository>();
+      final adress = await findAdress.getAddress(value);
       ruaText.text = adress.logradouro?.toUpperCase() ?? '';
       cityText.text = adress.localidade?.toUpperCase() ?? '';
       bairroText.text = adress.bairro?.toUpperCase() ?? '';

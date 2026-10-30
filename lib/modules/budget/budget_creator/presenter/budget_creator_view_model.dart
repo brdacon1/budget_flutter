@@ -1,3 +1,5 @@
+import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
+import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
@@ -11,8 +13,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/services/data/service/via_cep_service.dart' as CEP;
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender {
@@ -31,7 +32,7 @@ enum Gender {
 class BudgetCreatorViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final CustomerInfo item;
-  final DisplayAlert displayAlert = DisplayAlert();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   BudgetCreatorViewModel({required this.item});
 
@@ -201,7 +202,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   Future<void> onCepChanged(String value) async {
     if (value.length == 9) {
-      final adress = await CEP.ViaCepService().getAdress(value);
+      final adress = await getIt<CepRepository>().getAddress(value);
       ruaController.text = adress.logradouro!.toUpperCase();
       cityController.text = adress.localidade!.toUpperCase();
       bairroController.text = adress.bairro!.toUpperCase();

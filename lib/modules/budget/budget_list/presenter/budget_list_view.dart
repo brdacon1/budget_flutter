@@ -1,3 +1,4 @@
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +10,8 @@ import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/models/global_uid_user.dart' as UID;
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/loading_event.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:badges/badges.dart' as badges;
 import 'components/budget_list_card.dart';
 import 'components/modals/budget_list_delete_bottom_modal_widget.dart';
@@ -26,12 +27,12 @@ class BudgetListView extends StatefulWidget {
 
 class _BudgetListView extends State<BudgetListView> {
   final BudgetListViewModel _viewModel = getIt<BudgetListViewModel>();
-  ConvertCoin moneyConvert = ConvertCoin();
+  ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   @override
   void initState() {
     budget.IDORCAMENTO = '';
-    InterstitialAdService.instance.load();
+    getIt<AdsRepository>().loadInterstitial();
     _viewModel.initialScreen();
     super.initState();
   }
@@ -52,7 +53,7 @@ class _BudgetListView extends State<BudgetListView> {
         return BudgetListDuplicateBottomModalWidget(
           onConfirm: (clientData, quoteItems, comments) async {
             Navigator.of(dialogContext).pop();
-            var alertDisplayLoading = LoadingEvent();
+            final alertDisplayLoading = getIt<LoadingEventRepository>();
             try {
               await alertDisplayLoading.alertLoading(viewContext);
               await _viewModel.duplicateEvent(clientData, quoteItems, comments);
@@ -136,7 +137,7 @@ class _BudgetListView extends State<BudgetListView> {
                           (value) async => {
                         if (value == "Ver anuncio")
                           {
-                            InterstitialAdService.instance.show(),
+                            getIt<AdsRepository>().showInterstitial(),
                             Navigator.push(
                               context,
                               MaterialPageRoute(

@@ -1,9 +1,10 @@
+import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/models/customer_info.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 
 class BudgetTabViewModel extends ChangeNotifier {
-  final DisplayAlert _displayAlert = DisplayAlert();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;
 

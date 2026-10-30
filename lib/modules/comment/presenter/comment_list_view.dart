@@ -1,9 +1,10 @@
+import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/observation_budget.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'comment_list_view_model.dart';
 import 'components/comment_form_dialog.dart';
@@ -19,7 +20,7 @@ class CommentListView extends StatefulWidget {
 
 class _CommentListView extends State<CommentListView> {
   late CommentListViewModel _viewModel;
-  final DisplayAlert _displayAlert = DisplayAlert();
+  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {

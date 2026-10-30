@@ -1,14 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/shared/models/observation_pdf.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
-import 'package:oflite/modules/core/services/data/service/display_alert.dart';
-import 'package:oflite/modules/core/usecases/data/usecase/pdf_generate_usecase.dart';
 
 /// Geração/visualização do PDF no fluxo Web.
 ///
@@ -23,7 +24,12 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     required this.owner,
     required this.observations,
     required this.token,
-  });
+    PdfGenerateUseCase? pdfGenerateUseCase,
+    ConvertCoinRepository? convertCoinRepository,
+    DisplayAlertRepository? displayAlertRepository,
+  })  : _pdf = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
+        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>();
 
   final List<ItemsBudget> items;
   final CustomerInfo customer;
@@ -31,9 +37,9 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final List<ObservationPdf> observations;
   final String token;
 
-  final PdfGenerateUseCase _pdf = PdfGenerateUseCase();
-  final ConvertCoin moneyConvert = ConvertCoin();
-  final DisplayAlert _displayAlert = DisplayAlert();
+  final PdfGenerateUseCase _pdf;
+  final ConvertCoinRepository _moneyConvert;
+  final DisplayAlertRepository _displayAlert;
 
   Uint8List? _bytes;
   Uint8List? get bytes => _bytes;
@@ -88,9 +94,9 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
         _bytes = await _pdf.patternPDFBytes(
           countService: countService,
           countProduct: countProduct,
-          totalPriceBudget: moneyConvert.convertFromDouble(totalBudget),
-          totalPriceProducts: moneyConvert.convertFromDouble(totalProducts),
-          totalPriceServices: moneyConvert.convertFromDouble(totalServices),
+          totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+          totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+          totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
           items: List<ItemsBudget>.from(items),
           customer: customer,
           owner: owner,

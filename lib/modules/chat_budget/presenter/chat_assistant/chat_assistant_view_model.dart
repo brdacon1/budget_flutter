@@ -1,3 +1,4 @@
+import 'package:oflite/injection.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
@@ -8,8 +9,8 @@ import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_reposit
 import 'package:oflite/modules/chat_budget/domain/repository/chat_script_repository.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/fetch_chat_script_usecase.dart';
-import 'package:oflite/modules/core/services/data/service/budget_share_link_service.dart';
-import 'package:oflite/modules/core/services/data/service/via_cep_service.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/shared/models/address.dart';
@@ -507,8 +508,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.ok(null);
     }
 
-    final viaCep = ViaCepService();
-    final address = await viaCep.getAdress(cep);
+    final viaCep = getIt<CepRepository>();
+    final address = await viaCep.getAddress(cep);
 
     if (address.logradouro == null || address.logradouro!.isEmpty) {
       // CEP não encontrado → avisa e vai para manual
@@ -719,7 +720,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.error(Exception(_shareErrorMessage));
     }
 
-    final url = await BudgetShareLinkService.buildShareUrl(
+    final url = await getIt<ShareLinkRepository>().buildShareUrl(
       enderecoNumero: budgetId,
     );
     if (url == null || url.isEmpty) {

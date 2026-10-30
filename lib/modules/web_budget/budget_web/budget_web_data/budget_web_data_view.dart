@@ -6,7 +6,7 @@ import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
 import 'package:oflite/shared/models/observation_pdf.dart';
 import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'components/budget_web_approve_button.dart';
 import 'components/budget_web_comments_section.dart';
 import 'components/budget_web_data_section.dart';
@@ -58,7 +58,7 @@ class BudgetWebDataView extends StatefulWidget {
   final List<ObservationPdf> observations;
   final OwnerPdf owner;
   final String token;
-  final ConvertCoin moneyConvert;
+  final ConvertCoinRepository moneyConvert;
   final double totalProducts;
   final double totalServices;
   final double totalBudget;

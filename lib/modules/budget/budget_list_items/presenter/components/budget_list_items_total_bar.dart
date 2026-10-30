@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/core/services/data/service/convert_coin.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
 class BudgetListItemsTotalBar extends StatelessWidget {
   const BudgetListItemsTotalBar({super.key, required this.viewModel});
@@ -9,7 +9,7 @@ class BudgetListItemsTotalBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ConvertCoin moneyConvert = viewModel.moneyConvert;
+    final ConvertCoinRepository moneyConvert = viewModel.moneyConvert;
     return Container(
       height: 65.0,
       color: buttonColor,
