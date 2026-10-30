@@ -26,30 +26,15 @@ lib/
 │   │   │   └── repository/
 │   │   │       └── budget_repository_impl.dart
 │   │   ├── domain/
-│   │   │   └── repository/
-│   │   │       └── budget_repository.dart
+│   │   │   ├── repository/
+│   │   │   │   └── budget_repository.dart
+│   │   │   └── usecase/              # (quando necessário)
 │   │   └── presenter/
 │   │       ├── budget_list/
-│   │       │   ├── budget_list_view.dart
-│   │       │   ├── budget_list_view_model.dart
-│   │       │   └── components/
 │   │       ├── budget_creator/
-│   │       ├── budget_list_items/
-│   │       └── budget_tab/
+│   │       └── ...
 │   │
 │   ├── core/                          # 🔷 Serviços transversais (sem UI)
-│   │   ├── ads/
-│   │   ├── cep/
-│   │   ├── convert_coin/
-│   │   ├── display_alert/
-│   │   ├── in_app_purchase/
-│   │   ├── loading_event/
-│   │   ├── notification/
-│   │   └── share_link/
-│   │       ├── share_link_binds.dart
-│   │       ├── domain/repository/
-│   │       └── data/
-│   │
 │   ├── login/
 │   ├── payment/
 │   ├── pdf/
@@ -63,20 +48,8 @@ lib/
 │
 └── shared/
     ├── common/
-    │   ├── constants/        # (constants.dart, environment.dart, etc.)
-    │   ├── enums/            # AlertTypeEnum, ReceiptFieldEnum...
-    │   ├── strings/          # Strings centralizadas
-    │   ├── utils/            # Helpers puros
-    │   ├── widgets/          # Widgets reutilizáveis globais
-    │   └── controllers/      # Controllers globais (ex: MenuControllerApp)
     ├── design_pattern/
-    │   ├── command.dart
-    │   └── result.dart       # Result<T, E> para tratamento de erro
-    └── models/               # Modelos/Entidades compartilhados
-        ├── customer_info.dart
-        ├── items_budget.dart
-        ├── receipt.dart
-        └── ...
+    └── models/
 ```
 
 ---
@@ -92,20 +65,132 @@ lib/
 | DataSource | `{feature}_remote_datasource.dart` | `budget_remote_datasource.dart` |
 | Repository (impl) | `{feature}_repository_impl.dart` | `budget_repository_impl.dart` |
 | Repository (interface) | `{feature}_repository.dart` | `budget_repository.dart` |
+| UseCase | `{acao}_{feature}_usecase.dart` | `create_budget_from_chat_usecase.dart` |
 | Binds | `{module}_binds.dart` | `budget_binds.dart` |
 | Routes | `{module}_routes.dart` | `budget_routes.dart` |
-| UseCase | `{acao}_{feature}_usecase.dart` | `create_budget_from_chat_usecase.dart` |
 
 ---
 
-## 3. Como Funciona o Gerenciamento de Estado
+## 3. O DataSource — Papel, Regras e Exemplo Real
 
-### 3.1 Stack tecnológica
+### 3.1 O que é o DataSource?
+
+O **DataSource** é a classe que **fala diretamente com o mundo externo**:</br>
+`FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`, `FirebaseStorage`, sensores do celular, etc.
+
+Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua única responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`, `Uint8List`, etc.) com a fonte externa.
+
+### 3.2 O que o DataSource NÃO faz?
+
+| ❌ NÃO faz | ✅ Quem faz |
+|-----------|------------|
+| Converter JSON → Model/Entity | `RepositoryImpl` |
+| Validar regras de negócio | `ViewModel` ou `UseCase` |
+| Acessar `BuildContext` ou widgets | `View` (Widget) |
+| Conter lógica de apresentação (UI) | `View` |
+| Conter `ChangeNotifier` | `ViewModel` |
+
+### 3.3 Regras de Ouro do DataSource
+
+1. **Retorna/tipifica apenas tipos primitivos ou `Map<String, dynamic>`** — nunca models do domínio.
+2. **Não lança exceções customizadas de negócio** — pode lançar exceções técnicas (FirebaseException, SocketException, etc.) que serão tratadas pelo Repository ou UseCase.
+3. **É injetado no RepositoryImpl** — a ViewModel nunca vê o DataSource.
+4. **Permite mock no construtor** — aceitar a instância externa (ex: `FirebaseFirestore? firestore`) facilita testes unitários.
+
+### 3.4 Exemplo Real — `BudgetRemoteDataSource`
+
+**Arquivo**: `lib/modules/budget/data/datasource/budget_remote_datasource.dart`
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+
+/// Fonte de dados remota para orçamentos (Firebase Firestore).
+///
+/// Não conhece `Entity`; trabalha apenas com `Map<String, dynamic>`.
+/// A conversão para models/entities acontece no [BudgetRepositoryImpl].
+class BudgetRemoteDataSource {
+  final FirebaseFirestore _firestore;
+
+  BudgetRemoteDataSource({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  CollectionReference get _budgetsCollection =>
+      _firestore.collection('EMPRESAS/${UID.user}/USERS/${UID.user}/ORCAMENTOS');
+
+  Future<List<Map<String, dynamic>>> getBudgets() async {
+    final snapshot =
+        await _budgetsCollection.orderBy('ID', descending: true).get();
+    return snapshot.docs
+        .map((d) => Map<String, dynamic>.from(d.data() as Map))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> getBudgetById(String id) async {
+    final doc = await _budgetsCollection.doc(id).get();
+    final data = doc.data();
+    if (data == null) return <String, dynamic>{};
+    return Map<String, dynamic>.from(data as Map);
+  }
+
+  Future<void> saveBudget(Map<String, dynamic> data) async {
+    final id = data['ID'] as String?;
+    if (id == null) throw Exception('ID is required');
+    await _budgetsCollection.doc(id).set(data);
+  }
+
+  Future<void> updateBudget(String id, Map<String, dynamic> data) async {
+    await _budgetsCollection.doc(id).update(data);
+  }
+
+  Future<void> deleteBudget(String id) async {
+    await _budgetsCollection.doc(id).delete();
+  }
+
+  Future<List<Map<String, dynamic>>> getBudgetItems(String budgetId) async {
+    final snapshot = await _budgetsCollection
+        .doc(budgetId)
+        .collection('ITENS')
+        .orderBy('CATEGORIA', descending: false)
+        .get();
+    return snapshot.docs.map((d) {
+      final map = Map<String, dynamic>.from(d.data());
+      map['id'] = d.id;
+      return map;
+    }).toList();
+  }
+
+  Future<void> saveBudgetItem(
+      String budgetId, String itemId, Map<String, dynamic> data) async {
+    await _budgetsCollection
+        .doc(budgetId)
+        .collection('ITENS')
+        .doc(itemId)
+        .set(data);
+  }
+
+  Future<void> deleteBudgetItem(String budgetId, String itemId) async {
+    await _budgetsCollection
+        .doc(budgetId)
+        .collection('ITENS')
+        .doc(itemId)
+        .delete();
+  }
+}
+```
+
+> **Observe**: o DataSource expõe métodos como `getBudgets()`, `saveBudget()`, `deleteBudgetItem()`, mas trabalha **exclusivamente** com `Map<String, dynamic>` e tipos nativos (`String`, `void`).
+
+---
+
+## 4. Como Funciona o Gerenciamento de Estado
+
+### 4.1 Stack tecnológica
 - **`get_it`**: Injeção de dependências (Service Locator)
 - **`ChangeNotifier`**: Notificação de mudanças de estado (classe nativa do Flutter)
 - **Padrão Observer**: A View escuta o ViewModel via `addListener` / `notifyListeners`
 
-### 3.2 Ciclo de vida
+### 4.2 Ciclo de vida
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -116,7 +201,7 @@ lib/
        └────────── Ação do usuário ───────────┘
 ```
 
-### 3.3 Regras do `injection.dart`
+### 4.3 Regras do `injection.dart`
 
 | Tipo | Registro | Motivo |
 |------|----------|--------|
@@ -126,11 +211,11 @@ lib/
 
 ---
 
-## 4. Como Criar um Módulo (passo a passo)
+## 5. Como Criar um Módulo (passo a passo)
 
 > Exemplo criando um módulo fictício chamado `invoice` (notas fiscais).
 
-### 4.1 Criar a árvore de pastas
+### 5.1 Criar a árvore de pastas
 
 ```bash
 mkdir -p lib/modules/invoice/data/datasource
@@ -140,7 +225,7 @@ mkdir -p lib/modules/invoice/presenter/invoice_list/components
 mkdir -p lib/modules/invoice/presenter/invoice_creator/components
 ```
 
-### 4.2 Interface do Repository (camada Domain)
+### 5.2 Interface do Repository (camada Domain)
 
 **Arquivo**: `lib/modules/invoice/domain/repository/invoice_repository.dart`
 
@@ -152,7 +237,7 @@ abstract class InvoiceRepository {
 }
 ```
 
-### 4.3 DataSource (camada Data — fonte remota)
+### 5.3 DataSource (camada Data — fonte remota)
 
 **Arquivo**: `lib/modules/invoice/data/datasource/invoice_remote_datasource.dart`
 
@@ -181,7 +266,7 @@ class InvoiceRemoteDataSource {
 }
 ```
 
-### 4.4 Repository Implementation (camada Data)
+### 5.4 Repository Implementation (camada Data)
 
 **Arquivo**: `lib/modules/invoice/data/repository/invoice_repository_impl.dart`
 
@@ -213,7 +298,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 }
 ```
 
-### 4.5 ViewModel (camada Presenter)
+### 5.5 ViewModel (camada Presenter)
 
 **Arquivo**: `lib/modules/invoice/presenter/invoice_list/invoice_list_view_model.dart`
 
@@ -265,7 +350,7 @@ class InvoiceListViewModel extends ChangeNotifier {
 
 > **Importante**: ViewModels **sempre** extendem `ChangeNotifier`. Chamam `notifyListeners()` toda vez que o estado muda.
 
-### 4.6 View (camada Presenter — tela)
+### 5.6 View (camada Presenter — tela)
 
 **Arquivo**: `lib/modules/invoice/presenter/invoice_list/invoice_list_view.dart`
 
@@ -335,7 +420,7 @@ class _InvoiceListViewState extends State<InvoiceListView> {
 
 > **Regra**: A View **nunca** acessa o Repository diretamente. Só conversa com o ViewModel. A UI é reativa: o `addListener` chama `setState` aqui.
 
-### 4.7 Binds (registro no get_it)
+### 5.7 Binds (registro no get_it)
 
 **Arquivo**: `lib/modules/invoice/invoice_binds.dart`
 
@@ -361,7 +446,7 @@ void registerInvoiceDependencies(GetIt sl) {
 }
 ```
 
-### 4.8 Routes (exposição de rotas)
+### 5.8 Routes (exposição de rotas)
 
 **Arquivo**: `lib/modules/invoice/invoice_routes.dart`
 
@@ -390,7 +475,7 @@ final Map<String, WidgetBuilder> invoiceRoutes = {
 };
 ```
 
-### 4.9 Registrar no app
+### 5.9 Registrar no app
 
 1. **Adicione no `injection.dart`**:
    ```dart
@@ -411,7 +496,266 @@ final Map<String, WidgetBuilder> invoiceRoutes = {
 
 ---
 
-## 5. A Pasta `modules/core/` — Serviços Transversais
+## 6. UseCases — Quando e Como Criar
+
+### 6.1 O que é um UseCase?
+
+Um **UseCase** encapsula **uma única ação de negócio** que pode envolver:
+- Orquestração de múltiplos repositórios
+- Lógica complexa de transformação de dados
+- Regras de negócio que não cabem nem no Repository nem no ViewModel
+
+Ele é **independente de UI** (não conhece widgets, context ou `ChangeNotifier`) e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
+
+### 6.2 Quando CRIAR um UseCase?
+
+| Situação | Exemplo no projeto |
+|----------|-------------------|
+| **Orquestração multi-repo** | `CreateBudgetFromChatUsecase` usa `ChatBudgetRepository` + `ChatScriptRepository` |
+| **Lógica pesada de transformação** | `PdfGenerateUseCase` monta um PDF completo com tabelas, grids, imagens e formatação |
+| **Regra de negócio reutilizável** | Gerar um recibo em PDF exige cálculos de pagamento e layout — `PdfGenerateReceiptUseCase` |
+| **Fluxo com múltiplos passos** | Chatbot: carregar script → criar rascunho → atualizar endereço → adicionar itens |
+| **Testabilidade isolada** | Quando a lógica é complexa o suficiente para merecer testes unitários próprios |
+
+### 6.3 Quando NÃO criar um UseCase?
+
+| Situação | O que fazer em vez disso |
+|----------|-------------------------|
+| Operação CRUD simples (get, create, delete) | Chamar diretamente no ViewModel via `Repository` |
+| Apenas repassar chamada para o Repository | Não adicionar camada intermediária desnecessária |
+| Lógica puramente de UI (validação de campo, estado de loading) | Fica no **ViewModel** |
+| Acesso direto a dados sem transformação | Chamar o **Repository** direto |
+
+### 6.4 Onde o UseCase fica na arquitetura?
+
+```
+┌────────┐     ┌──────────┐     ┌──────────┐     ┌─────────────┐     ┌──────────┐
+│  View  │────▶│ ViewModel │────▶│ UseCase  │────▶│ Repository  │────▶│DataSource│
+└────────┘     └──────────┘     └──────────┘     └─────────────┘     └──────────┘
+                                    (opcional)
+```
+
+> **Regra**: o UseCase é **opcional**. A maioria das telas simples não precisa. Use quando a lógica de negócio justificar a separação.
+
+### 6.5 Exemplo 1 — Orquestração Multi-Repo (`CreateBudgetFromChatUsecase`)
+
+**Arquivo**: `lib/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart`
+
+```dart
+import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart';
+import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_repository.dart';
+import 'package:oflite/modules/chat_budget/domain/repository/chat_script_repository.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/items_budget.dart';
+
+/// Orquestra a criação completa de um orçamento via chat.
+///
+/// Responsável por carregar o script e executar os passos do fluxo
+/// conforme interação do usuário, delegando I/O ao [ChatBudgetRepository].
+class CreateBudgetFromChatUsecase {
+  final ChatBudgetRepository _chatRepo;
+  final ChatScriptRepository _scriptRepo;
+
+  const CreateBudgetFromChatUsecase(this._chatRepo, this._scriptRepo);
+
+  /// Script atual (fallback incluído).
+  ChatScriptEntity? get script => _scriptRepo.currentScript;
+
+  /// Garante que o script está carregado.
+  Future<Result<ChatScriptEntity>> ensureScriptLoaded() async {
+    final current = _scriptRepo.currentScript;
+    if (current != null) return Result.ok(current);
+    return _scriptRepo.fetchScript();
+  }
+
+  /// Cria o orçamento vazio a partir do nome do cliente.
+  Future<Result<CustomerInfo>> createDraft(
+    String clientName, {
+    String? phone,
+  }) async {
+    return _chatRepo.createDraftBudget(clientName, phone: phone);
+  }
+
+  /// Atualiza endereço completo no rascunho.
+  Future<Result<void>> updateAddress({
+    String? street,
+    String? city,
+    String? neighborhood,
+    String? zip,
+  }) async {
+    return _chatRepo.updateDraftAddress(
+      street: street,
+      city: city,
+      neighborhood: neighborhood,
+      zip: zip,
+    );
+  }
+
+  /// Adiciona um item (produto ou serviço) ao rascunho.
+  Future<Result<void>> addItem(ItemsBudget item) async {
+    return _chatRepo.addDraftItem(item);
+  }
+
+  /// Finaliza e salva o orçamento completo.
+  Future<Result<CustomerInfo>> finalizeBudget() async {
+    return _chatRepo.finalizeDraft();
+  }
+}
+```
+
+> **Por que é UseCase?** Precisa coordenar **dois repositórios diferentes** (`ChatBudgetRepository` e `ChatScriptRepository`) e orquestrar um fluxo em múltiplos passos. O ViewModel não deveria saber dessa complexidade.
+
+### 6.6 Exemplo 2 — Lógica Pesada Sem Repo (`PdfGenerateUseCase`)
+
+**Arquivo**: `lib/modules/pdf/domain/usecase/pdf_generate_usecase.dart`
+
+```dart
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/items_budget.dart';
+import 'package:oflite/shared/models/observation_pdf.dart';
+import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+/// Geração do PDF do orçamento (dados do titular, tabela de produtos,
+/// tabela de serviços e observações).
+class PdfGenerateUseCase {
+  final ConvertCoinRepository _moneyConvert;
+
+  PdfGenerateUseCase(this._moneyConvert);
+
+  Future<String> patternPDF({
+    required int countService,
+    required int countProduct,
+    required String totalPriceBudget,
+    required String totalPriceProducts,
+    required String totalPriceServices,
+    required List<ItemsBudget> items,
+    required CustomerInfo customer,
+    required OwnerPdf owner,
+    required List<ObservationPdf> observations,
+    String? authToken,
+  }) async {
+    final PdfDocument document = await _buildDocument(
+      countService: countService,
+      countProduct: countProduct,
+      // ...
+    );
+
+    // Desenha logo, grids, tabelas, observações...
+    // Lógica de 800+ linhas de layout de PDF
+
+    final String localFile = await _saveDocument(document);
+    document.dispose();
+    return localFile;
+  }
+
+  Future<String> _saveDocument(PdfDocument document) async {
+    final List<int> bytes = await document.save();
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/orçamento.pdf';
+    final file = File(path);
+    await file.writeAsBytes(bytes);
+    return path;
+  }
+}
+```
+
+> **Por que é UseCase?** Não acessa banco de dados diretamente, mas contém **lógica pesada de negócio** (layout de PDF com tabelas, cálculo de posições, renderização de imagens). Isolar isso facilita testes e mantém o ViewModel enxuto.
+
+### 6.7 Exemplo 3 — Recibo em PDF (`PdfGenerateReceiptUseCase`)
+
+**Arquivo**: `lib/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart`
+
+```dart
+import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:oflite/shared/models/customer_info.dart';
+import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/shared/models/payment_customer.dart';
+import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+/// Geração do PDF do recibo (dados do titular, dados do orçamento,
+/// dados do recibo e tabela de pagamentos realizados).
+class PdfGenerateReceiptUseCase {
+  final ConvertCoinRepository _moneyConvert;
+
+  PdfGenerateReceiptUseCase(this._moneyConvert);
+
+  Future<String> patternPDF({
+    required List<PaymentCustomer> paymentList,
+    required Receipt recived,
+    required String totalPriceBudget,
+    required CustomerInfo customer,
+    required OwnerPdf owner,
+  }) async {
+    final PdfDocument document = _createDocument();
+    final PdfPage page = document.pages.add();
+    final PdfGraphics graphics = page.graphics;
+
+    final double sizeWithImage = await _drawLogo(page, owner);
+    _drawOwnerGrid(page, owner, sizeWithImage);
+    _drawReceiptTitle(page, graphics);
+    final double count = _drawBudgetDataGrid(page, customer);
+    _drawReceiptInfoGrid(page, recived);
+    _drawPaymentsSectionTitle(page, graphics, count);
+
+    if (paymentList.isNotEmpty) {
+      _drawPaymentsTable(
+        page: page,
+        count: count,
+        paymentList: paymentList,
+        totalPriceBudget: totalPriceBudget,
+      );
+    }
+
+    final String localFile = await _saveDocument(document);
+    document.dispose();
+    return localFile;
+  }
+}
+```
+
+> **Por que é UseCase?** Reutiliza a mesma justificativa do PDF de orçamento: lógica complexa, pura transformação de dados em documento, sem acesso direto a DataSource.
+
+### 6.8 Como registrar um UseCase no `binds`?
+
+UseCases recebem dependências via construtor e são registrados como **`registerFactory`** (se precisar de estado fresco) ou **`registerLazySingleton`** (se forem stateless e reutilizáveis):
+
+```dart
+// Exemplo no chat_budget_binds.dart:
+sl.registerFactory<CreateBudgetFromChatUsecase>(
+  () => CreateBudgetFromChatUsecase(
+    sl<ChatBudgetRepository>(),
+    sl<ChatScriptRepository>(),
+  ),
+);
+
+// Exemplo no pdf_binds.dart:
+sl.registerFactory<PdfGenerateUseCase>(
+  () => PdfGenerateUseCase(sl<ConvertCoinRepository>()),
+);
+sl.registerFactory<PdfGenerateReceiptUseCase>(
+  () => PdfGenerateReceiptUseCase(sl<ConvertCoinRepository>()),
+);
+```
+
+> **Dica**: UseCases podem ser chamados tanto no **ViewModel** quanto dentro de outro **UseCase** (composição).
+
+---
+
+## 7. A Pasta `modules/core/` — Serviços Transversais
 
 Diferentemente dos módulos de **feature** (budget, payment, receipt...), os módulos em `core/` **não possuem UI** (pastas `presenter/` e `view/`).
 
@@ -437,7 +781,7 @@ core/share_link/
 
 ---
 
-## 6. Resumo das Regras de Ouro
+## 8. Resumo das Regras de Ouro
 
 | # | Regra |
 |---|-------|
@@ -446,15 +790,18 @@ core/share_link/
 | 3 | View só conversa com o ViewModel (nunca com Repository direto) |
 | 4 | ViewModels registrados como `registerFactory` no get_it |
 | 5 | Repositórios e DataSources como `registerLazySingleton` |
-| 6 | Usar `Result<T, E>` (quando aplicável) para fluxos de erro |
-| 7 | Componentes (widgets) ficam em `presenter/components/` ou `presenter/{subfeature}/components/` |
-| 8 | Modais ficam em `presenter/components/modals/` |
-| 9 | Strings centralizadas em `shared/common/strings/` |
-| 10 | Modelos compartilhados em `shared/models/` |
+| 6 | DataSource trabalha apenas com `Map<String, dynamic>` / tipos primitivos |
+| 7 | UseCase só existe quando há lógica de negócio complexa ou orquestração multi-repo |
+| 8 | UseCase é independente de UI e de fonte de dados |
+| 9 | Usar `Result<T, E>` (quando aplicável) para fluxos de erro |
+| 10 | Componentes (widgets) ficam em `presenter/components/` ou subpastas |
+| 11 | Modais ficam em `presenter/components/modals/` |
+| 12 | Strings centralizadas em `shared/common/strings/` |
+| 13 | Modelos compartilhados em `shared/models/` |
 
 ---
 
-## 7. Módulos Existentes (checklist)
+## 9. Módulos Existentes (checklist)
 
 - [x] `budget` — Orçamentos (list, creator, items, tab)
 - [x] `chat_budget` — Assistente de orçamento por chat
@@ -483,7 +830,7 @@ core/share_link/
 
 ---
 
-## 8. Dicas Rápidas
+## 10. Dicas Rápidas
 
 ### Adicionar um novo campo no formulário
 1. Atualizar o modelo em `shared/models/`
@@ -502,3 +849,15 @@ core/share_link/
 2. Adicionar no `Map<String, WidgetBuilder>` do módulo
 3. Registrar no `app_routes.dart`
 4. Navegar com `Navigator.pushNamed(context, BudgetRoute.budgetCreator.path)`
+
+### Criar um novo UseCase
+1. Criar classe em `modules/{modulo}/domain/usecase/{acao}_{feature}_usecase.dart`
+2. Receber dependências no construtor (repositórios ou outros usecases)
+3. Implementar o método principal com a lógica de negócio
+4. Retornar `Result<T, E>` quando houver fluxo de erro
+5. Registrar no `{modulo}_binds.dart`
+6. Injetar no ViewModel via `getIt<MeuUseCase>()`
+
+---
+
+> **Documento mantido na pasta `.pi/`** — atualizar sempre que novos padrões forem adotados.
