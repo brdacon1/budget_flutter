@@ -31,7 +31,6 @@ class _BudgetListView extends State<BudgetListView> {
   @override
   void initState() {
     budget.IDORCAMENTO = '';
-    // Pré-carrega o intersticial em background, sem travar a tela.
     InterstitialAdService.instance.load();
     _viewModel.initialScreen();
     super.initState();
@@ -89,6 +88,164 @@ class _BudgetListView extends State<BudgetListView> {
     });
   }
 
+  Widget _floatingButton({required double height}) {
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Visibility(
+              visible: _viewModel.deleteVisible,
+              child: badges.Badge(
+                badgeStyle: badges.BadgeStyle(
+                  badgeColor: const Color.fromARGB(255, 231, 15, 87),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                badgeContent: Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Center(
+                    child: Text(
+                      _viewModel.deleteItens.length.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
+                ),
+                child: FloatingActionButton(
+                  heroTag: "delete",
+                  onPressed: _dialogDeleteBuilder,
+                  backgroundColor: buttonColor,
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: height * 0.02),
+            FloatingActionButton(
+              heroTag: "adicionar",
+              onPressed: () async {
+                if (!UID.autoRenewing!) {
+                  await _viewModel.displayAlert.adsNotification(context).then(
+                          (value) async => {
+                        if (value == "Ver anuncio")
+                          {
+                            InterstitialAdService.instance.show(),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BudgetTabView(
+                                      item: _viewModel.novoOrcamento())),
+                            ).then((_) async {
+                              budget.IDORCAMENTO = '';
+                              await _viewModel.getInformationOrcamento();
+                              _viewModel.clearDeleteItens();
+                            }),
+                          }
+                        else if (value == "Se tornar premium")
+                          {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      SubscriptionView()),
+                            ),
+                          }
+                      });
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            BudgetTabView(item: _viewModel.novoOrcamento())),
+                  ).then((_) async {
+                    budget.IDORCAMENTO = '';
+                    await _viewModel.getInformationOrcamento();
+                    _viewModel.clearDeleteItens();
+                  });
+                }
+              },
+              backgroundColor: buttonColor,
+              child: const Icon(
+                Icons.add,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _listView() {
+    return Expanded(
+      child: RefreshIndicator(
+        color: Colors.cyan[50],
+        backgroundColor: bgColor,
+        onRefresh: () async {
+          await _viewModel.getInformationOrcamento();
+          _viewModel.clearDeleteItens();
+        },
+        child: ListView.builder(
+          shrinkWrap: true,
+          padding:
+          const EdgeInsets.only(bottom: 170, left: 15, right: 15, top: 0),
+          itemCount: _viewModel.getFilteredData().length,
+          itemBuilder: (context, index) {
+            final item = _viewModel.getFilteredData()[index];
+            return BudgetListCard(
+              item: item,
+              moneyConvert: moneyConvert,
+              onDelete: () {
+                if (!item.checkBox!) {
+                  _viewModel.toggleDeleteItem(index);
+                }
+              },
+              onOpen: () {
+                budget.IDORCAMENTO = item.id;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BudgetTabView(item: item),
+                  ),
+                ).then((_) async {
+                  budget.IDORCAMENTO = '';
+                  await _viewModel.getInformationOrcamento();
+                  _viewModel.clearDeleteItens();
+                });
+              },
+              onDuplicate: () async {
+                if (!UID.autoRenewing! &&
+                    _viewModel.getFilteredData().length > 10) {
+                  await _viewModel.displayAlert
+                      .notificationError(context, "Erro!",
+                      "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados")
+                      .then((value) => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SubscriptionView()),
+                    ),
+                  });
+                } else {
+                  budget.IDORCAMENTO = item.id;
+                  await _dialogDuplicate();
+                }
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final he = MediaQuery.of(context).size.height;
@@ -104,199 +261,43 @@ class _BudgetListView extends State<BudgetListView> {
             SizedBox(
               height: he * 0.03,
             ),
-            FadeAnimationWidget(
-              delay: 1,
-              child: Container(
-                margin: const EdgeInsets.only(right: 125.0),
-                child: Text(
-                  "Meus orçamentos",
-                  style: GoogleFonts.heebo(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 26,
-                      letterSpacing: 2),
-                ),
+            Container(
+              margin: const EdgeInsets.only(right: 125.0),
+              child: Text(
+                "Meus orçamentos",
+                style: GoogleFonts.heebo(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 26,
+                    letterSpacing: 2),
               ),
             ),
             SizedBox(
               height: he * 0.03,
             ),
-            FadeAnimationWidget(
-              delay: 1,
-              child: Container(
-                height: 50.0,
-                margin:
-                    const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
-                child: CupertinoSearchTextField(
-                  placeholder: "Digite o nome do cliente...",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                  ),
-                  backgroundColor: Colors.white12,
-                  itemColor: whiteColor,
-                  controller: searchController,
-                  onChanged: _viewModel.onSearchTextChanged,
+            Container(
+              height: 50.0,
+              margin:
+              const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
+              child: CupertinoSearchTextField(
+                placeholder: "Digite o nome do cliente...",
+                style: const TextStyle(
+                  color: whiteColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
                 ),
+                backgroundColor: Colors.white12,
+                itemColor: whiteColor,
+                controller: searchController,
+                onChanged: _viewModel.onSearchTextChanged,
               ),
             ),
-            Expanded(
-              child: RefreshIndicator(
-                color: Colors.cyan[50],
-                backgroundColor: bgColor,
-                onRefresh: () async {
-                  await _viewModel.getInformationOrcamento();
-                  _viewModel.clearDeleteItens();
-                },
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding:
-                      const EdgeInsets.only(bottom: 170, left: 15, right: 15, top: 0),
-                  itemCount: _viewModel.getFilteredData().length,
-                  itemBuilder: (context, index) {
-                    final item = _viewModel.getFilteredData()[index];
-                    return BudgetListCard(
-                      item: item,
-                      moneyConvert: moneyConvert,
-                      onDelete: () {
-                        if (!item.checkBox!) {
-                          _viewModel.toggleDeleteItem(index);
-                        }
-                      },
-                      onOpen: () {
-                        budget.IDORCAMENTO = item.id;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BudgetTabView(item: item),
-                          ),
-                        ).then((_) async {
-                          budget.IDORCAMENTO = '';
-                          await _viewModel.getInformationOrcamento();
-                          _viewModel.clearDeleteItens();
-                        });
-                      },
-                      onDuplicate: () async {
-                        if (!UID.autoRenewing! &&
-                            _viewModel.getFilteredData().length > 10) {
-                          await _viewModel.displayAlert
-                              .notificationError(context, "Erro!",
-                                  "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados")
-                              .then((value) => {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              SubscriptionView()),
-                                    ),
-                                  });
-                        } else {
-                          budget.IDORCAMENTO = item.id;
-                          await _dialogDuplicate();
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
+            _listView(),
           ]);
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Visibility(
-                visible: _viewModel.deleteVisible,
-                child: badges.Badge(
-                  badgeStyle: badges.BadgeStyle(
-                    badgeColor: const Color.fromARGB(255, 231, 15, 87),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  badgeContent: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Center(
-                      child: Text(
-                        _viewModel.deleteItens.length.toString(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: FloatingActionButton(
-                    heroTag: "delete",
-                    onPressed: _dialogDeleteBuilder,
-                    backgroundColor: buttonColor,
-                    child: const Icon(
-                      Icons.delete_outline_rounded,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: he * 0.02),
-              FloatingActionButton(
-                heroTag: "adicionar",
-                onPressed: () async {
-                  if (!UID.autoRenewing!) {
-                    await _viewModel.displayAlert.adsNotification(context).then(
-                        (value) async => {
-                              if (value == "Ver anuncio")
-                                {
-                                  InterstitialAdService.instance.show(),
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => BudgetTabView(
-                                            item: _viewModel.novoOrcamento())),
-                                  ).then((_) async {
-                                    budget.IDORCAMENTO = '';
-                                    await _viewModel.getInformationOrcamento();
-                                    _viewModel.clearDeleteItens();
-                                  }),
-                                }
-                              else if (value == "Se tornar premium")
-                                {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            SubscriptionView()),
-                                  ),
-                                }
-                            });
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              BudgetTabView(item: _viewModel.novoOrcamento())),
-                    ).then((_) async {
-                      budget.IDORCAMENTO = '';
-                      await _viewModel.getInformationOrcamento();
-                      _viewModel.clearDeleteItens();
-                    });
-                  }
-                },
-                backgroundColor: buttonColor,
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+      floatingActionButton: _floatingButton(height: he),
       bottomNavigationBar: const BannerAdWidget(),
     );
   }
