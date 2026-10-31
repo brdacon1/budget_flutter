@@ -1,6 +1,7 @@
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as global_uid;
 
 /// Configura o submenu "Trocar nome de usuário" no chat.
 ///
@@ -12,9 +13,14 @@ class ShowChangeUsernameMenuUsecase {
 
   /// Exibe o submenu de alteração de nome de usuário.
   Future<String> call() async {
-    final content = '${ChatBudgetStrings.changeUsernameInstructions}\n\n'
-        '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
-        '${ChatBudgetStrings.menuBackOption}';
+    final currentName = global_uid.name?.trim() ?? '';
+    final content = currentName.isNotEmpty
+        ? 'O nome de usuário atual é "$currentName".\n\n'
+            '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
+            '${ChatBudgetStrings.menuBackOption}'
+        : '${ChatBudgetStrings.changeUsernameInstructions}\n\n'
+            '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
+            '${ChatBudgetStrings.menuBackOption}';
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(

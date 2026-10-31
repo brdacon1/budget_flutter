@@ -152,9 +152,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
   Future<void> _openChangeNameModal() async {
     final displayAlert = getIt<DisplayAlertRepository>();
-    await displayAlert.dialogChangeName(context);
-    // Ao fechar o modal, o chat confirma a alteração
-    // TODO: receber o novo nome e confirmar no chat (prompt 5)
+    final newName = await displayAlert.dialogChangeName(context);
+    if (!mounted) return;
+    await _vm.onUsernameChanged(newName);
   }
 
   Future<void> _openLogoEditFlow() async {

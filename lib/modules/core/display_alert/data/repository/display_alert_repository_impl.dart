@@ -126,8 +126,9 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   }
 
   @override
-  Future<void> dialogChangeName(BuildContext context) {
-    return showModalBottomSheet<void>(
+  Future<String?> dialogChangeName(BuildContext context) async {
+    String? savedName;
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -148,14 +149,10 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
 
               await getIt<UserRemoteDataSource>().updateUser(DADOS);
               global_uid_user.name = name;
+              savedName = name;
               _loadingEvent.closeLoading(modalContext);
               if (modalContext.mounted) {
                 Navigator.of(modalContext).pop();
-                await notification(
-                  modalContext,
-                  'Feito!',
-                  'Nome atualizado com sucesso!',
-                );
               }
             } else {
               _loadingEvent.closeLoading(modalContext);
@@ -180,6 +177,7 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
         },
       ),
     );
+    return savedName;
   }
 
   @override

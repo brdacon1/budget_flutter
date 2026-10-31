@@ -37,7 +37,8 @@ abstract class DisplayAlertRepository {
   Future<void> dialogChangePassword(BuildContext context);
 
   /// Modal para trocar o nome do usuário (bottom sheet com campo de nome).
-  Future<void> dialogChangeName(BuildContext context);
+  /// Retorna o novo nome se salvo, ou null se cancelado.
+  Future<String?> dialogChangeName(BuildContext context);
 
   /// Modal de opções para adicionar orçamento (anúncio x premium).
   ///

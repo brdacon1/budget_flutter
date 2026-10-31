@@ -101,7 +101,10 @@ void registerChatBudgetDependencies(GetIt sl) {
     () => const HandlePriceListMenuOptionUsecase(),
   );
   sl.registerLazySingleton<HandlePdfEditMenuOptionUsecase>(
-    () => HandlePdfEditMenuOptionUsecase(sl<ChatBudgetRepository>()),
+    () => HandlePdfEditMenuOptionUsecase(
+      sl<ChatBudgetRepository>(),
+      sl<PdfRepository>(),
+    ),
   );
   sl.registerLazySingleton<HandlePdfFieldInputUsecase>(
     () => HandlePdfFieldInputUsecase(

@@ -321,6 +321,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _handlePdfConfirm(clean);
       } else if (_step == ChatFlowStep.changeUsername) {
         await _handleUsername(clean);
+      } else if (_step == ChatFlowStep.changeUsernameResult) {
+        await _handleUsernameResult(clean);
       } else if (_step == ChatFlowStep.logoMenu) {
         await _handleLogo(clean);
       } else if (_step == ChatFlowStep.welcome || _step == ChatFlowStep.askClient) {
@@ -426,6 +428,50 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
     _setStepFromName(result.nextStep);
     notifyListeners();
+  }
+
+  // ------------------------------------------------------------------
+  // Callback da View após fechar o modal de alterar nome
+  // ------------------------------------------------------------------
+  Future<void> onUsernameChanged(String? newName) async {
+    if (newName != null && newName.isNotEmpty) {
+      await _addBotMessage(
+        '${ChatBudgetStrings.changeUsernameSuccess} $newName',
+        type: ChatMessageType.text,
+      );
+      await _backToMainMenu();
+      return;
+    }
+
+    // Usuário cancelou ou não alterou
+    await _addBotMessage(
+      ChatBudgetStrings.changeUsernameNotChanged,
+      type: ChatMessageType.text,
+    );
+    await _addBotMessage(
+      ChatBudgetStrings.changeUsernameRetryQuestion,
+      type: ChatMessageType.text,
+    );
+    _setStep(ChatFlowStep.changeUsernameResult);
+    notifyListeners();
+  }
+
+  Future<void> _handleUsernameResult(String option) async {
+    switch (option) {
+      case '1':
+        _pendingNavigation = 'open_change_name';
+        notifyListeners();
+        break;
+      case '2':
+        await _backToMainMenu();
+        break;
+      default:
+        await _addBotMessage(
+          ChatBudgetStrings.menuInvalidOption,
+          type: ChatMessageType.text,
+        );
+        break;
+    }
   }
 
   Future<void> _handleLogo(String option) async {

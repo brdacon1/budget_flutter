@@ -184,8 +184,8 @@ class ChatBudgetStrings {
       : 'I will open the modal so you can change your username.';
 
   static String get changeUsernameMenuOptions => _isPt
-      ? '1. Abrir modal'
-      : '1. Open modal';
+      ? '1. Alterar nome de usuário'
+      : '1. Chance user name';
 
   static String get changeUsernameSuccess => _isPt
       ? 'Nome de usuário atualizado com sucesso para:'
@@ -194,4 +194,12 @@ class ChatBudgetStrings {
   static String get changeUsernameCancelled => _isPt
       ? 'Ok, deixei como está.'
       : 'Okay, I left it as is.';
+
+  static String get changeUsernameNotChanged => _isPt
+      ? 'Você não alterou o nome de usuário.'
+      : 'You did not change the username.';
+
+  static String get changeUsernameRetryQuestion => _isPt
+      ? 'Quer tentar novamente?\n\n1. Sim\n2. Não'
+      : 'Want to try again?\n\n1. Yes\n2. No';
 }
