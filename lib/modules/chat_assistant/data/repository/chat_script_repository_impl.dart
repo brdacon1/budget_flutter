@@ -25,8 +25,6 @@ class ChatScriptRepositoryImpl extends ChatScriptRepository {
         _cached = ChatScriptEntity.fallback;
       } else {
         _cached = ChatScriptEntity(
-          welcomeMessage: raw['welcomeMessage'] as String? ??
-              ChatScriptEntity.fallback.welcomeMessage,
           askClientName: raw['askClientName'] as String? ??
               ChatScriptEntity.fallback.askClientName,
           askPhone: raw['askPhone'] as String? ??

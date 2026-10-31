@@ -28,18 +28,6 @@ class StartBudgetFromMenuUsecase {
       ),
     );
 
-    // Boas-vindas
-    await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: script?.welcomeMessage ??
-            ChatScriptEntity.fallback.welcomeMessage,
-        timestamp: DateTime.now(),
-      ),
-    );
-
     // Pede nome com picker de contato
     await _chatRepo.sendMessage(
       ChatMessageEntity(
