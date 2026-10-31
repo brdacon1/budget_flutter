@@ -120,8 +120,8 @@ class ChatMessageBubble extends StatelessWidget {
                       }),
                       const SizedBox(height: 10),
                     ],
-                    Text(
-                      message.content,
+                    Text.rich(
+                      _buildMessageText(message.content),
                       style: const TextStyle(color: Colors.white, fontSize: 15),
                     ),
                     if (message.type == ChatMessageType.contactPicker) ...[
@@ -162,6 +162,27 @@ class ChatMessageBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  TextSpan _buildMessageText(String text) {
+    final spans = <TextSpan>[];
+    final lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final match = RegExp(r'^(\d+\.\s*)(.*)$').firstMatch(line);
+      if (match != null) {
+        spans.add(TextSpan(
+          text: '${match.group(1)}${match.group(2)}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ));
+      } else {
+        spans.add(TextSpan(text: line));
+      }
+      if (i < lines.length - 1) {
+        spans.add(const TextSpan(text: '\n'));
+      }
+    }
+    return TextSpan(children: spans);
   }
 
   Widget _buildAvatar() {

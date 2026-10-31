@@ -63,11 +63,11 @@ class ChatBudgetStrings {
       ? '1. Criar orçamentos\n\n'
         '2. Lista de preço\n\n'
         '3. Editar PDF\n\n'
-        '4. Trocar nome de usuário\n'
+        '4. Trocar nome de usuário'
       : '1. Create budget\n\n'
         '2. Price list\n\n'
         '3. Edit PDF\n\n'
-        '4. Change username\n';
+        '4. Change username';
 
   static String get menuInvalidOption => _isPt
       ? 'Opção inválida. Envie o número correspondente.'
