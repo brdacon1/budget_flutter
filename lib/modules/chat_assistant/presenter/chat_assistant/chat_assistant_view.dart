@@ -110,12 +110,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     switch (nav) {
       case 'open_price_list':
-        Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => const ProductPriceListView(fromMenu: true),
           ),
         );
+        if (mounted) {
+          await _vm.resetChatCommand.execute();
+        }
         break;
       case 'open_product_creator':
         _openProductCreator();
