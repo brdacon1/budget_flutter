@@ -82,8 +82,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final textController = TextEditingController();
   final cepController = TextEditingController();
   final streetController = TextEditingController();
+  final numberController = TextEditingController();
   final cityController = TextEditingController();
   final neighborhoodController = TextEditingController();
+
+  // Indica se o formulário manual está no modo "corrigir" (veio do CEP).
+  bool _isCorrectingAddress = false;
+  bool get isCorrectingAddress => _isCorrectingAddress;
 
   // Armazena dados temporários enquanto o usuário responde passo a passo
   String _pendingClientName = '';
@@ -163,10 +168,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _pendingClientName = '';
       _pendingPhone = '';
       _pendingAddress = null;
+      _isCorrectingAddress = false;
       _shareErrorMessage = null;
       textController.clear();
       cepController.clear();
       streetController.clear();
+      numberController.clear();
       cityController.clear();
       neighborhoodController.clear();
       _step = ChatFlowStep.idle;
@@ -185,6 +192,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pendingClientName = '';
     _pendingPhone = '';
     _pendingAddress = null;
+    _isCorrectingAddress = false;
     _shareErrorMessage = null;
     _clientNameMsgId = null;
     _clientPhoneMsgId = null;
@@ -490,6 +498,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Usuário respondeu "NÃO" em "Você tem o CEP?" → vai para manual.
   Future<Result<void>> _goToManualAddress() async {
+    _isCorrectingAddress = false;
+    _pendingAddress = null;
+    streetController.clear();
+    numberController.clear();
+    cityController.clear();
+    neighborhoodController.clear();
     _setStep(ChatFlowStep.askStreetManual);
     await _addBotMessage(
       _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
@@ -497,6 +511,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     );
     return Result.ok(null);
   }
+
+  String _upper(String? v) => (v ?? '').trim().toUpperCase();
 
   Future<Result<void>> _submitCep(String cep) async {
     final cleanCep = cep.replaceAll(RegExp(r'\D'), '');
@@ -513,6 +529,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     if (address.logradouro == null || address.logradouro!.isEmpty) {
       // CEP não encontrado → avisa e vai para manual
+      _isCorrectingAddress = false;
+      _pendingAddress = null;
       _setStep(ChatFlowStep.askStreetManual);
       await _addBotMessage(
         _script?.cepNotFound ?? ChatScriptEntity.fallback.cepNotFound,
@@ -532,9 +550,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _setStep(ChatFlowStep.confirmCepAddress);
     await _addBotMessage(
       'Encontrei o endereço:\n'
-      '${address.logradouro}\n'
-      '${address.bairro != null && address.bairro!.isNotEmpty ? '${address.bairro}\n' : ''}'
-      '${address.localidade}',
+      '${_upper(address.logradouro)}\n'
+      '${address.bairro != null && address.bairro!.isNotEmpty ? '${_upper(address.bairro)}\n' : ''}'
+      '${_upper(address.localidade)}',
       type: ChatMessageType.inlineButtons,
       payload: {'actions': ['Confirmar endereço', 'Corrigir endereço']},
     );
@@ -553,6 +571,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     );
 
     _pendingAddress = null;
+    _isCorrectingAddress = false;
 
     _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
@@ -572,6 +591,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _submitManualAddress() async {
     final street = streetController.text.trim();
+    final number = numberController.text.trim();
     final city = cityController.text.trim();
     final neighborhood = neighborhoodController.text.trim();
 
@@ -583,15 +603,55 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.ok(null);
     }
 
+    // Concatena rua + número separado por vírgula
+    final fullStreet = number.isNotEmpty ? '$street, $number' : street;
+
     await _usecase.updateAddress(
-      street: street,
+      street: fullStreet,
       city: city,
       neighborhood: neighborhood.isEmpty ? null : neighborhood,
     );
 
     streetController.clear();
+    numberController.clear();
     cityController.clear();
     neighborhoodController.clear();
+    _isCorrectingAddress = false;
+    _pendingAddress = null;
+
+    _setStep(ChatFlowStep.askProducts);
+    await _addBotMessage(
+      'Endereço cadastrado com sucesso.',
+      type: ChatMessageType.text,
+    );
+    await _addBotMessage(
+      _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
+      type: ChatMessageType.action,
+      payload: {
+        'label': 'Selecionar produtos',
+        'action': 'open_products',
+      },
+    );
+    return Result.ok(null);
+  }
+
+  /// Cancela a correção e confirma o endereço original do CEP.
+  Future<Result<void>> _cancelCorrectionAndConfirm() async {
+    if (_pendingAddress == null) return Result.ok(null);
+
+    await _usecase.updateAddress(
+      zip: _pendingAddress!.cep,
+      street: _pendingAddress!.logradouro,
+      city: _pendingAddress!.localidade,
+      neighborhood: _pendingAddress!.bairro,
+    );
+
+    streetController.clear();
+    numberController.clear();
+    cityController.clear();
+    neighborhoodController.clear();
+    _isCorrectingAddress = false;
+    _pendingAddress = null;
 
     _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
@@ -747,10 +807,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pendingClientName = '';
     _pendingPhone = '';
     _pendingAddress = null;
+    _isCorrectingAddress = false;
     _shareErrorMessage = null;
     textController.clear();
     cepController.clear();
     streetController.clear();
+    numberController.clear();
     cityController.clear();
     neighborhoodController.clear();
     _clientNameMsgId = null;
@@ -888,9 +950,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await confirmCepAddressCommand.execute();
         break;
       case 'Corrigir endereço':
-        // Limpa endereço pendente e vai para manual
-        _pendingAddress = null;
-        await _goToManualAddress();
+        // Preenche os campos com dados do CEP e vai para manual
+        _isCorrectingAddress = true;
+        streetController.text = _upper(_pendingAddress?.logradouro);
+        cityController.text = _upper(_pendingAddress?.localidade);
+        neighborhoodController.text = _upper(_pendingAddress?.bairro);
+        numberController.clear();
+        _setStep(ChatFlowStep.askStreetManual);
+        await _addBotMessage(
+          _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
+          type: ChatMessageType.text,
+        );
         break;
       case 'Confirmar dados':
         await _createDraftAndGoToAddress(
@@ -915,6 +985,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
       case 'edit_products':
         // A view abre a tela de produtos em modo edição
+        break;
+      case 'cancel_and_proceed':
+        await _cancelCorrectionAndConfirm();
         break;
     }
   }
@@ -962,6 +1035,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     textController.dispose();
     cepController.dispose();
     streetController.dispose();
+    numberController.dispose();
     cityController.dispose();
     neighborhoodController.dispose();
     super.dispose();

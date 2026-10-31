@@ -30,9 +30,16 @@ class ChatBudgetStrings {
       _isPt ? 'Editando mensagem' : 'Editing message';
 
   static String get streetField =>
-      _isPt ? 'Rua e número' : 'Street and number';
+      _isPt ? 'Rua' : 'Street';
+
+  static String get numberField =>
+      _isPt ? 'Número' : 'Number';
 
   static String get cityField => _isPt ? 'Cidade' : 'City';
+
+  static String get cancelAndProceed =>
+      _isPt ? 'Cancelar e seguir com a geração do orçamento'
+             : 'Cancel and proceed with budget generation';
 
   static String get clientFallback =>
       _isPt ? 'Cliente' : 'Client';

@@ -3,6 +3,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/chat_message_bubble.dart';
+import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
 
@@ -184,9 +185,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     if (step == ChatFlowStep.askStreetManual) {
       return _ManualAddressForm(
         streetController: _vm.streetController,
+        numberController: _vm.numberController,
         cityController: _vm.cityController,
         neighborhoodController: _vm.neighborhoodController,
+        isCorrecting: _vm.isCorrectingAddress,
         onSubmit: () => _vm.submitManualAddressCommand.execute(),
+        onCancelAndProceed: () => _vm.handleAction('cancel_and_proceed'),
       );
     }
 
@@ -251,6 +255,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case 'finalize_budget':
       case 'Finalizar e gerar link':
         await _vm.handleAction('finalize_budget');
+        break;
+      case 'cancel_and_proceed':
+        await _vm.handleAction('cancel_and_proceed');
         break;
       default:
         // Delega para o ViewModel ações que não precisam de interação com a UI
@@ -369,20 +376,26 @@ class _EditAwareInputBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Formulário de endereço manual (rótulo + 3 campos + botão)
+// Formulário de endereço manual (com suporte a correção de CEP)
 // ---------------------------------------------------------------------------
 
 class _ManualAddressForm extends StatelessWidget {
   final TextEditingController streetController;
+  final TextEditingController numberController;
   final TextEditingController cityController;
   final TextEditingController neighborhoodController;
+  final bool isCorrecting;
   final VoidCallback onSubmit;
+  final VoidCallback onCancelAndProceed;
 
   const _ManualAddressForm({
     required this.streetController,
+    required this.numberController,
     required this.cityController,
     required this.neighborhoodController,
+    required this.isCorrecting,
     required this.onSubmit,
+    required this.onCancelAndProceed,
   });
 
   @override
@@ -397,9 +410,43 @@ class _ManualAddressForm extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildField(streetController, 'Rua e número'),
+            if (isCorrecting)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.cyanAccent),
+                      foregroundColor: Colors.cyanAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: onCancelAndProceed,
+                    child: Text(
+                      ChatBudgetStrings.cancelAndProceed,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _buildField(streetController, ChatBudgetStrings.streetField),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: _buildField(numberController, ChatBudgetStrings.numberField, keyboardType: TextInputType.number),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
-            _buildField(cityController, 'Cidade'),
+            _buildField(cityController, ChatBudgetStrings.cityField),
             const SizedBox(height: 8),
             _buildField(neighborhoodController, 'Bairro (opcional)'),
             const SizedBox(height: 10),
@@ -427,9 +474,10 @@ class _ManualAddressForm extends StatelessWidget {
     );
   }
 
-  Widget _buildField(TextEditingController ctrl, String hint) {
+  Widget _buildField(TextEditingController ctrl, String hint, {TextInputType? keyboardType}) {
     return TextField(
       controller: ctrl,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: hint,
