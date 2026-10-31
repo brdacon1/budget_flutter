@@ -13,9 +13,8 @@ class MainTabViewModel extends ChangeNotifier {
 
   final List<TabItem> _tabItems = [
     TabItem(icon: Icons.support_agent, title: 'Assistente'),
-    TabItem(icon: Icons.dashboard, title: 'Dashboard'),
     TabItem(icon: Icons.inventory_outlined, title: 'Orçamentos'),
-    TabItem(icon: Icons.menu, title: 'Menu'),
+    TabItem(icon: Icons.dashboard, title: 'Dashboard'),
   ];
   List<TabItem> get tabItems => _tabItems;
 

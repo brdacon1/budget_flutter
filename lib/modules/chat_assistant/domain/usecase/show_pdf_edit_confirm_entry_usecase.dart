@@ -20,37 +20,52 @@ class ShowPdfEditConfirmEntryUsecase {
       owner = result.value;
     }
 
-    final buffer = StringBuffer();
-    buffer.writeln('📋 *Dados cadastrados do PDF:*');
-    buffer.writeln();
-    buffer.writeln('🏢 Nome da empresa: ${owner?.empresa?.trim().isNotEmpty == true ? owner!.empresa!.trim() : "—"}');
-    buffer.writeln('📞 Telefone: ${owner?.fone?.trim().isNotEmpty == true ? owner!.fone!.trim() : "—"}');
-    buffer.writeln('📧 Email: ${owner?.email?.trim().isNotEmpty == true ? owner!.email!.trim() : "—"}');
-    buffer.writeln('🏛️ CNPJ: ${owner?.cnpj?.trim().isNotEmpty == true ? owner!.cnpj!.trim() : "—"}');
+    final dataRows = <Map<String, String>>[];
+
+    dataRows.add(_row(
+      '🏢 Nome da empresa:',
+      owner?.empresa?.trim().isNotEmpty == true ? owner!.empresa!.trim() : 'Não cadastrado',
+    ));
+    dataRows.add(_row(
+      '📞 Telefone:',
+      owner?.fone?.trim().isNotEmpty == true ? owner!.fone!.trim() : 'Não cadastrado',
+    ));
+    dataRows.add(_row(
+      '📧 Email:',
+      owner?.email?.trim().isNotEmpty == true ? owner!.email!.trim() : 'Não cadastrado',
+    ));
+    dataRows.add(_row(
+      '🏛️ CNPJ:',
+      owner?.cnpj?.trim().isNotEmpty == true ? owner!.cnpj!.trim() : 'Não cadastrado',
+    ));
+
     final addressParts = <String>[];
     if (owner?.rua?.trim().isNotEmpty == true) addressParts.add(owner!.rua!.trim());
     if (owner?.bairro?.trim().isNotEmpty == true) addressParts.add(owner!.bairro!.trim());
     if (owner?.city?.trim().isNotEmpty == true) addressParts.add(owner!.city!.trim());
     if (owner?.cep?.trim().isNotEmpty == true) addressParts.add('CEP: ${owner!.cep!.trim()}');
-    if (addressParts.isNotEmpty) {
-      buffer.writeln('📍 Endereço: ${addressParts.join(' - ')}');
-    } else {
-      buffer.writeln('📍 Endereço: —');
-    }
-    buffer.writeln('🖼️ Logo: ${owner?.logoName?.trim().isNotEmpty == true ? 'cadastrada' : "—"}');
-    buffer.writeln();
-    buffer.writeln( ChatBudgetStrings.pdfEditProceedQuestion );
+    dataRows.add(_row(
+      '📍 Endereço:',
+      addressParts.isNotEmpty ? addressParts.join(' - ') : 'Não cadastrado',
+    ));
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.inlineButtons,
-        content: buffer.toString(),
-        payload: {'actions': ['Sim', 'Não']},
+        content: ChatBudgetStrings.pdfEditProceedQuestion,
+        payload: {
+          'actions': ['Sim', 'Não'],
+          'dataRows': dataRows,
+        },
         timestamp: DateTime.now(),
       ),
     );
     return 'pdfEditConfirmEntry';
+  }
+
+  Map<String, String> _row(String label, String value) {
+    return {'label': label, 'value': value};
   }
 }

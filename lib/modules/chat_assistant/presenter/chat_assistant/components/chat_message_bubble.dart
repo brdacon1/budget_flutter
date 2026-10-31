@@ -24,6 +24,21 @@ class ChatMessageBubble extends StatelessWidget {
 
   bool get _isUser => message.sender == ChatSender.user;
 
+  List<Map<String, String>>? get _dataRows {
+    final p = message.payload;
+    if (p == null) return null;
+    final raw = p['dataRows'];
+    if (raw is List) {
+      return raw.whereType<Map>().map((e) {
+        return <String, String>{
+          'label': e['label']?.toString() ?? '',
+          'value': e['value']?.toString() ?? '',
+        };
+      }).toList();
+    }
+    return null;
+  }
+
   String? get _editableField {
     final p = message.payload;
     if (p == null) return null;
@@ -75,6 +90,35 @@ class ChatMessageBubble extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
+                    ],
+                    if (_dataRows != null && _dataRows!.isNotEmpty && !_isUser) ...[
+                      ..._dataRows!.map((row) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: row['label'],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' ${row['value']}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF00BFA5),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 10),
                     ],
                     Text(
                       message.content,
