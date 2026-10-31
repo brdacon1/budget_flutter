@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'modules/budget/budget_routes.dart';
-import 'modules/chat_budget/chat_budget_routes.dart';
+import 'modules/chat_assistant/chat_assistant_routes.dart';
 import 'modules/dashboard/dashboard_routes.dart';
 import 'modules/image/image_routes.dart';
 import 'modules/login/login_routes.dart';

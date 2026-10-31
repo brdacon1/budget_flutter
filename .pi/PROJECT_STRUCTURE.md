@@ -759,10 +759,10 @@ Ele é **independente de UI** (não conhece widgets, context ou `ChangeNotifier`
 **Arquivo**: `lib/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart`
 
 ```dart
-import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
-import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart';
-import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_budget/domain/repository/chat_script_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/shared/models/customer_info.dart';
 import 'package:oflite/shared/models/items_budget.dart';
@@ -951,7 +951,7 @@ class PdfGenerateReceiptUseCase {
 UseCases recebem dependências via construtor e são registrados como **`registerFactory`** (se precisar de estado fresco) ou **`registerLazySingleton`** (se forem stateless e reutilizáveis):
 
 ```dart
-// Exemplo no chat_budget_binds.dart:
+// Exemplo no chat_assistant_binds.dart:
 sl.registerFactory<CreateBudgetFromChatUsecase>(
   () => CreateBudgetFromChatUsecase(
     sl<ChatBudgetRepository>(),

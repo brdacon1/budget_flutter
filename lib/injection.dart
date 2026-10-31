@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
-import 'package:oflite/modules/chat_budget/chat_budget_binds.dart';
+import 'package:oflite/modules/chat_assistant/chat_assistant_binds.dart';
 import 'package:oflite/modules/comment/comment_binds.dart';
 import 'package:oflite/modules/core/ads/ads_binds.dart';
 import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
