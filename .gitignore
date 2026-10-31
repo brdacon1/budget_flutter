@@ -185,9 +185,11 @@ key.properties
 *.temp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # Version managers

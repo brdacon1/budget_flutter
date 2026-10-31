@@ -1,0 +1,147 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
+import '../comment_list_view_model.dart';
+
+/// Exibe o bottom modal de adicionar/editar comentário.
+///
+/// Retorna `true` quando o comentário foi salvo/atualizado com sucesso,
+/// `false` em caso de falha e `null` quando o usuário fechou sem salvar.
+/// Fundo branco, campo multilinha no padrão do projeto (cinza máximo) e
+/// botão no padrão dos botões. Acompanha o teclado.
+Future<bool?> showCommentFormDialog({
+  required BuildContext context,
+  required CommentListViewModel viewModel,
+  required ObservationBudget comment,
+  required DisplayAlertRepository displayAlert,
+}) {
+  final TextEditingController descricaoController = TextEditingController();
+  descricaoController.text = comment.observacao ?? '';
+
+  final bool isNew = comment.id == null || comment.id!.isEmpty;
+  final String textButtonName = isNew ? CommentStrings.addButton : CommentStrings.updateButton;
+
+  return showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _CommentFormModal(
+      descricaoController: descricaoController,
+      buttonLabel: textButtonName,
+      isNew: isNew,
+      comment: comment,
+      viewModel: viewModel,
+      displayAlert: displayAlert,
+    ),
+  );
+}
+
+class _CommentFormModal extends StatefulWidget {
+  const _CommentFormModal({
+    required this.descricaoController,
+    required this.buttonLabel,
+    required this.isNew,
+    required this.comment,
+    required this.viewModel,
+    required this.displayAlert,
+  });
+
+  final TextEditingController descricaoController;
+  final String buttonLabel;
+  final bool isNew;
+  final ObservationBudget comment;
+  final CommentListViewModel viewModel;
+  final DisplayAlertRepository displayAlert;
+
+  @override
+  State<_CommentFormModal> createState() => _CommentFormModalState();
+}
+
+class _CommentFormModalState extends State<_CommentFormModal> {
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    widget.descricaoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    bool success;
+    if (widget.isNew) {
+      success = await widget.viewModel.addComment(widget.descricaoController.text);
+      if (success) {
+        await widget.viewModel.loadComments();
+        if (mounted) {
+          await widget.displayAlert.notification(
+              context, CommentStrings.successTitle, CommentStrings.successAddMessage);
+        }
+      } else {
+        if (mounted) {
+          await widget.displayAlert.notificationError(
+              context, CommentStrings.errorTitle, CommentStrings.errorAddMessage);
+        }
+      }
+    } else {
+      widget.comment.observacao = widget.descricaoController.text;
+      success = await widget.viewModel.updateComment(widget.comment);
+      if (success) {
+        if (mounted) {
+          await widget.displayAlert.notification(
+              context, CommentStrings.successTitle, CommentStrings.successUpdateMessage);
+        }
+      } else {
+        if (mounted) {
+          await widget.displayAlert.notificationError(
+              context, CommentStrings.errorTitle, CommentStrings.errorUpdateMessage);
+        }
+      }
+    }
+    if (mounted) {
+      Navigator.pop(context, success);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBottomModal(
+      title: CommentStrings.title,
+      buttonLabel: _submitting ? CommentStrings.saving : widget.buttonLabel,
+      onButtonPressed: _submitting ? () {} : _submit,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.35,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+            color: Colors.white,
+          ),
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: widget.descricaoController,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            decoration: InputDecoration(
+              enabledBorder: InputBorder.none,
+              border: InputBorder.none,
+              hintText: CommentStrings.hint,
+              hintStyle: TextStyle(color: Colors.grey[600]),
+            ),
+            style: GoogleFonts.heebo(
+              color: AppBottomModal.grayColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

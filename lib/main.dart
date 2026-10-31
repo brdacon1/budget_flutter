@@ -1,23 +1,21 @@
+import 'package:oflite/injection.dart';
 import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:oflite/common/constants/environment.dart';
-import 'package:oflite/common/controllers/menu_controller_app.dart';
-import 'package:oflite/services/notification_service.dart';
-import 'package:oflite/presentations/pdf/pdf_edit/pdf_edit_view.dart';
-import 'package:oflite/presentations/main_tab/main_tab_view.dart';
-import 'package:oflite/presentations/subscription/subscription_view.dart';
-import 'package:oflite/presentations/login/login_view.dart';
-import 'package:oflite/presentations/budget/budget_list/budget_list_view.dart';
-import 'package:oflite/presentations/terms_conditions/terms_conditions_view.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:provider/provider.dart';
-import 'common/constants/constants.dart';
+import 'app_routes.dart';
+import 'injection.dart';
+import 'shared/common/constants/constants.dart';
 
 /// Chave global do navigator do app. Compartilhada com o
-/// `NotificationService` para que, ao tocar no banner de uma notificação de
+/// `NotificationRepository` para que, ao tocar no banner de uma notificação de
 /// aprovação/reprovação vinda do fluxo Web, o app abra o orçamento
 /// correspondente (`BudgetTabView`).
 final GlobalKey<NavigatorState> globalNavigatorKey =
@@ -25,33 +23,31 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Inicializa o Firebase e os ads em paralelo para não travar a splash.
-  await Future.wait([
-    Firebase.initializeApp(),
-    MobileAds.instance.initialize(),
-  ]);
-  // Carrega as chaves do ambiente (env/*.json). O ambiente é escolhido
-  // automaticamente: release -> produção, debug -> desenvolvimento.
-  await Environment.instance.initialize();
-  // Em desenvolvimento, registra os dispositivos de teste para que os blocos
-  // reais do AdMob sirvam anúncios de teste (sem risco de cliques inválidos
-  // e com preenchimento garantido no emulador). O ID de cada aparelho aparece
-  // no logcat na primeira falha de carga (linha "To get test ads on this
-  // device, use: <ID>"). Adicione-o em [_kTestDeviceIds].
-  if (Environment.instance.environment == 'development') {
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: _kTestDeviceIds),
-    );
+  setupDependencyInjection();
+
+  // Inicializa o Firebase sempre (mobile e web).
+  await Firebase.initializeApp();
+
+  // Ads e notificações são mobile-only. No web esses plugins não existem
+  // e lançam exceção, causando tela branca se o entry point mobile for
+  // compilado para web por engano.
+  if (!kIsWeb) {
+    await getIt<AdsRepository>().initialize();
+
+    if (Environment.instance.environment == 'development') {
+      await getIt<AdsRepository>().setTestDevices(
+        _kTestDeviceIds,
+      );
+    }
+
+    await getIt<NotificationRepository>().initialize();
+    getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
   }
-  // Inicializa notificações push (FCM + canal Android + listener de
-  // foreground). Não bloqueia o runApp — falhas aqui não impedem o app.
-  await NotificationService.instance.initialize();
-  // Registra a chave do navigator no serviço de notificações para que o
-  // toque no banner (ou o cold-start pelo banner) consiga abrir o orçamento.
-  NotificationService.instance.setNavigatorKey(globalNavigatorKey);
+
+  await Environment.instance.initialize();
+
   runApp(const MyApp());
 }
-
 
 /// IDs de dispositivos de teste (hash do AdMob) para servir anúncios de
 /// teste mesmo usando blocos reais em desenvolvimento.
@@ -63,8 +59,6 @@ Future<void> main() async {
 const _kTestDeviceIds = <String>[
   // 'SEU_DEVICE_ID_AQUI',
 ];
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -97,15 +91,8 @@ class MyApp extends StatelessWidget {
           darkTheme: darkTheme,
           debugShowCheckedModeBanner: false,
           navigatorKey: globalNavigatorKey,
-          home: const LoginView(),
-          routes: {
-            '/menu_tecnico': (BuildContext _) => const BudgetListView(),
-            '/pg-subscription': (BuildContext _) => const SubscriptionView(),
-            '/menu': (BuildContext _) => const MainTabView(),
-            '/pg-pdf-config': (BuildContext _) => const PdfEditView(),
-            TermsConditionsView.routeName: (BuildContext _) =>
-                const TermsConditionsView(),
-          },
+          initialRoute: AppRoute.login.path,
+          routes: appRoutes,
         ),
       ),
     );
