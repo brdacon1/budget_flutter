@@ -18,6 +18,7 @@ import 'package:oflite/modules/chat_budget/domain/usecase/handle_pdf_field_input
 import 'package:oflite/modules/chat_budget/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/chat_budget/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/show_price_list_menu_usecase.dart';
@@ -33,34 +34,6 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:share_plus/share_plus.dart';
-
-/// Passos do fluxo conversacional.
-enum ChatFlowStep {
-  idle,
-  welcome,
-  askClient,
-  askPhone,
-  confirmClientData,
-  askAddress,
-  askHasCep,
-  askCep,
-  confirmCepAddress,
-  askStreetManual,
-  askProducts,
-  reviewProducts,
-  askComments,
-  shareLink,
-  mainMenu,
-  priceListMenu,
-  priceListAddResult,
-  pdfEditMenu,
-  pdfEditFieldInput,
-  pdfEditConfirm,
-  changeUsername,
-  changeUsernameResult,
-  logoMenu,
-  logoViewResult,
-}
 
 /// ViewModel do assistente de chat.
 ///

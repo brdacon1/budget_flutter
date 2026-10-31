@@ -3,6 +3,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/chat_message_bubble.dart';
+import 'package:oflite/modules/chat_budget/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
