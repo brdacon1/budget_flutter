@@ -150,6 +150,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<HandleChangeUsernameOptionUsecase>(),
       sl<HandleLogoMenuOptionUsecase>(),
       sl<OnLogoUpdatedUsecase>(),
+      sl<PdfRepository>(),
     ),
   );
 }

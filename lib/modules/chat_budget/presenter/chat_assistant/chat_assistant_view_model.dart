@@ -18,6 +18,8 @@ import 'package:oflite/modules/chat_budget/domain/usecase/handle_pdf_field_input
 import 'package:oflite/modules/chat_budget/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
@@ -79,6 +81,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final HandleChangeUsernameOptionUsecase _handleChangeUsername;
   final HandleLogoMenuOptionUsecase _handleLogoMenuOption;
   final OnLogoUpdatedUsecase _onLogoUpdated;
+  final PdfRepository _pdfRepo;
 
   bool _disposed = false;
 
@@ -97,6 +100,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._handleChangeUsername,
     this._handleLogoMenuOption,
     this._onLogoUpdated,
+    this._pdfRepo,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -141,6 +145,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   bool _isCorrectingAddress = false;
   bool get isCorrectingAddress => _isCorrectingAddress;
+
+  bool _isPdfEditAddressMode = false;
 
   String _pendingClientName = '';
   String _pendingPhone = '';
@@ -236,6 +242,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _commentsFeedbackMsgId = null;
     _pdfEditField = null;
     _pendingNavigation = null;
+    _isPdfEditAddressMode = false;
   }
 
   // ------------------------------------------------------------------
@@ -382,6 +389,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pdfEditField = result.pdfField;
     if (result.navigation != null) {
       _pendingNavigation = result.navigation;
+    }
+    if (result.nextStep == 'askHasCep') {
+      _isPdfEditAddressMode = true;
     }
     _setStepFromName(result.nextStep);
     notifyListeners();
@@ -667,8 +677,74 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
+  // ------------------------------------------------------------------
+  // Salvar endereço no OwnerPdf (fluxo de edição de PDF)
+  // ------------------------------------------------------------------
+  Future<void> _savePdfAddress({
+    String? street,
+    String? city,
+    String? neighborhood,
+    String? zip,
+  }) async {
+    final fetchResult = await _pdfRepo.fetchInformationEnterprise();
+    if (fetchResult is Error<OwnerPdf>) {
+      await _addBotMessage(
+        'Erro ao buscar dados do PDF: ${fetchResult.error}',
+        type: ChatMessageType.text,
+      );
+      return;
+    }
+    final current = (fetchResult as Ok<OwnerPdf>).value;
+    final updated = OwnerPdf(
+      rua: street ?? current.rua,
+      empresa: current.empresa,
+      email: current.email,
+      cnpj: current.cnpj,
+      bairro: neighborhood ?? current.bairro,
+      city: city ?? current.city,
+      cep: zip ?? current.cep,
+      fotoId: current.fotoId,
+      fone: current.fone,
+      logoName: current.logoName,
+    );
+    final saveResult = await _pdfRepo.saveInformationEnterprise(updated);
+    if (saveResult is Error<void>) {
+      await _addBotMessage(
+        'Erro ao salvar endereço: ${saveResult.error}',
+        type: ChatMessageType.text,
+      );
+    }
+  }
+
+  Future<void> _finishPdfAddressFlow() async {
+    _pendingAddress = null;
+    _isCorrectingAddress = false;
+    _isPdfEditAddressMode = false;
+
+    await _addBotMessage(
+      ChatBudgetStrings.pdfEditSuccessAddress,
+      type: ChatMessageType.text,
+    );
+    await _addBotMessage(
+      'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
+      type: ChatMessageType.text,
+    );
+    _setStep(ChatFlowStep.pdfEditConfirm);
+  }
+
   Future<Result<void>> _confirmCepAddress() async {
     if (_pendingAddress == null) return Result.ok(null);
+
+    if (_isPdfEditAddressMode) {
+      await _savePdfAddress(
+        zip: _pendingAddress!.cep,
+        street: _upper(_pendingAddress!.logradouro),
+        city: _upper(_pendingAddress!.localidade),
+        neighborhood: _upper(_pendingAddress!.bairro),
+      );
+      await _finishPdfAddressFlow();
+      return Result.ok(null);
+    }
 
     await _usecase.updateAddress(
       zip: _pendingAddress!.cep,
@@ -712,6 +788,20 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     final fullStreet = number.isNotEmpty ? '$street, $number' : street;
 
+    if (_isPdfEditAddressMode) {
+      await _savePdfAddress(
+        street: fullStreet,
+        city: city,
+        neighborhood: neighborhood.isEmpty ? null : neighborhood,
+      );
+      streetController.clear();
+      numberController.clear();
+      cityController.clear();
+      neighborhoodController.clear();
+      await _finishPdfAddressFlow();
+      return Result.ok(null);
+    }
+
     await _usecase.updateAddress(
       street: fullStreet,
       city: city,
@@ -743,6 +833,21 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _cancelCorrectionAndConfirm() async {
     if (_pendingAddress == null) return Result.ok(null);
+
+    if (_isPdfEditAddressMode) {
+      await _savePdfAddress(
+        zip: _pendingAddress!.cep,
+        street: _upper(_pendingAddress!.logradouro),
+        city: _upper(_pendingAddress!.localidade),
+        neighborhood: _upper(_pendingAddress!.bairro),
+      );
+      streetController.clear();
+      numberController.clear();
+      cityController.clear();
+      neighborhoodController.clear();
+      await _finishPdfAddressFlow();
+      return Result.ok(null);
+    }
 
     await _usecase.updateAddress(
       zip: _pendingAddress!.cep,
