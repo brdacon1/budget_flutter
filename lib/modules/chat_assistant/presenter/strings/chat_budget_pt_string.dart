@@ -200,6 +200,6 @@ class ChatBudgetStrings {
       : 'You did not change the username.';
 
   static String get changeUsernameRetryQuestion => _isPt
-      ? 'Quer tentar novamente?\n\n1. Sim\n2. Não'
-      : 'Want to try again?\n\n1. Yes\n2. No';
+      ? '1. Trocar novamente\n2. Voltar ao menu principal'
+      : '1. Change again\n2. Back to main menu';
 }

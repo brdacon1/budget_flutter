@@ -412,17 +412,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
         '${ChatBudgetStrings.changeUsernameSuccess} $newName',
         type: ChatMessageType.text,
       );
-      await _backToMainMenu();
-      return;
+    } else {
+      // Usuário cancelou ou não alterou
+      await _addBotMessage(
+        ChatBudgetStrings.changeUsernameNotChanged,
+        type: ChatMessageType.text,
+      );
     }
 
-    // Usuário cancelou ou não alterou
     await _addBotMessage(
-      ChatBudgetStrings.changeUsernameNotChanged,
-      type: ChatMessageType.text,
-    );
-    await _addBotMessage(
-      ChatBudgetStrings.changeUsernameRetryQuestion,
+      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n'
+      '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
     );
     _setStep(ChatFlowStep.changeUsernameResult);
@@ -436,6 +436,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         notifyListeners();
         break;
       case '2':
+      case '0':
         await _backToMainMenu();
         break;
       default:
