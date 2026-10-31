@@ -146,15 +146,15 @@ class PdfEditViewModel extends ChangeNotifier {
     _loadingEvent.alertLoading(context);
     try {
       final localOwner = OwnerPdf()
-        ..bairro = bairroText.text
+        ..bairro = bairroText.text.trim().toUpperCase()
         ..fotoId = owner.fotoId
-        ..city = cityText.text
-        ..rua = ruaText.text
-        ..cep = cepText.text
-        ..email = emailText.text
-        ..fone = phoneText.text
-        ..cnpj = cpfText.text
-        ..empresa = nameText.text
+        ..city = cityText.text.trim().toUpperCase()
+        ..rua = ruaText.text.trim().toUpperCase()
+        ..cep = cepText.text.trim()
+        ..email = emailText.text.trim()
+        ..fone = phoneText.text.trim()
+        ..cnpj = cpfText.text.trim()
+        ..empresa = nameText.text.trim().toUpperCase()
         ..logoName = owner.logoName;
 
       await _pdfRepository.saveInformationEnterprise(localOwner);

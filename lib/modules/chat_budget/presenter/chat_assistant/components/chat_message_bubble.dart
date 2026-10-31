@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
@@ -148,6 +151,11 @@ class ChatMessageBubble extends StatelessWidget {
         return _ProductListActions(
           onEdit: () => onAction?.call('edit_products'),
         );
+      case ChatMessageType.image:
+        return _ImageContent(
+          payload: message.payload,
+          onTap: onAction,
+        );
       case ChatMessageType.text:
       default:
         return const SizedBox.shrink();
@@ -275,6 +283,72 @@ class _ProductListActions extends StatelessWidget {
         ),
         onPressed: onEdit,
       ),
+    );
+  }
+}
+
+class _ImageContent extends StatelessWidget {
+  final Map<String, dynamic>? payload;
+  final void Function(String action)? onTap;
+
+  const _ImageContent({this.payload, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    if (payload == null) return const SizedBox.shrink();
+
+    final imageBase64 = payload!['imageBase64'] as String?;
+    final imageUrl = payload!['imageUrl'] as String?;
+    final changeAction = payload!['changeAction'] as String?;
+    final changeLabel = payload!['changeLabel'] as String? ?? 'Alterar logo';
+
+    Widget imageWidget;
+    if (imageBase64 != null && imageBase64.isNotEmpty) {
+      final bytes = base64Decode(imageBase64);
+      imageWidget = Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+      );
+    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+      imageWidget = Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 240,
+              maxHeight: 240,
+            ),
+            child: imageWidget,
+          ),
+        ),
+        if (changeAction != null) ...[
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.edit, size: 16),
+            label: Text(changeLabel),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00BFA5),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            ),
+            onPressed: () => onTap?.call(changeAction),
+          ),
+        ],
+      ],
     );
   }
 }

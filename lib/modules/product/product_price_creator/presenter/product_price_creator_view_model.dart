@@ -37,6 +37,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   late String titlePage;
   bool isSaving = false;
 
+  /// Item salvo/atualizado após operação bem-sucedida (exposto para quem chamou o modal).
+  ProductPriceModel? savedItem;
+
   ProductPriceCreatorViewModel({required this.item}) {
     _initFromItem();
   }
@@ -128,6 +131,15 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
         : ProductPtString.updateSuccess;
     if (!context.mounted) return;
     displayAlert.notification(context, ProductPtString.doneTitle, successMessage);
+
+    // Guarda o item salvo para quem chamou o modal
+    savedItem = _buildModel(
+      moneyConvert.convertFromString(priceController.text),
+      moneyConvert.convertQtdFromString(qtdText.text),
+      moneyConvert.convertFromString(priceController.text) *
+          moneyConvert.convertQtdFromString(qtdText.text),
+    );
+
     if (context.mounted) {
       Navigator.pop(context, true);
     }

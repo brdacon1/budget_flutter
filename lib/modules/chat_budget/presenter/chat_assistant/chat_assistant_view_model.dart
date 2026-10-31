@@ -1,7 +1,7 @@
-import 'package:oflite/injection.dart';
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
+import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_budget/domain/entity/chat_script_entity.dart';
@@ -9,13 +9,27 @@ import 'package:oflite/modules/chat_budget/domain/repository/chat_budget_reposit
 import 'package:oflite/modules/chat_budget/domain/repository/chat_script_repository.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart';
 import 'package:oflite/modules/chat_budget/domain/usecase/fetch_chat_script_usecase.dart';
-import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_change_username_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_logo_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_main_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_pdf_edit_confirm_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_pdf_edit_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_pdf_field_input_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/handle_price_list_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/on_logo_updated_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/chat_budget/domain/usecase/show_price_list_menu_usecase.dart';
+import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/modules/core/cep/data/model/address.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
+import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Passos do fluxo conversacional.
@@ -34,13 +48,37 @@ enum ChatFlowStep {
   reviewProducts,
   askComments,
   shareLink,
+  mainMenu,
+  priceListMenu,
+  priceListAddResult,
+  pdfEditMenu,
+  pdfEditFieldInput,
+  pdfEditConfirm,
+  changeUsername,
+  changeUsernameResult,
+  logoMenu,
+  logoViewResult,
 }
 
+/// ViewModel do assistente de chat.
+///
+/// SEMPRE inicia do zero. Não restaura conversas em andamento.
+/// Quando o usuário sai da tela e volta, o chat começa limpo.
 class ChatAssistantViewModel extends ChangeNotifier {
   final ChatBudgetRepository _chatRepo;
   final ChatScriptRepository _scriptRepo;
   final CreateBudgetFromChatUsecase _usecase;
   final FetchChatScriptUsecase _fetchScriptUsecase;
+  final ShowPriceListMenuUsecase _showPriceListUsecase;
+  final ResetChatToMenuUsecase _resetToMenuUsecase;
+  final HandleMainMenuOptionUsecase _handleMainMenuOption;
+  final HandlePriceListMenuOptionUsecase _handlePriceListMenuOption;
+  final HandlePdfEditMenuOptionUsecase _handlePdfEditMenuOption;
+  final HandlePdfFieldInputUsecase _handlePdfFieldInput;
+  final HandlePdfEditConfirmOptionUsecase _handlePdfEditConfirm;
+  final HandleChangeUsernameOptionUsecase _handleChangeUsername;
+  final HandleLogoMenuOptionUsecase _handleLogoMenuOption;
+  final OnLogoUpdatedUsecase _onLogoUpdated;
 
   bool _disposed = false;
 
@@ -49,15 +87,22 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._scriptRepo,
     this._usecase,
     this._fetchScriptUsecase,
+    this._showPriceListUsecase,
+    this._resetToMenuUsecase,
+    this._handleMainMenuOption,
+    this._handlePriceListMenuOption,
+    this._handlePdfEditMenuOption,
+    this._handlePdfFieldInput,
+    this._handlePdfEditConfirm,
+    this._handleChangeUsername,
+    this._handleLogoMenuOption,
+    this._onLogoUpdated,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
     shareLinkCommand.addListener(_onCommandDone);
   }
 
-  // ------------------------------------------------------------------
-  // Estado observável
-  // ------------------------------------------------------------------
   ChatFlowStep _step = ChatFlowStep.idle;
   ChatFlowStep get step => _step;
 
@@ -66,19 +111,27 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _chatRepo.setCurrentFlowStep(value.name);
   }
 
+  void _setStepFromName(String name) {
+    _step = _nameToStep(name);
+    _chatRepo.setCurrentFlowStep(name);
+  }
+
+  ChatFlowStep _nameToStep(String name) {
+    return ChatFlowStep.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => ChatFlowStep.mainMenu,
+    );
+  }
+
   List<ChatMessageEntity> get messages => _chatRepo.messages;
-
   CustomerInfo? get draftBudget => _chatRepo.draftBudget;
-
   ChatScriptEntity? get _script => _scriptRepo.currentScript;
 
   bool get isLoading => initializeChat.running || sendTextCommand.running;
 
-  /// Mensagem de erro do último share (para a View exibir).
   String? get shareErrorMessage => _shareErrorMessage;
   String? _shareErrorMessage;
 
-  // Controllers para inputs
   final textController = TextEditingController();
   final cepController = TextEditingController();
   final streetController = TextEditingController();
@@ -86,50 +139,44 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final cityController = TextEditingController();
   final neighborhoodController = TextEditingController();
 
-  // Indica se o formulário manual está no modo "corrigir" (veio do CEP).
   bool _isCorrectingAddress = false;
   bool get isCorrectingAddress => _isCorrectingAddress;
 
-  // Armazena dados temporários enquanto o usuário responde passo a passo
   String _pendingClientName = '';
   String _pendingPhone = '';
 
-  // IDs das mensagens de nome e telefone para permitir edição
   String? _clientNameMsgId;
   String? _clientPhoneMsgId;
 
-  // Flag de edição inline (mensagem específica sendo editada)
-  String? _editingMsgId;   // id da mensagem que está sendo editada
-  String? _editingField;    // 'clientName' | 'clientPhone'
+  String? _editingMsgId;
+  String? _editingField;
 
   bool get isEditingMessage => _editingMsgId != null;
 
-  // IDs das mensagens de review e pergunta de comentários
-  // (permitem remover/re-enviar quando o usuário edita produtos).
   String? _reviewMsgId;
   String? _commentQuestionMsgId;
 
-  // ID da mensagem de feedback após edição de comentários.
-  // Evita duplicar o balão "Comentários atualizados..." quando o usuário
-  // edita comentários, volta, edita de novo e volta novamente.
   String? _commentsFeedbackMsgId;
 
-  // Endereço retornado pelo ViaCEP, aguardando confirmação do usuário
   Address? _pendingAddress;
 
-  // Itens atualmente no rascunho (para permitir edição).
   final List<ItemsBudget> _currentDraftItems = [];
 
-  // Máscara de telefone
   final _phoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
     filter: {'#': RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
 
-  // ------------------------------------------------------------------
-  // Commands
-  // ------------------------------------------------------------------
+  String? _pdfEditField;
+
+  String? _pendingNavigation;
+  String? get pendingNavigation => _pendingNavigation;
+
+  void clearPendingNavigation() {
+    _pendingNavigation = null;
+  }
+
   late final Command0<void> initializeChat = Command0(_initialize);
   late final Command1<void, String> sendTextCommand = Command1(_sendText);
   late final Command0<void> pickContactCommand = Command0(_pickContact);
@@ -137,13 +184,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
   late final Command0<void> skipAddressCommand = Command0(_skipAddress);
   late final Command1<void, String> submitCepCommand = Command1(_submitCep);
   late final Command0<void> confirmCepAddressCommand = Command0(_confirmCepAddress);
-  late final Command0<void> submitManualAddressCommand =
-      Command0(_submitManualAddress);
+  late final Command0<void> submitManualAddressCommand = Command0(_submitManualAddress);
   late final Command0<void> openProductSelectionCommand = Command0(_noop);
-  late final Command1<void, List<ItemsBudget>> confirmProductsCommand =
-      Command1(_confirmProducts);
-  late final Command1<void, List<ItemsBudget>> editProductsCommand =
-      Command1(_editProducts);
+  late final Command1<void, List<ItemsBudget>> confirmProductsCommand = Command1(_confirmProducts);
+  late final Command1<void, List<ItemsBudget>> editProductsCommand = Command1(_editProducts);
   late final Command0<void> shareLinkCommand = Command0(_shareLink);
   late final Command0<void> resetChatCommand = Command0(_resetChat);
 
@@ -151,67 +195,47 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Inicialização
   // ------------------------------------------------------------------
   Future<Result<void>> _initialize() async {
-    final saved = _chatRepo.currentFlowStep;
+    _clearLocalState();
+    try {
+      await _fetchScriptUsecase.call();
+    } catch (_) {}
+    final step = await _resetToMenuUsecase();
+    _setStepFromName(step);
+    notifyListeners();
+    return Result.ok(null);
+  }
 
-    // Se a conversa anterior já foi finalizada (link compartilhado),
-    // limpa tudo e inicia uma nova conversa do zero.
-    if (saved == ChatFlowStep.shareLink.name) {
-      // Conversa já finalizada: limpa apenas o estado LOCAL do chat.
-      // NÃO deleta o orçamento do banco — ele já existe para o cliente.
-      _clientNameMsgId = null;
-      _clientPhoneMsgId = null;
-      _editingMsgId = null;
-      _editingField = null;
-      _chatRepo.clearSession();
-      _chatRepo.setCurrentFlowStep(null);
-      _currentDraftItems.clear();
-      _pendingClientName = '';
-      _pendingPhone = '';
-      _pendingAddress = null;
-      _isCorrectingAddress = false;
-      _shareErrorMessage = null;
-      textController.clear();
-      cepController.clear();
-      streetController.clear();
-      numberController.clear();
-      cityController.clear();
-      neighborhoodController.clear();
-      _step = ChatFlowStep.idle;
-      // cai no fluxo de inicialização abaixo
-    } else if (_chatRepo.messages.isNotEmpty && saved != null) {
-      // Restaura conversa em andamento sem duplicar mensagens
-      _step = ChatFlowStep.values.firstWhere(
-        (e) => e.name == saved,
-        orElse: () => ChatFlowStep.askClient,
-      );
-      notifyListeners();
-      return Result.ok(null);
-    }
+  Future<void> _backToMainMenu() async {
+    _clearLocalState();
+    final step = await _resetToMenuUsecase();
+    _setStepFromName(step);
+    notifyListeners();
+  }
 
-    _setStep(ChatFlowStep.welcome);
+  void _clearLocalState() {
+    _chatRepo.clearSession();
+    _chatRepo.setCurrentFlowStep(null);
+    _currentDraftItems.clear();
     _pendingClientName = '';
     _pendingPhone = '';
     _pendingAddress = null;
     _isCorrectingAddress = false;
     _shareErrorMessage = null;
+    textController.clear();
+    cepController.clear();
+    streetController.clear();
+    numberController.clear();
+    cityController.clear();
+    neighborhoodController.clear();
     _clientNameMsgId = null;
     _clientPhoneMsgId = null;
     _editingMsgId = null;
     _editingField = null;
-
-    // Carrega script
-    final scriptResult = await _fetchScriptUsecase.call();
-    if (scriptResult is Error<ChatScriptEntity>) {
-      return Result.error(scriptResult.error);
-    }
-
-    // Mensagem inicial com boas-vindas + botão de escolher contato em um só balão
-    _setStep(ChatFlowStep.askClient);
-    await _addBotMessage(
-      _script?.welcomeMessage ?? ChatScriptEntity.fallback.welcomeMessage,
-      type: ChatMessageType.contactPicker,
-    );
-    return Result.ok(null);
+    _reviewMsgId = null;
+    _commentQuestionMsgId = null;
+    _commentsFeedbackMsgId = null;
+    _pdfEditField = null;
+    _pendingNavigation = null;
   }
 
   // ------------------------------------------------------------------
@@ -227,7 +251,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return _phoneMask.maskText(digits);
   }
 
-  /// Retorna texto formatado ou vazio se inválido
   String? _tryFormatPhone(String raw) {
     final digits = raw.replaceAll(RegExp(r'\D'), '');
     if (digits.length < 10 || digits.length > 11) return null;
@@ -235,31 +258,27 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   // ------------------------------------------------------------------
-  // Ações do usuário
+  // Envia texto do usuário
   // ------------------------------------------------------------------
-
   Future<Result<void>> _sendText(String text) async {
     if (text.trim().isEmpty) return Result.ok(null);
     final clean = text.trim();
 
-    // ----------------------------------------------------------------
-    // MODO EDIÇÃO: atualiza a mensagem existente SEM criar nova
-    // ----------------------------------------------------------------
+    // Em qualquer fluxo, "0" volta ao menu principal
+    if (clean == '0' && _step != ChatFlowStep.mainMenu) {
+      await _backToMainMenu();
+      return Result.ok(null);
+    }
+
+    // Modo edição
     if (_editingMsgId != null && _editingField != null) {
       await _chatRepo.updateMessage(_editingMsgId!, clean);
-
       if (_editingField == 'clientName') {
         _pendingClientName = clean;
-        // atualiza referência se o ID mudou (não muda, é o mesmo)
       } else if (_editingField == 'clientPhone') {
         final formatted = _tryFormatPhone(clean);
-        if (formatted != null) {
-          _pendingPhone = formatted;
-        } else {
-          _pendingPhone = clean;
-        }
+        _pendingPhone = formatted ?? clean;
       }
-
       textController.clear();
       _editingMsgId = null;
       _editingField = null;
@@ -267,9 +286,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.ok(null);
     }
 
-    // ---------------------------------------------------------------
-    // FLUXO NORMAL: envia nova mensagem do usuário
-    // ---------------------------------------------------------------
+    // Envia mensagem do usuário
     final msgId = _generateMessageId();
     final userPayload = switch (_step) {
       ChatFlowStep.askClient => {'editableField': 'clientName'},
@@ -278,62 +295,153 @@ class ChatAssistantViewModel extends ChangeNotifier {
     };
     await _sendUserMessageWithId(msgId, clean, payload: userPayload);
 
-    // Guarda ID da mensagem para edição futura
     if (_step == ChatFlowStep.askClient) {
       _clientNameMsgId = msgId;
     } else if (_step == ChatFlowStep.askPhone) {
       _clientPhoneMsgId = msgId;
     }
 
-    switch (_step) {
-      case ChatFlowStep.welcome:
-      case ChatFlowStep.askClient:
-        // Guarda nome e pede telefone
+    try {
+      if (_step == ChatFlowStep.mainMenu) {
+        await _handleMainMenu(clean);
+      } else if (_step == ChatFlowStep.priceListMenu) {
+        await _handlePriceList(clean);
+      } else if (_step == ChatFlowStep.pdfEditMenu) {
+        await _handlePdfEdit(clean);
+      } else if (_step == ChatFlowStep.pdfEditFieldInput) {
+        await _handlePdfField(clean);
+      } else if (_step == ChatFlowStep.pdfEditConfirm) {
+        await _handlePdfConfirm(clean);
+      } else if (_step == ChatFlowStep.changeUsername) {
+        await _handleUsername(clean);
+      } else if (_step == ChatFlowStep.logoMenu) {
+        await _handleLogo(clean);
+      } else if (_step == ChatFlowStep.welcome || _step == ChatFlowStep.askClient) {
         _pendingClientName = clean;
         _setStep(ChatFlowStep.askPhone);
         await _addBotMessage(
           _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
           type: ChatMessageType.text,
         );
-        break;
-
-      case ChatFlowStep.askPhone:
-        // Valida telefone obrigatório
+      } else if (_step == ChatFlowStep.askPhone) {
         if (!_isValidPhone(clean)) {
           await _addBotMessage(
             'Telefone inválido. Informe apenas números com DDD. Ex: (11) 99999-9999 ou 11999999999.',
             type: ChatMessageType.text,
           );
-          // Permanece no mesmo step pedindo telefone novamente
-          break;
+        } else {
+          _pendingPhone = _normalizePhone(clean);
+          await _showClientDataConfirmation();
         }
-        _pendingPhone = _normalizePhone(clean);
-        await _showClientDataConfirmation();
-        break;
-
-      case ChatFlowStep.askCep:
+      } else if (_step == ChatFlowStep.askHasCep) {
+        if (clean == '1') {
+          await _askForCep();
+        } else if (clean == '2') {
+          await _goToManualAddress();
+        } else {
+          await _addBotMessage(
+            'Opção inválida. Digite 1 para Sim ou 2 para Não.',
+            type: ChatMessageType.text,
+          );
+        }
+      } else if (_step == ChatFlowStep.askCep) {
         await _submitCep(clean);
-        break;
-
-      case ChatFlowStep.askStreetManual:
-        // Input dedicado, não chega aqui
-        break;
-
-      default:
-        break;
+      }
+    } catch (e) {
+      await _addBotMessage(
+        'Erro ao processar: $e',
+        type: ChatMessageType.text,
+      );
     }
     return Result.ok(null);
   }
 
+  // ------------------------------------------------------------------
+  // Handlers de menus delegando para UseCases
+  // ------------------------------------------------------------------
+  Future<void> _handleMainMenu(String option) async {
+    final result = await _handleMainMenuOption(option);
+    _setStepFromName(result.nextStep);
+    _pendingNavigation = result.navigation;
+    notifyListeners();
+  }
+
+  Future<void> _handlePriceList(String option) async {
+    final result = _handlePriceListMenuOption(option);
+    if (result.navigation != null) {
+      _pendingNavigation = result.navigation;
+    }
+    if (result.nextStep != _step.name) {
+      _setStepFromName(result.nextStep);
+    }
+    notifyListeners();
+  }
+
+  Future<void> _handlePdfEdit(String option) async {
+    final result = await _handlePdfEditMenuOption(option);
+    _pdfEditField = result.pdfField;
+    if (result.navigation != null) {
+      _pendingNavigation = result.navigation;
+    }
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+  }
+
+  Future<void> _handlePdfField(String value) async {
+    if (_pdfEditField == null) return;
+    final result = await _handlePdfFieldInput(_pdfEditField!, value);
+    _pdfEditField = result.pdfField;
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+  }
+
+  Future<void> _handlePdfConfirm(String option) async {
+    final result = await _handlePdfEditConfirm(option);
+    if (result.nextStep == 'mainMenu') {
+      await _backToMainMenu();
+      return;
+    }
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+  }
+
+  Future<void> _handleUsername(String option) async {
+    final result = await _handleChangeUsername(option);
+    if (result.navigation != null) {
+      _pendingNavigation = result.navigation;
+    }
+    if (result.nextStep == 'mainMenu') {
+      await _backToMainMenu();
+      return;
+    }
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+  }
+
+  Future<void> _handleLogo(String option) async {
+    final result = await _handleLogoMenuOption(option);
+    if (result.navigation != null) {
+      _pendingNavigation = result.navigation;
+    }
+    if (result.nextStep == 'mainMenu') {
+      await _backToMainMenu();
+      return;
+    }
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+  }
+
+  // ------------------------------------------------------------------
+  // Fluxo de orçamento
+  // ------------------------------------------------------------------
   Future<Result<void>> _pickContact() async {
     try {
-      final hasPermission = await UserInfo.FlutterContacts.requestPermission();
+      final hasPermission = await user_info.FlutterContacts.requestPermission();
       if (!hasPermission) return Result.ok(null);
 
-      final contact = await UserInfo.FlutterContacts.openExternalPick();
+      final contact = await user_info.FlutterContacts.openExternalPick();
       if (contact == null) return Result.ok(null);
 
-      // Extrai nome
       String name = contact.displayName.trim();
       if (name.isEmpty) {
         final first = contact.name.first.trim();
@@ -342,7 +450,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       }
       if (name.isEmpty) name = 'Cliente';
 
-      // Extrai telefone
       String? phone;
       final phones = contact.phones;
       if (phones.isNotEmpty) {
@@ -351,9 +458,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
             .replaceAll('+', '')
             .replaceAll(RegExp(r'\D'), '');
         if (phone.isNotEmpty) {
-          // valida quantidade de dígitos
           if (phone.length < 10 || phone.length > 11) {
-            phone = null; // inválido, vai pedir manualmente
+            phone = null;
           } else {
             phone = _phoneMask.maskText(phone);
           }
@@ -361,11 +467,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
       }
 
       final nameMsgId = _generateMessageId();
-      await _sendUserMessageWithId(nameMsgId, name, payload: {'editableField': 'clientName'});
+      await _sendUserMessageWithId(
+        nameMsgId,
+        name,
+        payload: {'editableField': 'clientName'},
+      );
       _clientNameMsgId = nameMsgId;
       _pendingClientName = name;
 
-      // Se não tiver telefone válido no contato, pede
       if (phone == null || phone.isEmpty) {
         _setStep(ChatFlowStep.askPhone);
         await _addBotMessage(
@@ -388,7 +497,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
     textController.clear();
 
     final msgId = _generateMessageId();
-    await _sendUserMessageWithId(msgId, name, payload: {'editableField': 'clientName'});
+    await _sendUserMessageWithId(
+      msgId,
+      name,
+      payload: {'editableField': 'clientName'},
+    );
     _clientNameMsgId = msgId;
 
     _pendingClientName = name;
@@ -400,7 +513,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  /// Mostra os dados do cliente para confirmação antes de criar o rascunho.
   Future<Result<void>> _showClientDataConfirmation() async {
     _setStep(ChatFlowStep.confirmClientData);
     await _addBotMessage(
@@ -415,7 +527,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  /// Prepara modo de edição inline (tipo WhatsApp).
   void prepareEditMessage(String field, String currentText, String messageId) {
     textController.text = currentText;
     _editingMsgId = messageId;
@@ -442,7 +553,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cancela o modo de edição (ex: ao tocar fora)
   void cancelEdit() {
     _editingMsgId = null;
     _editingField = null;
@@ -450,7 +560,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cria o orçamento e avança para perguntar o endereço.
   Future<Result<void>> _createDraftAndGoToAddress(
     String clientName, {
     String? phone,
@@ -486,17 +595,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  /// Usuário respondeu "SIM" em "Você tem o CEP?" → pede o CEP.
   Future<Result<void>> _askForCep() async {
     _setStep(ChatFlowStep.askCep);
     await _addBotMessage(
-      _script?.askCep ?? ChatScriptEntity.fallback.askCep,
+      '${_script?.askCep ?? ChatScriptEntity.fallback.askCep}\n\n'
+      '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
     );
     return Result.ok(null);
   }
 
-  /// Usuário respondeu "NÃO" em "Você tem o CEP?" → vai para manual.
   Future<Result<void>> _goToManualAddress() async {
     _isCorrectingAddress = false;
     _pendingAddress = null;
@@ -506,7 +614,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     neighborhoodController.clear();
     _setStep(ChatFlowStep.askStreetManual);
     await _addBotMessage(
-      _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
+      '${_script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback}\n\n'
+      '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
     );
     return Result.ok(null);
@@ -528,7 +637,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final address = await viaCep.getAddress(cep);
 
     if (address.logradouro == null || address.logradouro!.isEmpty) {
-      // CEP não encontrado → avisa e vai para manual
       _isCorrectingAddress = false;
       _pendingAddress = null;
       _setStep(ChatFlowStep.askStreetManual);
@@ -543,7 +651,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.ok(null);
     }
 
-    // Guarda o endereço encontrado e espera confirmação
     _pendingAddress = address;
     _pendingAddress!.cep = cep;
 
@@ -552,22 +659,22 @@ class ChatAssistantViewModel extends ChangeNotifier {
       'Encontrei o endereço:\n'
       '${_upper(address.logradouro)}\n'
       '${address.bairro != null && address.bairro!.isNotEmpty ? '${_upper(address.bairro)}\n' : ''}'
-      '${_upper(address.localidade)}',
+      '${_upper(address.localidade)}\n\n'
+      '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.inlineButtons,
       payload: {'actions': ['Confirmar endereço', 'Corrigir endereço']},
     );
     return Result.ok(null);
   }
 
-  /// Usuário confirmou o endereço retornado pelo ViaCEP.
   Future<Result<void>> _confirmCepAddress() async {
     if (_pendingAddress == null) return Result.ok(null);
 
     await _usecase.updateAddress(
       zip: _pendingAddress!.cep,
-      street: _pendingAddress!.logradouro,
-      city: _pendingAddress!.localidade,
-      neighborhood: _pendingAddress!.bairro,
+      street: _upper(_pendingAddress!.logradouro),
+      city: _upper(_pendingAddress!.localidade),
+      neighborhood: _upper(_pendingAddress!.bairro),
     );
 
     _pendingAddress = null;
@@ -590,10 +697,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _submitManualAddress() async {
-    final street = streetController.text.trim();
+    final street = _upper(streetController.text.trim());
     final number = numberController.text.trim();
-    final city = cityController.text.trim();
-    final neighborhood = neighborhoodController.text.trim();
+    final city = _upper(cityController.text.trim());
+    final neighborhood = _upper(neighborhoodController.text.trim());
 
     if (street.isEmpty || city.isEmpty) {
       await _addBotMessage(
@@ -603,7 +710,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return Result.ok(null);
     }
 
-    // Concatena rua + número separado por vírgula
     final fullStreet = number.isNotEmpty ? '$street, $number' : street;
 
     await _usecase.updateAddress(
@@ -635,15 +741,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return Result.ok(null);
   }
 
-  /// Cancela a correção e confirma o endereço original do CEP.
   Future<Result<void>> _cancelCorrectionAndConfirm() async {
     if (_pendingAddress == null) return Result.ok(null);
 
     await _usecase.updateAddress(
       zip: _pendingAddress!.cep,
-      street: _pendingAddress!.logradouro,
-      city: _pendingAddress!.localidade,
-      neighborhood: _pendingAddress!.bairro,
+      street: _upper(_pendingAddress!.logradouro),
+      city: _upper(_pendingAddress!.localidade),
+      neighborhood: _upper(_pendingAddress!.bairro),
     );
 
     streetController.clear();
@@ -681,7 +786,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _usecase.addProducts(items);
     _currentDraftItems.addAll(items);
 
-    // Mostra resumo atualizado com os itens do banco
     return await _showProductReviewAndComments();
   }
 
@@ -689,10 +793,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return _confirmProducts(items, isEdit: true);
   }
 
-  /// Busca os itens atuais do draft no banco e exibe o resumo + pergunta comentários.
-  /// Remove as mensagens anteriores para evitar duplicação no chat.
   Future<Result<void>> _showProductReviewAndComments() async {
-    // Remove mensagens anteriores de review e comentários (já exibidas)
     if (_reviewMsgId != null) {
       await _chatRepo.removeMessageById(_reviewMsgId!);
       _reviewMsgId = null;
@@ -702,7 +803,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _commentQuestionMsgId = null;
     }
 
-    // Busca itens atualizados do draft
     final result = await _chatRepo.fetchDraftItems();
     final List<ItemsBudget> items;
     if (result is Ok<List<ItemsBudget>>) {
@@ -711,7 +811,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       items = List<ItemsBudget>.from(_currentDraftItems);
     }
 
-    // Monta resumo
     final buffer = StringBuffer();
     double grandTotal = 0;
     if (items.isEmpty) {
@@ -722,7 +821,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         final lineTotal = it.TOTAL ?? ((it.QTD ?? 0) * (it.PRECO ?? 0));
         grandTotal += lineTotal;
         buffer.writeln(
-          '• ${it.DESCRICAO} — ${(it.QTD ?? 1).toInt()}x R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)} = R\$ ${lineTotal.toStringAsFixed(2)}',
+          '• ${it.DESCRICAO} — ${(it.QTD ?? 1).toInt()}x '
+          'R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)} = '
+          'R\$ ${lineTotal.toStringAsFixed(2)}',
         );
       }
       buffer.writeln('');
@@ -731,7 +832,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _setStep(ChatFlowStep.askComments);
 
-    // Envia resumo e guarda ID
     _reviewMsgId = _generateMessageId();
     await _sendBotMessageWithId(
       _reviewMsgId!,
@@ -739,7 +839,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
       type: ChatMessageType.productList,
     );
 
-    // Envia pergunta de comentários e guarda ID
     _commentQuestionMsgId = _generateMessageId();
     await _sendBotMessageWithId(
       _commentQuestionMsgId!,
@@ -796,41 +895,18 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _resetChat() async {
-    // Se a conversa já foi finalizada (shareLink), apaga apenas estado LOCAL.
-    // NÃO deleta o orçamento do banco — ele já é um orçamento válido e salvo
-    // para o cliente.
     if (_step != ChatFlowStep.shareLink) {
       await _chatRepo.deleteDraft();
     }
-    _chatRepo.clearSession();
-    _currentDraftItems.clear();
-    _pendingClientName = '';
-    _pendingPhone = '';
-    _pendingAddress = null;
-    _isCorrectingAddress = false;
-    _shareErrorMessage = null;
-    textController.clear();
-    cepController.clear();
-    streetController.clear();
-    numberController.clear();
-    cityController.clear();
-    neighborhoodController.clear();
-    _clientNameMsgId = null;
-    _clientPhoneMsgId = null;
-    _editingMsgId = null;
-    _editingField = null;
-    _reviewMsgId = null;
-    _commentQuestionMsgId = null;
-    _commentsFeedbackMsgId = null;
-    _chatRepo.setCurrentFlowStep(null);
-    _step = ChatFlowStep.idle;
-    return await _initialize();
+    _clearLocalState();
+    final step = await _resetToMenuUsecase();
+    _setStepFromName(step);
+    return Result.ok(null);
   }
 
   // ------------------------------------------------------------------
   // Helpers de mensagens
   // ------------------------------------------------------------------
-
   String _generateMessageId() {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
@@ -896,16 +972,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
   }
 
-  /// Limpa o erro de share para que o SnackBar não reapareça.
   void clearShareError() {
     _shareErrorMessage = null;
     shareLinkCommand.clearResult();
   }
 
   // ------------------------------------------------------------------
-  // Ação de botões inline recebida pela View
+  // Ação de botões inline
   // ------------------------------------------------------------------
-
   Future<void> handleAction(String action) async {
     switch (action) {
       case 'pick_contact':
@@ -913,7 +987,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
       case 'SIM':
         if (_step == ChatFlowStep.askAddress) {
-          // SIM para "quer incluir endereço?" → pergunta se tem CEP
           _setStep(ChatFlowStep.askHasCep);
           await _addBotMessage(
             _script?.askHasCep ?? ChatScriptEntity.fallback.askHasCep,
@@ -921,22 +994,15 @@ class ChatAssistantViewModel extends ChangeNotifier {
             payload: {'actions': ['SIM', 'NÃO']},
           );
         } else if (_step == ChatFlowStep.askHasCep) {
-          // SIM tem CEP → pede o CEP
           await _askForCep();
-        } else if (_step == ChatFlowStep.askComments) {
-          // SIM quer comentários → view abre tela de comentários
-          // Ação é tratada pela View via onAction
         }
         break;
       case 'NÃO':
         if (_step == ChatFlowStep.askAddress) {
-          // NÃO quer endereço → pula
           await skipAddressCommand.execute();
         } else if (_step == ChatFlowStep.askHasCep) {
-          // NÃO tem CEP → vai para manual
           await _goToManualAddress();
         } else if (_step == ChatFlowStep.askComments) {
-          // NÃO quer comentários → pula e finaliza
           await _finalizeAndShare();
         }
         break;
@@ -950,7 +1016,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await confirmCepAddressCommand.execute();
         break;
       case 'Corrigir endereço':
-        // Preenche os campos com dados do CEP e vai para manual
         _isCorrectingAddress = true;
         streetController.text = _upper(_pendingAddress?.logradouro);
         cityController.text = _upper(_pendingAddress?.localidade);
@@ -975,7 +1040,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _askEditPhone();
         break;
       case 'open_products':
-        // A view abre a tela de produtos
         break;
       case 'share_link':
         await shareLinkCommand.execute();
@@ -984,7 +1048,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _finalizeAndShare();
         break;
       case 'edit_products':
-        // A view abre a tela de produtos em modo edição
         break;
       case 'cancel_and_proceed':
         await _cancelCorrectionAndConfirm();
@@ -992,22 +1055,53 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
   }
 
-  /// Chamado pela View após o usuário voltar da tela de itens do orçamento.
+  // ------------------------------------------------------------------
+  // Callback da View após criar produto
+  // ------------------------------------------------------------------
+  Future<void> onProductCreatedFromChat() async {
+    final productRepo = getIt<ProductPriceRepository>();
+    final result = await productRepo.fetchProducts();
+
+    ProductPriceModel? lastProduct;
+    if (result is Ok<List<ProductPriceModel>> && result.value.isNotEmpty) {
+      lastProduct = result.value.last;
+    }
+
+    if (lastProduct != null) {
+      final desc = lastProduct.descricao ?? 'Produto';
+      final preco = (lastProduct.preco ?? 0).toStringAsFixed(2);
+      final categoria = lastProduct.categoria ?? 'Serviços';
+
+      await _addBotMessage(
+        'Produto criado com sucesso! 🎉\n\n'
+        'Descrição: $desc\n'
+        'Preço: R\$ $preco\n'
+        'Categoria: $categoria',
+        type: ChatMessageType.inlineButtons,
+        payload: {
+          'actions': ['Abrir lista de produtos'],
+        },
+      );
+    } else {
+      await _addBotMessage(
+        'Produto criado com sucesso! 🎉',
+        type: ChatMessageType.text,
+      );
+    }
+
+    final step = await _showPriceListUsecase();
+    _setStepFromName(step);
+    notifyListeners();
+  }
+
   Future<void> goToCommentsAfterProductEdit() async {
-    // Sincroniza o total recalculado pela BudgetListItemsViewModel
     await _chatRepo.refreshDraftTotal();
-    // Mostra resumo atualizado e pergunta de comentários
     await _showProductReviewAndComments();
   }
 
-  /// Chamado pela View após o usuário voltar da tela de comentários.
-  /// Envia o feedback de comentários atualizados com botões de ação,
-  /// mas garante que não haja duplicatas se o balão já existe.
   Future<void> finalizeAfterComments() async {
     _setStep(ChatFlowStep.askComments);
 
-    // Se o balão de feedback já foi enviado anteriormente e ainda existe
-    // no histórico, simplesmente mantém a mensagem atual — não repete.
     if (_commentsFeedbackMsgId != null &&
         _chatRepo.messages.any((m) => m.id == _commentsFeedbackMsgId)) {
       return;
@@ -1018,12 +1112,22 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     await _sendBotMessageWithId(
       msgId,
-      'Comentários atualizados com sucesso. Deseja editar novamente ou finalizar o orçamento?',
+      'Comentários atualizados com sucesso. Deseja editar '
+      'novamente ou finalizar o orçamento?',
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['Editar comentários', 'Finalizar e gerar link']
       },
     );
+  }
+
+  // ------------------------------------------------------------------
+  // Callbacks dos fluxos externos
+  // ------------------------------------------------------------------
+  Future<void> onLogoUpdated() async {
+    final step = await _onLogoUpdated();
+    _setStepFromName(step);
+    notifyListeners();
   }
 
   @override

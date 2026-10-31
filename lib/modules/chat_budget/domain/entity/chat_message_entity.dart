@@ -8,6 +8,7 @@ enum ChatMessageType {
   productList,
   contactPicker,
   inlineButtons,
+  image,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.

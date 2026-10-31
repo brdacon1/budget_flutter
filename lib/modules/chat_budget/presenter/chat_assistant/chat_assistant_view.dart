@@ -6,6 +6,17 @@ import 'package:oflite/modules/chat_budget/presenter/chat_assistant/components/c
 import 'package:oflite/modules/chat_budget/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/image/presenter/image_edit_view.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
+import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
+import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/shared/design_pattern/result.dart';
 
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
@@ -25,13 +36,19 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   void initState() {
     super.initState();
     _vm = getIt<ChatAssistantViewModel>();
+    _vm.addListener(_onVmChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _vm.initializeChat.execute();
     });
   }
 
+  void _onVmChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    _vm.removeListener(_onVmChanged);
     _vm.dispose();
     _scrollController.dispose();
     _inputFocusNode.dispose();
@@ -80,6 +97,91 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     // Ao voltar da tela de comentários, finaliza o orçamento
     await _vm.finalizeAfterComments();
+  }
+
+  /// Processa navegações pendentes disparadas pela ViewModel (telas/modais externas).
+  Future<void> _handlePendingNavigation() async {
+    final nav = _vm.pendingNavigation;
+    if (nav == null) return;
+
+    // Limpa imediatamente para evitar re-executar no próximo build
+    _vm.clearPendingNavigation();
+
+    switch (nav) {
+      case 'open_price_list':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProductPriceListView(fromMenu: true),
+          ),
+        );
+        break;
+      case 'open_product_creator':
+        _openProductCreator();
+        break;
+      case 'open_pdf_edit':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const PdfEditView(),
+          ),
+        );
+        break;
+      case 'open_change_name':
+        _openChangeNameModal();
+        break;
+      case 'open_logo_view':
+        break;
+      case 'open_logo_edit':
+        await _openLogoEditFlow();
+        break;
+    }
+  }
+
+  Future<void> _openProductCreator() async {
+    final result = await showProductPriceCreatorBottomModal(
+      context,
+      item: ProductPriceModel(),
+    );
+
+    if (result == true) {
+      // Modal salvou com sucesso — notifica o ViewModel para buscar o produto
+      await _vm.onProductCreatedFromChat();
+    }
+  }
+
+  Future<void> _openChangeNameModal() async {
+    final displayAlert = getIt<DisplayAlertRepository>();
+    await displayAlert.dialogChangeName(context);
+    // Ao fechar o modal, o chat confirma a alteração
+    // TODO: receber o novo nome e confirmar no chat (prompt 5)
+  }
+
+  Future<void> _openLogoEditFlow() async {
+    final isSubscribed = UID.autoRenewing ?? false;
+    if (!isSubscribed) {
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SubscriptionView()),
+      );
+    } else {
+      final pdfRepo = getIt<PdfRepository>();
+      final result = await pdfRepo.fetchInformationEnterprise();
+      final owner = result is Ok<OwnerPdf> ? result.value : OwnerPdf();
+
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ImageEditView(owner: owner, title: 'Editar Logo'),
+        ),
+      );
+    }
+
+    if (!mounted) return;
+    // Ao voltar, notifica o ViewModel para confirmar e voltar ao menu de PDF
+    await _vm.onLogoUpdated();
   }
 
   @override
@@ -133,10 +235,14 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           ),
         ],
       ),
-      body: AnimatedBuilder(
-        animation: _vm,
-        builder: (context, _) {
+      body: Builder(
+        builder: (context) {
           _scrollToBottom();
+
+          // Processa navegação pendente da ViewModel (fora do build)
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (mounted) await _handlePendingNavigation();
+          });
 
           // Mostra SnackBar quando share dá erro
           if (_vm.shareLinkCommand.error && mounted) {
@@ -258,6 +364,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         break;
       case 'cancel_and_proceed':
         await _vm.handleAction('cancel_and_proceed');
+        break;
+      case 'open_logo_edit':
+        await _openLogoEditFlow();
         break;
       default:
         // Delega para o ViewModel ações que não precisam de interação com a UI
