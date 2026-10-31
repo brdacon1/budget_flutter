@@ -51,9 +51,8 @@ class _MainTabView extends State<MainTabView> {
   Widget build(BuildContext context) {
     final List<Widget> children = [
       const ChatAssistantView(),
-      const DashboardView(),
       const BudgetListView(),
-      const MainConfigMenuView(),
+      const DashboardView(),
     ];
 
     return AnimatedBuilder(
