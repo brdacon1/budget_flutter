@@ -165,6 +165,10 @@ class ChatBudgetStrings {
       ? 'Vamos atualizar o endereço da sua empresa. Você tem o CEP?'
       : 'Let\'s update your company address. Do you have the ZIP code?';
 
+  static String get pdfEditProceedQuestion => _isPt
+      ? 'Deseja prosseguir com a alteração?'
+      : 'Do you want to proceed with the changes?';
+
   // ------------------------------------------------------------------
   // Logo submenu
   // ------------------------------------------------------------------

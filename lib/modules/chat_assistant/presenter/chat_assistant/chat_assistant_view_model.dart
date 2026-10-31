@@ -21,6 +21,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
@@ -49,6 +50,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final HandleMainMenuOptionUsecase _handleMainMenuOption;
   final HandlePriceListMenuOptionUsecase _handlePriceListMenuOption;
   final HandlePdfEditMenuOptionUsecase _handlePdfEditMenuOption;
+  final ShowPdfEditMenuUsecase _showPdfEditUsecase;
   final HandlePdfFieldInputUsecase _handlePdfFieldInput;
   final HandlePdfEditConfirmOptionUsecase _handlePdfEditConfirm;
   final HandleChangeUsernameOptionUsecase _handleChangeUsername;
@@ -68,6 +70,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._handleMainMenuOption,
     this._handlePriceListMenuOption,
     this._handlePdfEditMenuOption,
+    this._showPdfEditUsecase,
     this._handlePdfFieldInput,
     this._handlePdfEditConfirm,
     this._handleChangeUsername,
@@ -286,6 +289,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _handleMainMenu(clean);
       } else if (_step == ChatFlowStep.priceListMenu) {
         await _handlePriceList(clean);
+      } else if (_step == ChatFlowStep.pdfEditConfirmEntry) {
+        await _handlePdfEditConfirmEntry(clean);
       } else if (_step == ChatFlowStep.pdfEditMenu) {
         await _handlePdfEdit(clean);
       } else if (_step == ChatFlowStep.pdfEditFieldInput) {
@@ -357,6 +362,22 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _setStepFromName(result.nextStep);
     }
     notifyListeners();
+  }
+
+  Future<void> _handlePdfEditConfirmEntry(String option) async {
+    final upper = option.trim().toUpperCase();
+    if (upper == 'SIM') {
+      final step = await _showPdfEditUsecase();
+      _setStepFromName(step);
+      notifyListeners();
+    } else if (upper == 'NÃO') {
+      await _backToMainMenu();
+    } else {
+      await _addBotMessage(
+        ChatBudgetStrings.menuInvalidOption,
+        type: ChatMessageType.text,
+      );
+    }
   }
 
   Future<void> _handlePdfEdit(String option) async {

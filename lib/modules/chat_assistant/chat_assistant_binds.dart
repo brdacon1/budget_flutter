@@ -20,6 +20,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_use
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_confirm_entry_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/start_budget_from_menu_usecase.dart';
@@ -75,6 +76,12 @@ void registerChatBudgetDependencies(GetIt sl) {
   sl.registerLazySingleton<ShowPdfEditMenuUsecase>(
     () => ShowPdfEditMenuUsecase(sl<ChatBudgetRepository>()),
   );
+  sl.registerLazySingleton<ShowPdfEditConfirmEntryUsecase>(
+    () => ShowPdfEditConfirmEntryUsecase(
+      sl<ChatBudgetRepository>(),
+      sl<PdfRepository>(),
+    ),
+  );
   sl.registerLazySingleton<ShowChangeUsernameMenuUsecase>(
     () => ShowChangeUsernameMenuUsecase(sl<ChatBudgetRepository>()),
   );
@@ -92,6 +99,7 @@ void registerChatBudgetDependencies(GetIt sl) {
     () => HandleMainMenuOptionUsecase(
       sl<StartBudgetFromMenuUsecase>(),
       sl<ShowPriceListMenuUsecase>(),
+      sl<ShowPdfEditConfirmEntryUsecase>(),
       sl<ShowPdfEditMenuUsecase>(),
       sl<ShowChangeUsernameMenuUsecase>(),
       sl<ResetChatToMenuUsecase>(),
@@ -148,6 +156,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<HandleMainMenuOptionUsecase>(),
       sl<HandlePriceListMenuOptionUsecase>(),
       sl<HandlePdfEditMenuOptionUsecase>(),
+      sl<ShowPdfEditMenuUsecase>(),
       sl<HandlePdfFieldInputUsecase>(),
       sl<HandlePdfEditConfirmOptionUsecase>(),
       sl<HandleChangeUsernameOptionUsecase>(),

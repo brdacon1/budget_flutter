@@ -1,5 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_confirm_entry_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
@@ -9,6 +10,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/start_budget_from_m
 class HandleMainMenuOptionUsecase {
   final StartBudgetFromMenuUsecase _startBudget;
   final ShowPriceListMenuUsecase _showPriceList;
+  final ShowPdfEditConfirmEntryUsecase _showPdfEditConfirmEntry;
   final ShowPdfEditMenuUsecase _showPdfEdit;
   final ShowChangeUsernameMenuUsecase _showChangeUsername;
   final ResetChatToMenuUsecase _resetToMenu;
@@ -16,6 +18,7 @@ class HandleMainMenuOptionUsecase {
   const HandleMainMenuOptionUsecase(
     this._startBudget,
     this._showPriceList,
+    this._showPdfEditConfirmEntry,
     this._showPdfEdit,
     this._showChangeUsername,
     this._resetToMenu,
@@ -30,7 +33,7 @@ class HandleMainMenuOptionUsecase {
         final step = await _showPriceList();
         return ChatMenuResult(step);
       case '3':
-        final step = await _showPdfEdit();
+        final step = await _showPdfEditConfirmEntry();
         return ChatMenuResult(step);
       case '4':
         final step = await _showChangeUsername();

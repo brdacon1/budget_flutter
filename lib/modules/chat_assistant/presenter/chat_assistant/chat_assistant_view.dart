@@ -342,8 +342,24 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           await _vm.handleAction('SIM');
         }
         break;
+      case 'Sim':
+        if (_vm.step == ChatFlowStep.pdfEditConfirmEntry) {
+          await _vm.sendTextCommand.execute('Sim');
+        } else {
+          await _vm.handleAction(action);
+        }
+        break;
       case 'NÃO':
         if (_vm.step == ChatFlowStep.askComments) {
+          await _vm.handleAction('NÃO');
+        } else {
+          await _vm.skipAddressCommand.execute();
+        }
+        break;
+      case 'Não':
+        if (_vm.step == ChatFlowStep.pdfEditConfirmEntry) {
+          await _vm.sendTextCommand.execute('Não');
+        } else if (_vm.step == ChatFlowStep.askComments) {
           await _vm.handleAction('NÃO');
         } else {
           await _vm.skipAddressCommand.execute();
