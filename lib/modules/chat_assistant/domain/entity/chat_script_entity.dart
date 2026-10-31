@@ -3,7 +3,6 @@
 /// Todas as mensagens que o bot exibe podem ser alteradas
 /// editando o documento `CONFIG/CHAT_SCRIPT/DEFAULT`.
 class ChatScriptEntity {
-  final String welcomeMessage;
   final String askClientName;
   final String askPhone;
   final String askAddress;
@@ -16,7 +15,6 @@ class ChatScriptEntity {
   final String shareLabel;
 
   const ChatScriptEntity({
-    required this.welcomeMessage,
     required this.askClientName,
     required this.askPhone,
     required this.askAddress,
@@ -31,8 +29,6 @@ class ChatScriptEntity {
 
   /// Fallback quando o documento ainda não foi criado no Firestore.
   static const ChatScriptEntity fallback = ChatScriptEntity(
-    welcomeMessage:
-        'Olá! Sou seu assistente de orçamentos. Para quem você quer criar um orçamento?',
     askClientName: 'Para quem você quer criar um orçamento?',
     askPhone: 'Qual o telefone do cliente?',
     askAddress: 'Você quer incluir o endereço do cliente?',

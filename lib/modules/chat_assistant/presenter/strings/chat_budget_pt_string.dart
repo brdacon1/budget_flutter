@@ -60,14 +60,14 @@ class ChatBudgetStrings {
       : 'What can I do for you?';
 
   static String get mainMenuOptions => _isPt
-      ? '1. Criar orçamentos\n'
-        '2. Lista de preço\n'
-        '3. Editar PDF\n'
-        '4. Trocar nome de usuário'
-      : '1. Create budget\n'
-        '2. Price list\n'
-        '3. Edit PDF\n'
-        '4. Change username';
+      ? '1. Criar orçamentos\n\n'
+        '2. Lista de preço\n\n'
+        '3. Editar PDF\n\n'
+        '4. Trocar nome de usuário\n'
+      : '1. Create budget\n\n'
+        '2. Price list\n\n'
+        '3. Edit PDF\n\n'
+        '4. Change username\n';
 
   static String get menuInvalidOption => _isPt
       ? 'Opção inválida. Envie o número correspondente.'
