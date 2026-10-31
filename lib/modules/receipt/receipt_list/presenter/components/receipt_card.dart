@@ -1,7 +1,7 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 

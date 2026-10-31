@@ -6,7 +6,7 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Gerenciamento de estado da tela de criação/edição de recibo.

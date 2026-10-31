@@ -7,7 +7,7 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/payment_customer.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 
 enum Gender {
   descricaoText,

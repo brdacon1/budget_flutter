@@ -1,8 +1,8 @@
 import 'package:oflite/modules/payment/data/datasource/payment_remote_datasource.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
-import 'package:oflite/shared/models/payment_customer.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentRepositoryImpl extends PaymentRepository {

@@ -1,6 +1,6 @@
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptRepositoryImpl extends ReceiptRepository {

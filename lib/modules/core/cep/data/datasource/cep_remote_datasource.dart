@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:oflite/shared/models/address.dart';
+import 'package:oflite/modules/core/cep/data/model/address.dart';
 
 /// Fonte remota de dados de CEP (ViaCEP).
 class CepRemoteDataSource {

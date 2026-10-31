@@ -2,7 +2,7 @@ import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/dashboard/presenter/components/storage_info_card.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/shared/models/month_calculate.dart';
+import 'package:oflite/modules/dashboard/domain/entity/month_calculate.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'chart_line.dart';

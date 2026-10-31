@@ -1,4 +1,3 @@
-
 class PaymentCustomer {
   String? id;
   String? METODO;

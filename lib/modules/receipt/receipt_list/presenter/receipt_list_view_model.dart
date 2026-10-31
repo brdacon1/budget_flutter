@@ -7,8 +7,8 @@ import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart
 import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Gerenciamento de estado da tela de **lista de recibos**.

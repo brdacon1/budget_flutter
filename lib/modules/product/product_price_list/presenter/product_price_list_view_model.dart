@@ -12,8 +12,8 @@ import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart'
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 

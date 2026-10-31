@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/models/info_user.dart';
-import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/modules/login/data/model/info_user.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 
 class UserRemoteDataSource {
   final FirebaseFirestore _firestore;

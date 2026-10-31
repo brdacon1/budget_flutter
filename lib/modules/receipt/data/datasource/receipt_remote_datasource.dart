@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 class ReceiptRemoteDataSource {
   final FirebaseFirestore _firestore;

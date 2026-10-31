@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/models/my_budget_dashboard.dart';
+import 'package:oflite/modules/dashboard/domain/entity/my_budget_dashboard.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'chart.dart';

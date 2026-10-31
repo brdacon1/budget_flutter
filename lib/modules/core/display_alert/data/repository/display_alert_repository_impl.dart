@@ -10,8 +10,8 @@ import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widg
 import 'package:oflite/shared/common/widgets/modals/change_name_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/change_password_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_widget.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
-import 'package:oflite/shared/models/info_user.dart';
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as global_uid_user;
+import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
 

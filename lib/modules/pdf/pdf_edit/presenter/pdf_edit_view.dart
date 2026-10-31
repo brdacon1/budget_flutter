@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'components/pdf_edit_header.dart';
 import 'components/pdf_edit_logo_section.dart';

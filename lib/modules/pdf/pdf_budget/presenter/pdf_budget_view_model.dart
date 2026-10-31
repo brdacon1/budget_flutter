@@ -5,10 +5,10 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
-import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 

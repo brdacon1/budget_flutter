@@ -13,7 +13,7 @@ import 'package:oflite/modules/core/share_link/domain/repository/share_link_repo
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/shared/models/address.dart';
+import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:share_plus/share_plus.dart';

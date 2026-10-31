@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
-import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'image_edit_view_model.dart';

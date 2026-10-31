@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 abstract class ReceiptRepository extends ChangeNotifier {

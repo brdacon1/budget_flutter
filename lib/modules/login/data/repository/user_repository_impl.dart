@@ -1,8 +1,8 @@
 import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/shared/models/info_user.dart';
-import 'package:oflite/shared/models/owner_pdf.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as uid;
+import 'package:oflite/modules/login/data/model/info_user.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class UserRepositoryImpl extends UserRepository {

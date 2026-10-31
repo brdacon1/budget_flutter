@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 
 /// Gerenciamento de estado da tela de **abas de recibo**.
 ///

@@ -11,7 +11,7 @@ import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 class MenuItem {
   final IconData icon;

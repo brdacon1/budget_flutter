@@ -1,5 +1,3 @@
-library oflite.globals;
-
 class InfoUser {
   String? Id;
   String? USER;

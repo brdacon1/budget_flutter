@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 
 class ImageEditViewModel extends ChangeNotifier {

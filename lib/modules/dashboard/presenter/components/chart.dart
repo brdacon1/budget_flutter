@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/models/my_budget_dashboard.dart';
+import 'package:oflite/modules/dashboard/domain/entity/my_budget_dashboard.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 class Chart extends StatefulWidget {

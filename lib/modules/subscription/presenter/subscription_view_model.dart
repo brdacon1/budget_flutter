@@ -5,7 +5,7 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 enum SubscriptionState { idle, loading, success, error }
 

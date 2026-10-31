@@ -7,9 +7,9 @@ import 'package:oflite/modules/payment/domain/repository/payment_repository.dart
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as Orcamento;
-import 'package:oflite/shared/models/payment_customer.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentListViewModel extends ChangeNotifier {

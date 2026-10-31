@@ -1,4 +1,4 @@
-import 'package:oflite/shared/models/address.dart';
+import 'package:oflite/modules/core/cep/data/model/address.dart';
 
 /// Contrato para busca de endereço por CEP.
 abstract class CepRepository {

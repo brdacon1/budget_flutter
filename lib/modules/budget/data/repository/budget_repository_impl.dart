@@ -8,7 +8,7 @@ import 'package:oflite/modules/budget/data/model/items_list_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budgetGlobals;
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budgetGlobals;
 
 class BudgetRepositoryImpl extends BudgetRepository {
   final BudgetRemoteDataSource _remote;

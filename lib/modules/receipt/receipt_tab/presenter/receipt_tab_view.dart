@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/models/receipt.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/payment/payment_list/presenter/payment_list_view.dart';
 import 'package:oflite/modules/pdf/pdf_receipt/presenter/pdf_receipt_view.dart';
 import 'package:oflite/modules/receipt/receipt_creator/presenter/receipt_creator_view.dart';

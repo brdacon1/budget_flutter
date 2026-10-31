@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as global_uid_user;
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/login/presenter/login_view.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';

@@ -11,8 +11,8 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/models/global_uid_user.dart' as UID;
-import 'package:oflite/shared/models/owner_pdf.dart';
+import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender {

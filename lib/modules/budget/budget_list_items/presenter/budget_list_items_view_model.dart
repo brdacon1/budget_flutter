@@ -3,7 +3,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/models/global_uid_budget.dart' as budget;
+import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
