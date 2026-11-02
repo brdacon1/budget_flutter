@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
@@ -26,6 +27,11 @@ class PdfBudgetViewModel extends ChangeNotifier {
   bool _loading = true;
   bool get loading => _loading;
   bool _disposed = false;
+  PdfLayoutType _layoutType = PdfLayoutType.standard;
+
+  void setLayoutType(PdfLayoutType type) {
+    _layoutType = type;
+  }
 
   PdfBudgetViewModel({
     PdfRepository? pdfRepository,
@@ -99,10 +105,17 @@ class PdfBudgetViewModel extends ChangeNotifier {
           totalBudget += total;
         }
 
-        final layoutType = owner.pdfLayoutType ?? 'standard';
+        final ownerLayout = owner.pdfLayoutType ?? 'standard';
+        final effectiveLayout = _layoutType != PdfLayoutType.standard
+            ? _layoutType
+            : PdfLayoutType.values.firstWhere(
+                (e) => e.name == ownerLayout,
+                orElse: () => PdfLayoutType.standard,
+              );
+
         final String generated;
-        switch (layoutType) {
-          case 'executive':
+        switch (effectiveLayout) {
+          case PdfLayoutType.executive:
             generated = await _pdfGenerateExecutiveUseCase.executivePDF(
               countService: countService,
               countProduct: countProduct,
@@ -114,7 +127,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
               owner: owner,
               observations: comments,
             );
-          case 'professional':
+          case PdfLayoutType.professional:
             generated = await _pdfGenerateProfessionalUseCase.professionalPDF(
               countService: countService,
               countProduct: countProduct,

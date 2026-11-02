@@ -9,6 +9,8 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
+import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
@@ -39,6 +41,8 @@ class PdfMenuViewModel extends ChangeNotifier {
       MenuItem(icon: Icons.comment_outlined, title: PdfStrings.menuComments),
       MenuItem(icon: Icons.payments_outlined, title: PdfStrings.menuReceipt),
       MenuItem(icon: Icons.share_outlined, title: PdfStrings.menuShareLink),
+      MenuItem(icon: Icons.business_center_outlined, title: PdfStrings.menuPdfExecutive),
+      MenuItem(icon: Icons.workspace_premium_outlined, title: PdfStrings.menuPdfProfessional),
     ];
     notifyListeners();
   }
@@ -60,6 +64,22 @@ class PdfMenuViewModel extends ChangeNotifier {
           context,
           MaterialPageRoute(
             builder: (context) => ReceiptListView(item: item),
+          ),
+        );
+        break;
+      case 3:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PdfBudgetView(layoutType: PdfLayoutType.executive),
+          ),
+        );
+        break;
+      case 4:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PdfBudgetView(layoutType: PdfLayoutType.professional),
           ),
         );
         break;

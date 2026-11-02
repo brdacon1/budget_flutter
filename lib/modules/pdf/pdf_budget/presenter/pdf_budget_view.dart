@@ -6,11 +6,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'pdf_budget_view_model.dart';
 
 class PdfBudgetView extends StatefulWidget {
-  const PdfBudgetView({super.key});
+  final PdfLayoutType layoutType;
+  const PdfBudgetView({super.key, this.layoutType = PdfLayoutType.standard});
 
   @override
   State<PdfBudgetView> createState() => _PdfBudgetView();
@@ -23,12 +25,9 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   void initState() {
     super.initState();
     _viewModel = getIt<PdfBudgetViewModel>();
-    // Dispara o carregamento no próximo frame. Poderia rodar depois de
-    // `dispose` se a tela fosse fechada muito rápido — o VM agora ignora
-    // notificações pós-dispose, mas mesmo assim só disparamos se a View
-    // ainda estiver montada.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _viewModel.setLayoutType(widget.layoutType);
       _viewModel.initialData(context);
     });
   }
