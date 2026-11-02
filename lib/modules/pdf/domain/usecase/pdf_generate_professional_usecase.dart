@@ -1,10 +1,9 @@
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -23,6 +22,10 @@ class PdfGenerateProfessionalUseCase {
 
   PdfGenerateProfessionalUseCase(this._moneyConvert);
 
+  // ---------------------------------------------------------------------------
+  // API pública
+  // ---------------------------------------------------------------------------
+
   Future<String> professionalPDF({
     required int countService,
     required int countProduct,
@@ -36,7 +39,7 @@ class PdfGenerateProfessionalUseCase {
     String? authToken,
   }) async {
     try {
-      final PdfDocument document = await _buildProfessionalDocument(
+      final PdfDocument document = await _buildDocument(
         countService: countService,
         countProduct: countProduct,
         totalPriceBudget: totalPriceBudget,
@@ -71,7 +74,7 @@ class PdfGenerateProfessionalUseCase {
     String? authToken,
   }) async {
     try {
-      final PdfDocument document = await _buildProfessionalDocument(
+      final PdfDocument document = await _buildDocument(
         countService: countService,
         countProduct: countProduct,
         totalPriceBudget: totalPriceBudget,
@@ -93,7 +96,31 @@ class PdfGenerateProfessionalUseCase {
     }
   }
 
-  Future<PdfDocument> _buildProfessionalDocument({
+  // ---------------------------------------------------------------------------
+  // Cores e fontes reutilizáveis
+  // ---------------------------------------------------------------------------
+
+  static final PdfColor _primaryBlue = PdfColor(30, 58, 138);   // azul escuro
+  static final PdfColor _lightBg    = PdfColor(240, 245, 255);  // fundo leve azulado
+  static final PdfColor _borderGray = PdfColor(220, 220, 220);
+
+  PdfFont get _fontTitle => PdfStandardFont(PdfFontFamily.helvetica, 18, style: PdfFontStyle.bold);
+  PdfFont get _fontSectionTitle => PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+  PdfFont get _fontHeader => PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
+  PdfFont get _fontRegular => PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular);
+  PdfFont get _fontSmall => PdfStandardFont(PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular);
+  PdfFont get _fontTotal => PdfStandardFont(PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold);
+
+  PdfBrush get _brushPrimary => PdfSolidBrush(_primaryBlue);
+  PdfBrush get _brushWhite => PdfBrushes.white;
+  PdfBrush get _brushBlack => PdfBrushes.black;
+  PdfBrush get _brushGray => PdfSolidBrush(PdfColor(100, 100, 100));
+
+  // ---------------------------------------------------------------------------
+  // Documento
+  // ---------------------------------------------------------------------------
+
+  Future<PdfDocument> _buildDocument({
     required int countService,
     required int countProduct,
     required String totalPriceBudget,
@@ -105,39 +132,29 @@ class PdfGenerateProfessionalUseCase {
     required List<ObservationPdf> observations,
     String? authToken,
   }) async {
-    final PdfDocument document = _createDocument();
+    final PdfDocument document = PdfDocument()
+      ..pageSettings.size = PdfPageSize.a4
+      ..pageSettings.margins.left = 30
+      ..pageSettings.margins.right = 30
+      ..pageSettings.margins.top = 30
+      ..pageSettings.margins.bottom = 50;
+
     final PdfPage page = document.pages.add();
+    final double pageW = page.getClientSize().width;
 
-    double currentY = await _drawLogoWithHeader(
-      page, owner, authToken,
-    );
+    double y = await _drawHeader(page, owner, authToken, pageW);
 
-    currentY = _drawBudgetDataSection(page, customer, currentY + 12);
-    currentY = _drawClientDataSection(page, customer, currentY + 12);
+    y = _drawInfoBoxes(page, customer, pageW, y + 12);
 
-    // Produtos
+    // ── Produtos ──
     if (countProduct > 0) {
-      currentY = _drawSectionTitle(page, 'PRODUTOS', currentY + 15);
-      currentY = _drawItemsTable(
+      y = _drawSectionTitle(page, 'PRODUTOS', y + 18);
+      y = _drawItemsTable(
         page: page,
-        topY: currentY,
+        topY: y,
         items: items,
         category: 'Produtos',
-        countService: countService,
-        totalPriceProducts: totalPriceProducts,
-        totalPriceServices: totalPriceServices,
-        totalPriceBudget: totalPriceBudget,
-      );
-    }
-
-    // Serviços
-    if (countService > 0) {
-      currentY = _drawSectionTitle(page, 'SERVIÇOS', currentY + 10);
-      currentY = _drawItemsTable(
-        page: page,
-        topY: currentY,
-        items: items,
-        category: 'Serviços',
+        descriptionLabel: 'Descrição dos produtos',
         countService: countService,
         countProduct: countProduct,
         totalPriceProducts: totalPriceProducts,
@@ -146,40 +163,50 @@ class PdfGenerateProfessionalUseCase {
       );
     }
 
-    _drawFooter(page, owner);
-
-    if (observations.isNotEmpty) {
-      _drawObservationsPage(document, observations, owner);
+    // ── Serviços ──
+    if (countService > 0) {
+      y = _drawSectionTitle(page, 'SERVIÇOS', y + 14);
+      y = _drawItemsTable(
+        page: page,
+        topY: y,
+        items: items,
+        category: 'Serviços',
+        descriptionLabel: 'Descrição dos serviços',
+        countService: countService,
+        countProduct: countProduct,
+        totalPriceProducts: totalPriceProducts,
+        totalPriceServices: totalPriceServices,
+        totalPriceBudget: totalPriceBudget,
+      );
     }
 
+    // ── Observações (se couber, senão nova página) ──
+    if (observations.isNotEmpty) {
+      final double obsHeight = 60 + (observations.length * 22);
+      if (y + obsHeight > page.getClientSize().height - 40) {
+        _drawObservationsNewPage(document, observations, owner, pageW);
+      } else {
+        y = _drawObservationsSection(page, observations, pageW, y + 18);
+      }
+    }
+
+    _drawFooter(page, owner, pageW);
     return document;
   }
 
   // ---------------------------------------------------------------------------
-  // Documento
+  // Header — logo + dados da empresa + linha azul
   // ---------------------------------------------------------------------------
 
-  PdfDocument _createDocument() {
-    return PdfDocument()
-      ..pageSettings.size = PdfPageSize.a4
-      ..pageSettings.margins.left = 30
-      ..pageSettings.margins.right = 30
-      ..pageSettings.margins.top = 50
-      ..pageSettings.margins.bottom = 50;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Logo + Header completo da empresa (vertical, ao lado da logo)
-  // ---------------------------------------------------------------------------
-
-  Future<double> _drawLogoWithHeader(
+  Future<double> _drawHeader(
     PdfPage page,
     OwnerPdf owner,
     String? authToken,
+    double pageW,
   ) async {
     final PdfGraphics g = page.graphics;
-    double logoHeight = 0;
-    double logoWidth = 0;
+    double logoH = 0;
+    double logoW = 0;
     PdfBitmap? image;
 
     if (owner.fotoId != null && owner.fotoId!.isNotEmpty) {
@@ -203,251 +230,220 @@ class PdfGenerateProfessionalUseCase {
         );
 
         if (response.statusCode == 200) {
-          final Uint8List fileContent = response.bodyBytes;
-          image = PdfBitmap(fileContent);
+          image = PdfBitmap(response.bodyBytes);
           final double ratio = image.width / image.height;
-
-          if (image.height == image.width) {
-            logoWidth = 80;
-            logoHeight = 80;
-          } else if (image.height > image.width) {
-            logoWidth = 60;
-            logoHeight = 80;
+          if (image.height > image.width) {
+            logoW = 55;
+            logoH = 70;
           } else {
-            logoWidth = 80 * ratio;
-            logoHeight = 80;
+            logoW = 70 * ratio;
+            logoH = 70;
           }
-
-          g.drawImage(
-            image,
-            Rect.fromLTWH(0, 0, logoWidth, logoHeight),
-          );
+          g.drawImage(image, Rect.fromLTWH(0, 0, logoW, logoH));
         }
       } catch (_) {
-        if (kIsWeb) {
-          // ignora
-        } else {
-          rethrow;
-        }
+        if (!kIsWeb) rethrow;
       }
     }
 
-    final double textLeft = logoWidth + 10;
-    final PdfFont boldFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold,
-    );
-    final PdfFont regularFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular,
-    );
-
+    final double textX = logoW > 0 ? logoW + 12 : 0;
     double y = 0;
 
+    // Nome empresa — azul escuro, grande
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!, boldFont,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(textLeft, y, page.getClientSize().width - textLeft, 16),
+        owner.empresa!,
+        _fontTitle,
+        brush: _brushPrimary,
+        bounds: Rect.fromLTWH(textX, y, pageW - textX, 24),
       );
-      y += 15;
+      y += 22;
     }
-    if (owner.cnpj != null && owner.cnpj!.isNotEmpty) {
+
+    final PdfFont infoFont = _fontRegular;
+    final PdfBrush infoBrush = _brushGray;
+
+    void _infoLine(String label, String? value) {
+      if (value == null || value.isEmpty) return;
       g.drawString(
-        'CNPJ/CPF: ${owner.cnpj}', regularFont,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(textLeft, y, page.getClientSize().width - textLeft, 13),
+        '$label $value',
+        infoFont,
+        brush: infoBrush,
+        bounds: Rect.fromLTWH(textX, y, pageW - textX, 13),
       );
       y += 12;
     }
-    if (owner.email != null && owner.email!.isNotEmpty) {
-      g.drawString(
-        'E-mail: ${owner.email}', regularFont,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(textLeft, y, page.getClientSize().width - textLeft, 13),
-      );
-      y += 12;
-    }
-    if (owner.fone != null && owner.fone!.isNotEmpty) {
-      g.drawString(
-        'Telefone: ${owner.fone}', regularFont,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(textLeft, y, page.getClientSize().width - textLeft, 13),
-      );
-      y += 12;
-    }
+
+    _infoLine('CNPJ/CPF:', owner.cnpj);
+    _infoLine('E-mail:', owner.email);
+    _infoLine('Telefone:', owner.fone);
 
     final addressParts = <String>[];
     if (owner.rua != null && owner.rua!.isNotEmpty) addressParts.add(owner.rua!);
     if (owner.bairro != null && owner.bairro!.isNotEmpty) addressParts.add(owner.bairro!);
     if (owner.city != null && owner.city!.isNotEmpty) addressParts.add(owner.city!);
     if (owner.cep != null && owner.cep!.isNotEmpty) addressParts.add('CEP: ${owner.cep}');
-
     if (addressParts.isNotEmpty) {
+      _infoLine('Endereço:', addressParts.join(' - '));
+    }
+
+    final double headerBottom = (logoH > y) ? logoH : y;
+
+    // Linha azul separadora
+    g.drawLine(
+      PdfPen(_primaryBlue, width: 2),
+      Offset(0, headerBottom + 6),
+      Offset(pageW, headerBottom + 6),
+    );
+
+    return headerBottom + 14;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Caixas de informação lado a lado
+  // ---------------------------------------------------------------------------
+
+  double _drawInfoBoxes(
+    PdfPage page,
+    CustomerInfo customer,
+    double pageW,
+    double topY,
+  ) {
+    final PdfGraphics g = page.graphics;
+    final double gap = 14;
+    final double boxW = (pageW - gap) / 2;
+    const double pad = 10;
+
+    final PdfPen borderPen = PdfPen(_borderGray, width: 0.5);
+    final PdfBrush bgBrush = PdfSolidBrush(PdfColor(250, 250, 250));
+
+    // ── Box esquerdo: DADOS DO ORÇAMENTO ──
+    final double leftH = _boxContentHeight([
+      _BoxRow('Número:', customer.id),
+      _BoxRow('Criado em:', customer.data),
+    ]);
+    _drawBox(g, 0, topY, boxW, leftH + pad * 2 + 22, borderPen, bgBrush);
+    _drawBoxTitle(g, 'DADOS DO ORÇAMENTO', 0, topY, boxW, pad);
+    _drawBoxRows(g, [
+      _BoxRow('Número:', customer.id),
+      _BoxRow('Criado em:', customer.data),
+    ], pad, topY + 22, boxW - pad * 2);
+
+    // ── Box direito: DADOS DO CLIENTE ──
+    final double rightH = _boxContentHeight([
+      _BoxRow('Cliente:', customer.customerName),
+      _BoxRow('Telefone:', customer.phone),
+      _BoxRow('Endereço:', customer.street),
+      if (customer.city != null && customer.city!.isNotEmpty)
+        _BoxRow('Cidade / CEP:', '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}'),
+    ]);
+    _drawBox(g, boxW + gap, topY, boxW, rightH + pad * 2 + 22, borderPen, bgBrush);
+    _drawBoxTitle(g, 'DADOS DO CLIENTE', boxW + gap, topY, boxW, pad);
+    _drawBoxRows(g, [
+      _BoxRow('Cliente:', customer.customerName),
+      _BoxRow('Telefone:', customer.phone),
+      _BoxRow('Endereço:', customer.street),
+      if (customer.city != null && customer.city!.isNotEmpty)
+        _BoxRow('Cidade / CEP:', '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}'),
+    ], pad, topY + 22, boxW - pad * 2, xOffset: boxW + gap);
+
+    return topY + (leftH > rightH ? leftH : rightH) + pad * 2 + 22;
+  }
+
+  void _drawBox(
+    PdfGraphics g,
+    double x, double y, double w, double h,
+    PdfPen border, PdfBrush? bg,
+  ) {
+    if (bg != null) {
+      g.drawRectangle(brush: bg, bounds: Rect.fromLTWH(x, y, w, h));
+    }
+    g.drawRectangle(pen: border, bounds: Rect.fromLTWH(x, y, w, h));
+  }
+
+  void _drawBoxTitle(
+    PdfGraphics g, String title,
+    double x, double y, double w, double pad,
+  ) {
+    g.drawString(
+      title,
+      _fontSectionTitle,
+      brush: _brushPrimary,
+      bounds: Rect.fromLTWH(x + pad, y + pad, w - pad * 2, 16),
+    );
+    // linha abaixo do título
+    g.drawLine(
+      PdfPen(_borderGray, width: 0.5),
+      Offset(x + pad, y + pad + 16),
+      Offset(x + w - pad, y + pad + 16),
+    );
+  }
+
+  void _drawBoxRows(
+    PdfGraphics g,
+    List<_BoxRow> rows,
+    double pad,
+    double startY,
+    double contentW, {
+    double xOffset = 0,
+  }) {
+    double y = startY + pad;
+    for (final row in rows) {
+      if (row.value == null || row.value!.isEmpty) continue;
       g.drawString(
-        'Endereço: ${addressParts.join(' - ')}', regularFont,
-        brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(textLeft, y, page.getClientSize().width - textLeft, 13),
+        row.label,
+        _fontRegular,
+        brush: _brushGray,
+        bounds: Rect.fromLTWH(xOffset + pad, y, contentW * 0.4, 13),
       );
-      y += 12;
+      g.drawString(
+        row.value!,
+        _fontRegular,
+        brush: _brushBlack,
+        bounds: Rect.fromLTWH(xOffset + pad + contentW * 0.4, y, contentW * 0.6, 13),
+        format: PdfStringFormat(alignment: PdfTextAlignment.right),
+      );
+      y += 13;
     }
+  }
 
-    return math.max(logoHeight, y + 5);
+  double _boxContentHeight(List<_BoxRow> rows) {
+    int valid = 0;
+    for (final r in rows) {
+      if (r.value != null && r.value!.isNotEmpty) valid++;
+    }
+    return valid * 13.0;
   }
 
   // ---------------------------------------------------------------------------
-  // Autenticação
-  // ---------------------------------------------------------------------------
-
-  Future<String> _getAuthToken(String? authToken) async {
-    if (authToken != null && authToken.isNotEmpty) {
-      return authToken;
-    }
-    if (uid.googleAuth!) {
-      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
-    }
-    final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: user_global.email!.trim(),
-      password: user_global.password!.trim(),
-    );
-    return (await auth.user?.getIdToken()) ?? '';
-  }
-
-  // ---------------------------------------------------------------------------
-  // "DADOS DO ORÇAMENTO"
-  // ---------------------------------------------------------------------------
-
-  double _drawBudgetDataSection(
-    PdfPage page,
-    CustomerInfo customer,
-    double topY,
-  ) {
-    final PdfGraphics g = page.graphics;
-    final PdfFont titleFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold,
-    );
-    final PdfFont rowFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular,
-    );
-
-    g.drawString(
-      'DADOS DO ORÇAMENTO',
-      titleFont,
-      brush: PdfBrushes.black,
-      bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, 18),
-    );
-
-    final PdfGrid grid = PdfGrid()..columns.add(count: 2);
-    grid.headers.clear();
-
-    final PdfGridCellStyle style = PdfGridCellStyle(
-      font: rowFont,
-      cellPadding: PdfPaddings(top: 2, bottom: 2, left: 0, right: 2),
-    )..borders.all = PdfPens.transparent;
-
-    void addRow(String label, String? value) {
-      if (value == null || value.isEmpty) return;
-      final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
-    }
-
-    addRow('Número:', customer.id);
-    addRow('Criado em:', customer.data);
-
-    for (int i = 0; i < grid.rows.count; i++) {
-      for (int j = 0; j < grid.rows[i].cells.count; j++) {
-        grid.rows[i].cells[j].style = style;
-      }
-    }
-    grid.columns[0].width = 120;
-    grid.columns[1].width = page.getClientSize().width - 120;
-
-    final PdfLayoutResult? result = grid.draw(
-      page: page,
-      bounds: Rect.fromLTWH(0, topY + 18, page.getClientSize().width, page.getClientSize().height),
-      format: PdfLayoutFormat(breakType: PdfLayoutBreakType.fitPage, layoutType: PdfLayoutType.onePage),
-    );
-    return result != null ? result.bounds.bottom : topY + 18;
-  }
-
-  // ---------------------------------------------------------------------------
-  // "DADOS DO CLIENTE"
-  // ---------------------------------------------------------------------------
-
-  double _drawClientDataSection(
-    PdfPage page,
-    CustomerInfo customer,
-    double topY,
-  ) {
-    final PdfGraphics g = page.graphics;
-    final PdfFont titleFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold,
-    );
-    final PdfFont rowFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular,
-    );
-
-    g.drawString(
-      'DADOS DO CLIENTE',
-      titleFont,
-      brush: PdfBrushes.black,
-      bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, 18),
-    );
-
-    final PdfGrid grid = PdfGrid()..columns.add(count: 2);
-    grid.headers.clear();
-
-    final PdfGridCellStyle style = PdfGridCellStyle(
-      font: rowFont,
-      cellPadding: PdfPaddings(top: 2, bottom: 2, left: 0, right: 2),
-    )..borders.all = PdfPens.transparent;
-
-    void addRow(String label, String? value) {
-      if (value == null || value.isEmpty) return;
-      final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
-    }
-
-    addRow('Cliente:', customer.customerName);
-    addRow('Telefone:', customer.phone);
-    addRow('Endereço:', customer.street);
-    if (customer.city != null && customer.city!.isNotEmpty) {
-      final zip = customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : '';
-      addRow('Cidade / CEP:', '${customer.city}$zip');
-    }
-
-    for (int i = 0; i < grid.rows.count; i++) {
-      for (int j = 0; j < grid.rows[i].cells.count; j++) {
-        grid.rows[i].cells[j].style = style;
-      }
-    }
-    grid.columns[0].width = 120;
-    grid.columns[1].width = page.getClientSize().width - 120;
-
-    final PdfLayoutResult? result = grid.draw(
-      page: page,
-      bounds: Rect.fromLTWH(0, topY + 18, page.getClientSize().width, page.getClientSize().height),
-      format: PdfLayoutFormat(breakType: PdfLayoutBreakType.fitPage, layoutType: PdfLayoutType.onePage),
-    );
-    return result != null ? result.bounds.bottom : topY + 18;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Título de seção
+  // Título de seção com barra azul vertical
   // ---------------------------------------------------------------------------
 
   double _drawSectionTitle(PdfPage page, String title, double topY) {
     final PdfGraphics g = page.graphics;
-    final PdfFont font = PdfStandardFont(
-      PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold,
+    const double barW = 4;
+    const double barH = 20;
+
+    // barra vertical azul
+    g.drawRectangle(
+      brush: _brushPrimary,
+      bounds: Rect.fromLTWH(0, topY + 2, barW, barH),
     );
+
+    // fundo azul bem claro
+    g.drawRectangle(
+      brush: PdfSolidBrush(_lightBg),
+      bounds: Rect.fromLTWH(barW + 4, topY, page.getClientSize().width - barW - 4, barH + 4),
+    );
+
     g.drawString(
       title,
-      font,
-      brush: PdfBrushes.black,
-      bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, 20),
+      _fontSectionTitle,
+      brush: _brushPrimary,
+      bounds: Rect.fromLTWH(barW + 10, topY + 3, page.getClientSize().width - barW - 14, barH),
     );
-    return topY + 20;
+
+    return topY + barH + 8;
   }
 
   // ---------------------------------------------------------------------------
@@ -459,47 +455,43 @@ class PdfGenerateProfessionalUseCase {
     required double topY,
     required List<ItemsBudget> items,
     required String category,
+    required String descriptionLabel,
     required int countService,
+    required int countProduct,
     String? totalPriceProducts,
     String? totalPriceServices,
     required String totalPriceBudget,
-    int countProduct = 0,
   }) {
     final PdfGrid grid = PdfGrid();
     grid.columns.add(count: 5);
 
+    // Header
     final PdfGridRow header = grid.headers.add(1)[0];
-    if (category == 'Produtos') {
-      header.cells[0].value = 'Descrição dos produtos';
-    } else {
-      header.cells[0].value = 'Descrição dos serviços';
-    }
+    header.cells[0].value = descriptionLabel;
     header.cells[1].value = 'Medida';
     header.cells[2].value = 'Qtd';
     header.cells[3].value = 'Preço';
     header.cells[4].value = 'Total';
 
-    final PdfFont fontHeader = PdfStandardFont(
-      PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold,
-    );
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-      font: fontHeader,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+      font: _fontHeader,
+      backgroundBrush: _brushPrimary,
+      textBrush: _brushWhite,
+      cellPadding: PdfPaddings(top: 6, left: 6, right: 6, bottom: 6),
     )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+      ..borders.all = PdfPens.transparent;
 
-    header.height = 25;
     grid.headers.applyStyle(headerStyle);
-    grid.columns[0].width = 200;
-    grid.columns[1].width = 75;
-    grid.columns[3].width = 105;
-    grid.columns[4].width = 105;
+    header.height = 26;
 
+    // Larguras
+    grid.columns[0].width = 200;
+    grid.columns[1].width = 70;
+    grid.columns[2].width = 50;
+    grid.columns[3].width = 100;
+    grid.columns[4].width = 100;
+
+    // Linhas
     for (final item in items) {
       if (item.CATEGORIA == category) {
         final PdfGridRow row = grid.rows.add();
@@ -513,92 +505,122 @@ class PdfGenerateProfessionalUseCase {
 
     _applyRowStyle(grid, _itemRowStyle());
 
+    // Total parcial
     if (category == 'Produtos' && totalPriceProducts != null) {
-      _addTotalRow(
+      _addRightAlignedTotalRow(
         grid: grid,
         label: 'Valor de produtos:',
         value: totalPriceProducts,
-        style: _totalRowStyle(fontHeader),
-        height: 25,
+        font: _fontRegular,
+        textBrush: _brushBlack,
+        bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
       );
     }
     if (category == 'Serviços' && totalPriceServices != null) {
-      _addTotalRow(
+      if (countProduct > 0) {
+        _addRightAlignedTotalRow(
+          grid: grid,
+          label: 'Valor de produtos:',
+          value: totalPriceProducts ?? '',
+          font: _fontRegular,
+          textBrush: _brushBlack,
+          bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
+        );
+      }
+      _addRightAlignedTotalRow(
         grid: grid,
         label: 'Valor de serviços:',
         value: totalPriceServices,
-        style: _totalRowStyle(fontHeader),
-        height: 25,
+        font: _fontRegular,
+        textBrush: _brushBlack,
+        bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
       );
     }
 
-    final bool isLastTable =
+    // Total geral (se for última tabela)
+    final bool isLast =
         (category == 'Produtos' && countService == 0) ||
         (category == 'Serviços');
 
-    if (isLastTable) {
-      _addTotalRow(
+    if (isLast) {
+      _addRightAlignedTotalRow(
         grid: grid,
         label: 'VALOR TOTAL:',
         value: totalPriceBudget,
-        style: _budgetTotalRowStyle(),
-        height: 30,
+        font: _fontTotal,
+        textBrush: _brushWhite,
+        bgBrush: _brushPrimary,
       );
     }
 
     final PdfLayoutResult result = grid.draw(
       page: page,
-      format: PdfLayoutFormat(breakType: PdfLayoutBreakType.fitPage, layoutType: PdfLayoutType.paginate),
       bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, page.getClientSize().height),
+      format: PdfLayoutFormat(
+        breakType: PdfLayoutBreakType.fitPage,
+        layoutType: PdfLayoutType.paginate,
+      ),
     ) as PdfLayoutResult;
 
     return result.bounds.bottom;
   }
 
+  void _addRightAlignedTotalRow({
+    required PdfGrid grid,
+    required String label,
+    required String value,
+    required PdfFont font,
+    required PdfBrush textBrush,
+    required PdfBrush bgBrush,
+  }) {
+    final PdfGridRow row = grid.rows.add();
+    row.cells[3].value = label;
+    row.cells[4].value = value;
+
+    final PdfGridCellStyle style = PdfGridCellStyle(
+      font: font,
+      textBrush: textBrush,
+      backgroundBrush: bgBrush,
+      cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
+    )
+      ..borders.all = PdfPens.transparent;
+
+    for (int i = 0; i < row.cells.count; i++) {
+      row.cells[i].style = style;
+    }
+    row.height = 24;
+  }
+
   // ---------------------------------------------------------------------------
-  // Observações (nova página)
+  // Observações (na mesma página)
   // ---------------------------------------------------------------------------
 
-  void _drawObservationsPage(
-    PdfDocument document,
+  double _drawObservationsSection(
+    PdfPage page,
     List<ObservationPdf> observations,
-    OwnerPdf owner,
+    double pageW,
+    double topY,
   ) {
-    final PdfPage page = document.pages.add();
     final PdfGraphics g = page.graphics;
 
-    final PdfFont titleFont = PdfStandardFont(
-      PdfFontFamily.helvetica, 13, style: PdfFontStyle.bold,
-    );
-    g.drawString(
-      'OBSERVAÇÕES DO ORÇAMENTO',
-      titleFont,
-      brush: PdfBrushes.black,
-      bounds: Rect.fromLTWH(0, 10, page.getClientSize().width, 24),
-    );
+    double y = _drawSectionTitle(page, 'OBSERVAÇÕES DO ORÇAMENTO', topY);
 
     final PdfGrid grid = PdfGrid()..columns.add(count: 2);
     final PdfGridRow header = grid.headers.add(1)[0];
     header.cells[0].value = 'Data';
     header.cells[1].value = 'Observação';
 
-    final PdfFont fontHeader = PdfStandardFont(
-      PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold,
-    );
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-      font: fontHeader,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+      font: _fontHeader,
+      backgroundBrush: _brushPrimary,
+      textBrush: _brushWhite,
+      cellPadding: PdfPaddings(top: 6, left: 6, right: 6, bottom: 6),
     )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+      ..borders.all = PdfPens.transparent;
 
     grid.headers.applyStyle(headerStyle);
     grid.columns[0].width = 75;
-    grid.columns[1].width = page.getClientSize().width - 75;
+    grid.columns[1].width = pageW - 75;
 
     for (final obs in observations) {
       final PdfGridRow row = grid.rows.add();
@@ -608,33 +630,81 @@ class PdfGenerateProfessionalUseCase {
 
     _applyRowStyle(grid, _itemRowStyle());
 
-    grid.draw(
+    final PdfLayoutResult result = grid.draw(
       page: page,
-      bounds: Rect.fromLTWH(0, 40, page.getClientSize().width, page.getClientSize().height),
-      format: PdfLayoutFormat(breakType: PdfLayoutBreakType.fitPage, layoutType: PdfLayoutType.paginate),
-    );
+      bounds: Rect.fromLTWH(0, y, pageW, page.getClientSize().height),
+      format: PdfLayoutFormat(
+        breakType: PdfLayoutBreakType.fitPage,
+        layoutType: PdfLayoutType.paginate,
+      ),
+    ) as PdfLayoutResult;
 
-    _drawFooter(page, owner);
+    return result.bounds.bottom;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Observações (nova página)
+  // ---------------------------------------------------------------------------
+
+  void _drawObservationsNewPage(
+    PdfDocument document,
+    List<ObservationPdf> observations,
+    OwnerPdf owner,
+    double pageW,
+  ) {
+    final PdfPage page = document.pages.add();
+    _drawObservationsSection(page, observations, pageW, 10);
+    _drawFooter(page, owner, pageW);
   }
 
   // ---------------------------------------------------------------------------
   // Footer
   // ---------------------------------------------------------------------------
 
-  void _drawFooter(PdfPage page, OwnerPdf owner) {
-    final PdfFont font = PdfStandardFont(
-      PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular,
+  void _drawFooter(PdfPage page, OwnerPdf owner, double pageW) {
+    final PdfGraphics g = page.graphics;
+    final double y = page.getClientSize().height - 24;
+
+    // Linha cinza
+    g.drawLine(
+      PdfPen(_borderGray, width: 0.5),
+      Offset(0, y),
+      Offset(pageW, y),
     );
-    page.graphics.drawString(
+
+    // Esquerda
+    g.drawString(
       '${owner.empresa ?? ''} • Orçamento Comercial',
-      font,
-      brush: PdfBrushes.gray,
-      bounds: Rect.fromLTWH(
-        0, page.getClientSize().height - 20,
-        page.getClientSize().width, 16,
-      ),
-      format: PdfStringFormat(alignment: PdfTextAlignment.center),
+      _fontSmall,
+      brush: _brushGray,
+      bounds: Rect.fromLTWH(0, y + 4, pageW * 0.5, 14),
+      format: PdfStringFormat(alignment: PdfTextAlignment.left),
     );
+
+    // Direita — página
+    g.drawString(
+      'Page 1 of 1',
+      _fontSmall,
+      brush: _brushGray,
+      bounds: Rect.fromLTWH(pageW * 0.5, y + 4, pageW * 0.5, 14),
+      format: PdfStringFormat(alignment: PdfTextAlignment.right),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Autenticação
+  // ---------------------------------------------------------------------------
+
+  Future<String> _getAuthToken(String? authToken) async {
+    if (authToken != null && authToken.isNotEmpty) return authToken;
+    if (uid.googleAuth!) {
+      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
+    }
+    final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: user_global.email!.trim(),
+      password: user_global.password!.trim(),
+    );
+    return (await auth.user?.getIdToken()) ?? '';
   }
 
   // ---------------------------------------------------------------------------
@@ -642,54 +712,14 @@ class PdfGenerateProfessionalUseCase {
   // ---------------------------------------------------------------------------
 
   PdfGridCellStyle _itemRowStyle() {
-    return PdfGridCellStyle()
-      ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
-  }
-
-  PdfGridCellStyle _totalRowStyle(PdfFont font) {
     return PdfGridCellStyle(
-      font: font,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-      textBrush: PdfBrushes.black,
-      backgroundBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
+      font: _fontRegular,
+      cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
     )
       ..borders.left = PdfPens.transparent
       ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
-  }
-
-  PdfGridCellStyle _budgetTotalRowStyle() {
-    return PdfGridCellStyle(
-      font: PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.transparent;
-  }
-
-  void _addTotalRow({
-    required PdfGrid grid,
-    required String label,
-    required String value,
-    required PdfGridCellStyle style,
-    required double height,
-  }) {
-    final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[3].value = label;
-    totalRow.cells[4].value = value;
-    for (int i = 0; i < totalRow.cells.count; i++) {
-      totalRow.cells[i].style = style;
-    }
-    totalRow.height = height;
+      ..borders.top = PdfPen(_borderGray, width: 0.5)
+      ..borders.bottom = PdfPen(_borderGray, width: 0.5);
   }
 
   void _applyRowStyle(PdfGrid grid, PdfGridCellStyle style) {
@@ -708,4 +738,14 @@ class PdfGenerateProfessionalUseCase {
     await file.writeAsBytes(await document.save(), flush: true);
     return '$path/${budget.IDORCAMENTO}.pdf';
   }
+}
+
+// ---------------------------------------------------------------------------
+// Modelo auxiliar
+// ---------------------------------------------------------------------------
+
+class _BoxRow {
+  final String label;
+  final String? value;
+  _BoxRow(this.label, this.value);
 }
