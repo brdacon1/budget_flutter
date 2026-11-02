@@ -13,6 +13,24 @@ subprojects {
     afterEvaluate { subproject ->
         if (subproject.hasProperty('android')) {
             subproject.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+                kotlinOptions {
+                    jvmTarget = '17'
+                }
+                if (namespace == null) {
+                    def manifestFile = subproject.file('src/main/AndroidManifest.xml')
+                    if (manifestFile.exists()) {
+                        def manifestContent = manifestFile.text
+                        def matcher = manifestContent =~ /package="([^"]+)"/
+                        if (matcher.find()) {
+                            namespace = matcher.group(1)
+                        }
+                    }
+                }
+                compileSdk = 37
                 defaultConfig {
                     externalNativeBuild {
                         cmake {
