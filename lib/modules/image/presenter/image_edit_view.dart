@@ -199,6 +199,7 @@ class _ImageEditView extends State<ImageEditView> {
                 localOwner.cnpj = widget.owner.cnpj;
                 localOwner.empresa = widget.owner.empresa;
                 localOwner.logoName = _viewModel.fileName;
+                localOwner.pdfLayoutType = widget.owner.pdfLayoutType;
                 widget.owner.logoName = _viewModel.fileName;
 
                 await getIt<PdfRemoteDataSource>().saveInformationEnterprise(localOwner.toJson());

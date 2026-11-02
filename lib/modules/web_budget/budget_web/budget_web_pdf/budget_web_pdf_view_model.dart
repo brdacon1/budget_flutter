@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -25,9 +27,13 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     required this.observations,
     required this.token,
     PdfGenerateUseCase? pdfGenerateUseCase,
+    PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
+    PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
     ConvertCoinRepository? convertCoinRepository,
     DisplayAlertRepository? displayAlertRepository,
   })  : _pdf = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+        _pdfExecutive = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+        _pdfProfessional = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>(),
         _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
         _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>();
 
@@ -38,6 +44,8 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final String token;
 
   final PdfGenerateUseCase _pdf;
+  final PdfGenerateExecutiveUseCase _pdfExecutive;
+  final PdfGenerateProfessionalUseCase _pdfProfessional;
   final ConvertCoinRepository _moneyConvert;
   final DisplayAlertRepository _displayAlert;
 
@@ -91,18 +99,50 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
         // use case limpá-las, a aba de dados fica sem itens após gerar o PDF
         // e a pré-visualização só funciona na 1ª vez. Passamos **cópias**, sem
         // tocar na regra do use case (mobile permanece idêntico).
-        _bytes = await _pdf.patternPDFBytes(
-          countService: countService,
-          countProduct: countProduct,
-          totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
-          totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
-          totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
-          items: List<ItemsBudget>.from(items),
-          customer: customer,
-          owner: owner,
-          observations: List<ObservationPdf>.from(observations),
-          authToken: token,
-        );
+        final layoutType = owner.pdfLayoutType ?? 'standard';
+        final Uint8List bytes;
+        switch (layoutType) {
+          case 'executive':
+            bytes = await _pdfExecutive.executivePDFBytes(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: List<ItemsBudget>.from(items),
+              customer: customer,
+              owner: owner,
+              observations: List<ObservationPdf>.from(observations),
+              authToken: token,
+            );
+          case 'professional':
+            bytes = await _pdfProfessional.professionalPDFBytes(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: List<ItemsBudget>.from(items),
+              customer: customer,
+              owner: owner,
+              observations: List<ObservationPdf>.from(observations),
+              authToken: token,
+            );
+          default:
+            bytes = await _pdf.patternPDFBytes(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: List<ItemsBudget>.from(items),
+              customer: customer,
+              owner: owner,
+              observations: List<ObservationPdf>.from(observations),
+              authToken: token,
+            );
+        }
+        _bytes = bytes;
       }
     } catch (e) {
       if (context.mounted) {

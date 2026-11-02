@@ -747,6 +747,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       fotoId: current.fotoId,
       fone: current.fone,
       logoName: current.logoName,
+      pdfLayoutType: current.pdfLayoutType,
     );
     final saveResult = await _pdfRepo.saveInformationEnterprise(updated);
     if (saveResult is Error<void>) {
@@ -1273,6 +1274,21 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<void> onLogoUpdated() async {
     final step = await _onLogoUpdated();
     _setStepFromName(step);
+    notifyListeners();
+  }
+
+  Future<void> onPdfModelSelected() async {
+    await _addBotMessage(
+      ChatBudgetStrings.pdfModelSelected,
+      type: ChatMessageType.text,
+    );
+    await _addBotMessage(
+      '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n'
+      '${ChatBudgetStrings.pdfEditMenuOptions}\n\n'
+      '${ChatBudgetStrings.menuBackOption}',
+      type: ChatMessageType.text,
+    );
+    _setStep(ChatFlowStep.pdfEditMenu);
     notifyListeners();
   }
 

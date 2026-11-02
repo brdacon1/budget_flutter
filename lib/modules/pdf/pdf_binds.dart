@@ -8,6 +8,8 @@ import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
@@ -29,6 +31,12 @@ void registerPdfDependencies(GetIt sl) {
   sl.registerLazySingleton<PdfGenerateUseCase>(
     () => PdfGenerateUseCase(sl<ConvertCoinRepository>()),
   );
+  sl.registerLazySingleton<PdfGenerateExecutiveUseCase>(
+    () => PdfGenerateExecutiveUseCase(sl<ConvertCoinRepository>()),
+  );
+  sl.registerLazySingleton<PdfGenerateProfessionalUseCase>(
+    () => PdfGenerateProfessionalUseCase(sl<ConvertCoinRepository>()),
+  );
   sl.registerLazySingleton<PdfGenerateReceiptUseCase>(
     () => PdfGenerateReceiptUseCase(sl<ConvertCoinRepository>()),
   );
@@ -48,6 +56,8 @@ void registerPdfDependencies(GetIt sl) {
       displayAlertRepository: sl<DisplayAlertRepository>(),
       convertCoinRepository: sl<ConvertCoinRepository>(),
       pdfGenerateUseCase: sl<PdfGenerateUseCase>(),
+      pdfGenerateExecutiveUseCase: sl<PdfGenerateExecutiveUseCase>(),
+      pdfGenerateProfessionalUseCase: sl<PdfGenerateProfessionalUseCase>(),
     ),
   );
 }

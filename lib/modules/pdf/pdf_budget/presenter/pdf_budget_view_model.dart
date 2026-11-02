@@ -3,6 +3,8 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
@@ -17,6 +19,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
   final PdfGenerateUseCase _pdfGenerateUseCase;
+  final PdfGenerateExecutiveUseCase _pdfGenerateExecutiveUseCase;
+  final PdfGenerateProfessionalUseCase _pdfGenerateProfessionalUseCase;
 
   String? fileBytes;
   bool _loading = true;
@@ -28,10 +32,14 @@ class PdfBudgetViewModel extends ChangeNotifier {
     DisplayAlertRepository? displayAlertRepository,
     ConvertCoinRepository? convertCoinRepository,
     PdfGenerateUseCase? pdfGenerateUseCase,
+    PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
+    PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
   })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
         _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
         _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
-        _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>();
+        _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+        _pdfGenerateExecutiveUseCase = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+        _pdfGenerateProfessionalUseCase = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>();
 
   void _safeNotify() {
     if (_disposed) return;
@@ -91,17 +99,46 @@ class PdfBudgetViewModel extends ChangeNotifier {
           totalBudget += total;
         }
 
-        final generated = await _pdfGenerateUseCase.patternPDF(
-          countService: countService,
-          countProduct: countProduct,
-          totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
-          totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
-          totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
-          items: budgetItems,
-          customer: customer,
-          owner: owner,
-          observations: comments,
-        );
+        final layoutType = owner.pdfLayoutType ?? 'standard';
+        final String generated;
+        switch (layoutType) {
+          case 'executive':
+            generated = await _pdfGenerateExecutiveUseCase.executivePDF(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: budgetItems,
+              customer: customer,
+              owner: owner,
+              observations: comments,
+            );
+          case 'professional':
+            generated = await _pdfGenerateProfessionalUseCase.professionalPDF(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: budgetItems,
+              customer: customer,
+              owner: owner,
+              observations: comments,
+            );
+          default:
+            generated = await _pdfGenerateUseCase.patternPDF(
+              countService: countService,
+              countProduct: countProduct,
+              totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
+              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
+              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              items: budgetItems,
+              customer: customer,
+              owner: owner,
+              observations: comments,
+            );
+        }
         fileBytes = generated;
       } else {
         if (context.mounted) {

@@ -155,7 +155,8 @@ class PdfEditViewModel extends ChangeNotifier {
         ..fone = phoneText.text.trim()
         ..cnpj = cpfText.text.trim()
         ..empresa = nameText.text.trim().toUpperCase()
-        ..logoName = owner.logoName;
+        ..logoName = owner.logoName
+        ..pdfLayoutType = owner.pdfLayoutType;
 
       await _pdfRepository.saveInformationEnterprise(localOwner);
       owner = localOwner;

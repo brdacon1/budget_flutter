@@ -73,6 +73,8 @@ class HandlePdfEditMenuOptionUsecase {
           ),
         );
         return const ChatMenuResult('logoMenu');
+      case '7':
+        return const ChatMenuResult('pdfEditMenu', navigation: 'open_pdf_model_select');
       case '0':
         return const ChatMenuResult('mainMenu');
       default:

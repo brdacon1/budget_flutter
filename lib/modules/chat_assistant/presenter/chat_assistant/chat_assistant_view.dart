@@ -12,6 +12,7 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/pdf/pdf_model_select/presenter/pdf_model_select_view.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
@@ -138,6 +139,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         break;
       case 'open_logo_edit':
         await _openLogoEditFlow();
+        break;
+      case 'open_pdf_model_select':
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PdfModelSelectView()),
+        );
+        if (mounted && result == true) {
+          await _vm.onPdfModelSelected();
+        }
         break;
     }
   }
