@@ -200,7 +200,7 @@ Se desejar permitir troca de tipo direto na aba PDF, pode-se adicionar um `Popup
 
 ### 3.8. Web — `BudgetWebPdfViewModel` (modificar)
 
-**Arquivo**: `lib/modules/web_budget/budget_web/budget_web_pdf/budget_web_pdf_view_model.dart`
+**Arquivo**: `../lib/modules/web_budget/budget_web/budget_web_data/budget_web_pdf_view_model.dart`
 
 - Adicionar campo `PdfLayoutType layoutType` (com default `standard`).
 - Em `inicialData`, usar `switch` para chamar o método de bytes correto (`executivePDFBytes`, `professionalPDFBytes`, `patternPDFBytes`).
@@ -235,7 +235,7 @@ BudgetTabView
 | 4 | **Modificar** | `lib/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart` |
 | 5 | **Modificar** | `lib/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart` |
 | 6 | **Modificar** | `lib/modules/pdf/presenter/strings/pdf_pt_string.dart` |
-| 7 | **Modificar** (web) | `lib/modules/web_budget/budget_web/budget_web_pdf/budget_web_pdf_view_model.dart` |
+| 7 | **Modificar** (web) | `../lib/modules/web_budget/budget_web/budget_web_data/budget_web_pdf_view_model.dart` |
 | 8 | **Opcional** (web) | `lib/modules/web_budget/budget_web/budget_web_budget/budget_web_budget_view.dart` (seletor de layout) |
 
 ---

@@ -61,7 +61,7 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> inicialData(BuildContext context) async {
+  Future<void> initialData(BuildContext context) async {
     _loading = true;
     _safeNotify();
     try {

@@ -13,7 +13,7 @@ import 'components/budget_web_data_section.dart';
 import 'components/budget_web_items_section.dart';
 import '../budget_web_items/components/budget_web_items_total_bar.dart';
 import '../budget_web_items/components/modals/budget_web_approval_modal_widget.dart';
-import '../budget_web_pdf/budget_web_pdf_view_model.dart';
+import 'budget_web_pdf_data_view_model.dart';
 import '../utils/web_pdf_saver.dart';
 
 /// Tab "Meus dados" do orçamento Web — agora centraliza **tudo** o que o
@@ -108,14 +108,13 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
   }
 
   Future<void> _openPdfInNewTab() async {
-    // Já gerado antes? Abre direto.
     if (_pdfViewModel.bytes != null && !_pdfViewModel.loading) {
       openPdfInNewTabWeb(_pdfViewModel.bytes!);
       return;
     }
     setState(() => _generatingPdf = true);
     try {
-      await _pdfViewModel.inicialData(context);
+      await _pdfViewModel.initialData(context);
       final bytes = _pdfViewModel.bytes;
       if (bytes != null) {
         openPdfInNewTabWeb(bytes);
@@ -228,8 +227,6 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
               ],
             ),
           ),
-          // Painel fixo do rodapé: botão de aprovar (com padding, arredondado,
-          // acima do preço) + barra de totais (full-width, abaixo).
           Material(
             color: bgColor,
             child: Column(
