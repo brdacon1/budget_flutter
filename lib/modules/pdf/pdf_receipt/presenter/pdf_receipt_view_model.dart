@@ -52,7 +52,6 @@ class PdfReceiptViewModel extends ChangeNotifier {
         return;
       }
 
-      // Garante que o path do Firestore no datasource esteja correto
       budget.IDORCAMENTO = item.id;
       budget.IDRECIBO = receipt.id;
 

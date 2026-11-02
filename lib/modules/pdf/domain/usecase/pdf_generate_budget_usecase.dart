@@ -18,10 +18,10 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 /// Geração do PDF do orçamento (dados do titular, dados do orçamento,
 /// tabela de produtos, tabela de serviços e observações).
-class PdfGenerateUseCase {
+class PdfGenerateBudgetUsecase {
   final ConvertCoinRepository _moneyConvert;
 
-  PdfGenerateUseCase(this._moneyConvert);
+  PdfGenerateBudgetUsecase(this._moneyConvert);
 
   Future<String> patternPDF({
     required int countService,

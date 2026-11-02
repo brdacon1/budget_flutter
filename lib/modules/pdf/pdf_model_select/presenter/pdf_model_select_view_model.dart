@@ -10,23 +10,23 @@ import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfModelSelectViewModel extends ChangeNotifier {
-  final PdfGenerateUseCase _pdfGenerateUseCase;
+  final PdfGenerateBudgetUsecase _pdfGenerateBudgetUsecase;
   final PdfGenerateExecutiveUseCase _pdfGenerateExecutiveUseCase;
   final PdfGenerateProfessionalUseCase _pdfGenerateProfessionalUseCase;
   final PdfRepository _pdfRepository;
   final ConvertCoinRepository _moneyConvert;
 
   PdfModelSelectViewModel({
-    PdfGenerateUseCase? pdfGenerateUseCase,
+    PdfGenerateBudgetUsecase? pdfGenerateBudgetUsecase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
     PdfRepository? pdfRepository,
     ConvertCoinRepository? convertCoinRepository,
-  })  : _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+  })  : _pdfGenerateBudgetUsecase = pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetUsecase>(),
         _pdfGenerateExecutiveUseCase = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
         _pdfGenerateProfessionalUseCase = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>(),
         _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
@@ -110,7 +110,7 @@ class PdfModelSelectViewModel extends ChangeNotifier {
     ];
 
     try {
-      _standardBytes = await _pdfGenerateUseCase.patternPDFBytes(
+      _standardBytes = await _pdfGenerateBudgetUsecase.patternPDFBytes(
         countService: 1,
         countProduct: 1,
         totalPriceBudget: _moneyConvert.convertFromDouble(250.0),

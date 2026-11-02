@@ -6,7 +6,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -26,12 +26,12 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     required this.owner,
     required this.observations,
     required this.token,
-    PdfGenerateUseCase? pdfGenerateUseCase,
+    PdfGenerateBudgetUsecase? pdfGenerateUseCase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
     ConvertCoinRepository? convertCoinRepository,
     DisplayAlertRepository? displayAlertRepository,
-  })  : _pdf = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+  })  : _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateBudgetUsecase>(),
         _pdfExecutive = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
         _pdfProfessional = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>(),
         _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
@@ -43,7 +43,7 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final List<ObservationPdf> observations;
   final String token;
 
-  final PdfGenerateUseCase _pdf;
+  final PdfGenerateBudgetUsecase _pdfGenerateUseCase;
   final PdfGenerateExecutiveUseCase _pdfExecutive;
   final PdfGenerateProfessionalUseCase _pdfProfessional;
   final ConvertCoinRepository _moneyConvert;
@@ -129,7 +129,7 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               authToken: token,
             );
           default:
-            bytes = await _pdf.patternPDFBytes(
+            bytes = await _pdfGenerateUseCase.patternPDFBytes(
               countService: countService,
               countProduct: countProduct,
               totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),

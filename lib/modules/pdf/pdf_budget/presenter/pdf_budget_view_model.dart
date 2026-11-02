@@ -6,7 +6,7 @@ import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -19,7 +19,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
-  final PdfGenerateUseCase _pdfGenerateUseCase;
+  final PdfGenerateBudgetUsecase _pdfGenerateBudgetUsecase;
   final PdfGenerateExecutiveUseCase _pdfGenerateExecutiveUseCase;
   final PdfGenerateProfessionalUseCase _pdfGenerateProfessionalUseCase;
 
@@ -37,13 +37,13 @@ class PdfBudgetViewModel extends ChangeNotifier {
     PdfRepository? pdfRepository,
     DisplayAlertRepository? displayAlertRepository,
     ConvertCoinRepository? convertCoinRepository,
-    PdfGenerateUseCase? pdfGenerateUseCase,
+    PdfGenerateBudgetUsecase? pdfGenerateBudgetUsecase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
   })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
         _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
         _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
-        _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateUseCase>(),
+        _pdfGenerateBudgetUsecase = pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetUsecase>(),
         _pdfGenerateExecutiveUseCase = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
         _pdfGenerateProfessionalUseCase = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>();
 
@@ -140,7 +140,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
               observations: comments,
             );
           default:
-            generated = await _pdfGenerateUseCase.patternPDF(
+            generated = await _pdfGenerateBudgetUsecase.patternPDF(
               countService: countService,
               countProduct: countProduct,
               totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),

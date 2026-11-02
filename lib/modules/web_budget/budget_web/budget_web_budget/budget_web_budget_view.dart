@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/modules/web_budget/budget_web/budget_web_data/budget_web_pdf_data_view.dart';
+import 'package:oflite/modules/web_budget/budget_web/budget_web_pdf_data/budget_web_pdf_data_view.dart';
 import 'budget_web_budget_view_model.dart';
 
 /// Orçamento liberado no fluxo Web — tela única "Meus dados".
