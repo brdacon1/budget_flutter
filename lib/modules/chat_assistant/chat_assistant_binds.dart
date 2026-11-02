@@ -139,7 +139,11 @@ void registerChatBudgetDependencies(GetIt sl) {
     ),
   );
   sl.registerLazySingleton<OnLogoUpdatedUsecase>(
-    () => OnLogoUpdatedUsecase(sl<ChatBudgetRepository>()),
+    () => OnLogoUpdatedUsecase(
+      sl<ChatBudgetRepository>(),
+      sl<PdfRepository>(),
+      sl<ShowLogoInChatUsecase>(),
+    ),
   );
 
   // ------------------------------------------------------------------
