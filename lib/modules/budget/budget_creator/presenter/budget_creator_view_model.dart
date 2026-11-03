@@ -1,3 +1,4 @@
+import 'package:oflite/modules/budget/budget_list/presenter/enum/gender_enum.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -8,26 +9,12 @@ import 'package:flutter_contacts/properties/phone.dart';
 
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-
-enum Gender {
-  fullname,
-  Email,
-  phone,
-  cep,
-  rua,
-  data,
-  city,
-  id,
-  bairro,
-  status,
-}
 
 class BudgetCreatorViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
@@ -44,7 +31,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final bairroNode = FocusNode();
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
-  Gender? selected;
+  GenderEnum? selected;
   String? nameButton;
   String? titlePage;
   String? titleBox;
@@ -187,7 +174,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     await _budgetRepository.updateBudget(budget);
   }
 
-  void selectField(Gender field) {
+  void selectField(GenderEnum field) {
     selected = field;
     notifyListeners();
   }
