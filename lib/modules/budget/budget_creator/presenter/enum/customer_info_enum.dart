@@ -1,4 +1,4 @@
-enum GenderEnum {
+enum CustomerInfoEnum {
   fullname,
   Email,
   phone,

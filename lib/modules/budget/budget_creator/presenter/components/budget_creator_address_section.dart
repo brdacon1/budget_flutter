@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/budget/budget_list/presenter/enum/gender_enum.dart';
+import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
 import 'budget_creator_field.dart';
@@ -43,7 +43,7 @@ class BudgetCreatorAddressSection extends StatelessWidget {
           ),
           children: <Widget>[
             BudgetCreatorField(
-              field: GenderEnum.cep,
+              field: CustomerInfoEnum.cep,
               viewModel: viewModel,
               hintText: 'CEP',
               prefixIcon: Icons.add_location_outlined,
@@ -54,12 +54,12 @@ class BudgetCreatorAddressSection extends StatelessWidget {
               onChanged: viewModel.onCepChanged,
               onTap: () {
                 viewModel.cepNode.requestFocus();
-                viewModel.selectField(GenderEnum.cep);
+                viewModel.selectField(CustomerInfoEnum.cep);
               },
             ),
             SizedBox(height: he * 0.02),
             BudgetCreatorField(
-              field: GenderEnum.rua,
+              field: CustomerInfoEnum.rua,
               viewModel: viewModel,
               hintText: 'Rua',
               prefixIcon: Icons.location_on_outlined,
@@ -67,12 +67,12 @@ class BudgetCreatorAddressSection extends StatelessWidget {
               focusNode: viewModel.ruaNode,
               onTap: () {
                 viewModel.ruaNode.requestFocus();
-                viewModel.selectField(GenderEnum.rua);
+                viewModel.selectField(CustomerInfoEnum.rua);
               },
             ),
             SizedBox(height: he * 0.02),
             BudgetCreatorField(
-              field: GenderEnum.city,
+              field: CustomerInfoEnum.city,
               viewModel: viewModel,
               hintText: 'Cidade',
               prefixIcon: Icons.location_city_outlined,
@@ -80,19 +80,19 @@ class BudgetCreatorAddressSection extends StatelessWidget {
               focusNode: viewModel.cityNode,
               onTap: () {
                 viewModel.cityNode.requestFocus();
-                viewModel.selectField(GenderEnum.city);
+                viewModel.selectField(CustomerInfoEnum.city);
               },
             ),
             SizedBox(height: he * 0.02),
             BudgetCreatorField(
-              field: GenderEnum.bairro,
+              field: CustomerInfoEnum.bairro,
               viewModel: viewModel,
               hintText: 'Bairro',
               prefixIcon: Icons.location_searching,
               controller: viewModel.bairroController,
               focusNode: viewModel.bairroNode,
               onTap: () {
-                viewModel.selectField(GenderEnum.bairro);
+                viewModel.selectField(CustomerInfoEnum.bairro);
                 viewModel.bairroNode.requestFocus();
               },
             ),

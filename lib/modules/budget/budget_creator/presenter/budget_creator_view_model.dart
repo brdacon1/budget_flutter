@@ -1,4 +1,4 @@
-import 'package:oflite/modules/budget/budget_list/presenter/enum/gender_enum.dart';
+import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -23,15 +23,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   BudgetCreatorViewModel({required this.item});
 
-  final nameNode = FocusNode();
-  final phoneNode = FocusNode();
-  final cepNode = FocusNode();
-  final ruaNode = FocusNode();
-  final cityNode = FocusNode();
-  final bairroNode = FocusNode();
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.white;
-  GenderEnum? selected;
+  CustomerInfoEnum? selected;
   String? nameButton;
   String? titlePage;
   String? titleBox;
@@ -47,6 +39,13 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final cityController = TextEditingController();
   final bairroController = TextEditingController();
   final statusController = TextEditingController();
+
+  final nameNode = FocusNode();
+  final phoneNode = FocusNode();
+  final cepNode = FocusNode();
+  final ruaNode = FocusNode();
+  final cityNode = FocusNode();
+  final bairroNode = FocusNode();
 
   var maskFormatter = MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -174,7 +173,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     await _budgetRepository.updateBudget(budget);
   }
 
-  void selectField(GenderEnum field) {
+  void selectField(CustomerInfoEnum field) {
     selected = field;
     notifyListeners();
   }

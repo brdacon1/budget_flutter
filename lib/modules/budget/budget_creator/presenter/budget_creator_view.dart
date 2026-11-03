@@ -100,6 +100,25 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
       ),
     );
   }
+  
+  Widget _buildScreen({required double height, required double we}) {
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            BudgetCreatorHeader(
+              titlePage: _viewModel.titlePage ?? '',
+              onBack: () => Navigator.pop(context, true),
+            ),
+            _buildBudgetFields(height: height, we: we),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,22 +128,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          AnimatedBuilder(
-            animation: _viewModel,
-            builder: (context, _) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  BudgetCreatorHeader(
-                    titlePage: _viewModel.titlePage ?? '',
-                    onBack: () => Navigator.pop(context, true),
-                  ),
-                  _buildBudgetFields(height: he, we: we),
-                ],
-              );
-            },
-          ),
+          _buildScreen(height: he, we: he),
           _buildButtonSaveBudget(we: we),
         ],
       ),
