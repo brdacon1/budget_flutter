@@ -63,7 +63,7 @@ class _DashboardView extends State<DashboardView> {
                         if (ResponsiveWidget.isMobile(context))
                           const SizedBox(height: defaultPadding),
                         if (ResponsiveWidget.isMobile(context))
-                          StarageDetails(item: _viewModel.myBudgetDashboard),
+                          StorageDetails(item: _viewModel.myBudgetDashboard),
                         const SizedBox(height: defaultPadding),
                         MonthEvolution(item: _viewModel.monthCalculate),
                         const SizedBox(height: defaultPadding),
@@ -76,7 +76,7 @@ class _DashboardView extends State<DashboardView> {
                   if (!ResponsiveWidget.isMobile(context))
                     Expanded(
                       flex: 2,
-                      child: StarageDetails(
+                      child: StorageDetails(
                         item: _viewModel.myBudgetDashboard,
                       ),
                     ),

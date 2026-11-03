@@ -5,18 +5,18 @@ import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.d
 import 'chart.dart';
 import 'storage_info_card.dart';
 
-class StarageDetails extends StatefulWidget {
+class StorageDetails extends StatefulWidget {
   final MyBudgetDashboard item;
-  const StarageDetails({
-    Key? key,
+  const StorageDetails({
+    super.key,
     required this.item
-  }) : super(key: key);
+  });
 
   @override
   _StarageDetails createState() => _StarageDetails();
 }
 
-class _StarageDetails extends State<StarageDetails> {
+class _StarageDetails extends State<StorageDetails> {
 
   @override
   initState() {
