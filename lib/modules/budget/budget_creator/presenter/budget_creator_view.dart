@@ -46,6 +46,61 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     }
   }
 
+  Widget _buildBudgetFields({required double height, required double we}) {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: SizedBox(
+          child: Column(
+            children: <Widget>[
+              BudgetCreatorContactSection(
+                viewModel: _viewModel,
+                onPickContact: () =>
+                    _viewModel.pickContact(we, context),
+              ),
+              BudgetCreatorInfoSection(
+                viewModel: _viewModel,
+                onSelectStatus: _selectStatus,
+              ),
+              BudgetCreatorAddressSection(
+                viewModel: _viewModel,
+              ),
+              SizedBox(height: height * 0.20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildButtonSaveBudget({required double we}) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: AnimatedBuilder(
+        animation: _viewModel,
+        builder: (context, _) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: BudgetCreatorSaveButton(
+                  label: _viewModel.nameButton ?? '',
+                  onPressed: () async {
+                    await _viewModel.eventSave(context, we);
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              const BannerAdWidget(),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
@@ -65,59 +120,12 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                     titlePage: _viewModel.titlePage ?? '',
                     onBack: () => Navigator.pop(context, true),
                   ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: SizedBox(
-                        child: Column(
-                          children: <Widget>[
-                            BudgetCreatorContactSection(
-                              viewModel: _viewModel,
-                              onPickContact: () =>
-                                  _viewModel.pickContact(we, context),
-                            ),
-                            BudgetCreatorInfoSection(
-                              viewModel: _viewModel,
-                              onSelectStatus: _selectStatus,
-                            ),
-                            BudgetCreatorAddressSection(
-                              viewModel: _viewModel,
-                            ),
-                            SizedBox(height: he * 0.20),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildBudgetFields(height: he, we: we),
                 ],
               );
             },
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedBuilder(
-              animation: _viewModel,
-              builder: (context, _) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: BudgetCreatorSaveButton(
-                        label: _viewModel.nameButton ?? '',
-                        onPressed: () async {
-                          await _viewModel.eventSave(context, we);
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const BannerAdWidget(),
-                  ],
-                );
-              },
-            ),
-          ),
+          _buildButtonSaveBudget(we: we),
         ],
       ),
     );
