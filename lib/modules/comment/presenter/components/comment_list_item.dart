@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
+import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 /// Item da lista de comentários, exibido em um [ExpansionTileCard].
 class CommentListItem extends StatelessWidget {
@@ -76,56 +77,30 @@ class CommentListItem extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _ActionButton(
-                    icon: Icons.delete_outline_rounded,
-                    label: CommentStrings.deleteLabel,
-                    onTap: () => onDelete(comment),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon: Icons.delete_outline_rounded,
+                        label: CommentStrings.deleteLabel,
+                        onPressed: () => onDelete(comment),
+                      ),
+                    ),
                   ),
-                  _ActionButton(
-                    icon: Icons.edit,
-                    label: CommentStrings.editLabel,
-                    onTap: () => onEdit(comment),
+
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon: Icons.edit,
+                        label: CommentStrings.editLabel,
+                        onPressed: () => onEdit(comment),
+                      ),
+                    ),
                   ),
                 ],
               ),
             )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Future<void> Function() onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 85.0,
-      height: 52.0,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: whiteColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-        ),
-        onPressed: onTap,
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 4),
-            Icon(icon, color: bgColor),
-            const SizedBox(height: 2.0),
-            Text(label, style: const TextStyle(fontSize: 8.5, color: bgColor)),
           ],
         ),
       ),

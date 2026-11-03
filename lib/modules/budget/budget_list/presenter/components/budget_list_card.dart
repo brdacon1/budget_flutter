@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 class BudgetListCard extends StatelessWidget {
   const BudgetListCard({
@@ -137,28 +138,10 @@ class BudgetListCard extends StatelessWidget {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: SizedBox(
-                          height: 46.0,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.08),
-                              foregroundColor: whiteColor,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              padding: EdgeInsets.zero,
-                            ),
-                            onPressed: onDelete,
-                            child: const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.delete_outline_rounded, size: 16, color: whiteColor),
-                                SizedBox(height: 2),
-                                Text('Excluir', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: whiteColor)),
-                              ],
-                            ),
-                          ),
+                        child: ActionButton(
+                          icon: Icons.delete_outline_rounded,
+                          label: 'Excluir',
+                          onPressed: onDelete,
                         ),
                       ),
                     ),
@@ -167,28 +150,10 @@ class BudgetListCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        height: 46.0,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.08),
-                            foregroundColor: whiteColor,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          onPressed: onDuplicate,
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.copy_rounded, size: 16, color: whiteColor),
-                              SizedBox(height: 2),
-                              Text('Duplicar', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: whiteColor)),
-                            ],
-                          ),
-                        ),
+                      child: ActionButton(
+                        icon: Icons.copy_rounded,
+                        label: 'Duplicar',
+                        onPressed: onDuplicate,
                       ),
                     ),
                   ),
@@ -196,28 +161,10 @@ class BudgetListCard extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        height: 46.0,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.08),
-                            foregroundColor: whiteColor,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: EdgeInsets.zero,
-                          ),
-                          onPressed: onOpen,
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.open_in_new_rounded, size: 16, color: whiteColor),
-                              SizedBox(height: 2),
-                              Text('Abrir', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: whiteColor)),
-                            ],
-                          ),
-                        ),
+                      child: ActionButton(
+                        icon: Icons.open_in_new_rounded,
+                        label: 'Abrir',
+                        onPressed: onOpen,
                       ),
                     ),
                   ),

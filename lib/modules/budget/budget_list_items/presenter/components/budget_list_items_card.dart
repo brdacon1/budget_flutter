@@ -3,6 +3,7 @@ import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 class BudgetListItemsCard extends StatelessWidget {
   const BudgetListItemsCard({
@@ -127,37 +128,16 @@ class BudgetListItemsCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   if (!item.checkBox!)
-                    SizedBox(
-                      width: 140.0,
-                      height: 46.0,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.08),
-                          foregroundColor: whiteColor,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon: Icons.delete_outline_rounded,
+                        label: 'Excluir',
                         onPressed: onDelete,
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.delete_outline_rounded, size: 16, color: whiteColor),
-                            SizedBox(height: 2),
-                            Text(
-                              'Excluir',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: whiteColor,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
+                  ),
                 ],
               ),
             )
