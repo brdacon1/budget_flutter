@@ -59,7 +59,6 @@ class DashboardViewModel extends ChangeNotifier {
 
   double getWeekOfMonthFromId(String? rawId) {
     if (rawId == null || rawId.isEmpty) return 0;
-    // Remove qualquer sufixo não numérico (ex: hífen, letras)
     final sanitized = rawId.replaceAll(RegExp(r'[^0-9]'), '');
     if (sanitized.isEmpty) return 0;
     final ms = int.tryParse(sanitized);
