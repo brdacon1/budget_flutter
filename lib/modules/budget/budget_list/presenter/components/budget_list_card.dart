@@ -129,93 +129,97 @@ class BudgetListCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 5, top: 10),
+              padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return Visibility(
-                        visible: !item.checkBox!,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
+                  if (!item.checkBox!)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: SizedBox(
-                          width: 85.0,
-                          height: 52.0,
+                          height: 46.0,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: whiteColor,
+                              backgroundColor: Colors.white.withOpacity(0.08),
+                              foregroundColor: whiteColor,
+                              elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
+                              padding: EdgeInsets.zero,
                             ),
                             onPressed: onDelete,
                             child: const Column(
-                              children: <Widget>[
-                                SizedBox(height: 4),
-                                Icon(Icons.delete_outline_rounded, color: bgColor),
-                                SizedBox(height: 2.0),
-                                Text('Excluir',
-                                    style: TextStyle(fontSize: 8.5, color: bgColor)),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.delete_outline_rounded, size: 16, color: whiteColor),
+                                SizedBox(height: 2),
+                                Text('Excluir', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: whiteColor)),
                               ],
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return SizedBox(
-                        width: 85.0,
-                        height: 52.0,
+                      ),
+                    ),
+
+                  // Botão Duplicar (Neutro elegante)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: SizedBox(
+                        height: 46.0,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: whiteColor,
+                            backgroundColor: Colors.white.withOpacity(0.08),
+                            foregroundColor: whiteColor,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
-                          ),
-                          onPressed: onOpen,
-                          child: const Column(
-                            children: <Widget>[
-                              SizedBox(height: 4),
-                              Icon(Icons.open_in_new_rounded, color: bgColor),
-                              SizedBox(height: 2.0),
-                              Text('Abrir',
-                                  style: TextStyle(fontSize: 8.5, color: bgColor)),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return SizedBox(
-                        width: 85.0,
-                        height: 52.0,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: whiteColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
+                            padding: EdgeInsets.zero,
                           ),
                           onPressed: onDuplicate,
                           child: const Column(
-                            children: <Widget>[
-                              SizedBox(height: 4),
-                              Icon(Icons.copy, color: bgColor),
-                              SizedBox(height: 2.0),
-                              Text('Duplicar',
-                                  style: TextStyle(fontSize: 8.5, color: bgColor)),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.copy_rounded, size: 16, color: whiteColor),
+                              SizedBox(height: 2),
+                              Text('Duplicar', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: whiteColor)),
                             ],
                           ),
                         ),
-                      );
-                    },
+                      ),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: SizedBox(
+                        height: 46.0,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white.withOpacity(0.08),
+                            foregroundColor: whiteColor,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            padding: EdgeInsets.zero,
+                          ),
+                          onPressed: onOpen,
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.open_in_new_rounded, size: 16, color: whiteColor),
+                              SizedBox(height: 2),
+                              Text('Abrir', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: whiteColor)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

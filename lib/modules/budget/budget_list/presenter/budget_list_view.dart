@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
-import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
 import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
