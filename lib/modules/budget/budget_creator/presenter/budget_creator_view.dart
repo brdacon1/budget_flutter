@@ -12,7 +12,7 @@ import 'budget_creator_view_model.dart';
 
 class BudgetCreatorView extends StatefulWidget {
   final CustomerInfo item;
-  const BudgetCreatorView({Key? key, required this.item}) : super(key: key);
+  const BudgetCreatorView({super.key, required this.item});
 
   @override
   State<BudgetCreatorView> createState() => _BudgetCreatorView();
