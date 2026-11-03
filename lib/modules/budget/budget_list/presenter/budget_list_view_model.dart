@@ -20,12 +20,10 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   CustomerInfo customerBudget = CustomerInfo();
-  Color enabled = const Color(0xFF827F8A);
   final _foundUsers = <CustomerInfo>[];
-  final deleteItens = <CustomerInfo>[];
-  CustomerInfo novo = CustomerInfo();
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.grey;
+  final deleteItems = <CustomerInfo>[];
+  CustomerInfo _customerInfoNew = CustomerInfo();
+
   bool deleteVisible = false;
   bool checkBoxAppear = false;
   bool _isRefreshing = false;
@@ -59,9 +57,9 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   Future<bool> deleteData() async {
-    final result = await _budgetRepository.deleteBudgets(deleteItens);
+    final result = await _budgetRepository.deleteBudgets(deleteItems);
     if (result is Ok<void>) {
-      deleteItens.clear();
+      deleteItems.clear();
       deleteVisible = false;
       await getInformationOrcamento();
       return true;
@@ -104,8 +102,8 @@ class BudgetListViewModel extends ChangeNotifier {
     if (!getFilteredData()[index].checkBox!) {
       getFilteredData()[index].checkBox = true;
       getFilteredData()[index].index = index;
-      deleteItens.add(getFilteredData()[index]);
-      if (deleteItens.isNotEmpty) {
+      deleteItems.add(getFilteredData()[index]);
+      if (deleteItems.isNotEmpty) {
         deleteVisible = true;
       }
     }
@@ -114,8 +112,8 @@ class BudgetListViewModel extends ChangeNotifier {
 
   void removeDeleteItem(CustomerInfo item) {
     getFilteredData()[item.index].checkBox = false;
-    deleteItens.remove(item);
-    if (deleteItens.isEmpty) {
+    deleteItems.remove(item);
+    if (deleteItems.isEmpty) {
       deleteVisible = false;
       checkBoxAppear = false;
     }
@@ -123,14 +121,14 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   void clearDeleteItens() {
-    deleteItens.clear();
+    deleteItems.clear();
     deleteVisible = false;
     checkBoxAppear = false;
     if (!_disposed) notifyListeners();
   }
 
-  CustomerInfo novoOrcamento() {
-    novo = CustomerInfo(
+  CustomerInfo customerInfoNew() {
+    _customerInfoNew = CustomerInfo(
       phone: '',
       customerName: '',
       address: '',
@@ -145,7 +143,7 @@ class BudgetListViewModel extends ChangeNotifier {
       street: '',
     );
     budget.IDORCAMENTO = '';
-    return novo;
+    return _customerInfoNew;
   }
 
   @override

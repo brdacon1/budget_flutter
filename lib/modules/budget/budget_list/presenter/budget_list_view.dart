@@ -73,7 +73,7 @@ class _BudgetListView extends State<BudgetListView> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return BudgetListDeleteBottomModalWidget(
-          deleteItens: _viewModel.deleteItens,
+          deleteItens: _viewModel.deleteItems,
           onRemove: (item) => _viewModel.removeDeleteItem(item),
           onConfirm: () async {
             await _viewModel.deleteData();
@@ -106,7 +106,7 @@ class _BudgetListView extends State<BudgetListView> {
                   padding: const EdgeInsets.all(3.0),
                   child: Center(
                     child: Text(
-                      _viewModel.deleteItens.length.toString(),
+                      _viewModel.deleteItems.length.toString(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
@@ -141,7 +141,7 @@ class _BudgetListView extends State<BudgetListView> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => BudgetTabView(
-                                      item: _viewModel.novoOrcamento())),
+                                      item: _viewModel.customerInfoNew())),
                             ).then((_) async {
                               budget.IDORCAMENTO = '';
                               await _viewModel.getInformationOrcamento();
@@ -163,7 +163,7 @@ class _BudgetListView extends State<BudgetListView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            BudgetTabView(item: _viewModel.novoOrcamento())),
+                            BudgetTabView(item: _viewModel.customerInfoNew())),
                   ).then((_) async {
                     budget.IDORCAMENTO = '';
                     await _viewModel.getInformationOrcamento();
