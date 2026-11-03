@@ -13,10 +13,10 @@ class StorageDetails extends StatefulWidget {
   });
 
   @override
-  _StarageDetails createState() => _StarageDetails();
+  State<StorageDetails> createState() => _StorageDetails();
 }
 
-class _StarageDetails extends State<StorageDetails> {
+class _StorageDetails extends State<StorageDetails> {
 
   @override
   initState() {
