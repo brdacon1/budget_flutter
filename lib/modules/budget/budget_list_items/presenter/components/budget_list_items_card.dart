@@ -122,42 +122,42 @@ class BudgetListItemsCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 5, top: 10),
+              padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return Visibility(
-                        visible: !item.checkBox!,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: SizedBox(
-                          width: 85.0,
-                          height: 52.0,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: whiteColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                  if (!item.checkBox!)
+                    SizedBox(
+                      width: 140.0,
+                      height: 46.0,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.08),
+                          foregroundColor: whiteColor,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: onDelete,
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.delete_outline_rounded, size: 16, color: whiteColor),
+                            SizedBox(height: 2),
+                            Text(
+                              'Excluir',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: whiteColor,
                               ),
                             ),
-                            onPressed: onDelete,
-                            child: const Column(
-                              children: <Widget>[
-                                SizedBox(height: 4),
-                                Icon(Icons.delete_outline_rounded, color: bgColor),
-                                SizedBox(height: 2.0),
-                                Text('Excluir',
-                                    style: TextStyle(fontSize: 10, color: bgColor)),
-                              ],
-                            ),
-                          ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
                 ],
               ),
             )
