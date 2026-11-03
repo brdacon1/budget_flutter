@@ -52,52 +52,74 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
-      body: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              BudgetCreatorHeader(
-                titlePage: _viewModel.titlePage ?? '',
-                onBack: () => Navigator.pop(context, true),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(
-                    child: Column(
-                      children: <Widget>[
-                        BudgetCreatorContactSection(
-                          viewModel: _viewModel,
-                          onPickContact: () =>
-                              _viewModel.pickContact(we, context),
+      body: Stack(
+        children: [
+          AnimatedBuilder(
+            animation: _viewModel,
+            builder: (context, _) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  BudgetCreatorHeader(
+                    titlePage: _viewModel.titlePage ?? '',
+                    onBack: () => Navigator.pop(context, true),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SizedBox(
+                        child: Column(
+                          children: <Widget>[
+                            BudgetCreatorContactSection(
+                              viewModel: _viewModel,
+                              onPickContact: () =>
+                                  _viewModel.pickContact(we, context),
+                            ),
+                            BudgetCreatorInfoSection(
+                              viewModel: _viewModel,
+                              onSelectStatus: _selectStatus,
+                            ),
+                            BudgetCreatorAddressSection(
+                              viewModel: _viewModel,
+                            ),
+                            SizedBox(height: he * 0.20),
+                          ],
                         ),
-                        BudgetCreatorInfoSection(
-                          viewModel: _viewModel,
-                          onSelectStatus: _selectStatus,
-                        ),
-                        BudgetCreatorAddressSection(
-                          viewModel: _viewModel,
-                        ),
-                        SizedBox(height: he * 0.02),
-                        BudgetCreatorSaveButton(
-                          label: _viewModel.nameButton ?? '',
-                          onPressed: () async {
-                            await _viewModel.eventSave(context, we);
-                          },
-                        ),
-                        SizedBox(height: he * 0.10),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          );
-        },
+                ],
+              );
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AnimatedBuilder(
+              animation: _viewModel,
+              builder: (context, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: BudgetCreatorSaveButton(
+                        label: _viewModel.nameButton ?? '',
+                        onPressed: () async {
+                          await _viewModel.eventSave(context, we);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const BannerAdWidget(),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }
