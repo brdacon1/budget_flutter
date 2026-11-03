@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/receipt/receipt_list/presenter/components/action_button.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 /// Card de recibo (ExpansionTileCard) da lista de recibos.
@@ -24,6 +25,43 @@ class ReceiptCard extends StatelessWidget {
   final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
   final VoidCallback onOpen;
+
+  Widget _buildButtons() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: SizedBox(
+                height: 46.0,
+                child: ActionButton(
+                  icon: Icons.delete_outline_rounded,
+                  label: ReceiptPtString.deleteLabel,
+                  onPressed: onDelete,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: SizedBox(
+                height: 46.0,
+                child: ActionButton(
+                  icon: Icons.open_in_new_rounded,
+                  label: ReceiptPtString.openLabel,
+                  onPressed: onOpen,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,41 +135,7 @@ class ReceiptCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        height: 46.0,
-                        child: _ActionButton(
-                          icon: Icons.delete_outline_rounded,
-                          label: ReceiptPtString.deleteLabel,
-                          onPressed: onDelete,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        height: 46.0,
-                        child: _ActionButton(
-                          icon: Icons.open_in_new_rounded,
-                          label: ReceiptPtString.openLabel,
-                          onPressed: onOpen,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildButtons(),
           ],
         ),
       ),
@@ -139,48 +143,3 @@ class ReceiptCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 46.0,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: whiteColor.withOpacity(0.08),
-          foregroundColor: whiteColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          padding: EdgeInsets.zero,
-        ),
-        onPressed: onPressed,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(icon, size: 16, color: whiteColor),
-            const SizedBox(height: 2.0),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: whiteColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
