@@ -246,6 +246,21 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
 
+  Widget _buildBottomNavigationBar() {
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        final bottomInset = MediaQuery.of(context).viewPadding.bottom;
+        return Container(
+          color: buttonColor,
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: BudgetListItemsTotalBar(viewModel: _viewModel),
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     var we = MediaQuery.of(context).size.width;
@@ -269,17 +284,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingActionButton(height: he),
-      bottomNavigationBar: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          final bottomInset = MediaQuery.of(context).viewPadding.bottom;
-          return Container(
-            color: buttonColor,
-            padding: EdgeInsets.only(bottom: bottomInset),
-            child: BudgetListItemsTotalBar(viewModel: _viewModel),
-          );
-        },
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 }
