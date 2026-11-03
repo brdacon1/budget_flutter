@@ -405,7 +405,6 @@ class PdfGenerateBudgetUsecase {
     addLeftRow('Criado em :', customer.data);
     addLeftRow('Cliente :', customer.customerName);
     addLeftRow('Telefone :', customer.phone);
-    addLeftRow('Empresa :', customer.companyName);
 
     // Coluna direita: apenas o endereço do cliente (apenas os preenchidos
     // aparecem, dinamicamente).

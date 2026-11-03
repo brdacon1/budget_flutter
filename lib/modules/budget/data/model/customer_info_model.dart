@@ -12,7 +12,6 @@ class CustomerInfo {
   String? address;
   String? phone;
   String? customerName;
-  String? companyName;
   String? status;
   double? totalValue;
   bool? checkBox;
@@ -28,7 +27,6 @@ class CustomerInfo {
     this.address,
     this.phone,
     this.customerName,
-    this.companyName,
     this.status,
     this.zip,
     this.totalValue});
@@ -44,7 +42,6 @@ class CustomerInfo {
     address = json['ENDERECO'];
     phone = json['FONE'];
     customerName = json['NOMECLIENTE'];
-    companyName = json['NOMEEMPRESA'];
     status = json['STATUS'];
     zip = json['CEP'];
     totalValue = json['VALORTOTAL'] ?? 0;
@@ -61,7 +58,6 @@ class CustomerInfo {
     String? address,
     String? phone,
     String? customerName,
-    String? companyName,
     String? status,
     String? zip,
     double? totalValue,
@@ -77,7 +73,6 @@ class CustomerInfo {
       address: address ?? this.address,
       phone: phone ?? this.phone,
       customerName: customerName ?? this.customerName,
-      companyName: companyName ?? this.companyName,
       status: status ?? this.status,
       zip: zip ?? this.zip,
       totalValue: totalValue ?? this.totalValue,
@@ -96,7 +91,6 @@ class CustomerInfo {
     data['ENDERECO'] = address;
     data['FONE'] = phone;
     data['NOMECLIENTE'] = customerName;
-    data['NOMEEMPRESA'] = companyName;
     data['STATUS'] = status;
     data['CEP'] = zip;
     data['VALORTOTAL'] = totalValue;

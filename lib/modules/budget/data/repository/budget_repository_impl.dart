@@ -150,7 +150,6 @@ class BudgetRepositoryImpl extends BudgetRepository {
           email: source.email,
           address: source.address,
           generated: source.generated,
-          companyName: source.companyName,
           zip: source.zip,
           street: source.street,
           city: source.city,

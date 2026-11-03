@@ -113,7 +113,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       ..email = source.email
       ..address = source.address
       ..generated = source.generated
-      ..companyName = source.companyName
       ..customerName = source.customerName
       ..phone = source.phone
       ..status = source.status
@@ -136,7 +135,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     Orcamento.ENDERECO = source.address;
     Orcamento.FONE = source.phone;
     Orcamento.NOMECLIENTE = source.customerName;
-    Orcamento.NOMEEMPRESA = source.companyName;
     Orcamento.STATUS = source.status;
     Orcamento.VALORTOTAL = source.totalValue;
   }
@@ -158,7 +156,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       email: item.email,
       address: item.address,
       generated: item.generated,
-      companyName: item.companyName,
       customerName: nameController.text,
       phone: phoneController.text,
       status: statusController.text,

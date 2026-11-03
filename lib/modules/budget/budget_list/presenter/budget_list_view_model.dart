@@ -133,7 +133,6 @@ class BudgetListViewModel extends ChangeNotifier {
     novo = CustomerInfo(
       phone: '',
       customerName: '',
-      companyName: '',
       address: '',
       email: '',
       generated: '',
