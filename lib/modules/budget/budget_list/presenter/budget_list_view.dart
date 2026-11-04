@@ -9,7 +9,7 @@ import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart'
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'components/budget_list_card.dart';
+import 'components/card/budget_list_card.dart';
 import 'components/modals/budget_list_delete_bottom_modal_widget.dart';
 import 'components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'budget_list_view_model.dart';

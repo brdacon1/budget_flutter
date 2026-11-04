@@ -240,7 +240,6 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> saveCart(BuildContext context) async {
-    // Em modo seleção não salva no Firestore — retorna os itens selecionados.
     if (selectionMode) {
       finalizeSelection(context);
       return;

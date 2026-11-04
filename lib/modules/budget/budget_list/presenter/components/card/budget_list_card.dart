@@ -146,7 +146,6 @@ class BudgetListCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Botão Duplicar (Neutro elegante)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
