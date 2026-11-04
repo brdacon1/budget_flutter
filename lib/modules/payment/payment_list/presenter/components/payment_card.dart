@@ -1,9 +1,10 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 class PaymentCard extends StatelessWidget {
   final PaymentCustomer item;
@@ -12,12 +13,12 @@ class PaymentCard extends StatelessWidget {
   final VoidCallback onEdit;
 
   const PaymentCard({
-    Key? key,
+    super.key,
     required this.item,
     required this.moneyConvert,
     required this.onDelete,
     required this.onEdit,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,9 @@ class PaymentCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            PaymentStrings.paymentValueLabel(moneyConvert.convertFromDouble(item.PRECO!)),
+            PaymentStrings.paymentValueLabel(
+              moneyConvert.convertFromDouble(item.PRECO!),
+            ),
             style: const TextStyle(
               color: whiteColor,
               letterSpacing: 0.5,
@@ -52,10 +55,7 @@ class PaymentCard extends StatelessWidget {
             ),
           ),
           children: <Widget>[
-            const Divider(
-              thickness: 1.0,
-              height: 1.0,
-            ),
+            const Divider(thickness: 1.0, height: 1.0),
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -78,57 +78,29 @@ class PaymentCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _ActionButton(
-                    icon: Icons.delete_outline_rounded,
-                    label: PaymentStrings.deleteLabel,
-                    onPressed: onDelete,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon: Icons.delete_outline_rounded,
+                        label: PaymentStrings.deleteLabel,
+                        onPressed: onDelete,
+                      ),
+                    ),
                   ),
-                  _ActionButton(
-                    icon: Icons.edit,
-                    label: PaymentStrings.editLabel,
-                    onPressed: onEdit,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon: Icons.edit,
+                        label: PaymentStrings.editLabel,
+                        onPressed: onEdit,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _ActionButton({
-    Key? key,
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 85.0,
-      height: 52.0,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: whiteColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-        ),
-        onPressed: onPressed,
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 4),
-            Icon(icon, color: bgColor),
-            const SizedBox(height: 2.0),
-            Text(label, style: const TextStyle(fontSize: 10, color: bgColor)),
+            ),
           ],
         ),
       ),

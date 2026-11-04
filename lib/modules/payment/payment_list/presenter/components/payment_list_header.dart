@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 
 class PaymentListHeader extends StatelessWidget {
   final VoidCallback onBack;
 
-  const PaymentListHeader({
-    Key? key,
-    required this.onBack,
-  }) : super(key: key);
+  const PaymentListHeader({super.key, required this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -38,19 +34,16 @@ class PaymentListHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: he * 0.03),
-        FadeAnimationWidget(
-          delay: 1,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.028),
-            child: Text(
-              PaymentStrings.paymentsTitle,
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                letterSpacing: 2,
-              ),
+        Container(
+          alignment: Alignment.topLeft,
+          margin: EdgeInsets.only(left: we * 0.028),
+          child: Text(
+            PaymentStrings.paymentsTitle,
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 2,
             ),
           ),
         ),

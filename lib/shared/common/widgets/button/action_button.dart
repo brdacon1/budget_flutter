@@ -18,7 +18,7 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50.0,
+      height: 48.0,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor:
@@ -34,7 +34,7 @@ class ActionButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon, size: 20, color: whiteColor),
+            Icon(icon, size: 19, color: whiteColor),
             const SizedBox(height: 2.0),
             Text(
               label,
