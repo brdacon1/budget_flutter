@@ -4,6 +4,7 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
+import 'package:oflite/shared/common/widgets/label/expansion_card_label.dart';
 
 class BudgetListItemsCard extends StatelessWidget {
   const BudgetListItemsCard({
@@ -51,89 +52,18 @@ class BudgetListItemsCard extends StatelessWidget {
           ),
           children: <Widget>[
             const Divider(thickness: 1.0, height: 1.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Categoria",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-                Text(
-                  "${item.CATEGORIA}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ],
+            ExpansionCardLabel(
+              nameText: "Categoria",
+              textData: "${item.CATEGORIA}",
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Total",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-                Text(
-                  moneyConvert.convertFromDouble(item.TOTAL!),
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ],
+            ExpansionCardLabel(
+              nameText: "Total",
+              textData: moneyConvert.convertFromDouble(item.TOTAL!),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Quantidade",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-                Text(
-                  '${item.QTD}',
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Unidade de medida",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-                Text(
-                  '${item.MEDIDA}',
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ],
+            ExpansionCardLabel(nameText: "Quantidade", textData: '${item.QTD}'),
+            ExpansionCardLabel(
+              nameText: "Unidade de medida",
+              textData: '${item.MEDIDA}',
             ),
             Padding(
               padding: const EdgeInsets.only(
