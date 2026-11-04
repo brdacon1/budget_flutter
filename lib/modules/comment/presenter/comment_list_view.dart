@@ -1,17 +1,18 @@
-import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+
 import 'comment_list_view_model.dart';
 import 'components/comment_form_dialog.dart';
 import 'components/comment_list_item.dart';
 
 class CommentListView extends StatefulWidget {
   final CustomerInfo item;
+
   const CommentListView({super.key, required this.item});
 
   @override
@@ -45,8 +46,19 @@ class _CommentListView extends State<CommentListView> {
     final success = await _viewModel.loadComments();
     if (!success && mounted) {
       await _displayAlert.notificationError(
-          context, "Erro!", "Não foi possível carregar os comentários");
+        context,
+        "Erro!",
+        "Não foi possível carregar os comentários",
+      );
     }
+  }
+
+  Future<void> _openNotificationError() async {
+    await _displayAlert.notificationError(
+      context,
+      "Erro!",
+      "Não foi possível remover o comentário",
+    );
   }
 
   Future<void> _openCommentForm(ObservationBudget comment) async {
@@ -60,6 +72,68 @@ class _CommentListView extends State<CommentListView> {
     if (saved == null) return;
     await _viewModel.loadComments();
     _viewModel.resetSelectionState();
+  }
+
+  Widget _title(double we) {
+    return Container(
+      alignment: Alignment.topLeft,
+      margin: EdgeInsets.only(left: we * 0.028),
+      child: Text(
+        "Comentários",
+        style: GoogleFonts.heebo(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 26,
+          letterSpacing: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _commentList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      padding: const EdgeInsets.only(bottom: 150, left: 15, right: 15, top: 10),
+      itemCount: _viewModel.foundObservation.length,
+      itemBuilder: (context, index) {
+        final comment = _viewModel.foundObservation[index];
+        return CommentListItem(
+          comment: comment,
+          onDelete: (obs) async {
+            final success = await _viewModel.deleteComment(obs);
+            if (!success && mounted) {
+              await _openNotificationError();
+            }
+          },
+          onEdit: (obs) async {
+            await _openCommentForm(obs);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _backButton(double we) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        GestureDetector(
+          onTap: () {
+            Navigator.pop(context, true);
+          },
+          child: Container(
+            alignment: Alignment.topLeft,
+            margin: EdgeInsets.only(left: we * 0.02),
+            child: const Icon(
+              Icons.arrow_back_outlined,
+              color: Colors.white,
+              size: 35.0,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -92,83 +166,18 @@ class _CommentListView extends State<CommentListView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final newObservation = ObservationBudget()
-            ..checkbox = false
-            ..id = ''
-            ..data = ''
-            ..uid = ''
-            ..observacao = '';
+          final newObservation =
+              ObservationBudget()
+                ..checkbox = false
+                ..id = ''
+                ..data = ''
+                ..uid = ''
+                ..observacao = '';
           _openCommentForm(newObservation);
         },
         backgroundColor: buttonColor,
         child: const Icon(Icons.add, color: Colors.black),
       ),
-    );
-  }
-
-  Widget _backButton(double we) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        GestureDetector(
-          onTap: () {
-            Navigator.pop(context, true);
-          },
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.02),
-            child: const Icon(
-              Icons.arrow_back_outlined,
-              color: Colors.white,
-              size: 35.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _title(double we) {
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        alignment: Alignment.topLeft,
-        margin: EdgeInsets.only(left: we * 0.028),
-        child: Text(
-          "Comentários",
-          style: GoogleFonts.heebo(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 26,
-            letterSpacing: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _commentList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 150, left: 15, right: 15, top: 10),
-      itemCount: _viewModel.foundObservation.length,
-      itemBuilder: (context, index) {
-        final comment = _viewModel.foundObservation[index];
-        return CommentListItem(
-          comment: comment,
-          onDelete: (obs) async {
-            final success = await _viewModel.deleteComment(obs);
-            if (!success && mounted) {
-              await _displayAlert.notificationError(
-                  context, "Erro!", "Não foi possível remover o comentário");
-            }
-          },
-          onEdit: (obs) async {
-            await _openCommentForm(obs);
-          },
-        );
-      },
     );
   }
 }

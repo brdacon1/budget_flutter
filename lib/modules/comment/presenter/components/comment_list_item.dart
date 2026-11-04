@@ -1,8 +1,8 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 /// Item da lista de comentários, exibido em um [ExpansionTileCard].
@@ -51,10 +51,7 @@ class CommentListItem extends StatelessWidget {
             ),
           ),
           children: <Widget>[
-            const Divider(
-              thickness: 1.0,
-              height: 1.0,
-            ),
+            const Divider(thickness: 1.0, height: 1.0),
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -87,7 +84,6 @@ class CommentListItem extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -100,7 +96,7 @@ class CommentListItem extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

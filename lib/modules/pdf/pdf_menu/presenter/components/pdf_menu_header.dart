@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 /// Cabeçalho da tela [PdfMenuView]: botão de voltar + título/subtítulo.
@@ -24,24 +23,24 @@ class PdfMenuHeader extends StatelessWidget {
           child: Container(
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: we * 0.040),
-            child: const Icon(Icons.arrow_back_outlined,
-                color: Colors.white, size: 35.0),
+            child: const Icon(
+              Icons.arrow_back_outlined,
+              color: Colors.white,
+              size: 35.0,
+            ),
           ),
         ),
         SizedBox(height: he * 0.03),
-        FadeAnimationWidget(
-          delay: 1,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.05),
-            child: Text(
-              PdfStrings.optionsTitle,
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                letterSpacing: 2,
-              ),
+        Container(
+          alignment: Alignment.topLeft,
+          margin: EdgeInsets.only(left: we * 0.05),
+          child: Text(
+            PdfStrings.optionsTitle,
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 2,
             ),
           ),
         ),
