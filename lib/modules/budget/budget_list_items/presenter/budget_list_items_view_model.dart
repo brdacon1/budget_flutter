@@ -23,7 +23,7 @@ class BudgetListItemsViewModel extends ChangeNotifier {
   var budgets = <ItemsBudget>[];
   var deleteItens = <ItemsBudget>[];
 
-  ItemsBudget novo = ItemsBudget();
+  ItemsBudget newItemsBudget = ItemsBudget();
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   bool deleteVisible = false;
   bool checkBoxAppear = false;

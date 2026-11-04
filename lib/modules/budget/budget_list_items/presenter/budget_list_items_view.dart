@@ -76,7 +76,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   Future<void> _showProductPriceCreatorBottomModal() async {
     await showProductPriceCreatorBottomModal(
       context,
-      item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
+      item: ProductPriceModel.fromItemsBudget(_viewModel.newItemsBudget),
     ).then((value) async {
       await _viewModel.getListItens();
     });
