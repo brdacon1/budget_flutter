@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 /// Cabeçalho da tela de lista de preço: botão voltar + título + campo de
 /// busca.
@@ -55,40 +54,34 @@ class ProductPriceListHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: he * 0.02),
-        FadeAnimationWidget(
-          delay: 1,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.04),
-            child: Text(
-              title ?? ProductPtString.listTitle,
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 28,
-                letterSpacing: 2,
-              ),
+        Container(
+          alignment: Alignment.topLeft,
+          margin: EdgeInsets.only(left: we * 0.04),
+          child: Text(
+            title ?? ProductPtString.listTitle,
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 28,
+              letterSpacing: 2,
             ),
           ),
         ),
         SizedBox(height: he * 0.02),
-        FadeAnimationWidget(
-          delay: 1,
-          child: Container(
-            height: 50.0,
-            margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),
-            child: CupertinoSearchTextField(
-              placeholder: ProductPtString.searchHint,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18.0,
-              ),
-              backgroundColor: Colors.white12,
-              itemColor: whiteColor,
-              controller: searchController,
-              onChanged: onSearchChanged,
+        Container(
+          height: 50.0,
+          margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),
+          child: CupertinoSearchTextField(
+            placeholder: ProductPtString.searchHint,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
             ),
+            backgroundColor: Colors.white12,
+            itemColor: whiteColor,
+            controller: searchController,
+            onChanged: onSearchChanged,
           ),
         ),
       ],

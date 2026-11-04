@@ -6,8 +6,8 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';

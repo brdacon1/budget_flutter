@@ -10,9 +10,9 @@ Eliminar **todas as strings literais (hardcoded)** de Views, ViewModels e compon
 |--------|-----------------------|---------|
 | ✅ login | Sim (completo) | `lib/modules/login/presenter/strings/login_pt_string.dart` |
 | ✅ singup | Sim (completo) | `lib/modules/singup/presenter/strings/singup_pt_string.dart` |
-| ✅ product | Sim (migrado de shared) | `lib/modules/product/presenter/strings/product_pt_string.dart` |
+| ✅ product | Sim (migrado de shared) | `../lib/modules/product/product_price_list/presenter/strings/product_pt_string.dart` |
 | ✅ receipt | Sim (migrado de shared) | `lib/modules/receipt/presenter/strings/receipt_pt_string.dart` |
-| ✅ product | Sim (migrado de shared) | `lib/modules/product/presenter/strings/product_pt_string.dart` |
+| ✅ product | Sim (migrado de shared) | `../lib/modules/product/product_price_list/presenter/strings/product_pt_string.dart` |
 | ✅ receipt | Sim (migrado de shared) | `lib/modules/receipt/presenter/strings/receipt_pt_string.dart` |
 | ❌ budget | Não | pendente |
 | ❌ payment | Não | pendente |

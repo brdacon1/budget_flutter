@@ -7,8 +7,8 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';

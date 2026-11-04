@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 
