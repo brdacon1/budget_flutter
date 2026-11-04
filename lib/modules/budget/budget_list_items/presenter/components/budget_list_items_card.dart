@@ -89,17 +89,26 @@ class BudgetListItemsCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  if (!item.checkBox!)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ActionButton(
-                          icon: Icons.delete_outline_rounded,
-                          label: 'Excluir',
-                          onPressed: onDelete,
-                        ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon:
+                            item.checkBox!
+                                ? Icons.check_circle_outline
+                                : Icons.delete_outline_rounded,
+                        label:
+                            item.checkBox!
+                                ? 'Selecionado para remover'
+                                : 'Excluir',
+                        onPressed: onDelete,
+                        backgroundColor:
+                            item.checkBox!
+                                ? buttonColor.withValues(alpha: 0.20)
+                                : whiteColor.withValues(alpha: 0.08),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),

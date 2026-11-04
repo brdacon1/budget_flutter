@@ -18,10 +18,11 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 46.0,
+      height: 50.0,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? whiteColor.withOpacity(0.08),
+          backgroundColor:
+              backgroundColor ?? whiteColor.withValues(alpha: 0.08),
           foregroundColor: whiteColor,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -33,12 +34,12 @@ class ActionButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon, size: 16, color: whiteColor),
+            Icon(icon, size: 20, color: whiteColor),
             const SizedBox(height: 2.0),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: whiteColor,
               ),
