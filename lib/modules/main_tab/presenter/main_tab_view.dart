@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/budget_list/presenter/budget_list_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
 import 'package:oflite/modules/main_config_menu/presenter/main_config_menu_view.dart';
@@ -30,10 +30,10 @@ class _MainTabView extends State<MainTabView> {
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
       // token já foi obtido no startup. Se por algum motivo o save do login
-      // não chegou ao Firestore (ex.: race com o `global_uid_user.user`),
+      // não chegou ao Firestore (ex.: race com o `userRepository.selectUser`),
       // esta chamada garante que o token deste device entre na lista
       // `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}`. Idempotente.
-      final ownerUid = uid.user;
+      final ownerUid = getIt<UserRepository>().selectUser.value?.USER;
       if (ownerUid != null && ownerUid.trim().isNotEmpty) {
         getIt<NotificationRepository>()
             .persistCurrentTokenToFirebase(ownerUid);

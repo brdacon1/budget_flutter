@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 class ProductPriceRemoteDataSource {
   final FirebaseFirestore _firestore;
   ProductPriceRemoteDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference get _collection =>
-      _firestore.collection('EMPRESAS/${UID.user}/USERS/${UID.user}/PRICELIST');
+  CollectionReference _collection(String userUid) =>
+      _firestore.collection('EMPRESAS/$userUid/USERS/$userUid/PRICELIST');
 
-  Future<List<Map<String, dynamic>>> getProducts() async {
-    final snapshot = await _collection.get();
+  Future<List<Map<String, dynamic>>> getProducts(String userUid) async {
+    final snapshot = await _collection(userUid).get();
     return snapshot.docs.map((d) {
       final map = Map<String, dynamic>.from(d.data() as Map);
       map['id'] = d.id;
@@ -18,15 +17,15 @@ class ProductPriceRemoteDataSource {
     }).toList();
   }
 
-  Future<DocumentReference> addProduct(Map<String, dynamic> data) async {
-    return await _collection.add(data);
+  Future<DocumentReference> addProduct(String userUid, Map<String, dynamic> data) async {
+    return await _collection(userUid).add(data);
   }
 
-  Future<void> updateProduct(String id, Map<String, dynamic> data) async {
-    await _collection.doc(id).update(data);
+  Future<void> updateProduct(String userUid, String id, Map<String, dynamic> data) async {
+    await _collection(userUid).doc(id).update(data);
   }
 
-  Future<void> deleteProduct(String id) async {
-    await _collection.doc(id).delete();
+  Future<void> deleteProduct(String userUid, String id) async {
+    await _collection(userUid).doc(id).delete();
   }
 }

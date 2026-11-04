@@ -13,7 +13,7 @@ import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 
 class MenuItem {
   final IconData icon;
@@ -84,7 +84,7 @@ class PdfMenuViewModel extends ChangeNotifier {
         );
         break;
       case 2:
-        if (!UID.autoRenewing!) {
+        if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false)) {
           await _displayAlert.adsNotification(context).then(
                   (value) async => {
                 if (value == PdfStrings.watchAd)

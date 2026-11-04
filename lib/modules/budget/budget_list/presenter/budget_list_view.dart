@@ -10,7 +10,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 
 import 'budget_list_view_model.dart';
@@ -130,7 +130,7 @@ class _BudgetListView extends State<BudgetListView> {
       child: FloatingActionButton(
         heroTag: "adicionar",
         onPressed: () async {
-          if (!UID.autoRenewing!) {
+          if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false)) {
             await _viewModel.displayAlert
                 .adsNotification(context)
                 .then(
@@ -241,7 +241,7 @@ class _BudgetListView extends State<BudgetListView> {
                 });
               },
               onDuplicate: () async {
-                if (!UID.autoRenewing! &&
+                if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false) &&
                     _viewModel.getFilteredData().length > 10) {
                   await _viewModel.displayAlert
                       .notificationError(

@@ -1,5 +1,3 @@
-library oflite.globals;
-
 class CustomerInfo {
   String? id;
   String? data;

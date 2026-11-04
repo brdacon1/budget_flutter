@@ -4,6 +4,7 @@ import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dar
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/budget_list/presenter/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view_model.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 
 /// Registra as dependências do módulo Budget (orçamentos).
 void registerBudgetDependencies(GetIt sl) {
@@ -11,7 +12,10 @@ void registerBudgetDependencies(GetIt sl) {
     () => BudgetRemoteDataSource(),
   );
   sl.registerLazySingleton<BudgetRepository>(
-    () => BudgetRepositoryImpl(sl<BudgetRemoteDataSource>()),
+    () => BudgetRepositoryImpl(
+      sl<BudgetRemoteDataSource>(),
+      sl<UserRepository>(),
+    ),
   );
 
   // ViewModels

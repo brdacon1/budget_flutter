@@ -24,21 +24,22 @@ void registerPdfDependencies(GetIt sl) {
     () => PdfRepositoryImpl(
       sl<PdfRemoteDataSource>(),
       sl<BudgetRemoteDataSource>(),
+      sl<UserRepository>(),
     ),
   );
 
   // Usecases (stateless)
   sl.registerLazySingleton<PdfGenerateBudgetUsecase>(
-    () => PdfGenerateBudgetUsecase(sl<ConvertCoinRepository>()),
+    () => PdfGenerateBudgetUsecase(sl<ConvertCoinRepository>(), sl<UserRepository>()),
   );
   sl.registerLazySingleton<PdfGenerateExecutiveUseCase>(
-    () => PdfGenerateExecutiveUseCase(sl<ConvertCoinRepository>()),
+    () => PdfGenerateExecutiveUseCase(sl<ConvertCoinRepository>(), sl<UserRepository>()),
   );
   sl.registerLazySingleton<PdfGenerateProfessionalUseCase>(
-    () => PdfGenerateProfessionalUseCase(sl<ConvertCoinRepository>()),
+    () => PdfGenerateProfessionalUseCase(sl<ConvertCoinRepository>(), sl<UserRepository>()),
   );
   sl.registerLazySingleton<PdfGenerateReceiptUseCase>(
-    () => PdfGenerateReceiptUseCase(sl<ConvertCoinRepository>()),
+    () => PdfGenerateReceiptUseCase(sl<ConvertCoinRepository>(), sl<UserRepository>()),
   );
 
   // ViewModels (Factory — sem parâmetros required no construtor)

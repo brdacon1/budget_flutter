@@ -1,11 +1,15 @@
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptRepositoryImpl extends ReceiptRepository {
   final ReceiptRemoteDataSource _remote;
-  ReceiptRepositoryImpl(this._remote);
+  final UserRepository _userRepository;
+  ReceiptRepositoryImpl(this._remote, this._userRepository);
+
+  String? get _userUid => _userRepository.selectUser.value?.USER;
 
   List<Receipt> _receipts = [];
   String? _budgetId;
@@ -33,8 +37,12 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
     if (!forceRefresh && _receipts.isNotEmpty && _lastBudgetId == _budgetId) {
       return Result.ok(_receipts);
     }
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
-      final raw = await _remote.getReceipts(_budgetId!);
+      final raw = await _remote.getReceipts(userUid, _budgetId!);
       _receipts = raw.map((e) => Receipt.fromJson(e)).toList();
       _lastBudgetId = _budgetId;
       notifyListeners();
@@ -46,11 +54,15 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
 
   @override
   Future<Result<void>> saveReceipt(Receipt receipt) async {
+    if (_budgetId == null || _budgetId!.isEmpty) {
+      return Result.error(Exception('budgetId is not set'));
+    }
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
-      if (_budgetId == null || _budgetId!.isEmpty) {
-        return Result.error(Exception('budgetId is not set'));
-      }
-      await _remote.saveReceipt(_budgetId!, receipt.toJson(), receipt.id!);
+      await _remote.saveReceipt(userUid, _budgetId!, receipt.toJson(), receipt.id!);
       final index = _receipts.indexWhere((r) => r.id == receipt.id);
       if (index >= 0) {
         _receipts[index] = receipt;
@@ -66,9 +78,13 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
 
   @override
   Future<Result<void>> deleteReceipt(Receipt receipt) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
       if (receipt.id != null && _budgetId != null) {
-        await _remote.deleteReceipt(_budgetId!, receipt.id!);
+        await _remote.deleteReceipt(userUid, _budgetId!, receipt.id!);
         _receipts.removeWhere((r) => r.id == receipt.id);
         notifyListeners();
       }
@@ -80,10 +96,14 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
 
   @override
   Future<Result<void>> deleteReceipts(List<Receipt> receipts) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
       for (final r in receipts) {
         if (r.id != null && _budgetId != null) {
-          await _remote.deleteReceipt(_budgetId!, r.id!);
+          await _remote.deleteReceipt(userUid, _budgetId!, r.id!);
         }
       }
       _receipts.removeWhere((r) => receipts.any((d) => d.id == r.id));

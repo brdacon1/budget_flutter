@@ -5,6 +5,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -17,13 +18,16 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   final ChatBudgetRemoteDataSource _chatRemote;
   final BudgetRepository _budgetRepo;
+  final UserRepository _userRepository;
 
   String? _sessionId;
   CustomerInfo? _draft;
   final List<ChatMessageEntity> _messages = [];
   String? _currentFlowStep;
 
-  ChatBudgetRepositoryImpl(this._chatRemote, this._budgetRepo);
+  ChatBudgetRepositoryImpl(this._chatRemote, this._budgetRepo, this._userRepository);
+
+  String? get _userUid => _userRepository.selectUser.value?.USER;
 
   @override
   String? get currentSessionId => _sessionId;
@@ -74,10 +78,13 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
 
       _draft = budget;
       _sessionId = _generateSessionId();
-      await _chatRemote.createSession(_sessionId!, {
-        'budgetId': id,
-        'createdAt': DateTime.now().toIso8601String(),
-      });
+      final userUid = _userUid;
+      if (userUid != null && userUid.isNotEmpty) {
+        await _chatRemote.createSession(userUid, _sessionId!, {
+          'budgetId': id,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+      }
 
       notifyListeners();
       return Result.ok(budget);
@@ -152,13 +159,16 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
     _messages.add(message);
     if (_sessionId != null) {
       try {
-        await _chatRemote.saveMessage(_sessionId!, {
-          'sender': message.sender.name,
-          'type': message.type.name,
-          'content': message.content,
-          'payload': message.payload,
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        final userUid = _userUid;
+        if (userUid != null && userUid.isNotEmpty) {
+          await _chatRemote.saveMessage(userUid, _sessionId!, {
+            'sender': message.sender.name,
+            'type': message.type.name,
+            'content': message.content,
+            'payload': message.payload,
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+        }
       } catch (_) {
         // Falha silenciosa — mensagens ainda estão em memória
       }

@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
@@ -36,8 +35,9 @@ class _TableResult {
 /// - Rodapé centralizado.
 class PdfGenerateExecutiveUseCase {
   final ConvertCoinRepository _moneyConvert;
+  final UserRepository _userRepository;
 
-  PdfGenerateExecutiveUseCase(this._moneyConvert);
+  PdfGenerateExecutiveUseCase(this._moneyConvert, this._userRepository);
 
   Future<String> executivePDF({
     required int countService,
@@ -360,15 +360,19 @@ class PdfGenerateExecutiveUseCase {
   // -------------------------------------------------------------------------
 
   Future<String> _getAuthToken(String? authToken) async {
-    if (authToken != null && authToken.isNotEmpty) {
-      return authToken;
+    if (authToken != null && authToken.isNotEmpty) return authToken;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final token = await currentUser.getIdToken();
+      if (token != null && token.isNotEmpty) return token;
     }
-    if (uid.googleAuth!) {
-      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
-    }
+    final session = _userRepository.selectUser.value;
+    if (session == null) return '';
+    if (session.googleAuth == true) return '';
+    if (session.EMAIL == null || session.EMAIL!.isEmpty || session.Senha == null || session.Senha!.isEmpty) return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: user_global.email!.trim(),
-      password: user_global.password!.trim(),
+      email: session.EMAIL!.trim(),
+      password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';
   }

@@ -7,8 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
+import 'package:oflite/injection.dart';
 
 class ImageEditViewModel extends ChangeNotifier {
   XFile? pickedFile;
@@ -89,7 +90,7 @@ class ImageEditViewModel extends ChangeNotifier {
 
     try {
       final FirebaseStorage storage = FirebaseStorage.instance;
-      final String? userId = UID.user;
+      final String? userId = getIt<UserRepository>().selectUser.value?.USER;
       final Directory appDir = await getApplicationDocumentsDirectory();
       
       fileName = "$userId.jpg";

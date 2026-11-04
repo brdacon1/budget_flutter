@@ -1,5 +1,3 @@
-library oflite.globals;
-
 class ItemsBudget {
   String? id;
   String? CATEGORIA;

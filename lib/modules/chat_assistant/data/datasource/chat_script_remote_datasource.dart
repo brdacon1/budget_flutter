@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 /// Fonte de dados remota para o script de mensagens do bot.
 ///
@@ -11,13 +10,13 @@ class ChatScriptRemoteDataSource {
   ChatScriptRemoteDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  DocumentReference get _scriptDoc => _firestore
-      .collection('EMPRESAS/${UID.user}/CONFIG')
+  DocumentReference _scriptDoc(String userUid) => _firestore
+      .collection('EMPRESAS/$userUid/CONFIG')
       .doc('CHAT_SCRIPT');
 
   /// Retorna o mapa do script ou null se não existir.
-  Future<Map<String, dynamic>?> getScript() async {
-    final doc = await _scriptDoc.get();
+  Future<Map<String, dynamic>?> getScript(String userUid) async {
+    final doc = await _scriptDoc(userUid).get();
     final data = doc.data();
     if (data == null) return null;
     return Map<String, dynamic>.from(data as Map);

@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
@@ -18,8 +17,9 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 /// Geração do PDF do orçamento — Layout **Profissional**.
 class PdfGenerateProfessionalUseCase {
   final ConvertCoinRepository _moneyConvert;
+  final UserRepository _userRepository;
 
-  PdfGenerateProfessionalUseCase(this._moneyConvert);
+  PdfGenerateProfessionalUseCase(this._moneyConvert, this._userRepository);
 
   // ---------------------------------------------------------------------------
   // API pública
@@ -696,12 +696,18 @@ class PdfGenerateProfessionalUseCase {
 
   Future<String> _getAuthToken(String? authToken) async {
     if (authToken != null && authToken.isNotEmpty) return authToken;
-    if (uid.googleAuth!) {
-      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final token = await currentUser.getIdToken();
+      if (token != null && token.isNotEmpty) return token;
     }
+    final session = _userRepository.selectUser.value;
+    if (session == null) return '';
+    if (session.googleAuth == true) return '';
+    if (session.EMAIL == null || session.EMAIL!.isEmpty || session.Senha == null || session.Senha!.isEmpty) return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: user_global.email!.trim(),
-      password: user_global.password!.trim(),
+      email: session.EMAIL!.trim(),
+      password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';
   }

@@ -12,7 +12,7 @@ import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -370,7 +370,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> addNew(BuildContext context) async {
-    final isPremium = UID.autoRenewing ?? false;
+    final isPremium = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

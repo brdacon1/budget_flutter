@@ -1,11 +1,15 @@
 import 'package:oflite/modules/product/data/datasource/product_price_remote_datasource.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceRepositoryImpl extends ProductPriceRepository {
   final ProductPriceRemoteDataSource _remote;
-  ProductPriceRepositoryImpl(this._remote);
+  final UserRepository _userRepository;
+  ProductPriceRepositoryImpl(this._remote, this._userRepository);
+
+  String? get _userUid => _userRepository.selectUser.value?.USER;
 
   List<ProductPriceModel> _products = [];
 
@@ -18,8 +22,12 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
     if (!forceRefresh && _products.isNotEmpty) {
       return Result.ok(_products);
     }
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
-      final raw = await _remote.getProducts();
+      final raw = await _remote.getProducts(userUid);
       _products = raw
           .map((e) => ProductPriceModel.fromJson(e)
               .copyWith(id: e['id'] as String?, checkBox: false, selectProduct: false))
@@ -33,9 +41,13 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
 
   @override
   Future<Result<String?>> addProduct(ProductPriceModel product) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
       final map = product.toJson()..['COLOR'] = 'false';
-      final docRef = await _remote.addProduct(map);
+      final docRef = await _remote.addProduct(userUid, map);
       final id = docRef.id;
       _products.add(product.copyWith(id: id));
       notifyListeners();
@@ -47,11 +59,15 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
 
   @override
   Future<Result<void>> updateProduct(ProductPriceModel product) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
       if (product.id == null) {
         return Result.error(Exception('Product id is null'));
       }
-      await _remote.updateProduct(product.id!, product.toJson()..['COLOR'] = 'false');
+      await _remote.updateProduct(userUid, product.id!, product.toJson()..['COLOR'] = 'false');
       final index = _products.indexWhere((p) => p.id == product.id);
       if (index >= 0) {
         _products[index] = product;
@@ -65,8 +81,12 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
 
   @override
   Future<Result<void>> deleteProduct(String id) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
-      await _remote.deleteProduct(id);
+      await _remote.deleteProduct(userUid, id);
       _products.removeWhere((p) => p.id == id);
       notifyListeners();
       return Result.ok(null);
@@ -77,9 +97,13 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
 
   @override
   Future<Result<void>> deleteProducts(List<String> ids) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
       for (final id in ids) {
-        await _remote.deleteProduct(id);
+        await _remote.deleteProduct(userUid, id);
       }
       _products.removeWhere((p) => ids.contains(p.id));
       notifyListeners();
@@ -91,8 +115,12 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
 
   @override
   Future<int> getProductCount() async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return 0;
+    }
     try {
-      final raw = await _remote.getProducts();
+      final raw = await _remote.getProducts(userUid);
       return raw.length;
     } catch (_) {
       return 0;

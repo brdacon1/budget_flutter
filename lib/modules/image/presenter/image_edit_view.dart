@@ -1,4 +1,3 @@
-import 'package:oflite/injection.dart';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'image_edit_view_model.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
@@ -202,7 +202,10 @@ class _ImageEditView extends State<ImageEditView> {
                 localOwner.pdfLayoutType = widget.owner.pdfLayoutType;
                 widget.owner.logoName = _viewModel.fileName;
 
-                await getIt<PdfRemoteDataSource>().saveInformationEnterprise(localOwner.toJson());
+                final userUid = getIt<UserRepository>().selectUser.value?.USER;
+                if (userUid != null && userUid.isNotEmpty) {
+                  await getIt<PdfRemoteDataSource>().saveInformationEnterprise(userUid, localOwner.toJson());
+                }
 
                 if (mounted) {
                   alertDisplayLoading.closeLoading(context);

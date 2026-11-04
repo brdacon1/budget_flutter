@@ -4,8 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
@@ -17,8 +16,9 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 /// dados do recibo e tabela de pagamentos realizados).
 class PdfGenerateReceiptUseCase {
   final ConvertCoinRepository _moneyConvert;
+  final UserRepository _userRepository;
 
-  PdfGenerateReceiptUseCase(this._moneyConvert);
+  PdfGenerateReceiptUseCase(this._moneyConvert, this._userRepository);
 
   Future<String> patternPDF({
     required List<PaymentCustomer> paymentList,
@@ -130,12 +130,18 @@ class PdfGenerateReceiptUseCase {
   }
 
   Future<String> _getAuthToken() async {
-    if (uid.googleAuth!) {
-      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final token = await currentUser.getIdToken();
+      if (token != null && token.isNotEmpty) return token;
     }
+    final session = _userRepository.selectUser.value;
+    if (session == null) return '';
+    if (session.googleAuth == true) return '';
+    if (session.EMAIL == null || session.EMAIL!.isEmpty || session.Senha == null || session.Senha!.isEmpty) return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: user_global.email!.trim(),
-      password: user_global.password!.trim(),
+      email: session.EMAIL!.trim(),
+      password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';
   }

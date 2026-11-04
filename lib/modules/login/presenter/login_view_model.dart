@@ -9,7 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
@@ -128,18 +127,19 @@ class LoginViewModel extends ChangeNotifier {
         notifyListeners();
 
         uid = currentUser.uid;
-        global_uid_user.user = uid;
-        global_uid_user.name = currentUser.displayName ?? 'User';
 
         final prefs = await SharedPreferences.getInstance();
         final storedPassword = prefs.getString('password');
         final isGoogle =
             storedPassword == null || storedPassword == 'NO_PASS';
 
-        global_uid_user.password = isGoogle ? 'NO_PASS' : storedPassword;
-        global_uid_user.googleAuth = isGoogle;
-        global_uid_user.email =
-            currentUser.email ?? prefs.getString('email') ?? '';
+        final session = InfoUser()
+          ..USER = uid
+          ..NOME = currentUser.displayName ?? 'User'
+          ..Senha = isGoogle ? 'NO_PASS' : storedPassword
+          ..googleAuth = isGoogle
+          ..EMAIL = currentUser.email ?? prefs.getString('email') ?? '';
+        _userRepository.selectUser.value = session;
 
         await _getUserInfo();
         state = LoginState.success;
@@ -188,12 +188,14 @@ class LoginViewModel extends ChangeNotifier {
     await prefs.setString('email', auth.user?.email ?? '');
     await prefs.setString('password', 'NO_PASS');
 
-    global_uid_user.password = 'NO_PASS';
-    global_uid_user.googleAuth = true;
     uid = auth.user?.uid ?? '';
-    global_uid_user.user = uid;
-    global_uid_user.email = auth.user?.email;
-    global_uid_user.name = auth.user?.displayName ?? 'User';
+    final session = InfoUser()
+      ..USER = uid
+      ..EMAIL = auth.user?.email
+      ..NOME = auth.user?.displayName ?? 'User'
+      ..Senha = 'NO_PASS'
+      ..googleAuth = true;
+    _userRepository.selectUser.value = session;
 
     final user = await _getUserInfo();
 
@@ -212,11 +214,13 @@ class LoginViewModel extends ChangeNotifier {
     await prefs.setString('email', email);
     await prefs.setString('password', password);
 
-    global_uid_user.password = password.trim();
     uid = auth.user!.uid.toString();
-    global_uid_user.user = uid;
-    global_uid_user.email = email;
-    global_uid_user.googleAuth = false;
+    final session = InfoUser()
+      ..USER = uid
+      ..EMAIL = email
+      ..Senha = password.trim()
+      ..googleAuth = false;
+    _userRepository.selectUser.value = session;
 
     await _getUserInfo();
   }
@@ -226,23 +230,20 @@ class LoginViewModel extends ChangeNotifier {
     if (result is Ok<InfoUser?>) {
       final user = result.value;
       if (user != null) {
+        // Preserva Senha e googleAuth que nunca vêm do Firestore
+        final prev = _userRepository.selectUser.value;
+        if (prev != null) {
+          user.Senha = prev.Senha;
+          user.googleAuth = prev.googleAuth;
+        }
         users = user;
-        global_uid_user.user = user.USER;
-        global_uid_user.name = user.NOME ?? 'User';
-        global_uid_user.email = user.EMAIL;
-        global_uid_user.phone = user.FONE;
-        global_uid_user.id = user.Id;
-        global_uid_user.idPay = user.IdPay;
-        global_uid_user.productId = user.ProductId;
-        global_uid_user.purchaseToken = user.PurchaseToken;
-        global_uid_user.autoRenewing = user.AutoRenewing;
+        _userRepository.selectUser.value = user;
       }
-      final ownerUid = global_uid_user.user;
+      final ownerUid = _userRepository.selectUser.value?.USER;
       if (ownerUid != null && ownerUid.isNotEmpty) {
         final tokens =
             await getIt<NotificationRepository>().loadFcmTokens(ownerUid);
         users.TOKENS = tokens;
-        global_uid_user.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
       getIt<NotificationRepository>().tryOpenPendingBudget();
@@ -259,10 +260,11 @@ class LoginViewModel extends ChangeNotifier {
                     : next,
           );
 
-          global_uid_user.autoRenewing = latestSubscription.isAutoRenewing;
-          global_uid_user.purchaseToken =
-              latestSubscription.purchaseToken ?? '';
-          global_uid_user.productId = latestSubscription.productId;
+          final session = _userRepository.selectUser.value ?? InfoUser();
+          session.AutoRenewing = latestSubscription.isAutoRenewing;
+          session.PurchaseToken = latestSubscription.purchaseToken ?? '';
+          session.ProductId = latestSubscription.productId;
+          _userRepository.selectUser.value = session;
 
           if (Platform.isAndroid &&
               latestSubscription is PurchaseAndroid &&
@@ -272,12 +274,16 @@ class LoginViewModel extends ChangeNotifier {
             );
           }
         } else {
-          global_uid_user.autoRenewing = false;
-          global_uid_user.purchaseToken = '';
+          final session = _userRepository.selectUser.value ?? InfoUser();
+          session.AutoRenewing = false;
+          session.PurchaseToken = '';
+          _userRepository.selectUser.value = session;
         }
       } catch (_) {
-        global_uid_user.autoRenewing = false;
-        global_uid_user.purchaseToken = '';
+        final session = _userRepository.selectUser.value ?? InfoUser();
+        session.AutoRenewing = false;
+        session.PurchaseToken = '';
+        _userRepository.selectUser.value = session;
       }
 
       return user;

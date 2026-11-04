@@ -17,7 +17,7 @@ import 'package:oflite/modules/product/product_price/data/model/product_price_mo
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 
@@ -172,7 +172,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _openLogoEditFlow() async {
-    final isSubscribed = UID.autoRenewing ?? false;
+    final isSubscribed = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
     if (!isSubscribed) {
       if (!mounted) return;
       await Navigator.push(
