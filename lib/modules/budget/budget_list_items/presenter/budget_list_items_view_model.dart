@@ -25,7 +25,6 @@ class BudgetListItemsViewModel extends ChangeNotifier {
 
   ItemsBudget novo = ItemsBudget();
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
-  Color enabled = const Color(0xFF827F8A);
   bool deleteVisible = false;
   bool checkBoxAppear = false;
   double totalProducts = 0;
