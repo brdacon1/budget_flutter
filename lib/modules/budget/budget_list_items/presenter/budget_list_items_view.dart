@@ -228,7 +228,6 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                 ),
               ),
             ),
-            SizedBox(height: height * 0.02),
             Visibility(
               visible: !_viewModel.deleteVisible,
               child: FloatingActionButton(
