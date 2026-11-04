@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/shared/common/constants/global_uid_budget.dart'
+    as budget;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -38,7 +38,10 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   Future<void> duplicateEvent(
-      bool clientData, bool quoteItems, bool comments) async {
+    bool clientData,
+    bool quoteItems,
+    bool comments,
+  ) async {
     final String? originalId = budget.IDORCAMENTO;
     if (originalId == null || originalId.isEmpty) return;
 
@@ -91,9 +94,11 @@ class BudgetListViewModel extends ChangeNotifier {
       return _foundUsers;
     } else {
       return _foundUsers
-          .where((x) => x.customerName!
-              .toLowerCase()
-              .contains(searchController.text.toLowerCase()))
+          .where(
+            (x) => x.customerName!.toLowerCase().contains(
+              searchController.text.toLowerCase(),
+            ),
+          )
           .toList();
     }
   }

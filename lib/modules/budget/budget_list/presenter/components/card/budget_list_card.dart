@@ -1,9 +1,10 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
+import 'package:oflite/shared/common/widgets/label/expansion_card_label.dart';
 
 class BudgetListCard extends StatelessWidget {
   const BudgetListCard({
@@ -21,6 +22,37 @@ class BudgetListCard extends StatelessWidget {
   final VoidCallback onOpen;
   final VoidCallback onDuplicate;
 
+  Widget _buildLabels() {
+    return Column(
+      children: [
+        ExpansionCardLabel(
+          nameText: 'Data do orçamento:',
+          textData: '${item.data}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: 'Status:',
+          textData: "${item.status}",
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: 'Telefone:',
+          textData: '${item.phone}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: 'Valor do orçamento:',
+          textData: moneyConvert.convertFromDouble(item.totalValue!),
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -32,11 +64,12 @@ class BudgetListCard extends StatelessWidget {
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
           leading: const CircleAvatar(
-              backgroundColor: bgColor,
-              child: Icon(
-                Icons.account_balance_wallet_outlined,
-                color: whiteColor,
-              )),
+            backgroundColor: bgColor,
+            child: Icon(
+              Icons.account_balance_wallet_outlined,
+              color: whiteColor,
+            ),
+          ),
           title: Text(
             "${item.customerName}",
             maxLines: 2,
@@ -47,104 +80,44 @@ class BudgetListCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: Text("Nº orçamento: ${item.id}",
-              style: const TextStyle(
-                  color: whiteColor, letterSpacing: 0.5, fontSize: 12.0)),
+          subtitle: Text(
+            "Nº orçamento: ${item.id}",
+            style: const TextStyle(
+              color: whiteColor,
+              letterSpacing: 0.5,
+              fontSize: 12.0,
+            ),
+          ),
           children: <Widget>[
-            const Divider(
-              thickness: 1.0,
-              height: 1.0,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  "Telefone: ${item.phone}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text("Data do orçamento: ${item.data}",
-                    style: const TextStyle(
-                        color: whiteColor,
-                        letterSpacing: 0.5,
-                        fontSize: 12.0)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text("Status: ${item.status}",
-                    style: const TextStyle(
-                        color: whiteColor,
-                        letterSpacing: 0.5,
-                        fontSize: 12.0)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                    "Valor total: ${moneyConvert.convertFromDouble(item.totalValue!)}",
-                    style: const TextStyle(
-                        color: whiteColor,
-                        letterSpacing: 0.5,
-                        fontSize: 12.0)),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text("Criado em: ${item.data}",
-                    style: const TextStyle(
-                        color: whiteColor,
-                        letterSpacing: 0.5,
-                        fontSize: 12.0)),
-              ),
-            ),
+            const Divider(thickness: 1.0, height: 1.0),
+            _buildLabels(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
+              padding: const EdgeInsets.only(
+                bottom: 12,
+                top: 12,
+                left: 16,
+                right: 16,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  if (!item.checkBox!)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ActionButton(
-                          icon: Icons.delete_outline_rounded,
-                          label: 'Excluir',
-                          onPressed: onDelete,
-                        ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon:
+                            item.checkBox!
+                                ? Icons.check_circle_outline
+                                : Icons.delete_outline_rounded,
+                        label: item.checkBox! ? 'Select' : 'Excluir',
+                        onPressed: onDelete,
+                        backgroundColor:
+                            item.checkBox!
+                                ? buttonColor.withValues(alpha: 0.20)
+                                : whiteColor.withValues(alpha: 0.08),
                       ),
                     ),
+                  ),
 
                   Expanded(
                     child: Padding(
@@ -169,7 +142,7 @@ class BudgetListCard extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

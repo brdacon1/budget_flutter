@@ -38,6 +38,7 @@ class ExpansionCardLabel extends StatelessWidget {
             textData,
             style: const TextStyle(
               color: whiteColor,
+              fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
               fontSize: 12.0,
             ),
