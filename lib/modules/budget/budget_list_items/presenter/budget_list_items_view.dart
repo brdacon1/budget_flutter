@@ -33,16 +33,21 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = BudgetListItemsViewModel(item: widget.item);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.getListItens();
-    });
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _viewModel = BudgetListItemsViewModel(item: widget.item);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.getListItens();
+    });
   }
 
   Future<void> _dialogDeleteBuilder() async {
@@ -65,6 +70,28 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       if (_viewModel.deleteItens.isEmpty) {
         await _viewModel.getListItens();
       }
+    });
+  }
+
+  Future<void> _showProductPriceCreatorBottomModal() async {
+    await showProductPriceCreatorBottomModal(
+      context,
+      item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
+    ).then((value) async {
+      await _viewModel.getListItens();
+    });
+  }
+
+  Future<void> _openPriceList() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                ProductPriceListView(item: widget.item, fromMenu: false),
+      ),
+    ).then((value) async {
+      await _viewModel.getListItens();
     });
   }
 
@@ -112,6 +139,8 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Widget _buildList() {
+    final filteredItems = _viewModel.getFilteredData();
+
     return Expanded(
       child: RefreshIndicator(
         color: Colors.cyan[50],
@@ -121,17 +150,16 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
           _viewModel.clearDeleteItens();
         },
         child: ListView.builder(
-          shrinkWrap: true,
           padding: const EdgeInsets.only(
             bottom: 100,
             left: 15,
             right: 15,
             top: 3,
           ),
-          itemCount: _viewModel.getFilteredData().length,
+          itemCount: filteredItems.length,
           itemBuilder: (context, index) {
             return BudgetListItemsCard(
-              item: _viewModel.getFilteredData()[index],
+              item: filteredItems[index],
               moneyConvert: _viewModel.moneyConvert,
               onDelete: () => _viewModel.toggleDeleteItem(index),
             );
@@ -201,44 +229,30 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
               ),
             ),
             SizedBox(height: height * 0.02),
-            FloatingActionButton(
-              heroTag: "adicionar",
-              onPressed: () async {
-                if (await _viewModel.getProductCount() > 0) {
-                  final value = await displayAlert.listNotification(context);
-                  if (value == "Criar novo item") {
-                    budget.fromListItem = true;
-                    await showProductPriceCreatorBottomModal(
-                      context,
-                      item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
-                    );
-                  } else if (value == "Selecionar da lista de preço") {
+            Visibility(
+              visible: !_viewModel.deleteVisible,
+              child: FloatingActionButton(
+                heroTag: "adicionar",
+                onPressed: () async {
+                  if (await _viewModel.getProductCount() > 0) {
+                    final value = await displayAlert.listNotification(context);
+                    if (value == "Criar novo item") {
+                      budget.fromListItem = true;
+                      _showProductPriceCreatorBottomModal();
+                    } else if (value == "Selecionar da lista de preço") {
+                      budget.fromListItem = false;
+                      _openPriceList();
+                    }
                     budget.fromListItem = false;
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => ProductPriceListView(
-                              item: widget.item,
-                              fromMenu: false,
-                            ),
-                      ),
-                    );
+                  } else {
+                    budget.fromListItem = true;
+                    _showProductPriceCreatorBottomModal();
+                    budget.fromListItem = false;
                   }
-                  budget.fromListItem = false;
-                  await _viewModel.getListItens();
-                } else {
-                  budget.fromListItem = true;
-                  await showProductPriceCreatorBottomModal(
-                    context,
-                    item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
-                  );
-                  budget.fromListItem = false;
-                  await _viewModel.getListItens();
-                }
-              },
-              backgroundColor: buttonColor,
-              child: const Icon(Icons.add, color: Colors.black),
+                },
+                backgroundColor: buttonColor,
+                child: const Icon(Icons.add, color: Colors.black),
+              ),
             ),
           ],
         );
