@@ -91,6 +91,17 @@ class _CommentListView extends State<CommentListView> {
   }
 
   Widget _commentList() {
+    if (_viewModel.foundObservation.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+        child: Text(
+          "O orçamento não possui comentários",
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.only(bottom: 150, left: 16, right: 16),
@@ -149,19 +160,52 @@ class _CommentListView extends State<CommentListView> {
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final newObservation =
-              ObservationBudget()
-                ..checkbox = false
-                ..id = ''
-                ..data = ''
-                ..uid = ''
-                ..observacao = '';
-          _openCommentForm(newObservation);
+      floatingActionButton: _buildFloatingActionButton(),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return FloatingActionButton.extended(
+          heroTag: 'adicionar_comentario',
+          onPressed: () {
+            final newObservation =
+                ObservationBudget()
+                  ..checkbox = false
+                  ..id = ''
+                  ..data = ''
+                  ..uid = ''
+                  ..observacao = '';
+            _openCommentForm(newObservation);
+          },
+          backgroundColor: buttonColor,
+          elevation: 4,
+          icon: const Icon(Icons.add, color: Colors.black, size: 20),
+          label: const Text(
+            'Novo Comentário',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCommentList() {
+    return Expanded(
+      child: RefreshIndicator(
+        color: Colors.cyan[50],
+        backgroundColor: bgColor,
+        onRefresh: () async {
+          await _viewModel.loadComments();
+          _viewModel.resetSelectionState();
         },
-        backgroundColor: buttonColor,
-        child: const Icon(Icons.add, color: Colors.black),
+        child: _commentList(),
       ),
     );
   }
@@ -175,17 +219,7 @@ class _CommentListView extends State<CommentListView> {
         SizedBox(height: height * 0.03),
         _title(we),
         SizedBox(height: height * 0.03),
-        Expanded(
-          child: RefreshIndicator(
-            color: Colors.cyan[50],
-            backgroundColor: bgColor,
-            onRefresh: () async {
-              await _viewModel.loadComments();
-              _viewModel.resetSelectionState();
-            },
-            child: _commentList(),
-          ),
-        ),
+        _buildCommentList(),
       ],
     );
   }
