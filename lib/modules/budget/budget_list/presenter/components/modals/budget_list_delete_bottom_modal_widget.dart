@@ -37,8 +37,6 @@ class _BudgetListDeleteBottomModalWidgetState
   @override
   void initState() {
     super.initState();
-    // Cópia local — a UI reconstrói a partir dela, garantindo atualização
-    // em tempo real ao remover um item via "X".
     _items = List<CustomerInfo>.from(widget.deleteItens);
   }
 
