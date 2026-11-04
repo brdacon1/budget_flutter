@@ -1,22 +1,25 @@
-import 'package:oflite/injection.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'components/budget_list_items_card.dart';
-import 'components/modals/budget_list_items_delete_bottom_modal_widget.dart';
-import 'components/budget_list_items_total_bar.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/global_uid_budget.dart'
+    as budget;
+
 import 'budget_list_items_view_model.dart';
+import 'components/budget_list_items_card.dart';
+import 'components/budget_list_items_total_bar.dart';
+import 'components/modals/budget_list_items_delete_bottom_modal_widget.dart';
 
 class BudgetListItemsView extends StatefulWidget {
   final CustomerInfo item;
+
   const BudgetListItemsView({super.key, required this.item});
 
   @override
@@ -66,50 +69,46 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Widget _buildHeader({required double height, required double width}) {
-    return  Column(children: [
-      SizedBox(
-        height: height * 0.02,
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context, true);
-            },
-            child: Container(
-              alignment: Alignment.topLeft,
-              margin: EdgeInsets.only(left: width * 0.028),
-              child: const Icon(
-                Icons.arrow_back_outlined,
-                color: Colors.white,
-                size: 35.0,
+    return Column(
+      children: [
+        SizedBox(height: height * 0.02),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context, true);
+              },
+              child: Container(
+                alignment: Alignment.topLeft,
+                margin: EdgeInsets.only(left: width * 0.028),
+                child: const Icon(
+                  Icons.arrow_back_outlined,
+                  color: Colors.white,
+                  size: 35.0,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      SizedBox(
-        height: height * 0.02,
-      ),
-      Container(
-        alignment: Alignment.topLeft,
-        margin: EdgeInsets.only(left: width * 0.035),
-        child: Text(
-          "Itens orçamentos",
-          style: GoogleFonts.heebo(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 26,
-            letterSpacing: 1,
+          ],
+        ),
+        SizedBox(height: height * 0.02),
+        Container(
+          alignment: Alignment.topLeft,
+          margin: EdgeInsets.only(left: width * 0.035),
+          child: Text(
+            "Itens orçamentos",
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 1,
+            ),
           ),
         ),
-      ),
-      SizedBox(
-        height: height * 0.02,
-      ),
-    ],);
+        SizedBox(height: height * 0.02),
+      ],
+    );
   }
 
   Widget _buildList() {
@@ -123,8 +122,12 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
         },
         child: ListView.builder(
           shrinkWrap: true,
-          padding:
-          const EdgeInsets.only(bottom: 100, left: 15, right: 15, top: 3),
+          padding: const EdgeInsets.only(
+            bottom: 100,
+            left: 15,
+            right: 15,
+            top: 3,
+          ),
           itemCount: _viewModel.getFilteredData().length,
           itemBuilder: (context, index) {
             return BudgetListItemsCard(
@@ -138,18 +141,17 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     );
   }
 
-  
   Widget _buildSearchBar() {
     return Container(
       height: 50.0,
-      margin:
-      const EdgeInsets.only(right: 15.0, left: 15.0, bottom: 25),
+      margin: const EdgeInsets.only(right: 15.0, left: 15.0, bottom: 25),
       child: CupertinoSearchTextField(
         placeholder: "Digite a descrição do item...",
         style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0),
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 18.0,
+        ),
         backgroundColor: Colors.white12,
         itemColor: Colors.white,
         controller: searchController,
@@ -157,8 +159,8 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       ),
     );
   }
-  
-  Widget _buildFloatingActionButton({required double height})  {
+
+  Widget _buildFloatingActionButton({required double height}) {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
@@ -208,16 +210,19 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                     budget.fromListItem = true;
                     await showProductPriceCreatorBottomModal(
                       context,
-                      item: ProductPriceModel.fromItemsBudget(
-                          _viewModel.novo),
+                      item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
                     );
                   } else if (value == "Selecionar da lista de preço") {
                     budget.fromListItem = false;
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ProductPriceListView(
-                              item: widget.item, fromMenu: false)),
+                        builder:
+                            (context) => ProductPriceListView(
+                              item: widget.item,
+                              fromMenu: false,
+                            ),
+                      ),
                     );
                   }
                   budget.fromListItem = false;
@@ -226,25 +231,20 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                   budget.fromListItem = true;
                   await showProductPriceCreatorBottomModal(
                     context,
-                    item: ProductPriceModel.fromItemsBudget(
-                        _viewModel.novo),
+                    item: ProductPriceModel.fromItemsBudget(_viewModel.novo),
                   );
                   budget.fromListItem = false;
                   await _viewModel.getListItens();
                 }
               },
               backgroundColor: buttonColor,
-              child: const Icon(
-                Icons.add,
-                color: Colors.black,
-              ),
+              child: const Icon(Icons.add, color: Colors.black),
             ),
           ],
         );
       },
     );
   }
-
 
   Widget _buildBottomNavigationBar() {
     return AnimatedBuilder(
@@ -259,7 +259,6 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -277,10 +276,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                 _buildHeader(height: he, width: we),
                 _buildSearchBar(),
                 _buildList(),
-            ],
-          );
-        },
-      ),
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingActionButton(height: he),
