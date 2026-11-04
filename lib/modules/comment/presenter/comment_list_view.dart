@@ -5,6 +5,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/header/app_header.dart';
 
 import 'comment_list_view_model.dart';
 import 'components/comment_form_dialog.dart';
@@ -147,23 +148,6 @@ class _CommentListView extends State<CommentListView> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return _buildScreen(height: he, we: we);
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: _buildFloatingActionButton(),
-    );
-  }
-
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
       animation: _viewModel,
@@ -214,13 +198,29 @@ class _CommentListView extends State<CommentListView> {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
-        SizedBox(height: height * 0.07),
-        _backButton(we),
-        SizedBox(height: height * 0.03),
-        _title(we),
-        SizedBox(height: height * 0.03),
+        AppHeader(
+          onBack: () => Navigator.pop(context, true),
+          titleText: 'Comentários',
+        ),
         _buildCommentList(),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final we = MediaQuery.of(context).size.width;
+    final he = MediaQuery.of(context).size.height;
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: AnimatedBuilder(
+        animation: _viewModel,
+        builder: (context, _) {
+          return _buildScreen(height: he, we: we);
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 }
