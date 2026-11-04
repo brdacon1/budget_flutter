@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -8,7 +9,6 @@ import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
@@ -16,6 +16,7 @@ import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfBudgetViewModel extends ChangeNotifier {
+  final BudgetRepository _budgetRepository;
   final PdfRepository _pdfRepository;
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
@@ -34,13 +35,15 @@ class PdfBudgetViewModel extends ChangeNotifier {
   }
 
   PdfBudgetViewModel({
+    BudgetRepository? budgetRepository,
     PdfRepository? pdfRepository,
     DisplayAlertRepository? displayAlertRepository,
     ConvertCoinRepository? convertCoinRepository,
     PdfGenerateBudgetUsecase? pdfGenerateBudgetUsecase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
-  })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+  })  : _budgetRepository = budgetRepository ?? getIt<BudgetRepository>(),
+        _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
         _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
         _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
         _pdfGenerateBudgetUsecase = pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetUsecase>(),
@@ -62,13 +65,13 @@ class PdfBudgetViewModel extends ChangeNotifier {
       List<ObservationPdf> comments = [];
 
       final itemsResult = await _pdfRepository
-          .fetchBudgetItems(budget.IDORCAMENTO ?? '', forceRefresh: true);
+          .fetchBudgetItems(_budgetRepository.selectBudget.value?.id ?? '', forceRefresh: true);
       if (itemsResult is Ok<List<ItemsBudget>>) {
         budgetItems = itemsResult.value;
       }
 
       final customerResult = await _pdfRepository
-          .fetchBudgetById(budget.IDORCAMENTO ?? '', forceRefresh: true);
+          .fetchBudgetById(_budgetRepository.selectBudget.value?.id ?? '', forceRefresh: true);
       if (customerResult is Ok<CustomerInfo>) {
         customer = customerResult.value;
       }
@@ -80,7 +83,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
       }
 
       final commentResult = await _pdfRepository
-          .fetchBudgetComments(budget.IDORCAMENTO ?? '', forceRefresh: true);
+          .fetchBudgetComments(_budgetRepository.selectBudget.value?.id ?? '', forceRefresh: true);
       if (commentResult is Ok<List<ObservationPdf>>) {
         comments = commentResult.value;
       }

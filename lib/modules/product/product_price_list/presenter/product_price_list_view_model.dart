@@ -12,7 +12,6 @@ import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -259,7 +258,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
           TOTAL: cart.total,
           IDPRODUCT: cart.id,
         );
-        await budgetRepo.saveBudgetItem(budget.IDORCAMENTO ?? '', item);
+        await budgetRepo.saveBudgetItem(
+          _budgetRepo.selectBudget.value?.id ?? item?.id ?? '',
+          item,
+        );
       }
       addItems = <ProductPriceModel>[];
       deleteItems = <ProductPriceModel>[];

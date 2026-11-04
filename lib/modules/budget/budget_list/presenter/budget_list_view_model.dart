@@ -3,8 +3,6 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart'
-    as budget;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -42,7 +40,7 @@ class BudgetListViewModel extends ChangeNotifier {
     bool quoteItems,
     bool comments,
   ) async {
-    final String? originalId = budget.IDORCAMENTO;
+    final String? originalId = _budgetRepository.selectBudget.value?.id;
     if (originalId == null || originalId.isEmpty) return;
 
     final result = await _budgetRepository.duplicateBudget(
@@ -54,7 +52,7 @@ class BudgetListViewModel extends ChangeNotifier {
 
     if (result is Ok<CustomerInfo>) {
       customerBudget = result.value;
-      budget.IDORCAMENTO = '';
+      _budgetRepository.clearSelectBudget();
       await getInformationOrcamento();
     }
   }
@@ -147,7 +145,7 @@ class BudgetListViewModel extends ChangeNotifier {
       id: '',
       street: '',
     );
-    budget.IDORCAMENTO = '';
+    _budgetRepository.clearSelectBudget();
     return _customerInfoNew;
   }
 

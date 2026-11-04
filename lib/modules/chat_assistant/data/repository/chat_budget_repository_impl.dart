@@ -7,7 +7,6 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budgetGlobals;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 
 /// Implementação do [ChatBudgetRepository].
@@ -222,7 +221,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       final updated = _draft!.copyWith(totalValue: total);
       await _budgetRepo.updateBudget(updated);
       _draft = updated;
-      budgetGlobals.VALORTOTAL = total;
+      _budgetRepo.selectBudget.value = _draft?.copyWith(totalValue: total);
       notifyListeners();
       return Result.ok(null);
     } catch (e) {
@@ -249,8 +248,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       );
       await _budgetRepo.updateBudget(finalized);
       _draft = finalized;
-      budgetGlobals.IDORCAMENTO = finalized.id;
-      budgetGlobals.VALORTOTAL = finalized.totalValue ?? 0;
+      _budgetRepo.selectBudget.value = finalized;
       notifyListeners();
       return Result.ok(finalized);
     } catch (e) {

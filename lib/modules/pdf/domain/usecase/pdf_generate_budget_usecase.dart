@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -48,7 +47,7 @@ class PdfGenerateBudgetUsecase {
         observations: observations,
         authToken: authToken,
       );
-      final String localFile = await _saveDocument(document);
+      final String localFile = await _saveDocument(document, customer.id!);
       items.clear();
       observations.clear();
       document.dispose();
@@ -881,12 +880,12 @@ class PdfGenerateBudgetUsecase {
     );
   }
 
-  Future<String> _saveDocument(PdfDocument document) async {
+  Future<String> _saveDocument(PdfDocument document, String filename) async {
     final directory = await getTemporaryDirectory();
     print(directory);
     final String path = directory.path;
-    final File file = File('$path/${budget.IDORCAMENTO}.pdf');
+    final File file = File('$path/$filename.pdf');
     await file.writeAsBytes(await document.save(), flush: true);
-    return '$path/${budget.IDORCAMENTO}.pdf';
+    return '$path/$filename.pdf';
   }
 }

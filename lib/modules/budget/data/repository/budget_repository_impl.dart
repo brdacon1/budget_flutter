@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -8,7 +9,6 @@ import 'package:oflite/modules/budget/data/model/items_list_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budgetGlobals;
 
 class BudgetRepositoryImpl extends BudgetRepository {
   final BudgetRemoteDataSource _remote;
@@ -24,14 +24,23 @@ class BudgetRepositoryImpl extends BudgetRepository {
   @override
   List<CustomerInfo> get budgets => List.unmodifiable(_budgets);
 
-  @override
-  CustomerInfo? get selectedBudget => _selectedBudget;
+  final ValueNotifier<CustomerInfo?> _selectBudget = ValueNotifier<CustomerInfo?>(null);
 
   @override
-  void selectBudget(CustomerInfo? budget) {
-    _selectedBudget = budget;
-    notifyListeners();
+  ValueNotifier<CustomerInfo?> get selectBudget => _selectBudget;
+
+  @override
+  set selectBudget(ValueNotifier<CustomerInfo?> value) {
+    _selectBudget.value = value.value;
   }
+
+  @override
+  void clearSelectBudget() {
+    _selectBudget.value = null;
+  }
+
+  @override
+  CustomerInfo? get selectedBudget => _selectedBudget;
 
   @override
   List<ItemsBudget> getBudgetItems(String budgetId) =>
@@ -74,8 +83,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
   Future<Result<void>> saveBudget(CustomerInfo budget) async {
     try {
       await _remote.saveBudget(budget.toJson());
-      budgetGlobals.IDORCAMENTO = budget.id;
-      budgetGlobals.VALORTOTAL = budget.totalValue ?? 0;
+      _selectBudget.value = budget;
 
       // Atualiza cache se já existir
       final index = _budgets.indexWhere((b) => b.id == budget.id);
@@ -187,7 +195,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
       }
 
       _budgets.insert(0, newBudget);
-      budgetGlobals.IDORCAMENTO = '';
+      _selectBudget.value = null;
       notifyListeners();
       return Result.ok(newBudget);
     } catch (e) {

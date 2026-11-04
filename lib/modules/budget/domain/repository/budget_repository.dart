@@ -68,8 +68,12 @@ abstract class BudgetRepository extends ChangeNotifier {
   Future<Result<List<ItemsBudget>>> fetchBudgetItems(
       String budgetId, {bool forceRefresh = false});
 
-  /// Seleciona um orçamento como ativo.
-  void selectBudget(CustomerInfo? budget);
+  /// Seleciona um orçamento como ativo (via ValueNotifier - substitui global_uid_budget).
+  ValueNotifier<CustomerInfo?> get selectBudget;
+  set selectBudget(ValueNotifier<CustomerInfo?> value);
+
+  /// Limpa o orçamento selecionado.
+  void clearSelectBudget();
 
   /// Limpa o cache de itens de um orçamento.
   void clearItemsCache(String budgetId);

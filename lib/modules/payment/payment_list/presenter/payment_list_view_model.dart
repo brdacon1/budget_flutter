@@ -7,7 +7,6 @@ import 'package:oflite/modules/payment/domain/repository/payment_repository.dart
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -39,9 +38,8 @@ class PaymentListViewModel extends ChangeNotifier {
   ConvertCoinRepository get moneyConvert => _moneyConvert;
 
   Future<void> inicialData() async {
-    // Path do Firestore depende das globais budget.IDORCAMENTO e budget.IDRECIBO.
-    Orcamento.IDORCAMENTO = item.id;
-    Orcamento.IDRECIBO = receipt.id;
+    _paymentRepository.budgetId = item.id;
+    _paymentRepository.receiptId = receipt.id;
     final result = await _paymentRepository.fetchPayments(receipt);
     if (result is Ok<List<PaymentCustomer>>) {
       foundPayment = result.value;
@@ -75,7 +73,7 @@ class PaymentListViewModel extends ChangeNotifier {
   }
 
   Future<void> editPayment(BuildContext context, int index) async {
-    Orcamento.IDRECIBO = receipt.id;
+    _paymentRepository.receiptId = receipt.id;
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -98,7 +96,7 @@ class PaymentListViewModel extends ChangeNotifier {
       ..id = ''
       ..DESCRICAO = 'null'
       ..PRECO = 0;
-    Orcamento.IDRECIBO = receipt.id;
+    _paymentRepository.receiptId = receipt.id;
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PaymentCreatorView(item: novo)),

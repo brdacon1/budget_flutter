@@ -53,6 +53,7 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
     super.initState();
     _viewModel = ReceiptCreatorViewModel(
       receipt: widget.receipt,
+      item: widget.item,
       onReceiptCreated: widget.onReceiptCreated,
     );
   }

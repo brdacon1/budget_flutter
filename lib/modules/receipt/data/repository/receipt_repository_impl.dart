@@ -8,18 +8,35 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   ReceiptRepositoryImpl(this._remote);
 
   List<Receipt> _receipts = [];
+  String? _budgetId;
+  String? _lastBudgetId;
 
   @override
   List<Receipt> get receipts => List.unmodifiable(_receipts);
 
   @override
+  String? get budgetId => _budgetId;
+  @override
+  set budgetId(String? value) {
+    if (value != _budgetId) {
+      _budgetId = value;
+      _receipts = [];
+    }
+  }
+
+  @override
   Future<Result<List<Receipt>>> fetchReceipts({bool forceRefresh = false}) async {
-    if (!forceRefresh && _receipts.isNotEmpty) {
+    if (_budgetId == null || _budgetId!.isEmpty) {
+      _receipts = [];
+      return Result.ok(_receipts);
+    }
+    if (!forceRefresh && _receipts.isNotEmpty && _lastBudgetId == _budgetId) {
       return Result.ok(_receipts);
     }
     try {
-      final raw = await _remote.getReceipts();
+      final raw = await _remote.getReceipts(_budgetId!);
       _receipts = raw.map((e) => Receipt.fromJson(e)).toList();
+      _lastBudgetId = _budgetId;
       notifyListeners();
       return Result.ok(_receipts);
     } catch (e) {
@@ -30,7 +47,10 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   @override
   Future<Result<void>> saveReceipt(Receipt receipt) async {
     try {
-      await _remote.saveReceipt(receipt.toJson(), receipt.id!);
+      if (_budgetId == null || _budgetId!.isEmpty) {
+        return Result.error(Exception('budgetId is not set'));
+      }
+      await _remote.saveReceipt(_budgetId!, receipt.toJson(), receipt.id!);
       final index = _receipts.indexWhere((r) => r.id == receipt.id);
       if (index >= 0) {
         _receipts[index] = receipt;
@@ -47,8 +67,8 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   @override
   Future<Result<void>> deleteReceipt(Receipt receipt) async {
     try {
-      if (receipt.id != null) {
-        await _remote.deleteReceipt(receipt.id!);
+      if (receipt.id != null && _budgetId != null) {
+        await _remote.deleteReceipt(_budgetId!, receipt.id!);
         _receipts.removeWhere((r) => r.id == receipt.id);
         notifyListeners();
       }
@@ -62,8 +82,8 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   Future<Result<void>> deleteReceipts(List<Receipt> receipts) async {
     try {
       for (final r in receipts) {
-        if (r.id != null) {
-          await _remote.deleteReceipt(r.id!);
+        if (r.id != null && _budgetId != null) {
+          await _remote.deleteReceipt(_budgetId!, r.id!);
         }
       }
       _receipts.removeWhere((r) => receipts.any((d) => d.id == r.id));

@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart'
-    as budget;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 
@@ -32,7 +31,7 @@ class _BudgetListView extends State<BudgetListView> {
 
   @override
   void initState() {
-    budget.IDORCAMENTO = '';
+    getIt<BudgetRepository>().clearSelectBudget();
     getIt<AdsRepository>().loadInterstitial();
     _viewModel.initialScreen();
     super.initState();
@@ -148,7 +147,7 @@ class _BudgetListView extends State<BudgetListView> {
                                 ),
                           ),
                         ).then((_) async {
-                          budget.IDORCAMENTO = '';
+                          getIt<BudgetRepository>().clearSelectBudget();
                           await _viewModel.getInformationOrcamento();
                           _viewModel.clearDeleteItens();
                         }),
@@ -173,7 +172,7 @@ class _BudgetListView extends State<BudgetListView> {
                         BudgetTabView(item: _viewModel.customerInfoNew()),
               ),
             ).then((_) async {
-              budget.IDORCAMENTO = '';
+              getIt<BudgetRepository>().clearSelectBudget();
               await _viewModel.getInformationOrcamento();
               _viewModel.clearDeleteItens();
             });
@@ -229,14 +228,14 @@ class _BudgetListView extends State<BudgetListView> {
                 }
               },
               onOpen: () {
-                budget.IDORCAMENTO = item.id;
+                getIt<BudgetRepository>().selectBudget.value = item;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => BudgetTabView(item: item),
                   ),
                 ).then((_) async {
-                  budget.IDORCAMENTO = '';
+                  getIt<BudgetRepository>().clearSelectBudget();
                   await _viewModel.getInformationOrcamento();
                   _viewModel.clearDeleteItens();
                 });
@@ -261,7 +260,7 @@ class _BudgetListView extends State<BudgetListView> {
                         },
                       );
                 } else {
-                  budget.IDORCAMENTO = item.id;
+                  getIt<BudgetRepository>().selectBudget.value = item;
                   await _dialogDuplicate();
                 }
               },

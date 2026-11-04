@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
 import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
@@ -51,7 +50,7 @@ class PdfGenerateReceiptUseCase {
         );
       }
 
-      final String localFile = await _saveDocument(document);
+      final String localFile = await _saveDocument(document, customer.id!);
       document.dispose();
       return localFile;
     } catch (_) {
@@ -533,11 +532,11 @@ class PdfGenerateReceiptUseCase {
     );
   }
 
-  Future<String> _saveDocument(PdfDocument document) async {
+  Future<String> _saveDocument(PdfDocument document, String filename) async {
     final directory = await getApplicationSupportDirectory();
     final String path = directory.path;
-    final File file = File('$path/${budget.IDORCAMENTO}.pdf');
+    final File file = File('$path/$filename.pdf');
     await file.writeAsBytes(await document.save(), flush: true);
-    return '$path/${budget.IDORCAMENTO}.pdf';
+    return '$path/$filename.pdf';
   }
 }

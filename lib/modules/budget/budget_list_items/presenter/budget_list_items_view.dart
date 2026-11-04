@@ -9,8 +9,6 @@ import 'package:oflite/modules/product/product_price/data/model/product_price_mo
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart'
-    as budget;
 
 import 'budget_list_items_view_model.dart';
 import 'components/budget_list_items_card.dart';
@@ -236,17 +234,12 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                   if (await _viewModel.getProductCount() > 0) {
                     final value = await displayAlert.listNotification(context);
                     if (value == "Criar novo item") {
-                      budget.fromListItem = true;
                       _showProductPriceCreatorBottomModal();
                     } else if (value == "Selecionar da lista de preço") {
-                      budget.fromListItem = false;
                       _openPriceList();
                     }
-                    budget.fromListItem = false;
                   } else {
-                    budget.fromListItem = true;
                     _showProductPriceCreatorBottomModal();
-                    budget.fromListItem = false;
                   }
                 },
                 backgroundColor: buttonColor,

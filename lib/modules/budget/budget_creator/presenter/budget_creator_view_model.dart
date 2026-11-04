@@ -12,7 +12,6 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -109,22 +108,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       ..totalValue = source.totalValue;
   }
 
-  void _applyToGlobals(CustomerInfo source) {
-    Orcamento.ID = source.id;
-    Orcamento.DATA = source.data;
-    Orcamento.RUA = source.street;
-    Orcamento.GERADO = source.generated;
-    Orcamento.BAIRRO = source.neighborhood;
-    Orcamento.CITY = source.city;
-    Orcamento.CEP = source.zip;
-    Orcamento.EMAIL = source.email;
-    Orcamento.ENDERECO = source.address;
-    Orcamento.FONE = source.phone;
-    Orcamento.NOMECLIENTE = source.customerName;
-    Orcamento.STATUS = source.status;
-    Orcamento.VALORTOTAL = source.totalValue;
-  }
-
   void _enterEditMode(CustomerInfo budget) {
     nameButton = 'Atualizar';
     titlePage = 'Editar orçamento';
@@ -154,7 +137,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   void init() {
     try {
-      _applyToGlobals(item);
       _setupUiState();
       _fillControllers();
       notifyListeners();
@@ -162,11 +144,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   }
 
   Future<void> saveBudget(CustomerInfo budget) async {
-    final result = await _budgetRepository.saveBudget(budget);
-    if (result is Ok<void>) {
-      Orcamento.IDORCAMENTO = budget.id;
-      Orcamento.VALORTOTAL = budget.totalValue ?? 0;
-    }
+    await _budgetRepository.saveBudget(budget);
   }
 
   Future<void> updateItensDADOS(CustomerInfo budget) async {
@@ -251,7 +229,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
     _applyToItem(budget);
     if (!isUpdate) {
-      _applyToGlobals(budget);
       _enterEditMode(budget);
     }
     notifyListeners();

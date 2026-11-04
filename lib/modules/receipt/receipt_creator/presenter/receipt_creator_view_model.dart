@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
@@ -16,6 +17,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
 
   final Receipt receipt;
+  final CustomerInfo item;
   final ValueChanged<Receipt>? onReceiptCreated;
 
   final TextEditingController descricaoText = TextEditingController();
@@ -29,6 +31,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
   ReceiptCreatorViewModel({
     required this.receipt,
+    required this.item,
     this.onReceiptCreated,
   }) {
     _initFromReceipt();
@@ -64,6 +67,9 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
   Future<void> save(BuildContext context) async {
     loadingEvent.alertLoading(context);
+
+    // Garante que o repositório sabe qual orçamento está ativo
+    _receiptRepository.budgetId = item.id;
 
     if (nameButton == ReceiptPtString.saveButton) {
       final DateTime now = DateTime.now();

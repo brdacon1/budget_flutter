@@ -5,7 +5,6 @@ import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
@@ -51,9 +50,6 @@ class PdfReceiptViewModel extends ChangeNotifier {
         notifyListeners();
         return;
       }
-
-      budget.IDORCAMENTO = item.id;
-      budget.IDRECIBO = receipt.id;
 
       final paymentResult =
           await _paymentRepository.fetchPayments(receipt, forceRefresh: true);

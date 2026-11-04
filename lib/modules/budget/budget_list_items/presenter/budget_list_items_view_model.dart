@@ -5,8 +5,6 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart'
-    as budget;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -63,8 +61,9 @@ class BudgetListItemsViewModel extends ChangeNotifier {
       }
       totalBudget += total;
     }
-    if (budget.VALORTOTAL != totalBudget) {
-      budget.VALORTOTAL = totalBudget;
+    final currentSelectBudget = _budgetRepository.selectBudget.value;
+    if (currentSelectBudget != null && currentSelectBudget.totalValue != totalBudget) {
+      _budgetRepository.selectBudget.value = item.copyWith(totalValue: totalBudget);
       // Atualiza o orçamento com o total recalculado
       final budgetUpdate = item.copyWith(totalValue: totalBudget);
       await _budgetRepository.updateBudget(budgetUpdate);
