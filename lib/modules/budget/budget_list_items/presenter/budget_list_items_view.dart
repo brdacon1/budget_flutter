@@ -49,7 +49,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return BudgetListItemsDeleteBottomModalWidget(
-          deleteItens: _viewModel.deleteItens,
+          deleteItems: _viewModel.deleteItens,
           moneyConvert: _viewModel.moneyConvert,
           onRemove: (item) => _viewModel.removeDeleteItem(item),
           onConfirm: () async {
