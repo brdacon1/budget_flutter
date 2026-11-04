@@ -77,7 +77,7 @@ class _CommentListView extends State<CommentListView> {
   Widget _title(double we) {
     return Container(
       alignment: Alignment.topLeft,
-      margin: EdgeInsets.only(left: we * 0.028),
+      margin: EdgeInsets.only(left: we * 0.04),
       child: Text(
         "Comentários",
         style: GoogleFonts.heebo(
@@ -93,7 +93,7 @@ class _CommentListView extends State<CommentListView> {
   Widget _commentList() {
     return ListView.builder(
       shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 150, left: 15, right: 15, top: 10),
+      padding: const EdgeInsets.only(bottom: 150, left: 16, right: 16),
       itemCount: _viewModel.foundObservation.length,
       itemBuilder: (context, index) {
         final comment = _viewModel.foundObservation[index];
@@ -124,7 +124,7 @@ class _CommentListView extends State<CommentListView> {
           },
           child: Container(
             alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.02),
+            margin: EdgeInsets.only(left: we * 0.03),
             child: const Icon(
               Icons.arrow_back_outlined,
               color: Colors.white,
@@ -140,30 +140,15 @@ class _CommentListView extends State<CommentListView> {
   Widget build(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: bgColor,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          SizedBox(height: he * 0.07),
-          _backButton(we),
-          SizedBox(height: he * 0.03),
-          _title(we),
-          SizedBox(height: he * 0.03),
-          Expanded(
-            child: RefreshIndicator(
-              color: Colors.cyan[50],
-              backgroundColor: bgColor,
-              onRefresh: () async {
-                await _viewModel.loadComments();
-                _viewModel.resetSelectionState();
-              },
-              child: _commentList(),
-            ),
-          ),
-        ],
+      body: AnimatedBuilder(
+        animation: _viewModel,
+        builder: (context, _) {
+          return _buildScreen(height: he, we: we);
+        },
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           final newObservation =
@@ -178,6 +163,30 @@ class _CommentListView extends State<CommentListView> {
         backgroundColor: buttonColor,
         child: const Icon(Icons.add, color: Colors.black),
       ),
+    );
+  }
+
+  Widget _buildScreen({required double height, required double we}) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        SizedBox(height: height * 0.07),
+        _backButton(we),
+        SizedBox(height: height * 0.03),
+        _title(we),
+        SizedBox(height: height * 0.03),
+        Expanded(
+          child: RefreshIndicator(
+            color: Colors.cyan[50],
+            backgroundColor: bgColor,
+            onRefresh: () async {
+              await _viewModel.loadComments();
+              _viewModel.resetSelectionState();
+            },
+            child: _commentList(),
+          ),
+        ),
+      ],
     );
   }
 }
