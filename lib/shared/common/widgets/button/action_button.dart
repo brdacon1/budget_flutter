@@ -7,11 +7,13 @@ class ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.backgroundColor,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ActionButton extends StatelessWidget {
       height: 46.0,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: whiteColor.withOpacity(0.08),
+          backgroundColor: backgroundColor ?? whiteColor.withOpacity(0.08),
           foregroundColor: whiteColor,
           elevation: 0,
           shape: RoundedRectangleBorder(
