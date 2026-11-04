@@ -18,6 +18,37 @@ class BudgetListItemsCard extends StatelessWidget {
   final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
 
+  Widget _buildLabels() {
+    return Column(
+      children: [
+        ExpansionCardLabel(
+          nameText: "Categoria:",
+          textData: "${item.CATEGORIA}",
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Total:",
+          textData: moneyConvert.convertFromDouble(item.TOTAL!),
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Quantidade:",
+          textData: '${item.QTD}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Unidade de medida:",
+          textData: '${item.MEDIDA}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -52,26 +83,9 @@ class BudgetListItemsCard extends StatelessWidget {
           ),
           children: <Widget>[
             const Divider(thickness: 1.0, height: 1.0),
-            ExpansionCardLabel(
-              nameText: "Categoria",
-              textData: "${item.CATEGORIA}",
-            ),
-            ExpansionCardLabel(
-              nameText: "Total",
-              textData: moneyConvert.convertFromDouble(item.TOTAL!),
-            ),
-            ExpansionCardLabel(nameText: "Quantidade", textData: '${item.QTD}'),
-            ExpansionCardLabel(
-              nameText: "Unidade de medida",
-              textData: '${item.MEDIDA}',
-            ),
+            _buildLabels(),
             Padding(
-              padding: const EdgeInsets.only(
-                bottom: 12,
-                top: 12,
-                left: 16,
-                right: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
