@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 import 'components/payment_card.dart';
-import 'components/payment_list_header.dart';
 import 'components/payment_total_bar.dart';
 import 'payment_list_view_model.dart';
 
@@ -69,6 +70,7 @@ class _PaymentListView extends State<PaymentListView> {
 
   @override
   Widget build(BuildContext context) {
+    final he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
@@ -77,7 +79,11 @@ class _PaymentListView extends State<PaymentListView> {
           return Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              PaymentListHeader(onBack: () => Navigator.pop(context, true)),
+              AppHeaderSecondTitle(
+                titlePage: PaymentStrings.paymentsTitle,
+                secondTitle: 'Pagamentos do orçamento',
+                onBack: () => Navigator.pop(context, true),
+              ),
               _buildListView(),
             ],
           );

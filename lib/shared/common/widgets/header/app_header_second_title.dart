@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class BudgetCreatorHeader extends StatelessWidget {
-  const BudgetCreatorHeader({
+class AppHeaderSecondTitle extends StatelessWidget {
+  const AppHeaderSecondTitle({
     super.key,
     required this.titlePage,
+    required this.secondTitle,
     required this.onBack,
   });
 
   final String titlePage;
+  final String secondTitle;
   final VoidCallback onBack;
 
   @override
@@ -50,10 +52,11 @@ class BudgetCreatorHeader extends StatelessWidget {
           alignment: Alignment.topLeft,
           margin: EdgeInsets.only(left: we * 0.05),
           child: Text(
-            "Informações do orçamento",
+            secondTitle,
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
           ),
         ),
+        SizedBox(height: he * 0.02),
       ],
     );
   }

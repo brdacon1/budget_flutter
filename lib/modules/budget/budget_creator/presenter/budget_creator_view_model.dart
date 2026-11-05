@@ -3,9 +3,8 @@ import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
-import 'package:flutter_contacts/properties/name.dart';
-import 'package:flutter_contacts/properties/phone.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
+
 
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -13,6 +12,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class BudgetCreatorViewModel extends ChangeNotifier {
@@ -64,6 +64,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
 
   bool get _isEditing => (item.id ?? '').isNotEmpty;
+  bool get isEditing => _isEditing;
 
   void _setupUiState() {
     final editing = _isEditing;
@@ -191,10 +192,10 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     fieldFone = true;
     notifyListeners();
 
-    final hasPermission = await UserInfo.FlutterContacts.requestPermission();
+    final hasPermission = await user_info.FlutterContacts.requestPermission();
     if (!hasPermission) return;
 
-    final contact = await UserInfo.FlutterContacts.openExternalPick();
+    final contact = await user_info.FlutterContacts.openExternalPick();
     if (contact == null) return;
 
     String name = contact.displayName.trim();
@@ -215,59 +216,28 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> eventSave(BuildContext context, double we) async {
-    final isUpdate = nameButton == 'Atualizar';
+  late final Command0<void> saveBudgetCommand = Command0(_executeSaveBudget);
+
+  Future<Result<void>> _executeSaveBudget() async {
+    final isUpdate = _isEditing;
     final formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    final budget = _buildBudget(isUpdate, formattedDate);
 
-    final CustomerInfo budget = _buildBudget(isUpdate, formattedDate);
-
-    if (isUpdate) {
-      await updateItensDADOS(budget);
-    } else {
-      await saveBudget(budget);
-    }
-
-    _applyToItem(budget);
-    if (!isUpdate) {
-      _enterEditMode(budget);
-    }
-    notifyListeners();
-
-    if (isUpdate) {
-      if (context.mounted) {
-        await displayAlert.notification(
-          context,
-          'Feito!',
-          'Dados do orçamento atualizado com sucesso!',
-        );
+    try {
+      if (isUpdate) {
+        await updateItensDADOS(budget);
+      } else {
+        await saveBudget(budget);
       }
-      return;
-    }
 
-    if (await UserInfo.FlutterContacts.requestPermission()) {
-      if (context.mounted) {
-        await displayAlert.notification(
-          context,
-          'Feito!',
-          'Orçamento criado com sucesso!',
-        );
+      _applyToItem(budget);
+      if (!isUpdate) {
+        _enterEditMode(budget);
       }
-      if (context.mounted) {
-        final saveContact = await showConfirmBottomModal(
-          context,
-          title: 'Salvar contato',
-          message: 'Gostaria de salvar o telefone em sua lista de contatos?',
-        );
-        if (saveContact) {
-          final newContact = UserInfo.Contact()
-            ..name = Name(first: budget.customerName ?? '')
-            ..phones = [
-              Phone(budget.phone ?? ''),
-              Phone(budget.phone ?? '', label: PhoneLabel.work),
-            ];
-          await UserInfo.FlutterContacts.insertContact(newContact);
-        }
-      }
+      notifyListeners();
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
     }
   }
 

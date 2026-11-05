@@ -5,7 +5,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/header/app_header.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 import 'comment_list_view_model.dart';
 import 'components/comment_form_dialog.dart';
@@ -125,29 +125,6 @@ class _CommentListView extends State<CommentListView> {
     );
   }
 
-  Widget _backButton(double we) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        GestureDetector(
-          onTap: () {
-            Navigator.pop(context, true);
-          },
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.03),
-            child: const Icon(
-              Icons.arrow_back_outlined,
-              color: Colors.white,
-              size: 35.0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
       animation: _viewModel,
@@ -198,9 +175,10 @@ class _CommentListView extends State<CommentListView> {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
-        AppHeader(
+        AppHeaderSecondTitle(
+          titlePage: 'Comentários',
+          secondTitle: 'Comentários do orçamento',
           onBack: () => Navigator.pop(context, true),
-          titleText: 'Comentários',
         ),
         _buildCommentList(),
       ],

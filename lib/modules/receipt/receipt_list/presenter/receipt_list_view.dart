@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
-import '../../../../shared/common/widgets/header/app_header.dart';
 import 'components/receipt_card.dart';
 import 'receipt_list_view_model.dart';
 
@@ -108,6 +108,7 @@ class _ReceiptListView extends State<ReceiptListView> {
 
   @override
   Widget build(BuildContext context) {
+    final he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
@@ -116,9 +117,10 @@ class _ReceiptListView extends State<ReceiptListView> {
           return Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              AppHeader(
+              AppHeaderSecondTitle(
+                titlePage: 'Recibos',
+                secondTitle: 'Recibos do orçamento',
                 onBack: () => Navigator.pop(context, true),
-                titleText: 'Recibos',
               ),
               _buildListReceipt(),
             ],
