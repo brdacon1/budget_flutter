@@ -22,6 +22,30 @@ class BudgetRemoteDataSource {
         .toList();
   }
 
+  Future<List<Map<String, dynamic>>> getBudgetsPaginated(
+    String userUid, {
+    required int limit,
+    String? startAfterId,
+  }) async {
+    var query = _budgetsCollection(userUid)
+        .orderBy('ID', descending: true)
+        .limit(limit);
+
+    if (startAfterId != null && startAfterId.isNotEmpty) {
+      query = query.startAfter([startAfterId]);
+    }
+
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((d) => Map<String, dynamic>.from(d.data() as Map))
+        .toList();
+  }
+
+  Future<int> countBudgets(String userUid) async {
+    final aggregate = await _budgetsCollection(userUid).count().get();
+    return aggregate.count ?? 0;
+  }
+
   Future<Map<String, dynamic>> getBudgetById(String userUid, String id) async {
     final doc = await _budgetsCollection(userUid).doc(id).get();
     final data = doc.data();

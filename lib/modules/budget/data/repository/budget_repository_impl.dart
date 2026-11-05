@@ -54,6 +54,31 @@ class BudgetRepositoryImpl extends BudgetRepository {
   List<ObservationBudget> getComments(String budgetId) =>
       List.unmodifiable(_commentsCache[budgetId] ?? []);
 
+  // Paginação
+  String? _lastBudgetId;
+  bool _hasMoreBudgets = true;
+  bool _isLoadingMoreBudgets = false;
+
+  @override
+  bool get hasMoreBudgets => _hasMoreBudgets;
+
+  @override
+  bool get isLoadingMoreBudgets => _isLoadingMoreBudgets;
+
+  @override
+  Future<Result<int>> countBudgets() async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+    try {
+      final count = await _remote.countBudgets(userUid);
+      return Result.ok(count);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
   @override
   Future<Result<List<CustomerInfo>>> fetchBudgets(
       {bool forceRefresh = false}) async {
@@ -70,6 +95,55 @@ class BudgetRepositoryImpl extends BudgetRepository {
       notifyListeners();
       return Result.ok(_budgets);
     } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated(
+      {bool refresh = false}) async {
+    if (_isLoadingMoreBudgets) return Result.ok(_budgets);
+
+    if (refresh) {
+      _budgets.clear();
+      _lastBudgetId = null;
+      _hasMoreBudgets = true;
+    }
+
+    if (!_hasMoreBudgets) return Result.ok(_budgets);
+
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+
+    _isLoadingMoreBudgets = true;
+    notifyListeners();
+
+    try {
+      final raw = await _remote.getBudgetsPaginated(
+        userUid,
+        limit: 7,
+        startAfterId: _lastBudgetId,
+      );
+
+      if (raw.isEmpty) {
+        _hasMoreBudgets = false;
+      } else {
+        final newBudgets = raw.map((e) => CustomerInfo.fromMap(e)).toList();
+        _lastBudgetId = newBudgets.last.id;
+        _budgets.addAll(newBudgets);
+        if (newBudgets.length < 7) {
+          _hasMoreBudgets = false;
+        }
+      }
+
+      _isLoadingMoreBudgets = false;
+      notifyListeners();
+      return Result.ok(_budgets);
+    } catch (e) {
+      _isLoadingMoreBudgets = false;
+      notifyListeners();
       return Result.error(Exception(e.toString()));
     }
   }

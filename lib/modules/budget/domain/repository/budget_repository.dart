@@ -22,8 +22,21 @@ abstract class BudgetRepository extends ChangeNotifier {
   /// Comentários cacheados de um orçamento específico.
   List<ObservationBudget> getComments(String budgetId);
 
+  /// Indica se ainda há mais orçamentos para carregar.
+  bool get hasMoreBudgets;
+
+  /// Indica se está carregando uma próxima página.
+  bool get isLoadingMoreBudgets;
+
   /// Carrega todos os orçamentos. Usa cache a menos que [forceRefresh] seja true.
   Future<Result<List<CustomerInfo>>> fetchBudgets({bool forceRefresh = false});
+
+  /// Carrega orçamentos paginados (7 por vez). Acumula no cache.
+  /// [refresh] true limpa o cache e reinicia a paginação.
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated({bool refresh = false});
+
+  /// Retorna a quantidade total de orçamentos no Firestore.
+  Future<Result<int>> countBudgets();
 
   /// Busca orçamentos do mês corrente (range de IDs).
   Future<Result<List<CustomerInfo>>> fetchBudgetsByMonthRange(

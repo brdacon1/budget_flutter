@@ -28,17 +28,30 @@ class BudgetListView extends StatefulWidget {
 class _BudgetListView extends State<BudgetListView> {
   final BudgetListViewModel _viewModel = getIt<BudgetListViewModel>();
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     getIt<BudgetRepository>().clearSelectBudget();
     getIt<AdsRepository>().loadInterstitial();
+    _scrollController.addListener(_onScroll);
     _viewModel.initialScreen();
     super.initState();
   }
 
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= maxScroll * 0.8) {
+      _viewModel.loadMore();
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _viewModel.dispose();
     super.dispose();
   }
@@ -57,7 +70,7 @@ class _BudgetListView extends State<BudgetListView> {
             try {
               await alertDisplayLoading.alertLoading(viewContext);
               await _viewModel.duplicateEvent(clientData, quoteItems, comments);
-              await _viewModel.getInformationOrcamento();
+              await _viewModel.getInformationOrcamento(refresh: true);
             } finally {
               alertDisplayLoading.closeLoading(viewContext);
             }
@@ -148,7 +161,7 @@ class _BudgetListView extends State<BudgetListView> {
                           ),
                         ).then((_) async {
                           getIt<BudgetRepository>().clearSelectBudget();
-                          await _viewModel.getInformationOrcamento();
+                          await _viewModel.getInformationOrcamento(refresh: true);
                           _viewModel.clearDeleteItens();
                         }),
                       }
@@ -173,7 +186,7 @@ class _BudgetListView extends State<BudgetListView> {
               ),
             ).then((_) async {
               getIt<BudgetRepository>().clearSelectBudget();
-              await _viewModel.getInformationOrcamento();
+              await _viewModel.getInformationOrcamento(refresh: true);
               _viewModel.clearDeleteItens();
             });
           }
@@ -205,10 +218,11 @@ class _BudgetListView extends State<BudgetListView> {
         color: Colors.cyan[50],
         backgroundColor: bgColor,
         onRefresh: () async {
-          await _viewModel.getInformationOrcamento();
+          await _viewModel.getInformationOrcamento(refresh: true);
           _viewModel.clearDeleteItens();
         },
         child: ListView.builder(
+          controller: _scrollController,
           shrinkWrap: true,
           padding: const EdgeInsets.only(
             bottom: 170,
@@ -216,8 +230,20 @@ class _BudgetListView extends State<BudgetListView> {
             right: 15,
             top: 0,
           ),
-          itemCount: _viewModel.getFilteredData().length,
+          itemCount: _viewModel.getFilteredData().length + (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
+            if (index >= _viewModel.getFilteredData().length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
+                  ),
+                ),
+              );
+            }
             final item = _viewModel.getFilteredData()[index];
             return BudgetListCard(
               item: item,
@@ -236,13 +262,13 @@ class _BudgetListView extends State<BudgetListView> {
                   ),
                 ).then((_) async {
                   getIt<BudgetRepository>().clearSelectBudget();
-                  await _viewModel.getInformationOrcamento();
+                  await _viewModel.getInformationOrcamento(refresh: true);
                   _viewModel.clearDeleteItens();
                 });
               },
               onDuplicate: () async {
                 if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false) &&
-                    _viewModel.getFilteredData().length > 10) {
+                    _viewModel.totalBudgetCount > 10) {
                   await _viewModel.displayAlert
                       .notificationError(
                         context,

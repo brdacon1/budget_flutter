@@ -26,13 +26,33 @@ class BudgetListViewModel extends ChangeNotifier {
   bool checkBoxAppear = false;
   bool _isRefreshing = false;
 
+  int _totalBudgetCount = 0;
+  int get totalBudgetCount => _totalBudgetCount;
+
+  Future<void> loadCount() async {
+    final result = await _budgetRepository.countBudgets();
+    if (result is Ok<int>) {
+      _totalBudgetCount = result.value;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
+  bool get isLoadingMore => _budgetRepository.isLoadingMoreBudgets;
+  bool get hasMoreBudgets => _budgetRepository.hasMoreBudgets;
+
+  Future<void> loadMore() async {
+    if (_isRefreshing || !hasMoreBudgets) return;
+    await getInformationOrcamento(refresh: false);
+  }
+
   void _onBudgetRepoChanged() {
     if (_disposed || _isRefreshing) return;
-    getInformationOrcamento();
+    getInformationOrcamento(refresh: false);
   }
 
   Future<void> initialScreen() async {
-    await getInformationOrcamento();
+    await loadCount();
+    await getInformationOrcamento(refresh: true);
   }
 
   Future<void> duplicateEvent(
@@ -53,24 +73,30 @@ class BudgetListViewModel extends ChangeNotifier {
     if (result is Ok<CustomerInfo>) {
       customerBudget = result.value;
       _budgetRepository.clearSelectBudget();
-      await getInformationOrcamento();
+      _totalBudgetCount++;
+      if (!_disposed) notifyListeners();
+      await getInformationOrcamento(refresh: true);
     }
   }
 
   Future<bool> deleteData() async {
     final result = await _budgetRepository.deleteBudgets(deleteItems);
     if (result is Ok<void>) {
+      _totalBudgetCount -= deleteItems.length;
+      if (!_disposed) notifyListeners();
       deleteItems.clear();
       deleteVisible = false;
-      await getInformationOrcamento();
+      await getInformationOrcamento(refresh: true);
       return true;
     }
     return false;
   }
 
-  Future<List<CustomerInfo>> getInformationOrcamento() async {
+  Future<List<CustomerInfo>> getInformationOrcamento(
+      {bool refresh = true}) async {
     _isRefreshing = true;
-    final result = await _budgetRepository.fetchBudgets(forceRefresh: true);
+    final result =
+        await _budgetRepository.fetchBudgetsPaginated(refresh: refresh);
     _foundUsers.clear();
     if (result is Ok<List<CustomerInfo>>) {
       for (final b in result.value) {
