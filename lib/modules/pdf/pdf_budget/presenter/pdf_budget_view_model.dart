@@ -9,9 +9,9 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -21,8 +21,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
   final PdfGenerateBudgetSimpleUsecase _pdfGenerateBudgetUsecase;
-  final PdfGenerateExecutiveUseCase _pdfGenerateExecutiveUseCase;
-  final PdfGenerateProfessionalUseCase _pdfGenerateProfessionalUseCase;
+  final PdfGenerateBudgetExecutiveUsecase _pdfGenerateExecutiveUseCase;
+  final PdfGenerateBudgetProfessionalUsecase _pdfGenerateProfessionalUseCase;
 
   String? fileBytes;
   bool _loading = true;
@@ -41,8 +41,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
     DisplayAlertRepository? displayAlertRepository,
     ConvertCoinRepository? convertCoinRepository,
     PdfGenerateBudgetSimpleUsecase? pdfGenerateBudgetUsecase,
-    PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
-    PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
+    PdfGenerateBudgetExecutiveUsecase? pdfGenerateExecutiveUseCase,
+    PdfGenerateBudgetProfessionalUsecase? pdfGenerateProfessionalUseCase,
   }) : _budgetRepository = budgetRepository ?? getIt<BudgetRepository>(),
        _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
        _displayAlert =
@@ -51,10 +51,11 @@ class PdfBudgetViewModel extends ChangeNotifier {
        _pdfGenerateBudgetUsecase =
            pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetSimpleUsecase>(),
        _pdfGenerateExecutiveUseCase =
-           pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+           pdfGenerateExecutiveUseCase ??
+           getIt<PdfGenerateBudgetExecutiveUsecase>(),
        _pdfGenerateProfessionalUseCase =
            pdfGenerateProfessionalUseCase ??
-           getIt<PdfGenerateProfessionalUseCase>();
+           getIt<PdfGenerateBudgetProfessionalUsecase>();
 
   void _safeNotify() {
     if (_disposed) return;

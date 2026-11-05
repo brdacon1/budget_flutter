@@ -5,21 +5,24 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 /// Geração do PDF do orçamento — Layout **Profissional**.
-class PdfGenerateProfessionalUseCase {
+class PdfGenerateBudgetProfessionalUsecase {
   final ConvertCoinRepository _moneyConvert;
   final UserRepository _userRepository;
 
-  PdfGenerateProfessionalUseCase(this._moneyConvert, this._userRepository);
+  PdfGenerateBudgetProfessionalUsecase(
+    this._moneyConvert,
+    this._userRepository,
+  );
 
   // ---------------------------------------------------------------------------
   // API pública
@@ -99,20 +102,38 @@ class PdfGenerateProfessionalUseCase {
   // Cores e fontes reutilizáveis
   // ---------------------------------------------------------------------------
 
-  static final PdfColor _primaryBlue = PdfColor(30, 58, 138);   // azul escuro
-  static final PdfColor _lightBg    = PdfColor(240, 245, 255);  // fundo leve azulado
+  static final PdfColor _primaryBlue = PdfColor(30, 58, 138); // azul escuro
+  static final PdfColor _lightBg = PdfColor(
+    240,
+    245,
+    255,
+  ); // fundo leve azulado
   static final PdfColor _borderGray = PdfColor(220, 220, 220);
 
-  PdfFont get _fontTitle => PdfStandardFont(PdfFontFamily.helvetica, 18, style: PdfFontStyle.bold);
-  PdfFont get _fontSectionTitle => PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
-  PdfFont get _fontHeader => PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
-  PdfFont get _fontRegular => PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular);
-  PdfFont get _fontSmall => PdfStandardFont(PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular);
-  PdfFont get _fontTotal => PdfStandardFont(PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold);
+  PdfFont get _fontTitle =>
+      PdfStandardFont(PdfFontFamily.helvetica, 18, style: PdfFontStyle.bold);
+
+  PdfFont get _fontSectionTitle =>
+      PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+
+  PdfFont get _fontHeader =>
+      PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
+
+  PdfFont get _fontRegular =>
+      PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular);
+
+  PdfFont get _fontSmall =>
+      PdfStandardFont(PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular);
+
+  PdfFont get _fontTotal =>
+      PdfStandardFont(PdfFontFamily.helvetica, 11, style: PdfFontStyle.bold);
 
   PdfBrush get _brushPrimary => PdfSolidBrush(_primaryBlue);
+
   PdfBrush get _brushWhite => PdfBrushes.white;
+
   PdfBrush get _brushBlack => PdfBrushes.black;
+
   PdfBrush get _brushGray => PdfSolidBrush(PdfColor(100, 100, 100));
 
   // ---------------------------------------------------------------------------
@@ -131,12 +152,13 @@ class PdfGenerateProfessionalUseCase {
     required List<ObservationPdf> observations,
     String? authToken,
   }) async {
-    final PdfDocument document = PdfDocument()
-      ..pageSettings.size = PdfPageSize.a4
-      ..pageSettings.margins.left = 30
-      ..pageSettings.margins.right = 30
-      ..pageSettings.margins.top = 30
-      ..pageSettings.margins.bottom = 50;
+    final PdfDocument document =
+        PdfDocument()
+          ..pageSettings.size = PdfPageSize.a4
+          ..pageSettings.margins.left = 30
+          ..pageSettings.margins.right = 30
+          ..pageSettings.margins.top = 30
+          ..pageSettings.margins.bottom = 50;
 
     final PdfPage page = document.pages.add();
     final double pageW = page.getClientSize().width;
@@ -211,9 +233,10 @@ class PdfGenerateProfessionalUseCase {
     if (owner.fotoId != null && owner.fotoId!.isNotEmpty) {
       try {
         final String fotoId = owner.fotoId ?? '';
-        final String endpointUrl = fotoId.startsWith('http')
-            ? fotoId
-            : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
+        final String endpointUrl =
+            fotoId.startsWith('http')
+                ? fotoId
+                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
 
         final Map<String, String> headers = <String, String>{
           'Accept': 'application/json;odata=verbose',
@@ -278,10 +301,14 @@ class PdfGenerateProfessionalUseCase {
     _infoLine('Telefone:', owner.fone);
 
     final addressParts = <String>[];
-    if (owner.rua != null && owner.rua!.isNotEmpty) addressParts.add(owner.rua!);
-    if (owner.bairro != null && owner.bairro!.isNotEmpty) addressParts.add(owner.bairro!);
-    if (owner.city != null && owner.city!.isNotEmpty) addressParts.add(owner.city!);
-    if (owner.cep != null && owner.cep!.isNotEmpty) addressParts.add('CEP: ${owner.cep}');
+    if (owner.rua != null && owner.rua!.isNotEmpty)
+      addressParts.add(owner.rua!);
+    if (owner.bairro != null && owner.bairro!.isNotEmpty)
+      addressParts.add(owner.bairro!);
+    if (owner.city != null && owner.city!.isNotEmpty)
+      addressParts.add(owner.city!);
+    if (owner.cep != null && owner.cep!.isNotEmpty)
+      addressParts.add('CEP: ${owner.cep}');
     if (addressParts.isNotEmpty) {
       _infoLine('Endereço:', addressParts.join(' - '));
     }
@@ -323,10 +350,13 @@ class PdfGenerateProfessionalUseCase {
     ]);
     _drawBox(g, 0, topY, boxW, leftH + pad * 2 + 22, borderPen, bgBrush);
     _drawBoxTitle(g, 'DADOS DO ORÇAMENTO', 0, topY, boxW, pad);
-    _drawBoxRows(g, [
-      _BoxRow('Número:', customer.id),
-      _BoxRow('Criado em:', customer.data),
-    ], pad, topY + 22, boxW - pad * 2);
+    _drawBoxRows(
+      g,
+      [_BoxRow('Número:', customer.id), _BoxRow('Criado em:', customer.data)],
+      pad,
+      topY + 22,
+      boxW - pad * 2,
+    );
 
     // ── Box direito: DADOS DO CLIENTE ──
     final double rightH = _boxContentHeight([
@@ -334,25 +364,50 @@ class PdfGenerateProfessionalUseCase {
       _BoxRow('Telefone:', customer.phone),
       _BoxRow('Endereço:', customer.street),
       if (customer.city != null && customer.city!.isNotEmpty)
-        _BoxRow('Cidade / CEP:', '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}'),
+        _BoxRow(
+          'Cidade / CEP:',
+          '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}',
+        ),
     ]);
-    _drawBox(g, boxW + gap, topY, boxW, rightH + pad * 2 + 22, borderPen, bgBrush);
+    _drawBox(
+      g,
+      boxW + gap,
+      topY,
+      boxW,
+      rightH + pad * 2 + 22,
+      borderPen,
+      bgBrush,
+    );
     _drawBoxTitle(g, 'DADOS DO CLIENTE', boxW + gap, topY, boxW, pad);
-    _drawBoxRows(g, [
-      _BoxRow('Cliente:', customer.customerName),
-      _BoxRow('Telefone:', customer.phone),
-      _BoxRow('Endereço:', customer.street),
-      if (customer.city != null && customer.city!.isNotEmpty)
-        _BoxRow('Cidade / CEP:', '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}'),
-    ], pad, topY + 22, boxW - pad * 2, xOffset: boxW + gap);
+    _drawBoxRows(
+      g,
+      [
+        _BoxRow('Cliente:', customer.customerName),
+        _BoxRow('Telefone:', customer.phone),
+        _BoxRow('Endereço:', customer.street),
+        if (customer.city != null && customer.city!.isNotEmpty)
+          _BoxRow(
+            'Cidade / CEP:',
+            '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}',
+          ),
+      ],
+      pad,
+      topY + 22,
+      boxW - pad * 2,
+      xOffset: boxW + gap,
+    );
 
     return topY + (leftH > rightH ? leftH : rightH) + pad * 2 + 22;
   }
 
   void _drawBox(
     PdfGraphics g,
-    double x, double y, double w, double h,
-    PdfPen border, PdfBrush? bg,
+    double x,
+    double y,
+    double w,
+    double h,
+    PdfPen border,
+    PdfBrush? bg,
   ) {
     if (bg != null) {
       g.drawRectangle(brush: bg, bounds: Rect.fromLTWH(x, y, w, h));
@@ -361,8 +416,12 @@ class PdfGenerateProfessionalUseCase {
   }
 
   void _drawBoxTitle(
-    PdfGraphics g, String title,
-    double x, double y, double w, double pad,
+    PdfGraphics g,
+    String title,
+    double x,
+    double y,
+    double w,
+    double pad,
   ) {
     g.drawString(
       title,
@@ -399,7 +458,12 @@ class PdfGenerateProfessionalUseCase {
         row.value!,
         _fontRegular,
         brush: _brushBlack,
-        bounds: Rect.fromLTWH(xOffset + pad + contentW * 0.4, y, contentW * 0.6, 13),
+        bounds: Rect.fromLTWH(
+          xOffset + pad + contentW * 0.4,
+          y,
+          contentW * 0.6,
+          13,
+        ),
         format: PdfStringFormat(alignment: PdfTextAlignment.right),
       );
       y += 13;
@@ -432,14 +496,24 @@ class PdfGenerateProfessionalUseCase {
     // fundo azul bem claro
     g.drawRectangle(
       brush: PdfSolidBrush(_lightBg),
-      bounds: Rect.fromLTWH(barW + 4, topY, page.getClientSize().width - barW - 4, barH + 4),
+      bounds: Rect.fromLTWH(
+        barW + 4,
+        topY,
+        page.getClientSize().width - barW - 4,
+        barH + 4,
+      ),
     );
 
     g.drawString(
       title,
       _fontSectionTitle,
       brush: _brushPrimary,
-      bounds: Rect.fromLTWH(barW + 10, topY + 3, page.getClientSize().width - barW - 14, barH),
+      bounds: Rect.fromLTWH(
+        barW + 10,
+        topY + 3,
+        page.getClientSize().width - barW - 14,
+        barH,
+      ),
     );
 
     return topY + barH + 8;
@@ -477,8 +551,7 @@ class PdfGenerateProfessionalUseCase {
       backgroundBrush: _brushPrimary,
       textBrush: _brushWhite,
       cellPadding: PdfPaddings(top: 6, left: 6, right: 6, bottom: 6),
-    )
-      ..borders.all = PdfPens.transparent;
+    )..borders.all = PdfPens.transparent;
 
     grid.headers.applyStyle(headerStyle);
     header.height = 26;
@@ -552,14 +625,21 @@ class PdfGenerateProfessionalUseCase {
       );
     }
 
-    final PdfLayoutResult result = grid.draw(
-      page: page,
-      bounds: Rect.fromLTWH(0, topY, page.getClientSize().width, page.getClientSize().height),
-      format: PdfLayoutFormat(
-        breakType: PdfLayoutBreakType.fitPage,
-        layoutType: PdfLayoutType.paginate,
-      ),
-    ) as PdfLayoutResult;
+    final PdfLayoutResult result =
+        grid.draw(
+              page: page,
+              bounds: Rect.fromLTWH(
+                0,
+                topY,
+                page.getClientSize().width,
+                page.getClientSize().height,
+              ),
+              format: PdfLayoutFormat(
+                breakType: PdfLayoutBreakType.fitPage,
+                layoutType: PdfLayoutType.paginate,
+              ),
+            )
+            as PdfLayoutResult;
 
     return result.bounds.bottom;
   }
@@ -581,8 +661,7 @@ class PdfGenerateProfessionalUseCase {
       textBrush: textBrush,
       backgroundBrush: bgBrush,
       cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
-    )
-      ..borders.all = PdfPens.transparent;
+    )..borders.all = PdfPens.transparent;
 
     for (int i = 0; i < row.cells.count; i++) {
       row.cells[i].style = style;
@@ -614,8 +693,7 @@ class PdfGenerateProfessionalUseCase {
       backgroundBrush: _brushPrimary,
       textBrush: _brushWhite,
       cellPadding: PdfPaddings(top: 6, left: 6, right: 6, bottom: 6),
-    )
-      ..borders.all = PdfPens.transparent;
+    )..borders.all = PdfPens.transparent;
 
     grid.headers.applyStyle(headerStyle);
     grid.columns[0].width = 75;
@@ -629,14 +707,16 @@ class PdfGenerateProfessionalUseCase {
 
     _applyRowStyle(grid, _itemRowStyle());
 
-    final PdfLayoutResult result = grid.draw(
-      page: page,
-      bounds: Rect.fromLTWH(0, y, pageW, page.getClientSize().height),
-      format: PdfLayoutFormat(
-        breakType: PdfLayoutBreakType.fitPage,
-        layoutType: PdfLayoutType.paginate,
-      ),
-    ) as PdfLayoutResult;
+    final PdfLayoutResult result =
+        grid.draw(
+              page: page,
+              bounds: Rect.fromLTWH(0, y, pageW, page.getClientSize().height),
+              format: PdfLayoutFormat(
+                breakType: PdfLayoutBreakType.fitPage,
+                layoutType: PdfLayoutType.paginate,
+              ),
+            )
+            as PdfLayoutResult;
 
     return result.bounds.bottom;
   }
@@ -665,11 +745,7 @@ class PdfGenerateProfessionalUseCase {
     final double y = page.getClientSize().height - 24;
 
     // Linha cinza
-    g.drawLine(
-      PdfPen(_borderGray, width: 0.5),
-      Offset(0, y),
-      Offset(pageW, y),
-    );
+    g.drawLine(PdfPen(_borderGray, width: 0.5), Offset(0, y), Offset(pageW, y));
 
     // Esquerda
     g.drawString(
@@ -704,7 +780,11 @@ class PdfGenerateProfessionalUseCase {
     final session = _userRepository.selectUser.value;
     if (session == null) return '';
     if (session.googleAuth == true) return '';
-    if (session.EMAIL == null || session.EMAIL!.isEmpty || session.Senha == null || session.Senha!.isEmpty) return '';
+    if (session.EMAIL == null ||
+        session.EMAIL!.isEmpty ||
+        session.Senha == null ||
+        session.Senha!.isEmpty)
+      return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: session.EMAIL!.trim(),
       password: session.Senha!.trim(),
@@ -718,9 +798,9 @@ class PdfGenerateProfessionalUseCase {
 
   PdfGridCellStyle _itemRowStyle() {
     return PdfGridCellStyle(
-      font: _fontRegular,
-      cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
-    )
+        font: _fontRegular,
+        cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
+      )
       ..borders.left = PdfPens.transparent
       ..borders.right = PdfPens.transparent
       ..borders.top = PdfPen(_borderGray, width: 0.5)
@@ -752,5 +832,6 @@ class PdfGenerateProfessionalUseCase {
 class _BoxRow {
   final String label;
   final String? value;
+
   _BoxRow(this.label, this.value);
 }

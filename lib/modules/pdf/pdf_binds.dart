@@ -7,9 +7,9 @@ import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
@@ -33,14 +33,14 @@ void registerPdfDependencies(GetIt sl) {
       sl<UserRepository>(),
     ),
   );
-  sl.registerLazySingleton<PdfGenerateExecutiveUseCase>(
-    () => PdfGenerateExecutiveUseCase(
+  sl.registerLazySingleton<PdfGenerateBudgetExecutiveUsecase>(
+    () => PdfGenerateBudgetExecutiveUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
     ),
   );
-  sl.registerLazySingleton<PdfGenerateProfessionalUseCase>(
-    () => PdfGenerateProfessionalUseCase(
+  sl.registerLazySingleton<PdfGenerateBudgetProfessionalUsecase>(
+    () => PdfGenerateBudgetProfessionalUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
     ),
@@ -67,8 +67,9 @@ void registerPdfDependencies(GetIt sl) {
       displayAlertRepository: sl<DisplayAlertRepository>(),
       convertCoinRepository: sl<ConvertCoinRepository>(),
       pdfGenerateBudgetUsecase: sl<PdfGenerateBudgetSimpleUsecase>(),
-      pdfGenerateExecutiveUseCase: sl<PdfGenerateExecutiveUseCase>(),
-      pdfGenerateProfessionalUseCase: sl<PdfGenerateProfessionalUseCase>(),
+      pdfGenerateExecutiveUseCase: sl<PdfGenerateBudgetExecutiveUsecase>(),
+      pdfGenerateProfessionalUseCase:
+          sl<PdfGenerateBudgetProfessionalUsecase>(),
     ),
   );
 }

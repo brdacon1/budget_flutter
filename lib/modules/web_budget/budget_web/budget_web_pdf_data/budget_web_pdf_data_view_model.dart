@@ -8,9 +8,9 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 
 /// Geração/visualização do PDF no fluxo Web.
@@ -27,17 +27,18 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     required this.observations,
     required this.token,
     PdfGenerateBudgetSimpleUsecase? pdfGenerateUseCase,
-    PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
-    PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
+    PdfGenerateBudgetExecutiveUsecase? pdfGenerateExecutiveUseCase,
+    PdfGenerateBudgetProfessionalUsecase? pdfGenerateProfessionalUseCase,
     ConvertCoinRepository? convertCoinRepository,
     DisplayAlertRepository? displayAlertRepository,
   }) : _pdfGenerateUseCase =
            pdfGenerateUseCase ?? getIt<PdfGenerateBudgetSimpleUsecase>(),
        _pdfExecutive =
-           pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+           pdfGenerateExecutiveUseCase ??
+           getIt<PdfGenerateBudgetExecutiveUsecase>(),
        _pdfProfessional =
            pdfGenerateProfessionalUseCase ??
-           getIt<PdfGenerateProfessionalUseCase>(),
+           getIt<PdfGenerateBudgetProfessionalUsecase>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
        _displayAlert =
            displayAlertRepository ?? getIt<DisplayAlertRepository>();
@@ -49,8 +50,8 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final String token;
 
   final PdfGenerateBudgetSimpleUsecase _pdfGenerateUseCase;
-  final PdfGenerateExecutiveUseCase _pdfExecutive;
-  final PdfGenerateProfessionalUseCase _pdfProfessional;
+  final PdfGenerateBudgetExecutiveUsecase _pdfExecutive;
+  final PdfGenerateBudgetProfessionalUsecase _pdfProfessional;
   final ConvertCoinRepository _moneyConvert;
   final DisplayAlertRepository _displayAlert;
 
