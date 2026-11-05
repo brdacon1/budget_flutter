@@ -7,10 +7,10 @@ import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_simple_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_usecase.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
 
