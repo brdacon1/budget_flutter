@@ -8,38 +8,45 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfModelSelectViewModel extends ChangeNotifier {
-  final PdfGenerateBudgetUsecase _pdfGenerateBudgetUsecase;
+  final PdfGenerateBudgetSimpleUsecase _pdfGenerateBudgetUsecase;
   final PdfGenerateExecutiveUseCase _pdfGenerateExecutiveUseCase;
   final PdfGenerateProfessionalUseCase _pdfGenerateProfessionalUseCase;
   final PdfRepository _pdfRepository;
   final ConvertCoinRepository _moneyConvert;
 
   PdfModelSelectViewModel({
-    PdfGenerateBudgetUsecase? pdfGenerateBudgetUsecase,
+    PdfGenerateBudgetSimpleUsecase? pdfGenerateBudgetUsecase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
     PdfRepository? pdfRepository,
     ConvertCoinRepository? convertCoinRepository,
-  })  : _pdfGenerateBudgetUsecase = pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetUsecase>(),
-        _pdfGenerateExecutiveUseCase = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
-        _pdfGenerateProfessionalUseCase = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>(),
-        _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
-        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
+  }) : _pdfGenerateBudgetUsecase =
+           pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetSimpleUsecase>(),
+       _pdfGenerateExecutiveUseCase =
+           pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+       _pdfGenerateProfessionalUseCase =
+           pdfGenerateProfessionalUseCase ??
+           getIt<PdfGenerateProfessionalUseCase>(),
+       _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+       _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
 
   final PageController pageController = PageController();
   int _currentIndex = 0;
+
   int get currentIndex => _currentIndex;
 
   OwnerPdf? _owner;
+
   OwnerPdf? get owner => _owner;
 
   bool _loading = true;
+
   bool get loading => _loading;
 
   Uint8List? _standardBytes;
@@ -47,10 +54,13 @@ class PdfModelSelectViewModel extends ChangeNotifier {
   Uint8List? _professionalBytes;
 
   Uint8List? get standardBytes => _standardBytes;
+
   Uint8List? get executiveBytes => _executiveBytes;
+
   Uint8List? get professionalBytes => _professionalBytes;
 
   bool _saving = false;
+
   bool get saving => _saving;
 
   static const List<Map<String, String>> _layouts = [
@@ -134,17 +144,18 @@ class PdfModelSelectViewModel extends ChangeNotifier {
         observations: List<ObservationPdf>.from(observations),
       );
 
-      _professionalBytes = await _pdfGenerateProfessionalUseCase.professionalPDFBytes(
-        countService: 1,
-        countProduct: 1,
-        totalPriceBudget: _moneyConvert.convertFromDouble(250.0),
-        totalPriceProducts: _moneyConvert.convertFromDouble(100.0),
-        totalPriceServices: _moneyConvert.convertFromDouble(150.0),
-        items: List<ItemsBudget>.from(items),
-        customer: customer,
-        owner: owner,
-        observations: List<ObservationPdf>.from(observations),
-      );
+      _professionalBytes = await _pdfGenerateProfessionalUseCase
+          .professionalPDFBytes(
+            countService: 1,
+            countProduct: 1,
+            totalPriceBudget: _moneyConvert.convertFromDouble(250.0),
+            totalPriceProducts: _moneyConvert.convertFromDouble(100.0),
+            totalPriceServices: _moneyConvert.convertFromDouble(150.0),
+            items: List<ItemsBudget>.from(items),
+            customer: customer,
+            owner: owner,
+            observations: List<ObservationPdf>.from(observations),
+          );
     } catch (_) {
       // Falha silenciosa nos demos — a View pode mostrar placeholder
     }

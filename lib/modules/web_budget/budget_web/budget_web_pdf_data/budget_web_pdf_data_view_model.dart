@@ -2,16 +2,16 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_usecase.dart';
-import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_simple_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_professional_usecase.dart';
+import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 
 /// Geração/visualização do PDF no fluxo Web.
 ///
@@ -26,16 +26,21 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
     required this.owner,
     required this.observations,
     required this.token,
-    PdfGenerateBudgetUsecase? pdfGenerateUseCase,
+    PdfGenerateBudgetSimpleUsecase? pdfGenerateUseCase,
     PdfGenerateExecutiveUseCase? pdfGenerateExecutiveUseCase,
     PdfGenerateProfessionalUseCase? pdfGenerateProfessionalUseCase,
     ConvertCoinRepository? convertCoinRepository,
     DisplayAlertRepository? displayAlertRepository,
-  })  : _pdfGenerateUseCase = pdfGenerateUseCase ?? getIt<PdfGenerateBudgetUsecase>(),
-        _pdfExecutive = pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
-        _pdfProfessional = pdfGenerateProfessionalUseCase ?? getIt<PdfGenerateProfessionalUseCase>(),
-        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
-        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>();
+  }) : _pdfGenerateUseCase =
+           pdfGenerateUseCase ?? getIt<PdfGenerateBudgetSimpleUsecase>(),
+       _pdfExecutive =
+           pdfGenerateExecutiveUseCase ?? getIt<PdfGenerateExecutiveUseCase>(),
+       _pdfProfessional =
+           pdfGenerateProfessionalUseCase ??
+           getIt<PdfGenerateProfessionalUseCase>(),
+       _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
+       _displayAlert =
+           displayAlertRepository ?? getIt<DisplayAlertRepository>();
 
   final List<ItemsBudget> items;
   final CustomerInfo customer;
@@ -43,19 +48,22 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final List<ObservationPdf> observations;
   final String token;
 
-  final PdfGenerateBudgetUsecase _pdfGenerateUseCase;
+  final PdfGenerateBudgetSimpleUsecase _pdfGenerateUseCase;
   final PdfGenerateExecutiveUseCase _pdfExecutive;
   final PdfGenerateProfessionalUseCase _pdfProfessional;
   final ConvertCoinRepository _moneyConvert;
   final DisplayAlertRepository _displayAlert;
 
   Uint8List? _bytes;
+
   Uint8List? get bytes => _bytes;
 
   bool _loading = true;
+
   bool get loading => _loading;
 
   bool _disposed = false;
+
   void _safeNotify() {
     if (_disposed) return;
     notifyListeners();
@@ -107,8 +115,12 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               countService: countService,
               countProduct: countProduct,
               totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
-              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
-              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              totalPriceProducts: _moneyConvert.convertFromDouble(
+                totalProducts,
+              ),
+              totalPriceServices: _moneyConvert.convertFromDouble(
+                totalServices,
+              ),
               items: List<ItemsBudget>.from(items),
               customer: customer,
               owner: owner,
@@ -120,8 +132,12 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               countService: countService,
               countProduct: countProduct,
               totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
-              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
-              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              totalPriceProducts: _moneyConvert.convertFromDouble(
+                totalProducts,
+              ),
+              totalPriceServices: _moneyConvert.convertFromDouble(
+                totalServices,
+              ),
               items: List<ItemsBudget>.from(items),
               customer: customer,
               owner: owner,
@@ -133,8 +149,12 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               countService: countService,
               countProduct: countProduct,
               totalPriceBudget: _moneyConvert.convertFromDouble(totalBudget),
-              totalPriceProducts: _moneyConvert.convertFromDouble(totalProducts),
-              totalPriceServices: _moneyConvert.convertFromDouble(totalServices),
+              totalPriceProducts: _moneyConvert.convertFromDouble(
+                totalProducts,
+              ),
+              totalPriceServices: _moneyConvert.convertFromDouble(
+                totalServices,
+              ),
               items: List<ItemsBudget>.from(items),
               customer: customer,
               owner: owner,
