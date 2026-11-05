@@ -7,10 +7,12 @@ class AppHeaderSecondTitle extends StatelessWidget {
     required this.titlePage,
     required this.secondTitle,
     required this.onBack,
+    this.isBottomPadding = true,
   });
 
   final String titlePage;
   final String secondTitle;
+  final bool isBottomPadding;
   final VoidCallback onBack;
 
   @override
@@ -56,7 +58,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
           ),
         ),
-        SizedBox(height: he * 0.02),
+        isBottomPadding ? SizedBox(height: he * 0.02) : Container(),
       ],
     );
   }

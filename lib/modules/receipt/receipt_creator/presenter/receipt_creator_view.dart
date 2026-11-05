@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
+
 import 'components/receipt_creator_form.dart';
-import 'components/receipt_creator_header.dart';
 import 'components/receipt_creator_save_button.dart';
 import 'receipt_creator_view_model.dart';
 
@@ -77,9 +78,11 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
           // o que fazia o formulário/botão extrapolarem por cima da tab bar.
           return Column(
             children: <Widget>[
-              ReceiptCreatorHeader(
+              AppHeaderSecondTitle(
                 titlePage: _viewModel.titlePage,
-                onBack: () => Navigator.pop(context),
+                secondTitle: 'Pagamentos do orçamento',
+                onBack: () => Navigator.pop(context, true),
+                isBottomPadding: false,
               ),
               Expanded(
                 child: ListView(
