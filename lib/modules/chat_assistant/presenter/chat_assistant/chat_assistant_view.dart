@@ -308,6 +308,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         numberController: _vm.numberController,
         cityController: _vm.cityController,
         neighborhoodController: _vm.neighborhoodController,
+        cepController: _vm.isCorrectingAddress ? _vm.cepController : null,
         isCorrecting: _vm.isCorrectingAddress,
         onSubmit: () => _vm.submitManualAddressCommand.execute(),
         onCancelAndProceed: () => _vm.handleAction('cancel_and_proceed'),
@@ -523,6 +524,7 @@ class _ManualAddressForm extends StatelessWidget {
   final TextEditingController numberController;
   final TextEditingController cityController;
   final TextEditingController neighborhoodController;
+  final TextEditingController? cepController;
   final bool isCorrecting;
   final VoidCallback onSubmit;
   final VoidCallback onCancelAndProceed;
@@ -532,6 +534,7 @@ class _ManualAddressForm extends StatelessWidget {
     required this.numberController,
     required this.cityController,
     required this.neighborhoodController,
+    this.cepController,
     required this.isCorrecting,
     required this.onSubmit,
     required this.onCancelAndProceed,
@@ -584,6 +587,10 @@ class _ManualAddressForm extends StatelessWidget {
                 ),
               ],
             ),
+            if (isCorrecting && cepController != null) ...[
+              const SizedBox(height: 8),
+              _buildField(cepController!, 'CEP', keyboardType: TextInputType.number),
+            ],
             const SizedBox(height: 8),
             _buildField(cityController, ChatBudgetStrings.cityField),
             const SizedBox(height: 8),

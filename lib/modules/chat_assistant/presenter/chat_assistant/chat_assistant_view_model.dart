@@ -150,6 +150,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
     type: MaskAutoCompletionType.lazy,
   );
 
+  final _cepMask = MaskTextInputFormatter(
+    mask: '#####-###',
+    filter: {'#': RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy,
+  );
+
   String? _pdfEditField;
 
   String? _pendingNavigation;
@@ -703,7 +709,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     _pendingAddress = address;
-    _pendingAddress!.cep = cep;
+    _pendingAddress!.cep = _cepMask.maskText(cep);
 
     _setStep(ChatFlowStep.confirmCepAddress);
     await _addBotMessage(
@@ -845,6 +851,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     await _usecase.updateAddress(
+      zip: _isCorrectingAddress ? _cepMask.maskText(cepController.text.trim()) : null,
       street: fullStreet,
       city: city,
       neighborhood: neighborhood.isEmpty ? null : neighborhood,
@@ -1164,6 +1171,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
       case 'Corrigir endereço':
         _isCorrectingAddress = true;
+        cepController.text = _cepMask.maskText(_pendingAddress?.cep ?? '');
         streetController.text = _upper(_pendingAddress?.logradouro);
         cityController.text = _upper(_pendingAddress?.localidade);
         neighborhoodController.text = _upper(_pendingAddress?.bairro);
