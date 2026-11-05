@@ -49,8 +49,12 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
       final map = product.toJson()..['COLOR'] = 'false';
       final docRef = await _remote.addProduct(userUid, map);
       final id = docRef.id;
-      _products.add(product.copyWith(id: id));
-      notifyListeners();
+      // Só atualiza o cache se ele já tiver sido carregado; evita
+      // envenenar com lista parcial quando o add vem do orçamento.
+      if (_products.isNotEmpty) {
+        _products.add(product.copyWith(id: id));
+        notifyListeners();
+      }
       return Result.ok(id);
     } catch (e) {
       return Result.error(Exception(e.toString()));
