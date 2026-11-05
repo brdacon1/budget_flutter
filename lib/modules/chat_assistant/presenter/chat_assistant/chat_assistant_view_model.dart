@@ -448,9 +448,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     await _addBotMessage(
-      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n'
+      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n\n'
       '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
     );
     _setStep(ChatFlowStep.changeUsernameResult);
     notifyListeners();
@@ -776,6 +777,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
       type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
     );
     _setStep(ChatFlowStep.pdfEditConfirm);
   }
@@ -1295,6 +1297,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       '${ChatBudgetStrings.pdfEditMenuOptions}\n\n'
       '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
     );
     _setStep(ChatFlowStep.pdfEditMenu);
     notifyListeners();

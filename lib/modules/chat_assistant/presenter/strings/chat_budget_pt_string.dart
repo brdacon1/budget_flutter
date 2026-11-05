@@ -40,6 +40,10 @@ class ChatBudgetStrings {
 
   static String get clientFallback => _isPt ? 'Cliente' : 'Client';
 
+  static String get typeOptionInstruction => _isPt
+      ? 'Digite o numero da opção desejada e envie'
+      : 'Type the desired option number and send';
+
   static String get budgetNotAvailable => _isPt
       ? 'Orçamento não disponível para compartilhar'
       : 'Budget not available for sharing';

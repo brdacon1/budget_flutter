@@ -57,6 +57,7 @@ class HandlePdfEditMenuOptionUsecase {
             type: ChatMessageType.text,
             content:
                 '${ChatBudgetStrings.pdfEditAskHasCep}\n\n1. Sim\n2. Não\n\n${ChatBudgetStrings.menuBackOption}',
+            payload: {'showMenuHint': true},
             timestamp: DateTime.now(),
           ),
         );
@@ -69,6 +70,7 @@ class HandlePdfEditMenuOptionUsecase {
             type: ChatMessageType.text,
             content:
                 '${ChatBudgetStrings.logoMenuQuestion}\n\n${ChatBudgetStrings.logoMenuOptions}',
+            payload: {'showMenuHint': true},
             timestamp: DateTime.now(),
           ),
         );

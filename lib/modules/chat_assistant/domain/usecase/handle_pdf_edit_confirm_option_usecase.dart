@@ -19,6 +19,7 @@ class HandlePdfEditConfirmOptionUsecase {
             type: ChatMessageType.text,
             content:
                 '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n${ChatBudgetStrings.pdfEditMenuOptions}\n\n${ChatBudgetStrings.menuBackOption}',
+            payload: {'showMenuHint': true},
             timestamp: DateTime.now(),
           ),
         );

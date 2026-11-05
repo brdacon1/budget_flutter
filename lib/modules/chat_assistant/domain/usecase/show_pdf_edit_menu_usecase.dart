@@ -22,6 +22,7 @@ class ShowPdfEditMenuUsecase {
         sender: ChatSender.bot,
         type: ChatMessageType.text,
         content: content,
+        payload: {'showMenuHint': true},
         timestamp: DateTime.now(),
       ),
     );
