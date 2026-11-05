@@ -1,10 +1,10 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
+import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 /// Formulário (ExpansionTileCard) de criação/edição de recibo.
 ///
@@ -43,8 +43,8 @@ class ReceiptCreatorForm extends StatelessWidget {
 
     // Cores do estado original (ambas brancas → destaque visualmente neutro,
     // preservado para não alterar o comportamento).
-    const Color enabledtxt = Colors.white;
-    const Color deaible = Colors.white;
+    const Color enableTxt = Colors.white;
+    const Color disableTxt = Colors.white;
     final bool isDescricao = selectedField == ReceiptFieldType.descricao;
 
     return Padding(
@@ -100,13 +100,13 @@ class ReceiptCreatorForm extends StatelessWidget {
                       border: InputBorder.none,
                       prefixIcon: Icon(
                         Icons.confirmation_number_outlined,
-                        color: isDescricao ? enabledtxt : deaible,
+                        color: isDescricao ? enableTxt : disableTxt,
                       ),
                       hintText: ReceiptPtString.numberHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
-                      color: isDescricao ? enabledtxt : deaible,
+                      color: isDescricao ? enableTxt : disableTxt,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -135,13 +135,13 @@ class ReceiptCreatorForm extends StatelessWidget {
                       border: InputBorder.none,
                       prefixIcon: Icon(
                         Icons.calendar_month_outlined,
-                        color: isDescricao ? enabledtxt : deaible,
+                        color: isDescricao ? enableTxt : disableTxt,
                       ),
                       hintText: ReceiptPtString.dateHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
-                      color: isDescricao ? enabledtxt : deaible,
+                      color: isDescricao ? enableTxt : disableTxt,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -170,7 +170,7 @@ class ReceiptCreatorForm extends StatelessWidget {
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(
-                    color: isDescricao ? enabledtxt : deaible,
+                    color: isDescricao ? enableTxt : disableTxt,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
