@@ -173,7 +173,6 @@ class LoginViewModel extends ChangeNotifier {
 
   Future<void> _signInWithGoogle() async {
     try {
-      await GoogleSignIn.instance.initialize();
       final googleUser = await GoogleSignIn.instance.authenticate();
       final googleAuth = googleUser!.authentication;
 

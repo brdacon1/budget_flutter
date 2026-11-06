@@ -10,6 +10,7 @@ import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'app_routes.dart';
 import 'shared/common/constants/constants.dart';
 
@@ -26,6 +27,17 @@ Future<void> main() async {
 
   // Inicializa o Firebase sempre (mobile e web).
   await Firebase.initializeApp();
+
+  // Inicializa Google Sign-In exatamente uma vez por execução do app.
+  // A biblioteca exige que initialize() seja chamado uma única vez
+  // antes de qualquer outro método.
+  if (!kIsWeb) {
+    try {
+      await GoogleSignIn.instance.initialize();
+    } catch (_) {
+      // Ignora falhas silenciosas na inicialização
+    }
+  }
 
   // Ads e notificações são mobile-only. No web esses plugins não existem
   // e lançam exceção, causando tela branca se o entry point mobile for
