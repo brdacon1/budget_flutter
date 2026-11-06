@@ -48,11 +48,15 @@ jobs:
           printf '%s' "${{ secrets.KEYSTORE_BASE_64 }}" | base64 --decode > android/app/Key/release.keystore
 
       # -----------------------------------------------------------------------
-      # 6. Decode google-services.json
+      # 6. Verificar se google-services.json existe (local no repo)
       # -----------------------------------------------------------------------
-      - name: Decode google-services.json
+      - name: Check google-services.json
         run: |
-          printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+          if [ ! -s android/app/google-services.json ]; then
+            echo "ERRO: android/app/google-services.json está vazio ou não existe"
+            exit 1
+          fi
+          echo "google-services.json OK"
 
       # -----------------------------------------------------------------------
       # 7. Gerar key.properties (signing config para o Gradle)
