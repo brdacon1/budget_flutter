@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 class PdfRemoteDataSource {
   final FirebaseFirestore _firestore;
   PdfRemoteDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  Future<Map<String, dynamic>> getInformationEnterprise() async {
+  Future<Map<String, dynamic>> getInformationEnterprise(String userUid) async {
     final doc = await _firestore
-        .collection('EMPRESAS/${UID.user}/USERS/${UID.user}/INFOPDF')
+        .collection('EMPRESAS/$userUid/USERS/$userUid/INFOPDF')
         .doc('INFORMATION')
         .get();
     final data = doc.data();
@@ -19,16 +18,16 @@ class PdfRemoteDataSource {
     return Map<String, dynamic>.from(data);
   }
 
-  Future<void> saveInformationEnterprise(Map<String, dynamic> data) async {
+  Future<void> saveInformationEnterprise(String userUid, Map<String, dynamic> data) async {
     await _firestore
-        .collection('EMPRESAS/${UID.user}/USERS/${UID.user}/INFOPDF')
+        .collection('EMPRESAS/$userUid/USERS/$userUid/INFOPDF')
         .doc('INFORMATION')
         .set(data);
   }
 
-  Future<void> updateInformationEnterprise(Map<String, dynamic> data) async {
+  Future<void> updateInformationEnterprise(String userUid, Map<String, dynamic> data) async {
     await _firestore
-        .collection('EMPRESAS/${UID.user}/USERS/${UID.user}/INFOPDF')
+        .collection('EMPRESAS/$userUid/USERS/$userUid/INFOPDF')
         .doc('INFORMATION')
         .update(data);
   }

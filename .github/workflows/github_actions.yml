@@ -1,0 +1,78 @@
+name: Build Android Release (Production)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # 2. Java 17 (Zulu)
+      # -----------------------------------------------------------------------
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # -----------------------------------------------------------------------
+      # 3. Flutter (stable + cache)
+      # -----------------------------------------------------------------------
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # -----------------------------------------------------------------------
+      # 4. Dependências
+      # -----------------------------------------------------------------------
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # -----------------------------------------------------------------------
+      # 5. Decode Keystore (Base64 → arquivo .keystore)
+      # -----------------------------------------------------------------------
+      - name: Decode Keystore
+        run: |
+          mkdir -p android/app/Key
+          echo "${{ secrets.KEYSTORE_BASE_64 }}" | base64 --decode > android/app/Key/release.keystore
+
+      # -----------------------------------------------------------------------
+      # 6. Gerar key.properties (signing config para o Gradle)
+      # -----------------------------------------------------------------------
+      - name: Create key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=Key/release.keystore
+          EOF
+
+      # -----------------------------------------------------------------------
+      # 7. Build App Bundle (AAB) com envs de produção
+      # -----------------------------------------------------------------------
+      - name: Build App Bundle (AAB)
+        run: |
+          flutter build appbundle \
+            --release \
+            --dart-define-from-file=env/production_environment.json
+
+      # -----------------------------------------------------------------------
+      # 8. Upload artefato
+      # -----------------------------------------------------------------------
+      - name: Upload Release Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle-aab
+          path: build/app/outputs/bundle/release/*.aab

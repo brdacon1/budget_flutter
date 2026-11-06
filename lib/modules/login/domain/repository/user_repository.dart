@@ -7,6 +7,9 @@ abstract class UserRepository extends ChangeNotifier {
   InfoUser? get currentUser;
   OwnerPdf? get defaultPdf;
 
+  ValueNotifier<InfoUser?> get selectUser;
+  set selectUser(ValueNotifier<InfoUser?> value);
+
   Future<Result<InfoUser?>> getUserInfo(String uid);
   Future<Result<void>> saveUser(InfoUser user);
   Future<Result<void>> updateUser(InfoUser user);

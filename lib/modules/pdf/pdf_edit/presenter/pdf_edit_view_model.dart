@@ -11,7 +11,6 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -90,17 +89,22 @@ class PdfEditViewModel extends ChangeNotifier {
       }
 
       String? token;
-      final tokenResult = await _userRepository.getIdToken();
-      if (tokenResult is Ok<String>) {
-        token = tokenResult.value;
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        token = await currentUser.getIdToken();
       }
-      if (token == 'NOT_AUTH' || token == null) {
-        if (UID.googleAuth != true) {
-          final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: UID.email!.trim(),
-            password: UID.password!.trim(),
-          );
-          token = await auth.user?.getIdToken();
+      if (token == null || token.isEmpty) {
+        final session = getIt<UserRepository>().selectUser.value;
+        if (session != null && session.googleAuth != true) {
+          final email = session.EMAIL?.trim() ?? '';
+          final password = session.Senha?.trim() ?? '';
+          if (email.isNotEmpty && password.isNotEmpty) {
+            final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: email,
+              password: password,
+            );
+            token = await auth.user?.getIdToken();
+          }
         }
       }
 
@@ -155,7 +159,8 @@ class PdfEditViewModel extends ChangeNotifier {
         ..fone = phoneText.text.trim()
         ..cnpj = cpfText.text.trim()
         ..empresa = nameText.text.trim().toUpperCase()
-        ..logoName = owner.logoName;
+        ..logoName = owner.logoName
+        ..pdfLayoutType = owner.pdfLayoutType;
 
       await _pdfRepository.saveInformationEnterprise(localOwner);
       owner = localOwner;

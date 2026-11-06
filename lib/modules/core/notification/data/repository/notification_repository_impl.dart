@@ -7,10 +7,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:oflite/modules/core/notification/data/datasource/notification_remote_datasource.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
-import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/injection.dart';
 
 /// Handler top-level (obrigatório ser top-level, não método de instância)
@@ -31,8 +31,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
   static const String _channelName = 'High Importance Notifications';
 
   final NotificationRemoteDataSource _dataSource;
+  final UserRepository _userRepository;
 
-  NotificationRepositoryImpl(this._dataSource);
+  NotificationRepositoryImpl(this._dataSource, this._userRepository);
 
   GlobalKey<NavigatorState>? _navigatorKey;
   String? _pendingBudgetId;
@@ -178,7 +179,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     if (pending == null || pending.isEmpty) return;
     final key = _navigatorKey;
     if (key == null || key.currentContext == null) return;
-    final owner = uid.user;
+    final owner = _userRepository.selectUser.value?.USER;
     if (owner == null || owner.isEmpty) return;
     _pendingBudgetId = null;
     unawaited(_openBudget(pending));
@@ -196,16 +197,16 @@ class NotificationRepositoryImpl implements NotificationRepository {
       _pendingBudgetId = budgetId;
       return;
     }
-    final owner = uid.user;
+    final owner = _userRepository.selectUser.value?.USER;
     if (owner == null || owner.isEmpty) {
       _pendingBudgetId = budgetId;
       return;
     }
     try {
-      budget.IDORCAMENTO = budgetId;
-      final raw = await getIt<BudgetRemoteDataSource>().getBudgetById(budgetId);
+      final raw = await getIt<BudgetRemoteDataSource>().getBudgetById(owner, budgetId);
       final customer = CustomerInfo.fromMap(raw);
       customer.id ??= budgetId;
+      getIt<BudgetRepository>().selectBudget.value = customer;
       final context = key.currentContext!;
       if (!context.mounted) {
         _pendingBudgetId = budgetId;

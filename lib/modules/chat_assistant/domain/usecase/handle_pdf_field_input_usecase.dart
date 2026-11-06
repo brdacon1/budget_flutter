@@ -114,6 +114,7 @@ class HandlePdfFieldInputUsecase {
         type: ChatMessageType.text,
         content:
             'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
+        payload: {'showMenuHint': true},
         timestamp: DateTime.now(),
       ),
     );

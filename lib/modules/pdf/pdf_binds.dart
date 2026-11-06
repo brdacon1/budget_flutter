@@ -7,30 +7,63 @@ import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_professional_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_simple_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
 
 /// Registra as dependências do módulo PDF.
 void registerPdfDependencies(GetIt sl) {
-  sl.registerLazySingleton<PdfRemoteDataSource>(
-    () => PdfRemoteDataSource(),
-  );
+  sl.registerLazySingleton<PdfRemoteDataSource>(() => PdfRemoteDataSource());
   // PdfRepositoryImpl depende também de BudgetRemoteDataSource (já registrado).
   sl.registerLazySingleton<PdfRepository>(
     () => PdfRepositoryImpl(
       sl<PdfRemoteDataSource>(),
       sl<BudgetRemoteDataSource>(),
+      sl<UserRepository>(),
     ),
   );
 
   // Usecases (stateless)
-  sl.registerLazySingleton<PdfGenerateUseCase>(
-    () => PdfGenerateUseCase(sl<ConvertCoinRepository>()),
+  sl.registerLazySingleton<PdfGenerateBudgetSimpleUsecase>(
+    () => PdfGenerateBudgetSimpleUsecase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<PdfGenerateBudgetExecutiveUsecase>(
+    () => PdfGenerateBudgetExecutiveUsecase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<PdfGenerateBudgetProfessionalUsecase>(
+    () => PdfGenerateBudgetProfessionalUsecase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<PdfGenerateReceiptExecutiveUsecase>(
+    () => PdfGenerateReceiptExecutiveUsecase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<PdfGenerateReceiptProfessionalUsecase>(
+    () => PdfGenerateReceiptProfessionalUsecase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
   );
   sl.registerLazySingleton<PdfGenerateReceiptUseCase>(
-    () => PdfGenerateReceiptUseCase(sl<ConvertCoinRepository>()),
+    () => PdfGenerateReceiptUseCase(
+      sl<ConvertCoinRepository>(),
+      sl<UserRepository>(),
+    ),
   );
 
   // ViewModels (Factory — sem parâmetros required no construtor)
@@ -47,7 +80,10 @@ void registerPdfDependencies(GetIt sl) {
       pdfRepository: sl<PdfRepository>(),
       displayAlertRepository: sl<DisplayAlertRepository>(),
       convertCoinRepository: sl<ConvertCoinRepository>(),
-      pdfGenerateUseCase: sl<PdfGenerateUseCase>(),
+      pdfGenerateBudgetUsecase: sl<PdfGenerateBudgetSimpleUsecase>(),
+      pdfGenerateExecutiveUseCase: sl<PdfGenerateBudgetExecutiveUsecase>(),
+      pdfGenerateProfessionalUseCase:
+          sl<PdfGenerateBudgetProfessionalUsecase>(),
     ),
   );
 }

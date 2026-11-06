@@ -150,6 +150,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
     type: MaskAutoCompletionType.lazy,
   );
 
+  final _cepMask = MaskTextInputFormatter(
+    mask: '#####-###',
+    filter: {'#': RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy,
+  );
+
   String? _pdfEditField;
 
   String? _pendingNavigation;
@@ -442,9 +448,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     await _addBotMessage(
-      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n'
+      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n\n'
       '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
     );
     _setStep(ChatFlowStep.changeUsernameResult);
     notifyListeners();
@@ -703,7 +710,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     _pendingAddress = address;
-    _pendingAddress!.cep = cep;
+    _pendingAddress!.cep = _cepMask.maskText(cep);
 
     _setStep(ChatFlowStep.confirmCepAddress);
     await _addBotMessage(
@@ -747,6 +754,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       fotoId: current.fotoId,
       fone: current.fone,
       logoName: current.logoName,
+      pdfLayoutType: current.pdfLayoutType,
     );
     final saveResult = await _pdfRepo.saveInformationEnterprise(updated);
     if (saveResult is Error<void>) {
@@ -769,6 +777,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
       type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
     );
     _setStep(ChatFlowStep.pdfEditConfirm);
   }
@@ -844,6 +853,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     await _usecase.updateAddress(
+      zip: _isCorrectingAddress ? _cepMask.maskText(cepController.text.trim()) : null,
       street: fullStreet,
       city: city,
       neighborhood: neighborhood.isEmpty ? null : neighborhood,
@@ -1163,6 +1173,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
       case 'Corrigir endereço':
         _isCorrectingAddress = true;
+        cepController.text = _cepMask.maskText(_pendingAddress?.cep ?? '');
         streetController.text = _upper(_pendingAddress?.logradouro);
         cityController.text = _upper(_pendingAddress?.localidade);
         neighborhoodController.text = _upper(_pendingAddress?.bairro);
@@ -1273,6 +1284,22 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<void> onLogoUpdated() async {
     final step = await _onLogoUpdated();
     _setStepFromName(step);
+    notifyListeners();
+  }
+
+  Future<void> onPdfModelSelected() async {
+    await _addBotMessage(
+      ChatBudgetStrings.pdfModelSelected,
+      type: ChatMessageType.text,
+    );
+    await _addBotMessage(
+      '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n'
+      '${ChatBudgetStrings.pdfEditMenuOptions}\n\n'
+      '${ChatBudgetStrings.menuBackOption}',
+      type: ChatMessageType.text,
+      payload: {'showMenuHint': true},
+    );
+    _setStep(ChatFlowStep.pdfEditMenu);
     notifyListeners();
   }
 

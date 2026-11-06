@@ -6,10 +6,9 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -40,7 +39,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   /// Item salvo/atualizado após operação bem-sucedida (exposto para quem chamou o modal).
   ProductPriceModel? savedItem;
 
-  ProductPriceCreatorViewModel({required this.item}) {
+  final bool fromListItem;
+
+  ProductPriceCreatorViewModel({required this.item, this.fromListItem = false}) {
     _initFromItem();
   }
 
@@ -62,7 +63,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
           item.idProduct != 'null' &&
           item.idProduct!.isNotEmpty;
     } else {
-      fieldVisible = budget.fromListItem == true;
+      fieldVisible = fromListItem;
       nameButton = ProductPtString.saveButton;
       titlePage = ProductPtString.createTitle;
       categoriaText.text = 'Serviços';
@@ -160,7 +161,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     try {
       final result = await _productRepository.addProduct(model);
       if (result is Error<String?>) throw result.error;
-      if (budget.fromListItem == true) {
+      if (fromListItem) {
         final id = (result as Ok<String?>).value;
         final withId = model.copyWith(id: id);
         final budgetItem = ItemsBudget(
@@ -174,7 +175,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
           IDPRODUCT: id,
         );
         await _budgetRepository.saveBudgetItem(
-            budget.IDORCAMENTO ?? '', budgetItem);
+            _budgetRepository.selectBudget.value?.id ?? '', budgetItem);
       }
       return null;
     } catch (e) {
@@ -208,7 +209,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
         checkBox: item.checkBox,
       );
       await _budgetRepository.saveBudgetItem(
-          budget.IDORCAMENTO ?? '', budgetItem);
+          _budgetRepository.selectBudget.value?.id ?? '', budgetItem);
       return null;
     } catch (e) {
       return ProductPtString.updateOrcamentoError;

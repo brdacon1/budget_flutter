@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Implementação do [ChatScriptRepository].
@@ -9,18 +10,25 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Mantém cache em memória do último script carregado.
 class ChatScriptRepositoryImpl extends ChatScriptRepository {
   final ChatScriptRemoteDataSource _remote;
+  final UserRepository _userRepository;
 
   ChatScriptEntity? _cached;
 
-  ChatScriptRepositoryImpl(this._remote);
+  ChatScriptRepositoryImpl(this._remote, this._userRepository);
+
+  String? get _userUid => _userRepository.selectUser.value?.USER;
 
   @override
   ChatScriptEntity? get currentScript => _cached;
 
   @override
   Future<Result<ChatScriptEntity>> fetchScript() async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
     try {
-      final raw = await _remote.getScript();
+      final raw = await _remote.getScript(userUid);
       if (raw == null || raw.isEmpty) {
         _cached = ChatScriptEntity.fallback;
       } else {

@@ -10,10 +10,10 @@ import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widg
 import 'package:oflite/shared/common/widgets/modals/change_name_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/change_password_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_widget.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as global_uid_user;
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -23,9 +23,13 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 /// consome [LoadingEventRepository] para o spinner de loading.
 class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   final LoadingEventRepository _loadingEvent;
+  final UserRepository _userRepository;
 
-  DisplayAlertRepositoryImpl({required LoadingEventRepository loadingEvent})
-      : _loadingEvent = loadingEvent;
+  DisplayAlertRepositoryImpl({
+    required LoadingEventRepository loadingEvent,
+    required UserRepository userRepository,
+  })  : _loadingEvent = loadingEvent,
+        _userRepository = userRepository;
 
   final InfoUser DADOS = InfoUser();
 
@@ -137,18 +141,20 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
           try {
             _loadingEvent.alertLoading(modalContext);
             if (name.isNotEmpty) {
-              DADOS.AutoRenewing = global_uid_user.autoRenewing;
-              DADOS.EMAIL = global_uid_user.email;
-              DADOS.FONE = global_uid_user.phone;
-              DADOS.Id = global_uid_user.id;
-              DADOS.IdPay = global_uid_user.idPay;
+              final session = _userRepository.selectUser.value ?? InfoUser();
+              DADOS.AutoRenewing = session.AutoRenewing;
+              DADOS.EMAIL = session.EMAIL;
+              DADOS.FONE = session.FONE;
+              DADOS.Id = session.Id;
+              DADOS.IdPay = session.IdPay;
               DADOS.NOME = name;
-              DADOS.ProductId = global_uid_user.productId;
-              DADOS.PurchaseToken = global_uid_user.purchaseToken;
-              DADOS.USER = global_uid_user.user;
+              DADOS.ProductId = session.ProductId;
+              DADOS.PurchaseToken = session.PurchaseToken;
+              DADOS.USER = session.USER;
 
               await getIt<UserRemoteDataSource>().updateUser(DADOS);
-              global_uid_user.name = name;
+              session.NOME = name;
+              _userRepository.selectUser.value = session;
               savedName = name;
               _loadingEvent.closeLoading(modalContext);
               if (modalContext.mounted) {

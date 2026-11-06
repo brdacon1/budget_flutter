@@ -2,12 +2,12 @@ import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender {
   descricaoText,
@@ -18,8 +18,8 @@ enum Gender {
 class PaymentCreatorViewModel extends ChangeNotifier {
   final PaymentRepository _paymentRepository;
   final ConvertCoinRepository _moneyConvert;
-  final LoadingEventRepository _loadingEvent;
-  final DisplayAlertRepository _displayAlert;
+
+  late final Command0<void> saveCommand;
 
   Color enabledtxt = Colors.white;
   Color deaible = Colors.white;
@@ -27,44 +27,44 @@ class PaymentCreatorViewModel extends ChangeNotifier {
   String? nameButton;
   String? titlePage;
   bool fieldVisible = false;
-  PaymentCustomer ITENS = PaymentCustomer();
+  PaymentCustomer _item = PaymentCustomer();
 
   final TextEditingController typeText = TextEditingController();
-  final TextEditingController precoText = TextEditingController();
   final TextEditingController descricaoText = TextEditingController();
   final MoneyMaskedTextController controller =
       MoneyMaskedTextController(leftSymbol: 'R\$ ');
 
   PaymentCreatorViewModel({
+    required PaymentCustomer item,
     PaymentRepository? paymentRepository,
     ConvertCoinRepository? convertCoinRepository,
-    LoadingEventRepository? loadingEventRepository,
-    DisplayAlertRepository? displayAlertRepository,
   })  : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
-        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
-        _loadingEvent = loadingEventRepository ?? getIt<LoadingEventRepository>(),
-        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>();
+        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>() {
+    _initFromItem(item);
+    saveCommand = Command0(_executeSave);
+  }
 
-  void init(PaymentCustomer item) {
-    try {
-      if (item.DESCRICAO.toString() != 'null') {
-        nameButton = PaymentStrings.updateButton;
-        titlePage = PaymentStrings.editPaymentTitle;
-        typeText.text = item.METODO.toString();
-        controller.text = _moneyConvert.convertFromDouble(item.PRECO!);
-        descricaoText.text = item.DESCRICAO.toString();
-        fieldVisible = true;
-      } else {
-        nameButton = PaymentStrings.saveButton;
-        titlePage = PaymentStrings.createPaymentTitle;
-        typeText.text = PaymentStrings.defaultPaymentType;
-        controller.text = '';
-        descricaoText.text = '';
-        precoText.text = '1';
-        fieldVisible = true;
-      }
-      notifyListeners();
-    } catch (e) {}
+  void _initFromItem(PaymentCustomer item) {
+    _item = item;
+    final hasDescricao = item.DESCRICAO != null &&
+        item.DESCRICAO.toString() != 'null' &&
+        item.DESCRICAO.toString().isNotEmpty;
+
+    if (hasDescricao) {
+      nameButton = PaymentStrings.updateButton;
+      titlePage = PaymentStrings.editPaymentTitle;
+      typeText.text = item.METODO.toString();
+      controller.text = _moneyConvert.convertFromDouble(item.PRECO ?? 0);
+      descricaoText.text = item.DESCRICAO.toString();
+    } else {
+      nameButton = PaymentStrings.saveButton;
+      titlePage = PaymentStrings.createPaymentTitle;
+      typeText.text = PaymentStrings.defaultPaymentType;
+      controller.text = '';
+      descricaoText.text = '';
+    }
+    fieldVisible = true;
+    notifyListeners();
   }
 
   void selectField(Gender field) {
@@ -85,26 +85,33 @@ class PaymentCreatorViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> save(BuildContext context, PaymentCustomer item) async {
-    double cleanAmount = _moneyConvert.convertFromString(controller.text);
-    _loadingEvent.alertLoading(context);
-    if (nameButton == PaymentStrings.saveButton) {
-      ITENS.METODO = typeText.text;
-      ITENS.DESCRICAO = descricaoText.text;
-      ITENS.PRECO = cleanAmount;
-      await _paymentRepository.savePayment(ITENS);
-      _loadingEvent.closeLoading(context);
-      await _displayAlert.notification(
-          context, PaymentStrings.doneTitle, PaymentStrings.paymentCreated);
-    } else if (nameButton == PaymentStrings.updateButton) {
-      ITENS.METODO = typeText.text;
-      ITENS.DESCRICAO = descricaoText.text;
-      ITENS.PRECO = cleanAmount;
-      ITENS.id = item.id;
-      await _paymentRepository.updatePayment(ITENS);
-      _loadingEvent.closeLoading(context);
-      await _displayAlert.notification(
-          context, PaymentStrings.doneTitle, PaymentStrings.paymentUpdated);
+  Future<Result<void>> _executeSave() async {
+    try {
+      final cleanAmount = _moneyConvert.convertFromString(controller.text);
+
+      final currentItem = PaymentCustomer()
+        ..METODO = typeText.text
+        ..DESCRICAO = descricaoText.text
+        ..PRECO = cleanAmount;
+
+      if (nameButton == PaymentStrings.saveButton) {
+        await _paymentRepository.savePayment(currentItem);
+      } else {
+        currentItem.id = _item.id;
+        await _paymentRepository.updatePayment(currentItem);
+      }
+
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
     }
+  }
+
+  @override
+  void dispose() {
+    typeText.dispose();
+    descricaoText.dispose();
+    controller.dispose();
+    super.dispose();
   }
 }

@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/login/data/model/info_user.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 enum SubscriptionState { idle, loading, success, error }
 
@@ -118,9 +119,11 @@ class SubscriptionViewModel extends ChangeNotifier {
 
   void _onPurchaseUpdated(Purchase purchase) async {
     try {
-      UID.autoRenewing = purchase.isAutoRenewing;
-      UID.purchaseToken = purchase.purchaseToken ?? '';
-      UID.productId = purchase.productId;
+      _updateSubscriptionSession(
+        autoRenewing: purchase.isAutoRenewing,
+        purchaseToken: purchase.purchaseToken ?? '',
+        productId: purchase.productId,
+      );
 
       if (purchase.purchaseState == PurchaseState.Purchased) {
         // Android: acknowledge obrigatório em até 3 dias
@@ -192,9 +195,11 @@ class SubscriptionViewModel extends ChangeNotifier {
               current.transactionDate > next.transactionDate ? current : next,
         );
 
-        UID.autoRenewing = latest.isAutoRenewing;
-        UID.purchaseToken = latest.purchaseToken ?? '';
-        UID.productId = latest.productId;
+        _updateSubscriptionSession(
+          autoRenewing: latest.isAutoRenewing,
+          purchaseToken: latest.purchaseToken ?? '',
+          productId: latest.productId,
+        );
 
         if (Platform.isAndroid &&
             latest is PurchaseAndroid &&
@@ -203,13 +208,29 @@ class SubscriptionViewModel extends ChangeNotifier {
               .acknowledgePurchaseAndroid(latest.purchaseToken ?? '');
         }
       } else {
-        UID.autoRenewing = false;
-        UID.purchaseToken = '';
+        _updateSubscriptionSession(
+          autoRenewing: false,
+          purchaseToken: '',
+        );
       }
     } catch (e) {
-      UID.autoRenewing = false;
-      UID.purchaseToken = '';
+      _updateSubscriptionSession(
+        autoRenewing: false,
+        purchaseToken: '',
+      );
     }
+  }
+
+  void _updateSubscriptionSession({
+    required bool autoRenewing,
+    required String purchaseToken,
+    String? productId,
+  }) {
+    final session = getIt<UserRepository>().selectUser.value ?? InfoUser();
+    session.AutoRenewing = autoRenewing;
+    session.PurchaseToken = purchaseToken;
+    if (productId != null) session.ProductId = productId;
+    getIt<UserRepository>().selectUser.value = session;
   }
 
   @override

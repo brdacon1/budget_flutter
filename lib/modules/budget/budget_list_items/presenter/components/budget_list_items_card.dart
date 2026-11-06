@@ -1,8 +1,10 @@
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/button/action_button.dart';
+import 'package:oflite/shared/common/widgets/label/expansion_card_label.dart';
 
 class BudgetListItemsCard extends StatelessWidget {
   const BudgetListItemsCard({
@@ -15,6 +17,37 @@ class BudgetListItemsCard extends StatelessWidget {
   final ItemsBudget item;
   final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
+
+  Widget _buildLabels() {
+    return Column(
+      children: [
+        ExpansionCardLabel(
+          nameText: "Categoria:",
+          textData: "${item.CATEGORIA}",
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Total:",
+          textData: moneyConvert.convertFromDouble(item.TOTAL!),
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Quantidade:",
+          textData: '${item.QTD}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+        ExpansionCardLabel(
+          nameText: "Unidade de medida:",
+          textData: '${item.MEDIDA}',
+          horizontalPadding: 12,
+          verticalPadding: 5,
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,118 +82,36 @@ class BudgetListItemsCard extends StatelessWidget {
             ),
           ),
           children: <Widget>[
-            const Divider(
-              thickness: 1.0,
-              height: 1.0,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  "Categoria: ${item.CATEGORIA}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  "Total: ${moneyConvert.convertFromDouble(item.TOTAL!)}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  "Quantidade: ${item.QTD}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  "Unidade de medida: ${item.MEDIDA}",
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ),
+            const Divider(thickness: 1.0, height: 1.0),
+            _buildLabels(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 5, top: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return Visibility(
-                        visible: !item.checkBox!,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: SizedBox(
-                          width: 85.0,
-                          height: 52.0,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: whiteColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                            ),
-                            onPressed: onDelete,
-                            child: const Column(
-                              children: <Widget>[
-                                SizedBox(height: 4),
-                                Icon(Icons.delete_outline_rounded, color: bgColor),
-                                SizedBox(height: 2.0),
-                                Text('Excluir',
-                                    style: TextStyle(fontSize: 10, color: bgColor)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: ActionButton(
+                        icon:
+                            item.checkBox!
+                                ? Icons.check_circle_outline
+                                : Icons.delete_outline_rounded,
+                        label:
+                            item.checkBox!
+                                ? 'Selecionado para remover'
+                                : 'Excluir',
+                        onPressed: onDelete,
+                        backgroundColor:
+                            item.checkBox!
+                                ? buttonColor.withValues(alpha: 0.20)
+                                : whiteColor.withValues(alpha: 0.08),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

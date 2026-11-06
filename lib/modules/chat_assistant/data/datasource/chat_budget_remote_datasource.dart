@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
 
 /// Fonte de dados remota para mensagens de sessão do chat.
 ///
@@ -11,29 +10,29 @@ class ChatBudgetRemoteDataSource {
   ChatBudgetRemoteDataSource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference _messagesCollection(String sessionId) => _firestore
+  CollectionReference _messagesCollection(String userUid, String sessionId) => _firestore
       .collection(
-          'EMPRESAS/${UID.user}/USERS/${UID.user}/CHAT_SESSIONS/$sessionId/MESSAGES');
+          'EMPRESAS/$userUid/USERS/$userUid/CHAT_SESSIONS/$sessionId/MESSAGES');
 
-  DocumentReference _sessionDoc(String sessionId) => _firestore
-      .collection('EMPRESAS/${UID.user}/USERS/${UID.user}/CHAT_SESSIONS')
+  DocumentReference _sessionDoc(String userUid, String sessionId) => _firestore
+      .collection('EMPRESAS/$userUid/USERS/$userUid/CHAT_SESSIONS')
       .doc(sessionId);
 
   /// Cria o documento de sessão.
   Future<void> createSession(
-      String sessionId, Map<String, dynamic> meta) async {
-    await _sessionDoc(sessionId).set(meta);
+      String userUid, String sessionId, Map<String, dynamic> meta) async {
+    await _sessionDoc(userUid, sessionId).set(meta);
   }
 
   /// Salva uma mensagem na sessão.
   Future<void> saveMessage(
-      String sessionId, Map<String, dynamic> data) async {
-    await _messagesCollection(sessionId).add(data);
+      String userUid, String sessionId, Map<String, dynamic> data) async {
+    await _messagesCollection(userUid, sessionId).add(data);
   }
 
   /// Busca mensagens de uma sessão ordenadas por timestamp.
-  Future<List<Map<String, dynamic>>> fetchMessages(String sessionId) async {
-    final snapshot = await _messagesCollection(sessionId)
+  Future<List<Map<String, dynamic>>> fetchMessages(String userUid, String sessionId) async {
+    final snapshot = await _messagesCollection(userUid, sessionId)
         .orderBy('timestamp', descending: false)
         .get();
     return snapshot.docs.map((d) {

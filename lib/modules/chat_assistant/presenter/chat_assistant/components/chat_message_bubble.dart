@@ -134,6 +134,16 @@ class ChatMessageBubble extends StatelessWidget {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
+                    ] else if (message.payload?['showMenuHint'] == true) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        ChatBudgetStrings.typeOptionInstruction,
+                        style: TextStyle(
+                          color: Colors.white.withAlpha(200),
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
                     ],
                     if (_isUser && _editableField != null) ...[
                       const SizedBox(height: 4),

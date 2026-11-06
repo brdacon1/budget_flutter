@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none'
 
-version: 2.0.2+145
+version: 2.0.3+146
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -30,8 +30,8 @@ dependencies:
   badges: ^3.1.2
   extended_masked_text: ^3.0.1
   intl: ^0.20.2
-  syncfusion_flutter_pdf: ^34.2.2
-  syncfusion_flutter_pdfviewer: ^34.2.2
+  syncfusion_flutter_pdf: ^35.1.42
+  syncfusion_flutter_pdfviewer: ^35.1.42
   open_file: ^3.5.11
   flutter_svg: ^2.0.17
   fl_chart: ^0.70.2
@@ -42,11 +42,11 @@ dependencies:
   image_cropper: ^9.0.0
   dotted_border: ^2.0.0+3
   shared_preferences: ^2.5.3
-  google_mobile_ads: ^9.0.0
+  google_mobile_ads: ^9.2.0
   firebase_messaging: ^16.4.3
   flutter_local_notifications: ^22.3.0
   google_sign_in: ^7.2.0
-  flutter_inapp_purchase: ^11.0.3
+  flutter_inapp_purchase: ^11.3.1
   share_plus: ^13.2.1
   web: ^1.1.0
   webview_flutter: ^4.11.0
@@ -67,15 +67,15 @@ flutter:
 
   uses-material-design: true
   assets:
-      - assets/360.png
-      - assets/work.png
-      - assets/pintor.png
-      - assets/constru_man.png
-      - assets/images/
-      - assets/icons/
-      - assets/login-initial-page.png
-      - env/development_environment.json
-      - env/production_environment.json
+    - assets/360.png
+    - assets/work.png
+    - assets/pintor.png
+    - assets/constru_man.png
+    - assets/images/
+    - assets/icons/
+    - assets/login-initial-page.png
+    - env/development_environment.json
+    - env/production_environment.json
   fonts:
     - family: Montserrat-Bold
       fonts:

@@ -7,7 +7,6 @@ import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart
 import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -24,9 +23,7 @@ class ReceiptListViewModel extends ChangeNotifier {
   ReceiptListViewModel({required this.item});
 
   Future<void> inicialData() async {
-    // Path do Firestore depende da global budget.IDORCAMENTO.
-    // Garante que está setada antes de buscar recibos.
-    budget.IDORCAMENTO = item.id;
+    _receiptRepository.budgetId = item.id;
     final result = await _receiptRepository.fetchReceipts();
     if (result is Ok<List<Receipt>>) {
       foundPayment = result.value;
@@ -75,7 +72,6 @@ class ReceiptListViewModel extends ChangeNotifier {
       descricao: 'null',
       valorTotal: 0,
     );
-    budget.IDRECIBO = DateTime.now().millisecondsSinceEpoch.toString();
     await Navigator.push(
       context,
       MaterialPageRoute(

@@ -1,4 +1,3 @@
-import 'package:http/http.dart' as http;
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
@@ -17,10 +16,7 @@ class ShowLogoInChatUsecase {
     if (result is Error<OwnerPdf>) return false;
 
     final owner = (result as Ok<OwnerPdf>).value;
-    final hasLogo = owner.fotoId != null &&
-        owner.fotoId!.isNotEmpty &&
-        owner.logoName != null &&
-        owner.logoName!.isNotEmpty;
+    final hasLogo = owner.fotoId != null && owner.fotoId!.isNotEmpty;
 
     if (!hasLogo) {
       await _chatRepo.sendMessage(
@@ -35,29 +31,13 @@ class ShowLogoInChatUsecase {
       return false;
     }
 
-    // Verificar se a logo está acessível
-    final imageUrl =
-        'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
-        '${Uri.encodeComponent(owner.logoName!)}?alt=media&token=${owner.fotoId}';
-
-    // Tenta baixar para garantir que a URL é válida
-    try {
-      final response = await http.head(Uri.parse(imageUrl));
-      if (response.statusCode != 200) {
-        await _chatRepo.sendMessage(
-          ChatMessageEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            sender: ChatSender.bot,
-            type: ChatMessageType.text,
-            content: 'Você ainda não tem uma logo cadastrada.',
-            timestamp: DateTime.now(),
-          ),
-        );
-        return false;
-      }
-    } catch (_) {
-      // Se falhar, tenta mostrar mesmo assim
-    }
+    // `fotoId` pode ser a URL completa do Firebase (novo comportamento)
+    // ou apenas o token (legado). Tratamos ambos.
+    final String fotoId = owner.fotoId ?? '';
+    final imageUrl = fotoId.startsWith('http')
+        ? fotoId
+        : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
+          '${Uri.encodeComponent(owner.logoName ?? '')}?alt=media&token=$fotoId';
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(

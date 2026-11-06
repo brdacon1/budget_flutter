@@ -1,27 +1,25 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as user_global;
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 /// Geração do PDF do orçamento (dados do titular, dados do orçamento,
 /// tabela de produtos, tabela de serviços e observações).
-class PdfGenerateUseCase {
+class PdfGenerateBudgetSimpleUsecase {
   final ConvertCoinRepository _moneyConvert;
+  final UserRepository _userRepository;
 
-  PdfGenerateUseCase(this._moneyConvert);
+  PdfGenerateBudgetSimpleUsecase(this._moneyConvert, this._userRepository);
 
   Future<String> patternPDF({
     required int countService,
@@ -48,7 +46,7 @@ class PdfGenerateUseCase {
         observations: observations,
         authToken: authToken,
       );
-      final String localFile = await _saveDocument(document);
+      final String localFile = await _saveDocument(document, customer.id!);
       items.clear();
       observations.clear();
       document.dispose();
@@ -158,12 +156,13 @@ class PdfGenerateUseCase {
   // ---------------------------------------------------------------------------
 
   PdfDocument _createDocument() {
-    final PdfDocument document = PdfDocument()
-      ..pageSettings.size = PdfPageSize.a4
-      ..pageSettings.margins.left = 30
-      ..pageSettings.margins.right = 30
-      ..pageSettings.margins.top = 50
-      ..pageSettings.margins.bottom = 50;
+    final PdfDocument document =
+        PdfDocument()
+          ..pageSettings.size = PdfPageSize.a4
+          ..pageSettings.margins.left = 30
+          ..pageSettings.margins.right = 30
+          ..pageSettings.margins.top = 50
+          ..pageSettings.margins.bottom = 50;
     return document;
   }
 
@@ -171,7 +170,11 @@ class PdfGenerateUseCase {
   // Logo / image
   // ---------------------------------------------------------------------------
 
-  Future<double> _drawLogo(PdfPage page, OwnerPdf owner, String? authToken) async {
+  Future<double> _drawLogo(
+    PdfPage page,
+    OwnerPdf owner,
+    String? authToken,
+  ) async {
     if (owner.fotoId == null || owner.fotoId!.isEmpty) {
       return 0;
     }
@@ -192,9 +195,10 @@ class PdfGenerateUseCase {
       // partir do `logoName` continua disponível para dados antigos onde o
       // `fotoId` não seja uma URL completa.
       final String fotoId = owner.fotoId ?? '';
-      final String endpointUrl = fotoId.startsWith('http')
-          ? fotoId
-          : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
+      final String endpointUrl =
+          fotoId.startsWith('http')
+              ? fotoId
+              : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
 
       // No Flutter Web, enviar um header `Authorization: Bearer` dispara um
       // preflight CORS que o Firebase Storage pode rejeitar, fazendo a
@@ -254,17 +258,23 @@ class PdfGenerateUseCase {
   }
 
   Future<String> _getAuthToken(String? authToken) async {
-    // Web: o token provisório do Firebase chega pela URL — não há login do
-    // dono no navegador. Reutiliza-o direto.
-    if (authToken != null && authToken.isNotEmpty) {
-      return authToken;
+    if (authToken != null && authToken.isNotEmpty) return authToken;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final token = await currentUser.getIdToken();
+      if (token != null && token.isNotEmpty) return token;
     }
-    if (uid.googleAuth!) {
-      return (await FirebaseAuth.instance.currentUser?.getIdToken()) ?? '';
-    }
+    final session = _userRepository.selectUser.value;
+    if (session == null) return '';
+    if (session.googleAuth == true) return '';
+    if (session.EMAIL == null ||
+        session.EMAIL!.isEmpty ||
+        session.Senha == null ||
+        session.Senha!.isEmpty)
+      return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: user_global.email!.trim(),
-      password: user_global.password!.trim(),
+      email: session.EMAIL!.trim(),
+      password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';
   }
@@ -295,18 +305,23 @@ class PdfGenerateUseCase {
     addRow(owner.rua);
     addRow(owner.city);
 
-    final PdfGridCellStyle style = PdfGridCellStyle()
-      ..borders.all = PdfPens.transparent;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle()..borders.all = PdfPens.transparent;
 
     for (int i = 0; i < pdfGrid.rows.count; i++) {
       final PdfGridRow row = pdfGrid.rows[i];
-      row.style.font = i == 0
-          ? PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold)
-          : PdfStandardFont(
-              PdfFontFamily.helvetica,
-              8,
-              style: PdfFontStyle.regular,
-            );
+      row.style.font =
+          i == 0
+              ? PdfStandardFont(
+                PdfFontFamily.helvetica,
+                12,
+                style: PdfFontStyle.bold,
+              )
+              : PdfStandardFont(
+                PdfFontFamily.helvetica,
+                8,
+                style: PdfFontStyle.regular,
+              );
       for (int j = 0; j < row.cells.count; j++) {
         row.cells[j].style = style;
       }
@@ -405,7 +420,6 @@ class PdfGenerateUseCase {
     addLeftRow('Criado em :', customer.data);
     addLeftRow('Cliente :', customer.customerName);
     addLeftRow('Telefone :', customer.phone);
-    addLeftRow('Empresa :', customer.companyName);
 
     // Coluna direita: apenas o endereço do cliente (apenas os preenchidos
     // aparecem, dinamicamente).
@@ -463,7 +477,12 @@ class PdfGenerateUseCase {
     if (leftGrid.rows.count > 0) {
       final PdfLayoutResult? result = leftGrid.draw(
         page: page,
-        bounds: Rect.fromLTWH(0, startY, halfWidth, page.getClientSize().height),
+        bounds: Rect.fromLTWH(
+          0,
+          startY,
+          halfWidth,
+          page.getClientSize().height,
+        ),
         format: onePageFormat,
       );
       if (result != null && result.bounds.bottom > bottomY) {
@@ -557,16 +576,17 @@ class PdfGenerateUseCase {
       10,
       style: PdfFontStyle.bold,
     );
-    final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-      font: fontHeader,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle headerStyle =
+        PdfGridCellStyle(
+            font: fontHeader,
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+            textBrush: PdfBrushes.black,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
 
     header.height = 25;
     grid.headers.applyStyle(headerStyle);
@@ -606,16 +626,18 @@ class PdfGenerateUseCase {
       );
     }
 
-    final PdfLayoutResult result = grid.draw(
-      page: page,
-      format: _paginateLayoutFormat(),
-      bounds: Rect.fromLTWH(
-        0,
-        topY,
-        page.getClientSize().width,
-        page.getClientSize().height,
-      ),
-    ) as PdfLayoutResult;
+    final PdfLayoutResult result =
+        grid.draw(
+              page: page,
+              format: _paginateLayoutFormat(),
+              bounds: Rect.fromLTWH(
+                0,
+                topY,
+                page.getClientSize().width,
+                page.getClientSize().height,
+              ),
+            )
+            as PdfLayoutResult;
 
     return result.bounds.height;
   }
@@ -647,16 +669,17 @@ class PdfGenerateUseCase {
       10,
       style: PdfFontStyle.bold,
     );
-    final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-      font: fontHeader,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle headerStyle =
+        PdfGridCellStyle(
+            font: fontHeader,
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+            textBrush: PdfBrushes.black,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
 
     header.height = 25;
     grid.headers.applyStyle(headerStyle);
@@ -761,16 +784,17 @@ class PdfGenerateUseCase {
       style: PdfFontStyle.bold,
     );
 
-    final PdfGridCellStyle headerStyleComment = PdfGridCellStyle(
-      font: fontHeaderComment,
-      format: formatComment,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle headerStyleComment =
+        PdfGridCellStyle(
+            font: fontHeaderComment,
+            format: formatComment,
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+            textBrush: PdfBrushes.black,
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
 
     commentPdfGrid.headers.applyStyle(headerStyleComment);
     commentPdfGrid.columns[0].width = 75;
@@ -782,18 +806,20 @@ class PdfGenerateUseCase {
       row.cells[1].value = obs.observacao;
     }
 
-    final PdfGridCellStyle styleComment = PdfGridCellStyle()
-      ..cellPadding = PdfPaddings(top: 5, left: 15, right: 5, bottom: 5)
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle styleComment =
+        PdfGridCellStyle()
+          ..cellPadding = PdfPaddings(top: 5, left: 15, right: 5, bottom: 5)
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
 
     _applyRowStyle(commentPdfGrid, styleComment);
 
-    final PdfLayoutFormat layoutFormatComment = PdfLayoutFormat()
-      ..breakType = PdfLayoutBreakType.fitPage
-      ..layoutType = PdfLayoutType.paginate;
+    final PdfLayoutFormat layoutFormatComment =
+        PdfLayoutFormat()
+          ..breakType = PdfLayoutBreakType.fitPage
+          ..layoutType = PdfLayoutType.paginate;
 
     commentPdfGrid.draw(
       page: pageComment,
@@ -812,40 +838,47 @@ class PdfGenerateUseCase {
   // ---------------------------------------------------------------------------
 
   PdfGridCellStyle _createItemRowStyle() {
-    final PdfGridCellStyle style = PdfGridCellStyle()
-      ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle()
+          ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
     return style;
   }
 
   PdfGridCellStyle _createTotalRowStyle(PdfFont fontHeader) {
-    final PdfGridCellStyle style = PdfGridCellStyle(
-      font: fontHeader,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-      textBrush: PdfBrushes.black,
-      backgroundBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle(
+            font: fontHeader,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+            textBrush: PdfBrushes.black,
+            backgroundBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
     return style;
   }
 
   PdfGridCellStyle _createBudgetTotalRowStyle() {
-    final PdfGridCellStyle style = PdfGridCellStyle(
-      font: PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.transparent;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle(
+            font: PdfStandardFont(
+              PdfFontFamily.helvetica,
+              12,
+              style: PdfFontStyle.bold,
+            ),
+            textBrush: PdfBrushes.black,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.transparent;
     return style;
   }
 
@@ -882,12 +915,12 @@ class PdfGenerateUseCase {
     );
   }
 
-  Future<String> _saveDocument(PdfDocument document) async {
+  Future<String> _saveDocument(PdfDocument document, String filename) async {
     final directory = await getTemporaryDirectory();
     print(directory);
     final String path = directory.path;
-    final File file = File('$path/${budget.IDORCAMENTO}.pdf');
+    final File file = File('$path/$filename.pdf');
     await file.writeAsBytes(await document.save(), flush: true);
-    return '$path/${budget.IDORCAMENTO}.pdf';
+    return '$path/$filename.pdf';
   }
 }

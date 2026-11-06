@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
 import 'budget_creator_field.dart';
@@ -47,7 +48,7 @@ class BudgetCreatorContactSection extends StatelessWidget {
           ),
           children: <Widget>[
             BudgetCreatorField(
-              field: Gender.fullname,
+              field: CustomerInfoEnum.fullname,
               viewModel: viewModel,
               hintText: 'Nome do cliente',
               prefixIcon: Icons.person_outlined,
@@ -58,7 +59,7 @@ class BudgetCreatorContactSection extends StatelessWidget {
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             BudgetCreatorField(
-              field: Gender.phone,
+              field: CustomerInfoEnum.phone,
               viewModel: viewModel,
               hintText: 'Telefone',
               prefixIcon: Icons.phone_android_outlined,
@@ -68,7 +69,7 @@ class BudgetCreatorContactSection extends StatelessWidget {
               inputFormatters: [viewModel.maskFormatter],
               onTap: () {
                 viewModel.phoneNode.requestFocus();
-                viewModel.selectField(Gender.phone);
+                viewModel.selectField(CustomerInfoEnum.phone);
               },
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),

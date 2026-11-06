@@ -40,6 +40,10 @@ class ChatBudgetStrings {
 
   static String get clientFallback => _isPt ? 'Cliente' : 'Client';
 
+  static String get typeOptionInstruction => _isPt
+      ? 'Digite o numero da opção desejada e envie'
+      : 'Type the desired option number and send';
+
   static String get budgetNotAvailable => _isPt
       ? 'Orçamento não disponível para compartilhar'
       : 'Budget not available for sharing';
@@ -105,13 +109,15 @@ class ChatBudgetStrings {
         '3. Email\n'
         '4. CNPJ\n'
         '5. Endereço\n'
-        '6. Logo'
+        '6. Logo\n'
+        '7. Modelo de PDF'
       : '1. Company name\n'
         '2. Phone\n'
         '3. Email\n'
         '4. CNPJ\n'
         '5. Address\n'
-        '6. Logo';
+        '6. Logo\n'
+        '7. PDF Model';
 
   static String get pdfEditAskName => _isPt
       ? 'Digite o novo nome da empresa:'
@@ -160,6 +166,14 @@ class ChatBudgetStrings {
   static String get pdfEditSuccessAddress => _isPt
       ? 'Endereço atualizado com sucesso.'
       : 'Address successfully updated.';
+
+  static String get pdfModelSelected => _isPt
+      ? 'Novo modelo de PDF selecionado'
+      : 'New PDF model selected';
+
+  static String get pdfModelSelectError => _isPt
+      ? 'Não foi possível salvar o modelo de PDF. Tente novamente.'
+      : 'Could not save the PDF model. Please try again.';
 
   static String get pdfEditAskHasCep => _isPt
       ? 'Vamos atualizar o endereço da sua empresa. Você tem o CEP?'

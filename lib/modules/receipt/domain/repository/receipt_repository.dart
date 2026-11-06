@@ -5,6 +5,9 @@ import 'package:oflite/shared/design_pattern/result.dart';
 abstract class ReceiptRepository extends ChangeNotifier {
   List<Receipt> get receipts;
 
+  String? get budgetId;
+  set budgetId(String? value);
+
   Future<Result<List<Receipt>>> fetchReceipts({bool forceRefresh = false});
   Future<Result<void>> saveReceipt(Receipt receipt);
   Future<Result<void>> deleteReceipt(Receipt receipt);

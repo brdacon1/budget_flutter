@@ -5,6 +5,4 @@
 /// (e não solto na View/ViewModel) para ser reutilizável e independente da
 /// tela — seguindo o padrão de `product_price_field_enum.dart` e
 /// `singup_field_enum.dart`.
-enum ReceiptFieldType {
-  descricao,
-}
+enum ReceiptFieldType { isDescription }

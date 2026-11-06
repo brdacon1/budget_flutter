@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 
@@ -33,8 +33,13 @@ import 'product_price_creator_view_model.dart';
 ///   da regra.
 class ProductPriceCreatorView extends StatefulWidget {
   final ProductPriceModel item;
+  final bool fromListItem;
 
-  const ProductPriceCreatorView({super.key, required this.item});
+  const ProductPriceCreatorView({
+    super.key,
+    required this.item,
+    this.fromListItem = false,
+  });
 
   @override
   State<ProductPriceCreatorView> createState() =>
@@ -47,7 +52,10 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ProductPriceCreatorViewModel(item: widget.item);
+    _viewModel = ProductPriceCreatorViewModel(
+      item: widget.item,
+      fromListItem: widget.fromListItem,
+    );
   }
 
   @override
@@ -149,11 +157,15 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
 Future<bool?> showProductPriceCreatorBottomModal(
   BuildContext context, {
   required ProductPriceModel item,
+  bool fromListItem = false,
 }) {
   return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => ProductPriceCreatorView(item: item),
+    builder: (context) => ProductPriceCreatorView(
+      item: item,
+      fromListItem: fromListItem,
+    ),
   );
 }

@@ -7,13 +7,12 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -240,7 +239,6 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> saveCart(BuildContext context) async {
-    // Em modo seleção não salva no Firestore — retorna os itens selecionados.
     if (selectionMode) {
       finalizeSelection(context);
       return;
@@ -260,7 +258,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
           TOTAL: cart.total,
           IDPRODUCT: cart.id,
         );
-        await budgetRepo.saveBudgetItem(budget.IDORCAMENTO ?? '', item);
+        await budgetRepo.saveBudgetItem(
+          _budgetRepo.selectBudget.value?.id ?? item?.id ?? '',
+          item,
+        );
       }
       addItems = <ProductPriceModel>[];
       deleteItems = <ProductPriceModel>[];
@@ -369,7 +370,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> addNew(BuildContext context) async {
-    final isPremium = UID.autoRenewing ?? false;
+    final isPremium = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

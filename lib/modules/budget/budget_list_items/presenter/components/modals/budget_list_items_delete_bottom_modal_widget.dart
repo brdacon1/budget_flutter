@@ -1,6 +1,7 @@
 import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/budget/budget_list_items/presenter/components/card/delete_items_card.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -18,13 +19,13 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 class BudgetListItemsDeleteBottomModalWidget extends StatefulWidget {
   const BudgetListItemsDeleteBottomModalWidget({
     super.key,
-    required this.deleteItens,
+    required this.deleteItems,
     required this.moneyConvert,
     required this.onRemove,
     required this.onConfirm,
   });
 
-  final List<ItemsBudget> deleteItens;
+  final List<ItemsBudget> deleteItems;
   final ConvertCoinRepository moneyConvert;
   final void Function(ItemsBudget item) onRemove;
   final Future<void> Function() onConfirm;
@@ -42,9 +43,7 @@ class _BudgetListItemsDeleteBottomModalWidgetState
   @override
   void initState() {
     super.initState();
-    // Cópia local — a UI reconstrói a partir dela, garantindo atualização
-    // em tempo real ao remover um item via "X".
-    _items = List<ItemsBudget>.from(widget.deleteItens);
+    _items = List<ItemsBudget>.from(widget.deleteItems);
   }
 
   void _removeItem(ItemsBudget item) {
@@ -107,7 +106,7 @@ class _BudgetListItemsDeleteBottomModalWidgetState
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: _items.length,
                 itemBuilder: (context, index) {
-                  return _DeleteItemCard(
+                  return DeleteItemCard(
                     item: _items[index],
                     moneyConvert: widget.moneyConvert,
                     onRemove: () => _removeItem(_items[index]),
@@ -119,74 +118,3 @@ class _BudgetListItemsDeleteBottomModalWidgetState
   }
 }
 
-class _DeleteItemCard extends StatelessWidget {
-  const _DeleteItemCard({
-    required this.item,
-    required this.moneyConvert,
-    required this.onRemove,
-  });
-
-  final ItemsBudget item;
-  final ConvertCoinRepository moneyConvert;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFFF5F5F5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: ListTile(
-        title: Text(
-          item.DESCRICAO ?? '',
-          maxLines: 1,
-          style: GoogleFonts.heebo(
-            color: AppBottomModal.grayColor,
-            letterSpacing: 0.5,
-            fontSize: 13.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.CATEGORIA.toString(),
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 10.0,
-              ),
-            ),
-            Text(
-              moneyConvert.convertFromDouble(item.PRECO!),
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 10.0,
-              ),
-            ),
-            Text(
-              item.QTD.toString(),
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 10.0,
-              ),
-            ),
-          ],
-        ),
-        trailing: Transform.scale(
-          scale: 1.4,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: const Icon(
-              Icons.close,
-              color: AppBottomModal.grayColor,
-              size: 20.0,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

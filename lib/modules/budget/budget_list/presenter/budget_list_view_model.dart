@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as budget;
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -20,28 +18,49 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   CustomerInfo customerBudget = CustomerInfo();
-  Color enabled = const Color(0xFF827F8A);
   final _foundUsers = <CustomerInfo>[];
-  final deleteItens = <CustomerInfo>[];
-  CustomerInfo novo = CustomerInfo();
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.grey;
+  final deleteItems = <CustomerInfo>[];
+  CustomerInfo _customerInfoNew = CustomerInfo();
+
   bool deleteVisible = false;
   bool checkBoxAppear = false;
   bool _isRefreshing = false;
 
+  int _totalBudgetCount = 0;
+  int get totalBudgetCount => _totalBudgetCount;
+
+  Future<void> loadCount() async {
+    final result = await _budgetRepository.countBudgets();
+    if (result is Ok<int>) {
+      _totalBudgetCount = result.value;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
+  bool get isLoadingMore => _budgetRepository.isLoadingMoreBudgets;
+  bool get hasMoreBudgets => _budgetRepository.hasMoreBudgets;
+
+  Future<void> loadMore() async {
+    if (_isRefreshing || !hasMoreBudgets) return;
+    await getInformationOrcamento(refresh: false);
+  }
+
   void _onBudgetRepoChanged() {
     if (_disposed || _isRefreshing) return;
-    getInformationOrcamento();
+    getInformationOrcamento(refresh: false);
   }
 
   Future<void> initialScreen() async {
-    await getInformationOrcamento();
+    await loadCount();
+    await getInformationOrcamento(refresh: true);
   }
 
   Future<void> duplicateEvent(
-      bool clientData, bool quoteItems, bool comments) async {
-    final String? originalId = budget.IDORCAMENTO;
+    bool clientData,
+    bool quoteItems,
+    bool comments,
+  ) async {
+    final String? originalId = _budgetRepository.selectBudget.value?.id;
     if (originalId == null || originalId.isEmpty) return;
 
     final result = await _budgetRepository.duplicateBudget(
@@ -53,25 +72,31 @@ class BudgetListViewModel extends ChangeNotifier {
 
     if (result is Ok<CustomerInfo>) {
       customerBudget = result.value;
-      budget.IDORCAMENTO = '';
-      await getInformationOrcamento();
+      _budgetRepository.clearSelectBudget();
+      _totalBudgetCount++;
+      if (!_disposed) notifyListeners();
+      await getInformationOrcamento(refresh: true);
     }
   }
 
   Future<bool> deleteData() async {
-    final result = await _budgetRepository.deleteBudgets(deleteItens);
+    final result = await _budgetRepository.deleteBudgets(deleteItems);
     if (result is Ok<void>) {
-      deleteItens.clear();
+      _totalBudgetCount -= deleteItems.length;
+      if (!_disposed) notifyListeners();
+      deleteItems.clear();
       deleteVisible = false;
-      await getInformationOrcamento();
+      await getInformationOrcamento(refresh: true);
       return true;
     }
     return false;
   }
 
-  Future<List<CustomerInfo>> getInformationOrcamento() async {
+  Future<List<CustomerInfo>> getInformationOrcamento(
+      {bool refresh = true}) async {
     _isRefreshing = true;
-    final result = await _budgetRepository.fetchBudgets(forceRefresh: true);
+    final result =
+        await _budgetRepository.fetchBudgetsPaginated(refresh: refresh);
     _foundUsers.clear();
     if (result is Ok<List<CustomerInfo>>) {
       for (final b in result.value) {
@@ -93,9 +118,11 @@ class BudgetListViewModel extends ChangeNotifier {
       return _foundUsers;
     } else {
       return _foundUsers
-          .where((x) => x.customerName!
-              .toLowerCase()
-              .contains(searchController.text.toLowerCase()))
+          .where(
+            (x) => x.customerName!.toLowerCase().contains(
+              searchController.text.toLowerCase(),
+            ),
+          )
           .toList();
     }
   }
@@ -104,8 +131,8 @@ class BudgetListViewModel extends ChangeNotifier {
     if (!getFilteredData()[index].checkBox!) {
       getFilteredData()[index].checkBox = true;
       getFilteredData()[index].index = index;
-      deleteItens.add(getFilteredData()[index]);
-      if (deleteItens.isNotEmpty) {
+      deleteItems.add(getFilteredData()[index]);
+      if (deleteItems.isNotEmpty) {
         deleteVisible = true;
       }
     }
@@ -114,8 +141,8 @@ class BudgetListViewModel extends ChangeNotifier {
 
   void removeDeleteItem(CustomerInfo item) {
     getFilteredData()[item.index].checkBox = false;
-    deleteItens.remove(item);
-    if (deleteItens.isEmpty) {
+    deleteItems.remove(item);
+    if (deleteItems.isEmpty) {
       deleteVisible = false;
       checkBoxAppear = false;
     }
@@ -123,17 +150,16 @@ class BudgetListViewModel extends ChangeNotifier {
   }
 
   void clearDeleteItens() {
-    deleteItens.clear();
+    deleteItems.clear();
     deleteVisible = false;
     checkBoxAppear = false;
     if (!_disposed) notifyListeners();
   }
 
-  CustomerInfo novoOrcamento() {
-    novo = CustomerInfo(
+  CustomerInfo customerInfoNew() {
+    _customerInfoNew = CustomerInfo(
       phone: '',
       customerName: '',
-      companyName: '',
       address: '',
       email: '',
       generated: '',
@@ -145,8 +171,8 @@ class BudgetListViewModel extends ChangeNotifier {
       id: '',
       street: '',
     );
-    budget.IDORCAMENTO = '';
-    return novo;
+    _budgetRepository.clearSelectBudget();
+    return _customerInfoNew;
   }
 
   @override

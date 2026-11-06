@@ -9,12 +9,16 @@ class ObservationPdf {
     required this.observacao,
   });
 
+  factory ObservationPdf.fromMap(Map<String, dynamic> map) {
+    return ObservationPdf(
+      data: map['DATA'] ?? '',
+      observacao: map['OBSERVACAO'] ?? '',
+    );
+  }
+
   factory ObservationPdf.fromSnapshot(DocumentSnapshot snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-    return ObservationPdf(
-      data: data['DATA'] ?? '',
-      observacao: data['OBSERVACAO'] ?? '',
-    );
+    return ObservationPdf.fromMap(data);
   }
 
   Map<String, dynamic> toMap() {

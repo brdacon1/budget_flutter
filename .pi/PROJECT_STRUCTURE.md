@@ -1,21 +1,27 @@
 # 📁 Estrutura do Projeto — OFLite (Budget Flutter)
 
 > **Arquitetura**: MVVM + Clean Architecture (simplificada)
-> **Gerenciamento de Estado**: `ChangeNotifier` (Provider pattern) + `get_it` (Injeção de Dependência)
+> **Gerenciamento de Estado**: `ChangeNotifier` (Provider pattern) + `get_it`
+> (Injeção de Dependência)
 > **Roteamento**: `MaterialPageRoute` + Map de rotas estáticas
 
 ---
 
 ## 0. Ponytail — Regra de Ouro do Projeto
 
-Este projeto segue o modo **ponytail full**: *o menor código completo que resolve o problema*.
+Este projeto segue o modo **ponytail full**: *o menor código completo que
+resolve o problema*.
 
-- **Não** adicionamos abstração, wrapper, conversão de tipo ou configuração que ninguém pediu.
-- **Não** criamos datasource em core que é puramente local (ex: `display_alert`, `loading_event`).
-- **Criamos** datasource em core que acessa **fonte externa** (SDK de terceiros, Firebase, API REST).
+- **Não** adicionamos abstração, wrapper, conversão de tipo ou configuração que
+  ninguém pediu.
+- **Não** criamos datasource em core que é puramente local (ex: `display_alert`,
+  `loading_event`).
+- **Criamos** datasource em core que acessa **fonte externa** (SDK de terceiros,
+  Firebase, API REST).
 - O shortest working diff vence. Deletar > adicionar.
 
-Para detalhes completos: <https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md>
+Para detalhes
+completos: <https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md>
 
 ---
 
@@ -98,20 +104,20 @@ lib/
 
 ## 2. Convenções de Nomenclatura
 
-| Tipo | Padrão | Exemplo |
-|------|--------|---------|
-| View (página) | `{feature}_view.dart` | `budget_list_view.dart` |
-| ViewModel | `{feature}_view_model.dart` | `budget_list_view_model.dart` |
-| Componente | `{feature}_{nome}.dart` | `budget_list_card.dart` |
-| Modal | `{feature}_{acao}_bottom_modal_widget.dart` | `budget_list_delete_bottom_modal_widget.dart` |
-| Strings do módulo | `{modulo}_pt_string.dart` | `login_pt_string.dart` |
-| DataSource | `{feature}_remote_datasource.dart` | `budget_remote_datasource.dart` |
-| Repository (impl) | `{feature}_repository_impl.dart` | `budget_repository_impl.dart` |
-| Repository (interface) | `{feature}_repository.dart` | `budget_repository.dart` |
-| UseCase | `{acao}_{feature}_usecase.dart` | `create_budget_from_chat_usecase.dart` |
-| Binds | `{module}_binds.dart` | `budget_binds.dart` |
-| Routes | `{module}_routes.dart` | `budget_routes.dart` |
-| Strings do módulo | `{module}_pt_string.dart` | `login_pt_string.dart` |
+| Tipo                   | Padrão                                      | Exemplo                                       |
+|------------------------|---------------------------------------------|-----------------------------------------------|
+| View (página)          | `{feature}_view.dart`                       | `budget_list_view.dart`                       |
+| ViewModel              | `{feature}_view_model.dart`                 | `budget_list_view_model.dart`                 |
+| Componente             | `{feature}_{nome}.dart`                     | `budget_list_card.dart`                       |
+| Modal                  | `{feature}_{acao}_bottom_modal_widget.dart` | `budget_list_delete_bottom_modal_widget.dart` |
+| Strings do módulo      | `{modulo}_pt_string.dart`                   | `login_pt_string.dart`                        |
+| DataSource             | `{feature}_remote_datasource.dart`          | `budget_remote_datasource.dart`               |
+| Repository (impl)      | `{feature}_repository_impl.dart`            | `budget_repository_impl.dart`                 |
+| Repository (interface) | `{feature}_repository.dart`                 | `budget_repository.dart`                      |
+| UseCase                | `{acao}_{feature}_usecase.dart`             | `create_budget_from_chat_usecase.dart`        |
+| Binds                  | `{module}_binds.dart`                       | `budget_binds.dart`                           |
+| Routes                 | `{module}_routes.dart`                      | `budget_routes.dart`                          |
+| Strings do módulo      | `{module}_pt_string.dart`                   | `login_pt_string.dart`                        |
 
 ---
 
@@ -120,41 +126,50 @@ lib/
 ### 3.1 O que é o DataSource?
 
 O **DataSource** é a classe que **fala diretamente com o mundo externo**:</br>
-`FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`, `FirebaseStorage`, SDKs de terceiros (Google Mobile Ads, FlutterInappPurchase, etc.), sensores do celular.
+`FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`,
+`FirebaseStorage`, SDKs de terceiros (Google Mobile Ads, FlutterInappPurchase,
+etc.), sensores do celular.
 
-Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua única responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`, `Uint8List`, etc.) com a fonte externa.
+Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua única
+responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`,
+`Uint8List`, etc.) com a fonte externa.
 
 ### 3.2 O que o DataSource NÃO faz?
 
-| ❌ NÃO faz | ✅ Quem faz |
-|-----------|------------|
-| Converter JSON → Model/Entity | `RepositoryImpl` |
-| Validar regras de negócio | `ViewModel` ou `UseCase` |
-| Acessar `BuildContext` ou widgets | `View` (Widget) |
-| Conter lógica de apresentação (UI) | `View` |
-| Conter `ChangeNotifier` | `ViewModel` |
+| ❌ NÃO faz                         | ✅ Quem faz              |
+|------------------------------------|--------------------------|
+| Converter JSON → Model/Entity      | `RepositoryImpl`         |
+| Validar regras de negócio          | `ViewModel` ou `UseCase` |
+| Acessar `BuildContext` ou widgets  | `View` (Widget)          |
+| Conter lógica de apresentação (UI) | `View`                   |
+| Conter `ChangeNotifier`            | `ViewModel`              |
 
 ### 3.3 Regras de Ouro do DataSource
 
-1. **Retorna/tipifica apenas tipos primitivos ou `Map<String, dynamic>`** — nunca models do domínio.
-2. **Não lança exceções customizadas de negócio** — pode lançar exceções técnicas (FirebaseException, SocketException, etc.) que serão tratadas pelo Repository ou UseCase.
+1. **Retorna/tipifica apenas tipos primitivos ou `Map<String, dynamic>`** —
+   nunca models do domínio.
+2. **Não lança exceções customizadas de negócio** — pode lançar exceções
+   técnicas (FirebaseException, SocketException, etc.) que serão tratadas pelo
+   Repository ou UseCase.
 3. **É injetado no RepositoryImpl** — a ViewModel nunca vê o DataSource.
-4. **Permite mock no construtor** — aceitar a instância externa (ex: `FirebaseFirestore? firestore`) facilita testes unitários.
+4. **Permite mock no construtor** — aceitar a instância externa (ex:
+   `FirebaseFirestore? firestore`) facilita testes unitários.
 
 ### 3.4 Quando um módulo `core/` PRECISA de DataSource?
 
-| Módulo | Fonte externa? | DataSource? |
-|--------|---------------|------------|
-| `core/cep` | Sim (API ViaCep) | ✅ Sim |
-| `core/share_link` | Sim (Firebase Dynamic Links / SDK) | ✅ Sim |
-| `core/ads` | Sim (Google Mobile Ads SDK) | ✅ Sim |
-| `core/in_app_purchase` | Sim (Google Play / App Store SDK) | ✅ Sim |
-| `core/notification` | Sim (FCM + Firestore) | ✅ Sim |
-| `core/convert_coin` | Não (pura formatação `intl`) | ❌ Não |
-| `core/display_alert` | Não (snackbar local) | ❌ Não |
-| `core/loading_event` | Não (dialog local) | ❌ Não |
+| Módulo                 | Fonte externa?                     | DataSource? |
+|------------------------|------------------------------------|-------------|
+| `core/cep`             | Sim (API ViaCep)                   | ✅ Sim      |
+| `core/share_link`      | Sim (Firebase Dynamic Links / SDK) | ✅ Sim      |
+| `core/ads`             | Sim (Google Mobile Ads SDK)        | ✅ Sim      |
+| `core/in_app_purchase` | Sim (Google Play / App Store SDK)  | ✅ Sim      |
+| `core/notification`    | Sim (FCM + Firestore)              | ✅ Sim      |
+| `core/convert_coin`    | Não (pura formatação `intl`)       | ❌ Não      |
+| `core/display_alert`   | Não (snackbar local)               | ❌ Não      |
+| `core/loading_event`   | Não (dialog local)                 | ❌ Não      |
 
-> **Regra**: se o módulo `core/` acessa qualquer SDK externo, Firebase, HTTP ou storage, ele **deve** ter `data/datasource/`.
+> **Regra**: se o módulo `core/` acessa qualquer SDK externo, Firebase, HTTP ou
+> storage, ele **deve** ter `data/datasource/`.
 
 ### 3.5 Exemplo Real — `BudgetRemoteDataSource`
 
@@ -238,16 +253,22 @@ class BudgetRemoteDataSource {
 }
 ```
 
-> **Observe**: o DataSource expõe métodos como `getBudgets()`, `saveBudget()`, `deleteBudgetItem()`, mas trabalha **exclusivamente** com `Map<String, dynamic>` e tipos nativos (`String`, `void`).
+> **Observe**: o DataSource expõe métodos como `getBudgets()`, `saveBudget()`,
+> `deleteBudgetItem()`, mas trabalha **exclusivamente** com
+> `Map<String, dynamic>`
+> e tipos nativos (`String`, `void`).
 
 ---
 
 ## 4. Como Funciona o Gerenciamento de Estado
 
 ### 4.1 Stack tecnológica
+
 - **`get_it`**: Injeção de dependências (Service Locator)
-- **`ChangeNotifier`**: Notificação de mudanças de estado (classe nativa do Flutter)
-- **Padrão Observer**: A View escuta o ViewModel via `addListener` / `notifyListeners`
+- **`ChangeNotifier`**: Notificação de mudanças de estado (classe nativa do
+  Flutter)
+- **Padrão Observer**: A View escuta o ViewModel via `addListener` /
+  `notifyListeners`
 
 ### 4.2 Ciclo de vida
 
@@ -262,30 +283,36 @@ class BudgetRemoteDataSource {
 
 ### 4.3 Regras do `injection.dart`
 
-| Tipo | Registro | Motivo |
-|------|----------|--------|
-| DataSources | `registerLazySingleton` | Compartilhado, mantém cache de conexão |
-| Repositories | `registerLazySingleton` | Mantém cache em memória |
-| ViewModels | `registerFactory` | Sempre nova instância ao abrir a tela |
+| Tipo         | Registro                | Motivo                                 |
+|--------------|-------------------------|----------------------------------------|
+| DataSources  | `registerLazySingleton` | Compartilhado, mantém cache de conexão |
+| Repositories | `registerLazySingleton` | Mantém cache em memória                |
+| ViewModels   | `registerFactory`       | Sempre nova instância ao abrir a tela  |
 
 ---
 
 ## 4.4 Padrão Command para Ações Assíncronas
 
-> Quando um botão (ou qualquer interação da UI) dispara uma operação **assíncrona** que depende de espera (ex: salvar no Firestore, chamar API, gerar PDF), o ViewModel **não expõe o `Future` cru** para a View. Em vez disso, encapsula essa ação em um **`Command`**.
+> Quando um botão (ou qualquer interação da UI) dispara uma operação
+> **assíncrona** que depende de espera (ex: salvar no Firestore, chamar API,
+> gerar
+> PDF), o ViewModel **não expõe o `Future` cru** para a View. Em vez disso,
+> encapsula essa ação em um **`Command`**.
 
-O `Command` é um `ChangeNotifier` especializado que controla o ciclo de vida de uma ação async, evitando cliques duplos e expondo estados reativos:
+O `Command` é um `ChangeNotifier` especializado que controla o ciclo de vida de
+uma ação async, evitando cliques duplos e expondo estados reativos:
 
-| Estado | Tipo | Significado |
-|--------|------|-------------|
-| `running` | `bool` | A ação está em execução (bloqueia novo disparo) |
-| `completed` | `bool` | A ação terminou com sucesso (`Result` é `Ok`) |
-| `error` | `bool` | A ação terminou com erro (`Result` é `Error`) |
-| `result` | `Result<T>?` | O resultado embrulhado em `Result<T>` |
+| Estado      | Tipo         | Significado                                     |
+|-------------|--------------|-------------------------------------------------|
+| `running`   | `bool`       | A ação está em execução (bloqueia novo disparo) |
+| `completed` | `bool`       | A ação terminou com sucesso (`Result` é `Ok`)   |
+| `error`     | `bool`       | A ação terminou com erro (`Result` é `Error`)   |
+| `result`    | `Result<T>?` | O resultado embrulhado em `Result<T>`           |
 
 ### Implementação na ViewModel
 
-A ViewModel declara o `Command` no construtor, apontando-o para um método protegido que retorna `Future<Result<T>>`:
+A ViewModel declara o `Command` no construtor, apontando-o para um método
+protegido que retorna `Future<Result<T>>`:
 
 ```dart
 import 'package:flutter/foundation.dart';
@@ -308,11 +335,16 @@ class BudgetCreateViewModel extends ChangeNotifier {
 }
 ```
 
-> **Regra**: o método executado pelo `Command` (ex: `_executeSaveBudget`) deve ser **protegido** (`private`) e retornar sempre `Future<Result<T>>`. A ViewModel pode expor outros métodos `public` para manipular estado local, mas **a ação que dispara espera deve passar pelo `Command`**.
+> **Regra**: o método executado pelo `Command` (ex: `_executeSaveBudget`) deve
+> ser **protegido** (`private`) e retornar sempre `Future<Result<T>>`. A
+> ViewModel
+> pode expor outros métodos `public` para manipular estado local, mas **a ação
+que dispara espera deve passar pelo `Command`**.
 
 ### Implementação na View
 
-Na View, escutamos o `Command` via `addListener` e reagimos aos estados (loading, sucesso, erro):
+Na View, escutamos o `Command` via `addListener` e reagimos aos estados
+(loading, sucesso, erro):
 
 ```dart
 class _BudgetCreateViewState extends State<BudgetCreateView> {
@@ -370,12 +402,20 @@ class _BudgetCreateViewState extends State<BudgetCreateView> {
 
 ### Regras de Ouro do Command
 
-1. **Todo botão que dispara operação async deve usar `Command`** — nunca exponha `Future<void> metodo()` direto para a View.
-2. **A View escuta o `Command`, não chama `await` diretamente** — o `addListener` permite reação desacoplada.
-3. **O `Command` impede cliques duplos** — enquanto `running == true`, novas chamadas a `execute()` são ignoradas.
-4. **O `Command` sempre retorna `Result<T>`** — sucesso (`Ok`) e erro (`Error`) são estados reativos, não exceções lançadas.
-5. **Dispose dos listeners do `Command` na View** — assim como o `ViewModel`, o `Command` é um `ChangeNotifier` e precisa ter seus listeners removidos no `dispose()`.
-6. **Use `Command0<T>` para ações sem parâmetro; `Command1<T, A>` para ações com 1 argumento.** (Comandos com múltiplos argumentos devem usar um objeto/dto no lugar.)
+1. **Todo botão que dispara operação async deve usar `Command`** — nunca exponha
+   `Future<void> metodo()` direto para a View.
+2. **A View escuta o `Command`, não chama `await` diretamente** — o
+   `addListener` permite reação desacoplada.
+3. **O `Command` impede cliques duplos** — enquanto `running == true`, novas
+   chamadas a `execute()` são ignoradas.
+4. **O `Command` sempre retorna `Result<T>`** — sucesso (`Ok`) e erro (`Error`)
+   são estados reativos, não exceções lançadas.
+5. **Dispose dos listeners do `Command` na View** — assim como o `ViewModel`, o
+   `Command` é um `ChangeNotifier` e precisa ter seus listeners removidos no
+   `dispose()`.
+6. **Use `Command0<T>` para ações sem parâmetro; `Command1<T, A>` para ações com
+   1 argumento.** (Comandos com múltiplos argumentos devem usar um objeto/dto no
+   lugar.)
 
 ### Exemplo de classe Command (referência)
 
@@ -454,7 +494,8 @@ abstract class InvoiceRepository {
 
 ### 5.3 DataSource (camada Data — fonte remota)
 
-**Arquivo**: `lib/modules/invoice/data/datasource/invoice_remote_datasource.dart`
+**Arquivo**:
+`lib/modules/invoice/data/datasource/invoice_remote_datasource.dart`
 
 ```dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -515,7 +556,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
 ### 5.5 ViewModel (camada Presenter)
 
-**Arquivo**: `lib/modules/invoice/presenter/invoice_list/invoice_list_view_model.dart`
+**Arquivo**:
+`lib/modules/invoice/presenter/invoice_list/invoice_list_view_model.dart`
 
 ```dart
 import 'package:flutter/material.dart';
@@ -563,7 +605,8 @@ class InvoiceListViewModel extends ChangeNotifier {
 }
 ```
 
-> **Importante**: ViewModels **sempre** extendem `ChangeNotifier`. Chamam `notifyListeners()` toda vez que o estado muda.
+> **Importante**: ViewModels **sempre** extendem `ChangeNotifier`. Chamam
+> `notifyListeners()` toda vez que o estado muda.
 
 ### 5.6 View (camada Presenter — tela)
 
@@ -633,7 +676,8 @@ class _InvoiceListViewState extends State<InvoiceListView> {
 }
 ```
 
-> **Regra**: A View **nunca** acessa o Repository diretamente. Só conversa com o ViewModel. A UI é reativa: o `addListener` chama `setState` aqui.
+> **Regra**: A View **nunca** acessa o Repository diretamente. Só conversa com o
+> ViewModel. A UI é reativa: o `addListener` chama `setState` aqui.
 
 ### 5.7 Binds (registro no get_it)
 
@@ -718,30 +762,32 @@ final Map<String, WidgetBuilder> invoiceRoutes = {
 ### 6.1 O que é um UseCase?
 
 Um **UseCase** encapsula **uma única ação de negócio** que pode envolver:
+
 - Orquestração de múltiplos repositórios
 - Lógica complexa de transformação de dados
 - Regras de negócio que não cabem nem no Repository nem no ViewModel
 
-Ele é **independente de UI** (não conhece widgets, context ou `ChangeNotifier`) e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
+Ele é **independente de UI** (não conhece widgets, context ou `ChangeNotifier`)
+e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
 
 ### 6.2 Quando CRIAR um UseCase?
 
-| Situação | Exemplo no projeto |
-|----------|-------------------|
-| **Orquestração multi-repo** | `CreateBudgetFromChatUsecase` usa `ChatBudgetRepository` + `ChatScriptRepository` |
-| **Lógica pesada de transformação** | `PdfGenerateUseCase` monta um PDF completo com tabelas, grids, imagens e formatação |
-| **Regra de negócio reutilizável** | Gerar um recibo em PDF exige cálculos de pagamento e layout — `PdfGenerateReceiptUseCase` |
-| **Fluxo com múltiplos passos** | Chatbot: carregar script → criar rascunho → atualizar endereço → adicionar itens |
-| **Testabilidade isolada** | Quando a lógica é complexa o suficiente para merecer testes unitários próprios |
+| Situação                           | Exemplo no projeto                                                                        |
+|------------------------------------|-------------------------------------------------------------------------------------------|
+| **Orquestração multi-repo**        | `CreateBudgetFromChatUsecase` usa `ChatBudgetRepository` + `ChatScriptRepository`         |
+| **Lógica pesada de transformação** | `PdfGenerateUseCase` monta um PDF completo com tabelas, grids, imagens e formatação       |
+| **Regra de negócio reutilizável**  | Gerar um recibo em PDF exige cálculos de pagamento e layout — `PdfGenerateReceiptUseCase` |
+| **Fluxo com múltiplos passos**     | Chatbot: carregar script → criar rascunho → atualizar endereço → adicionar itens          |
+| **Testabilidade isolada**          | Quando a lógica é complexa o suficiente para merecer testes unitários próprios            |
 
 ### 6.3 Quando NÃO criar um UseCase?
 
-| Situação | O que fazer em vez disso |
-|----------|-------------------------|
-| Operação CRUD simples (get, create, delete) | Chamar diretamente no ViewModel via `Repository` |
-| Apenas repassar chamada para o Repository | Não adicionar camada intermediária desnecessária |
-| Lógica puramente de UI (validação de campo, estado de loading) | Fica no **ViewModel** |
-| Acesso direto a dados sem transformação | Chamar o **Repository** direto |
+| Situação                                                       | O que fazer em vez disso                         |
+|----------------------------------------------------------------|--------------------------------------------------|
+| Operação CRUD simples (get, create, delete)                    | Chamar diretamente no ViewModel via `Repository` |
+| Apenas repassar chamada para o Repository                      | Não adicionar camada intermediária desnecessária |
+| Lógica puramente de UI (validação de campo, estado de loading) | Fica no **ViewModel**                            |
+| Acesso direto a dados sem transformação                        | Chamar o **Repository** direto                   |
 
 ### 6.4 Onde o UseCase fica na arquitetura?
 
@@ -752,11 +798,13 @@ Ele é **independente de UI** (não conhece widgets, context ou `ChangeNotifier`
                                     (opcional)
 ```
 
-> **Regra**: o UseCase é **opcional**. A maioria das telas simples não precisa. Use quando a lógica de negócio justificar a separação.
+> **Regra**: o UseCase é **opcional**. A maioria das telas simples não precisa.
+> Use quando a lógica de negócio justificar a separação.
 
 ### 6.5 Exemplo 1 — Orquestração Multi-Repo (`CreateBudgetFromChatUsecase`)
 
-**Arquivo**: `lib/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart`
+**Arquivo**:
+`lib/modules/chat_budget/domain/usecase/create_budget_from_chat_usecase.dart`
 
 ```dart
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
@@ -822,7 +870,9 @@ class CreateBudgetFromChatUsecase {
 }
 ```
 
-> **Por que é UseCase?** Precisa coordenar **dois repositórios diferentes** (`ChatBudgetRepository` e `ChatScriptRepository`) e orquestrar um fluxo em múltiplos passos. O ViewModel não deveria saber dessa complexidade.
+> **Por que é UseCase?** Precisa coordenar **dois repositórios diferentes**
+> (`ChatBudgetRepository` e `ChatScriptRepository`) e orquestrar um fluxo em
+> múltiplos passos. O ViewModel não deveria saber dessa complexidade.
 
 ### 6.6 Exemplo 2 — Lógica Pesada Sem Repo (`PdfGenerateUseCase`)
 
@@ -885,11 +935,15 @@ class PdfGenerateUseCase {
 }
 ```
 
-> **Por que é UseCase?** Não acessa banco de dados diretamente, mas contém **lógica pesada de negócio** (layout de PDF com tabelas, cálculo de posições, renderização de imagens). Isolar isso facilita testes e mantém o ViewModel enxuto.
+> **Por que é UseCase?** Não acessa banco de dados diretamente, mas contém
+> **lógica pesada de negócio** (layout de PDF com tabelas, cálculo de posições,
+> renderização de imagens). Isolar isso facilita testes e mantém o ViewModel
+> enxuto.
 
 ### 6.7 Exemplo 3 — Recibo em PDF (`PdfGenerateReceiptUseCase`)
 
-**Arquivo**: `lib/modules/pdf/domain/usecase/pdf_generate_receipt_usecase.dart`
+**Arquivo**:
+`../lib/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_usecase.dart`
 
 ```dart
 import 'dart:io';
@@ -944,11 +998,15 @@ class PdfGenerateReceiptUseCase {
 }
 ```
 
-> **Por que é UseCase?** Reutiliza a mesma justificativa do PDF de orçamento: lógica complexa, pura transformação de dados em documento, sem acesso direto a DataSource.
+> **Por que é UseCase?** Reutiliza a mesma justificativa do PDF de orçamento:
+> lógica complexa, pura transformação de dados em documento, sem acesso direto a
+> DataSource.
 
 ### 6.8 Como registrar um UseCase no `binds`?
 
-UseCases recebem dependências via construtor e são registrados como **`registerFactory`** (se precisar de estado fresco) ou **`registerLazySingleton`** (se forem stateless e reutilizáveis):
+UseCases recebem dependências via construtor e são registrados como **
+`registerFactory`** (se precisar de estado fresco) ou **
+`registerLazySingleton`** (se forem stateless e reutilizáveis):
 
 ```dart
 // Exemplo no chat_assistant_binds.dart:
@@ -968,19 +1026,23 @@ sl.registerFactory<PdfGenerateReceiptUseCase>(
 );
 ```
 
-> **Dica**: UseCases podem ser chamados tanto no **ViewModel** quanto dentro de outro **UseCase** (composição).
+> **Dica**: UseCases podem ser chamados tanto no **ViewModel** quanto dentro de
+> outro **UseCase** (composição).
 
 ---
 
 ## 7. A Pasta `modules/core/` — Serviços Transversais
 
-Diferentemente dos módulos de **feature** (budget, payment, receipt...), os módulos em `core/` **não possuem UI** (pastas `presenter/` e `view/`).
+Diferentemente dos módulos de **feature** (budget, payment, receipt...), os
+módulos em `core/` **não possuem UI** (pastas `presenter/` e `view/`).
 
 Eles expõem apenas:
+
 - `{service}_binds.dart`
 - `domain/repository/{service}_repository.dart`
 - `data/repository/{service}_repository_impl.dart`
-- **`data/datasource/{service}_remote_datasource.dart` quando acessam fonte externa** (SDKs, Firebase, HTTP)
+- **`data/datasource/{service}_remote_datasource.dart` quando acessam fonte
+  externa** (SDKs, Firebase, HTTP)
 
 ### Exemplo: `share_link` (tem datasource — fonte externa)
 
@@ -1002,35 +1064,38 @@ core/convert_coin/
 └── data/repository/convert_coin_repository_impl.dart
 ```
 
-**Quando usar `core/`**: serviços reutilizáveis por vários módulos — anúncios, conversão de moeda, loading global, alerts, CEP, notificações, compras in-app, etc.
+**Quando usar `core/`**: serviços reutilizáveis por vários módulos — anúncios,
+conversão de moeda, loading global, alerts, CEP, notificações, compras in-app,
+etc.
 
 ---
 
 ## 8. Resumo das Regras de Ouro
 
-| # | Regra |
-|---|-------|
-| 1 | Sempre separar em camadas: `data/` → `domain/` → `presenter/` |
-| 2 | ViewModel estende `ChangeNotifier` e nunca acessa widgets/context |
-| 3 | View só conversa com o ViewModel (nunca com Repository direto) |
-| 4 | ViewModels registrados como `registerFactory` no get_it |
-| 5 | Repositórios e DataSources como `registerLazySingleton` |
-| 6 | DataSource trabalha apenas com `Map<String, dynamic>` / tipos primitivos |
-| 7 | UseCase só existe quando há lógica de negócio complexa ou orquestração multi-repo |
-| 8 | UseCase é independente de UI e de fonte de dados |
-| 9 | Usar `Result<T, E>` (quando aplicável) para fluxos de erro |
-| 10 | Componentes (widgets) ficam em `presenter/components/` ou subpastas |
-| 11 | Modais ficam em `presenter/components/modals/` |
-| 12 | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`** |
-| 13 | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |
-| **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`** |
-| **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`** |
+| #      | Regra                                                                                                                                                    |
+|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1      | Sempre separar em camadas: `data/` → `domain/` → `presenter/`                                                                                            |
+| 2      | ViewModel estende `ChangeNotifier` e nunca acessa widgets/context                                                                                        |
+| 3      | View só conversa com o ViewModel (nunca com Repository direto)                                                                                           |
+| 4      | ViewModels registrados como `registerFactory` no get_it                                                                                                  |
+| 5      | Repositórios e DataSources como `registerLazySingleton`                                                                                                  |
+| 6      | DataSource trabalha apenas com `Map<String, dynamic>` / tipos primitivos                                                                                 |
+| 7      | UseCase só existe quando há lógica de negócio complexa ou orquestração multi-repo                                                                        |
+| 8      | UseCase é independente de UI e de fonte de dados                                                                                                         |
+| 9      | Usar `Result<T, E>` (quando aplicável) para fluxos de erro                                                                                               |
+| 10     | Componentes (widgets) ficam em `presenter/components/` ou subpastas                                                                                      |
+| 11     | Modais ficam em `presenter/components/modals/`                                                                                                           |
+| 12     | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`**                                                                       |
+| 13     | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |
+| **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`**                                                                            |
+| **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`**                                                                             |
 
 ---
 
 ## 9. Módulos Existentes (checklist)
 
 ### Features com Router + ViewModel + View
+
 - [x] `budget` — Orçamentos (list, creator, items, tab)
 - [x] `chat_budget` — Assistente de orçamento por chat
 - [x] `comment` — Comentários nos orçamentos
@@ -1049,6 +1114,7 @@ core/convert_coin/
 - [x] `web_budget` — Orçamento público web (compartilhável)
 
 ### Core — com DataSource (fonte externa)
+
 - [x] `core/ads` — Google Mobile Ads
 - [x] `core/cep` — Consulta de CEP
 - [x] `core/in_app_purchase` — Compras dentro do app
@@ -1056,6 +1122,7 @@ core/convert_coin/
 - [x] `core/share_link` — Compartilhamento de links
 
 ### Core — sem DataSource (lógica local / pura)
+
 - [x] `core/convert_coin` — Conversão de moeda (formatação `intl`)
 - [x] `core/display_alert` — SnackBars/Alerts globais
 - [x] `core/loading_event` — Loading global
@@ -1070,11 +1137,11 @@ core/convert_coin/
 
 Seguindo o padrão do projeto de referência (Clean Architecture modular):
 
-| Tipo | Pasta no módulo | Exemplo |
-|------|----------------|---------|
-| **Entity** (domínio puro) | `domain/entity/` | `budget_entity.dart` |
-| **Model** (DTO/JSON) | `data/model/` | `budget_response_model.dart` |
-| **Model local** (estado simples) | `presenter/` | `budget_list_state.dart` |
+| Tipo                             | Pasta no módulo  | Exemplo                      |
+|----------------------------------|------------------|------------------------------|
+| **Entity** (domínio puro)        | `domain/entity/` | `budget_entity.dart`         |
+| **Model** (DTO/JSON)             | `data/model/`    | `budget_response_model.dart` |
+| **Model local** (estado simples) | `presenter/`     | `budget_list_state.dart`     |
 
 ```
 lib/modules/budget/
@@ -1093,25 +1160,33 @@ lib/modules/budget/
 
 ### 10.2 Regras
 
-| # | Regra |
-|---|-------|
-| 1 | **Model/Entity de feature = dentro do módulo**. NUNCA em `shared/models/`. |
-| 2 | Se `pdf` precisa de `CustomerInfo`, importa de `modules/budget/domain/entity/` (ou consome via UseCase/Repository). |
-| 3 | `shared/models/` é **reservada para infraestrutura genuinamente global** (`Result<T>`, patterns, etc.). |
+| # | Regra                                                                                                                                                    |
+|---|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | **Model/Entity de feature = dentro do módulo**. NUNCA em `shared/models/`.                                                                               |
+| 2 | Se `pdf` precisa de `CustomerInfo`, importa de `modules/budget/domain/entity/` (ou consome via UseCase/Repository).                                      |
+| 3 | `shared/models/` é **reservada para infraestrutura genuinamente global** (`Result<T>`, patterns, etc.).                                                  |
 | 4 | Não invente abstração: se tem `fromJson`/`toJson`, é **Model** em `data/model/`. Se é pura classe de negócio sem JSON, é **Entity** em `domain/entity/`. |
-| 5 | Se um `core/` retorna dados, o model fica em `modules/core/{servico}/data/model/` ou `domain/entity/`. |
+| 5 | Se um `core/` retorna dados, o model fica em `modules/core/{servico}/data/model/` ou `domain/entity/`.                                                   |
 
 ### 10.3 Model "usado por mais de um módulo"
 
 Isso **NÃO** significa que ele vai para `shared/models/`.
 
-> **Quem é o DONO do conceito?** `CustomerInfo` descreve o cliente de um orçamento → módulo `budget` é o dono. Os outros importam de `budget`. Se houver dependência circular, crie `core/customer/` ou use interface no domain do consumidor.
+> **Quem é o DONO do conceito?** `CustomerInfo` descreve o cliente de um
+> orçamento → módulo `budget` é o dono. Os outros importam de `budget`. Se
+> houver
+> dependência circular, crie `core/customer/` ou use interface no domain do
+> consumidor.
 
 ### 10.4 Diretriz para o Agente (Ponytail)
 
-> **Quando o usuário pedir para criar um model, entity, DTO ou classe de dados, o agente DEVE perguntar: "Qual é o módulo dono?" e colocar o arquivo em `modules/{modulo}/data/model/` ou `modules/{modulo}/domain/entity/` — NUNCA em `shared/models/`.**
+> **Quando o usuário pedir para criar um model, entity, DTO ou classe de dados,
+o agente DEVE perguntar: "Qual é o módulo dono?" e colocar o arquivo em
+`modules/{modulo}/data/model/` ou `modules/{modulo}/domain/entity/` — NUNCA em
+`shared/models/`.**
 >
-> Se o agente não souber o módulo, ele deve **perguntar ao usuário antes de criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
+> Se o agente não souber o módulo, ele deve **perguntar ao usuário antes de
+criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
 
 ---
 
@@ -1121,69 +1196,85 @@ Isso **NÃO** significa que ele vai para `shared/models/`.
 
 ### Inventário atual
 
-| Arquivo | Módulo Dono | Justificativa |
-|---------|-------------|---------------|
-| `address.dart` | `core/cep` | Retorno da API ViaCep |
-| `customer_info.dart` | `budget` | Cliente do orçamento — usado por `budget`, `pdf`, `payment`, `web_budget`, `product` como dependente |
-| `global_uid_budget.dart` | `shared/common/constants/` | Não é model de negócio; é constante de path do Firestore |
-| `global_uid_user.dart` | `shared/common/constants/` | Idem — constante de path do Firestore |
-| `info_user.dart` | `login` | Dados do usuário logado — usado em `login` e `singup` |
-| `items_budget.dart` | `budget` | Item de orçamento — usado por `budget`, `product`, `chat_budget`, `pdf` |
-| `items_list_budget.dart` | `budget` | Extensão/variante de itens de orçamento |
-| `month_calculate.dart` | `dashboard` | Cálculo de evolução mensal — usado só em `dashboard` |
-| `my_budget_dashboard.dart` | `dashboard` | Resumo de orçamentos para dashboard |
-| `observation_budget.dart` | `budget` | Observação do orçamento — usada em `budget` e `comment` (comment consome) |
-| `observation_pdf.dart` | `budget` | Observação para PDF — deriva do conceito de budget |
-| `owner_info.dart` | **DELETAR** | Não é importado por ninguém |
-| `owner_pdf.dart` | `login` | Dados do titular/empresa — usado em `login`, `singup`, `pdf`, `image` |
-| `payment_customer.dart` | `payment` | Pagamento do cliente — usado em `payment`, `pdf`, `receipt` (receipt consome) |
-| `receipt.dart` | `receipt` | Recibo — usado em `receipt`, `payment`, `pdf` (os outros consomem) |
-| `recent_file.dart` | **DELETAR** | Não é importado por ninguém |
+| Arquivo                    | Módulo Dono                | Justificativa                                                                                        |
+|----------------------------|----------------------------|------------------------------------------------------------------------------------------------------|
+| `address.dart`             | `core/cep`                 | Retorno da API ViaCep                                                                                |
+| `customer_info.dart`       | `budget`                   | Cliente do orçamento — usado por `budget`, `pdf`, `payment`, `web_budget`, `product` como dependente |
+| `global_uid_budget.dart`   | `shared/common/constants/` | Não é model de negócio; é constante de path do Firestore                                             |
+| `global_uid_user.dart`     | `shared/common/constants/` | Idem — constante de path do Firestore                                                                |
+| `info_user.dart`           | `login`                    | Dados do usuário logado — usado em `login` e `singup`                                                |
+| `items_budget.dart`        | `budget`                   | Item de orçamento — usado por `budget`, `product`, `chat_budget`, `pdf`                              |
+| `items_list_budget.dart`   | `budget`                   | Extensão/variante de itens de orçamento                                                              |
+| `month_calculate.dart`     | `dashboard`                | Cálculo de evolução mensal — usado só em `dashboard`                                                 |
+| `my_budget_dashboard.dart` | `dashboard`                | Resumo de orçamentos para dashboard                                                                  |
+| `observation_budget.dart`  | `budget`                   | Observação do orçamento — usada em `budget` e `comment` (comment consome)                            |
+| `observation_pdf.dart`     | `budget`                   | Observação para PDF — deriva do conceito de budget                                                   |
+| `owner_info.dart`          | **DELETAR**                | Não é importado por ninguém                                                                          |
+| `owner_pdf.dart`           | `login`                    | Dados do titular/empresa — usado em `login`, `singup`, `pdf`, `image`                                |
+| `payment_customer.dart`    | `payment`                  | Pagamento do cliente — usado em `payment`, `pdf`, `receipt` (receipt consome)                        |
+| `receipt.dart`             | `receipt`                  | Recibo — usado em `receipt`, `payment`, `pdf` (os outros consomem)                                   |
+| `recent_file.dart`         | **DELETAR**                | Não é importado por ninguém                                                                          |
 
 ### Ordem de migração sugerida (do mais isolado para o mais acoplado)
 
-1. **`dashboard`** — `month_calculate.dart`, `my_budget_dashboard.dart` (isolados, zero impacto externo)
+1. **`dashboard`** — `month_calculate.dart`, `my_budget_dashboard.dart`
+   (isolados, zero impacto externo)
 2. **`core/cep`** — `address.dart` (isolado)
-3. **`login`** — `info_user.dart`, `owner_pdf.dart` (acoplado a `singup`, `pdf`, `image`)
+3. **`login`** — `info_user.dart`, `owner_pdf.dart` (acoplado a `singup`, `pdf`,
+   `image`)
 4. **`receipt`** — `receipt.dart` (acoplado a `payment`, `pdf`)
 5. **`payment`** — `payment_customer.dart` (acoplado a `pdf`, `receipt`)
-6. **`budget`** — `customer_info.dart`, `items_budget.dart`, `items_list_budget.dart`, `observation_budget.dart`, `observation_pdf.dart` (acoplado a quase todo mundo — **por último**)
-7. **Limpeza** — mover `global_uid_*.dart` para `shared/common/constants/`, deletar `owner_info.dart` e `recent_file.dart`
+6. **`budget`** — `customer_info.dart`, `items_budget.dart`,
+   `items_list_budget.dart`, `observation_budget.dart`, `observation_pdf.dart`
+   (acoplado a quase todo mundo — **por último**)
+7. **Limpeza** — mover `global_uid_*.dart` para `shared/common/constants/`,
+   deletar `owner_info.dart` e `recent_file.dart`
 
 ### Checklist por módulo (aplicar a cada migração)
 
-- [ ] Mover o arquivo de `shared/models/` para a pasta correta no módulo (`data/model/` ou `domain/entity/`)
+- [ ] Mover o arquivo de `shared/models/` para a pasta correta no módulo
+  (`data/model/` ou `domain/entity/`)
 - [ ] Atualizar o `import` interno do próprio módulo
-- [ ] Atualizar os `import` de **todos** os arquivos que consumiam de `shared/models/` para apontar para o novo caminho
-- [ ] Se o arquivo era importado por módulos que NÃO são o dono, **anotar a dependência cruzada** (futura refatoração de desacoplamento via UseCase/Repository)
+- [ ] Atualizar os `import` de **todos** os arquivos que consumiam de
+  `shared/models/` para apontar para o novo caminho
+- [ ] Se o arquivo era importado por módulos que NÃO são o dono, **anotar a
+  dependência cruzada** (futura refatoração de desacoplamento via
+  UseCase/Repository)
 - [ ] Rodar `flutter analyze` para validar imports quebrados
 - [ ] Rodar build/run para validar funcionamento
-- [ ] Remover o arquivo antigo de `shared/models/` **só depois** de confirmar que nada mais referencia
+- [ ] Remover o arquivo antigo de `shared/models/` **só depois** de confirmar
+  que nada mais referencia
 
 ---
 
 ## 12. Dicas Rápidas
 
 ### Adicionar um novo campo no formulário
-1. Atualizar o modelo no **módulo dono** (`modules/{modulo}/data/model/` ou `domain/entity/`)
+
+1. Atualizar o modelo no **módulo dono** (`modules/{modulo}/data/model/` ou
+   `domain/entity/`)
 2. Atualizar o DataSource para persistir o novo campo
 3. Atualizar o ViewModel (validação/lógica)
 4. Atualizar a View (novo widget de input)
 5. Atualizar o componente de PDF se necessário
 
 ### Criar um modal de ações
+
 1. Criar em `presenter/components/modals/{nome}_bottom_modal_widget.dart`
 2. Usar `showModalBottomSheet` na View
 3. O callback de ação chama um método no ViewModel
 
 ### Expor uma nova rota
+
 1. Adicionar no enum `BudgetRoute` (ou módulo correspondente)
 2. Adicionar no `Map<String, WidgetBuilder>` do módulo
 3. Registrar no `app_routes.dart`
 4. Navegar com `Navigator.pushNamed(context, BudgetRoute.budgetCreator.path)`
 
 ### Criar um novo UseCase
-1. Criar classe em `modules/{modulo}/domain/usecase/{acao}_{feature}_usecase.dart`
+
+1. Criar classe em
+   `modules/{modulo}/domain/usecase/{acao}_{feature}_usecase.dart`
 2. Receber dependências no construtor (repositórios ou outros usecases)
 3. Implementar o método principal com a lógica de negócio
 4. Retornar `Result<T, E>` quando houver fluxo de erro
@@ -1191,16 +1282,25 @@ Isso **NÃO** significa que ele vai para `shared/models/`.
 6. Injetar no ViewModel via `getIt<MeuUseCase>()`
 
 ### Criar strings de um módulo
+
 1. Criar pasta `presenter/strings/` dentro do módulo
 2. Criar arquivo `{modulo}_pt_string.dart`
-3. Criar classe `static` com getters `static String get ...` (igual ao padrão de internacionalização)
-4. Mover **todas** as strings literais das Views, ViewModels e componentes do módulo para esse arquivo
-5. Importar no View, ViewModel e componentes usando `import 'package:oflite/modules/{modulo}/presenter/strings/{modulo}_pt_string.dart'`
-6. **Nunca colocar strings literais (hardcoded) diretamente em Views, ViewModels ou componentes.**
+3. Criar classe `static` com getters `static String get ...` (igual ao padrão de
+   internacionalização)
+4. Mover **todas** as strings literais das Views, ViewModels e componentes do
+   módulo para esse arquivo
+5. Importar no View, ViewModel e componentes usando
+   `import 'package:oflite/modules/{modulo}/presenter/strings/{modulo}_pt_string.dart'`
+6. **Nunca colocar strings literais (hardcoded) diretamente em Views, ViewModels
+   ou componentes.**
 
-> **IMPORTANTE**: strings usadas por mais de um módulo (ex: `errorTitle`) ficam no módulo dono do contexto. Se todos os módulos precisam, use o módulo mais baixo na hierarquia (ex: login → signup usa o `errorTitle` do login). Evite `shared/common/strings/` — strings são **próprias de cada módulo**.
+> **IMPORTANTE**: strings usadas por mais de um módulo (ex: `errorTitle`) ficam
+> no módulo dono do contexto. Se todos os módulos precisam, use o módulo mais
+> baixo na hierarquia (ex: login → signup usa o `errorTitle` do login). Evite
+> `shared/common/strings/` — strings são **próprias de cada módulo**.
 
 ### Criar um módulo core com datasource
+
 1. Criar `data/datasource/{service}_remote_datasource.dart`
 2. Mover todo acesso ao SDK externo (Firebase, HTTP, plugin) para o DataSource
 3. Manter o RepositoryImpl como orquestrador (estado, callbacks, regras)
@@ -1209,4 +1309,5 @@ Isso **NÃO** significa que ele vai para `shared/models/`.
 
 ---
 
-> **Documento mantido na pasta `.pi/`** — atualizar sempre que novos padrões forem adotados.
+> **Documento mantido na pasta `.pi/`** — atualizar sempre que novos padrões
+> forem adotados.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
@@ -25,7 +26,7 @@ class BudgetCreatorField extends StatelessWidget {
     this.onChanged,
   });
 
-  final Gender field;
+  final CustomerInfoEnum field;
   final BudgetCreatorViewModel viewModel;
   final String hintText;
   final IconData prefixIcon;
@@ -76,14 +77,14 @@ class BudgetCreatorField extends StatelessWidget {
             enabled: enabled,
             prefixIcon: Icon(
               prefixIcon,
-              color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+              color: Colors.white,
             ),
             suffixIcon: suffixIcon,
             hintText: hintText,
             hintStyle: const TextStyle(color: Colors.grey),
           ),
           style: TextStyle(
-            color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),

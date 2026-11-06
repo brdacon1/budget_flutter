@@ -10,7 +10,7 @@ import 'components/storage_details.dart';
 import 'dashboard_view_model.dart';
 
 class DashboardView extends StatefulWidget {
-  const DashboardView({Key? key}) : super(key: key);
+  const DashboardView({super.key});
 
   @override
   State<DashboardView> createState() => _DashboardView();
@@ -63,7 +63,7 @@ class _DashboardView extends State<DashboardView> {
                         if (ResponsiveWidget.isMobile(context))
                           const SizedBox(height: defaultPadding),
                         if (ResponsiveWidget.isMobile(context))
-                          StarageDetails(item: _viewModel.myBudgetDashboard),
+                          StorageDetails(item: _viewModel.myBudgetDashboard),
                         const SizedBox(height: defaultPadding),
                         MonthEvolution(item: _viewModel.monthCalculate),
                         const SizedBox(height: defaultPadding),
@@ -76,7 +76,7 @@ class _DashboardView extends State<DashboardView> {
                   if (!ResponsiveWidget.isMobile(context))
                     Expanded(
                       flex: 2,
-                      child: StarageDetails(
+                      child: StorageDetails(
                         item: _viewModel.myBudgetDashboard,
                       ),
                     ),

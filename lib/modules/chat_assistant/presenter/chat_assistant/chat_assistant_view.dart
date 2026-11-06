@@ -12,11 +12,12 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/pdf/pdf_model_select/presenter/pdf_model_select_view.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 
@@ -139,6 +140,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case 'open_logo_edit':
         await _openLogoEditFlow();
         break;
+      case 'open_pdf_model_select':
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PdfModelSelectView()),
+        );
+        if (mounted && result == true) {
+          await _vm.onPdfModelSelected();
+        }
+        break;
     }
   }
 
@@ -162,7 +172,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _openLogoEditFlow() async {
-    final isSubscribed = UID.autoRenewing ?? false;
+    final isSubscribed = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
     if (!isSubscribed) {
       if (!mounted) return;
       await Navigator.push(
@@ -298,6 +308,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         numberController: _vm.numberController,
         cityController: _vm.cityController,
         neighborhoodController: _vm.neighborhoodController,
+        cepController: _vm.isCorrectingAddress ? _vm.cepController : null,
         isCorrecting: _vm.isCorrectingAddress,
         onSubmit: () => _vm.submitManualAddressCommand.execute(),
         onCancelAndProceed: () => _vm.handleAction('cancel_and_proceed'),
@@ -513,6 +524,7 @@ class _ManualAddressForm extends StatelessWidget {
   final TextEditingController numberController;
   final TextEditingController cityController;
   final TextEditingController neighborhoodController;
+  final TextEditingController? cepController;
   final bool isCorrecting;
   final VoidCallback onSubmit;
   final VoidCallback onCancelAndProceed;
@@ -522,6 +534,7 @@ class _ManualAddressForm extends StatelessWidget {
     required this.numberController,
     required this.cityController,
     required this.neighborhoodController,
+    this.cepController,
     required this.isCorrecting,
     required this.onSubmit,
     required this.onCancelAndProceed,
@@ -574,6 +587,10 @@ class _ManualAddressForm extends StatelessWidget {
                 ),
               ],
             ),
+            if (isCorrecting && cepController != null) ...[
+              const SizedBox(height: 8),
+              _buildField(cepController!, 'CEP', keyboardType: TextInputType.number),
+            ],
             const SizedBox(height: 8),
             _buildField(cityController, ChatBudgetStrings.cityField),
             const SizedBox(height: 8),

@@ -1,10 +1,10 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
+import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 /// Formulário (ExpansionTileCard) de criação/edição de recibo.
 ///
@@ -43,9 +43,9 @@ class ReceiptCreatorForm extends StatelessWidget {
 
     // Cores do estado original (ambas brancas → destaque visualmente neutro,
     // preservado para não alterar o comportamento).
-    const Color enabledtxt = Colors.white;
-    const Color deaible = Colors.white;
-    final bool isDescricao = selectedField == ReceiptFieldType.descricao;
+    const Color enableTxt = Colors.white;
+    const Color disableTxt = Colors.white;
+    final bool isDescription = selectedField == ReceiptFieldType.isDescription;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
@@ -88,25 +88,25 @@ class ReceiptCreatorForm extends StatelessWidget {
                   height: he * 0.078,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
-                    color: isDescricao ? bgColor : bgColor,
+                    color: isDescription ? bgColor : bgColor,
                   ),
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
                     controller: idController,
-                    onTap: () => onSelectField(ReceiptFieldType.descricao),
+                    onTap: () => onSelectField(ReceiptFieldType.isDescription),
                     decoration: InputDecoration(
                       enabled: false,
                       enabledBorder: InputBorder.none,
                       border: InputBorder.none,
                       prefixIcon: Icon(
                         Icons.confirmation_number_outlined,
-                        color: isDescricao ? enabledtxt : deaible,
+                        color: isDescription ? enableTxt : disableTxt,
                       ),
                       hintText: ReceiptPtString.numberHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
-                      color: isDescricao ? enabledtxt : deaible,
+                      color: isDescription ? enableTxt : disableTxt,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -123,25 +123,25 @@ class ReceiptCreatorForm extends StatelessWidget {
                   height: he * 0.078,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
-                    color: isDescricao ? bgColor : bgColor,
+                    color: isDescription ? bgColor : bgColor,
                   ),
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
                     controller: dataController,
-                    onTap: () => onSelectField(ReceiptFieldType.descricao),
+                    onTap: () => onSelectField(ReceiptFieldType.isDescription),
                     decoration: InputDecoration(
                       enabled: false,
                       enabledBorder: InputBorder.none,
                       border: InputBorder.none,
                       prefixIcon: Icon(
                         Icons.calendar_month_outlined,
-                        color: isDescricao ? enabledtxt : deaible,
+                        color: isDescription ? enableTxt : disableTxt,
                       ),
                       hintText: ReceiptPtString.dateHint,
                       hintStyle: const TextStyle(color: Colors.grey),
                     ),
                     style: TextStyle(
-                      color: isDescricao ? enabledtxt : deaible,
+                      color: isDescription ? enableTxt : disableTxt,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -155,14 +155,14 @@ class ReceiptCreatorForm extends StatelessWidget {
                 height: he * 0.075,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.0),
-                  color: isDescricao ? bgColor : bgColor,
+                  color: isDescription ? bgColor : bgColor,
                 ),
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: descricaoController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 1,
-                  onTap: () => onSelectField(ReceiptFieldType.descricao),
+                  onTap: () => onSelectField(ReceiptFieldType.isDescription),
                   decoration: InputDecoration(
                     enabledBorder: InputBorder.none,
                     border: InputBorder.none,
@@ -170,7 +170,7 @@ class ReceiptCreatorForm extends StatelessWidget {
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(
-                    color: isDescricao ? enabledtxt : deaible,
+                    color: isDescription ? enableTxt : disableTxt,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -7,7 +7,6 @@ import 'package:oflite/modules/payment/domain/repository/payment_repository.dart
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -38,11 +37,10 @@ class PaymentListViewModel extends ChangeNotifier {
 
   ConvertCoinRepository get moneyConvert => _moneyConvert;
 
-  Future<void> inicialData() async {
-    // Path do Firestore depende das globais budget.IDORCAMENTO e budget.IDRECIBO.
-    Orcamento.IDORCAMENTO = item.id;
-    Orcamento.IDRECIBO = receipt.id;
-    final result = await _paymentRepository.fetchPayments(receipt);
+  Future<void> inicialData({bool forceRefresh = false}) async {
+    _paymentRepository.budgetId = item.id;
+    _paymentRepository.receiptId = receipt.id;
+    final result = await _paymentRepository.fetchPayments(receipt, forceRefresh: forceRefresh);
     if (result is Ok<List<PaymentCustomer>>) {
       foundPayment = result.value;
     }
@@ -54,7 +52,7 @@ class PaymentListViewModel extends ChangeNotifier {
     totalPaid = _paymentRepository.totalPaid;
   }
 
-  Future<void> refresh() => inicialData();
+  Future<void> refresh() => inicialData(forceRefresh: true);
 
   Future<void> deletePayment(BuildContext context, int index) async {
     _loadingEvent.alertLoading(context);
@@ -65,23 +63,27 @@ class PaymentListViewModel extends ChangeNotifier {
       if (result is Ok<void>) {
         await _displayAlert.notificationNotCloseScreen(
             context, PaymentStrings.doneTitle, PaymentStrings.paymentRemoved);
+      } else {
+        await _displayAlert.notificationError(
+            context, PaymentStrings.errorTitle, PaymentStrings.errorRemovePayment);
       }
     } catch (e) {
       _loadingEvent.closeLoading(context);
       await _displayAlert.notificationError(
           context, PaymentStrings.errorTitle, PaymentStrings.errorRemovePayment);
     }
-    await inicialData();
+    await inicialData(forceRefresh: true);
   }
 
   Future<void> editPayment(BuildContext context, int index) async {
-    Orcamento.IDRECIBO = receipt.id;
-    await Navigator.push(
+    _paymentRepository.receiptId = receipt.id;
+    final result = await showPaymentCreatorBottomModal(
       context,
-      MaterialPageRoute(
-          builder: (context) => PaymentCreatorView(item: foundPayment[index])),
+      item: foundPayment[index],
     );
-    await inicialData();
+    if (result == true) {
+      await inicialData(forceRefresh: true);
+    }
   }
 
   Future<void> addPayment(BuildContext context) async {
@@ -98,11 +100,13 @@ class PaymentListViewModel extends ChangeNotifier {
       ..id = ''
       ..DESCRICAO = 'null'
       ..PRECO = 0;
-    Orcamento.IDRECIBO = receipt.id;
-    await Navigator.push(
+    _paymentRepository.receiptId = receipt.id;
+    final result = await showPaymentCreatorBottomModal(
       context,
-      MaterialPageRoute(builder: (context) => PaymentCreatorView(item: novo)),
+      item: novo,
     );
-    await inicialData();
+    if (result == true) {
+      await inicialData(forceRefresh: true);
+    }
   }
 }

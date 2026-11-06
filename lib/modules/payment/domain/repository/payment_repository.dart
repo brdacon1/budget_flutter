@@ -7,6 +7,11 @@ abstract class PaymentRepository extends ChangeNotifier {
   List<PaymentCustomer> get payments;
   double get totalPaid;
 
+  String? get budgetId;
+  set budgetId(String? value);
+  String? get receiptId;
+  set receiptId(String? value);
+
   Future<Result<List<PaymentCustomer>>> fetchPayments(Receipt receipt,
       {bool forceRefresh = false});
   Future<Result<void>> savePayment(PaymentCustomer payment);

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/budget/budget_list/presenter/components/card/delete_budget_card.dart';
+import 'package:oflite/shared/common/utils/get_budget_status_color.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 
@@ -35,8 +37,6 @@ class _BudgetListDeleteBottomModalWidgetState
   @override
   void initState() {
     super.initState();
-    // Cópia local — a UI reconstrói a partir dela, garantindo atualização
-    // em tempo real ao remover um item via "X".
     _items = List<CustomerInfo>.from(widget.deleteItens);
   }
 
@@ -84,7 +84,7 @@ class _BudgetListDeleteBottomModalWidgetState
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: _items.length,
                 itemBuilder: (context, index) {
-                  return _DeleteItemCard(
+                  return DeleteItemCard(
                     item: _items[index],
                     onRemove: () => _removeItem(_items[index]),
                   );
@@ -95,66 +95,4 @@ class _BudgetListDeleteBottomModalWidgetState
   }
 }
 
-class _DeleteItemCard extends StatelessWidget {
-  const _DeleteItemCard({required this.item, required this.onRemove});
 
-  final CustomerInfo item;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFFF5F5F5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      child: ListTile(
-        title: Text(
-          'Cliente: ${item.customerName}',
-          style: GoogleFonts.heebo(
-            color: AppBottomModal.grayColor,
-            letterSpacing: 0.5,
-            fontSize: 12.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nº orçamento: ${item.id}',
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 12.0,
-              ),
-            ),
-            Text(
-              'Status: ${item.status}',
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 12.0,
-              ),
-            ),
-            Text(
-              'Criado em: ${item.data}',
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                letterSpacing: 0.5,
-                fontSize: 12.0,
-              ),
-            ),
-          ],
-        ),
-        trailing: GestureDetector(
-          onTap: onRemove,
-          child: const Icon(
-            Icons.close,
-            color: AppBottomModal.grayColor,
-            size: 23.0,
-          ),
-        ),
-      ),
-    );
-  }
-}

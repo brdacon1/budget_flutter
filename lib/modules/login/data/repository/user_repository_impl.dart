@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as uid;
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class UserRepositoryImpl extends UserRepository {
@@ -11,6 +11,16 @@ class UserRepositoryImpl extends UserRepository {
 
   InfoUser? _currentUser;
   OwnerPdf? _defaultPdf;
+
+  ValueNotifier<InfoUser?> _selectUser = ValueNotifier<InfoUser?>(null);
+
+  @override
+  ValueNotifier<InfoUser?> get selectUser => _selectUser;
+
+  @override
+  set selectUser(ValueNotifier<InfoUser?> value) {
+    _selectUser.value = value.value;
+  }
 
   @override
   InfoUser? get currentUser => _currentUser;
@@ -37,6 +47,7 @@ class UserRepositoryImpl extends UserRepository {
         ..AutoRenewing = raw['AutoRenewing'] ?? false;
 
       _currentUser = user;
+      _selectUser.value = user;
       notifyListeners();
       return Result.ok(user);
     } catch (e) {
@@ -49,6 +60,7 @@ class UserRepositoryImpl extends UserRepository {
     try {
       await _remote.saveUser(user);
       _currentUser = user;
+      _selectUser.value = user;
       notifyListeners();
       return Result.ok(null);
     } catch (e) {
@@ -61,6 +73,7 @@ class UserRepositoryImpl extends UserRepository {
     try {
       await _remote.updateUser(user);
       _currentUser = user;
+      _selectUser.value = user;
       notifyListeners();
       return Result.ok(null);
     } catch (e) {
@@ -72,13 +85,9 @@ class UserRepositoryImpl extends UserRepository {
   Future<Result<void>> createDefaultUserData(InfoUser user, OwnerPdf pdf) async {
     try {
       await _remote.saveUser(user);
-      uid.user = user.USER ?? '';
-      uid.name = user.NOME ?? '';
-      uid.email = user.EMAIL;
-      uid.phone = user.FONE;
-      uid.id = user.Id;
-      await _remote.savePdfInfo(pdf, uid.user ?? '');
+      await _remote.savePdfInfo(pdf, user.USER ?? '');
       _currentUser = user;
+      _selectUser.value = user;
       _defaultPdf = pdf;
       notifyListeners();
       return Result.ok(null);

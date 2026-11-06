@@ -9,6 +9,7 @@ class OwnerPdf {
   String? fotoId;
   String? fone;
   String? logoName;
+  String? pdfLayoutType;
 
   OwnerPdf({
      this.rua,
@@ -21,6 +22,7 @@ class OwnerPdf {
      this.fotoId,
      this.fone,
      this.logoName,
+     this.pdfLayoutType,
   });
 
   factory OwnerPdf.fromJson(Map<String, dynamic>? json) {
@@ -35,6 +37,7 @@ class OwnerPdf {
       fotoId: json?['FOTOID'] ?? '',
       fone: json?['FONE'] ?? '',
       logoName: json?['LOGONAME'] ?? '',
+      pdfLayoutType: json?['PDF_LAYOUT_TYPE'] ?? 'standard',
     );
   }
 
@@ -50,6 +53,7 @@ class OwnerPdf {
       'FONE': fone,
       'LOGONAME': logoName,
       'RUA': rua,
+      'PDF_LAYOUT_TYPE': pdfLayoutType,
     };
   }
 }

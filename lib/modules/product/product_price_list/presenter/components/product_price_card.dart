@@ -11,10 +11,6 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 /// carrinho no trailing, `fromMenu` que esconde o checkbox de carrinho) e os
 /// callbacks (`onLongPress`, `onTap`, `onToggleSelectProduct`,
 /// `onToggleDelete`). Não conhece o ViewModel nem services.
-///
-/// O estado dos checkboxes é lido do próprio `item` (`item.checkBox` /
-/// `item.selectProduct`), que é imutável e reconstruído a cada mudança pelo
-/// `AnimatedBuilder` da View.
 class ProductPriceCard extends StatelessWidget {
   const ProductPriceCard({
     super.key,
@@ -41,87 +37,128 @@ class ProductPriceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: secondaryColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
+    // Validação da categoria para colorir a pílula de acordo com o design (mantendo cores do tema)
+    final bool isProduct = '${item.categoria}'.toLowerCase().contains('produto') || item.categoria == '1';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      decoration: BoxDecoration(
+        color: secondaryColor,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: const Color(0xFF2A2A3C),
+          width: 1.2,
+        ),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(10),
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  '${item.descricao}',
-                  maxLines: 2,
-                  style: const TextStyle(
-                    color: whiteColor,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.0),
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Informações do item alinhadas à esquerda (Tag, Descrição e Preço)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tag superior estilo pílula arredondada
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: isProduct ? const Color(0xFF9C27B0) : const Color(0xFF00BFA5),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${item.categoria}',
+                          style: const TextStyle(
+                            color: whiteColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Descrição do produto/serviço
+                      Text(
+                        '${item.descricao}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: whiteColor,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Preço formatado usando o repositório original
+                      Text(
+                        moneyConvert.convertFromDouble(item.preco ?? 0),
+                        style: const TextStyle(
+                          color: Color(0xFFB388FF),
+                          letterSpacing: 0,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        subtitle: Align(
-          alignment: Alignment.centerLeft,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                '${item.categoria}',
-                style: const TextStyle(
-                  color: whiteColor,
-                  letterSpacing: 0,
-                  fontSize: 12.0,
-                ),
-              ),
-              Text(
-                moneyConvert.convertFromDouble(item.preco ?? 0),
-                style: const TextStyle(
-                  color: whiteColor,
-                  letterSpacing: 0,
-                  fontSize: 12.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-        onLongPress: onLongPress,
-        onTap: onTap,
-        trailing: Transform.scale(
-          scale: 1.7,
-          child: Visibility(
-            visible: !fromMenu && checkBoxProductVisible,
-            child: Checkbox(
-              side: const BorderSide(color: whiteColor),
-              checkColor: bgColor,
-              activeColor: whiteColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              value: item.selectProduct ?? false,
-              onChanged: (bool? newValue) => onToggleSelectProduct(),
-            ),
-          ),
-        ),
-        leading: Transform.scale(
-          scale: 1.6,
-          child: Visibility(
-            visible: checkBoxAppear,
-            child: Checkbox(
-              side: const BorderSide(color: whiteColor),
-              checkColor: bgColor,
-              activeColor: whiteColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              value: item.checkBox ?? false,
-              onChanged: (bool? newValue) => onToggleDelete(),
+
+                const SizedBox(width: 12),
+
+                // Seletor lateral grande mantendo o padrão do seu projeto (Transform.scale)
+                if (checkBoxAppear)
+                  Transform.scale(
+                    scale: 1.6,
+                    child: Checkbox(
+                      side: const BorderSide(color: whiteColor),
+                      checkColor: bgColor,
+                      activeColor: whiteColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      value: item.checkBox ?? false,
+                      onChanged: (bool? newValue) => onToggleDelete(),
+                    ),
+                  )
+                else if (!fromMenu && checkBoxProductVisible)
+                  Transform.scale(
+                    scale: 1.6,
+                    child: Checkbox(
+                      side: const BorderSide(color: whiteColor),
+                      checkColor: bgColor,
+                      activeColor: whiteColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      value: item.selectProduct ?? false,
+                      onChanged: (bool? newValue) => onToggleSelectProduct(),
+                    ),
+                  )
+                else
+                  Transform.scale(
+                    scale: 1.4,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFB388FF).withOpacity(0.8),
+                          width: 2.2,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

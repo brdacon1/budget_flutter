@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as globalUIDUser;
 import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/login/data/model/info_user.dart';
@@ -108,17 +107,19 @@ class SingUpViewModel extends ChangeNotifier {
       await prefs.setString('email', email);
       await prefs.setString('password', password);
 
-      globalUIDUser.user = uid;
-      globalUIDUser.name = nome;
-      globalUIDUser.email = email;
-      globalUIDUser.phone = DADOS.FONE;
-      globalUIDUser.id = uid;
-      globalUIDUser.password = password;
-      globalUIDUser.googleAuth = false;
-      globalUIDUser.idPay = '';
-      globalUIDUser.productId = '';
-      globalUIDUser.purchaseToken = '';
-      globalUIDUser.autoRenewing = false;
+      final session = InfoUser()
+        ..USER = uid
+        ..NOME = nome
+        ..EMAIL = email
+        ..FONE = DADOS.FONE
+        ..Id = uid
+        ..Senha = password
+        ..googleAuth = false
+        ..IdPay = ''
+        ..ProductId = ''
+        ..PurchaseToken = ''
+        ..AutoRenewing = false;
+      _userRepository.selectUser.value = session;
 
       await _getUserInfo(uid);
 
@@ -149,26 +150,18 @@ class SingUpViewModel extends ChangeNotifier {
         DADOS.PurchaseToken = user.PurchaseToken;
         DADOS.AutoRenewing = user.AutoRenewing;
 
-        globalUIDUser.user = user.USER;
-        globalUIDUser.name = user.NOME ?? 'User';
-        globalUIDUser.email = user.EMAIL;
-        globalUIDUser.phone = user.FONE;
-        globalUIDUser.id = user.Id;
-        globalUIDUser.idPay = user.IdPay;
-        globalUIDUser.productId = user.ProductId;
-        globalUIDUser.purchaseToken = user.PurchaseToken;
-        globalUIDUser.autoRenewing = user.AutoRenewing;
+        _userRepository.selectUser.value = user;
       } else {
-        // Usuário autenticado mas doc não encontrado: popula mínimo
-        globalUIDUser.user = uid;
+        final fallback = _userRepository.selectUser.value ?? InfoUser();
+        fallback.USER = uid;
+        _userRepository.selectUser.value = fallback;
       }
 
-      final ownerUid = globalUIDUser.user;
+      final ownerUid = _userRepository.selectUser.value?.USER;
       if (ownerUid != null && ownerUid.isNotEmpty) {
         final tokens =
             await getIt<NotificationRepository>().loadFcmTokens(ownerUid);
         DADOS.TOKENS = tokens;
-        globalUIDUser.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
 
@@ -184,10 +177,11 @@ class SingUpViewModel extends ChangeNotifier {
                     : next,
           );
 
-          globalUIDUser.autoRenewing = latestSubscription.isAutoRenewing;
-          globalUIDUser.purchaseToken =
-              latestSubscription.purchaseToken ?? '';
-          globalUIDUser.productId = latestSubscription.productId;
+          final session = _userRepository.selectUser.value ?? InfoUser();
+          session.AutoRenewing = latestSubscription.isAutoRenewing;
+          session.PurchaseToken = latestSubscription.purchaseToken ?? '';
+          session.ProductId = latestSubscription.productId;
+          _userRepository.selectUser.value = session;
 
           if (Platform.isAndroid &&
               latestSubscription is PurchaseAndroid &&
@@ -197,12 +191,16 @@ class SingUpViewModel extends ChangeNotifier {
             );
           }
         } else {
-          globalUIDUser.autoRenewing = false;
-          globalUIDUser.purchaseToken = '';
+          final session = _userRepository.selectUser.value ?? InfoUser();
+          session.AutoRenewing = false;
+          session.PurchaseToken = '';
+          _userRepository.selectUser.value = session;
         }
       } catch (_) {
-        globalUIDUser.autoRenewing = false;
-        globalUIDUser.purchaseToken = '';
+        final session = _userRepository.selectUser.value ?? InfoUser();
+        session.AutoRenewing = false;
+        session.PurchaseToken = '';
+        _userRepository.selectUser.value = session;
       }
 
       return user;

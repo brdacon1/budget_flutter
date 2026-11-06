@@ -1,33 +1,19 @@
+import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart' as UserInfo;
-import 'package:flutter_contacts/properties/name.dart';
-import 'package:flutter_contacts/properties/phone.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
+
 
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/global_uid_budget.dart' as Orcamento;
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-
-enum Gender {
-  fullname,
-  Email,
-  phone,
-  cep,
-  rua,
-  data,
-  city,
-  id,
-  bairro,
-  status,
-}
 
 class BudgetCreatorViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
@@ -36,15 +22,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   BudgetCreatorViewModel({required this.item});
 
-  final nameNode = FocusNode();
-  final phoneNode = FocusNode();
-  final cepNode = FocusNode();
-  final ruaNode = FocusNode();
-  final cityNode = FocusNode();
-  final bairroNode = FocusNode();
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.white;
-  Gender? selected;
+  CustomerInfoEnum? selected;
   String? nameButton;
   String? titlePage;
   String? titleBox;
@@ -60,6 +38,13 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final cityController = TextEditingController();
   final bairroController = TextEditingController();
   final statusController = TextEditingController();
+
+  final nameNode = FocusNode();
+  final phoneNode = FocusNode();
+  final cepNode = FocusNode();
+  final ruaNode = FocusNode();
+  final cityNode = FocusNode();
+  final bairroNode = FocusNode();
 
   var maskFormatter = MaskTextInputFormatter(
       mask: '(##) #####-####',
@@ -79,6 +64,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
 
   bool get _isEditing => (item.id ?? '').isNotEmpty;
+  bool get isEditing => _isEditing;
 
   void _setupUiState() {
     final editing = _isEditing;
@@ -113,7 +99,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       ..email = source.email
       ..address = source.address
       ..generated = source.generated
-      ..companyName = source.companyName
       ..customerName = source.customerName
       ..phone = source.phone
       ..status = source.status
@@ -122,23 +107,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       ..city = source.city
       ..neighborhood = source.neighborhood
       ..totalValue = source.totalValue;
-  }
-
-  void _applyToGlobals(CustomerInfo source) {
-    Orcamento.ID = source.id;
-    Orcamento.DATA = source.data;
-    Orcamento.RUA = source.street;
-    Orcamento.GERADO = source.generated;
-    Orcamento.BAIRRO = source.neighborhood;
-    Orcamento.CITY = source.city;
-    Orcamento.CEP = source.zip;
-    Orcamento.EMAIL = source.email;
-    Orcamento.ENDERECO = source.address;
-    Orcamento.FONE = source.phone;
-    Orcamento.NOMECLIENTE = source.customerName;
-    Orcamento.NOMEEMPRESA = source.companyName;
-    Orcamento.STATUS = source.status;
-    Orcamento.VALORTOTAL = source.totalValue;
   }
 
   void _enterEditMode(CustomerInfo budget) {
@@ -158,7 +126,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       email: item.email,
       address: item.address,
       generated: item.generated,
-      companyName: item.companyName,
       customerName: nameController.text,
       phone: phoneController.text,
       status: statusController.text,
@@ -171,7 +138,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   void init() {
     try {
-      _applyToGlobals(item);
       _setupUiState();
       _fillControllers();
       notifyListeners();
@@ -179,18 +145,14 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   }
 
   Future<void> saveBudget(CustomerInfo budget) async {
-    final result = await _budgetRepository.saveBudget(budget);
-    if (result is Ok<void>) {
-      Orcamento.IDORCAMENTO = budget.id;
-      Orcamento.VALORTOTAL = budget.totalValue ?? 0;
-    }
+    await _budgetRepository.saveBudget(budget);
   }
 
   Future<void> updateItensDADOS(CustomerInfo budget) async {
     await _budgetRepository.updateBudget(budget);
   }
 
-  void selectField(Gender field) {
+  void selectField(CustomerInfoEnum field) {
     selected = field;
     notifyListeners();
   }
@@ -230,10 +192,10 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     fieldFone = true;
     notifyListeners();
 
-    final hasPermission = await UserInfo.FlutterContacts.requestPermission();
+    final hasPermission = await user_info.FlutterContacts.requestPermission();
     if (!hasPermission) return;
 
-    final contact = await UserInfo.FlutterContacts.openExternalPick();
+    final contact = await user_info.FlutterContacts.openExternalPick();
     if (contact == null) return;
 
     String name = contact.displayName.trim();
@@ -254,60 +216,28 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> eventSave(BuildContext context, double we) async {
-    final isUpdate = nameButton == 'Atualizar';
+  late final Command0<void> saveBudgetCommand = Command0(_executeSaveBudget);
+
+  Future<Result<void>> _executeSaveBudget() async {
+    final isUpdate = _isEditing;
     final formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    final budget = _buildBudget(isUpdate, formattedDate);
 
-    final CustomerInfo budget = _buildBudget(isUpdate, formattedDate);
-
-    if (isUpdate) {
-      await updateItensDADOS(budget);
-    } else {
-      await saveBudget(budget);
-    }
-
-    _applyToItem(budget);
-    if (!isUpdate) {
-      _applyToGlobals(budget);
-      _enterEditMode(budget);
-    }
-    notifyListeners();
-
-    if (isUpdate) {
-      if (context.mounted) {
-        await displayAlert.notification(
-          context,
-          'Feito!',
-          'Dados do orçamento atualizado com sucesso!',
-        );
+    try {
+      if (isUpdate) {
+        await updateItensDADOS(budget);
+      } else {
+        await saveBudget(budget);
       }
-      return;
-    }
 
-    if (await UserInfo.FlutterContacts.requestPermission()) {
-      if (context.mounted) {
-        await displayAlert.notification(
-          context,
-          'Feito!',
-          'Orçamento criado com sucesso!',
-        );
+      _applyToItem(budget);
+      if (!isUpdate) {
+        _enterEditMode(budget);
       }
-      if (context.mounted) {
-        final saveContact = await showConfirmBottomModal(
-          context,
-          title: 'Salvar contato',
-          message: 'Gostaria de salvar o telefone em sua lista de contatos?',
-        );
-        if (saveContact) {
-          final newContact = UserInfo.Contact()
-            ..name = Name(first: budget.customerName ?? '')
-            ..phones = [
-              Phone(budget.phone ?? ''),
-              Phone(budget.phone ?? '', label: PhoneLabel.work),
-            ];
-          await UserInfo.FlutterContacts.insertContact(newContact);
-        }
-      }
+      notifyListeners();
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
     }
   }
 

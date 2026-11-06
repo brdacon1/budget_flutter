@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/constants/global_uid_user.dart' as UID;
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'components/pdf_edit_header.dart';
 import 'components/pdf_edit_logo_section.dart';
@@ -54,7 +54,7 @@ class _PdfEditView extends State<PdfEditView> {
                         fileContent: vm.fileContent,
                         loading: vm.loading,
                         hasError: vm.hasError,
-                        autoRenewing: UID.autoRenewing ?? false,
+                        autoRenewing: getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false,
                         onEditLogo: () => vm.editLogo(context),
                         onOpenSubscription: () =>
                             vm.openSubscription(context),

@@ -52,6 +52,7 @@ class UpdatePdfFieldUsecase {
           fotoId: current.fotoId,
           fone: current.fone,
           logoName: current.logoName,
+          pdfLayoutType: current.pdfLayoutType,
         );
       case 'phone':
         return OwnerPdf(
@@ -65,6 +66,7 @@ class UpdatePdfFieldUsecase {
           fotoId: current.fotoId,
           fone: value,
           logoName: current.logoName,
+          pdfLayoutType: current.pdfLayoutType,
         );
       case 'email':
         return OwnerPdf(
@@ -78,6 +80,7 @@ class UpdatePdfFieldUsecase {
           fotoId: current.fotoId,
           fone: current.fone,
           logoName: current.logoName,
+          pdfLayoutType: current.pdfLayoutType,
         );
       case 'cnpj':
         return OwnerPdf(
@@ -91,6 +94,7 @@ class UpdatePdfFieldUsecase {
           fotoId: current.fotoId,
           fone: current.fone,
           logoName: current.logoName,
+          pdfLayoutType: current.pdfLayoutType,
         );
       default:
         return current;

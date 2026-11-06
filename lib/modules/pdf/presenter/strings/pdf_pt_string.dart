@@ -45,6 +45,12 @@ class PdfStrings {
   static String get optionsTitle =>
       _isPt ? 'Opções' : 'Options';
 
+  static String get menuPdfExecutive =>
+      _isPt ? 'PDF Executivo' : 'Executive PDF';
+
+  static String get menuPdfProfessional =>
+      _isPt ? 'PDF Profissional' : 'Professional PDF';
+
   static String get optionsSubtitle =>
       _isPt ? 'Opções do orçamento' : 'Budget options';
 
