@@ -48,7 +48,14 @@ jobs:
           echo "${{ secrets.KEYSTORE_BASE_64 }}" | base64 --decode > android/app/Key/release.keystore
 
       # -----------------------------------------------------------------------
-      # 6. Gerar key.properties (signing config para o Gradle)
+      # 6. Decode google-services.json
+      # -----------------------------------------------------------------------
+      - name: Decode google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+
+      # -----------------------------------------------------------------------
+      # 7. Gerar key.properties (signing config para o Gradle)
       # -----------------------------------------------------------------------
       - name: Create key.properties
         run: |
@@ -60,7 +67,7 @@ jobs:
           EOF
 
       # -----------------------------------------------------------------------
-      # 7. Build App Bundle (AAB) com envs de produção
+      # 8. Build App Bundle (AAB) com envs de produção
       # -----------------------------------------------------------------------
       - name: Build App Bundle (AAB)
         run: |
@@ -69,7 +76,7 @@ jobs:
             --dart-define-from-file=env/production_environment.json
 
       # -----------------------------------------------------------------------
-      # 8. Upload artefato
+      # 9. Upload artefato
       # -----------------------------------------------------------------------
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v4
