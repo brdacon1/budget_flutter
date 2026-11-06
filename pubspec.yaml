@@ -38,7 +38,6 @@ dependencies:
   adaptive_theme: ^3.7.0
   firebase_storage: ^13.4.6
   image_picker: ^1.1.2
-  image_gallery_saver: ^2.0.3
   image_cropper: ^9.0.0
   dotted_border: ^2.0.0+3
   shared_preferences: ^2.5.3
