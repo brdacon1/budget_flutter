@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none'
 
-version: 2.0.2+145
+version: 2.0.3+146
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
@@ -67,15 +67,15 @@ flutter:
 
   uses-material-design: true
   assets:
-      - assets/360.png
-      - assets/work.png
-      - assets/pintor.png
-      - assets/constru_man.png
-      - assets/images/
-      - assets/icons/
-      - assets/login-initial-page.png
-      - env/development_environment.json
-      - env/production_environment.json
+    - assets/360.png
+    - assets/work.png
+    - assets/pintor.png
+    - assets/constru_man.png
+    - assets/images/
+    - assets/icons/
+    - assets/login-initial-page.png
+    - env/development_environment.json
+    - env/production_environment.json
   fonts:
     - family: Montserrat-Bold
       fonts:
