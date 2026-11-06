@@ -579,10 +579,10 @@ class PdfGenerateBudgetExecutiveUsecase {
           ..borders.bottom = PdfPen(PdfColor(220, 220, 220), width: 0.5);
 
     grid.headers.applyStyle(headerStyle);
-    grid.columns[0].width = 185;
-    grid.columns[1].width = 65;
-    grid.columns[2].width = 50;
-    grid.columns[3].width = 105;
+    grid.columns[0].width = 195;
+    grid.columns[1].width = 70;
+    grid.columns[2].width = 55;
+    grid.columns[3].width = 110;
     grid.columns[4].width = 105;
 
     for (final item in items) {

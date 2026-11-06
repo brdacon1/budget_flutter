@@ -557,11 +557,11 @@ class PdfGenerateBudgetProfessionalUsecase {
     header.height = 26;
 
     // Larguras
-    grid.columns[0].width = 200;
-    grid.columns[1].width = 70;
-    grid.columns[2].width = 50;
+    grid.columns[0].width = 210;
+    grid.columns[1].width = 75;
+    grid.columns[2].width = 55;
     grid.columns[3].width = 100;
-    grid.columns[4].width = 100;
+    grid.columns[4].width = 95;
 
     // Linhas
     for (final item in items) {
