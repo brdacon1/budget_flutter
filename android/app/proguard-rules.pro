@@ -9,14 +9,25 @@
 -keep class androidx.lifecycle.** { *; }
 -dontwarn io.flutter.embedding.**
 
-# JSON serialization
--keepattributes *Annotation*
+# Google Sign In / Google Play Services Auth
+-keep class com.google.android.gms.** { *; }
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.auth.api.signin.** { *; }
+-keepclassmembers class com.google.android.gms.auth.api.signin.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }
+-dontwarn com.google.android.gms.**
+
+# Firebase Auth (usado com Google Sign-In)
+-keep class com.google.firebase.auth.** { *; }
+-keep class com.google.android.gms.internal.** { *; }
 -keepattributes Signature
+-keepattributes *Annotation*
 -keepattributes Exceptions
 -keepattributes InnerClasses
 -keepattributes EnclosingMethod
 
-# Keep dart:convert JSON helpers
+# JSON serialization / Gson
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
