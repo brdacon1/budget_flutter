@@ -3,7 +3,6 @@ import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/payment/data/datasource/payment_remote_datasource.dart';
 import 'package:oflite/modules/payment/data/repository/payment_repository_impl.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
-import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view_model.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 
 void registerPaymentDependencies(GetIt sl) {
@@ -17,7 +16,4 @@ void registerPaymentDependencies(GetIt sl) {
       sl<UserRepository>(),
     ),
   );
-
-  // ViewModels
-  sl.registerFactory<PaymentCreatorViewModel>(() => PaymentCreatorViewModel());
 }
