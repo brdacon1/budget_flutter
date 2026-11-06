@@ -23,6 +23,7 @@ import 'package:oflite/modules/singup/singup_binds.dart';
 import 'package:oflite/modules/subscription/subscription_binds.dart';
 import 'package:oflite/modules/terms_conditions/terms_conditions_binds.dart';
 import 'package:oflite/modules/web_budget/web_budget_binds.dart';
+import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 
 /// Instância global do GetIt para injeção de dependências.
 ///
@@ -73,6 +74,7 @@ void setupDependencyInjection() {
   registerSubscriptionDependencies(getIt);
   registerTermsConditionsDependencies(getIt);
   registerWebBudgetDependencies(getIt);
+  registerDeleteAccountDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)
