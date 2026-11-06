@@ -267,3 +267,75 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
     });
   }
 );
+
+// ---------------------------------------------------------------------------
+// Exclusão de conta e dados (LGPD / Google Play requisito)
+// ---------------------------------------------------------------------------
+// Endpoint público para exclusão completa de conta + dados pessoais.
+// Recebe o email do usuário, localiza o UID, remove todos os documentos
+// Firestore (inclusive subcoleções) e deleta o usuário do Firebase Auth.
+// ---------------------------------------------------------------------------
+
+/**
+ * Deleta recursivamente um documento e todas as suas subcoleções.
+ * Usa a API interna do Firestore (recursiveDelete disponível no Admin SDK).
+ */
+async function deleteDocRecursive(docRef) {
+  try {
+    await admin.firestore().recursiveDelete(docRef);
+  } catch (e) {
+    logger.error("[deleteAccount] erro em recursiveDelete", { path: docRef.path, error: String(e) });
+    throw e;
+  }
+}
+
+exports.deleteAccount = onRequest(
+  { region: REGION, cors: ["*"] },
+  async (req, res) => {
+    res.set("Access-Control-Allow-Origin", "*");
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.status(204).send("");
+      return;
+    }
+
+    const email = String(req.body?.email || "").trim();
+    if (!email) {
+      res.status(400).json({ ok: false, erro: "email é obrigatório" });
+      return;
+    }
+
+    logger.info("[deleteAccount] solicitação recebida", { email });
+
+    try {
+      const userRecord = await admin.auth().getUserByEmail(email);
+      const uid = userRecord.uid;
+      logger.info("[deleteAccount] usuário encontrado", { uid, email });
+
+      // Remove todos os dados da empresa (inclusive subcoleções: ORCAMENTOS, RECIBOS, INFOPDF, FCM, NOTIFICACOES...)
+      const empresaRef = admin.firestore().doc(`EMPRESAS/${uid}`);
+      await deleteDocRecursive(empresaRef);
+      logger.info("[deleteAccount] EMPRESAS/{uid} removido", { uid });
+
+      // Remove o documento do usuário na coleção raiz USUARIOS
+      const usuarioRef = admin.firestore().doc(`USUARIOS/${uid}`);
+      await deleteDocRecursive(usuarioRef);
+      logger.info("[deleteAccount] USUARIOS/{uid} removido", { uid });
+
+      // Remove o usuário do Firebase Authentication
+      await admin.auth().deleteUser(uid);
+      logger.info("[deleteAccount] usuário Auth removido", { uid });
+
+      res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso." });
+    } catch (e) {
+      logger.error("[deleteAccount] erro", { email, error: String(e) });
+      const msg = String(e);
+      if (msg.includes("There is no user record")) {
+        res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
+        return;
+      }
+      res.status(500).json({ ok: false, erro: "Erro interno ao processar a exclusão." });
+    }
+  }
+);

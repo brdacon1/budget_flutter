@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_app/budget_web_app_view.dart';
+import 'package:oflite/modules/delete_account/delete_account_routes.dart';
+import 'package:oflite/modules/delete_account/presenter/delete_account_view.dart';
 import 'package:oflite/injection.dart';
 
 /// Entry point **Web** do fluxo público de orçamento.
@@ -63,11 +65,19 @@ class BudgetWebApp extends StatelessWidget {
         canvasColor: secondaryColor,
       ),
       initial: AdaptiveThemeMode.dark,
-      builder: (theme, darkTheme) => MaterialApp(
-        title: 'Orçamento',
-        debugShowCheckedModeBanner: false,
-        home: const BudgetWebAppView(),
-      ),
+      builder: (theme, darkTheme) {
+        final initialPath = Uri.base.path;
+        final isDeleteAccount = initialPath == DeleteAccountRoute.deleteAccount.path ||
+            initialPath.startsWith('${DeleteAccountRoute.deleteAccount.path}/');
+        return MaterialApp(
+          title: 'Orçamento',
+          debugShowCheckedModeBanner: false,
+          routes: {
+            ...deleteAccountRoutes,
+          },
+          home: isDeleteAccount ? const DeleteAccountView() : const BudgetWebAppView(),
+        );
+      },
     );
   }
 }
