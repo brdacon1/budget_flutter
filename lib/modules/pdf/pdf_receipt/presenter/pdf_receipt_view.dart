@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
@@ -11,7 +12,14 @@ import 'pdf_receipt_view_model.dart';
 class PdfReceiptView extends StatefulWidget {
   final Receipt receipt;
   final CustomerInfo item;
-  const PdfReceiptView({super.key, required this.receipt, required this.item});
+  final PdfLayoutType layoutType;
+
+  const PdfReceiptView({
+    super.key,
+    required this.receipt,
+    required this.item,
+    this.layoutType = PdfLayoutType.standard,
+  });
 
   @override
   State<PdfReceiptView> createState() => _PdfReceiptView();
@@ -25,6 +33,7 @@ class _PdfReceiptView extends State<PdfReceiptView> {
     super.initState();
     _viewModel =
         PdfReceiptViewModel(receipt: widget.receipt, item: widget.item);
+    _viewModel.setLayoutType(widget.layoutType);
     WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.initialData(context));
   }
 
