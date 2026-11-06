@@ -111,6 +111,8 @@ class LoginViewModel extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       state = LoginState.error;
       errorMessage = _mapFirebaseAuthError(e);
+    } on _LoginCancelledException catch (_) {
+      state = LoginState.idle;
     } catch (e) {
       state = LoginState.error;
       errorMessage = LoginStrings.loginErrorDefault;
@@ -170,15 +172,22 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> _signInWithGoogle() async {
-    await GoogleSignIn.instance.initialize();
-    final googleUser = await GoogleSignIn.instance.authenticate();
-    final googleAuth = googleUser!.authentication;
+    try {
+      await GoogleSignIn.instance.initialize();
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      final googleAuth = googleUser!.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      idToken: googleAuth.idToken,
-    );
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
 
-    await _signInWithCredential(credential);
+      await _signInWithCredential(credential);
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw _LoginCancelledException();
+      }
+      rethrow;
+    }
   }
 
   Future<void> _signInWithCredential(AuthCredential credential) async {
@@ -329,3 +338,7 @@ class LoginViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Exceção interna para sinalizar que o usuário cancelou o fluxo
+/// de login (ex.: fechou o picker do Google Sign-In).
+class _LoginCancelledException implements Exception {}

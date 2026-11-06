@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
@@ -49,6 +50,7 @@ class Header extends StatelessWidget {
 }
 
 Future<void> _logout() async {
+  await GoogleSignIn.instance.signOut();
   await _auth.signOut();
 }
 
