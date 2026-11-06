@@ -1,0 +1,72 @@
+{
+  "project_info": {
+    "project_number": "157009524901",
+    "firebase_url": "https://orcamentofacil-lite.firebaseio.com",
+    "project_id": "orcamentofacil-lite",
+    "storage_bucket": "orcamentofacil-lite.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157009524901:android:5ea24ac280199b104df54c",
+        "android_client_info": {
+          "package_name": "com.housestudio.oflite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "157009524901-0tn376lcov8erg18dkl1v062ja7apgfg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.housestudio.oflite",
+            "certificate_hash": "0959e2f7bd4c8c7035e01c23251a30d45cbfaf7b"
+          }
+        },
+        {
+          "client_id": "157009524901-gl1onbtvdhc1125jubonofjmavugusue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.housestudio.oflite",
+            "certificate_hash": "e3d718dca0fdabd8ddbeb7fd8a50eb296dd0a666"
+          }
+        },
+        {
+          "client_id": "157009524901-mtesedlopl4jl6k9jev1og2gdbp1o5vn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.housestudio.oflite",
+            "certificate_hash": "b65b2f1b47fa06fa8a13775bf08359b3a819a8ad"
+          }
+        },
+        {
+          "client_id": "157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrKC00sdSPo6DAqPcmO61CxcQnXCEv5nk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "157009524901-cf8t928c2u8ai2kh0hqpv24v9bpj2sru.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "157009524901-416uobbrkvda7avf5506j84ke1jgg23i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.housestudio.oflite"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-5106035309089315~7780835833"
+    }
+  ],
+  "configuration_version": "1"
+}

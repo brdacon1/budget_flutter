@@ -151,7 +151,8 @@ coverage/
 # Sensitive / credentials / keys (NEVER commit)
 # =============================================================================
 # Firebase
-**/google-services.json
+# google-services.json versionado para CI
+# **/google-services.json
 **/GoogleService-Info.plist
 firebase_options.dart
 .firebase/
