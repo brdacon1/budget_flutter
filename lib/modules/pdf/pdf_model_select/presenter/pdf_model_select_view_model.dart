@@ -9,7 +9,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_executive_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget_professional_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_generate_budget_simple_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 

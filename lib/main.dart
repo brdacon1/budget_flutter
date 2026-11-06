@@ -11,7 +11,6 @@ import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:provider/provider.dart';
 import 'app_routes.dart';
-import 'injection.dart';
 import 'shared/common/constants/constants.dart';
 
 /// Chave global do navigator do app. Compartilhada com o
