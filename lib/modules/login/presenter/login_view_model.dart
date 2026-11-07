@@ -113,6 +113,16 @@ class LoginViewModel extends ChangeNotifier {
       errorMessage = _mapFirebaseAuthError(e);
     } on _LoginCancelledException catch (_) {
       state = LoginState.idle;
+    } on GoogleSignInException catch (e) {
+      state = LoginState.error;
+      debugPrint('GoogleSignInException no _performLogin: ${e.code} - ${e.description}');
+      if (e.code == GoogleSignInExceptionCode.providerConfigurationError) {
+        errorMessage = 'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.';
+      } else if (e.code == GoogleSignInExceptionCode.uiUnavailable) {
+        errorMessage = 'A tela de login do Google não está disponível no momento. Tente novamente.';
+      } else {
+        errorMessage = 'Erro no login com Google. Tente novamente.';
+      }
     } catch (e) {
       state = LoginState.error;
       errorMessage = LoginStrings.loginErrorDefault;
@@ -174,17 +184,30 @@ class LoginViewModel extends ChangeNotifier {
   Future<void> _signInWithGoogle() async {
     try {
       final googleUser = await GoogleSignIn.instance.authenticate();
-      final googleAuth = googleUser!.authentication;
+      if (googleUser == null) {
+        throw _LoginCancelledException();
+      }
+
+      final googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw Exception('Google Sign-In retornou idToken nulo ou vazio.');
+      }
 
       final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
 
       await _signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
+      debugPrint('GoogleSignInException: code=${e.code}, description=${e.description}, details=${e.details}');
       if (e.code == GoogleSignInExceptionCode.canceled) {
         throw _LoginCancelledException();
       }
+      rethrow;
+    } catch (e, stack) {
+      debugPrint('Erro inesperado no Google Sign-In: $e\n$stack');
       rethrow;
     }
   }

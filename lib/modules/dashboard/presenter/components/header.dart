@@ -50,8 +50,16 @@ class Header extends StatelessWidget {
 }
 
 Future<void> _logout() async {
-  await GoogleSignIn.instance.signOut();
-  await _auth.signOut();
+  try {
+    await GoogleSignIn.instance.signOut();
+  } catch (e) {
+    debugPrint('Erro ao fazer signOut do GoogleSignIn: $e');
+  }
+  try {
+    await _auth.signOut();
+  } catch (e) {
+    debugPrint('Erro ao fazer signOut do FirebaseAuth: $e');
+  }
 }
 
 class ProfileCard extends StatefulWidget {
