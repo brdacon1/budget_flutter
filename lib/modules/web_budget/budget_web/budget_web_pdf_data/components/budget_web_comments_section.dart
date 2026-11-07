@@ -171,20 +171,25 @@ class _CommentsTable extends StatelessWidget {
       buttonLabel: '',
       onButtonPressed: () {},
       buttonVisible: false,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _FormReadOnlyField(
-              label: BudgetWebStrings.labelCommentDate,
-              value: _orEmpty(o.data),
-            ),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(
-              label: BudgetWebStrings.labelCommentText,
-              value: _orEmpty(o.observacao),
-            ),
-          ],
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelCommentDate,
+                value: _orEmpty(o.data),
+              ),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelCommentText,
+                value: _orEmpty(o.observacao),
+              ),
+            ],
+          ),
         ),
       ),
     );

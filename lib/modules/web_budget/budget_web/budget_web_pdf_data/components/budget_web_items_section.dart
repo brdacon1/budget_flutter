@@ -254,25 +254,30 @@ class _ItemsTable extends StatelessWidget {
       buttonLabel: '',
       onButtonPressed: () {},
       buttonVisible: false,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _FormReadOnlyField(label: 'Descrição', value: item.DESCRICAO ?? '-'),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(label: BudgetWebStrings.labelCategory, value: item.CATEGORIA ?? '-'),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(label: BudgetWebStrings.labelQuantity, value: '${item.QTD ?? 0}'),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(label: BudgetWebStrings.labelMeasure, value: item.MEDIDA ?? '-'),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(label: BudgetWebStrings.labelPrice, value: moneyConvert.convertFromDouble(item.PRECO ?? 0)),
-            const SizedBox(height: 12),
-            _FormReadOnlyField(
-              label: BudgetWebStrings.labelTotal,
-              value: moneyConvert.convertFromDouble(item.TOTAL ?? 0),
-            ),
-          ],
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _FormReadOnlyField(label: 'Descrição', value: item.DESCRICAO ?? '-'),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(label: BudgetWebStrings.labelCategory, value: item.CATEGORIA ?? '-'),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(label: BudgetWebStrings.labelQuantity, value: '${item.QTD ?? 0}'),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(label: BudgetWebStrings.labelMeasure, value: item.MEDIDA ?? '-'),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(label: BudgetWebStrings.labelPrice, value: moneyConvert.convertFromDouble(item.PRECO ?? 0)),
+              const SizedBox(height: 12),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelTotal,
+                value: moneyConvert.convertFromDouble(item.TOTAL ?? 0),
+              ),
+            ],
+          ),
         ),
       ),
     );
