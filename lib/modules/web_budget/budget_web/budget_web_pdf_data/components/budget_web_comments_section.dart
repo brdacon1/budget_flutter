@@ -1,6 +1,5 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
@@ -8,7 +7,8 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 /// Seção colapsável "Comentários" exibida na aba "Meus dados".
 ///
 /// Ao expandir, mostra a lista de observações/comentários do orçamento
-/// (somente leitura). Ao recolher, oculta a **lista inteira** — mesmo
+/// (somente leitura) em forma de **tabela** (`DataTable`), no mesmo padrão
+/// visual da seção de itens. Ao recolher, oculta a **lista inteira** — mesmo
 /// comportamento da seção de itens. Reutiliza as observações já carregadas
 /// pelo `BudgetWebBudgetViewModel` via `WebBudgetService.getObservations`.
 ///
@@ -56,7 +56,10 @@ class BudgetWebCommentsSection extends StatelessWidget {
                 ),
               )
             else
-              ...observations.map((o) => _CommentRow(observation: o)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: _CommentsTable(observations: observations),
+              ),
             const SizedBox(height: 10),
           ],
         ),
@@ -65,38 +68,93 @@ class BudgetWebCommentsSection extends StatelessWidget {
   }
 }
 
-class _CommentRow extends StatelessWidget {
-  const _CommentRow({required this.observation});
+/// Tabela de comentários com scroll horizontal, no padrão visual da
+/// seção de itens (`_ItemsTable`). Cada linha exibe a data e o texto do
+/// comentário.
+class _CommentsTable extends StatelessWidget {
+  const _CommentsTable({required this.observations});
 
-  final ObservationPdf observation;
+  final List<ObservationPdf> observations;
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: he * 0.012),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${BudgetWebStrings.labelCommentDate}: ${_orEmpty(observation.data)}',
-            style: GoogleFonts.heebo(
-              color: Colors.white70,
-              fontSize: 12,
-              letterSpacing: 0.5,
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: DataTable(
+                columnSpacing: defaultPadding,
+                horizontalMargin: 12,
+                headingRowColor: WidgetStateProperty.all(secondaryColor),
+                dataRowColor: WidgetStateProperty.all(Colors.transparent),
+                columns: [
+                  DataColumn(
+                    label: SizedBox(
+                      width: 100,
+                      child: Text(
+                        BudgetWebStrings.labelCommentDate,
+                        style: const TextStyle(
+                          color: whiteColor,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      BudgetWebStrings.labelCommentText,
+                      style: const TextStyle(
+                        color: whiteColor,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+                rows: observations
+                    .map(
+                      (o) => DataRow(
+                        cells: [
+                          DataCell(
+                            SizedBox(
+                              width: 100,
+                              child: Text(
+                                _orEmpty(o.data),
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              _orEmpty(o.observacao),
+                              softWrap: true,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 3,
+                              style: const TextStyle(
+                                color: whiteColor,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _orEmpty(observation.observacao),
-            style: GoogleFonts.heebo(
-              color: whiteColor,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
