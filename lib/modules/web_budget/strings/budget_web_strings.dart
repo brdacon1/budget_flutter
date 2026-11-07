@@ -77,6 +77,7 @@ class BudgetWebStrings {
 
   // Seções colapsáveis na aba "Meus dados" (itens + comentários)
   static String get sectionItems => 'Itens do orçamento';
+  static String get labelItemDetail => 'Item do orçamento';
   static String get sectionComments => 'Comentários';
   static String get itemsEmpty => 'Nenhum item neste orçamento.';
   static String get commentsEmpty => 'Nenhum comentário neste orçamento.';

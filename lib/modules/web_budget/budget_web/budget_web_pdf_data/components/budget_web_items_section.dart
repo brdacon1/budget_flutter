@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
@@ -124,6 +125,7 @@ class _ItemsTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
+          showCheckboxColumn: false,
           columnSpacing: defaultPadding,
           horizontalMargin: 12,
           headingRowColor: WidgetStateProperty.all(secondaryColor),
@@ -236,10 +238,80 @@ class _ItemsTable extends StatelessWidget {
                       ),
                     )),
                   ],
+                  onSelectChanged: (_) => _showItemDialog(context, item),
                 ),
               )
               .toList(),
         ),
+      ),
+    );
+  }
+
+  void _showItemDialog(BuildContext context, ItemsBudget item) {
+    showAppBottomModal(
+      context,
+      title: BudgetWebStrings.labelItemDetail,
+      buttonLabel: '',
+      onButtonPressed: () {},
+      buttonVisible: false,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _FormReadOnlyField(label: 'Descrição', value: item.DESCRICAO ?? '-'),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(label: BudgetWebStrings.labelCategory, value: item.CATEGORIA ?? '-'),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(label: BudgetWebStrings.labelQuantity, value: '${item.QTD ?? 0}'),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(label: BudgetWebStrings.labelMeasure, value: item.MEDIDA ?? '-'),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(label: BudgetWebStrings.labelPrice, value: moneyConvert.convertFromDouble(item.PRECO ?? 0)),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(
+              label: BudgetWebStrings.labelTotal,
+              value: moneyConvert.convertFromDouble(item.TOTAL ?? 0),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FormReadOnlyField extends StatelessWidget {
+  const _FormReadOnlyField({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppBottomModal.grayColor,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

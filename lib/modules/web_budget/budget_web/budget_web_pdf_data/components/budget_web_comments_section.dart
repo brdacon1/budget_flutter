@@ -1,8 +1,9 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 
 /// Seção colapsável "Comentários" exibida na aba "Meus dados".
 ///
@@ -90,6 +91,7 @@ class _CommentsTable extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minWidth: constraints.maxWidth),
               child: DataTable(
+                showCheckboxColumn: false,
                 columnSpacing: defaultPadding,
                 horizontalMargin: 12,
                 headingRowColor: WidgetStateProperty.all(secondaryColor),
@@ -119,38 +121,41 @@ class _CommentsTable extends StatelessWidget {
                     ),
                   ),
                 ],
-                rows: observations
-                    .map(
-                      (o) => DataRow(
-                        cells: [
-                          DataCell(
-                            SizedBox(
-                              width: 100,
-                              child: Text(
-                                _orEmpty(o.data),
-                                style: const TextStyle(
-                                  color: whiteColor,
-                                  fontSize: 12,
+                rows:
+                    observations
+                        .map(
+                          (o) => DataRow(
+                            onSelectChanged:
+                                (_) => _showCommentDialog(context, o),
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    _orEmpty(o.data),
+                                    style: const TextStyle(
+                                      color: whiteColor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          DataCell(
-                            Text(
-                              _orEmpty(o.observacao),
-                              softWrap: true,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 3,
-                              style: const TextStyle(
-                                color: whiteColor,
-                                fontSize: 12,
+                              DataCell(
+                                Text(
+                                  _orEmpty(o.observacao),
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 3,
+                                  style: const TextStyle(
+                                    color: whiteColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    )
-                    .toList(),
+                        )
+                        .toList(),
               ),
             ),
           );
@@ -159,9 +164,73 @@ class _CommentsTable extends StatelessWidget {
     );
   }
 
+  void _showCommentDialog(BuildContext context, ObservationPdf o) {
+    showAppBottomModal(
+      context,
+      title: BudgetWebStrings.sectionComments,
+      buttonLabel: '',
+      onButtonPressed: () {},
+      buttonVisible: false,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _FormReadOnlyField(
+              label: BudgetWebStrings.labelCommentDate,
+              value: _orEmpty(o.data),
+            ),
+            const SizedBox(height: 12),
+            _FormReadOnlyField(
+              label: BudgetWebStrings.labelCommentText,
+              value: _orEmpty(o.observacao),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _orEmpty(String? v) {
     final s = v?.toString();
     if (s == null || s.isEmpty || s == 'null') return '-';
     return s;
+  }
+}
+
+class _FormReadOnlyField extends StatelessWidget {
+  const _FormReadOnlyField({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppBottomModal.grayColor,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
