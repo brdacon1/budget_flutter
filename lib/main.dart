@@ -2,7 +2,7 @@ import 'package:oflite/injection.dart';
 import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
@@ -31,11 +31,14 @@ Future<void> main() async {
   // Inicializa Google Sign-In exatamente uma vez por execução do app.
   // A biblioteca exige que initialize() seja chamado uma única vez
   // antes de qualquer outro método.
+  // serverClientId é OBRIGATÓRIO no Android para a API CredentialManager.
   if (!kIsWeb) {
     try {
-      await GoogleSignIn.instance.initialize();
-    } catch (_) {
-      // Ignora falhas silenciosas na inicialização
+      await GoogleSignIn.instance.initialize(
+        serverClientId: '157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com',
+      );
+    } catch (e) {
+      debugPrint('Erro na inicialização do GoogleSignIn: $e');
     }
   }
 
