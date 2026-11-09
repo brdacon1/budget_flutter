@@ -91,7 +91,7 @@ class PdfMenuViewModel extends ChangeNotifier {
         );
         break;
       case 2:
-        if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+        if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
             false)) {
           await _displayAlert
               .adsNotification(context)

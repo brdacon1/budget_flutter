@@ -391,7 +391,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
 
   Future<void> addNew(BuildContext context) async {
     final isPremium =
-        getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
+        getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

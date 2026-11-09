@@ -46,7 +46,7 @@ class UserRepositoryImpl extends UserRepository {
             ..IdPay = raw['IdPay']
             ..ProductId = raw['ProductId']
             ..PurchaseToken = raw['PurchaseToken']
-            ..AutoRenewing = raw['AutoRenewing'] ?? false;
+            ..autoRenewing = raw['AutoRenewing'] ?? false;
 
       _currentUser = user;
       _selectUser.value = user;

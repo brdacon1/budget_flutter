@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+
+import 'components/pdf_edit_address_card.dart';
+import 'components/pdf_edit_enterprise_card.dart';
 import 'components/pdf_edit_header.dart';
 import 'components/pdf_edit_logo_section.dart';
-import 'components/pdf_edit_enterprise_card.dart';
-import 'components/pdf_edit_address_card.dart';
 import 'components/pdf_edit_save_button.dart';
 import 'pdf_edit_view_model.dart';
 
@@ -23,7 +24,9 @@ class _PdfEditView extends State<PdfEditView> {
   void initState() {
     super.initState();
     _viewModel = getIt<PdfEditViewModel>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _viewModel.inicialData(),
+    );
   }
 
   @override
@@ -54,10 +57,14 @@ class _PdfEditView extends State<PdfEditView> {
                         fileContent: vm.fileContent,
                         loading: vm.loading,
                         hasError: vm.hasError,
-                        autoRenewing: getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false,
+                        autoRenewing:
+                            getIt<UserRepository>()
+                                .selectUser
+                                .value
+                                ?.autoRenewing ??
+                            false,
                         onEditLogo: () => vm.editLogo(context),
-                        onOpenSubscription: () =>
-                            vm.openSubscription(context),
+                        onOpenSubscription: () => vm.openSubscription(context),
                       ),
                       PdfEditEnterpriseCard(
                         nameText: vm.nameText,

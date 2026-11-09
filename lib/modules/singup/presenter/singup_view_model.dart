@@ -89,7 +89,7 @@ class SingUpViewModel extends ChangeNotifier {
       DADOS.USER = uid;
       DADOS.NOME = nome;
       DADOS.id = uid;
-      DADOS.AutoRenewing = false;
+      DADOS.autoRenewing = false;
       DADOS.IdPay = '';
       DADOS.ProductId = '';
       DADOS.PurchaseToken = '';
@@ -118,7 +118,7 @@ class SingUpViewModel extends ChangeNotifier {
             ..IdPay = ''
             ..ProductId = ''
             ..PurchaseToken = ''
-            ..AutoRenewing = false;
+            ..autoRenewing = false;
       _userRepository.selectUser.value = session;
 
       await _getUserInfo(uid);
@@ -148,7 +148,7 @@ class SingUpViewModel extends ChangeNotifier {
         DADOS.IdPay = user.IdPay;
         DADOS.ProductId = user.ProductId;
         DADOS.PurchaseToken = user.PurchaseToken;
-        DADOS.AutoRenewing = user.AutoRenewing;
+        DADOS.autoRenewing = user.autoRenewing;
 
         _userRepository.selectUser.value = user;
       } else {
@@ -179,7 +179,7 @@ class SingUpViewModel extends ChangeNotifier {
           );
 
           final session = _userRepository.selectUser.value ?? InfoUser();
-          session.AutoRenewing = latestSubscription.isAutoRenewing;
+          session.autoRenewing = latestSubscription.isAutoRenewing;
           session.PurchaseToken = latestSubscription.purchaseToken ?? '';
           session.ProductId = latestSubscription.productId;
           _userRepository.selectUser.value = session;
@@ -193,13 +193,13 @@ class SingUpViewModel extends ChangeNotifier {
           }
         } else {
           final session = _userRepository.selectUser.value ?? InfoUser();
-          session.AutoRenewing = false;
+          session.autoRenewing = false;
           session.PurchaseToken = '';
           _userRepository.selectUser.value = session;
         }
       } catch (_) {
         final session = _userRepository.selectUser.value ?? InfoUser();
-        session.AutoRenewing = false;
+        session.autoRenewing = false;
         session.PurchaseToken = '';
         _userRepository.selectUser.value = session;
       }

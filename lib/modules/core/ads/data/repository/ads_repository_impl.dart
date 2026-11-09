@@ -22,7 +22,7 @@ class AdsRepositoryImpl implements AdsRepository {
 
   @override
   bool get shouldShowAds =>
-      !(_userRepository.selectUser.value?.AutoRenewing ?? false);
+      !(_userRepository.selectUser.value?.autoRenewing ?? false);
 
   @override
   String get bannerAdUnitId => Environment.instance.adMob.bannerAdUnitId;
@@ -73,7 +73,9 @@ class AdsRepositoryImpl implements AdsRepository {
   @override
   void showInterstitial() {
     if (!shouldShowAds) {
-      debugPrint('[AdsRepositoryImpl] Usuário premium — intersticial suprimido.');
+      debugPrint(
+        '[AdsRepositoryImpl] Usuário premium — intersticial suprimido.',
+      );
       return;
     }
     if (_interstitialAd == null) {

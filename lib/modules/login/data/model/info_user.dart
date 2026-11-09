@@ -6,7 +6,7 @@ class InfoUser {
   String? NOME;
   String? FONE;
   String? PurchaseToken;
-  bool? AutoRenewing = false;
+  bool? autoRenewing = false;
   String? IdPay;
   String? ProductId;
   bool? googleAuth = false;

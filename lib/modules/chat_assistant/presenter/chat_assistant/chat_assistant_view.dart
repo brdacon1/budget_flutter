@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
-import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
 import 'package:oflite/modules/pdf/pdf_model_select/presenter/pdf_model_select_view.dart';
@@ -17,9 +18,7 @@ import 'package:oflite/modules/product/product_price/data/model/product_price_mo
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
 class ChatAssistantView extends StatefulWidget {
@@ -76,9 +75,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => BudgetListItemsView(item: budget),
-      ),
+      MaterialPageRoute(builder: (_) => BudgetListItemsView(item: budget)),
     );
 
     // Ao voltar, os itens já foram salvos/editados na tela nativa.
@@ -92,9 +89,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => CommentListView(item: budget),
-      ),
+      MaterialPageRoute(builder: (_) => CommentListView(item: budget)),
     );
 
     // Ao voltar da tela de comentários, finaliza o orçamento
@@ -127,9 +122,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case 'open_pdf_edit':
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => const PdfEditView(),
-          ),
+          MaterialPageRoute(builder: (_) => const PdfEditView()),
         );
         break;
       case 'open_change_name':
@@ -172,7 +165,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _openLogoEditFlow() async {
-    final isSubscribed = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
+    final isSubscribed =
+        getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
     if (!isSubscribed) {
       if (!mounted) return;
       await Navigator.push(
@@ -216,8 +210,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                 color: Colors.cyan,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.support_agent,
-                  size: 20, color: Colors.white),
+              child: const Icon(
+                Icons.support_agent,
+                size: 20,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(width: 10),
             const Column(
@@ -225,17 +222,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
               children: [
                 Text(
                   'Assistente',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'online',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.greenAccent,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.greenAccent),
                 ),
               ],
             ),
@@ -286,7 +277,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                     return ChatMessageBubble(
                       message: msg,
                       onAction: (action) => _handleAction(action, msg),
-                      onEditMessage: (field, text, msgId) => _vm.prepareEditMessage(field, text, msgId),
+                      onEditMessage:
+                          (field, text, msgId) =>
+                              _vm.prepareEditMessage(field, text, msgId),
                     );
                   },
                 ),
@@ -327,7 +320,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       focusNode: _inputFocusNode,
       isEditing: _vm.isEditingMessage,
       onCancelEdit: () => _vm.cancelEdit(),
-      enabled: !_vm.isLoading &&
+      enabled:
+          !_vm.isLoading &&
           step != ChatFlowStep.askAddress &&
           step != ChatFlowStep.reviewProducts &&
           step != ChatFlowStep.shareLink,
@@ -443,7 +437,10 @@ class _EditAwareInputBar extends StatelessWidget {
           children: [
             if (isEditing)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 12,
+                ),
                 margin: const EdgeInsets.only(bottom: 6),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2A2D3E),
@@ -465,7 +462,11 @@ class _EditAwareInputBar extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: onCancelEdit,
-                      child: const Icon(Icons.close, size: 18, color: Colors.white70),
+                      child: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color: Colors.white70,
+                      ),
                     ),
                   ],
                 ),
@@ -479,12 +480,17 @@ class _EditAwareInputBar extends StatelessWidget {
                     enabled: enabled,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: isEditing ? 'Edite a mensagem...' : 'Digite uma mensagem...',
+                      hintText:
+                          isEditing
+                              ? 'Edite a mensagem...'
+                              : 'Digite uma mensagem...',
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
                       fillColor: const Color(0xFF2A2D3E),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
@@ -578,18 +584,29 @@ class _ManualAddressForm extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: _buildField(streetController, ChatBudgetStrings.streetField),
+                  child: _buildField(
+                    streetController,
+                    ChatBudgetStrings.streetField,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 1,
-                  child: _buildField(numberController, ChatBudgetStrings.numberField, keyboardType: TextInputType.number),
+                  child: _buildField(
+                    numberController,
+                    ChatBudgetStrings.numberField,
+                    keyboardType: TextInputType.number,
+                  ),
                 ),
               ],
             ),
             if (isCorrecting && cepController != null) ...[
               const SizedBox(height: 8),
-              _buildField(cepController!, 'CEP', keyboardType: TextInputType.number),
+              _buildField(
+                cepController!,
+                'CEP',
+                keyboardType: TextInputType.number,
+              ),
             ],
             const SizedBox(height: 8),
             _buildField(cityController, ChatBudgetStrings.cityField),
@@ -620,7 +637,11 @@ class _ManualAddressForm extends StatelessWidget {
     );
   }
 
-  Widget _buildField(TextEditingController ctrl, String hint, {TextInputType? keyboardType}) {
+  Widget _buildField(
+    TextEditingController ctrl,
+    String hint, {
+    TextInputType? keyboardType,
+  }) {
     return TextField(
       controller: ctrl,
       keyboardType: keyboardType,
@@ -630,8 +651,10 @@ class _ManualAddressForm extends StatelessWidget {
         hintStyle: TextStyle(color: Colors.grey[500]),
         filled: true,
         fillColor: const Color(0xFF2A2D3E),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

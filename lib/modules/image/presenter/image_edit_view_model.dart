@@ -48,7 +48,6 @@ class ImageEditViewModel extends ChangeNotifier {
     } else {
       final response = await http.get(Uri.parse(initialImageUrl!));
       if (response.statusCode != 200) {
-        print('Erro ao baixar imagem para cortar: ${response.statusCode}');
         return;
       }
 
@@ -112,7 +111,6 @@ class ImageEditViewModel extends ChangeNotifier {
       file.delete();
       return imageUrl;
     } catch (e) {
-      print('Erro ao enviar a imagem: $e');
       return '';
     }
   }
@@ -124,7 +122,6 @@ class ImageEditViewModel extends ChangeNotifier {
       final FirebaseStorage storage = FirebaseStorage.instance;
       final Reference ref = storage.ref().child('images/$imageName.jpg');
       await ref.delete();
-      print('Imagem excluída com sucesso!');
     } catch (e) {
       print('Erro ao excluir a imagem: $e');
     }

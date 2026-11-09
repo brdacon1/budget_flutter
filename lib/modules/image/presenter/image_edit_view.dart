@@ -33,9 +33,6 @@ class _ImageEditView extends State<ImageEditView> {
     super.initState();
     _viewModel = getIt<ImageEditViewModel>();
     _viewModel.addListener(_onViewModelChanged);
-    print(
-      'ImageEditView: fotoId=${widget.owner.fotoId}, logoName=${widget.owner.logoName}',
-    );
     _viewModel.loadInitialImage(widget.owner.fotoId, widget.owner.logoName);
   }
 
@@ -145,7 +142,6 @@ class _ImageEditView extends State<ImageEditView> {
             return const Center(child: CircularProgressIndicator());
           },
           errorBuilder: (context, error, stackTrace) {
-            print('ImageEditView: erro ao carregar imagem: $error');
             return const Icon(Icons.error, color: Colors.red, size: 64);
           },
         ),

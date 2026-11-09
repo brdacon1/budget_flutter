@@ -294,7 +294,7 @@ class LoginViewModel extends ChangeNotifier {
           );
 
           final session = _userRepository.selectUser.value ?? InfoUser();
-          session.AutoRenewing = latestSubscription.isAutoRenewing;
+          session.autoRenewing = latestSubscription.isAutoRenewing;
           session.PurchaseToken = latestSubscription.purchaseToken ?? '';
           session.ProductId = latestSubscription.productId;
           _userRepository.selectUser.value = session;
@@ -308,13 +308,13 @@ class LoginViewModel extends ChangeNotifier {
           }
         } else {
           final session = _userRepository.selectUser.value ?? InfoUser();
-          session.AutoRenewing = false;
+          session.autoRenewing = false;
           session.PurchaseToken = '';
           _userRepository.selectUser.value = session;
         }
       } catch (_) {
         final session = _userRepository.selectUser.value ?? InfoUser();
-        session.AutoRenewing = false;
+        session.autoRenewing = false;
         session.PurchaseToken = '';
         _userRepository.selectUser.value = session;
       }

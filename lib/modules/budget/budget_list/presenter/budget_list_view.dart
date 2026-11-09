@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
-import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
@@ -168,18 +168,20 @@ class _BudgetListView extends State<BudgetListView> {
           child: FloatingActionButton.extended(
             heroTag: "adicionar",
             onPressed: () async {
-              if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+              if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
                   false)) {
-                final value = await _viewModel.displayAlert.adsNotification(context);
+                final value = await _viewModel.displayAlert.adsNotification(
+                  context,
+                );
                 if (!mounted) return;
                 if (value == "Ver anuncio") {
                   getIt<AdsRepository>().showInterstitial();
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BudgetTabView(
-                        item: _viewModel.customerInfoNew(),
-                      ),
+                      builder:
+                          (context) =>
+                              BudgetTabView(item: _viewModel.customerInfoNew()),
                     ),
                   );
                   if (!mounted) return;
@@ -189,9 +191,7 @@ class _BudgetListView extends State<BudgetListView> {
                 } else if (value == "Se tornar premium") {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => SubscriptionView(),
-                    ),
+                    MaterialPageRoute(builder: (context) => SubscriptionView()),
                   );
                 }
               } else {
@@ -243,9 +243,8 @@ class _BudgetListView extends State<BudgetListView> {
 
   Widget _buildListView() {
     final data = _viewModel.getFilteredData();
-    final isEmpty = data.isEmpty &&
-        !_viewModel.isRefreshing &&
-        !_viewModel.isLoadingMore;
+    final isEmpty =
+        data.isEmpty && !_viewModel.isRefreshing && !_viewModel.isLoadingMore;
 
     if (isEmpty) {
       return Expanded(
@@ -303,9 +302,7 @@ class _BudgetListView extends State<BudgetListView> {
             right: 15,
             top: 0,
           ),
-          itemCount:
-              data.length +
-              (_viewModel.isLoadingMore ? 1 : 0),
+          itemCount: data.length + (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= data.length) {
               return const Padding(
@@ -345,7 +342,7 @@ class _BudgetListView extends State<BudgetListView> {
                 });
               },
               onDuplicate: () async {
-                if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+                if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
                         false) &&
                     _viewModel.totalBudgetCount > 10) {
                   await _viewModel.displayAlert.notificationError(
@@ -356,9 +353,7 @@ class _BudgetListView extends State<BudgetListView> {
                   if (!mounted) return;
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => SubscriptionView(),
-                    ),
+                    MaterialPageRoute(builder: (context) => SubscriptionView()),
                   );
                 } else {
                   getIt<BudgetRepository>().selectBudget.value = item;

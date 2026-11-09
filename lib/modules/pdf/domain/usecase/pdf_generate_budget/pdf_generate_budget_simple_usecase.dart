@@ -918,7 +918,6 @@ class PdfGenerateBudgetSimpleUsecase {
 
   Future<String> _saveDocument(PdfDocument document, String filename) async {
     final directory = await getTemporaryDirectory();
-    print(directory);
     final String path = directory.path;
     final File file = File('$path/$filename.pdf');
     await file.writeAsBytes(await document.save(), flush: true);
