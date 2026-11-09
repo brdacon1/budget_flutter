@@ -48,17 +48,17 @@ class ItemsListBudget {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = this.id;
-    data['CATEGORIA'] = this.category;
-    data['DESCRICAO'] = this.description;
-    data['PRECO'] = this.price;
-    data['QTD'] = this.QTD;
-    data['MEDIDA'] = this.MEDIDA;
-    data['TOTAL'] = this.total;
-    data['IDPRODUCT'] = this.IDPRODUCT;
-    data['checkBox'] = this.checkBox;
-    data['selectProduct'] = this.selectProduct;
-    data['indice'] = this.indice;
+    data['id'] = id;
+    data['CATEGORIA'] = category;
+    data['DESCRICAO'] = description;
+    data['PRECO'] = price;
+    data['QTD'] = QTD;
+    data['MEDIDA'] = MEDIDA;
+    data['TOTAL'] = total;
+    data['IDPRODUCT'] = IDPRODUCT;
+    data['checkBox'] = checkBox;
+    data['selectProduct'] = selectProduct;
+    data['indice'] = indice;
 
     return data;
   }

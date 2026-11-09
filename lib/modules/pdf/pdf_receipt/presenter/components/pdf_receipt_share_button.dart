@@ -22,9 +22,11 @@ class PdfReceiptShareButton extends StatelessWidget {
           child: TextButton(
             onPressed:
                 enabled
-                    ? () {
+                    ? () async {
                       final xFile = XFile(filePath!);
-                      Share.shareXFiles([xFile], text: PdfStrings.sharePdf);
+                      await SharePlus.instance.share(
+                        ShareParams(files: [xFile], text: PdfStrings.sharePdf),
+                      );
                     }
                     : null,
             style: TextButton.styleFrom(
