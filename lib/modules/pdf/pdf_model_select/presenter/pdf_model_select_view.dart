@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
 import 'pdf_model_select_view_model.dart';
 
 class PdfModelSelectView extends StatefulWidget {
@@ -18,7 +19,9 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
   void initState() {
     super.initState();
     _viewModel = PdfModelSelectViewModel();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _viewModel.inicialData(),
+    );
   }
 
   @override
@@ -77,9 +80,10 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _viewModel.currentIndex == index
-                            ? buttonColor
-                            : Colors.white24,
+                        color:
+                            _viewModel.currentIndex == index
+                                ? buttonColor
+                                : Colors.white24,
                       ),
                     );
                   }),
@@ -87,97 +91,110 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
               ),
             ),
           ),
-          body: _viewModel.loading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 1,
-                  ),
-                )
-              : Column(
-                  children: [
-                    Expanded(
-                      child: PageView.builder(
-                        controller: _viewModel.pageController,
-                        onPageChanged: _viewModel.onPageChanged,
-                        itemCount: _viewModel.layouts.length,
-                        itemBuilder: (context, index) {
-                          final bytes = switch (index) {
-                            0 => _viewModel.standardBytes,
-                            1 => _viewModel.executiveBytes,
-                            2 => _viewModel.professionalBytes,
-                            _ => null,
-                          };
-                          final label = _viewModel.layouts[index]['label'] ?? '';
+          body:
+              _viewModel.loading
+                  ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 1,
+                    ),
+                  )
+                  : Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _viewModel.pageController,
+                          onPageChanged: _viewModel.onPageChanged,
+                          itemCount: _viewModel.layouts.length,
+                          itemBuilder: (context, index) {
+                            final bytes = switch (index) {
+                              0 => _viewModel.standardBytes,
+                              1 => _viewModel.executiveBytes,
+                              2 => _viewModel.professionalBytes,
+                              _ => null,
+                            };
+                            final label =
+                                _viewModel.layouts[index]['label'] ?? '';
 
-                          if (bytes == null || bytes.isEmpty) {
-                            return Center(
-                              child: Text(
-                                'Não foi possível gerar a pré-visualização de $label',
-                                style: const TextStyle(color: Colors.white70),
-                                textAlign: TextAlign.center,
+                            if (bytes == null || bytes.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'Não foi possível gerar a pré-visualização de $label',
+                                  style: const TextStyle(color: Colors.white70),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            );
-                          }
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                color: Colors.white,
-                                child: SfPdfViewer.memory(
-                                  bytes,
-                                  enableDoubleTapZooming: false,
-                                  canShowScrollHead: false,
-                                  canShowScrollStatus: false,
-                                  canShowPaginationDialog: false,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: SfPdfViewer.memory(
+                                    bytes,
+                                    enableDoubleTapZooming: false,
+                                    canShowScrollHead: false,
+                                    canShowScrollStatus: false,
+                                    canShowPaginationDialog: false,
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: TextButton(
-                            onPressed: _viewModel.saving ? null : _onSelect,
-                            style: TextButton.styleFrom(
-                              backgroundColor: buttonColor,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: TextButton(
+                              onPressed: _viewModel.saving ? null : _onSelect,
+                              style: TextButton.styleFrom(
+                                backgroundColor: buttonColor,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                disabledBackgroundColor: buttonColor.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
-                              disabledBackgroundColor: buttonColor.withOpacity(0.4),
+                              child:
+                                  _viewModel.saving
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.black,
+                                        ),
+                                      )
+                                      : Text(
+                                        'Quero esse',
+                                        style: GoogleFonts.heebo(
+                                          color: Colors.black,
+                                          letterSpacing: 0.5,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                             ),
-                            child: _viewModel.saving
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.black,
-                                    ),
-                                  )
-                                : Text(
-                                    'Quero esse',
-                                    style: GoogleFonts.heebo(
-                                      color: Colors.black,
-                                      letterSpacing: 0.5,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
         );
       },
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 
 /// Card de item da lista de preço.
 ///
@@ -38,17 +38,16 @@ class ProductPriceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Validação da categoria para colorir a pílula de acordo com o design (mantendo cores do tema)
-    final bool isProduct = '${item.categoria}'.toLowerCase().contains('produto') || item.categoria == '1';
+    final bool isProduct =
+        '${item.categoria}'.toLowerCase().contains('produto') ||
+        item.categoria == '1';
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       decoration: BoxDecoration(
         color: secondaryColor,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: const Color(0xFF2A2A3C),
-          width: 1.2,
-        ),
+        border: Border.all(color: const Color(0xFF2A2A3C), width: 1.2),
       ),
       child: Material(
         color: Colors.transparent,
@@ -69,9 +68,15 @@ class ProductPriceCard extends StatelessWidget {
                     children: [
                       // Tag superior estilo pílula arredondada
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: isProduct ? const Color(0xFF9C27B0) : const Color(0xFF00BFA5),
+                          color:
+                              isProduct
+                                  ? const Color(0xFF9C27B0)
+                                  : const Color(0xFF00BFA5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -152,7 +157,7 @@ class ProductPriceCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFB388FF).withOpacity(0.8),
+                          color: const Color(0xFFB388FF).withValues(alpha: 0.8),
                           width: 2.2,
                         ),
                       ),

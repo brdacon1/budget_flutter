@@ -141,7 +141,7 @@ class _ItemsListBottomModalWidgetState
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -175,7 +175,9 @@ class _ItemsListBottomModalWidgetState
                       Text(
                         '${widget.moneyConvert.convertFromDouble(priceUnit)} un',
                         style: GoogleFonts.heebo(
-                          color: AppBottomModal.grayColor.withOpacity(0.7),
+                          color: AppBottomModal.grayColor.withValues(
+                            alpha: 0.7,
+                          ),
                           fontSize: 10.5,
                         ),
                       ),

@@ -23,7 +23,7 @@ class ChatInputBar extends StatelessWidget {
         color: const Color(0xFF1E1E2C),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -43,8 +43,10 @@ class ChatInputBar extends StatelessWidget {
                   hintStyle: TextStyle(color: Colors.grey[500]),
                   filled: true,
                   fillColor: const Color(0xFF2A2D3E),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,

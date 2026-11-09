@@ -25,20 +25,20 @@ class GetBudgetStatusColor {
         return StatusConfig(
           color: Colors.red,
           icon: Icons.close_sharp,
-          bgLight: Colors.red.withOpacity(0.1),
+          bgLight: Colors.red.withValues(alpha: 0.1),
         );
       case 'PENDENTE':
         return StatusConfig(
           color: Colors.amber[800]!,
           icon: Icons.pending_outlined,
-          bgLight: Colors.amber.withOpacity(0.1),
+          bgLight: Colors.amber.withValues(alpha: 0.1),
         );
       case 'FINALIZADO':
       default:
         return StatusConfig(
           color: Colors.grey.shade700,
           icon: Icons.circle,
-          bgLight: Colors.grey.withOpacity(0.1),
+          bgLight: Colors.grey.withValues(alpha: 0.1),
         );
     }
   }
