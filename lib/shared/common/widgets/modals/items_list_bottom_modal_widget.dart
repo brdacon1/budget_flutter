@@ -82,7 +82,7 @@ class _ItemsListBottomModalWidgetState
       itemBuilder: (context, index) {
         final item = _items[index];
         final double priceUnit = item.price ?? 0.0;
-        final double qtd = item.QTD ?? 0.0;
+        final double qtd = item.quantity ?? 0.0;
         final double totalPrice = priceUnit * qtd;
 
         return Card(
@@ -126,7 +126,7 @@ class _ItemsListBottomModalWidgetState
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Quantidade: ${_formatQuantity(item.QTD)}',
+                          'Quantidade: ${_formatQuantity(item.quantity)}',
                           style: GoogleFonts.heebo(
                             color: AppBottomModal.grayColor,
                             fontSize: 11.5,

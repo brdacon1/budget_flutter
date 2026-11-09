@@ -224,7 +224,7 @@ class _ItemsTable extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            '${item.QTD ?? 0}',
+                            '${item.quantity ?? 0}',
                             style: const TextStyle(
                               color: whiteColor,
                               fontSize: 12,
@@ -296,7 +296,7 @@ class _ItemsTable extends StatelessWidget {
               const SizedBox(height: 12),
               _FormReadOnlyField(
                 label: BudgetWebStrings.labelQuantity,
-                value: '${item.QTD ?? 0}',
+                value: '${item.quantity ?? 0}',
               ),
               const SizedBox(height: 12),
               _FormReadOnlyField(

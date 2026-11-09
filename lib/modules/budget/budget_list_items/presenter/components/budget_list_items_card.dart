@@ -35,7 +35,7 @@ class BudgetListItemsCard extends StatelessWidget {
         ),
         ExpansionCardLabel(
           nameText: "Quantidade:",
-          textData: '${item.QTD}',
+          textData: '${item.quantity}',
           horizontalPadding: 12,
           verticalPadding: 5,
         ),

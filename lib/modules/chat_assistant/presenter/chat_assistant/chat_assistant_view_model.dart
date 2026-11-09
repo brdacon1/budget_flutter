@@ -980,10 +980,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     } else {
       buffer.writeln('Itens do orçamento:');
       for (final it in items) {
-        final lineTotal = it.TOTAL ?? ((it.QTD ?? 0) * (it.price ?? 0));
+        final lineTotal = it.TOTAL ?? ((it.quantity ?? 0) * (it.price ?? 0));
         grandTotal += lineTotal;
         buffer.writeln(
-          '• ${it.description} — ${(it.QTD ?? 1).toInt()}x '
+          '• ${it.description} — ${(it.quantity ?? 1).toInt()}x '
           'R\$ ${(it.price ?? 0).toStringAsFixed(2)} = '
           'R\$ ${lineTotal.toStringAsFixed(2)}',
         );
