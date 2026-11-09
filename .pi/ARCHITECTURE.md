@@ -1414,5 +1414,82 @@ opção "Assista anúncio ou vire Premium". Nesse caso:
 
 ---
 
+## 14. Regra do `ProductPriceCreator` — Sempre Vincular ao Orçamento quando
+      Apropriado
+
+> **Contexto**: o `ProductPriceCreatorView` (`showProductPriceCreatorBottomModal`)
+> é usado em dois contextos diferentes: (a) gerenciamento global de produtos
+> (lista de preço) e (b) adição de itens dentro de um orçamento.
+>
+> Quando chamado a partir de uma **tela de orçamento** (`BudgetListItemsView`
+> ou `ProductPriceListView` vinculada a um orçamento), o produto criado deve
+> ser salvo **tanto na lista de preço (`ProductPriceRepository`) quanto no
+> orçamento (`BudgetRepository`)**. Isso é controlado pela flag `fromListItem`.
+
+### 14.1 Implementação
+
+O `ProductPriceCreatorViewModel` recebe `fromListItem` via construtor:
+
+```dart
+ProductPriceCreatorViewModel({
+  required this.item,
+  this.fromListItem = false,
+})
+```
+
+Quando `fromListItem == true`, o método `_create()` adiciona o produto recém-
+criado ao orçamento ativo via `BudgetRepository.saveBudgetItem`:
+
+```dart
+Future<String?> _create({required ProductPriceModel model}) async {
+  final result = await _productRepository.addProduct(model);
+  if (result is Error<String?>) throw result.error;
+
+  if (fromListItem) {
+    final id = (result as Ok<String?>).value;
+    final budgetItem = ItemsBudget(
+      id: id,
+      CATEGORIA: model.categoria,
+      DESCRICAO: model.descricao,
+      PRECO: model.preco,
+      QTD: model.qtd,
+      MEDIDA: model.medida,
+      TOTAL: model.total,
+      IDPRODUCT: id,
+    );
+    await _budgetRepository.saveBudgetItem(
+        _budgetRepository.selectBudget.value?.id ?? '', budgetItem);
+  }
+  // ...
+}
+```
+
+### 14.2 Quem deve passar `fromListItem: true`?
+
+| Origem da chamada | `fromListItem` | Motivo |
+|-------------------|----------------|--------|
+| `BudgetListItemsView` (botão "Criar novo item") | ✅ `true` | Está dentro do fluxo de um orçamento |
+| `ProductPriceListView` vinculada a orçamento (`fromMenu: false`) | ✅ `true` | Está dentro do fluxo de um orçamento |
+| `ProductPriceListView` via menu principal (`fromMenu: true`) | ❌ `false` | Gestão de produtos, não vinculada a orçamento |
+| Chat assistant (botão "Criar produto" no menu) | ❌ `false` | O chat reconduz o usuário para selecionar da lista depois |
+
+> **ATENÇÃO**: `ProductPriceCreatorViewModel` usa
+> `_budgetRepository.selectBudget.value?.id` para descobrir o id do orçamento.
+> Quem abre o creator obrigatoriamente deve ter garantido que
+> `BudgetRepository.selectBudget.value` está populado com o orçamento correto.
+
+### 14.3 Checklist para Evitar Regressão
+
+- [ ] `BudgetListItemsView` seta `selectBudget.value = widget.item` antes de
+      abrir qualquer tela/modal que possa salvar itens.
+- [ ] `BudgetListItemsView._showProductPriceCreatorBottomModal()` passa
+      `fromListItem: true`.
+- [ ] `ProductPriceListViewModel.openCreator()` calcula
+      `fromListItem: this.item != null && !fromMenu`.
+- [ ] `ProductPriceListViewModel.addNew()` não precisa de mudança (delega para
+      `openCreator()`).
+
+---
+
 > **Documento mantido na pasta `.pi/`** — atualizar sempre que novos padrões
 > forem adotados.

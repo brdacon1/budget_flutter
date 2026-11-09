@@ -265,7 +265,7 @@ class _BudgetListView extends State<BudgetListView> {
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+              const SizedBox(height: 30),
               Center(
                 child: Column(
                   children: [
