@@ -8,11 +8,11 @@ import 'package:oflite/shared/common/widgets/button/action_button.dart';
 /// Item da lista de comentários, exibido em um [ExpansionTileCard].
 class CommentListItem extends StatelessWidget {
   const CommentListItem({
-    Key? key,
+    super.key,
     required this.comment,
     required this.onDelete,
     required this.onEdit,
-  }) : super(key: key);
+  });
 
   final ObservationBudget comment;
   final Future<void> Function(ObservationBudget comment) onDelete;

@@ -1,49 +1,48 @@
-import 'package:oflite/injection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/login/presenter/login_view.dart';
-import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
-
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/login/presenter/login_view.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class Header extends StatelessWidget {
-  const Header({
-    Key? key,
-  }) : super(key: key);
+  const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (!ResponsiveWidget.isDesktop(context))
           FadeAnimationWidget(
             delay: 1,
             child: Container(
               alignment: Alignment.topLeft,
-              child: Text(DashboardStrings.pageTitle,style: GoogleFonts.heebo(
+              child: Text(
+                DashboardStrings.pageTitle,
+                style: GoogleFonts.heebo(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 26,
-                  letterSpacing: 1
-              ),
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ),
         if (!ResponsiveWidget.isMobile(context))
           Spacer(flex: ResponsiveWidget.isDesktop(context) ? 2 : 1),
-        const ProfileCard()
+        const ProfileCard(),
       ],
     );
   }
@@ -63,37 +62,41 @@ Future<void> _logout() async {
 }
 
 class ProfileCard extends StatefulWidget {
+  const ProfileCard({super.key});
 
-  const ProfileCard({
-    Key? key,
-  }) : super(key: key);
   @override
-  _ProfileCard createState() => _ProfileCard();
+  State<ProfileCard> createState() => _ProfileCard();
 }
+
 String capitalizeFirstLetter(String text) {
   if (text.isEmpty) {
     return '';
   }
   return text[0].toUpperCase() + text.substring(1).toLowerCase();
 }
+
 class _ProfileCard extends State<ProfileCard> {
   late String _selectedItem;
   late final List<String> _dropdownItems;
 
-  final List<IconData> _dropdownIcons = [
-    Icons.person,
-    Icons.logout,
-  ];
+  final List<IconData> _dropdownIcons = [Icons.person, Icons.logout];
 
   @override
   void initState() {
     super.initState();
-    final name = getIt<UserRepository>().selectUser.value?.NOME ?? DashboardStrings.userFallback;
+    final name =
+        getIt<UserRepository>().selectUser.value?.NOME ??
+        DashboardStrings.userFallback;
     _selectedItem = capitalizeFirstLetter(name.split(' ')[0]);
-    _dropdownItems = [
-      _selectedItem,
-      DashboardStrings.logout,
-    ];
+    _dropdownItems = [_selectedItem, DashboardStrings.logout];
+  }
+
+  Future<void> _openNavigationScreen() async {
+    await Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginView()),
+      (Route<dynamic> route) => false,
+    ).then((value) async => {});
   }
 
   @override
@@ -112,47 +115,43 @@ class _ProfileCard extends State<ProfileCard> {
       child: DropdownButton<String>(
         underline: Container(color: Colors.transparent),
         value: _selectedItem,
-        onChanged: (String? newValue)  async {
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            if(newValue! == DashboardStrings.logout)
-            {
-              getIt<NotificationRepository>().stopBudgetApprovalListener();
-              await _logout();
-              await prefs.remove('email');
-              await prefs.remove('password');
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginView()),
-                    (Route<dynamic> route) => false,
-                 ).then((value) async => {
-              });
-            }
+        onChanged: (String? newValue) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          if (newValue! == DashboardStrings.logout) {
+            getIt<NotificationRepository>().stopBudgetApprovalListener();
+            await _logout();
+            await prefs.remove('email');
+            await prefs.remove('password');
+            await _openNavigationScreen();
+          }
         },
-        items: _dropdownItems.asMap().entries.map<DropdownMenuItem<String>>((entry) {
-          int index = entry.key;
-          String value = entry.value;
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Row(
-              children: [
-                Icon(_dropdownIcons[index]), // Ícone
-                const SizedBox(width: 5), // Espaçamento entre o ícone e o texto
-                Text(value, style: const TextStyle(fontSize: 12),),
-                const SizedBox(width: 5),// Texto do item
-              ],
-            ),
-          );
-        }).toList(),
+        items:
+            _dropdownItems.asMap().entries.map<DropdownMenuItem<String>>((
+              entry,
+            ) {
+              int index = entry.key;
+              String value = entry.value;
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Row(
+                  children: [
+                    Icon(_dropdownIcons[index]), // Ícone
+                    const SizedBox(
+                      width: 5,
+                    ), // Espaçamento entre o ícone e o texto
+                    Text(value, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(width: 5), // Texto do item
+                  ],
+                ),
+              );
+            }).toList(),
       ),
     );
   }
 }
 
-
 class SearchField extends StatelessWidget {
-  const SearchField({
-    Key? key,
-  }) : super(key: key);
+  const SearchField({super.key});
 
   @override
   Widget build(BuildContext context) {

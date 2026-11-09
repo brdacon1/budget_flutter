@@ -13,7 +13,7 @@ class UserRepositoryImpl extends UserRepository {
   InfoUser? _currentUser;
   OwnerPdf? _defaultPdf;
 
-  ValueNotifier<InfoUser?> _selectUser = ValueNotifier<InfoUser?>(null);
+  final ValueNotifier<InfoUser?> _selectUser = ValueNotifier<InfoUser?>(null);
 
   @override
   ValueNotifier<InfoUser?> get selectUser => _selectUser;

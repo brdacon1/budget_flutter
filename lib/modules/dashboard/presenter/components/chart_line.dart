@@ -2,27 +2,28 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/dashboard/domain/entity/month_calculate.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 
 class ChartLine extends StatefulWidget {
   final MonthCalculate item;
-  const ChartLine({
-    Key? key,
-    required this.item
-  }) : super(key: key);
+
+  const ChartLine({super.key, required this.item});
 
   @override
-  _ChartLine createState() => _ChartLine();
+  State<ChartLine> createState() => _ChartLine();
 }
 
 class _ChartLine extends State<ChartLine> {
   late final bool isShowingMainData;
   double? sizeLine = 0;
+
   Map<int, List<CustomerInfo>> groupDataByWeek(List<CustomerInfo> dataList) {
     Map<int, List<CustomerInfo>> groupedData = {};
     for (var data in dataList) {
-      int weekNumber = getWeekNumber(DateTime.parse(data.id!)); // Assuming you have a date field in your DADOS class.
+      int weekNumber = getWeekNumber(
+        DateTime.parse(data.id!),
+      ); // Assuming you have a date field in your DADOS class.
       groupedData.putIfAbsent(weekNumber, () => []).add(data);
     }
     return groupedData;
@@ -49,27 +50,19 @@ class _ChartLine extends State<ChartLine> {
     return double.parse(value!.toStringAsFixed(0));
   }
 
-
   LineTouchData get lineTouchData1 => LineTouchData(
     handleBuiltInTouches: true,
     touchTooltipData: LineTouchTooltipData(
-      getTooltipColor: (LineBarSpot touchedSpot) => Colors.blueGrey.withValues(alpha: 0.8),
+      getTooltipColor:
+          (LineBarSpot touchedSpot) => Colors.blueGrey.withValues(alpha: 0.8),
     ),
   );
 
   FlTitlesData get titlesData1 => FlTitlesData(
-    bottomTitles: AxisTitles(
-      sideTitles: bottomTitles,
-    ),
-    rightTitles: const AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
-    ),
-    topTitles: const AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
-    ),
-    leftTitles: AxisTitles(
-      sideTitles: leftTitles(),
-    ),
+    bottomTitles: AxisTitles(sideTitles: bottomTitles),
+    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+    leftTitles: AxisTitles(sideTitles: leftTitles()),
   );
 
   List<LineChartBarData> get lineBarsData1 => [
@@ -159,11 +152,7 @@ class _ChartLine extends State<ChartLine> {
         break;
     }
 
-    return SideTitleWidget(
-      meta: meta,
-      space: 10,
-      child: text,
-    );
+    return SideTitleWidget(meta: meta, space: 10, child: text);
   }
 
   SideTitles get bottomTitles => SideTitles(
@@ -206,12 +195,9 @@ class _ChartLine extends State<ChartLine> {
     barWidth: 3,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(
-      show: false,
-      color: buttonColor,
-    ),
+    belowBarData: BarAreaData(show: false, color: buttonColor),
     spots: [
-      FlSpot(0,  widget.item.totalApprovedMonth_0!),
+      FlSpot(0, widget.item.totalApprovedMonth_0!),
       FlSpot(1, widget.item.totalApprovedMonth_1!),
       FlSpot(2, widget.item.totalApprovedMonth_2!),
       FlSpot(3, widget.item.totalApprovedMonth_3!),
@@ -224,10 +210,7 @@ class _ChartLine extends State<ChartLine> {
     barWidth: 3,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(
-      show: false,
-      color: buttonColor,
-    ),
+    belowBarData: BarAreaData(show: false, color: buttonColor),
     spots: [
       FlSpot(0, widget.item.totalPendingMonth_0!),
       FlSpot(1, widget.item.totalPendingMonth_1!),
@@ -242,10 +225,7 @@ class _ChartLine extends State<ChartLine> {
     barWidth: 3,
     isStrokeCapRound: true,
     dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(
-      show: false,
-      color: buttonColor,
-    ),
+    belowBarData: BarAreaData(show: false, color: buttonColor),
     spots: [
       FlSpot(0, widget.item.totalFinishMonth_0!),
       FlSpot(1, widget.item.totalFinishMonth_1!),
@@ -254,7 +234,12 @@ class _ChartLine extends State<ChartLine> {
     ],
   );
 
-  double findLargestValue(double? value1, double? value2, double? value3, double? value4) {
+  double findLargestValue(
+    double? value1,
+    double? value2,
+    double? value3,
+    double? value4,
+  ) {
     double largestValue = 0.0;
 
     if (value1 != null && value1 > largestValue) {
@@ -275,7 +260,6 @@ class _ChartLine extends State<ChartLine> {
 
     return largestValue;
   }
-
 
   @override
   void initState() {
@@ -319,9 +303,7 @@ class _ChartLine extends State<ChartLine> {
       largestValuePending,
       largestValueFinish,
     );
-    setState(() {
-
-    });
+    setState(() {});
     sizeLine = roundToTwoDecimals(sizeLine);
     return AspectRatio(
       aspectRatio: 1.23,
@@ -330,9 +312,7 @@ class _ChartLine extends State<ChartLine> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(
-                height: 5,
-              ),
+              const SizedBox(height: 5),
               Text(
                 DashboardStrings.weeklyProgress,
                 style: TextStyle(
@@ -343,18 +323,14 @@ class _ChartLine extends State<ChartLine> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 6, left: 0),
                   child: LineChart(sampleData1),
                 ),
               ),
-              const SizedBox(
-                height: 5,
-              ),
+              const SizedBox(height: 5),
             ],
           ),
         ],

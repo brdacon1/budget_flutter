@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 
 class RecentFiles extends StatefulWidget {
   final List<CustomerInfo> items;
 
-  const RecentFiles({Key? key, required this.items}) : super(key: key);
+  const RecentFiles({super.key, required this.items});
+
   @override
-  _RecentFiles createState() => _RecentFiles();
+  State<RecentFiles> createState() => _RecentFiles();
 }
 
 class _RecentFiles extends State<RecentFiles> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -40,19 +40,13 @@ class _RecentFiles extends State<RecentFiles> {
             child: DataTable(
               columnSpacing: defaultPadding,
               columns: [
-                DataColumn(
-                  label: Text(DashboardStrings.clientColumn),
-                ),
-                DataColumn(
-                  label: Text(DashboardStrings.dateColumn),
-                ),
-                DataColumn(
-                label: Text(DashboardStrings.numberColumn),
-                ),
+                DataColumn(label: Text(DashboardStrings.clientColumn)),
+                DataColumn(label: Text(DashboardStrings.dateColumn)),
+                DataColumn(label: Text(DashboardStrings.numberColumn)),
               ],
               rows: List.generate(
                 widget.items.length >= 5 ? 5 : widget.items.length,
-                    (index) => recentFileDataRow(widget.items[index]),
+                (index) => recentFileDataRow(widget.items[index]),
               ),
             ),
           ),

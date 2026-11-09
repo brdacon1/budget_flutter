@@ -285,7 +285,7 @@ class PdfGenerateBudgetProfessionalUsecase {
     final PdfFont infoFont = _fontRegular;
     final PdfBrush infoBrush = _brushGray;
 
-    void _infoLine(String label, String? value) {
+    void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
         '$label $value',
@@ -296,21 +296,25 @@ class PdfGenerateBudgetProfessionalUsecase {
       y += 12;
     }
 
-    _infoLine('CNPJ/CPF:', owner.cnpj);
-    _infoLine('E-mail:', owner.email);
-    _infoLine('Telefone:', owner.fone);
+    infoLine('CNPJ/CPF:', owner.cnpj);
+    infoLine('E-mail:', owner.email);
+    infoLine('Telefone:', owner.fone);
 
     final addressParts = <String>[];
-    if (owner.rua != null && owner.rua!.isNotEmpty)
+    if (owner.rua != null && owner.rua!.isNotEmpty) {
       addressParts.add(owner.rua!);
-    if (owner.bairro != null && owner.bairro!.isNotEmpty)
+    }
+    if (owner.bairro != null && owner.bairro!.isNotEmpty) {
       addressParts.add(owner.bairro!);
-    if (owner.city != null && owner.city!.isNotEmpty)
+    }
+    if (owner.city != null && owner.city!.isNotEmpty) {
       addressParts.add(owner.city!);
-    if (owner.cep != null && owner.cep!.isNotEmpty)
+    }
+    if (owner.cep != null && owner.cep!.isNotEmpty) {
       addressParts.add('CEP: ${owner.cep}');
+    }
     if (addressParts.isNotEmpty) {
-      _infoLine('Endereço:', addressParts.join(' - '));
+      infoLine('Endereço:', addressParts.join(' - '));
     }
 
     final double headerBottom = (logoH > y) ? logoH : y;
@@ -781,8 +785,9 @@ class PdfGenerateBudgetProfessionalUsecase {
     if (session.EMAIL == null ||
         session.EMAIL!.isEmpty ||
         session.Senha == null ||
-        session.Senha!.isEmpty)
+        session.Senha!.isEmpty) {
       return '';
+    }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: session.EMAIL!.trim(),
       password: session.Senha!.trim(),

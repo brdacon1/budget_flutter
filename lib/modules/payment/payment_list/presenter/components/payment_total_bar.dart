@@ -7,10 +7,10 @@ class PaymentTotalBar extends StatelessWidget {
   final ConvertCoinRepository moneyConvert;
 
   const PaymentTotalBar({
-    Key? key,
+    super.key,
     required this.totalPaid,
     required this.moneyConvert,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

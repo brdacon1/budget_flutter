@@ -1,26 +1,24 @@
 import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'image_edit_view_model.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
 
+import 'image_edit_view_model.dart';
 
 class ImageEditView extends StatefulWidget {
   final String title;
   final OwnerPdf owner;
-  const ImageEditView({
-    Key? key,
-    required this.title,
-    required this.owner,
-  }) : super(key: key);
+
+  const ImageEditView({super.key, required this.title, required this.owner});
 
   @override
   State<ImageEditView> createState() => _ImageEditView();
@@ -35,11 +33,10 @@ class _ImageEditView extends State<ImageEditView> {
     super.initState();
     _viewModel = getIt<ImageEditViewModel>();
     _viewModel.addListener(_onViewModelChanged);
-    print('ImageEditView: fotoId=${widget.owner.fotoId}, logoName=${widget.owner.logoName}');
-    _viewModel.loadInitialImage(
-      widget.owner.fotoId,
-      widget.owner.logoName,
+    print(
+      'ImageEditView: fotoId=${widget.owner.fotoId}, logoName=${widget.owner.logoName}',
     );
+    _viewModel.loadInitialImage(widget.owner.fotoId, widget.owner.logoName);
   }
 
   @override
@@ -56,12 +53,10 @@ class _ImageEditView extends State<ImageEditView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !kIsWeb
-          ? AppBar(
-              title: Text(widget.title),
-              backgroundColor: bgColor,
-            )
-          : null,
+      appBar:
+          !kIsWeb
+              ? AppBar(title: Text(widget.title), backgroundColor: bgColor)
+              : null,
       body: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +67,8 @@ class _ImageEditView extends State<ImageEditView> {
               child: Text(
                 widget.title,
                 style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                    color: Theme.of(context).highlightColor),
+                  color: Theme.of(context).highlightColor,
+                ),
               ),
             ),
           Expanded(child: _body()),
@@ -96,8 +92,9 @@ class _ImageEditView extends State<ImageEditView> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: kIsWeb ? 24.0 : 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: kIsWeb ? 24.0 : 16.0,
+            ),
             child: Card(
               color: Colors.white,
               elevation: 4.0,
@@ -204,7 +201,10 @@ class _ImageEditView extends State<ImageEditView> {
 
                 final userUid = getIt<UserRepository>().selectUser.value?.USER;
                 if (userUid != null && userUid.isNotEmpty) {
-                  await getIt<PdfRemoteDataSource>().saveInformationEnterprise(userUid, localOwner.toJson());
+                  await getIt<PdfRemoteDataSource>().saveInformationEnterprise(
+                    userUid,
+                    localOwner.toJson(),
+                  );
                 }
 
                 if (mounted) {
@@ -256,9 +256,7 @@ class _ImageEditView extends State<ImageEditView> {
       child: Card(
         color: Colors.white,
         elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
@@ -285,9 +283,7 @@ class _ImageEditView extends State<ImageEditView> {
               const SizedBox(height: 16),
               Text(
                 ImageStrings.uploadPrompt,
-                style: GoogleFonts.heebo(
-                  fontSize: 14,
-                ),
+                style: GoogleFonts.heebo(fontSize: 14),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
@@ -298,7 +294,9 @@ class _ImageEditView extends State<ImageEditView> {
                   style: TextButton.styleFrom(
                     backgroundColor: buttonColor,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 70),
+                      vertical: 15.0,
+                      horizontal: 70,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30.0),
                     ),

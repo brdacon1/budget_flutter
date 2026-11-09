@@ -135,12 +135,13 @@ class PdfGenerateReceiptProfessionalUsecase {
     required OwnerPdf owner,
     String? authToken,
   }) async {
-    final PdfDocument document = PdfDocument()
-      ..pageSettings.size = PdfPageSize.a4
-      ..pageSettings.margins.left = 30
-      ..pageSettings.margins.right = 30
-      ..pageSettings.margins.top = 30
-      ..pageSettings.margins.bottom = 50;
+    final PdfDocument document =
+        PdfDocument()
+          ..pageSettings.size = PdfPageSize.a4
+          ..pageSettings.margins.left = 30
+          ..pageSettings.margins.right = 30
+          ..pageSettings.margins.top = 30
+          ..pageSettings.margins.bottom = 50;
 
     final PdfPage page = document.pages.add();
     final double pageW = page.getClientSize().width;
@@ -181,9 +182,10 @@ class PdfGenerateReceiptProfessionalUsecase {
     if (owner.fotoId != null && owner.fotoId!.isNotEmpty) {
       try {
         final String fotoId = owner.fotoId ?? '';
-        final String endpointUrl = fotoId.startsWith('http')
-            ? fotoId
-            : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
+        final String endpointUrl =
+            fotoId.startsWith('http')
+                ? fotoId
+                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
 
         final Map<String, String> headers = <String, String>{
           'Accept': 'application/json;odata=verbose',
@@ -231,7 +233,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     final PdfFont infoFont = _fontRegular;
     final PdfBrush infoBrush = _brushGray;
 
-    void _infoLine(String label, String? value) {
+    void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
         '$label $value',
@@ -242,21 +244,25 @@ class PdfGenerateReceiptProfessionalUsecase {
       y += 12;
     }
 
-    _infoLine('CNPJ/CPF:', owner.cnpj);
-    _infoLine('E-mail:', owner.email);
-    _infoLine('Telefone:', owner.fone);
+    infoLine('CNPJ/CPF:', owner.cnpj);
+    infoLine('E-mail:', owner.email);
+    infoLine('Telefone:', owner.fone);
 
     final addressParts = <String>[];
-    if (owner.rua != null && owner.rua!.isNotEmpty) addressParts.add(owner.rua!);
+    if (owner.rua != null && owner.rua!.isNotEmpty) {
+      addressParts.add(owner.rua!);
+    }
     if (owner.bairro != null && owner.bairro!.isNotEmpty) {
       addressParts.add(owner.bairro!);
     }
-    if (owner.city != null && owner.city!.isNotEmpty) addressParts.add(owner.city!);
+    if (owner.city != null && owner.city!.isNotEmpty) {
+      addressParts.add(owner.city!);
+    }
     if (owner.cep != null && owner.cep!.isNotEmpty) {
       addressParts.add('CEP: ${owner.cep}');
     }
     if (addressParts.isNotEmpty) {
-      _infoLine('Endereço:', addressParts.join(' - '));
+      infoLine('Endereço:', addressParts.join(' - '));
     }
 
     final double headerBottom = (logoH > y) ? logoH : y;
@@ -321,7 +327,15 @@ class PdfGenerateReceiptProfessionalUsecase {
           '${customer.city}${customer.zip != null && customer.zip!.isNotEmpty ? ' - ${customer.zip}' : ''}',
         ),
     ]);
-    _drawBox(g, boxW + gap, topY, boxW, rightH + pad * 2 + 22, borderPen, bgBrush);
+    _drawBox(
+      g,
+      boxW + gap,
+      topY,
+      boxW,
+      rightH + pad * 2 + 22,
+      borderPen,
+      bgBrush,
+    );
     _drawBoxTitle(g, 'DADOS DO CLIENTE', boxW + gap, topY, boxW, pad);
     _drawBoxRows(
       g,
@@ -510,20 +524,21 @@ class PdfGenerateReceiptProfessionalUsecase {
       bgBrush: _brushPrimary,
     );
 
-    final PdfLayoutResult result = grid.draw(
-          page: page,
-          bounds: Rect.fromLTWH(
-            0,
-            topY,
-            page.getClientSize().width,
-            page.getClientSize().height,
-          ),
-          format: PdfLayoutFormat(
-            breakType: PdfLayoutBreakType.fitPage,
-            layoutType: PdfLayoutType.paginate,
-          ),
-        )
-        as PdfLayoutResult;
+    final PdfLayoutResult result =
+        grid.draw(
+              page: page,
+              bounds: Rect.fromLTWH(
+                0,
+                topY,
+                page.getClientSize().width,
+                page.getClientSize().height,
+              ),
+              format: PdfLayoutFormat(
+                breakType: PdfLayoutBreakType.fitPage,
+                layoutType: PdfLayoutType.paginate,
+              ),
+            )
+            as PdfLayoutResult;
 
     return result.bounds.bottom;
   }
@@ -613,9 +628,9 @@ class PdfGenerateReceiptProfessionalUsecase {
 
   PdfGridCellStyle _itemRowStyle() {
     return PdfGridCellStyle(
-      font: _fontRegular,
-      cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
-    )
+        font: _fontRegular,
+        cellPadding: PdfPaddings(top: 5, left: 6, right: 6, bottom: 5),
+      )
       ..borders.left = PdfPens.transparent
       ..borders.right = PdfPens.transparent
       ..borders.top = PdfPen(_borderGray, width: 0.5)

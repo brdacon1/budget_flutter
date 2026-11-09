@@ -3,13 +3,13 @@ import 'package:oflite/shared/common/constants/constants.dart';
 
 class StorageInfoCard extends StatelessWidget {
   const StorageInfoCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.iconColor,
     required this.svgSrc,
     required this.amountOfFiles,
     required this.numOfFiles,
-  }) : super(key: key);
+  });
 
   final IconData svgSrc;
   final Color iconColor;
@@ -24,9 +24,7 @@ class StorageInfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(defaultPadding),
       decoration: BoxDecoration(
         border: Border.all(width: 2, color: primaryColor.withOpacity(0.15)),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(defaultPadding),
-        ),
+        borderRadius: const BorderRadius.all(Radius.circular(defaultPadding)),
       ),
       child: Row(
         children: [
@@ -44,9 +42,9 @@ class StorageInfoCard extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: iconColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14
+                      color: iconColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -55,7 +53,7 @@ class StorageInfoCard extends StatelessWidget {
               ),
             ),
           ),
-          Text(amountOfFiles,style: Theme.of(context).textTheme.bodyLarge,)
+          Text(amountOfFiles, style: Theme.of(context).textTheme.bodyLarge),
         ],
       ),
     );

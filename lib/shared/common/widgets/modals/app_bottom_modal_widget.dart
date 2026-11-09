@@ -36,7 +36,9 @@ class AppBottomModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       // Acompanha o teclado: ao abrir o campo, o conteúdo sobe junto.
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -84,6 +86,7 @@ class _DragHandle extends StatelessWidget {
 
 class _Header extends StatelessWidget {
   const _Header({required this.title});
+
   final String title;
 
   @override
@@ -102,7 +105,11 @@ class _Header extends StatelessWidget {
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.close, color: AppBottomModal.grayColor, size: 26),
+          icon: const Icon(
+            Icons.close,
+            color: AppBottomModal.grayColor,
+            size: 26,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
@@ -112,6 +119,7 @@ class _Header extends StatelessWidget {
 
 class _ModalButton extends StatelessWidget {
   const _ModalButton({required this.label, required this.onPressed});
+
   final String label;
   final VoidCallback onPressed;
 
@@ -122,7 +130,9 @@ class _ModalButton extends StatelessWidget {
       style: TextButton.styleFrom(
         backgroundColor: const Color(0xFF0DF5E4), // buttonColor padrão
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 70),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
       ),
       child: Text(
         label,
@@ -154,12 +164,13 @@ Future<void> showAppBottomModal(
     isDismissible: dismissible,
     enableDrag: dismissible,
     backgroundColor: Colors.transparent,
-    builder: (context) => AppBottomModal(
-      title: title,
-      child: child,
-      buttonLabel: buttonLabel,
-      onButtonPressed: onButtonPressed,
-      buttonVisible: buttonVisible,
-    ),
+    builder:
+        (context) => AppBottomModal(
+          title: title,
+          buttonLabel: buttonLabel,
+          onButtonPressed: onButtonPressed,
+          buttonVisible: buttonVisible,
+          child: child,
+        ),
   );
 }

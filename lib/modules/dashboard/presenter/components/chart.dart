@@ -5,12 +5,11 @@ import 'package:oflite/shared/common/constants/constants.dart';
 
 class Chart extends StatefulWidget {
   final MyBudgetDashboard item;
-  const Chart({
-    Key? key,
-    required this.item
-  }) : super(key: key);
+
+  const Chart({super.key, required this.item});
+
   @override
-  _Chart createState() => _Chart();
+  State<Chart> createState() => _Chart();
 }
 
 class _Chart extends State<Chart> {
@@ -70,15 +69,16 @@ class _Chart extends State<Chart> {
                   widget.item.qtdTotal.toString(),
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 34
+                    fontSize: 34,
                   ),
                 ),
-                Text("Total",
+                Text(
+                  "Total",
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -87,5 +87,3 @@ class _Chart extends State<Chart> {
     );
   }
 }
-
-

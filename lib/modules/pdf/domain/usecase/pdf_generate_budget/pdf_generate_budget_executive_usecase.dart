@@ -377,8 +377,9 @@ class PdfGenerateBudgetExecutiveUsecase {
     if (session.EMAIL == null ||
         session.EMAIL!.isEmpty ||
         session.Senha == null ||
-        session.Senha!.isEmpty)
+        session.Senha!.isEmpty) {
       return '';
+    }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: session.EMAIL!.trim(),
       password: session.Senha!.trim(),

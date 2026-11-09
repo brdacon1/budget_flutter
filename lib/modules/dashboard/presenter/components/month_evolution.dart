@@ -1,17 +1,20 @@
-import 'package:oflite/injection.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/dashboard/presenter/components/storage_info_card.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/dashboard/domain/entity/month_calculate.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/modules/dashboard/presenter/components/storage_info_card.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+
 import 'chart_line.dart';
 
 class MonthEvolution extends StatefulWidget {
   final MonthCalculate item;
-  const MonthEvolution({Key? key, required this.item}) : super(key: key);
+
+  const MonthEvolution({super.key, required this.item});
+
   @override
-  _MonthEvolution createState() => _MonthEvolution();
+  State<MonthEvolution> createState() => _MonthEvolution();
 }
 
 class _MonthEvolution extends State<MonthEvolution> {
@@ -29,25 +32,33 @@ class _MonthEvolution extends State<MonthEvolution> {
 
   @override
   Widget build(BuildContext context) {
-    totalApproved = (widget.item.totalApprovedMonth_0!
-        + widget.item.totalApprovedMonth_1!
-        + widget.item.totalApprovedMonth_2!
-        + widget.item.totalApprovedMonth_3!) * 1000;
+    totalApproved =
+        (widget.item.totalApprovedMonth_0! +
+            widget.item.totalApprovedMonth_1! +
+            widget.item.totalApprovedMonth_2! +
+            widget.item.totalApprovedMonth_3!) *
+        1000;
 
-    totalReproved = (widget.item.totalReprovedMonth_0!
-        + widget.item.totalReprovedMonth_1!
-        + widget.item.totalReprovedMonth_2!
-        + widget.item.totalReprovedMonth_3!) * 1000;
+    totalReproved =
+        (widget.item.totalReprovedMonth_0! +
+            widget.item.totalReprovedMonth_1! +
+            widget.item.totalReprovedMonth_2! +
+            widget.item.totalReprovedMonth_3!) *
+        1000;
 
-    totalPending  = (widget.item.totalPendingMonth_0!
-        + widget.item.totalPendingMonth_1!
-        + widget.item.totalPendingMonth_2!
-        + widget.item.totalPendingMonth_3!) * 1000;
+    totalPending =
+        (widget.item.totalPendingMonth_0! +
+            widget.item.totalPendingMonth_1! +
+            widget.item.totalPendingMonth_2! +
+            widget.item.totalPendingMonth_3!) *
+        1000;
 
-    totalFinish   = (widget.item.totalFinishMonth_0!
-        + widget.item.totalFinishMonth_1!
-        + widget.item.totalFinishMonth_2!
-        + widget.item.totalFinishMonth_3!) * 1000;
+    totalFinish =
+        (widget.item.totalFinishMonth_0! +
+            widget.item.totalFinishMonth_1! +
+            widget.item.totalFinishMonth_2! +
+            widget.item.totalFinishMonth_3!) *
+        1000;
 
     return Container(
       padding: const EdgeInsets.all(defaultPadding),
@@ -104,4 +115,3 @@ class _MonthEvolution extends State<MonthEvolution> {
     );
   }
 }
-
