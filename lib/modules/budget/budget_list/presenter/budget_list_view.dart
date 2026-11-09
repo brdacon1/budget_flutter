@@ -8,9 +8,9 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 
 import 'budget_list_view_model.dart';
@@ -106,94 +106,128 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Widget _buildDeleteFloatingButton() {
-    return Visibility(
-      visible: _viewModel.deleteVisible,
-      child: badges.Badge(
-        badgeStyle: badges.BadgeStyle(
-          badgeColor: const Color.fromARGB(255, 231, 15, 87),
-          borderRadius: BorderRadius.circular(40),
-        ),
-        badgeContent: Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: Center(
-            child: Text(
-              _viewModel.deleteItems.length.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return Visibility(
+          visible: _viewModel.deleteVisible,
+          child: badges.Badge(
+            badgeStyle: badges.BadgeStyle(
+              badgeColor: const Color.fromARGB(255, 231, 15, 87),
+              borderRadius: BorderRadius.circular(40),
+            ),
+            badgeContent: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Center(
+                child: Text(
+                  _viewModel.deleteItems.length.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+            ),
+            child: FloatingActionButton.extended(
+              heroTag: "delete",
+              onPressed: _dialogDeleteBuilder,
+              backgroundColor: buttonColor,
+              elevation: 4,
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.black,
+              ),
+              label: const Text(
+                'Remover todos',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
-        ),
-        child: FloatingActionButton(
-          heroTag: "delete",
-          onPressed: _dialogDeleteBuilder,
-          backgroundColor: buttonColor,
-          child: const Icon(Icons.delete_outline_rounded, color: Colors.black),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildAddItemsFloatingButton() {
-    return Visibility(
-      visible: !_viewModel.deleteVisible,
-      child: FloatingActionButton(
-        heroTag: "adicionar",
-        onPressed: () async {
-          if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false)) {
-            await _viewModel.displayAlert
-                .adsNotification(context)
-                .then(
-                  (value) async => {
-                    if (value == "Ver anuncio")
-                      {
-                        getIt<AdsRepository>().showInterstitial(),
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => BudgetTabView(
-                                  item: _viewModel.customerInfoNew(),
-                                ),
-                          ),
-                        ).then((_) async {
-                          getIt<BudgetRepository>().clearSelectBudget();
-                          await _viewModel.getInformationOrcamento(refresh: true);
-                          _viewModel.clearDeleteItens();
-                        }),
-                      }
-                    else if (value == "Se tornar premium")
-                      {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SubscriptionView(),
-                          ),
-                        ),
+    return AnimatedBuilder(
+      animation: _viewModel,
+      builder: (context, _) {
+        return Visibility(
+          visible: !_viewModel.deleteVisible,
+          child: FloatingActionButton.extended(
+            heroTag: "adicionar",
+            onPressed: () async {
+              if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+                  false)) {
+                await _viewModel.displayAlert
+                    .adsNotification(context)
+                    .then(
+                      (value) async => {
+                        if (value == "Ver anuncio")
+                          {
+                            getIt<AdsRepository>().showInterstitial(),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => BudgetTabView(
+                                      item: _viewModel.customerInfoNew(),
+                                    ),
+                              ),
+                            ).then((_) async {
+                              getIt<BudgetRepository>().clearSelectBudget();
+                              await _viewModel.getInformationOrcamento(
+                                refresh: true,
+                              );
+                              _viewModel.clearDeleteItens();
+                            }),
+                          }
+                        else if (value == "Se tornar premium")
+                          {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SubscriptionView(),
+                              ),
+                            ),
+                          },
                       },
-                  },
-                );
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) =>
-                        BudgetTabView(item: _viewModel.customerInfoNew()),
+                    );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            BudgetTabView(item: _viewModel.customerInfoNew()),
+                  ),
+                ).then((_) async {
+                  getIt<BudgetRepository>().clearSelectBudget();
+                  await _viewModel.getInformationOrcamento(refresh: true);
+                  _viewModel.clearDeleteItens();
+                });
+              }
+            },
+            backgroundColor: buttonColor,
+            elevation: 4,
+            icon: const Icon(Icons.add, color: Colors.black, size: 20),
+            label: const Text(
+              'Novo orçamento',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
-            ).then((_) async {
-              getIt<BudgetRepository>().clearSelectBudget();
-              await _viewModel.getInformationOrcamento(refresh: true);
-              _viewModel.clearDeleteItens();
-            });
-          }
-        },
-        backgroundColor: buttonColor,
-        child: const Icon(Icons.add, color: Colors.black),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -230,7 +264,9 @@ class _BudgetListView extends State<BudgetListView> {
             right: 15,
             top: 0,
           ),
-          itemCount: _viewModel.getFilteredData().length + (_viewModel.isLoadingMore ? 1 : 0),
+          itemCount:
+              _viewModel.getFilteredData().length +
+              (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= _viewModel.getFilteredData().length) {
               return const Padding(
@@ -239,7 +275,10 @@ class _BudgetListView extends State<BudgetListView> {
                   child: SizedBox(
                     width: 24,
                     height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white70),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
               );
@@ -267,7 +306,8 @@ class _BudgetListView extends State<BudgetListView> {
                 });
               },
               onDuplicate: () async {
-                if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false) &&
+                if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+                        false) &&
                     _viewModel.totalBudgetCount > 10) {
                   await _viewModel.displayAlert
                       .notificationError(

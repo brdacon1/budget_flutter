@@ -215,20 +215,29 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                     ),
                   ),
                 ),
-                child: FloatingActionButton(
+                child: FloatingActionButton.extended(
                   heroTag: "delete",
                   onPressed: _dialogDeleteBuilder,
                   backgroundColor: buttonColor,
-                  child: const Icon(
+                  elevation: 4,
+                  icon: const Icon(
                     Icons.delete_outline_rounded,
                     color: Colors.black,
+                  ),
+                  label: const Text(
+                    'Remover todos',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
             ),
             Visibility(
               visible: !_viewModel.deleteVisible,
-              child: FloatingActionButton(
+              child: FloatingActionButton.extended(
                 heroTag: "adicionar",
                 onPressed: () async {
                   if (await _viewModel.getProductCount() > 0) {
@@ -243,7 +252,16 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                   }
                 },
                 backgroundColor: buttonColor,
-                child: const Icon(Icons.add, color: Colors.black),
+                elevation: 4,
+                icon: const Icon(Icons.add, color: Colors.black, size: 20),
+                label: const Text(
+                  'Adicionar item',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
               ),
             ),
           ],
