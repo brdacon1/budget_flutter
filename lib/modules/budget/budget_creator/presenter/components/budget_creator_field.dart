@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
 import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
 
 class BudgetCreatorField extends StatelessWidget {
   const BudgetCreatorField({
@@ -48,7 +48,6 @@ class BudgetCreatorField extends StatelessWidget {
   Widget build(BuildContext context) {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;
-    final isSelected = viewModel.selected == field;
 
     return FadeAnimationWidget(
       delay: 1,
@@ -75,18 +74,12 @@ class BudgetCreatorField extends StatelessWidget {
             enabledBorder: InputBorder.none,
             border: InputBorder.none,
             enabled: enabled,
-            prefixIcon: Icon(
-              prefixIcon,
-              color: Colors.white,
-            ),
+            prefixIcon: Icon(prefixIcon, color: Colors.white),
             suffixIcon: suffixIcon,
             hintText: hintText,
             hintStyle: const TextStyle(color: Colors.grey),
           ),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );

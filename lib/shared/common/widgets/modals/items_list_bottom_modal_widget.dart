@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
-import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Modal inferior com uma lista de itens (carrinho/exclusão) removíveis.
 ///
@@ -37,7 +37,8 @@ class ItemsListBottomModalWidget extends StatefulWidget {
       _ItemsListBottomModalWidgetState();
 }
 
-class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget> {
+class _ItemsListBottomModalWidgetState
+    extends State<ItemsListBottomModalWidget> {
   bool _processing = false;
   late List<ItemsBudget> _items;
 
@@ -74,13 +75,13 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
   }
 
   Widget _buildList() {
-   return ListView.builder(
+    return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: _items.length,
       itemBuilder: (context, index) {
         final item = _items[index];
-        final double priceUnit = item.PRECO ?? 0.0;
+        final double priceUnit = item.price ?? 0.0;
         final double qtd = item.QTD ?? 0.0;
         final double totalPrice = priceUnit * qtd;
 
@@ -93,12 +94,16 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
             side: const BorderSide(color: Color(0xFFDDE2E5), width: 1.2),
           ),
           child: InkWell(
-            onTap: widget.onItemTap == null
-                ? null
-                : () => widget.onItemTap!(item, index),
+            onTap:
+                widget.onItemTap == null
+                    ? null
+                    : () => widget.onItemTap!(item, index),
             borderRadius: BorderRadius.circular(10.0),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -109,7 +114,7 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          item.DESCRICAO ?? 'Sem descrição',
+                          item.description ?? 'Sem descrição',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.heebo(
@@ -129,15 +134,18 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
                           ),
                         ),
                         const SizedBox(height: 4),
-                        if (item.CATEGORIA != null)
+                        if (item.category != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              item.CATEGORIA.toString().toUpperCase(),
+                              item.category.toString().toUpperCase(),
                               style: GoogleFonts.heebo(
                                 color: AppBottomModal.grayColor,
                                 fontSize: 9.5,
@@ -210,21 +218,22 @@ class _ItemsListBottomModalWidgetState extends State<ItemsListBottomModalWidget>
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
-        child: _items.isEmpty
-            ? SizedBox(
-          height: MediaQuery.of(context).size.height * 0.15,
-          child: Center(
-            child: Text(
-              ProductPtString.cartEmptyLabel,
-              style: GoogleFonts.heebo(
-                color: AppBottomModal.grayColor,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        )
-            : _buildList(),
+        child:
+            _items.isEmpty
+                ? SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.15,
+                  child: Center(
+                    child: Text(
+                      ProductPtString.cartEmptyLabel,
+                      style: GoogleFonts.heebo(
+                        color: AppBottomModal.grayColor,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                )
+                : _buildList(),
       ),
     );
   }

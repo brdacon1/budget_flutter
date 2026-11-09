@@ -1,11 +1,11 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Seção colapsável "Itens do orçamento" exibida na aba "Meus dados".
 ///
@@ -63,8 +63,10 @@ class BudgetWebItemsSection extends StatelessWidget {
           ),
           children: <Widget>[
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8,
+              ),
               child: Container(
                 height: 44,
                 decoration: BoxDecoration(
@@ -93,10 +95,7 @@ class BudgetWebItemsSection extends StatelessWidget {
             else
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: _ItemsTable(
-                  items: items,
-                  moneyConvert: moneyConvert,
-                ),
+                child: _ItemsTable(items: items, moneyConvert: moneyConvert),
               ),
             const SizedBox(height: 10),
           ],
@@ -192,56 +191,79 @@ class _ItemsTable extends StatelessWidget {
               ),
             ),
           ],
-          rows: items
-              .map(
-                (item) => DataRow(
-                  cells: [
-                    DataCell(
-                      Container(
-                        constraints: const BoxConstraints(maxWidth: 220),
-                        child: Tooltip(
-                          message: item.DESCRICAO ?? '',
-                          child: Text(
-                            item.DESCRICAO ?? '-',
-                            softWrap: true,
-                            overflow: TextOverflow.fade,
+          rows:
+              items
+                  .map(
+                    (item) => DataRow(
+                      cells: [
+                        DataCell(
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Tooltip(
+                              message: item.description ?? '',
+                              child: Text(
+                                item.description ?? '-',
+                                softWrap: true,
+                                overflow: TextOverflow.fade,
+                                style: const TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            item.category ?? '-',
                             style: const TextStyle(
                               color: whiteColor,
                               fontSize: 12,
                             ),
                           ),
                         ),
-                      ),
+                        DataCell(
+                          Text(
+                            '${item.QTD ?? 0}',
+                            style: const TextStyle(
+                              color: whiteColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            item.MEDIDA ?? '-',
+                            style: const TextStyle(
+                              color: whiteColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            moneyConvert.convertFromDouble(item.price ?? 0),
+                            style: const TextStyle(
+                              color: whiteColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            moneyConvert.convertFromDouble(item.TOTAL ?? 0),
+                            style: const TextStyle(
+                              color: buttonColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                      onSelectChanged: (_) => _showItemDialog(context, item),
                     ),
-                    DataCell(Text(
-                      item.CATEGORIA ?? '-',
-                      style: const TextStyle(color: whiteColor, fontSize: 12),
-                    )),
-                    DataCell(Text(
-                      '${item.QTD ?? 0}',
-                      style: const TextStyle(color: whiteColor, fontSize: 12),
-                    )),
-                    DataCell(Text(
-                      item.MEDIDA ?? '-',
-                      style: const TextStyle(color: whiteColor, fontSize: 12),
-                    )),
-                    DataCell(Text(
-                      moneyConvert.convertFromDouble(item.PRECO ?? 0),
-                      style: const TextStyle(color: whiteColor, fontSize: 12),
-                    )),
-                    DataCell(Text(
-                      moneyConvert.convertFromDouble(item.TOTAL ?? 0),
-                      style: const TextStyle(
-                        color: buttonColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )),
-                  ],
-                  onSelectChanged: (_) => _showItemDialog(context, item),
-                ),
-              )
-              .toList(),
+                  )
+                  .toList(),
         ),
       ),
     );
@@ -262,15 +284,30 @@ class _ItemsTable extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _FormReadOnlyField(label: 'Descrição', value: item.DESCRICAO ?? '-'),
+              _FormReadOnlyField(
+                label: 'Descrição',
+                value: item.description ?? '-',
+              ),
               const SizedBox(height: 12),
-              _FormReadOnlyField(label: BudgetWebStrings.labelCategory, value: item.CATEGORIA ?? '-'),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelCategory,
+                value: item.category ?? '-',
+              ),
               const SizedBox(height: 12),
-              _FormReadOnlyField(label: BudgetWebStrings.labelQuantity, value: '${item.QTD ?? 0}'),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelQuantity,
+                value: '${item.QTD ?? 0}',
+              ),
               const SizedBox(height: 12),
-              _FormReadOnlyField(label: BudgetWebStrings.labelMeasure, value: item.MEDIDA ?? '-'),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelMeasure,
+                value: item.MEDIDA ?? '-',
+              ),
               const SizedBox(height: 12),
-              _FormReadOnlyField(label: BudgetWebStrings.labelPrice, value: moneyConvert.convertFromDouble(item.PRECO ?? 0)),
+              _FormReadOnlyField(
+                label: BudgetWebStrings.labelPrice,
+                value: moneyConvert.convertFromDouble(item.price ?? 0),
+              ),
               const SizedBox(height: 12),
               _FormReadOnlyField(
                 label: BudgetWebStrings.labelTotal,
@@ -303,10 +340,7 @@ class _FormReadOnlyField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-          ),
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
           const SizedBox(height: 4),
           Text(
             value,

@@ -1,6 +1,6 @@
 enum CustomerInfoEnum {
   fullname,
-  Email,
+  email,
   phone,
   cep,
   rua,

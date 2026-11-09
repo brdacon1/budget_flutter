@@ -1,23 +1,20 @@
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
-import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
-import 'package:oflite/modules/login/data/model/info_user.dart';
-import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
+import 'package:oflite/modules/login/data/model/info_user.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum LoginField { email, password }
 
@@ -31,9 +28,10 @@ class LoginViewModel extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final List<String> productLists = Platform.isAndroid
-      ? ['newproduct']
-      : ['com.housestudio.oflite', 'com.housestudio.oflite'];
+  final List<String> productLists =
+      Platform.isAndroid
+          ? ['newproduct']
+          : ['com.housestudio.oflite', 'com.housestudio.oflite'];
 
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
@@ -115,11 +113,15 @@ class LoginViewModel extends ChangeNotifier {
       state = LoginState.idle;
     } on GoogleSignInException catch (e) {
       state = LoginState.error;
-      debugPrint('GoogleSignInException no _performLogin: ${e.code} - ${e.description}');
+      debugPrint(
+        'GoogleSignInException no _performLogin: ${e.code} - ${e.description}',
+      );
       if (e.code == GoogleSignInExceptionCode.providerConfigurationError) {
-        errorMessage = 'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.';
+        errorMessage =
+            'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.';
       } else if (e.code == GoogleSignInExceptionCode.uiUnavailable) {
-        errorMessage = 'A tela de login do Google não está disponível no momento. Tente novamente.';
+        errorMessage =
+            'A tela de login do Google não está disponível no momento. Tente novamente.';
       } else {
         errorMessage = 'Erro no login com Google. Tente novamente.';
       }
@@ -142,15 +144,15 @@ class LoginViewModel extends ChangeNotifier {
 
         final prefs = await SharedPreferences.getInstance();
         final storedPassword = prefs.getString('password');
-        final isGoogle =
-            storedPassword == null || storedPassword == 'NO_PASS';
+        final isGoogle = storedPassword == null || storedPassword == 'NO_PASS';
 
-        final session = InfoUser()
-          ..USER = uid
-          ..NOME = currentUser.displayName ?? 'User'
-          ..Senha = isGoogle ? 'NO_PASS' : storedPassword
-          ..googleAuth = isGoogle
-          ..EMAIL = currentUser.email ?? prefs.getString('email') ?? '';
+        final session =
+            InfoUser()
+              ..USER = uid
+              ..NOME = currentUser.displayName ?? 'User'
+              ..Senha = isGoogle ? 'NO_PASS' : storedPassword
+              ..googleAuth = isGoogle
+              ..EMAIL = currentUser.email ?? prefs.getString('email') ?? '';
         _userRepository.selectUser.value = session;
 
         await _getUserInfo();
@@ -184,9 +186,6 @@ class LoginViewModel extends ChangeNotifier {
   Future<void> _signInWithGoogle() async {
     try {
       final googleUser = await GoogleSignIn.instance.authenticate();
-      if (googleUser == null) {
-        throw _LoginCancelledException();
-      }
 
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
@@ -195,13 +194,13 @@ class LoginViewModel extends ChangeNotifier {
         throw Exception('Google Sign-In retornou idToken nulo ou vazio.');
       }
 
-      final credential = GoogleAuthProvider.credential(
-        idToken: idToken,
-      );
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
 
       await _signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
-      debugPrint('GoogleSignInException: code=${e.code}, description=${e.description}, details=${e.details}');
+      debugPrint(
+        'GoogleSignInException: code=${e.code}, description=${e.description}, details=${e.details}',
+      );
       if (e.code == GoogleSignInExceptionCode.canceled) {
         throw _LoginCancelledException();
       }
@@ -220,12 +219,13 @@ class LoginViewModel extends ChangeNotifier {
     await prefs.setString('password', 'NO_PASS');
 
     uid = auth.user?.uid ?? '';
-    final session = InfoUser()
-      ..USER = uid
-      ..EMAIL = auth.user?.email
-      ..NOME = auth.user?.displayName ?? 'User'
-      ..Senha = 'NO_PASS'
-      ..googleAuth = true;
+    final session =
+        InfoUser()
+          ..USER = uid
+          ..EMAIL = auth.user?.email
+          ..NOME = auth.user?.displayName ?? 'User'
+          ..Senha = 'NO_PASS'
+          ..googleAuth = true;
     _userRepository.selectUser.value = session;
 
     final user = await _getUserInfo();
@@ -246,11 +246,12 @@ class LoginViewModel extends ChangeNotifier {
     await prefs.setString('password', password);
 
     uid = auth.user!.uid.toString();
-    final session = InfoUser()
-      ..USER = uid
-      ..EMAIL = email
-      ..Senha = password.trim()
-      ..googleAuth = false;
+    final session =
+        InfoUser()
+          ..USER = uid
+          ..EMAIL = email
+          ..Senha = password.trim()
+          ..googleAuth = false;
     _userRepository.selectUser.value = session;
 
     await _getUserInfo();
@@ -272,8 +273,9 @@ class LoginViewModel extends ChangeNotifier {
       }
       final ownerUid = _userRepository.selectUser.value?.USER;
       if (ownerUid != null && ownerUid.isNotEmpty) {
-        final tokens =
-            await getIt<NotificationRepository>().loadFcmTokens(ownerUid);
+        final tokens = await getIt<NotificationRepository>().loadFcmTokens(
+          ownerUid,
+        );
         users.TOKENS = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }

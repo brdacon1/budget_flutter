@@ -100,20 +100,20 @@ class PdfModelSelectViewModel extends ChangeNotifier {
     );
     final items = <ItemsBudget>[
       ItemsBudget(
-        DESCRICAO: 'Produto exemplo',
+        description: 'Produto exemplo',
         MEDIDA: 'unidade',
         QTD: 2,
-        PRECO: 50.0,
+        price: 50.0,
         TOTAL: 100.0,
-        CATEGORIA: 'Produtos',
+        category: 'Produtos',
       ),
       ItemsBudget(
-        DESCRICAO: 'Serviço exemplo',
+        description: 'Serviço exemplo',
         MEDIDA: 'hora',
         QTD: 1,
-        PRECO: 150.0,
+        price: 150.0,
         TOTAL: 150.0,
-        CATEGORIA: 'Serviços',
+        category: 'Serviços',
       ),
     ];
     final observations = <ObservationPdf>[

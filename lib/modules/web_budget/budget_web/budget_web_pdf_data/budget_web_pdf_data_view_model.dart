@@ -91,10 +91,10 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
         int countService = 0;
         for (final i in items) {
           final total = i.TOTAL ?? 0;
-          if (i.CATEGORIA == 'Produtos') {
+          if (i.category == 'Produtos') {
             totalProducts += total;
             countProduct++;
-          } else if (i.CATEGORIA == 'Serviços') {
+          } else if (i.category == 'Serviços') {
             totalServices += total;
             countService++;
           }

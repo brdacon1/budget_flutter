@@ -5,7 +5,8 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 class DeleteItemCard extends StatelessWidget {
-  const DeleteItemCard({super.key,
+  const DeleteItemCard({
+    super.key,
     required this.item,
     required this.moneyConvert,
     required this.onRemove,
@@ -25,7 +26,7 @@ class DeleteItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double priceUnit = item.PRECO ?? 0.0;
+    final double priceUnit = item.price ?? 0.0;
     final double qtd = item.QTD ?? 0.0;
     final double totalPrice = priceUnit * qtd;
 
@@ -33,9 +34,7 @@ class DeleteItemCard extends StatelessWidget {
       color: const Color(0xFFF5F5F5),
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
@@ -47,7 +46,7 @@ class DeleteItemCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    item.DESCRICAO ?? 'Sem descrição',
+                    item.description ?? 'Sem descrição',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.heebo(
@@ -67,15 +66,18 @@ class DeleteItemCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (item.CATEGORIA != null)
+                  if (item.category != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        item.CATEGORIA.toString().toUpperCase(),
+                        item.category.toString().toUpperCase(),
                         style: GoogleFonts.heebo(
                           color: AppBottomModal.grayColor,
                           fontSize: 9.5,
@@ -104,7 +106,7 @@ class DeleteItemCard extends StatelessWidget {
                 Text(
                   '${moneyConvert.convertFromDouble(priceUnit)} un',
                   style: GoogleFonts.heebo(
-                    color: AppBottomModal.grayColor.withOpacity(0.7),
+                    color: AppBottomModal.grayColor.withValues(alpha: 0.7),
                     fontSize: 10.5,
                   ),
                 ),

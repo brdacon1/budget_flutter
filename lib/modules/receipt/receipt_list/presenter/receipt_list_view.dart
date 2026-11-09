@@ -108,7 +108,6 @@ class _ReceiptListView extends State<ReceiptListView> {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(

@@ -67,13 +67,16 @@ class _BudgetListView extends State<BudgetListView> {
         return BudgetListDuplicateBottomModalWidget(
           onConfirm: (clientData, quoteItems, comments) async {
             Navigator.of(dialogContext).pop();
+            if (!mounted) return;
             final alertDisplayLoading = getIt<LoadingEventRepository>();
             try {
               await alertDisplayLoading.alertLoading(viewContext);
               await _viewModel.duplicateEvent(clientData, quoteItems, comments);
               await _viewModel.getInformationOrcamento(refresh: true);
             } finally {
-              alertDisplayLoading.closeLoading(viewContext);
+              if (mounted) {
+                alertDisplayLoading.closeLoading(viewContext);
+              }
             }
           },
         );
@@ -93,6 +96,7 @@ class _BudgetListView extends State<BudgetListView> {
           onConfirm: () async {
             await _viewModel.deleteData();
             _viewModel.clearDeleteItens();
+            if (!mounted) return;
             await _viewModel.displayAlert.notification(
               context,
               "Tudo Certo!",
@@ -166,40 +170,30 @@ class _BudgetListView extends State<BudgetListView> {
             onPressed: () async {
               if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
                   false)) {
-                await _viewModel.displayAlert
-                    .adsNotification(context)
-                    .then(
-                      (value) async => {
-                        if (value == "Ver anuncio")
-                          {
-                            getIt<AdsRepository>().showInterstitial(),
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => BudgetTabView(
-                                      item: _viewModel.customerInfoNew(),
-                                    ),
-                              ),
-                            ).then((_) async {
-                              getIt<BudgetRepository>().clearSelectBudget();
-                              await _viewModel.getInformationOrcamento(
-                                refresh: true,
-                              );
-                              _viewModel.clearDeleteItens();
-                            }),
-                          }
-                        else if (value == "Se tornar premium")
-                          {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SubscriptionView(),
-                              ),
-                            ),
-                          },
-                      },
-                    );
+                final value = await _viewModel.displayAlert.adsNotification(context);
+                if (!mounted) return;
+                if (value == "Ver anuncio") {
+                  getIt<AdsRepository>().showInterstitial();
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BudgetTabView(
+                        item: _viewModel.customerInfoNew(),
+                      ),
+                    ),
+                  );
+                  if (!mounted) return;
+                  getIt<BudgetRepository>().clearSelectBudget();
+                  await _viewModel.getInformationOrcamento(refresh: true);
+                  _viewModel.clearDeleteItens();
+                } else if (value == "Se tornar premium") {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SubscriptionView(),
+                    ),
+                  );
+                }
               } else {
                 Navigator.push(
                   context,
@@ -354,22 +348,18 @@ class _BudgetListView extends State<BudgetListView> {
                 if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
                         false) &&
                     _viewModel.totalBudgetCount > 10) {
-                  await _viewModel.displayAlert
-                      .notificationError(
-                        context,
-                        "Erro!",
-                        "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
-                      )
-                      .then(
-                        (value) => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SubscriptionView(),
-                            ),
-                          ),
-                        },
-                      );
+                  await _viewModel.displayAlert.notificationError(
+                    context,
+                    "Erro!",
+                    "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
+                  );
+                  if (!mounted) return;
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SubscriptionView(),
+                    ),
+                  );
                 } else {
                   getIt<BudgetRepository>().selectBudget.value = item;
                   await _dialogDuplicate();

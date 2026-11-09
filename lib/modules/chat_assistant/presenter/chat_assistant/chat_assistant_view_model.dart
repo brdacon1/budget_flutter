@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
@@ -18,22 +21,19 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_field_in
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/shared/design_pattern/command.dart';
-import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// ViewModel do assistente de chat.
@@ -84,6 +84,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   ChatFlowStep _step = ChatFlowStep.idle;
+
   ChatFlowStep get step => _step;
 
   void _setStep(ChatFlowStep value) {
@@ -104,7 +105,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   List<ChatMessageEntity> get messages => _chatRepo.messages;
+
   CustomerInfo? get draftBudget => _chatRepo.draftBudget;
+
   ChatScriptEntity? get _script => _scriptRepo.currentScript;
 
   bool get isLoading => initializeChat.running || sendTextCommand.running;
@@ -120,6 +123,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final neighborhoodController = TextEditingController();
 
   bool _isCorrectingAddress = false;
+
   bool get isCorrectingAddress => _isCorrectingAddress;
 
   bool _isPdfEditAddressMode = false;
@@ -159,6 +163,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   String? _pdfEditField;
 
   String? _pendingNavigation;
+
   String? get pendingNavigation => _pendingNavigation;
 
   void clearPendingNavigation() {
@@ -171,11 +176,18 @@ class ChatAssistantViewModel extends ChangeNotifier {
   late final Command0<void> createDraftCommand = Command0(_createDraftFromName);
   late final Command0<void> skipAddressCommand = Command0(_skipAddress);
   late final Command1<void, String> submitCepCommand = Command1(_submitCep);
-  late final Command0<void> confirmCepAddressCommand = Command0(_confirmCepAddress);
-  late final Command0<void> submitManualAddressCommand = Command0(_submitManualAddress);
+  late final Command0<void> confirmCepAddressCommand = Command0(
+    _confirmCepAddress,
+  );
+  late final Command0<void> submitManualAddressCommand = Command0(
+    _submitManualAddress,
+  );
   late final Command0<void> openProductSelectionCommand = Command0(_noop);
-  late final Command1<void, List<ItemsBudget>> confirmProductsCommand = Command1(_confirmProducts);
-  late final Command1<void, List<ItemsBudget>> editProductsCommand = Command1(_editProducts);
+  late final Command1<void, List<ItemsBudget>> confirmProductsCommand =
+      Command1(_confirmProducts);
+  late final Command1<void, List<ItemsBudget>> editProductsCommand = Command1(
+    _editProducts,
+  );
   late final Command0<void> shareLinkCommand = Command0(_shareLink);
   late final Command0<void> resetChatCommand = Command0(_resetChat);
 
@@ -309,7 +321,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _handleUsernameResult(clean);
       } else if (_step == ChatFlowStep.logoMenu) {
         await _handleLogo(clean);
-      } else if (_step == ChatFlowStep.welcome || _step == ChatFlowStep.askClient) {
+      } else if (_step == ChatFlowStep.welcome ||
+          _step == ChatFlowStep.askClient) {
         _pendingClientName = clean;
         _setStep(ChatFlowStep.askPhone);
         await _addBotMessage(
@@ -341,10 +354,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _submitCep(clean);
       }
     } catch (e) {
-      await _addBotMessage(
-        'Erro ao processar: $e',
-        type: ChatMessageType.text,
-      );
+      await _addBotMessage('Erro ao processar: $e', type: ChatMessageType.text);
     }
     return Result.ok(null);
   }
@@ -579,7 +589,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       'Telefone: ${_pendingPhone.isEmpty ? '—' : _pendingPhone}',
       type: ChatMessageType.inlineButtons,
       payload: {
-        'actions': ['Confirmar dados', 'Editar nome', 'Editar telefone']
+        'actions': ['Confirmar dados', 'Editar nome', 'Editar telefone'],
       },
     );
     return Result.ok(null);
@@ -629,7 +639,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       await _addBotMessage(
         _script?.askAddress ?? ChatScriptEntity.fallback.askAddress,
         type: ChatMessageType.inlineButtons,
-        payload: {'actions': ['SIM', 'NÃO']},
+        payload: {
+          'actions': ['SIM', 'NÃO'],
+        },
       );
     } else if (result is Error<CustomerInfo>) {
       await _addBotMessage(
@@ -645,10 +657,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {
-        'label': 'Selecionar produtos',
-        'action': 'open_products',
-      },
+      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
     );
     return Result.ok(null);
   }
@@ -703,7 +712,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         type: ChatMessageType.text,
       );
       await _addBotMessage(
-        _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
+        _script?.askStreetFallback ??
+            ChatScriptEntity.fallback.askStreetFallback,
         type: ChatMessageType.text,
       );
       return Result.ok(null);
@@ -720,7 +730,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       '${_upper(address.localidade)}\n\n'
       '${ChatBudgetStrings.menuBackOption}',
       type: ChatMessageType.inlineButtons,
-      payload: {'actions': ['Confirmar endereço', 'Corrigir endereço']},
+      payload: {
+        'actions': ['Confirmar endereço', 'Corrigir endereço'],
+      },
     );
     return Result.ok(null);
   }
@@ -814,10 +826,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {
-        'label': 'Selecionar produtos',
-        'action': 'open_products',
-      },
+      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
     );
     return Result.ok(null);
   }
@@ -853,7 +862,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     await _usecase.updateAddress(
-      zip: _isCorrectingAddress ? _cepMask.maskText(cepController.text.trim()) : null,
+      zip:
+          _isCorrectingAddress
+              ? _cepMask.maskText(cepController.text.trim())
+              : null,
       street: fullStreet,
       city: city,
       neighborhood: neighborhood.isEmpty ? null : neighborhood,
@@ -874,10 +886,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {
-        'label': 'Selecionar produtos',
-        'action': 'open_products',
-      },
+      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
     );
     return Result.ok(null);
   }
@@ -922,10 +931,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {
-        'label': 'Selecionar produtos',
-        'action': 'open_products',
-      },
+      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
     );
     return Result.ok(null);
   }
@@ -974,11 +980,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
     } else {
       buffer.writeln('Itens do orçamento:');
       for (final it in items) {
-        final lineTotal = it.TOTAL ?? ((it.QTD ?? 0) * (it.PRECO ?? 0));
+        final lineTotal = it.TOTAL ?? ((it.QTD ?? 0) * (it.price ?? 0));
         grandTotal += lineTotal;
         buffer.writeln(
-          '• ${it.DESCRICAO} — ${(it.QTD ?? 1).toInt()}x '
-          'R\$ ${(it.PRECO ?? 0).toStringAsFixed(2)} = '
+          '• ${it.description} — ${(it.QTD ?? 1).toInt()}x '
+          'R\$ ${(it.price ?? 0).toStringAsFixed(2)} = '
           'R\$ ${lineTotal.toStringAsFixed(2)}',
         );
       }
@@ -1000,7 +1006,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _commentQuestionMsgId!,
       'Deseja adicionar algum comentário ou observação ao orçamento?',
       type: ChatMessageType.inlineButtons,
-      payload: {'actions': ['SIM', 'NÃO']},
+      payload: {
+        'actions': ['SIM', 'NÃO'],
+      },
     );
 
     return Result.ok(null);
@@ -1039,7 +1047,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       enderecoNumero: budgetId,
     );
     if (url == null || url.isEmpty) {
-      _shareErrorMessage = 'Não foi possível gerar o link. Verifique sua conexão.';
+      _shareErrorMessage =
+          'Não foi possível gerar o link. Verifique sua conexão.';
       return Result.error(Exception(_shareErrorMessage));
     }
 
@@ -1147,7 +1156,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
           await _addBotMessage(
             _script?.askHasCep ?? ChatScriptEntity.fallback.askHasCep,
             type: ChatMessageType.inlineButtons,
-            payload: {'actions': ['SIM', 'NÃO']},
+            payload: {
+              'actions': ['SIM', 'NÃO'],
+            },
           );
         } else if (_step == ChatFlowStep.askHasCep) {
           await _askForCep();
@@ -1180,7 +1191,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         numberController.clear();
         _setStep(ChatFlowStep.askStreetManual);
         await _addBotMessage(
-          _script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback,
+          _script?.askStreetFallback ??
+              ChatScriptEntity.fallback.askStreetFallback,
           type: ChatMessageType.text,
         );
         break;
@@ -1273,7 +1285,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       'novamente ou finalizar o orçamento?',
       type: ChatMessageType.inlineButtons,
       payload: {
-        'actions': ['Editar comentários', 'Finalizar e gerar link']
+        'actions': ['Editar comentários', 'Finalizar e gerar link'],
       },
     );
   }

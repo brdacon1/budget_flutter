@@ -596,12 +596,12 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.CATEGORIA == 'Produtos') {
+      if (item.category == 'Produtos') {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.DESCRICAO!;
+        row.cells[0].value = item.description!;
         row.cells[1].value = item.MEDIDA!;
         row.cells[2].value = item.QTD.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.PRECO!);
+        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.TOTAL!);
       }
     }
@@ -689,12 +689,12 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.CATEGORIA == 'Serviços') {
+      if (item.category == 'Serviços') {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.DESCRICAO!;
+        row.cells[0].value = item.description!;
         row.cells[1].value = item.MEDIDA!;
         row.cells[2].value = item.QTD.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.PRECO!);
+        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.TOTAL!);
       }
     }

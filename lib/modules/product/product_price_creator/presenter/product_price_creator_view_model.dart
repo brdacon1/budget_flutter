@@ -1,20 +1,21 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
+import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_list/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceCreatorViewModel extends ChangeNotifier {
-  final ProductPriceRepository _productRepository = getIt<ProductPriceRepository>();
+  final ProductPriceRepository _productRepository =
+      getIt<ProductPriceRepository>();
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
@@ -26,8 +27,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   final TextEditingController unidadeText = TextEditingController();
   final TextEditingController qtdText = TextEditingController();
   final TextEditingController descricaoText = TextEditingController();
-  final MoneyMaskedTextController priceController =
-      MoneyMaskedTextController(leftSymbol: 'R\$ ');
+  final MoneyMaskedTextController priceController = MoneyMaskedTextController(
+    leftSymbol: 'R\$ ',
+  );
 
   ProductPriceFieldType? selectedField;
   late bool isEditing;
@@ -41,12 +43,16 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
   final bool fromListItem;
 
-  ProductPriceCreatorViewModel({required this.item, this.fromListItem = false}) {
+  ProductPriceCreatorViewModel({
+    required this.item,
+    this.fromListItem = false,
+  }) {
     _initFromItem();
   }
 
   void _initFromItem() {
-    final hasDescricao = item.descricao != null &&
+    final hasDescricao =
+        item.descricao != null &&
         item.descricao!.isNotEmpty &&
         item.descricao != 'null';
 
@@ -59,7 +65,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
       qtdText.text = (item.qtd ?? 0).toString();
       priceController.text = moneyConvert.convertFromDouble(item.preco ?? 0);
       descricaoText.text = item.descricao ?? '';
-      fieldVisible = item.idProduct != null &&
+      fieldVisible =
+          item.idProduct != null &&
           item.idProduct != 'null' &&
           item.idProduct!.isNotEmpty;
     } else {
@@ -107,11 +114,11 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     if (nameButton == ProductPtString.saveButton) {
       error = await _create(model: _buildModel(cleanAmount, qtd, totalPrice));
     } else if (nameButton == ProductPtString.updateButton && !fieldVisible) {
-      error =
-          await _updatePriceList(model: _buildModel(cleanAmount, 0, null));
+      error = await _updatePriceList(model: _buildModel(cleanAmount, 0, null));
     } else {
-      error =
-          await _updateOrcamento(model: _buildModel(cleanAmount, qtd, totalPrice));
+      error = await _updateOrcamento(
+        model: _buildModel(cleanAmount, qtd, totalPrice),
+      );
     }
 
     if (!context.mounted) return;
@@ -123,15 +130,23 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     if (error != null) {
       if (!context.mounted) return;
       await displayAlert.notificationError(
-          context, ProductPtString.errorTitle, error);
+        context,
+        ProductPtString.errorTitle,
+        error,
+      );
       return;
     }
 
-    final successMessage = nameButton == ProductPtString.saveButton
-        ? ProductPtString.addSuccess
-        : ProductPtString.updateSuccess;
+    final successMessage =
+        nameButton == ProductPtString.saveButton
+            ? ProductPtString.addSuccess
+            : ProductPtString.updateSuccess;
     if (!context.mounted) return;
-    displayAlert.notification(context, ProductPtString.doneTitle, successMessage);
+    displayAlert.notification(
+      context,
+      ProductPtString.doneTitle,
+      successMessage,
+    );
 
     // Guarda o item salvo para quem chamou o modal
     savedItem = _buildModel(
@@ -166,16 +181,18 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
         final withId = model.copyWith(id: id);
         final budgetItem = ItemsBudget(
           id: id,
-          CATEGORIA: withId.categoria,
-          DESCRICAO: withId.descricao,
-          PRECO: withId.preco,
+          category: withId.categoria,
+          description: withId.descricao,
+          price: withId.preco,
           QTD: withId.qtd,
           MEDIDA: withId.medida,
           TOTAL: withId.total,
           IDPRODUCT: id,
         );
         await _budgetRepository.saveBudgetItem(
-            _budgetRepository.selectBudget.value?.id ?? '', budgetItem);
+          _budgetRepository.selectBudget.value?.id ?? '',
+          budgetItem,
+        );
       }
       return null;
     } catch (e) {
@@ -199,9 +216,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     try {
       final budgetItem = ItemsBudget(
         id: item.idProduct,
-        CATEGORIA: model.categoria ?? 'Serviços',
-        DESCRICAO: model.descricao,
-        PRECO: model.preco,
+        category: model.categoria ?? 'Serviços',
+        description: model.descricao,
+        price: model.preco,
         QTD: model.qtd,
         MEDIDA: model.medida,
         TOTAL: model.total,
@@ -209,7 +226,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
         checkBox: item.checkBox,
       );
       await _budgetRepository.saveBudgetItem(
-          _budgetRepository.selectBudget.value?.id ?? '', budgetItem);
+        _budgetRepository.selectBudget.value?.id ?? '',
+        budgetItem,
+      );
       return null;
     } catch (e) {
       return ProductPtString.updateOrcamentoError;

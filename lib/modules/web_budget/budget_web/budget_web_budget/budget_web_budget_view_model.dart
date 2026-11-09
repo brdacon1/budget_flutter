@@ -1,16 +1,16 @@
-import 'package:oflite/injection.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
+import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 
 /// Estado do orçamento liberado no fluxo Web.
 ///
@@ -36,21 +36,27 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   bool _loading = true;
+
   bool get loading => _loading;
 
   String? _error;
+
   String? get error => _error;
 
   CustomerInfo? _budget;
+
   CustomerInfo? get budget => _budget;
 
   List<ItemsBudget> _items = const [];
+
   List<ItemsBudget> get items => _items;
 
   OwnerPdf? _owner;
+
   OwnerPdf? get owner => _owner;
 
   List<ObservationPdf> _observations = const [];
+
   List<ObservationPdf> get observations => _observations;
 
   double totalProducts = 0;
@@ -60,6 +66,7 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
   int countService = 0;
 
   bool _disposed = false;
+
   void _safeNotify() {
     if (_disposed) return;
     notifyListeners();
@@ -113,10 +120,10 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
     countService = 0;
     for (final i in _items) {
       final total = i.TOTAL ?? 0;
-      if (i.CATEGORIA == 'Produtos') {
+      if (i.category == 'Produtos') {
         totalProducts += total;
         countProduct++;
-      } else if (i.CATEGORIA == 'Serviços') {
+      } else if (i.category == 'Serviços') {
         totalServices += total;
         countService++;
       }
@@ -147,18 +154,22 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
       // Notifica o dono (quem criou/enviou o orçamento) — push via Firestore.
       final isApproved = status.toUpperCase() == 'APROVADO';
       final id = _budget?.id ?? enderecoNumero;
-      unawaited(_service.sendApprovalNotification(
-        ownerUid: ownerUid,
-        enderecoNumero: enderecoNumero,
-        token: token,
-        status: status,
-        title: isApproved
-            ? BudgetWebStrings.notificationTitleApproved(id)
-            : BudgetWebStrings.notificationTitleRejected(id),
-        message: isApproved
-            ? BudgetWebStrings.notificationMessageApproved(id)
-            : BudgetWebStrings.notificationMessageRejected(id),
-      ));
+      unawaited(
+        _service.sendApprovalNotification(
+          ownerUid: ownerUid,
+          enderecoNumero: enderecoNumero,
+          token: token,
+          status: status,
+          title:
+              isApproved
+                  ? BudgetWebStrings.notificationTitleApproved(id)
+                  : BudgetWebStrings.notificationTitleRejected(id),
+          message:
+              isApproved
+                  ? BudgetWebStrings.notificationMessageApproved(id)
+                  : BudgetWebStrings.notificationMessageRejected(id),
+        ),
+      );
       if (context.mounted) {
         await _displayAlert.notification(
           context,

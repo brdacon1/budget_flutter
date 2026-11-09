@@ -1,20 +1,19 @@
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
-import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum SingUpState { idle, loading, success, error }
 
@@ -107,18 +106,19 @@ class SingUpViewModel extends ChangeNotifier {
       await prefs.setString('email', email);
       await prefs.setString('password', password);
 
-      final session = InfoUser()
-        ..USER = uid
-        ..NOME = nome
-        ..EMAIL = email
-        ..FONE = DADOS.FONE
-        ..Id = uid
-        ..Senha = password
-        ..googleAuth = false
-        ..IdPay = ''
-        ..ProductId = ''
-        ..PurchaseToken = ''
-        ..AutoRenewing = false;
+      final session =
+          InfoUser()
+            ..USER = uid
+            ..NOME = nome
+            ..EMAIL = email
+            ..FONE = DADOS.FONE
+            ..Id = uid
+            ..Senha = password
+            ..googleAuth = false
+            ..IdPay = ''
+            ..ProductId = ''
+            ..PurchaseToken = ''
+            ..AutoRenewing = false;
       _userRepository.selectUser.value = session;
 
       await _getUserInfo(uid);
@@ -159,8 +159,9 @@ class SingUpViewModel extends ChangeNotifier {
 
       final ownerUid = _userRepository.selectUser.value?.USER;
       if (ownerUid != null && ownerUid.isNotEmpty) {
-        final tokens =
-            await getIt<NotificationRepository>().loadFcmTokens(ownerUid);
+        final tokens = await getIt<NotificationRepository>().loadFcmTokens(
+          ownerUid,
+        );
         DADOS.TOKENS = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }

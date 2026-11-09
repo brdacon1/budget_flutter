@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+
+import '../budget_web_items/components/budget_web_items_total_bar.dart';
+import '../budget_web_items/components/modals/budget_web_approval_modal_widget.dart';
+import '../utils/web_pdf_saver.dart';
+import 'budget_web_pdf_data_view_model.dart';
 import 'components/budget_web_approve_button.dart';
 import 'components/budget_web_comments_section.dart';
 import 'components/budget_web_data_section.dart';
 import 'components/budget_web_items_section.dart';
-import '../budget_web_items/components/budget_web_items_total_bar.dart';
-import '../budget_web_items/components/modals/budget_web_approval_modal_widget.dart';
-import 'budget_web_pdf_data_view_model.dart';
-import '../utils/web_pdf_saver.dart';
 
 /// Tab "Meus dados" do orçamento Web — agora centraliza **tudo** o que o
 /// cliente precisa ver num único scroll:
@@ -84,7 +85,7 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
     final q = _searchController.text.toLowerCase();
     if (q.isEmpty) return widget.items;
     return widget.items
-        .where((i) => (i.DESCRICAO ?? '').toLowerCase().contains(q))
+        .where((i) => (i.description ?? '').toLowerCase().contains(q))
         .toList();
   }
 
@@ -141,22 +142,32 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                   title: BudgetWebStrings.sectionContact,
                   icon: Icons.person,
                   rows: [
-                    BudgetWebDataRow(BudgetWebStrings.labelCustomerName,
-                        _orEmpty(widget.budget.customerName)),
                     BudgetWebDataRow(
-                        BudgetWebStrings.labelPhone, _orEmpty(widget.budget.phone)),
+                      BudgetWebStrings.labelCustomerName,
+                      _orEmpty(widget.budget.customerName),
+                    ),
+                    BudgetWebDataRow(
+                      BudgetWebStrings.labelPhone,
+                      _orEmpty(widget.budget.phone),
+                    ),
                   ],
                 ),
                 BudgetWebDataSection(
                   title: BudgetWebStrings.sectionInfo,
                   icon: Icons.request_page,
                   rows: [
-                    BudgetWebDataRow(BudgetWebStrings.labelStatus,
-                        _orEmpty(widget.budget.status)),
                     BudgetWebDataRow(
-                        BudgetWebStrings.labelDate, _orEmpty(widget.budget.data)),
-                    BudgetWebDataRow(BudgetWebStrings.labelNumber,
-                        _orEmpty(widget.budget.id)),
+                      BudgetWebStrings.labelStatus,
+                      _orEmpty(widget.budget.status),
+                    ),
+                    BudgetWebDataRow(
+                      BudgetWebStrings.labelDate,
+                      _orEmpty(widget.budget.data),
+                    ),
+                    BudgetWebDataRow(
+                      BudgetWebStrings.labelNumber,
+                      _orEmpty(widget.budget.id),
+                    ),
                   ],
                 ),
                 BudgetWebDataSection(
@@ -164,13 +175,21 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                   icon: Icons.location_on,
                   rows: [
                     BudgetWebDataRow(
-                        BudgetWebStrings.labelCep, _orEmpty(widget.budget.zip)),
-                    BudgetWebDataRow(BudgetWebStrings.labelStreet,
-                        _orEmpty(widget.budget.street)),
+                      BudgetWebStrings.labelCep,
+                      _orEmpty(widget.budget.zip),
+                    ),
                     BudgetWebDataRow(
-                        BudgetWebStrings.labelCity, _orEmpty(widget.budget.city)),
-                    BudgetWebDataRow(BudgetWebStrings.labelNeighborhood,
-                        _orEmpty(widget.budget.neighborhood)),
+                      BudgetWebStrings.labelStreet,
+                      _orEmpty(widget.budget.street),
+                    ),
+                    BudgetWebDataRow(
+                      BudgetWebStrings.labelCity,
+                      _orEmpty(widget.budget.city),
+                    ),
+                    BudgetWebDataRow(
+                      BudgetWebStrings.labelNeighborhood,
+                      _orEmpty(widget.budget.neighborhood),
+                    ),
                   ],
                 ),
                 BudgetWebItemsSection(
@@ -186,8 +205,10 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                 // versão Web. Reutiliza `BudgetWebPdfViewModel` para gerar os
                 // bytes — mesma regra de negócio do PDF do app mobile.
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 12,
+                  ),
                   child: SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -200,16 +221,17 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
                         ),
                       ),
                       onPressed: _generatingPdf ? null : _openPdfInNewTab,
-                      icon: _generatingPdf
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: buttonColor,
-                              ),
-                            )
-                          : const Icon(Icons.picture_as_pdf_outlined),
+                      icon:
+                          _generatingPdf
+                              ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: buttonColor,
+                                ),
+                              )
+                              : const Icon(Icons.picture_as_pdf_outlined),
                       label: Text(
                         _generatingPdf
                             ? BudgetWebStrings.loading

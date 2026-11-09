@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
@@ -13,7 +12,8 @@ import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_s
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessageEntity message;
   final void Function(String action)? onAction;
-  final void Function(String field, String currentText, String messageId)? onEditMessage;
+  final void Function(String field, String currentText, String messageId)?
+  onEditMessage;
 
   const ChatMessageBubble({
     super.key,
@@ -58,18 +58,27 @@ class ChatMessageBubble extends StatelessWidget {
           const SizedBox(width: 6),
           Flexible(
             child: GestureDetector(
-              onLongPress: _isUser && _editableField != null
-                  ? () => onEditMessage?.call(_editableField!, message.content, message.id)
-                  : null,
+              onLongPress:
+                  _isUser && _editableField != null
+                      ? () => onEditMessage?.call(
+                        _editableField!,
+                        message.content,
+                        message.id,
+                      )
+                      : null,
               child: Container(
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.75,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: _isUser
-                      ? const Color(0xFF075E54)
-                      : const Color(0xFF2A2D3E),
+                  color:
+                      _isUser
+                          ? const Color(0xFF075E54)
+                          : const Color(0xFF2A2D3E),
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(16),
                     topRight: const Radius.circular(16),
@@ -91,7 +100,9 @@ class ChatMessageBubble extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                     ],
-                    if (_dataRows != null && _dataRows!.isNotEmpty && !_isUser) ...[
+                    if (_dataRows != null &&
+                        _dataRows!.isNotEmpty &&
+                        !_isUser) ...[
                       ..._dataRows!.map((row) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 2),
@@ -150,7 +161,11 @@ class ChatMessageBubble extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.edit, size: 12, color: Colors.white70),
+                          const Icon(
+                            Icons.edit,
+                            size: 12,
+                            color: Colors.white70,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Toque e segure para editar',
@@ -181,10 +196,12 @@ class ChatMessageBubble extends StatelessWidget {
       final line = lines[i];
       final match = RegExp(r'^(\d+\.\s*)(.*)$').firstMatch(line);
       if (match != null) {
-        spans.add(TextSpan(
-          text: '${match.group(1)}${match.group(2)}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ));
+        spans.add(
+          TextSpan(
+            text: '${match.group(1)}${match.group(2)}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        );
       } else {
         spans.add(TextSpan(text: line));
       }
@@ -210,10 +227,7 @@ class ChatMessageBubble extends StatelessWidget {
   Widget _buildExtraContent() {
     switch (message.type) {
       case ChatMessageType.inlineButtons:
-        return _InlineButtons(
-          actions: _parseActions(),
-          onTap: onAction,
-        );
+        return _InlineButtons(actions: _parseActions(), onTap: onAction);
       case ChatMessageType.contactPicker:
         return _ContactPickerButton(onTap: onAction);
       case ChatMessageType.action:
@@ -227,12 +241,8 @@ class ChatMessageBubble extends StatelessWidget {
           onEdit: () => onAction?.call('edit_products'),
         );
       case ChatMessageType.image:
-        return _ImageContent(
-          payload: message.payload,
-          onTap: onAction,
-        );
+        return _ImageContent(payload: message.payload, onTap: onAction);
       case ChatMessageType.text:
-      default:
         return const SizedBox.shrink();
     }
   }
@@ -263,20 +273,27 @@ class _InlineButtons extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: actions.map((label) {
-        return ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF00BFA5),
-            foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          ),
-          onPressed: () => onTap?.call(label),
-          child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        );
-      }).toList(),
+      children:
+          actions.map((label) {
+            return ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00BFA5),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
+              onPressed: () => onTap?.call(label),
+              child: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -311,11 +328,7 @@ class _ActionButton extends StatelessWidget {
   final String action;
   final void Function(String)? onTap;
 
-  const _ActionButton({
-    required this.label,
-    required this.action,
-    this.onTap,
-  });
+  const _ActionButton({required this.label, required this.action, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -348,8 +361,10 @@ class _ProductListActions extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: OutlinedButton.icon(
         icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
-        label: const Text('Editar seleção',
-            style: TextStyle(color: Colors.cyanAccent)),
+        label: const Text(
+          'Editar seleção',
+          style: TextStyle(color: Colors.cyanAccent),
+        ),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.cyanAccent),
           shape: RoundedRectangleBorder(
@@ -380,15 +395,9 @@ class _ImageContent extends StatelessWidget {
     Widget imageWidget;
     if (imageBase64 != null && imageBase64.isNotEmpty) {
       final bytes = base64Decode(imageBase64);
-      imageWidget = Image.memory(
-        bytes,
-        fit: BoxFit.cover,
-      );
+      imageWidget = Image.memory(bytes, fit: BoxFit.cover);
     } else if (imageUrl != null && imageUrl.isNotEmpty) {
-      imageWidget = Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-      );
+      imageWidget = Image.network(imageUrl, fit: BoxFit.cover);
     } else {
       return const SizedBox.shrink();
     }
@@ -400,10 +409,7 @@ class _ImageContent extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 240,
-              maxHeight: 240,
-            ),
+            constraints: const BoxConstraints(maxWidth: 240, maxHeight: 240),
             child: imageWidget,
           ),
         ),

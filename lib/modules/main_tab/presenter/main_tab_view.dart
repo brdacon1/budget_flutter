@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/budget_list/presenter/budget_list_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
-import 'package:oflite/modules/main_config_menu/presenter/main_config_menu_view.dart';
-import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
+import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
+
 import 'main_tab_view_model.dart';
 
 class MainTabView extends StatefulWidget {
@@ -35,8 +35,7 @@ class _MainTabView extends State<MainTabView> {
       // `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}`. Idempotente.
       final ownerUid = getIt<UserRepository>().selectUser.value?.USER;
       if (ownerUid != null && ownerUid.trim().isNotEmpty) {
-        getIt<NotificationRepository>()
-            .persistCurrentTokenToFirebase(ownerUid);
+        getIt<NotificationRepository>().persistCurrentTokenToFirebase(ownerUid);
       }
     });
   }
@@ -61,25 +60,26 @@ class _MainTabView extends State<MainTabView> {
         return Scaffold(
           body: children[_viewModel.currentIndex],
           bottomNavigationBar: Theme(
-            data: Theme.of(context).copyWith(
-              canvasColor: secondaryColor,
-            ),
+            data: Theme.of(context).copyWith(canvasColor: secondaryColor),
             child: BottomNavigationBar(
               showUnselectedLabels: true,
               selectedItemColor: Colors.cyan[50],
-              selectedLabelStyle:
-                  const TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold),
+              selectedLabelStyle: const TextStyle(
+                fontSize: 11.0,
+                fontWeight: FontWeight.bold,
+              ),
               unselectedItemColor: Colors.grey,
               onTap: _viewModel.onTabTapped,
               currentIndex: _viewModel.currentIndex,
-              items: _viewModel.tabItems
-                  .map(
-                    (tabItem) => BottomNavigationBarItem(
-                      icon: Icon(tabItem.icon),
-                      label: tabItem.title,
-                    ),
-                  )
-                  .toList(),
+              items:
+                  _viewModel.tabItems
+                      .map(
+                        (tabItem) => BottomNavigationBarItem(
+                          icon: Icon(tabItem.icon),
+                          label: tabItem.title,
+                        ),
+                      )
+                      .toList(),
             ),
           ),
         );

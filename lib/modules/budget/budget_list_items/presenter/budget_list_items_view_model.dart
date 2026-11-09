@@ -52,18 +52,21 @@ class BudgetListItemsViewModel extends ChangeNotifier {
 
     for (int index = 0; index < budgets.length; index++) {
       double total = budgets[index].TOTAL ?? 0;
-      if (budgets[index].CATEGORIA == 'Produtos') {
+      if (budgets[index].category == 'Produtos') {
         totalProducts += total;
         countProduct++;
-      } else if (budgets[index].CATEGORIA == 'Serviços') {
+      } else if (budgets[index].category == 'Serviços') {
         totalServices += total;
         countService++;
       }
       totalBudget += total;
     }
     final currentSelectBudget = _budgetRepository.selectBudget.value;
-    if (currentSelectBudget != null && currentSelectBudget.totalValue != totalBudget) {
-      _budgetRepository.selectBudget.value = item.copyWith(totalValue: totalBudget);
+    if (currentSelectBudget != null &&
+        currentSelectBudget.totalValue != totalBudget) {
+      _budgetRepository.selectBudget.value = item.copyWith(
+        totalValue: totalBudget,
+      );
       // Atualiza o orçamento com o total recalculado
       final budgetUpdate = item.copyWith(totalValue: totalBudget);
       await _budgetRepository.updateBudget(budgetUpdate);
@@ -94,7 +97,7 @@ class BudgetListItemsViewModel extends ChangeNotifier {
     } else {
       return budgets
           .where(
-            (x) => x.DESCRICAO!.toLowerCase().contains(
+            (x) => x.description!.toLowerCase().contains(
               searchController.text.toLowerCase(),
             ),
           )

@@ -1,8 +1,8 @@
 class ItemsBudget {
   String? id;
-  String? CATEGORIA;
-  String? DESCRICAO;
-  double? PRECO;
+  String? category;
+  String? description;
+  double? price;
   double? QTD;
   String? MEDIDA;
   double? TOTAL;
@@ -13,9 +13,9 @@ class ItemsBudget {
 
   ItemsBudget({
     this.id,
-    this.CATEGORIA,
-    this.DESCRICAO,
-    this.PRECO,
+    this.category,
+    this.description,
+    this.price,
     this.QTD,
     this.MEDIDA,
     this.TOTAL,
@@ -26,9 +26,9 @@ class ItemsBudget {
 
   ItemsBudget.fromMap(dynamic json) {
     id = json['id'];
-    CATEGORIA = json['CATEGORIA'];
-    DESCRICAO = json['DESCRICAO'];
-    PRECO = _convertToDouble(json['PRECO']) ?? 0;
+    category = json['CATEGORIA'];
+    description = json['DESCRICAO'];
+    price = _convertToDouble(json['PRECO']) ?? 0;
     QTD = _convertToDouble(json['QTD']) ?? 0;
     MEDIDA = json['MEDIDA'];
     TOTAL = _convertToDouble(json['TOTAL']) ?? 0;
@@ -48,16 +48,16 @@ class ItemsBudget {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = this.id;
-    data['CATEGORIA'] = this.CATEGORIA;
-    data['DESCRICAO'] = this.DESCRICAO;
-    data['PRECO'] = this.PRECO;
-    data['QTD'] = this.QTD;
-    data['MEDIDA'] = this.MEDIDA;
-    data['TOTAL'] = this.TOTAL;
-    data['IDPRODUCT'] = this.IDPRODUCT;
-    data['checkBox'] = this.checkBox;
-    data['selectProduct'] = this.selectProduct;
+    data['id'] = id;
+    data['CATEGORIA'] = category;
+    data['DESCRICAO'] = description;
+    data['PRECO'] = price;
+    data['QTD'] = QTD;
+    data['MEDIDA'] = MEDIDA;
+    data['TOTAL'] = TOTAL;
+    data['IDPRODUCT'] = IDPRODUCT;
+    data['checkBox'] = checkBox;
+    data['selectProduct'] = selectProduct;
     data['indice'] = this.indice;
 
     return data;

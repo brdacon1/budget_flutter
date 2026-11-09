@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
@@ -11,14 +14,12 @@ import 'package:oflite/modules/product/product_price_list/presenter/strings/prod
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Gerenciamento de estado da tela de **lista de preço** (produtos/serviços).
 class ProductPriceListViewModel extends ChangeNotifier {
-  final ProductPriceRepository _productRepository = getIt<ProductPriceRepository>();
+  final ProductPriceRepository _productRepository =
+      getIt<ProductPriceRepository>();
   final BudgetRepository _budgetRepo = getIt<BudgetRepository>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
@@ -42,7 +43,11 @@ class ProductPriceListViewModel extends ChangeNotifier {
   bool checkBoxAppear = false;
   bool checkBoxProductVisible = true;
 
-  ProductPriceListViewModel({this.item, this.fromMenu = false, this.selectionMode = false});
+  ProductPriceListViewModel({
+    this.item,
+    this.fromMenu = false,
+    this.selectionMode = false,
+  });
 
   List<ProductPriceModel> get found {
     final query = searchController.text;
@@ -81,15 +86,21 @@ class ProductPriceListViewModel extends ChangeNotifier {
         for (final cart in addItems) {
           final i = list.indexWhere((e) => e.id == cart.id);
           if (i != -1) {
-            list[i] = list[i]
-                .copyWith(checkBox: false, indice: i, selectProduct: true);
+            list[i] = list[i].copyWith(
+              checkBox: false,
+              indice: i,
+              selectProduct: true,
+            );
           }
         }
         for (final del in deleteItems) {
           final i = list.indexWhere((e) => e.id == del.id);
           if (i != -1) {
-            list[i] = list[i]
-                .copyWith(checkBox: true, indice: i, selectProduct: false);
+            list[i] = list[i].copyWith(
+              checkBox: true,
+              indice: i,
+              selectProduct: false,
+            );
           }
         }
         _all = list;
@@ -126,9 +137,10 @@ class ProductPriceListViewModel extends ChangeNotifier {
     checkBoxProductVisible = !checkBoxAppear;
     addItems = <ProductPriceModel>[];
     if (!checkBoxAppear) {
-      _all = _all
-          .map((e) => e.copyWith(checkBox: false, selectProduct: false))
-          .toList();
+      _all =
+          _all
+              .map((e) => e.copyWith(checkBox: false, selectProduct: false))
+              .toList();
       deleteItems = <ProductPriceModel>[];
       deleteVisible = false;
     }
@@ -225,15 +237,16 @@ class ProductPriceListViewModel extends ChangeNotifier {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ItemsListBottomModalWidget(
-        title: ProductPtString.cartTitle,
-        items: addItems.map((e) => e.toItemsBudget()).toList(),
-        moneyConvert: moneyConvert,
-        buttonLabel: ProductPtString.cartButton,
-        onRemove: (item, index) => removeFromCart(index),
-        onItemTap: (item, index) async => await editCartQty(context, index),
-        onButtonPressed: () => saveCart(context),
-      ),
+      builder:
+          (context) => ItemsListBottomModalWidget(
+            title: ProductPtString.cartTitle,
+            items: addItems.map((e) => e.toItemsBudget()).toList(),
+            moneyConvert: moneyConvert,
+            buttonLabel: ProductPtString.cartButton,
+            onRemove: (item, index) => removeFromCart(index),
+            onItemTap: (item, index) async => await editCartQty(context, index),
+            onButtonPressed: () => saveCart(context),
+          ),
     );
     notifyListeners();
   }
@@ -250,16 +263,16 @@ class ProductPriceListViewModel extends ChangeNotifier {
       for (final cart in addItems) {
         final item = ItemsBudget(
           id: cart.id,
-          CATEGORIA: cart.categoria,
-          DESCRICAO: cart.descricao,
-          PRECO: cart.preco,
+          category: cart.categoria,
+          description: cart.descricao,
+          price: cart.preco,
           QTD: cart.qtd,
           MEDIDA: cart.medida,
           TOTAL: cart.total,
           IDPRODUCT: cart.id,
         );
         await budgetRepo.saveBudgetItem(
-          _budgetRepo.selectBudget.value?.id ?? item?.id ?? '',
+          _budgetRepo.selectBudget.value?.id ?? item.id ?? '',
           item,
         );
       }
@@ -293,16 +306,21 @@ class ProductPriceListViewModel extends ChangeNotifier {
   /// Converte os itens do carrinho para [ItemsBudget] e popa o resultado.
   /// Usado apenas quando [selectionMode] é true.
   void finalizeSelection(BuildContext context) {
-    final result = addItems.map((cart) => ItemsBudget(
-      id: cart.id,
-      CATEGORIA: cart.categoria,
-      DESCRICAO: cart.descricao,
-      PRECO: cart.preco,
-      QTD: cart.qtd,
-      MEDIDA: cart.medida,
-      TOTAL: cart.total,
-      IDPRODUCT: cart.id,
-    )).toList();
+    final result =
+        addItems
+            .map(
+              (cart) => ItemsBudget(
+                id: cart.id,
+                category: cart.categoria,
+                description: cart.descricao,
+                price: cart.preco,
+                QTD: cart.qtd,
+                MEDIDA: cart.medida,
+                TOTAL: cart.total,
+                IDPRODUCT: cart.id,
+              ),
+            )
+            .toList();
     Navigator.pop(context, result);
   }
 
@@ -311,14 +329,15 @@ class ProductPriceListViewModel extends ChangeNotifier {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ItemsListBottomModalWidget(
-        title: ProductPtString.deleteListTitle,
-        items: deleteItems.map((e) => e.toItemsBudget()).toList(),
-        moneyConvert: moneyConvert,
-        buttonLabel: ProductPtString.deleteButton,
-        onRemove: (item, index) => removeFromDeleteList(index),
-        onButtonPressed: () => deleteSelected(context),
-      ),
+      builder:
+          (context) => ItemsListBottomModalWidget(
+            title: ProductPtString.deleteListTitle,
+            items: deleteItems.map((e) => e.toItemsBudget()).toList(),
+            moneyConvert: moneyConvert,
+            buttonLabel: ProductPtString.deleteButton,
+            onRemove: (item, index) => removeFromDeleteList(index),
+            onButtonPressed: () => deleteSelected(context),
+          ),
     );
     notifyListeners();
   }
@@ -371,7 +390,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> addNew(BuildContext context) async {
-    final isPremium = getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
+    final isPremium =
+        getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false;
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/comment/domain/repository/comment_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
+import 'package:oflite/modules/comment/domain/repository/comment_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class CommentListViewModel extends ChangeNotifier {
@@ -45,8 +44,10 @@ class CommentListViewModel extends ChangeNotifier {
   }
 
   Future<bool> updateComment(ObservationBudget updateObservation) async {
-    final result =
-        await _commentRepository.updateComment(item.id!, updateObservation);
+    final result = await _commentRepository.updateComment(
+      item.id!,
+      updateObservation,
+    );
     if (result is Ok<void>) {
       await loadComments();
       return true;
@@ -55,7 +56,10 @@ class CommentListViewModel extends ChangeNotifier {
   }
 
   Future<bool> deleteSelected() async {
-    final result = await _commentRepository.deleteComments(item.id!, deleteItems);
+    final result = await _commentRepository.deleteComments(
+      item.id!,
+      deleteItems,
+    );
     if (result is Ok<void>) {
       deleteItems.clear();
       deleteVisible = false;

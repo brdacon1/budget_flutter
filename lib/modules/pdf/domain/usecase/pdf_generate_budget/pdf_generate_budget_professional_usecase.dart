@@ -565,12 +565,12 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     // Linhas
     for (final item in items) {
-      if (item.CATEGORIA == category) {
+      if (item.category == category) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.DESCRICAO ?? '';
+        row.cells[0].value = item.description ?? '';
         row.cells[1].value = item.MEDIDA ?? '';
         row.cells[2].value = (item.QTD ?? 0).toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.PRECO ?? 0);
+        row.cells[3].value = _moneyConvert.convertFromDouble(item.price ?? 0);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.TOTAL ?? 0);
       }
     }
@@ -679,8 +679,6 @@ class PdfGenerateBudgetProfessionalUsecase {
     double pageW,
     double topY,
   ) {
-    final PdfGraphics g = page.graphics;
-
     double y = _drawSectionTitle(page, 'OBSERVAÇÕES DO ORÇAMENTO', topY);
 
     final PdfGrid grid = PdfGrid()..columns.add(count: 2);

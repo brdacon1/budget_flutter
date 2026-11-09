@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
@@ -73,22 +72,6 @@ class _CommentListView extends State<CommentListView> {
     if (saved == null) return;
     await _viewModel.loadComments();
     _viewModel.resetSelectionState();
-  }
-
-  Widget _title(double we) {
-    return Container(
-      alignment: Alignment.topLeft,
-      margin: EdgeInsets.only(left: we * 0.04),
-      child: Text(
-        "Comentários",
-        style: GoogleFonts.heebo(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 26,
-          letterSpacing: 2,
-        ),
-      ),
-    );
   }
 
   Widget _commentList() {

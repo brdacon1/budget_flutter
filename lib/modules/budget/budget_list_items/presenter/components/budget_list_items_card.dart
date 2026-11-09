@@ -23,7 +23,7 @@ class BudgetListItemsCard extends StatelessWidget {
       children: [
         ExpansionCardLabel(
           nameText: "Categoria:",
-          textData: "${item.CATEGORIA}",
+          textData: "${item.category}",
           horizontalPadding: 12,
           verticalPadding: 5,
         ),
@@ -64,7 +64,7 @@ class BudgetListItemsCard extends StatelessWidget {
             child: Icon(Icons.production_quantity_limits, color: whiteColor),
           ),
           title: Text(
-            item.DESCRICAO!,
+            item.description!,
             maxLines: 2,
             style: const TextStyle(
               color: whiteColor,
@@ -74,7 +74,7 @@ class BudgetListItemsCard extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            "Preço: ${moneyConvert.convertFromDouble(item.PRECO!)}",
+            "Preço: ${moneyConvert.convertFromDouble(item.price!)}",
             style: const TextStyle(
               color: whiteColor,
               letterSpacing: 0.5,

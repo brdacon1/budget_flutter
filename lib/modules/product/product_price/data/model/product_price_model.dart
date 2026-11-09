@@ -65,18 +65,18 @@ class ProductPriceModel {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'CATEGORIA': categoria,
-        'DESCRICAO': descricao,
-        'PRECO': preco,
-        'QTD': qtd,
-        'MEDIDA': medida,
-        'TOTAL': total,
-        'IDPRODUCT': idProduct,
-        'checkBox': checkBox,
-        'selectProduct': selectProduct,
-        'indice': indice,
-      };
+    'id': id,
+    'CATEGORIA': categoria,
+    'DESCRICAO': descricao,
+    'PRECO': preco,
+    'QTD': qtd,
+    'MEDIDA': medida,
+    'TOTAL': total,
+    'IDPRODUCT': idProduct,
+    'checkBox': checkBox,
+    'selectProduct': selectProduct,
+    'indice': indice,
+  };
 
   ProductPriceModel copyWith({
     String? id,
@@ -118,9 +118,9 @@ class ProductPriceModel {
   factory ProductPriceModel.fromItemsBudget(ItemsBudget item) {
     return ProductPriceModel(
       id: item.id,
-      categoria: item.CATEGORIA,
-      descricao: item.DESCRICAO,
-      preco: item.PRECO,
+      categoria: item.category,
+      descricao: item.description,
+      preco: item.price,
       qtd: item.QTD,
       medida: item.MEDIDA,
       total: item.TOTAL,
@@ -134,12 +134,12 @@ class ProductPriceModel {
   factory ProductPriceModel.fromItemsListBudget(ItemsListBudget item) {
     return ProductPriceModel(
       id: item.id,
-      categoria: item.CATEGORIA,
-      descricao: item.DESCRICAO,
-      preco: item.PRECO,
+      categoria: item.category,
+      descricao: item.description,
+      preco: item.price,
       qtd: item.QTD,
       medida: item.MEDIDA,
-      total: item.TOTAL,
+      total: item.total,
       idProduct: item.IDPRODUCT,
       checkBox: item.checkBox,
       selectProduct: item.selectProduct,
@@ -152,12 +152,12 @@ class ProductPriceModel {
   ItemsListBudget toItemsListBudget() {
     return ItemsListBudget(
       id: id,
-      CATEGORIA: categoria,
-      DESCRICAO: descricao,
-      PRECO: preco,
+      category: categoria,
+      description: descricao,
+      price: preco,
       QTD: qtd,
       MEDIDA: medida,
-      TOTAL: total,
+      total: total,
       IDPRODUCT: idProduct,
       checkBox: checkBox,
       selectProduct: selectProduct,
@@ -169,9 +169,9 @@ class ProductPriceModel {
   ItemsBudget toItemsBudget() {
     return ItemsBudget(
       id: id,
-      CATEGORIA: categoria,
-      DESCRICAO: descricao,
-      PRECO: preco,
+      category: categoria,
+      description: descricao,
+      price: preco,
       QTD: qtd,
       MEDIDA: medida,
       TOTAL: total,

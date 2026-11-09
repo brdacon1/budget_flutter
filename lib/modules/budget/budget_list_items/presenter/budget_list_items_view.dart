@@ -244,6 +244,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                 heroTag: "adicionar",
                 onPressed: () async {
                   if (await _viewModel.getProductCount() > 0) {
+                    if (!mounted) return;
                     final value = await displayAlert.listNotification(context);
                     if (value == "Criar novo item") {
                       _showProductPriceCreatorBottomModal();

@@ -1,19 +1,18 @@
-import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/shared/common/widgets/ads/interstitial_ad_service.dart';
-import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
-import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
-import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
+import 'package:oflite/modules/receipt/receipt_list/presenter/receipt_list_view.dart';
+import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 
 class MenuItem {
   final IconData icon;
@@ -33,16 +32,24 @@ class PdfMenuViewModel extends ChangeNotifier {
     required this.item,
     DisplayAlertRepository? displayAlertRepository,
     ShareLinkRepository? shareLinkRepository,
-  })  : _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
-        _shareLinkRepository = shareLinkRepository ?? getIt<ShareLinkRepository>();
+  }) : _displayAlert =
+           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+       _shareLinkRepository =
+           shareLinkRepository ?? getIt<ShareLinkRepository>();
 
   Future<void> inicialData() async {
     menuItems = <MenuItem>[
       MenuItem(icon: Icons.comment_outlined, title: PdfStrings.menuComments),
       MenuItem(icon: Icons.payments_outlined, title: PdfStrings.menuReceipt),
       MenuItem(icon: Icons.share_outlined, title: PdfStrings.menuShareLink),
-      MenuItem(icon: Icons.business_center_outlined, title: PdfStrings.menuPdfExecutive),
-      MenuItem(icon: Icons.workspace_premium_outlined, title: PdfStrings.menuPdfProfessional),
+      MenuItem(
+        icon: Icons.business_center_outlined,
+        title: PdfStrings.menuPdfExecutive,
+      ),
+      MenuItem(
+        icon: Icons.workspace_premium_outlined,
+        title: PdfStrings.menuPdfProfessional,
+      ),
     ];
     notifyListeners();
   }
@@ -54,24 +61,22 @@ class PdfMenuViewModel extends ChangeNotifier {
       case 0:
         await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => CommentListView(item: item),
-          ),
+          MaterialPageRoute(builder: (context) => CommentListView(item: item)),
         );
         break;
       case 1:
         await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ReceiptListView(item: item),
-          ),
+          MaterialPageRoute(builder: (context) => ReceiptListView(item: item)),
         );
         break;
       case 3:
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PdfBudgetView(layoutType: PdfLayoutType.executive),
+            builder:
+                (context) =>
+                    const PdfBudgetView(layoutType: PdfLayoutType.executive),
           ),
         );
         break;
@@ -79,31 +84,37 @@ class PdfMenuViewModel extends ChangeNotifier {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PdfBudgetView(layoutType: PdfLayoutType.professional),
+            builder:
+                (context) =>
+                    const PdfBudgetView(layoutType: PdfLayoutType.professional),
           ),
         );
         break;
       case 2:
-        if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ?? false)) {
-          await _displayAlert.adsNotification(context).then(
-                  (value) async => {
-                if (value == PdfStrings.watchAd)
-                  {
-                    await shareBudget(context),
-                    Future.delayed(const Duration(milliseconds: 2), ()  {
-                      getIt<AdsRepository>().showInterstitial();
-                    }),
-                  }
-                else if (value == PdfStrings.goPremium)
-                  {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              SubscriptionView()),
-                    ),
-                  }
-              });
+        if (!(getIt<UserRepository>().selectUser.value?.AutoRenewing ??
+            false)) {
+          await _displayAlert
+              .adsNotification(context)
+              .then(
+                (value) async => {
+                  if (value == PdfStrings.watchAd)
+                    {
+                      await shareBudget(context),
+                      Future.delayed(const Duration(milliseconds: 2), () {
+                        getIt<AdsRepository>().showInterstitial();
+                      }),
+                    }
+                  else if (value == PdfStrings.goPremium)
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SubscriptionView(),
+                        ),
+                      ),
+                    },
+                },
+              );
         } else {
           await shareBudget(context);
         }

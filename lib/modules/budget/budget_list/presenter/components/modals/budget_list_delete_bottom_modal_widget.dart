@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/budget_list/presenter/components/card/delete_budget_card.dart';
-import 'package:oflite/shared/common/utils/get_budget_status_color.dart';
-import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Bottom modal para confirmar a remoção de orçamentos marcados.
 ///
@@ -67,32 +66,31 @@ class _BudgetListDeleteBottomModalWidgetState
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
-        child: _items.isEmpty
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  'Nenhum orçamento selecionado.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.heebo(
-                    color: AppBottomModal.grayColor,
-                    fontSize: 14,
+        child:
+            _items.isEmpty
+                ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    'Nenhum orçamento selecionado.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.heebo(
+                      color: AppBottomModal.grayColor,
+                      fontSize: 14,
+                    ),
                   ),
+                )
+                : ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: _items.length,
+                  itemBuilder: (context, index) {
+                    return DeleteItemCard(
+                      item: _items[index],
+                      onRemove: () => _removeItem(_items[index]),
+                    );
+                  },
                 ),
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  return DeleteItemCard(
-                    item: _items[index],
-                    onRemove: () => _removeItem(_items[index]),
-                  );
-                },
-              ),
       ),
     );
   }
 }
-
-

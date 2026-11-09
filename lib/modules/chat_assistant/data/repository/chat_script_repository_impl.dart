@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
@@ -33,25 +32,32 @@ class ChatScriptRepositoryImpl extends ChatScriptRepository {
         _cached = ChatScriptEntity.fallback;
       } else {
         _cached = ChatScriptEntity(
-          askClientName: raw['askClientName'] as String? ??
+          askClientName:
+              raw['askClientName'] as String? ??
               ChatScriptEntity.fallback.askClientName,
-          askPhone: raw['askPhone'] as String? ??
-              ChatScriptEntity.fallback.askPhone,
-          askAddress: raw['askAddress'] as String? ??
+          askPhone:
+              raw['askPhone'] as String? ?? ChatScriptEntity.fallback.askPhone,
+          askAddress:
+              raw['askAddress'] as String? ??
               ChatScriptEntity.fallback.askAddress,
-          askHasCep: raw['askHasCep'] as String? ??
+          askHasCep:
+              raw['askHasCep'] as String? ??
               ChatScriptEntity.fallback.askHasCep,
-          askCep: raw['askCep'] as String? ??
-              ChatScriptEntity.fallback.askCep,
-          cepNotFound: raw['cepNotFound'] as String? ??
+          askCep: raw['askCep'] as String? ?? ChatScriptEntity.fallback.askCep,
+          cepNotFound:
+              raw['cepNotFound'] as String? ??
               ChatScriptEntity.fallback.cepNotFound,
-          askStreetFallback: raw['askStreetFallback'] as String? ??
+          askStreetFallback:
+              raw['askStreetFallback'] as String? ??
               ChatScriptEntity.fallback.askStreetFallback,
-          askProducts: raw['askProducts'] as String? ??
+          askProducts:
+              raw['askProducts'] as String? ??
               ChatScriptEntity.fallback.askProducts,
-          finalMessage: raw['finalMessage'] as String? ??
+          finalMessage:
+              raw['finalMessage'] as String? ??
               ChatScriptEntity.fallback.finalMessage,
-          shareLabel: raw['shareLabel'] as String? ??
+          shareLabel:
+              raw['shareLabel'] as String? ??
               ChatScriptEntity.fallback.shareLabel,
         );
       }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/modules/core/in_app_purchase/data/datasource/in_app_purchase_remote_datasource.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
@@ -12,6 +11,7 @@ class InAppPurchaseRepositoryImpl implements InAppPurchaseRepository {
   final InAppPurchaseRemoteDataSource _dataSource;
 
   InAppPurchaseRepositoryImpl(this._dataSource);
+
   @override
   Future<void> initConnection() => _dataSource.initConnection();
 
@@ -57,8 +57,10 @@ class InAppPurchaseRepositoryImpl implements InAppPurchaseRepository {
   }
 
   @override
-  Stream<Purchase> get purchaseUpdatedStream => _dataSource.purchaseUpdatedStream;
+  Stream<Purchase> get purchaseUpdatedStream =>
+      _dataSource.purchaseUpdatedStream;
 
   @override
-  Stream<PurchaseError> get purchaseErrorStream => _dataSource.purchaseErrorStream;
+  Stream<PurchaseError> get purchaseErrorStream =>
+      _dataSource.purchaseErrorStream;
 }

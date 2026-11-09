@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
@@ -14,7 +15,7 @@ class SubscriptionViewModel extends ChangeNotifier {
   final InAppPurchaseRepository _iap;
 
   SubscriptionViewModel({InAppPurchaseRepository? iapRepository})
-      : _iap = iapRepository ?? getIt<InAppPurchaseRepository>();
+    : _iap = iapRepository ?? getIt<InAppPurchaseRepository>();
 
   SubscriptionState state = SubscriptionState.idle;
   String? errorMessage;
@@ -30,12 +31,15 @@ class SubscriptionViewModel extends ChangeNotifier {
 
   /// Guarda os produtos buscados (para obter offerToken no Android)
   List<ProductSubscription> _availableProducts = [];
+
   List<ProductSubscription> get availableProducts => _availableProducts;
 
   bool get hasProducts => _availableProducts.isNotEmpty;
 
   String? get displayPrice =>
-      _availableProducts.isNotEmpty ? _availableProducts.first.displayPrice : null;
+      _availableProducts.isNotEmpty
+          ? _availableProducts.first.displayPrice
+          : null;
 
   Future<void> init() async {
     state = SubscriptionState.idle;
@@ -67,8 +71,12 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Não quebra o flow para não travar a UI no emulador
     }
 
-    _purchaseUpdatedSubscription = _iap.purchaseUpdatedStream.listen(_onPurchaseUpdated);
-    _purchaseErrorSubscription = _iap.purchaseErrorStream.listen(_onPurchaseError);
+    _purchaseUpdatedSubscription = _iap.purchaseUpdatedStream.listen(
+      _onPurchaseUpdated,
+    );
+    _purchaseErrorSubscription = _iap.purchaseErrorStream.listen(
+      _onPurchaseError,
+    );
   }
 
   Future<void> requestSubscription() async {
@@ -91,24 +99,20 @@ class SubscriptionViewModel extends ChangeNotifier {
         }
 
         if (offerToken == null) {
-          throw Exception(
-          SubscriptionStrings.offerTokenError(sku),
-        );
+          throw Exception(SubscriptionStrings.offerTokenError(sku));
         }
       }
 
-      await _iap.requestPurchaseWithBuilder(
-        (builder) {
-          builder!.type = ProductQueryType.Subs;
+      await _iap.requestPurchaseWithBuilder((builder) {
+        builder.type = ProductQueryType.Subs;
 
-          if (Platform.isAndroid) {
-            builder!.android.skus = [sku];
-            builder!.android.offerToken = offerToken;
-          } else {
-            builder!.ios.sku = sku;
-          }
-        },
-      );
+        if (Platform.isAndroid) {
+          builder.android.skus = [sku];
+          builder.android.offerToken = offerToken;
+        } else {
+          builder.ios.sku = sku;
+        }
+      });
       // Sucesso/erro vem pelo listener
     } catch (e) {
       state = SubscriptionState.error;
@@ -130,16 +134,14 @@ class SubscriptionViewModel extends ChangeNotifier {
         if (Platform.isAndroid &&
             purchase is PurchaseAndroid &&
             purchase.isAcknowledgedAndroid != true) {
-          await FlutterInappPurchase.instance
-              .acknowledgePurchaseAndroid(purchase.purchaseToken ?? '');
+          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
+            purchase.purchaseToken ?? '',
+          );
         }
 
         // iOS: FINALIZAR TRANSAÇÃO é obrigatório!
         if (Platform.isIOS) {
-          await _iap.finishTransaction(
-            purchase: purchase,
-            isConsumable: false,
-          );
+          await _iap.finishTransaction(purchase: purchase, isConsumable: false);
         }
 
         state = SubscriptionState.success;
@@ -163,7 +165,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       errorMessage = null;
     } else {
       state = SubscriptionState.error;
-      errorMessage = purchaseError.message ?? SubscriptionStrings.subscriptionNotCompleted;
+      errorMessage = purchaseError.message;
     }
     notifyListeners();
   }
@@ -186,8 +188,7 @@ class SubscriptionViewModel extends ChangeNotifier {
 
   Future<void> checkExistingSubscription() async {
     try {
-      final result =
-          await _iap.getAvailablePurchases();
+      final result = await _iap.getAvailablePurchases();
 
       if (result.isNotEmpty) {
         final latest = result.reduce(
@@ -204,20 +205,15 @@ class SubscriptionViewModel extends ChangeNotifier {
         if (Platform.isAndroid &&
             latest is PurchaseAndroid &&
             latest.isAcknowledgedAndroid != true) {
-          await FlutterInappPurchase.instance
-              .acknowledgePurchaseAndroid(latest.purchaseToken ?? '');
+          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
+            latest.purchaseToken ?? '',
+          );
         }
       } else {
-        _updateSubscriptionSession(
-          autoRenewing: false,
-          purchaseToken: '',
-        );
+        _updateSubscriptionSession(autoRenewing: false, purchaseToken: '');
       }
     } catch (e) {
-      _updateSubscriptionSession(
-        autoRenewing: false,
-        purchaseToken: '',
-      );
+      _updateSubscriptionSession(autoRenewing: false, purchaseToken: '');
     }
   }
 
