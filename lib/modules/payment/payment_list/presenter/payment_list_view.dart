@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
@@ -21,6 +24,9 @@ class PaymentListView extends StatefulWidget {
 
 class _PaymentListView extends State<PaymentListView> {
   late final PaymentListViewModel _viewModel;
+  final LoadingEventRepository alertDisplayLoading =
+      getIt<LoadingEventRepository>();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -29,6 +35,7 @@ class _PaymentListView extends State<PaymentListView> {
       item: widget.item,
       receipt: widget.receipt,
     );
+    _viewModel.deletePaymentCommand.addListener(_deletePaymentCommandChanged);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _viewModel.inicialData(),
     );
@@ -37,7 +44,68 @@ class _PaymentListView extends State<PaymentListView> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _viewModel.deletePaymentCommand.removeListener(
+      _deletePaymentCommandChanged,
+    );
     super.dispose();
+  }
+
+  Future<void> _deletePaymentCommandChanged() async {
+    if (_viewModel.deletePaymentCommand.running) {
+      await _openLoad(isOpen: true);
+    }
+
+    if (_viewModel.deletePaymentCommand.error) {
+      await _openLoad(isOpen: false);
+      await _openNotificationNotCloseScreen();
+      await _notification(
+        isSuccess: false,
+        primaryText: PaymentStrings.errorTitle,
+        message: PaymentStrings.errorRemovePayment,
+      );
+
+      await _viewModel.inicialData();
+    } else if (_viewModel.deletePaymentCommand.completed) {
+      await _openLoad(isOpen: false);
+      await _notification(
+        isSuccess: true,
+        primaryText: PaymentStrings.doneTitle,
+        message: PaymentStrings.paymentRemoved,
+      );
+    }
+  }
+
+  Future<void> _notification({
+    required bool isSuccess,
+    required String primaryText,
+    required String message,
+  }) async {
+    if (context.mounted) {
+      if (isSuccess) {
+        await displayAlert.notification(context, primaryText, message);
+      } else {
+        await displayAlert.notificationError(context, primaryText, message);
+      }
+    }
+  }
+
+  Future<void> _openLoad({required bool isOpen}) async {
+    if (context.mounted) {
+      if (isOpen) {
+        await alertDisplayLoading.alertLoading(context);
+      } else {
+        alertDisplayLoading.closeLoading(context);
+      }
+    }
+  }
+
+  Future<void> _openNotificationNotCloseScreen() async {
+    await displayAlert.notificationNotCloseScreen(
+      context,
+      PaymentStrings.doneTitle,
+      PaymentStrings.paymentRemoved,
+    );
+    await _viewModel.inicialData();
   }
 
   Widget _buildListView() {
@@ -59,7 +127,7 @@ class _PaymentListView extends State<PaymentListView> {
             return PaymentCard(
               item: _viewModel.foundPayment[index],
               moneyConvert: _viewModel.moneyConvert,
-              onDelete: () => _viewModel.deletePayment(context, index),
+              onDelete: () => _viewModel.deletePaymentCommand.execute(index),
               onEdit: () => _viewModel.editPayment(context, index),
             );
           },

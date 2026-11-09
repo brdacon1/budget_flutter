@@ -46,7 +46,7 @@ class _ReceiptListView extends State<ReceiptListView> {
   void initState() {
     super.initState();
     _viewModel = ReceiptListViewModel(item: widget.item);
-    _viewModel.deleteReceiptCommand.addListener(_onSaveCommandChanged);
+    _viewModel.deleteReceiptCommand.addListener(_onDeleteCommandChanged);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _viewModel.inicialData(),
     );
@@ -55,29 +55,30 @@ class _ReceiptListView extends State<ReceiptListView> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _viewModel.deleteReceiptCommand.removeListener(_onDeleteCommandChanged);
     super.dispose();
   }
 
-  Future<void> _onSaveCommandChanged() async {
+  Future<void> _onDeleteCommandChanged() async {
     if (_viewModel.deleteReceiptCommand.running) {
       await _openLoad(isOpen: true);
     }
 
     if (_viewModel.deleteReceiptCommand.error) {
       await _openLoad(isOpen: false);
-
-      await _notification(
-        isSuccess: false,
-        primaryText: ReceiptPtString.doneTitle,
-        message: ReceiptPtString.deleteSuccess,
-      );
-      await _viewModel.inicialData();
-    } else if (_viewModel.deleteReceiptCommand.completed) {
-      await _openLoad(isOpen: false);
       await _notification(
         isSuccess: false,
         primaryText: ReceiptPtString.errorTitle,
         message: ReceiptPtString.deleteError,
+      );
+
+      await _viewModel.inicialData();
+    } else if (_viewModel.deleteReceiptCommand.completed) {
+      await _openLoad(isOpen: false);
+      await _notification(
+        isSuccess: true,
+        primaryText: ReceiptPtString.doneTitle,
+        message: ReceiptPtString.deleteSuccess,
       );
     }
   }

@@ -9,6 +9,7 @@ import 'package:oflite/modules/payment/domain/repository/payment_repository.dart
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentListViewModel extends ChangeNotifier {
@@ -16,6 +17,9 @@ class PaymentListViewModel extends ChangeNotifier {
   final DisplayAlertRepository _displayAlert;
   final LoadingEventRepository _loadingEvent;
   final ConvertCoinRepository _moneyConvert;
+  late final Command1<void, int> deletePaymentCommand = Command1(
+    _deletePayment,
+  );
 
   final CustomerInfo item;
   final Receipt receipt;
@@ -59,35 +63,15 @@ class PaymentListViewModel extends ChangeNotifier {
 
   Future<void> refresh() => inicialData(forceRefresh: true);
 
-  Future<void> deletePayment(BuildContext context, int index) async {
-    _loadingEvent.alertLoading(context);
+  Future<Result<void>> _deletePayment(int index) async {
     try {
-      final result = await _paymentRepository.deletePayment(
-        foundPayment[index].id!,
-      );
-      _loadingEvent.closeLoading(context);
-      if (result is Ok<void>) {
-        await _displayAlert.notificationNotCloseScreen(
-          context,
-          PaymentStrings.doneTitle,
-          PaymentStrings.paymentRemoved,
-        );
-      } else {
-        await _displayAlert.notificationError(
-          context,
-          PaymentStrings.errorTitle,
-          PaymentStrings.errorRemovePayment,
-        );
-      }
+      await _paymentRepository.deletePayment(foundPayment[index].id!);
+
+      notifyListeners();
+      return Result.ok(null);
     } catch (e) {
-      _loadingEvent.closeLoading(context);
-      await _displayAlert.notificationError(
-        context,
-        PaymentStrings.errorTitle,
-        PaymentStrings.errorRemovePayment,
-      );
+      return Result.error(Exception(e.toString()));
     }
-    await inicialData(forceRefresh: true);
   }
 
   Future<void> editPayment(BuildContext context, int index) async {
