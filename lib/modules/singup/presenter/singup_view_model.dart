@@ -85,7 +85,7 @@ class SingUpViewModel extends ChangeNotifier {
       final uid = cred.user!.uid;
 
       infoUser.email = email;
-      infoUser.FONE = '15991111111';
+      infoUser.phone = '15991111111';
       infoUser.user = uid;
       infoUser.NOME = nome;
       infoUser.id = uid;
@@ -111,7 +111,7 @@ class SingUpViewModel extends ChangeNotifier {
             ..user = uid
             ..NOME = nome
             ..email = email
-            ..FONE = infoUser.FONE
+            ..phone = infoUser.phone
             ..id = uid
             ..Senha = password
             ..googleAuth = false
@@ -143,7 +143,7 @@ class SingUpViewModel extends ChangeNotifier {
         infoUser.user = user.user;
         infoUser.NOME = user.NOME;
         infoUser.email = user.email;
-        infoUser.FONE = user.FONE;
+        infoUser.phone = user.phone;
         infoUser.id = user.id;
         infoUser.IdPay = user.IdPay;
         infoUser.ProductId = user.ProductId;

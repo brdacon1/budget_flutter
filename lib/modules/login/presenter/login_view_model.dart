@@ -328,7 +328,7 @@ class LoginViewModel extends ChangeNotifier {
     final infoUser = InfoUser();
     final PDF = OwnerPdf();
     infoUser.email = value?.email ?? '';
-    infoUser.FONE = value?.phoneNumber ?? '';
+    infoUser.phone = value?.phoneNumber ?? '';
     infoUser.user = value?.uid ?? '';
     infoUser.NOME = value?.displayName ?? '';
     infoUser.id = value?.uid ?? '';

@@ -41,7 +41,7 @@ class UserRepositoryImpl extends UserRepository {
             ..user = raw['USER']
             ..NOME = raw['NOME']
             ..email = raw['EMAIL']
-            ..FONE = raw['FONE']
+            ..phone = raw['FONE']
             ..id = raw['Id']
             ..IdPay = raw['IdPay']
             ..ProductId = raw['ProductId']

@@ -4,7 +4,7 @@ class InfoUser {
   String? email;
   String? Senha;
   String? NOME;
-  String? FONE;
+  String? phone;
   String? PurchaseToken;
   bool? autoRenewing = false;
   String? IdPay;
