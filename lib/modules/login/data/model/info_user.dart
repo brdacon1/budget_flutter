@@ -1,6 +1,6 @@
 class InfoUser {
   String? id;
-  String? USER;
+  String? user;
   String? EMAIL;
   String? Senha;
   String? NOME;

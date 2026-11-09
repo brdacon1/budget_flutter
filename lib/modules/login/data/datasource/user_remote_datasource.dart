@@ -22,8 +22,8 @@ class UserRemoteDataSource {
   }
 
   Future<void> saveUser(InfoUser user) async {
-    await _firestore.collection('USUARIOS').doc(user.USER).set({
-      'USER': user.USER,
+    await _firestore.collection('USUARIOS').doc(user.user).set({
+      'USER': user.user,
       'FONE': user.FONE,
       'EMAIL': user.EMAIL,
       'NOME': user.NOME,
@@ -36,8 +36,8 @@ class UserRemoteDataSource {
   }
 
   Future<void> updateUser(InfoUser user) async {
-    await _firestore.collection('USUARIOS').doc(user.USER).update({
-      'USER': user.USER,
+    await _firestore.collection('USUARIOS').doc(user.user).update({
+      'USER': user.user,
       'FONE': user.FONE,
       'EMAIL': user.EMAIL,
       'NOME': user.NOME,

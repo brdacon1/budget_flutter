@@ -35,7 +35,7 @@ class PaymentCard extends StatelessWidget {
             child: Icon(Icons.payments_outlined, color: whiteColor),
           ),
           title: Text(
-            item.DESCRICAO!,
+            item.description!,
             maxLines: 2,
             style: const TextStyle(
               color: whiteColor,

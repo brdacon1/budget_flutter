@@ -1,16 +1,17 @@
 import 'package:intl/intl.dart';
+import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/comment/data/datasource/comment_remote_datasource.dart';
 import 'package:oflite/modules/comment/domain/repository/comment_repository.dart';
-import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class CommentRepositoryImpl extends CommentRepository {
   final CommentRemoteDataSource _remote;
   final UserRepository _userRepository;
+
   CommentRepositoryImpl(this._remote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   final Map<String, List<ObservationBudget>> _cache = {};
 
@@ -19,8 +20,10 @@ class CommentRepositoryImpl extends CommentRepository {
       List.unmodifiable(_cache[budgetId] ?? []);
 
   @override
-  Future<Result<List<ObservationBudget>>> fetchComments(String budgetId,
-      {bool forceRefresh = false}) async {
+  Future<Result<List<ObservationBudget>>> fetchComments(
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _cache.containsKey(budgetId)) {
       return Result.ok(_cache[budgetId]!);
     }
@@ -62,7 +65,9 @@ class CommentRepositoryImpl extends CommentRepository {
 
   @override
   Future<Result<void>> updateComment(
-      String budgetId, ObservationBudget comment) async {
+    String budgetId,
+    ObservationBudget comment,
+  ) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));
@@ -85,7 +90,9 @@ class CommentRepositoryImpl extends CommentRepository {
 
   @override
   Future<Result<void>> deleteComments(
-      String budgetId, List<ObservationBudget> comments) async {
+    String budgetId,
+    List<ObservationBudget> comments,
+  ) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));

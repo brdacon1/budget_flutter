@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/payment_creator/presenter/payment_creator_view.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -30,17 +30,22 @@ class PaymentListViewModel extends ChangeNotifier {
     DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
     ConvertCoinRepository? convertCoinRepository,
-  })  : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
-        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
-        _loadingEvent = loadingEventRepository ?? getIt<LoadingEventRepository>(),
-        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
+  }) : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
+       _displayAlert =
+           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+       _loadingEvent =
+           loadingEventRepository ?? getIt<LoadingEventRepository>(),
+       _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
 
   ConvertCoinRepository get moneyConvert => _moneyConvert;
 
   Future<void> inicialData({bool forceRefresh = false}) async {
     _paymentRepository.budgetId = item.id;
     _paymentRepository.receiptId = receipt.id;
-    final result = await _paymentRepository.fetchPayments(receipt, forceRefresh: forceRefresh);
+    final result = await _paymentRepository.fetchPayments(
+      receipt,
+      forceRefresh: forceRefresh,
+    );
     if (result is Ok<List<PaymentCustomer>>) {
       foundPayment = result.value;
     }
@@ -57,20 +62,30 @@ class PaymentListViewModel extends ChangeNotifier {
   Future<void> deletePayment(BuildContext context, int index) async {
     _loadingEvent.alertLoading(context);
     try {
-      final result =
-          await _paymentRepository.deletePayment(foundPayment[index].id!);
+      final result = await _paymentRepository.deletePayment(
+        foundPayment[index].id!,
+      );
       _loadingEvent.closeLoading(context);
       if (result is Ok<void>) {
         await _displayAlert.notificationNotCloseScreen(
-            context, PaymentStrings.doneTitle, PaymentStrings.paymentRemoved);
+          context,
+          PaymentStrings.doneTitle,
+          PaymentStrings.paymentRemoved,
+        );
       } else {
         await _displayAlert.notificationError(
-            context, PaymentStrings.errorTitle, PaymentStrings.errorRemovePayment);
+          context,
+          PaymentStrings.errorTitle,
+          PaymentStrings.errorRemovePayment,
+        );
       }
     } catch (e) {
       _loadingEvent.closeLoading(context);
       await _displayAlert.notificationError(
-          context, PaymentStrings.errorTitle, PaymentStrings.errorRemovePayment);
+        context,
+        PaymentStrings.errorTitle,
+        PaymentStrings.errorRemovePayment,
+      );
     }
     await inicialData(forceRefresh: true);
   }
@@ -95,16 +110,14 @@ class PaymentListViewModel extends ChangeNotifier {
       );
       return;
     }
-    final PaymentCustomer novo = PaymentCustomer()
-      ..METODO = ''
-      ..id = ''
-      ..DESCRICAO = 'null'
-      ..PRECO = 0;
+    final PaymentCustomer novo =
+        PaymentCustomer()
+          ..METODO = ''
+          ..id = ''
+          ..description = 'null'
+          ..PRECO = 0;
     _paymentRepository.receiptId = receipt.id;
-    final result = await showPaymentCreatorBottomModal(
-      context,
-      item: novo,
-    );
+    final result = await showPaymentCreatorBottomModal(context, item: novo);
     if (result == true) {
       await inicialData(forceRefresh: true);
     }

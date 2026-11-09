@@ -2,18 +2,14 @@ import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
-import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-enum Gender {
-  descricaoText,
-  precoText,
-  typeText,
-}
+enum Gender { descricaoText, precoText, typeText }
 
 class PaymentCreatorViewModel extends ChangeNotifier {
   final PaymentRepository _paymentRepository;
@@ -31,31 +27,33 @@ class PaymentCreatorViewModel extends ChangeNotifier {
 
   final TextEditingController typeText = TextEditingController();
   final TextEditingController descricaoText = TextEditingController();
-  final MoneyMaskedTextController controller =
-      MoneyMaskedTextController(leftSymbol: 'R\$ ');
+  final MoneyMaskedTextController controller = MoneyMaskedTextController(
+    leftSymbol: 'R\$ ',
+  );
 
   PaymentCreatorViewModel({
     required PaymentCustomer item,
     PaymentRepository? paymentRepository,
     ConvertCoinRepository? convertCoinRepository,
-  })  : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
-        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>() {
+  }) : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
+       _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>() {
     _initFromItem(item);
     saveCommand = Command0(_executeSave);
   }
 
   void _initFromItem(PaymentCustomer item) {
     _item = item;
-    final hasDescricao = item.DESCRICAO != null &&
-        item.DESCRICAO.toString() != 'null' &&
-        item.DESCRICAO.toString().isNotEmpty;
+    final hasDescricao =
+        item.description != null &&
+        item.description.toString() != 'null' &&
+        item.description.toString().isNotEmpty;
 
     if (hasDescricao) {
       nameButton = PaymentStrings.updateButton;
       titlePage = PaymentStrings.editPaymentTitle;
       typeText.text = item.METODO.toString();
       controller.text = _moneyConvert.convertFromDouble(item.PRECO ?? 0);
-      descricaoText.text = item.DESCRICAO.toString();
+      descricaoText.text = item.description.toString();
     } else {
       nameButton = PaymentStrings.saveButton;
       titlePage = PaymentStrings.createPaymentTitle;
@@ -89,10 +87,11 @@ class PaymentCreatorViewModel extends ChangeNotifier {
     try {
       final cleanAmount = _moneyConvert.convertFromString(controller.text);
 
-      final currentItem = PaymentCustomer()
-        ..METODO = typeText.text
-        ..DESCRICAO = descricaoText.text
-        ..PRECO = cleanAmount;
+      final currentItem =
+          PaymentCustomer()
+            ..METODO = typeText.text
+            ..description = descricaoText.text
+            ..PRECO = cleanAmount;
 
       if (nameButton == PaymentStrings.saveButton) {
         await _paymentRepository.savePayment(currentItem);

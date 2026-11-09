@@ -31,7 +31,7 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   }) : _loadingEvent = loadingEvent,
        _userRepository = userRepository;
 
-  final InfoUser DADOS = InfoUser();
+  final InfoUser infoUser = InfoUser();
 
   // -----------------------------------------------------------------------
   // Alertas (snackbars)
@@ -145,17 +145,17 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
                 if (name.isNotEmpty) {
                   final session =
                       _userRepository.selectUser.value ?? InfoUser();
-                  DADOS.autoRenewing = session.autoRenewing;
-                  DADOS.EMAIL = session.EMAIL;
-                  DADOS.FONE = session.FONE;
-                  DADOS.id = session.id;
-                  DADOS.IdPay = session.IdPay;
-                  DADOS.NOME = name;
-                  DADOS.ProductId = session.ProductId;
-                  DADOS.PurchaseToken = session.PurchaseToken;
-                  DADOS.USER = session.USER;
+                  infoUser.autoRenewing = session.autoRenewing;
+                  infoUser.EMAIL = session.EMAIL;
+                  infoUser.FONE = session.FONE;
+                  infoUser.id = session.id;
+                  infoUser.IdPay = session.IdPay;
+                  infoUser.NOME = name;
+                  infoUser.ProductId = session.ProductId;
+                  infoUser.PurchaseToken = session.PurchaseToken;
+                  infoUser.user = session.user;
 
-                  await getIt<UserRemoteDataSource>().updateUser(DADOS);
+                  await getIt<UserRemoteDataSource>().updateUser(infoUser);
                   session.NOME = name;
                   _userRepository.selectUser.value = session;
                   savedName = name;

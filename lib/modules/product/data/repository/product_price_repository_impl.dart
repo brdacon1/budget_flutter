@@ -1,15 +1,16 @@
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/product/data/datasource/product_price_remote_datasource.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceRepositoryImpl extends ProductPriceRepository {
   final ProductPriceRemoteDataSource _remote;
   final UserRepository _userRepository;
+
   ProductPriceRepositoryImpl(this._remote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   List<ProductPriceModel> _products = [];
 
@@ -17,8 +18,9 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
   List<ProductPriceModel> get products => List.unmodifiable(_products);
 
   @override
-  Future<Result<List<ProductPriceModel>>> fetchProducts(
-      {bool forceRefresh = false}) async {
+  Future<Result<List<ProductPriceModel>>> fetchProducts({
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _products.isNotEmpty) {
       return Result.ok(_products);
     }
@@ -28,10 +30,16 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
     }
     try {
       final raw = await _remote.getProducts(userUid);
-      _products = raw
-          .map((e) => ProductPriceModel.fromJson(e)
-              .copyWith(id: e['id'] as String?, checkBox: false, selectProduct: false))
-          .toList();
+      _products =
+          raw
+              .map(
+                (e) => ProductPriceModel.fromJson(e).copyWith(
+                  id: e['id'] as String?,
+                  checkBox: false,
+                  selectProduct: false,
+                ),
+              )
+              .toList();
       notifyListeners();
       return Result.ok(_products);
     } catch (e) {
@@ -71,7 +79,11 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
       if (product.id == null) {
         return Result.error(Exception('Product id is null'));
       }
-      await _remote.updateProduct(userUid, product.id!, product.toJson()..['COLOR'] = 'false');
+      await _remote.updateProduct(
+        userUid,
+        product.id!,
+        product.toJson()..['COLOR'] = 'false',
+      );
       final index = _products.indexWhere((p) => p.id == product.id);
       if (index >= 0) {
         _products[index] = product;

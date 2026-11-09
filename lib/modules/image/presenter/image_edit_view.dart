@@ -195,7 +195,7 @@ class _ImageEditView extends State<ImageEditView> {
                 localOwner.pdfLayoutType = widget.owner.pdfLayoutType;
                 widget.owner.logoName = _viewModel.fileName;
 
-                final userUid = getIt<UserRepository>().selectUser.value?.USER;
+                final userUid = getIt<UserRepository>().selectUser.value?.user;
                 if (userUid != null && userUid.isNotEmpty) {
                   await getIt<PdfRemoteDataSource>().saveInformationEnterprise(
                     userUid,

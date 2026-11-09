@@ -38,7 +38,7 @@ class UserRepositoryImpl extends UserRepository {
       }
       final user =
           InfoUser()
-            ..USER = raw['USER']
+            ..user = raw['USER']
             ..NOME = raw['NOME']
             ..EMAIL = raw['EMAIL']
             ..FONE = raw['FONE']
@@ -90,7 +90,7 @@ class UserRepositoryImpl extends UserRepository {
   ) async {
     try {
       await _remote.saveUser(user);
-      await _remote.savePdfInfo(pdf, user.USER ?? '');
+      await _remote.savePdfInfo(pdf, user.user ?? '');
       _currentUser = user;
       _selectUser.value = user;
       _defaultPdf = pdf;

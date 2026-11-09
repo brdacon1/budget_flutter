@@ -1,15 +1,16 @@
-import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
-import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
-import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptRepositoryImpl extends ReceiptRepository {
   final ReceiptRemoteDataSource _remote;
   final UserRepository _userRepository;
+
   ReceiptRepositoryImpl(this._remote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   List<Receipt> _receipts = [];
   String? _budgetId;
@@ -20,6 +21,7 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
 
   @override
   String? get budgetId => _budgetId;
+
   @override
   set budgetId(String? value) {
     if (value != _budgetId) {
@@ -29,7 +31,9 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   }
 
   @override
-  Future<Result<List<Receipt>>> fetchReceipts({bool forceRefresh = false}) async {
+  Future<Result<List<Receipt>>> fetchReceipts({
+    bool forceRefresh = false,
+  }) async {
     if (_budgetId == null || _budgetId!.isEmpty) {
       _receipts = [];
       return Result.ok(_receipts);
@@ -62,7 +66,12 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
       return Result.error(Exception('User not authenticated'));
     }
     try {
-      await _remote.saveReceipt(userUid, _budgetId!, receipt.toJson(), receipt.id!);
+      await _remote.saveReceipt(
+        userUid,
+        _budgetId!,
+        receipt.toJson(),
+        receipt.id!,
+      );
       final index = _receipts.indexWhere((r) => r.id == receipt.id);
       if (index >= 0) {
         _receipts[index] = receipt;

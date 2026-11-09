@@ -22,7 +22,7 @@ class SingUpViewModel extends ChangeNotifier {
   final UserRepository _userRepository = getIt<UserRepository>();
   final PdfRepository _pdfRepository = getIt<PdfRepository>();
 
-  final InfoUser DADOS = InfoUser();
+  final InfoUser infoUser = InfoUser();
   final OwnerPdf PDF = OwnerPdf();
 
   final TextEditingController emailText = TextEditingController();
@@ -84,22 +84,22 @@ class SingUpViewModel extends ChangeNotifier {
       );
       final uid = cred.user!.uid;
 
-      DADOS.EMAIL = email;
-      DADOS.FONE = '15991111111';
-      DADOS.USER = uid;
-      DADOS.NOME = nome;
-      DADOS.id = uid;
-      DADOS.autoRenewing = false;
-      DADOS.IdPay = '';
-      DADOS.ProductId = '';
-      DADOS.PurchaseToken = '';
+      infoUser.EMAIL = email;
+      infoUser.FONE = '15991111111';
+      infoUser.user = uid;
+      infoUser.NOME = nome;
+      infoUser.id = uid;
+      infoUser.autoRenewing = false;
+      infoUser.IdPay = '';
+      infoUser.ProductId = '';
+      infoUser.PurchaseToken = '';
 
       PDF.email = email;
       PDF.empresa = 'Minha Empresa';
       PDF.logoName = '';
       PDF.fotoId = '';
 
-      await _userRepository.createDefaultUserData(DADOS, PDF);
+      await _userRepository.createDefaultUserData(infoUser, PDF);
       await _pdfRepository.saveInformationEnterprise(PDF);
 
       final prefs = await SharedPreferences.getInstance();
@@ -108,10 +108,10 @@ class SingUpViewModel extends ChangeNotifier {
 
       final session =
           InfoUser()
-            ..USER = uid
+            ..user = uid
             ..NOME = nome
             ..EMAIL = email
-            ..FONE = DADOS.FONE
+            ..FONE = infoUser.FONE
             ..id = uid
             ..Senha = password
             ..googleAuth = false
@@ -140,29 +140,29 @@ class SingUpViewModel extends ChangeNotifier {
     if (result is Ok<InfoUser?>) {
       final user = result.value;
       if (user != null) {
-        DADOS.USER = user.USER;
-        DADOS.NOME = user.NOME;
-        DADOS.EMAIL = user.EMAIL;
-        DADOS.FONE = user.FONE;
-        DADOS.id = user.id;
-        DADOS.IdPay = user.IdPay;
-        DADOS.ProductId = user.ProductId;
-        DADOS.PurchaseToken = user.PurchaseToken;
-        DADOS.autoRenewing = user.autoRenewing;
+        infoUser.user = user.user;
+        infoUser.NOME = user.NOME;
+        infoUser.EMAIL = user.EMAIL;
+        infoUser.FONE = user.FONE;
+        infoUser.id = user.id;
+        infoUser.IdPay = user.IdPay;
+        infoUser.ProductId = user.ProductId;
+        infoUser.PurchaseToken = user.PurchaseToken;
+        infoUser.autoRenewing = user.autoRenewing;
 
         _userRepository.selectUser.value = user;
       } else {
         final fallback = _userRepository.selectUser.value ?? InfoUser();
-        fallback.USER = uid;
+        fallback.user = uid;
         _userRepository.selectUser.value = fallback;
       }
 
-      final ownerUid = _userRepository.selectUser.value?.USER;
+      final ownerUid = _userRepository.selectUser.value?.user;
       if (ownerUid != null && ownerUid.isNotEmpty) {
         final tokens = await getIt<NotificationRepository>().loadFcmTokens(
           ownerUid,
         );
-        DADOS.TOKENS = tokens;
+        infoUser.TOKENS = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
 

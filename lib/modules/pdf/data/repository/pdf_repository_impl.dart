@@ -1,11 +1,11 @@
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
-import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
-import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PdfRepositoryImpl extends PdfRepository {
@@ -15,7 +15,7 @@ class PdfRepositoryImpl extends PdfRepository {
 
   PdfRepositoryImpl(this._pdfRemote, this._budgetRemote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   OwnerPdf? _ownerPdf;
   final Map<String, List<ItemsBudget>> _itemsCache = {};
@@ -26,8 +26,9 @@ class PdfRepositoryImpl extends PdfRepository {
   OwnerPdf? get ownerPdf => _ownerPdf;
 
   @override
-  Future<Result<OwnerPdf>> fetchInformationEnterprise(
-      {bool forceRefresh = false}) async {
+  Future<Result<OwnerPdf>> fetchInformationEnterprise({
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _ownerPdf != null) {
       return Result.ok(_ownerPdf!);
     }
@@ -78,8 +79,10 @@ class PdfRepositoryImpl extends PdfRepository {
   }
 
   @override
-  Future<Result<List<ItemsBudget>>> fetchBudgetItems(String budgetId,
-      {bool forceRefresh = false}) async {
+  Future<Result<List<ItemsBudget>>> fetchBudgetItems(
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _itemsCache.containsKey(budgetId)) {
       return Result.ok(_itemsCache[budgetId]!);
     }
@@ -98,8 +101,10 @@ class PdfRepositoryImpl extends PdfRepository {
   }
 
   @override
-  Future<Result<CustomerInfo>> fetchBudgetById(String budgetId,
-      {bool forceRefresh = false}) async {
+  Future<Result<CustomerInfo>> fetchBudgetById(
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _budgetCache.containsKey(budgetId)) {
       return Result.ok(_budgetCache[budgetId]!);
     }
@@ -118,8 +123,10 @@ class PdfRepositoryImpl extends PdfRepository {
   }
 
   @override
-  Future<Result<List<ObservationPdf>>> fetchBudgetComments(String budgetId,
-      {bool forceRefresh = false}) async {
+  Future<Result<List<ObservationPdf>>> fetchBudgetComments(
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _commentCache.containsKey(budgetId)) {
       return Result.ok(_commentCache[budgetId]!);
     }

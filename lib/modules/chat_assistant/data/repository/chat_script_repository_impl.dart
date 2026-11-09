@@ -15,7 +15,7 @@ class ChatScriptRepositoryImpl extends ChatScriptRepository {
 
   ChatScriptRepositoryImpl(this._remote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   @override
   ChatScriptEntity? get currentScript => _cached;

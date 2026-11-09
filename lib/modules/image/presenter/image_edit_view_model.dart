@@ -86,7 +86,7 @@ class ImageEditViewModel extends ChangeNotifier {
 
     try {
       final FirebaseStorage storage = FirebaseStorage.instance;
-      final String? userId = getIt<UserRepository>().selectUser.value?.USER;
+      final String? userId = getIt<UserRepository>().selectUser.value?.user;
       final Directory appDir = await getApplicationDocumentsDirectory();
 
       fileName = "$userId.jpg";

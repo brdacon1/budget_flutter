@@ -1,9 +1,9 @@
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/payment/data/datasource/payment_remote_datasource.dart';
+import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/payment/domain/repository/payment_repository.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
-import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class PaymentRepositoryImpl extends PaymentRepository {
@@ -11,9 +11,13 @@ class PaymentRepositoryImpl extends PaymentRepository {
   final ReceiptRemoteDataSource _receiptRemote;
   final UserRepository _userRepository;
 
-  PaymentRepositoryImpl(this._remote, this._receiptRemote, this._userRepository);
+  PaymentRepositoryImpl(
+    this._remote,
+    this._receiptRemote,
+    this._userRepository,
+  );
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   List<PaymentCustomer> _payments = [];
   String? _budgetId;
@@ -26,6 +30,7 @@ class PaymentRepositoryImpl extends PaymentRepository {
 
   @override
   String? get budgetId => _budgetId;
+
   @override
   set budgetId(String? value) {
     if (value != _budgetId) {
@@ -36,6 +41,7 @@ class PaymentRepositoryImpl extends PaymentRepository {
 
   @override
   String? get receiptId => _receiptId;
+
   @override
   set receiptId(String? value) {
     if (value != _receiptId) {
@@ -54,17 +60,23 @@ class PaymentRepositoryImpl extends PaymentRepository {
   }
 
   @override
-  Future<Result<List<PaymentCustomer>>> fetchPayments(Receipt receipt,
-      {bool forceRefresh = false}) async {
+  Future<Result<List<PaymentCustomer>>> fetchPayments(
+    Receipt receipt, {
+    bool forceRefresh = false,
+  }) async {
     // Evita caminho inválido no Firestore
-    if (receipt.id == null || receipt.id!.isEmpty ||
-        _budgetId == null || _budgetId!.isEmpty) {
+    if (receipt.id == null ||
+        receipt.id!.isEmpty ||
+        _budgetId == null ||
+        _budgetId!.isEmpty) {
       _payments = [];
       return Result.ok(_payments);
     }
 
-    if (!forceRefresh && _payments.isNotEmpty &&
-        _lastBudgetId == _budgetId && _lastReceiptId == _receiptId) {
+    if (!forceRefresh &&
+        _payments.isNotEmpty &&
+        _lastBudgetId == _budgetId &&
+        _lastReceiptId == _receiptId) {
       return Result.ok(_payments);
     }
     final userUid = _userUid;
@@ -79,7 +91,12 @@ class PaymentRepositoryImpl extends PaymentRepository {
       final total = totalPaid;
       if (receipt.valorTotal != total) {
         final updated = receipt.copyWith(valorTotal: total);
-        await _receiptRemote.saveReceipt(userUid, _budgetId!, updated.toJson(), updated.id!);
+        await _receiptRemote.saveReceipt(
+          userUid,
+          _budgetId!,
+          updated.toJson(),
+          updated.id!,
+        );
       }
 
       _lastBudgetId = _budgetId;
@@ -101,7 +118,12 @@ class PaymentRepositoryImpl extends PaymentRepository {
       if (_budgetId == null || _receiptId == null) {
         return Result.error(Exception('budgetId or receiptId is not set'));
       }
-      await _remote.savePayment(userUid, _budgetId!, _receiptId!, payment.toMap());
+      await _remote.savePayment(
+        userUid,
+        _budgetId!,
+        _receiptId!,
+        payment.toMap(),
+      );
       _payments.add(payment);
       notifyListeners();
       return Result.ok(null);
@@ -120,7 +142,13 @@ class PaymentRepositoryImpl extends PaymentRepository {
       if (payment.id == null || _budgetId == null || _receiptId == null) {
         return Result.error(Exception('missing id or context'));
       }
-      await _remote.updatePayment(userUid, _budgetId!, _receiptId!, payment.id!, payment.toMap());
+      await _remote.updatePayment(
+        userUid,
+        _budgetId!,
+        _receiptId!,
+        payment.id!,
+        payment.toMap(),
+      );
       final index = _payments.indexWhere((p) => p.id == payment.id);
       if (index >= 0) {
         _payments[index] = payment;

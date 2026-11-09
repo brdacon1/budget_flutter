@@ -1,13 +1,14 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/items_list_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -17,7 +18,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   BudgetRepositoryImpl(this._remote, this._userRepository);
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   // Cache em memória
   List<CustomerInfo> _budgets = [];
@@ -28,7 +29,8 @@ class BudgetRepositoryImpl extends BudgetRepository {
   @override
   List<CustomerInfo> get budgets => List.unmodifiable(_budgets);
 
-  final ValueNotifier<CustomerInfo?> _selectBudget = ValueNotifier<CustomerInfo?>(null);
+  final ValueNotifier<CustomerInfo?> _selectBudget =
+      ValueNotifier<CustomerInfo?>(null);
 
   @override
   ValueNotifier<CustomerInfo?> get selectBudget => _selectBudget;
@@ -80,8 +82,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
-  Future<Result<List<CustomerInfo>>> fetchBudgets(
-      {bool forceRefresh = false}) async {
+  Future<Result<List<CustomerInfo>>> fetchBudgets({
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _budgets.isNotEmpty) {
       return Result.ok(_budgets);
     }
@@ -100,8 +103,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
-  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated(
-      {bool refresh = false}) async {
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated({
+    bool refresh = false,
+  }) async {
     if (_isLoadingMoreBudgets) return Result.ok(_budgets);
 
     if (refresh) {
@@ -307,8 +311,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
-  Future<Result<void>> saveBudgetItem(
-      String budgetId, ItemsBudget item) async {
+  Future<Result<void>> saveBudgetItem(String budgetId, ItemsBudget item) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));
@@ -336,7 +339,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   @override
   Future<Result<void>> deleteBudgetItems(
-      String budgetId, List<ItemsBudget> items) async {
+    String budgetId,
+    List<ItemsBudget> items,
+  ) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));
@@ -359,7 +364,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   @override
   Future<Result<void>> addComments(
-      String budgetId, List<ObservationPdf> comments) async {
+    String budgetId,
+    List<ObservationPdf> comments,
+  ) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));
@@ -381,7 +388,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   @override
   Future<Result<List<ObservationBudget>>> fetchComments(
-      String budgetId, {bool forceRefresh = false}) async {
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _commentsCache.containsKey(budgetId)) {
       return Result.ok(_commentsCache[budgetId]!);
     }
@@ -391,8 +400,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
     }
     try {
       final raw = await _remote.getComments(userUid, budgetId);
-      final list =
-          raw.map((e) => ObservationBudget.fromMap(e)).toList();
+      final list = raw.map((e) => ObservationBudget.fromMap(e)).toList();
       _commentsCache[budgetId] = list;
       return Result.ok(list);
     } catch (e) {
@@ -402,7 +410,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   @override
   Future<Result<List<ItemsBudget>>> fetchBudgetItems(
-      String budgetId, {bool forceRefresh = false}) async {
+    String budgetId, {
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh && _itemsCache.containsKey(budgetId)) {
       return Result.ok(_itemsCache[budgetId]!);
     }
@@ -422,7 +432,9 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
   @override
   Future<Result<List<CustomerInfo>>> fetchBudgetsByMonthRange(
-      String startId, String endId) async {
+    String startId,
+    String endId,
+  ) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));

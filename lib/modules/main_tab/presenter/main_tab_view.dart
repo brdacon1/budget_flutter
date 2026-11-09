@@ -33,7 +33,7 @@ class _MainTabView extends State<MainTabView> {
       // não chegou ao Firestore (ex.: race com o `userRepository.selectUser`),
       // esta chamada garante que o token deste device entre na lista
       // `EMPRESAS/{uid}/USERS/{uid}/FCM/{token}`. Idempotente.
-      final ownerUid = getIt<UserRepository>().selectUser.value?.USER;
+      final ownerUid = getIt<UserRepository>().selectUser.value?.user;
       if (ownerUid != null && ownerUid.trim().isNotEmpty) {
         getIt<NotificationRepository>().persistCurrentTokenToFirebase(ownerUid);
       }

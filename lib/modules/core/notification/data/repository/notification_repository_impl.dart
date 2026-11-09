@@ -4,22 +4,24 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
+import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/notification/data/datasource/notification_remote_datasource.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
-import 'package:oflite/injection.dart';
 
 /// Handler top-level (obrigatório ser top-level, não método de instância)
 /// para mensagens FCM em background.
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
   if (kDebugMode) {
-    debugPrint('FCM background message: ${message.messageId} '
-        'orcamento=${message.data['ORCAMENTO_ID']}');
+    debugPrint(
+      'FCM background message: ${message.messageId} '
+      'orcamento=${message.data['ORCAMENTO_ID']}',
+    );
   }
 }
 
@@ -47,8 +49,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
   @override
   Future<void> initialize() async {
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = IOSInitializationSettings();
     const initSettings = InitializationSettings(
       android: androidSettings,
@@ -155,10 +158,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
     if (kDebugMode) {
       debugPrint(
-          'FCM token NULO após $maxAttempts tentativas. Verifique: '
-          '(1) SHA-1 do certificado cadastrado no Console do Firebase; '
-          '(2) google-services.json atualizado; '
-          '(3) Play Services no dispositivo.');
+        'FCM token NULO após $maxAttempts tentativas. Verifique: '
+        '(1) SHA-1 do certificado cadastrado no Console do Firebase; '
+        '(2) google-services.json atualizado; '
+        '(3) Play Services no dispositivo.',
+      );
     }
     return null;
   }
@@ -179,7 +183,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     if (pending == null || pending.isEmpty) return;
     final key = _navigatorKey;
     if (key == null || key.currentContext == null) return;
-    final owner = _userRepository.selectUser.value?.USER;
+    final owner = _userRepository.selectUser.value?.user;
     if (owner == null || owner.isEmpty) return;
     _pendingBudgetId = null;
     unawaited(_openBudget(pending));
@@ -197,13 +201,16 @@ class NotificationRepositoryImpl implements NotificationRepository {
       _pendingBudgetId = budgetId;
       return;
     }
-    final owner = _userRepository.selectUser.value?.USER;
+    final owner = _userRepository.selectUser.value?.user;
     if (owner == null || owner.isEmpty) {
       _pendingBudgetId = budgetId;
       return;
     }
     try {
-      final raw = await getIt<BudgetRemoteDataSource>().getBudgetById(owner, budgetId);
+      final raw = await getIt<BudgetRemoteDataSource>().getBudgetById(
+        owner,
+        budgetId,
+      );
       final customer = CustomerInfo.fromMap(raw);
       customer.id ??= budgetId;
       getIt<BudgetRepository>().selectBudget.value = customer;
@@ -212,9 +219,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
         _pendingBudgetId = budgetId;
         return;
       }
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => BudgetTabView(item: customer)),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => BudgetTabView(item: customer)));
     } catch (e) {
       if (kDebugMode) debugPrint('open budget from notification failed: $e');
       final context = key.currentContext;
@@ -333,21 +340,27 @@ class NotificationRepositoryImpl implements NotificationRepository {
     try {
       final String? token = await currentToken();
       if (kDebugMode) {
-        debugPrint('[_persistFcmToken] token obtido: '
-            '${token == null ? "NULL" : (token.isEmpty ? "VAZIO" : token)}');
+        debugPrint(
+          '[_persistFcmToken] token obtido: '
+          '${token == null ? "NULL" : (token.isEmpty ? "VAZIO" : token)}',
+        );
       }
       if (token == null || token.isEmpty) {
         if (kDebugMode) {
-          debugPrint('persist FCM token: SEM TOKEN — não vai salvar nada. '
-              'Provável causa: SHA-1 do certificado não cadastrado no '
-              'Firebase / google-services.json desatualizado.');
+          debugPrint(
+            'persist FCM token: SEM TOKEN — não vai salvar nada. '
+            'Provável causa: SHA-1 do certificado não cadastrado no '
+            'Firebase / google-services.json desatualizado.',
+          );
         }
         return;
       }
       await _dataSource.persistFcmToken(uid, token);
       if (kDebugMode) {
-        debugPrint('FCM token SALVO na lista: '
-            'EMPRESAS/$uid/USERS/$uid/FCM/$token');
+        debugPrint(
+          'FCM token SALVO na lista: '
+          'EMPRESAS/$uid/USERS/$uid/FCM/$token',
+        );
       }
     } catch (e, st) {
       if (kDebugMode) {

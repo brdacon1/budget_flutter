@@ -1,21 +1,16 @@
 class PaymentCustomer {
   String? id;
   String? METODO;
-  String? DESCRICAO;
+  String? description;
   double? PRECO;
 
-  PaymentCustomer({
-    this.id,
-    this.METODO,
-    this.DESCRICAO,
-    this.PRECO,
-  });
+  PaymentCustomer({this.id, this.METODO, this.description, this.PRECO});
 
   factory PaymentCustomer.fromMap(Map<String, dynamic> map) {
     return PaymentCustomer(
       id: map['id'],
       METODO: map['METODO'],
-      DESCRICAO: map['DESCRICAO'],
+      description: map['DESCRICAO'],
       PRECO: map['PRECO'],
     );
   }
@@ -24,7 +19,7 @@ class PaymentCustomer {
     return {
       'id': id,
       'METODO': METODO,
-      'DESCRICAO': DESCRICAO,
+      'DESCRICAO': description,
       'PRECO': PRECO,
     };
   }

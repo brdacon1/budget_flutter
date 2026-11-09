@@ -4,11 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/payment/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -63,12 +63,13 @@ class PdfGenerateReceiptUseCase {
   // ---------------------------------------------------------------------------
 
   PdfDocument _createDocument() {
-    final PdfDocument document = PdfDocument()
-      ..pageSettings.size = PdfPageSize.a4
-      ..pageSettings.margins.left = 30
-      ..pageSettings.margins.right = 30
-      ..pageSettings.margins.top = 50
-      ..pageSettings.margins.bottom = 50;
+    final PdfDocument document =
+        PdfDocument()
+          ..pageSettings.size = PdfPageSize.a4
+          ..pageSettings.margins.left = 30
+          ..pageSettings.margins.right = 30
+          ..pageSettings.margins.top = 50
+          ..pageSettings.margins.bottom = 50;
     return document;
   }
 
@@ -138,7 +139,11 @@ class PdfGenerateReceiptUseCase {
     final session = _userRepository.selectUser.value;
     if (session == null) return '';
     if (session.googleAuth == true) return '';
-    if (session.EMAIL == null || session.EMAIL!.isEmpty || session.Senha == null || session.Senha!.isEmpty) return '';
+    if (session.EMAIL == null ||
+        session.EMAIL!.isEmpty ||
+        session.Senha == null ||
+        session.Senha!.isEmpty)
+      return '';
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: session.EMAIL!.trim(),
       password: session.Senha!.trim(),
@@ -167,18 +172,23 @@ class PdfGenerateReceiptUseCase {
     addRow(owner.rua);
     addRow(owner.city);
 
-    final PdfGridCellStyle style = PdfGridCellStyle()
-      ..borders.all = PdfPens.transparent;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle()..borders.all = PdfPens.transparent;
 
     for (int i = 0; i < pdfGrid.rows.count; i++) {
       final PdfGridRow row = pdfGrid.rows[i];
-      row.style.font = i == 0
-          ? PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold)
-          : PdfStandardFont(
-              PdfFontFamily.helvetica,
-              8,
-              style: PdfFontStyle.regular,
-            );
+      row.style.font =
+          i == 0
+              ? PdfStandardFont(
+                PdfFontFamily.helvetica,
+                12,
+                style: PdfFontStyle.bold,
+              )
+              : PdfStandardFont(
+                PdfFontFamily.helvetica,
+                8,
+                style: PdfFontStyle.regular,
+              );
       for (int j = 0; j < row.cells.count; j++) {
         row.cells[j].style = style;
       }
@@ -270,8 +280,8 @@ class PdfGenerateReceiptUseCase {
         count += 10;
       }
 
-      final PdfGridCellStyle style = PdfGridCellStyle()
-        ..borders.all = PdfPens.transparent;
+      final PdfGridCellStyle style =
+          PdfGridCellStyle()..borders.all = PdfPens.transparent;
 
       for (int i = 0; i < pdfGrid.rows.count; i++) {
         final PdfGridRow row = pdfGrid.rows[i];
@@ -328,8 +338,8 @@ class PdfGenerateReceiptUseCase {
       addRow('Data do recibo :', recived.data);
       addRow('Nome do recibo :', recived.descricao);
 
-      final PdfGridCellStyle style = PdfGridCellStyle()
-        ..borders.all = PdfPens.transparent;
+      final PdfGridCellStyle style =
+          PdfGridCellStyle()..borders.all = PdfPens.transparent;
 
       for (int i = 0; i < pdfGrid.rows.count; i++) {
         final PdfGridRow row = pdfGrid.rows[i];
@@ -427,16 +437,17 @@ class PdfGenerateReceiptUseCase {
       10,
       style: PdfFontStyle.bold,
     );
-    final PdfGridCellStyle headerStyle = PdfGridCellStyle(
-      font: fontHeader,
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle headerStyle =
+        PdfGridCellStyle(
+            font: fontHeader,
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+            textBrush: PdfBrushes.black,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
 
     header.height = 25;
     grid.headers.applyStyle(headerStyle);
@@ -446,7 +457,7 @@ class PdfGenerateReceiptUseCase {
 
     for (final payment in paymentList) {
       final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = payment.DESCRICAO!;
+      row.cells[0].value = payment.description!;
       row.cells[1].value = payment.METODO!;
       row.cells[2].value = _moneyConvert.convertFromDouble(payment.PRECO!);
     }
@@ -480,26 +491,32 @@ class PdfGenerateReceiptUseCase {
   // ---------------------------------------------------------------------------
 
   PdfGridCellStyle _createPaymentRowStyle() {
-    final PdfGridCellStyle style = PdfGridCellStyle()
-      ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.lightGray;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle()
+          ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.lightGray;
     return style;
   }
 
   PdfGridCellStyle _createPaymentTotalRowStyle() {
-    final PdfGridCellStyle style = PdfGridCellStyle(
-      font: PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold),
-      textBrush: PdfBrushes.black,
-      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-    )
-      ..borders.left = PdfPens.transparent
-      ..borders.right = PdfPens.transparent
-      ..borders.top = PdfPens.lightGray
-      ..borders.bottom = PdfPens.transparent;
+    final PdfGridCellStyle style =
+        PdfGridCellStyle(
+            font: PdfStandardFont(
+              PdfFontFamily.helvetica,
+              12,
+              style: PdfFontStyle.bold,
+            ),
+            textBrush: PdfBrushes.black,
+            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+          )
+          ..borders.left = PdfPens.transparent
+          ..borders.right = PdfPens.transparent
+          ..borders.top = PdfPens.lightGray
+          ..borders.bottom = PdfPens.transparent;
     return style;
   }
 

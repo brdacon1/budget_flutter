@@ -148,7 +148,7 @@ class LoginViewModel extends ChangeNotifier {
 
         final session =
             InfoUser()
-              ..USER = uid
+              ..user = uid
               ..NOME = currentUser.displayName ?? 'User'
               ..Senha = isGoogle ? 'NO_PASS' : storedPassword
               ..googleAuth = isGoogle
@@ -221,7 +221,7 @@ class LoginViewModel extends ChangeNotifier {
     uid = auth.user?.uid ?? '';
     final session =
         InfoUser()
-          ..USER = uid
+          ..user = uid
           ..EMAIL = auth.user?.email
           ..NOME = auth.user?.displayName ?? 'User'
           ..Senha = 'NO_PASS'
@@ -230,7 +230,7 @@ class LoginViewModel extends ChangeNotifier {
 
     final user = await _getUserInfo();
 
-    if (user?.USER != auth.user?.uid) {
+    if (user?.user != auth.user?.uid) {
       await _createUserWithGoogle(auth.user);
     }
   }
@@ -248,7 +248,7 @@ class LoginViewModel extends ChangeNotifier {
     uid = auth.user!.uid.toString();
     final session =
         InfoUser()
-          ..USER = uid
+          ..user = uid
           ..EMAIL = email
           ..Senha = password.trim()
           ..googleAuth = false;
@@ -271,7 +271,7 @@ class LoginViewModel extends ChangeNotifier {
         users = user;
         _userRepository.selectUser.value = user;
       }
-      final ownerUid = _userRepository.selectUser.value?.USER;
+      final ownerUid = _userRepository.selectUser.value?.user;
       if (ownerUid != null && ownerUid.isNotEmpty) {
         final tokens = await getIt<NotificationRepository>().loadFcmTokens(
           ownerUid,
@@ -325,18 +325,18 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> _createUserWithGoogle(User? value) async {
-    final DADOS = InfoUser();
+    final infoUser = InfoUser();
     final PDF = OwnerPdf();
-    DADOS.EMAIL = value?.email ?? '';
-    DADOS.FONE = value?.phoneNumber ?? '';
-    DADOS.USER = value?.uid ?? '';
-    DADOS.NOME = value?.displayName ?? '';
-    DADOS.id = value?.uid ?? '';
+    infoUser.EMAIL = value?.email ?? '';
+    infoUser.FONE = value?.phoneNumber ?? '';
+    infoUser.user = value?.uid ?? '';
+    infoUser.NOME = value?.displayName ?? '';
+    infoUser.id = value?.uid ?? '';
     PDF.email = value?.email ?? '';
     PDF.empresa = "Minha Empresa";
     PDF.logoName = '';
     PDF.fotoId = '';
-    await _userRepository.createDefaultUserData(DADOS, PDF);
+    await _userRepository.createDefaultUserData(infoUser, PDF);
     await _pdfRepository.saveInformationEnterprise(PDF);
   }
 

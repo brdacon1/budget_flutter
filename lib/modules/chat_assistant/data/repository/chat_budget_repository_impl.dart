@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:intl/intl.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 
 /// Implementação do [ChatBudgetRepository].
 ///
@@ -25,9 +26,13 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   final List<ChatMessageEntity> _messages = [];
   String? _currentFlowStep;
 
-  ChatBudgetRepositoryImpl(this._chatRemote, this._budgetRepo, this._userRepository);
+  ChatBudgetRepositoryImpl(
+    this._chatRemote,
+    this._budgetRepo,
+    this._userRepository,
+  );
 
-  String? get _userUid => _userRepository.selectUser.value?.USER;
+  String? get _userUid => _userRepository.selectUser.value?.user;
 
   @override
   String? get currentSessionId => _sessionId;
@@ -254,7 +259,10 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       // Mantém o status que já estava; se vazio, força 'PENDENTE' igual à tela
       final currentStatus = _draft!.status;
       final finalized = _draft!.copyWith(
-        status: (currentStatus == null || currentStatus.isEmpty) ? 'PENDENTE' : currentStatus,
+        status:
+            (currentStatus == null || currentStatus.isEmpty)
+                ? 'PENDENTE'
+                : currentStatus,
       );
       await _budgetRepo.updateBudget(finalized);
       _draft = finalized;
