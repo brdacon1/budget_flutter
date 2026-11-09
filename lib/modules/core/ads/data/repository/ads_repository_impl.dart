@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/modules/core/ads/data/datasource/ads_remote_datasource.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 
 /// Implementação do repositório de anúncios AdMob.
@@ -10,13 +11,18 @@ import 'package:oflite/shared/common/constants/environment.dart';
 /// automaticamente após ser exibido ou em caso de falha (até 3 tentativas).
 class AdsRepositoryImpl implements AdsRepository {
   final AdsRemoteDataSource _dataSource;
+  final UserRepository _userRepository;
 
-  AdsRepositoryImpl(this._dataSource);
+  AdsRepositoryImpl(this._dataSource, this._userRepository);
 
   InterstitialAd? _interstitialAd;
   int _numInterstitialLoadAttempts = 0;
   static const int _maxFailedLoadAttempts = 3;
   bool _isLoading = false;
+
+  @override
+  bool get shouldShowAds =>
+      !(_userRepository.selectUser.value?.AutoRenewing ?? false);
 
   @override
   String get bannerAdUnitId => Environment.instance.adMob.bannerAdUnitId;
@@ -37,6 +43,7 @@ class AdsRepositoryImpl implements AdsRepository {
 
   @override
   void loadInterstitial() {
+    if (!shouldShowAds) return;
     if (_interstitialAd != null || _isLoading) return;
     _isLoading = true;
     _dataSource.loadInterstitial(
@@ -65,6 +72,10 @@ class AdsRepositoryImpl implements AdsRepository {
 
   @override
   void showInterstitial() {
+    if (!shouldShowAds) {
+      debugPrint('[AdsRepositoryImpl] Usuário premium — intersticial suprimido.');
+      return;
+    }
     if (_interstitialAd == null) {
       debugPrint('[AdsRepositoryImpl] Intersticial não carregado.');
       loadInterstitial();

@@ -418,10 +418,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_inapp_purchase
-      sha256: c43e500a769aee22d5af85165c10edd6d3076ac5f49c567886af3b83d774b500
+      sha256: b393d83bc43e15021cb2f79ebad844ad0cc43d7241a6e5ec596d31ebfaf2a9b2
       url: "https://pub.dev"
     source: hosted
-    version: "11.3.1"
+    version: "11.3.2"
   flutter_lints:
     dependency: "direct dev"
     description:

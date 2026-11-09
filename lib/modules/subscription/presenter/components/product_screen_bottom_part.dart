@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
@@ -164,8 +166,10 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
         _buildPriceValue(),
         SizedBox(height: screenAwareSize(15.0, context)),
         _buildSubscribeButton(),
-        SizedBox(height: screenAwareSize(10.0, context)),
-        _buildRestoreButton(),
+        if (Platform.isIOS) ...[
+          SizedBox(height: screenAwareSize(10.0, context)),
+          _buildRestoreButton(),
+        ],
       ],
     );
   }

@@ -1115,7 +1115,7 @@ etc.
 
 ### Core — com DataSource (fonte externa)
 
-- [x] `core/ads` — Google Mobile Ads
+- [x] `core/ads` — Google Mobile Ads (exibe apenas para não-assinantes)
 - [x] `core/cep` — Consulta de CEP
 - [x] `core/in_app_purchase` — Compras dentro do app
 - [x] `core/notification` — Push/local notifications
@@ -1306,6 +1306,111 @@ criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
 3. Manter o RepositoryImpl como orquestrador (estado, callbacks, regras)
 4. Registrar DataSource antes do Repository no `{service}_binds.dart`
 5. Injetar DataSource no RepositoryImpl via construtor
+
+---
+
+## 13. Regra de Exibição de Anúncios — Apenas para Não-Assinantes
+
+> **Esta é uma regra arquitetural transversal**: todo anúncio (banner ou
+> intersticial) deve ser suprimido automaticamente quando o usuário for
+> assinante (premium). A decisão de exibir ou não **não pode ser repetida**
+> em cada View/ViewModel.
+
+### 13.1 Princípio — Centralize a Decisão no `core/ads`
+
+As Views declaram **onde** o anúncio apareceria (ex:
+`bottomNavigationBar: BannerAdWidget()`), mas **nunca decidem** se ele será
+renderizado. Essa decisão pertence exclusivamente ao módulo `core/ads`, que
+consulta o estado global de assinatura (`UserRepository`) e decide por conta
+própria.
+
+| ❌ NÃO faça                                         | ✅ Faça em vez disso                                      |
+|-----------------------------------------------------|-----------------------------------------------------------|
+| Verificar `AutoRenewing` em cada View para esconder banner | Injetar `UserRepository` no `AdsRepositoryImpl` e expor `shouldShowAds` |
+| Verificar `AutoRenewing` antes de chamar `loadInterstitial()` na View | `loadInterstitial()` já aborta internamente quando `shouldShowAds == false` |
+| Duplicar lógica de "premium = sem anúncio" em PDF, Budget, etc. | Usar `BannerAdWidget` e `AdsRepository` sem condicionais externos |
+
+### 13.2 Implementação Padrão
+
+**Contrato (`AdsRepository`)**:
+```dart
+abstract class AdsRepository {
+  /// ... métodos existentes ...
+
+  /// Retorna `true` apenas quando o usuário NÃO é assinante.
+  bool get shouldShowAds;
+}
+```
+
+**Implementação (`AdsRepositoryImpl`)**:
+```dart
+class AdsRepositoryImpl implements AdsRepository {
+  final AdsRemoteDataSource _dataSource;
+  final UserRepository _userRepository;
+
+  AdsRepositoryImpl(this._dataSource, this._userRepository);
+
+  @override
+  bool get shouldShowAds =>
+      !(_userRepository.selectUser.value?.AutoRenewing ?? false);
+
+  @override
+  void loadInterstitial() {
+    if (!shouldShowAds) return;
+    // ... carrega intersticial normalmente
+  }
+
+  @override
+  void showInterstitial() {
+    if (!shouldShowAds) {
+      debugPrint('[AdsRepository] Premium — intersticial suprimido.');
+      return;
+    }
+    // ... exibe intersticial normalmente
+  }
+}
+```
+
+**Widget de Banner (`BannerAdWidget`)**:
+```dart
+class _BannerAdWidgetState extends State<BannerAdWidget> {
+  // ...
+  @override
+  void initState() {
+    super.initState();
+    // Se o usuário é premium, nem inicia o carregamento.
+    if (!getIt<AdsRepository>().shouldShowAds) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAd());
+  }
+}
+```
+
+> **Dica**: se `AutoRenewing` for atualizado durante o ciclo de vida do app
+> (ex: após restore de compra), certifique-se de que o
+> `UserRepository.selectUser` notifique listeners. Dessa forma, qualquer
+> tela recarregada já refletirá `shouldShowAds == false`.
+
+### 13.3 Quando a View PODE Ainda Verificar `AutoRenewing`
+
+A única exceção legítima é quando a **própria experiência de UI muda** — por
+exemplo, um botão de "Compartilhar" que, para não-assinantes, abre uma
+opção "Assista anúncio ou vire Premium". Nesse caso:
+
+1. A View/ViewModel **pode** checar `AutoRenewing` para decidir **qual fluxo
+   de UI** apresentar.
+2. Mas o **disparo do anúncio em si** (`showInterstitial`, ` loadInterstitial`)
+   deve ser feito sem condicionais extras — o `AdsRepository` já impede a
+   exibição para premium.
+
+### 13.4 Checklist para Novos Módulos com Anúncios
+
+- [ ] O banner é adicionado via `BannerAdWidget()`, sem `if` na View.
+- [ ] O intersticial é disparado via `getIt<AdsRepository>().showInterstitial()`,
+      sem `if` externo.
+- [ ] `AdsRepositoryImpl` recebe `UserRepository` via construtor e expõe
+      `shouldShowAds`.
+- [ ] `ads_binds.dart` registra `UserRepository` como dependência do
+      `AdsRepositoryImpl`.
 
 ---
 

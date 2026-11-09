@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 
 /// Widget reutilizável que carrega um banner do AdMob de forma deferida
@@ -42,6 +44,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
+    // Se o usuário é premium, nem inicia o carregamento.
+    if (!GetIt.I<AdsRepository>().shouldShowAds) return;
     // Deferir o carregamento para depois da primeira frame, evitando
     // travar a pintura inicial da tela.
     WidgetsBinding.instance.addPostFrameCallback((_) {

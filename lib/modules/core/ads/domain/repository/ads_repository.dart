@@ -22,4 +22,7 @@ abstract class AdsRepository {
 
   /// Retorna o ID do bloco intersticial.
   String get interstitialAdUnitId;
+
+  /// Retorna `true` apenas quando o usuário NÃO é assinante.
+  bool get shouldShowAds;
 }
