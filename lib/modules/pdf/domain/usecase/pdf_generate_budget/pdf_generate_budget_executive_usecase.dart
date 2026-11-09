@@ -590,7 +590,7 @@ class PdfGenerateBudgetExecutiveUsecase {
       if (item.category == category) {
         final row = grid.rows.add();
         row.cells[0].value = item.description ?? '';
-        row.cells[1].value = item.MEDIDA ?? '';
+        row.cells[1].value = item.measure ?? '';
         row.cells[2].value = (item.quantity ?? 0).toString();
         row.cells[3].value = _moneyConvert.convertFromDouble(item.price ?? 0);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.total ?? 0);

@@ -185,9 +185,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
           description: withId.descricao,
           price: withId.preco,
           quantity: withId.qtd,
-          MEDIDA: withId.medida,
+          measure: withId.medida,
           total: withId.total,
-          IDPRODUCT: id,
+          idProduct: id,
         );
         await _budgetRepository.saveBudgetItem(
           _budgetRepository.selectBudget.value?.id ?? '',
@@ -220,9 +220,9 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
         description: model.descricao,
         price: model.preco,
         quantity: model.qtd,
-        MEDIDA: model.medida,
+        measure: model.medida,
         total: model.total,
-        IDPRODUCT: item.idProduct,
+        idProduct: item.idProduct,
         checkBox: item.checkBox,
       );
       await _budgetRepository.saveBudgetItem(

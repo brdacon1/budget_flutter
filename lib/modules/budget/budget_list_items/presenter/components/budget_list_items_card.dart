@@ -41,7 +41,7 @@ class BudgetListItemsCard extends StatelessWidget {
         ),
         ExpansionCardLabel(
           nameText: "Unidade de medida:",
-          textData: '${item.MEDIDA}',
+          textData: '${item.measure}',
           horizontalPadding: 12,
           verticalPadding: 5,
         ),

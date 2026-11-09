@@ -112,10 +112,10 @@ class PaymentListViewModel extends ChangeNotifier {
     }
     final PaymentCustomer novo =
         PaymentCustomer()
-          ..METODO = ''
+          ..method = ''
           ..id = ''
           ..description = 'null'
-          ..PRECO = 0;
+          ..price = 0;
     _paymentRepository.receiptId = receipt.id;
     final result = await showPaymentCreatorBottomModal(context, item: novo);
     if (result == true) {

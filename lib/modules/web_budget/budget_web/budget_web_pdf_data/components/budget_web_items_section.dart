@@ -233,7 +233,7 @@ class _ItemsTable extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            item.MEDIDA ?? '-',
+                            item.measure ?? '-',
                             style: const TextStyle(
                               color: whiteColor,
                               fontSize: 12,
@@ -301,7 +301,7 @@ class _ItemsTable extends StatelessWidget {
               const SizedBox(height: 12),
               _FormReadOnlyField(
                 label: BudgetWebStrings.labelMeasure,
-                value: item.MEDIDA ?? '-',
+                value: item.measure ?? '-',
               ),
               const SizedBox(height: 12),
               _FormReadOnlyField(

@@ -3,12 +3,12 @@ class InfoUser {
   String? user;
   String? email;
   String? password;
-  String? NOME;
+  String? name;
   String? phone;
-  String? PurchaseToken;
+  String? purchaseToken;
   bool? autoRenewing = false;
-  String? IdPay;
-  String? ProductId;
+  String? idPay;
+  String? productId;
   bool? googleAuth = false;
 
   /// Lista de tokens FCM push do dono (um por dispositivo onde ele fez

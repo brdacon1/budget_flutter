@@ -600,7 +600,7 @@ class PdfGenerateBudgetSimpleUsecase {
       if (item.category == 'Produtos') {
         final PdfGridRow row = grid.rows.add();
         row.cells[0].value = item.description!;
-        row.cells[1].value = item.MEDIDA!;
+        row.cells[1].value = item.measure!;
         row.cells[2].value = item.quantity.toString();
         row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);
@@ -693,7 +693,7 @@ class PdfGenerateBudgetSimpleUsecase {
       if (item.category == 'Serviços') {
         final PdfGridRow row = grid.rows.add();
         row.cells[0].value = item.description!;
-        row.cells[1].value = item.MEDIDA!;
+        row.cells[1].value = item.measure!;
         row.cells[2].value = item.quantity.toString();
         row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
         row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);

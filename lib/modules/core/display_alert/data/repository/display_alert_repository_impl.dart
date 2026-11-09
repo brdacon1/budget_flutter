@@ -149,14 +149,14 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
                   infoUser.email = session.email;
                   infoUser.phone = session.phone;
                   infoUser.id = session.id;
-                  infoUser.IdPay = session.IdPay;
-                  infoUser.NOME = name;
-                  infoUser.ProductId = session.ProductId;
-                  infoUser.PurchaseToken = session.PurchaseToken;
+                  infoUser.idPay = session.idPay;
+                  infoUser.name = name;
+                  infoUser.productId = session.productId;
+                  infoUser.purchaseToken = session.purchaseToken;
                   infoUser.user = session.user;
 
                   await getIt<UserRemoteDataSource>().updateUser(infoUser);
-                  session.NOME = name;
+                  session.name = name;
                   _userRepository.selectUser.value = session;
                   savedName = name;
                   _loadingEvent.closeLoading(modalContext);

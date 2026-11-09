@@ -51,8 +51,8 @@ class PaymentCreatorViewModel extends ChangeNotifier {
     if (hasDescricao) {
       nameButton = PaymentStrings.updateButton;
       titlePage = PaymentStrings.editPaymentTitle;
-      typeText.text = item.METODO.toString();
-      controller.text = _moneyConvert.convertFromDouble(item.PRECO ?? 0);
+      typeText.text = item.method.toString();
+      controller.text = _moneyConvert.convertFromDouble(item.price ?? 0);
       descricaoText.text = item.description.toString();
     } else {
       nameButton = PaymentStrings.saveButton;
@@ -89,9 +89,9 @@ class PaymentCreatorViewModel extends ChangeNotifier {
 
       final currentItem =
           PaymentCustomer()
-            ..METODO = typeText.text
+            ..method = typeText.text
             ..description = descricaoText.text
-            ..PRECO = cleanAmount;
+            ..price = cleanAmount;
 
       if (nameButton == PaymentStrings.saveButton) {
         await _paymentRepository.savePayment(currentItem);

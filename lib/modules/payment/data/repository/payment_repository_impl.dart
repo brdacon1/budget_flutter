@@ -54,7 +54,7 @@ class PaymentRepositoryImpl extends PaymentRepository {
   double get totalPaid {
     double total = 0;
     for (final p in _payments) {
-      total += p.PRECO ?? 0;
+      total += p.price ?? 0;
     }
     return total;
   }

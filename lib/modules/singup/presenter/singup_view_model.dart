@@ -23,7 +23,7 @@ class SingUpViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository = getIt<PdfRepository>();
 
   final InfoUser infoUser = InfoUser();
-  final OwnerPdf PDF = OwnerPdf();
+  final OwnerPdf ownerPdf = OwnerPdf();
 
   final TextEditingController emailText = TextEditingController();
   final TextEditingController passwordText = TextEditingController();
@@ -87,20 +87,20 @@ class SingUpViewModel extends ChangeNotifier {
       infoUser.email = email;
       infoUser.phone = '15991111111';
       infoUser.user = uid;
-      infoUser.NOME = nome;
+      infoUser.name = nome;
       infoUser.id = uid;
       infoUser.autoRenewing = false;
-      infoUser.IdPay = '';
-      infoUser.ProductId = '';
-      infoUser.PurchaseToken = '';
+      infoUser.idPay = '';
+      infoUser.productId = '';
+      infoUser.purchaseToken = '';
 
-      PDF.email = email;
-      PDF.empresa = 'Minha Empresa';
-      PDF.logoName = '';
-      PDF.fotoId = '';
+      ownerPdf.email = email;
+      ownerPdf.empresa = 'Minha Empresa';
+      ownerPdf.logoName = '';
+      ownerPdf.fotoId = '';
 
-      await _userRepository.createDefaultUserData(infoUser, PDF);
-      await _pdfRepository.saveInformationEnterprise(PDF);
+      await _userRepository.createDefaultUserData(infoUser, ownerPdf);
+      await _pdfRepository.saveInformationEnterprise(ownerPdf);
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);
@@ -109,15 +109,15 @@ class SingUpViewModel extends ChangeNotifier {
       final session =
           InfoUser()
             ..user = uid
-            ..NOME = nome
+            ..name = nome
             ..email = email
             ..phone = infoUser.phone
             ..id = uid
             ..password = password
             ..googleAuth = false
-            ..IdPay = ''
-            ..ProductId = ''
-            ..PurchaseToken = ''
+            ..idPay = ''
+            ..productId = ''
+            ..purchaseToken = ''
             ..autoRenewing = false;
       _userRepository.selectUser.value = session;
 
@@ -141,13 +141,13 @@ class SingUpViewModel extends ChangeNotifier {
       final user = result.value;
       if (user != null) {
         infoUser.user = user.user;
-        infoUser.NOME = user.NOME;
+        infoUser.name = user.name;
         infoUser.email = user.email;
         infoUser.phone = user.phone;
         infoUser.id = user.id;
-        infoUser.IdPay = user.IdPay;
-        infoUser.ProductId = user.ProductId;
-        infoUser.PurchaseToken = user.PurchaseToken;
+        infoUser.idPay = user.idPay;
+        infoUser.productId = user.productId;
+        infoUser.purchaseToken = user.purchaseToken;
         infoUser.autoRenewing = user.autoRenewing;
 
         _userRepository.selectUser.value = user;
@@ -180,8 +180,8 @@ class SingUpViewModel extends ChangeNotifier {
 
           final session = _userRepository.selectUser.value ?? InfoUser();
           session.autoRenewing = latestSubscription.isAutoRenewing;
-          session.PurchaseToken = latestSubscription.purchaseToken ?? '';
-          session.ProductId = latestSubscription.productId;
+          session.purchaseToken = latestSubscription.purchaseToken ?? '';
+          session.productId = latestSubscription.productId;
           _userRepository.selectUser.value = session;
 
           if (Platform.isAndroid &&
@@ -194,13 +194,13 @@ class SingUpViewModel extends ChangeNotifier {
         } else {
           final session = _userRepository.selectUser.value ?? InfoUser();
           session.autoRenewing = false;
-          session.PurchaseToken = '';
+          session.purchaseToken = '';
           _userRepository.selectUser.value = session;
         }
       } catch (_) {
         final session = _userRepository.selectUser.value ?? InfoUser();
         session.autoRenewing = false;
-        session.PurchaseToken = '';
+        session.purchaseToken = '';
         _userRepository.selectUser.value = session;
       }
 

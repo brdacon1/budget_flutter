@@ -26,12 +26,12 @@ class UserRemoteDataSource {
       'USER': user.user,
       'FONE': user.phone,
       'EMAIL': user.email,
-      'NOME': user.NOME,
+      'NOME': user.name,
       'Id': user.id,
       'AutoRenewing': user.autoRenewing,
-      'IdPay': user.IdPay,
-      'ProductId': user.ProductId,
-      'PurchaseToken': user.PurchaseToken,
+      'IdPay': user.idPay,
+      'ProductId': user.productId,
+      'PurchaseToken': user.purchaseToken,
     });
   }
 
@@ -40,12 +40,12 @@ class UserRemoteDataSource {
       'USER': user.user,
       'FONE': user.phone,
       'EMAIL': user.email,
-      'NOME': user.NOME,
+      'NOME': user.name,
       'Id': user.id,
       'AutoRenewing': user.autoRenewing,
-      'IdPay': user.IdPay,
-      'ProductId': user.ProductId,
-      'PurchaseToken': user.PurchaseToken,
+      'IdPay': user.idPay,
+      'ProductId': user.productId,
+      'PurchaseToken': user.purchaseToken,
     });
   }
 

@@ -85,7 +85,7 @@ class _ProfileCard extends State<ProfileCard> {
   void initState() {
     super.initState();
     final name =
-        getIt<UserRepository>().selectUser.value?.NOME ??
+        getIt<UserRepository>().selectUser.value?.name ??
         DashboardStrings.userFallback;
     _selectedItem = capitalizeFirstLetter(name.split(' ')[0]);
     _dropdownItems = [_selectedItem, DashboardStrings.logout];

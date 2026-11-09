@@ -39,13 +39,13 @@ class UserRepositoryImpl extends UserRepository {
       final user =
           InfoUser()
             ..user = raw['USER']
-            ..NOME = raw['NOME']
+            ..name = raw['NOME']
             ..email = raw['EMAIL']
             ..phone = raw['FONE']
             ..id = raw['Id']
-            ..IdPay = raw['IdPay']
-            ..ProductId = raw['ProductId']
-            ..PurchaseToken = raw['PurchaseToken']
+            ..idPay = raw['IdPay']
+            ..productId = raw['ProductId']
+            ..purchaseToken = raw['PurchaseToken']
             ..autoRenewing = raw['AutoRenewing'] ?? false;
 
       _currentUser = user;

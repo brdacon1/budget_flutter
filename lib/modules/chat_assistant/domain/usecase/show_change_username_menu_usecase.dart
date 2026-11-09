@@ -14,14 +14,15 @@ class ShowChangeUsernameMenuUsecase {
 
   /// Exibe o submenu de alteração de nome de usuário.
   Future<String> call() async {
-    final currentName = _userRepository.selectUser.value?.NOME?.trim() ?? '';
-    final content = currentName.isNotEmpty
-        ? 'O nome de usuário atual é "$currentName".\n\n'
-            '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
-            '${ChatBudgetStrings.menuBackOption}'
-        : '${ChatBudgetStrings.changeUsernameInstructions}\n\n'
-            '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
-            '${ChatBudgetStrings.menuBackOption}';
+    final currentName = _userRepository.selectUser.value?.name?.trim() ?? '';
+    final content =
+        currentName.isNotEmpty
+            ? 'O nome de usuário atual é "$currentName".\n\n'
+                '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
+                '${ChatBudgetStrings.menuBackOption}'
+            : '${ChatBudgetStrings.changeUsernameInstructions}\n\n'
+                '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
+                '${ChatBudgetStrings.menuBackOption}';
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(

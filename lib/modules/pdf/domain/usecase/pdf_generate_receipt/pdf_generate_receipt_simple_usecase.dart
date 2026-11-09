@@ -459,8 +459,8 @@ class PdfGenerateReceiptUseCase {
     for (final payment in paymentList) {
       final PdfGridRow row = grid.rows.add();
       row.cells[0].value = payment.description!;
-      row.cells[1].value = payment.METODO!;
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.PRECO!);
+      row.cells[1].value = payment.method!;
+      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price!);
     }
 
     _applyRowStyle(grid, _createPaymentRowStyle());

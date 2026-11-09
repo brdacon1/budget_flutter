@@ -544,8 +544,8 @@ class PdfGenerateReceiptExecutiveUsecase {
     for (final payment in paymentList) {
       final row = grid.rows.add();
       row.cells[0].value = payment.description ?? '';
-      row.cells[1].value = payment.METODO ?? '';
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.PRECO ?? 0);
+      row.cells[1].value = payment.method ?? '';
+      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price ?? 0);
     }
 
     final PdfGridCellStyle rowStyle =

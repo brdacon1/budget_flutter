@@ -46,7 +46,7 @@ class PaymentCard extends StatelessWidget {
           ),
           subtitle: Text(
             PaymentStrings.paymentValueLabel(
-              moneyConvert.convertFromDouble(item.PRECO!),
+              moneyConvert.convertFromDouble(item.price!),
             ),
             style: const TextStyle(
               color: whiteColor,
@@ -64,7 +64,7 @@ class PaymentCard extends StatelessWidget {
                   vertical: 5.0,
                 ),
                 child: Text(
-                  PaymentStrings.paymentMethodLabel("${item.METODO}"),
+                  PaymentStrings.paymentMethodLabel("${item.method}"),
                   style: const TextStyle(
                     color: whiteColor,
                     letterSpacing: 0.5,

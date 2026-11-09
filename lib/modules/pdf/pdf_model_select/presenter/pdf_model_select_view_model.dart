@@ -101,7 +101,7 @@ class PdfModelSelectViewModel extends ChangeNotifier {
     final items = <ItemsBudget>[
       ItemsBudget(
         description: 'Produto exemplo',
-        MEDIDA: 'unidade',
+        measure: 'unidade',
         quantity: 2,
         price: 50.0,
         total: 100.0,
@@ -109,7 +109,7 @@ class PdfModelSelectViewModel extends ChangeNotifier {
       ),
       ItemsBudget(
         description: 'Serviço exemplo',
-        MEDIDA: 'hora',
+        measure: 'hora',
         quantity: 1,
         price: 150.0,
         total: 150.0,

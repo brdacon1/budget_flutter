@@ -149,7 +149,7 @@ class LoginViewModel extends ChangeNotifier {
         final session =
             InfoUser()
               ..user = uid
-              ..NOME = currentUser.displayName ?? 'User'
+              ..name = currentUser.displayName ?? 'User'
               ..password = isGoogle ? 'NO_PASS' : storedPassword
               ..googleAuth = isGoogle
               ..email = currentUser.email ?? prefs.getString('email') ?? '';
@@ -223,7 +223,7 @@ class LoginViewModel extends ChangeNotifier {
         InfoUser()
           ..user = uid
           ..email = auth.user?.email
-          ..NOME = auth.user?.displayName ?? 'User'
+          ..name = auth.user?.displayName ?? 'User'
           ..password = 'NO_PASS'
           ..googleAuth = true;
     _userRepository.selectUser.value = session;
@@ -295,8 +295,8 @@ class LoginViewModel extends ChangeNotifier {
 
           final session = _userRepository.selectUser.value ?? InfoUser();
           session.autoRenewing = latestSubscription.isAutoRenewing;
-          session.PurchaseToken = latestSubscription.purchaseToken ?? '';
-          session.ProductId = latestSubscription.productId;
+          session.purchaseToken = latestSubscription.purchaseToken ?? '';
+          session.productId = latestSubscription.productId;
           _userRepository.selectUser.value = session;
 
           if (Platform.isAndroid &&
@@ -309,13 +309,13 @@ class LoginViewModel extends ChangeNotifier {
         } else {
           final session = _userRepository.selectUser.value ?? InfoUser();
           session.autoRenewing = false;
-          session.PurchaseToken = '';
+          session.purchaseToken = '';
           _userRepository.selectUser.value = session;
         }
       } catch (_) {
         final session = _userRepository.selectUser.value ?? InfoUser();
         session.autoRenewing = false;
-        session.PurchaseToken = '';
+        session.purchaseToken = '';
         _userRepository.selectUser.value = session;
       }
 
@@ -326,18 +326,18 @@ class LoginViewModel extends ChangeNotifier {
 
   Future<void> _createUserWithGoogle(User? value) async {
     final infoUser = InfoUser();
-    final PDF = OwnerPdf();
+    final ownerPdf = OwnerPdf();
     infoUser.email = value?.email ?? '';
     infoUser.phone = value?.phoneNumber ?? '';
     infoUser.user = value?.uid ?? '';
-    infoUser.NOME = value?.displayName ?? '';
+    infoUser.name = value?.displayName ?? '';
     infoUser.id = value?.uid ?? '';
-    PDF.email = value?.email ?? '';
-    PDF.empresa = "Minha Empresa";
-    PDF.logoName = '';
-    PDF.fotoId = '';
-    await _userRepository.createDefaultUserData(infoUser, PDF);
-    await _pdfRepository.saveInformationEnterprise(PDF);
+    ownerPdf.email = value?.email ?? '';
+    ownerPdf.empresa = "Minha Empresa";
+    ownerPdf.logoName = '';
+    ownerPdf.fotoId = '';
+    await _userRepository.createDefaultUserData(infoUser, ownerPdf);
+    await _pdfRepository.saveInformationEnterprise(ownerPdf);
   }
 
   String _mapFirebaseAuthError(FirebaseAuthException error) {

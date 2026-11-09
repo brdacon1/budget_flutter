@@ -224,8 +224,8 @@ class SubscriptionViewModel extends ChangeNotifier {
   }) {
     final session = getIt<UserRepository>().selectUser.value ?? InfoUser();
     session.autoRenewing = autoRenewing;
-    session.PurchaseToken = purchaseToken;
-    if (productId != null) session.ProductId = productId;
+    session.purchaseToken = purchaseToken;
+    if (productId != null) session.productId = productId;
     getIt<UserRepository>().selectUser.value = session;
   }
 
