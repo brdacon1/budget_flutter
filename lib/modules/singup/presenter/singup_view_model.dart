@@ -88,7 +88,7 @@ class SingUpViewModel extends ChangeNotifier {
       DADOS.FONE = '15991111111';
       DADOS.USER = uid;
       DADOS.NOME = nome;
-      DADOS.Id = uid;
+      DADOS.id = uid;
       DADOS.AutoRenewing = false;
       DADOS.IdPay = '';
       DADOS.ProductId = '';
@@ -112,7 +112,7 @@ class SingUpViewModel extends ChangeNotifier {
             ..NOME = nome
             ..EMAIL = email
             ..FONE = DADOS.FONE
-            ..Id = uid
+            ..id = uid
             ..Senha = password
             ..googleAuth = false
             ..IdPay = ''
@@ -144,7 +144,7 @@ class SingUpViewModel extends ChangeNotifier {
         DADOS.NOME = user.NOME;
         DADOS.EMAIL = user.EMAIL;
         DADOS.FONE = user.FONE;
-        DADOS.Id = user.Id;
+        DADOS.id = user.id;
         DADOS.IdPay = user.IdPay;
         DADOS.ProductId = user.ProductId;
         DADOS.PurchaseToken = user.PurchaseToken;

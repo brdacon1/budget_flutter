@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class UserRepositoryImpl extends UserRepository {
   final UserRemoteDataSource _remote;
+
   UserRepositoryImpl(this._remote);
 
   InfoUser? _currentUser;
@@ -35,16 +36,17 @@ class UserRepositoryImpl extends UserRepository {
       if (raw == null) {
         return Result.ok(null);
       }
-      final user = InfoUser()
-        ..USER = raw['USER']
-        ..NOME = raw['NOME']
-        ..EMAIL = raw['EMAIL']
-        ..FONE = raw['FONE']
-        ..Id = raw['Id']
-        ..IdPay = raw['IdPay']
-        ..ProductId = raw['ProductId']
-        ..PurchaseToken = raw['PurchaseToken']
-        ..AutoRenewing = raw['AutoRenewing'] ?? false;
+      final user =
+          InfoUser()
+            ..USER = raw['USER']
+            ..NOME = raw['NOME']
+            ..EMAIL = raw['EMAIL']
+            ..FONE = raw['FONE']
+            ..id = raw['Id']
+            ..IdPay = raw['IdPay']
+            ..ProductId = raw['ProductId']
+            ..PurchaseToken = raw['PurchaseToken']
+            ..AutoRenewing = raw['AutoRenewing'] ?? false;
 
       _currentUser = user;
       _selectUser.value = user;
@@ -82,7 +84,10 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
-  Future<Result<void>> createDefaultUserData(InfoUser user, OwnerPdf pdf) async {
+  Future<Result<void>> createDefaultUserData(
+    InfoUser user,
+    OwnerPdf pdf,
+  ) async {
     try {
       await _remote.saveUser(user);
       await _remote.savePdfInfo(pdf, user.USER ?? '');

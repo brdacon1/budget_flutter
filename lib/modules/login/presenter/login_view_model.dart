@@ -331,7 +331,7 @@ class LoginViewModel extends ChangeNotifier {
     DADOS.FONE = value?.phoneNumber ?? '';
     DADOS.USER = value?.uid ?? '';
     DADOS.NOME = value?.displayName ?? '';
-    DADOS.Id = value?.uid ?? '';
+    DADOS.id = value?.uid ?? '';
     PDF.email = value?.email ?? '';
     PDF.empresa = "Minha Empresa";
     PDF.logoName = '';

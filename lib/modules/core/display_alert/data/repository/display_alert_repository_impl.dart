@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
+import 'package:oflite/modules/login/data/model/info_user.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/enums/alert_type_enum.dart';
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/change_name_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/change_password_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_widget.dart';
-import 'package:oflite/modules/login/data/model/info_user.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/login/data/datasource/user_remote_datasource.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -28,8 +28,8 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   DisplayAlertRepositoryImpl({
     required LoadingEventRepository loadingEvent,
     required UserRepository userRepository,
-  })  : _loadingEvent = loadingEvent,
-        _userRepository = userRepository;
+  }) : _loadingEvent = loadingEvent,
+       _userRepository = userRepository;
 
   final InfoUser DADOS = InfoUser();
 
@@ -103,29 +103,30 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangePasswordBottomModalWidget(
-        onSubmit: (modalContext, email) async {
-          try {
-            await _auth.sendPasswordResetEmail(email: email);
-            if (modalContext.mounted) {
-              Navigator.of(modalContext).pop();
-              await notification(
-                modalContext,
-                'Feito!',
-                'Você recebeu um email para trocar de senha',
-              );
-            }
-          } catch (e) {
-            if (modalContext.mounted) {
-              await notificationError(
-                modalContext,
-                'Erro!',
-                'Problemas para restaurar sua senha verifique seu e-mail se está correto!',
-              );
-            }
-          }
-        },
-      ),
+      builder:
+          (context) => ChangePasswordBottomModalWidget(
+            onSubmit: (modalContext, email) async {
+              try {
+                await _auth.sendPasswordResetEmail(email: email);
+                if (modalContext.mounted) {
+                  Navigator.of(modalContext).pop();
+                  await notification(
+                    modalContext,
+                    'Feito!',
+                    'Você recebeu um email para trocar de senha',
+                  );
+                }
+              } catch (e) {
+                if (modalContext.mounted) {
+                  await notificationError(
+                    modalContext,
+                    'Erro!',
+                    'Problemas para restaurar sua senha verifique seu e-mail se está correto!',
+                  );
+                }
+              }
+            },
+          ),
     );
   }
 
@@ -136,52 +137,54 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ChangeNameBottomModalWidget(
-        onSubmit: (modalContext, name) async {
-          try {
-            _loadingEvent.alertLoading(modalContext);
-            if (name.isNotEmpty) {
-              final session = _userRepository.selectUser.value ?? InfoUser();
-              DADOS.AutoRenewing = session.AutoRenewing;
-              DADOS.EMAIL = session.EMAIL;
-              DADOS.FONE = session.FONE;
-              DADOS.Id = session.Id;
-              DADOS.IdPay = session.IdPay;
-              DADOS.NOME = name;
-              DADOS.ProductId = session.ProductId;
-              DADOS.PurchaseToken = session.PurchaseToken;
-              DADOS.USER = session.USER;
+      builder:
+          (context) => ChangeNameBottomModalWidget(
+            onSubmit: (modalContext, name) async {
+              try {
+                _loadingEvent.alertLoading(modalContext);
+                if (name.isNotEmpty) {
+                  final session =
+                      _userRepository.selectUser.value ?? InfoUser();
+                  DADOS.AutoRenewing = session.AutoRenewing;
+                  DADOS.EMAIL = session.EMAIL;
+                  DADOS.FONE = session.FONE;
+                  DADOS.id = session.id;
+                  DADOS.IdPay = session.IdPay;
+                  DADOS.NOME = name;
+                  DADOS.ProductId = session.ProductId;
+                  DADOS.PurchaseToken = session.PurchaseToken;
+                  DADOS.USER = session.USER;
 
-              await getIt<UserRemoteDataSource>().updateUser(DADOS);
-              session.NOME = name;
-              _userRepository.selectUser.value = session;
-              savedName = name;
-              _loadingEvent.closeLoading(modalContext);
-              if (modalContext.mounted) {
-                Navigator.of(modalContext).pop();
+                  await getIt<UserRemoteDataSource>().updateUser(DADOS);
+                  session.NOME = name;
+                  _userRepository.selectUser.value = session;
+                  savedName = name;
+                  _loadingEvent.closeLoading(modalContext);
+                  if (modalContext.mounted) {
+                    Navigator.of(modalContext).pop();
+                  }
+                } else {
+                  _loadingEvent.closeLoading(modalContext);
+                  if (modalContext.mounted) {
+                    await notificationError(
+                      modalContext,
+                      'Erro!',
+                      'O campo nome não pode ser vazio!',
+                    );
+                  }
+                }
+              } catch (e) {
+                _loadingEvent.closeLoading(modalContext);
+                if (modalContext.mounted) {
+                  await notificationError(
+                    modalContext,
+                    'Erro!',
+                    'Problemas para atualizar o nome verifique os dados!',
+                  );
+                }
               }
-            } else {
-              _loadingEvent.closeLoading(modalContext);
-              if (modalContext.mounted) {
-                await notificationError(
-                  modalContext,
-                  'Erro!',
-                  'O campo nome não pode ser vazio!',
-                );
-              }
-            }
-          } catch (e) {
-            _loadingEvent.closeLoading(modalContext);
-            if (modalContext.mounted) {
-              await notificationError(
-                modalContext,
-                'Erro!',
-                'Problemas para atualizar o nome verifique os dados!',
-              );
-            }
-          }
-        },
-      ),
+            },
+          ),
     );
     return savedName;
   }

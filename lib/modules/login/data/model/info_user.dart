@@ -1,12 +1,12 @@
 class InfoUser {
-  String? Id;
+  String? id;
   String? USER;
   String? EMAIL;
   String? Senha;
   String? NOME;
   String? FONE;
   String? PurchaseToken;
-  bool?   AutoRenewing = false;
+  bool? AutoRenewing = false;
   String? IdPay;
   String? ProductId;
   bool? googleAuth = false;

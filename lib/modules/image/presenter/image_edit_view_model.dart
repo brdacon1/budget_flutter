@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
+import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ImageEditViewModel extends ChangeNotifier {
   XFile? pickedFile;
@@ -24,7 +24,6 @@ class ImageEditViewModel extends ChangeNotifier {
     if (fotoId == null || fotoId.isEmpty) return;
 
     initialImageUrl = fotoId;
-    print('ImageEditViewModel: initialImageUrl = $initialImageUrl');
     notifyListeners();
   }
 
@@ -72,9 +71,7 @@ class ImageEditViewModel extends ChangeNotifier {
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
         ),
-        IOSUiSettings(
-          title: ImageStrings.cropperTitle,
-        ),
+        IOSUiSettings(title: ImageStrings.cropperTitle),
       ],
     );
 
@@ -92,11 +89,11 @@ class ImageEditViewModel extends ChangeNotifier {
       final FirebaseStorage storage = FirebaseStorage.instance;
       final String? userId = getIt<UserRepository>().selectUser.value?.USER;
       final Directory appDir = await getApplicationDocumentsDirectory();
-      
+
       fileName = "$userId.jpg";
       final filePath = "${appDir.path}/$fileName";
       final File file = File(filePath);
-      
+
       final Uint8List fileBytes;
       final cropped = croppedFile;
       if (cropped != null) {
@@ -111,7 +108,7 @@ class ImageEditViewModel extends ChangeNotifier {
 
       final TaskSnapshot taskSnapshot = await uploadTask;
       final String imageUrl = await taskSnapshot.ref.getDownloadURL();
-      
+
       file.delete();
       return imageUrl;
     } catch (e) {

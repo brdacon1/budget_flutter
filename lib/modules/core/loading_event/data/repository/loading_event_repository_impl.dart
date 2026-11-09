@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
@@ -13,16 +12,14 @@ class LoadingEventRepositoryImpl implements LoadingEventRepository {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
+        return PopScope(
+          canPop: false, // Prevents closing the dialog via the back button
           child: const AlertDialog(
             backgroundColor: bgColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                CircularProgressIndicator(
-                  color: Color(0xFF0DF5E4),
-                ),
+                CircularProgressIndicator(color: Color(0xFF0DF5E4)),
                 SizedBox(height: 16),
                 Text(
                   'Aguarde...',
