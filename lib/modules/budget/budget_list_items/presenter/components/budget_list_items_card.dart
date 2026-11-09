@@ -29,7 +29,7 @@ class BudgetListItemsCard extends StatelessWidget {
         ),
         ExpansionCardLabel(
           nameText: "Total:",
-          textData: moneyConvert.convertFromDouble(item.TOTAL!),
+          textData: moneyConvert.convertFromDouble(item.total!),
           horizontalPadding: 12,
           verticalPadding: 5,
         ),

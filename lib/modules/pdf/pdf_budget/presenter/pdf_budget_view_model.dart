@@ -111,7 +111,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
 
         for (int index = 0; index < budgetItems.length; index++) {
           final item = budgetItems[index];
-          final total = item.TOTAL ?? 0;
+          final total = item.total ?? 0;
           if (item.category == 'Produtos') {
             totalProducts += total;
             countProduct++;

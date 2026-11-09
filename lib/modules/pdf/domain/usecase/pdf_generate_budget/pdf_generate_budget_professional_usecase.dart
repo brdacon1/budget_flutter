@@ -575,7 +575,7 @@ class PdfGenerateBudgetProfessionalUsecase {
         row.cells[1].value = item.MEDIDA ?? '';
         row.cells[2].value = (item.quantity ?? 0).toString();
         row.cells[3].value = _moneyConvert.convertFromDouble(item.price ?? 0);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.TOTAL ?? 0);
+        row.cells[4].value = _moneyConvert.convertFromDouble(item.total ?? 0);
       }
     }
 
@@ -782,14 +782,14 @@ class PdfGenerateBudgetProfessionalUsecase {
     final session = _userRepository.selectUser.value;
     if (session == null) return '';
     if (session.googleAuth == true) return '';
-    if (session.EMAIL == null ||
-        session.EMAIL!.isEmpty ||
+    if (session.email == null ||
+        session.email!.isEmpty ||
         session.Senha == null ||
         session.Senha!.isEmpty) {
       return '';
     }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: session.EMAIL!.trim(),
+      email: session.email!.trim(),
       password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';

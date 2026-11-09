@@ -230,7 +230,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       double total = 0;
       if (itemsResult is Ok<List<ItemsBudget>>) {
         for (final it in itemsResult.value) {
-          total += it.TOTAL ?? 0;
+          total += it.total ?? 0;
         }
       }
       final updated = _draft!.copyWith(totalValue: total);

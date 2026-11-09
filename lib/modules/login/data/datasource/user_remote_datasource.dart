@@ -25,7 +25,7 @@ class UserRemoteDataSource {
     await _firestore.collection('USUARIOS').doc(user.user).set({
       'USER': user.user,
       'FONE': user.FONE,
-      'EMAIL': user.EMAIL,
+      'EMAIL': user.email,
       'NOME': user.NOME,
       'Id': user.id,
       'AutoRenewing': user.autoRenewing,
@@ -39,7 +39,7 @@ class UserRemoteDataSource {
     await _firestore.collection('USUARIOS').doc(user.user).update({
       'USER': user.user,
       'FONE': user.FONE,
-      'EMAIL': user.EMAIL,
+      'EMAIL': user.email,
       'NOME': user.NOME,
       'Id': user.id,
       'AutoRenewing': user.autoRenewing,

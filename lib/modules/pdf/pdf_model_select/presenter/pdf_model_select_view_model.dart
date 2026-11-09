@@ -104,7 +104,7 @@ class PdfModelSelectViewModel extends ChangeNotifier {
         MEDIDA: 'unidade',
         quantity: 2,
         price: 50.0,
-        TOTAL: 100.0,
+        total: 100.0,
         category: 'Produtos',
       ),
       ItemsBudget(
@@ -112,7 +112,7 @@ class PdfModelSelectViewModel extends ChangeNotifier {
         MEDIDA: 'hora',
         quantity: 1,
         price: 150.0,
-        TOTAL: 150.0,
+        total: 150.0,
         category: 'Serviços',
       ),
     ];

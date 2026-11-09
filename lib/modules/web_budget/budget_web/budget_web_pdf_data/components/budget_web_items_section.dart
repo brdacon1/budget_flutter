@@ -251,7 +251,7 @@ class _ItemsTable extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            moneyConvert.convertFromDouble(item.TOTAL ?? 0),
+                            moneyConvert.convertFromDouble(item.total ?? 0),
                             style: const TextStyle(
                               color: buttonColor,
                               fontSize: 12,
@@ -311,7 +311,7 @@ class _ItemsTable extends StatelessWidget {
               const SizedBox(height: 12),
               _FormReadOnlyField(
                 label: BudgetWebStrings.labelTotal,
-                value: moneyConvert.convertFromDouble(item.TOTAL ?? 0),
+                value: moneyConvert.convertFromDouble(item.total ?? 0),
               ),
             ],
           ),

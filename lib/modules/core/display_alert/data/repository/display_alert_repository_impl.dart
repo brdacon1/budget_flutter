@@ -146,7 +146,7 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
                   final session =
                       _userRepository.selectUser.value ?? InfoUser();
                   infoUser.autoRenewing = session.autoRenewing;
-                  infoUser.EMAIL = session.EMAIL;
+                  infoUser.email = session.email;
                   infoUser.FONE = session.FONE;
                   infoUser.id = session.id;
                   infoUser.IdPay = session.IdPay;

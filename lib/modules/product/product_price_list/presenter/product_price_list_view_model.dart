@@ -268,7 +268,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
           price: cart.preco,
           quantity: cart.qtd,
           MEDIDA: cart.medida,
-          TOTAL: cart.total,
+          total: cart.total,
           IDPRODUCT: cart.id,
         );
         await budgetRepo.saveBudgetItem(
@@ -316,7 +316,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
                 price: cart.preco,
                 quantity: cart.qtd,
                 MEDIDA: cart.medida,
-                TOTAL: cart.total,
+                total: cart.total,
                 IDPRODUCT: cart.id,
               ),
             )

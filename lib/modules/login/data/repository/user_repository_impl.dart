@@ -40,7 +40,7 @@ class UserRepositoryImpl extends UserRepository {
           InfoUser()
             ..user = raw['USER']
             ..NOME = raw['NOME']
-            ..EMAIL = raw['EMAIL']
+            ..email = raw['EMAIL']
             ..FONE = raw['FONE']
             ..id = raw['Id']
             ..IdPay = raw['IdPay']

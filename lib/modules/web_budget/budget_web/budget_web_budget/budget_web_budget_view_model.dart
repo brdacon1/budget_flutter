@@ -119,7 +119,7 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
     countProduct = 0;
     countService = 0;
     for (final i in _items) {
-      final total = i.TOTAL ?? 0;
+      final total = i.total ?? 0;
       if (i.category == 'Produtos') {
         totalProducts += total;
         countProduct++;

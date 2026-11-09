@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,24 +9,13 @@ import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
+import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-enum Gender {
-  fullname,
-  email,
-  phone,
-  site,
-  cpf,
-  cep,
-  rua,
-  data,
-  city,
-  bairro,
-}
+enum Gender { fullname, email, phone, site, cpf, cep, rua, data, city, bairro }
 
 class PdfEditViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
@@ -72,10 +62,12 @@ class PdfEditViewModel extends ChangeNotifier {
     UserRepository? userRepository,
     DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
-  })  : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
-        _userRepository = userRepository ?? getIt<UserRepository>(),
-        _displayAlert = displayAlertRepository ?? getIt<DisplayAlertRepository>(),
-        _loadingEvent = loadingEventRepository ?? getIt<LoadingEventRepository>();
+  }) : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+       _userRepository = userRepository ?? getIt<UserRepository>(),
+       _displayAlert =
+           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
+       _loadingEvent =
+           loadingEventRepository ?? getIt<LoadingEventRepository>();
 
   Future<void> inicialData() async {
     loading = true;
@@ -96,7 +88,7 @@ class PdfEditViewModel extends ChangeNotifier {
       if (token == null || token.isEmpty) {
         final session = getIt<UserRepository>().selectUser.value;
         if (session != null && session.googleAuth != true) {
-          final email = session.EMAIL?.trim() ?? '';
+          final email = session.email?.trim() ?? '';
           final password = session.Senha?.trim() ?? '';
           if (email.isNotEmpty && password.isNotEmpty) {
             final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -149,29 +141,36 @@ class PdfEditViewModel extends ChangeNotifier {
   Future<void> save(BuildContext context) async {
     _loadingEvent.alertLoading(context);
     try {
-      final localOwner = OwnerPdf()
-        ..bairro = bairroText.text.trim().toUpperCase()
-        ..fotoId = owner.fotoId
-        ..city = cityText.text.trim().toUpperCase()
-        ..rua = ruaText.text.trim().toUpperCase()
-        ..cep = cepText.text.trim()
-        ..email = emailText.text.trim()
-        ..fone = phoneText.text.trim()
-        ..cnpj = cpfText.text.trim()
-        ..empresa = nameText.text.trim().toUpperCase()
-        ..logoName = owner.logoName
-        ..pdfLayoutType = owner.pdfLayoutType;
+      final localOwner =
+          OwnerPdf()
+            ..bairro = bairroText.text.trim().toUpperCase()
+            ..fotoId = owner.fotoId
+            ..city = cityText.text.trim().toUpperCase()
+            ..rua = ruaText.text.trim().toUpperCase()
+            ..cep = cepText.text.trim()
+            ..email = emailText.text.trim()
+            ..fone = phoneText.text.trim()
+            ..cnpj = cpfText.text.trim()
+            ..empresa = nameText.text.trim().toUpperCase()
+            ..logoName = owner.logoName
+            ..pdfLayoutType = owner.pdfLayoutType;
 
       await _pdfRepository.saveInformationEnterprise(localOwner);
       owner = localOwner;
 
       _loadingEvent.closeLoading(context);
       await _displayAlert.notification(
-          context, "Feito!", "Dados do PDF atualizados com sucesso!");
+        context,
+        "Feito!",
+        "Dados do PDF atualizados com sucesso!",
+      );
     } catch (_) {
       _loadingEvent.closeLoading(context);
       await _displayAlert.notificationError(
-          context, "Erro!", "Problemas ao atualizar os dados do PDF");
+        context,
+        "Erro!",
+        "Problemas ao atualizar os dados do PDF",
+      );
     }
   }
 

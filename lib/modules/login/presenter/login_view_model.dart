@@ -152,7 +152,7 @@ class LoginViewModel extends ChangeNotifier {
               ..NOME = currentUser.displayName ?? 'User'
               ..Senha = isGoogle ? 'NO_PASS' : storedPassword
               ..googleAuth = isGoogle
-              ..EMAIL = currentUser.email ?? prefs.getString('email') ?? '';
+              ..email = currentUser.email ?? prefs.getString('email') ?? '';
         _userRepository.selectUser.value = session;
 
         await _getUserInfo();
@@ -222,7 +222,7 @@ class LoginViewModel extends ChangeNotifier {
     final session =
         InfoUser()
           ..user = uid
-          ..EMAIL = auth.user?.email
+          ..email = auth.user?.email
           ..NOME = auth.user?.displayName ?? 'User'
           ..Senha = 'NO_PASS'
           ..googleAuth = true;
@@ -249,7 +249,7 @@ class LoginViewModel extends ChangeNotifier {
     final session =
         InfoUser()
           ..user = uid
-          ..EMAIL = email
+          ..email = email
           ..Senha = password.trim()
           ..googleAuth = false;
     _userRepository.selectUser.value = session;
@@ -327,7 +327,7 @@ class LoginViewModel extends ChangeNotifier {
   Future<void> _createUserWithGoogle(User? value) async {
     final infoUser = InfoUser();
     final PDF = OwnerPdf();
-    infoUser.EMAIL = value?.email ?? '';
+    infoUser.email = value?.email ?? '';
     infoUser.FONE = value?.phoneNumber ?? '';
     infoUser.user = value?.uid ?? '';
     infoUser.NOME = value?.displayName ?? '';

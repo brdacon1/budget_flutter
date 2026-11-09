@@ -325,14 +325,14 @@ class PdfGenerateReceiptExecutiveUsecase {
     final session = _userRepository.selectUser.value;
     if (session == null) return '';
     if (session.googleAuth == true) return '';
-    if (session.EMAIL == null ||
-        session.EMAIL!.isEmpty ||
+    if (session.email == null ||
+        session.email!.isEmpty ||
         session.Senha == null ||
         session.Senha!.isEmpty) {
       return '';
     }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: session.EMAIL!.trim(),
+      email: session.email!.trim(),
       password: session.Senha!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';

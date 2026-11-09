@@ -51,7 +51,7 @@ class BudgetListItemsViewModel extends ChangeNotifier {
     }
 
     for (int index = 0; index < budgets.length; index++) {
-      double total = budgets[index].TOTAL ?? 0;
+      double total = budgets[index].total ?? 0;
       if (budgets[index].category == 'Produtos') {
         totalProducts += total;
         countProduct++;

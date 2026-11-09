@@ -5,7 +5,7 @@ class ItemsBudget {
   double? price;
   double? quantity;
   String? MEDIDA;
-  double? TOTAL;
+  double? total;
   String? IDPRODUCT;
   bool? checkBox;
   bool? selectProduct;
@@ -18,7 +18,7 @@ class ItemsBudget {
     this.price,
     this.quantity,
     this.MEDIDA,
-    this.TOTAL,
+    this.total,
     this.IDPRODUCT,
     this.checkBox,
     this.selectProduct,
@@ -31,7 +31,7 @@ class ItemsBudget {
     price = _convertToDouble(json['PRECO']) ?? 0;
     quantity = _convertToDouble(json['QTD']) ?? 0;
     MEDIDA = json['MEDIDA'];
-    TOTAL = _convertToDouble(json['TOTAL']) ?? 0;
+    total = _convertToDouble(json['TOTAL']) ?? 0;
     IDPRODUCT = json['IDPRODUCT'];
     checkBox = json['checkBox'];
     selectProduct = json['selectProduct'];
@@ -54,7 +54,7 @@ class ItemsBudget {
     data['PRECO'] = price;
     data['QTD'] = quantity;
     data['MEDIDA'] = MEDIDA;
-    data['TOTAL'] = TOTAL;
+    data['TOTAL'] = total;
     data['IDPRODUCT'] = IDPRODUCT;
     data['checkBox'] = checkBox;
     data['selectProduct'] = selectProduct;
