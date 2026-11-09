@@ -276,7 +276,7 @@ class LoginViewModel extends ChangeNotifier {
         final tokens = await getIt<NotificationRepository>().loadFcmTokens(
           ownerUid,
         );
-        users.TOKENS = tokens;
+        users.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
       getIt<NotificationRepository>().tryOpenPendingBudget();

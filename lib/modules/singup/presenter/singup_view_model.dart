@@ -162,7 +162,7 @@ class SingUpViewModel extends ChangeNotifier {
         final tokens = await getIt<NotificationRepository>().loadFcmTokens(
           ownerUid,
         );
-        infoUser.TOKENS = tokens;
+        infoUser.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
       }
 

@@ -17,5 +17,5 @@ class InfoUser {
   /// mesma lista para enviar o push de aprovação/reprovação a TODOS os
   /// devices do dono — assim a notificação chega mesmo com o app fechado,
   /// não importa em quantos aparelhos a pessoa esteja conectada.
-  List<String> TOKENS = const [];
+  List<String> tokens = const [];
 }
