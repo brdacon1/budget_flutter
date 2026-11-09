@@ -3,7 +3,7 @@ class ItemsListBudget {
   String? category;
   String? description;
   double? price;
-  double? QTD;
+  double? quantity;
   String? MEDIDA;
   double? total;
   String? IDPRODUCT;
@@ -16,7 +16,7 @@ class ItemsListBudget {
     this.category,
     this.description,
     this.price,
-    this.QTD,
+    this.quantity,
     this.MEDIDA,
     this.total,
     this.IDPRODUCT,
@@ -29,7 +29,7 @@ class ItemsListBudget {
     category = json['CATEGORIA'];
     description = json['DESCRICAO'];
     price = _convertToDouble(json['PRECO']) ?? 0.toDouble();
-    QTD = _convertToDouble(json['QTD']) ?? 0.toDouble();
+    quantity = _convertToDouble(json['QTD']) ?? 0.toDouble();
     total = _convertToDouble(json['TOTAL']) ?? 0.toDouble();
     indice = json['indice'] ?? 0;
     MEDIDA = json['MEDIDA'];
@@ -52,7 +52,7 @@ class ItemsListBudget {
     data['CATEGORIA'] = category;
     data['DESCRICAO'] = description;
     data['PRECO'] = price;
-    data['QTD'] = QTD;
+    data['QTD'] = quantity;
     data['MEDIDA'] = MEDIDA;
     data['TOTAL'] = total;
     data['IDPRODUCT'] = IDPRODUCT;
