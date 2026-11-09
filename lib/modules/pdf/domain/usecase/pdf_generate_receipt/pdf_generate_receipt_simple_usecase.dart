@@ -141,13 +141,13 @@ class PdfGenerateReceiptUseCase {
     if (session.googleAuth == true) return '';
     if (session.email == null ||
         session.email!.isEmpty ||
-        session.Senha == null ||
-        session.Senha!.isEmpty) {
+        session.password == null ||
+        session.password!.isEmpty) {
       return '';
     }
     final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: session.email!.trim(),
-      password: session.Senha!.trim(),
+      password: session.password!.trim(),
     );
     return (await auth.user?.getIdToken()) ?? '';
   }

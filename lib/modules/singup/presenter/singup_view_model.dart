@@ -113,7 +113,7 @@ class SingUpViewModel extends ChangeNotifier {
             ..email = email
             ..phone = infoUser.phone
             ..id = uid
-            ..Senha = password
+            ..password = password
             ..googleAuth = false
             ..IdPay = ''
             ..ProductId = ''

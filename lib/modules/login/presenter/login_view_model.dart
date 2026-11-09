@@ -150,7 +150,7 @@ class LoginViewModel extends ChangeNotifier {
             InfoUser()
               ..user = uid
               ..NOME = currentUser.displayName ?? 'User'
-              ..Senha = isGoogle ? 'NO_PASS' : storedPassword
+              ..password = isGoogle ? 'NO_PASS' : storedPassword
               ..googleAuth = isGoogle
               ..email = currentUser.email ?? prefs.getString('email') ?? '';
         _userRepository.selectUser.value = session;
@@ -224,7 +224,7 @@ class LoginViewModel extends ChangeNotifier {
           ..user = uid
           ..email = auth.user?.email
           ..NOME = auth.user?.displayName ?? 'User'
-          ..Senha = 'NO_PASS'
+          ..password = 'NO_PASS'
           ..googleAuth = true;
     _userRepository.selectUser.value = session;
 
@@ -250,7 +250,7 @@ class LoginViewModel extends ChangeNotifier {
         InfoUser()
           ..user = uid
           ..email = email
-          ..Senha = password.trim()
+          ..password = password.trim()
           ..googleAuth = false;
     _userRepository.selectUser.value = session;
 
@@ -265,7 +265,7 @@ class LoginViewModel extends ChangeNotifier {
         // Preserva Senha e googleAuth que nunca vêm do Firestore
         final prev = _userRepository.selectUser.value;
         if (prev != null) {
-          user.Senha = prev.Senha;
+          user.password = prev.password;
           user.googleAuth = prev.googleAuth;
         }
         users = user;

@@ -2,7 +2,7 @@ class InfoUser {
   String? id;
   String? user;
   String? email;
-  String? Senha;
+  String? password;
   String? NOME;
   String? phone;
   String? PurchaseToken;

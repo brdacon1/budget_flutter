@@ -89,7 +89,7 @@ class PdfEditViewModel extends ChangeNotifier {
         final session = getIt<UserRepository>().selectUser.value;
         if (session != null && session.googleAuth != true) {
           final email = session.email?.trim() ?? '';
-          final password = session.Senha?.trim() ?? '';
+          final password = session.password?.trim() ?? '';
           if (email.isNotEmpty && password.isNotEmpty) {
             final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
               email: email,
