@@ -16,7 +16,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
 
-  final Receipt receipt;
+  Receipt receipt;
   final CustomerInfo item;
   final ValueChanged<Receipt>? onReceiptCreated;
 
@@ -35,6 +35,11 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
     this.onReceiptCreated,
   }) {
     _initFromReceipt();
+  }
+
+  void updateReceipt(Receipt newReceipt) {
+    receipt = newReceipt;
+    notifyListeners();
   }
 
   void _initFromReceipt() {

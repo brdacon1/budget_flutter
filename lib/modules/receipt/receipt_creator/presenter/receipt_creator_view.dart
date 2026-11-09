@@ -60,6 +60,15 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
   }
 
   @override
+  void didUpdateWidget(ReceiptCreatorView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.receipt.id != widget.receipt.id ||
+        oldWidget.receipt.valorTotal != widget.receipt.valorTotal) {
+      _viewModel.updateReceipt(widget.receipt);
+    }
+  }
+
+  @override
   void dispose() {
     _viewModel.dispose();
     super.dispose();

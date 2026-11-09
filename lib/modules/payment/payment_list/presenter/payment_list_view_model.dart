@@ -15,14 +15,13 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class PaymentListViewModel extends ChangeNotifier {
   final PaymentRepository _paymentRepository;
   final DisplayAlertRepository _displayAlert;
-  final LoadingEventRepository _loadingEvent;
   final ConvertCoinRepository _moneyConvert;
   late final Command1<void, int> deletePaymentCommand = Command1(
     _deletePayment,
   );
 
   final CustomerInfo item;
-  final Receipt receipt;
+  Receipt receipt;
 
   List<PaymentCustomer> foundPayment = <PaymentCustomer>[];
   double totalPaid = 0;
@@ -37,8 +36,6 @@ class PaymentListViewModel extends ChangeNotifier {
   }) : _paymentRepository = paymentRepository ?? getIt<PaymentRepository>(),
        _displayAlert =
            displayAlertRepository ?? getIt<DisplayAlertRepository>(),
-       _loadingEvent =
-           loadingEventRepository ?? getIt<LoadingEventRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
 
   ConvertCoinRepository get moneyConvert => _moneyConvert;
@@ -54,6 +51,7 @@ class PaymentListViewModel extends ChangeNotifier {
       foundPayment = result.value;
     }
     _calcTotal();
+    receipt = receipt.copyWith(valorTotal: totalPaid);
     notifyListeners();
   }
 
@@ -66,8 +64,7 @@ class PaymentListViewModel extends ChangeNotifier {
   Future<Result<void>> _deletePayment(int index) async {
     try {
       await _paymentRepository.deletePayment(foundPayment[index].id!);
-
-      notifyListeners();
+      await inicialData(forceRefresh: true);
       return Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));

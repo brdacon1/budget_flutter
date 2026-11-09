@@ -118,7 +118,7 @@ class _ReceiptListView extends State<ReceiptListView> {
             ),
       ),
     );
-    await _viewModel.inicialData();
+    await _viewModel.refresh();
   }
 
   Widget _buildListReceipt() {

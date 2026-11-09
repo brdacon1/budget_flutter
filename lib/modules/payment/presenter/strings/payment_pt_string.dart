@@ -85,4 +85,7 @@ class PaymentStrings {
 
   static String paymentMethodLabel(String method) =>
       _isPt ? 'Método do pagamento: $method' : 'Payment method: $method';
+
+  static String get emptyPaymentsMessage =>
+      _isPt ? 'Você ainda não adicionou pagamentos' : 'No payments added yet';
 }

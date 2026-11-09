@@ -67,7 +67,11 @@ class _ReceiptTabView extends State<ReceiptTabView> {
                 onReceiptCreated: _viewModel.updateReceipt,
               );
             case 1:
-              return PaymentListView(item: widget.item, receipt: receipt);
+              return PaymentListView(
+                item: widget.item,
+                receipt: receipt,
+                onReceiptUpdated: _viewModel.updateReceipt,
+              );
             case 2:
               return PdfReceiptView(item: widget.item, receipt: receipt);
             default:

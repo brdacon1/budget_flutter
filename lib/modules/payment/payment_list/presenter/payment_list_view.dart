@@ -15,8 +15,14 @@ import 'payment_list_view_model.dart';
 class PaymentListView extends StatefulWidget {
   final CustomerInfo item;
   final Receipt receipt;
+  final void Function(Receipt)? onReceiptUpdated;
 
-  const PaymentListView({super.key, required this.item, required this.receipt});
+  const PaymentListView({
+    super.key,
+    required this.item,
+    required this.receipt,
+    this.onReceiptUpdated,
+  });
 
   @override
   State<PaymentListView> createState() => _PaymentListView();
@@ -36,9 +42,7 @@ class _PaymentListView extends State<PaymentListView> {
       receipt: widget.receipt,
     );
     _viewModel.deletePaymentCommand.addListener(_deletePaymentCommandChanged);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _viewModel.inicialData(),
-    );
+    _viewModel.inicialData();
   }
 
   @override
@@ -72,6 +76,7 @@ class _PaymentListView extends State<PaymentListView> {
         primaryText: PaymentStrings.doneTitle,
         message: PaymentStrings.paymentRemoved,
       );
+      widget.onReceiptUpdated?.call(_viewModel.receipt);
     }
   }
 
@@ -109,6 +114,21 @@ class _PaymentListView extends State<PaymentListView> {
   }
 
   Widget _buildListView() {
+    if (_viewModel.foundPayment.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              PaymentStrings.emptyPaymentsMessage,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: RefreshIndicator(
         color: Colors.cyan[50],
@@ -128,7 +148,10 @@ class _PaymentListView extends State<PaymentListView> {
               item: _viewModel.foundPayment[index],
               moneyConvert: _viewModel.moneyConvert,
               onDelete: () => _viewModel.deletePaymentCommand.execute(index),
-              onEdit: () => _viewModel.editPayment(context, index),
+              onEdit: () async {
+                await _viewModel.editPayment(context, index);
+                if (mounted) widget.onReceiptUpdated?.call(_viewModel.receipt);
+              },
             );
           },
         ),
@@ -158,7 +181,10 @@ class _PaymentListView extends State<PaymentListView> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: buttonColor,
-        onPressed: () => _viewModel.addPayment(context),
+        onPressed: () async {
+          await _viewModel.addPayment(context);
+          if (mounted) widget.onReceiptUpdated?.call(_viewModel.receipt);
+        },
         child: const Icon(Icons.add, color: Colors.black),
       ),
       bottomNavigationBar: AnimatedBuilder(

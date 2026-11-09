@@ -21,16 +21,18 @@ class ReceiptListViewModel extends ChangeNotifier {
 
   ReceiptListViewModel({required this.item});
 
-  Future<void> inicialData() async {
+  Future<void> inicialData({bool forceRefresh = false}) async {
     _receiptRepository.budgetId = item.id;
-    final result = await _receiptRepository.fetchReceipts();
+    final result = await _receiptRepository.fetchReceipts(
+      forceRefresh: forceRefresh,
+    );
     if (result is Ok<List<Receipt>>) {
       foundPayment = result.value;
     }
     notifyListeners();
   }
 
-  Future<void> refresh() => inicialData();
+  Future<void> refresh() => inicialData(forceRefresh: true);
 
   Future<Result<void>> _deleteReceipt(int index) async {
     try {
