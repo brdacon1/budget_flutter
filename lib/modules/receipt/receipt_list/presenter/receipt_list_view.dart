@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
+import 'package:oflite/modules/receipt/receipt_tab/presenter/receipt_tab_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
@@ -33,11 +38,15 @@ class ReceiptListView extends StatefulWidget {
 
 class _ReceiptListView extends State<ReceiptListView> {
   late final ReceiptListViewModel _viewModel;
+  final LoadingEventRepository alertDisplayLoading =
+      getIt<LoadingEventRepository>();
+  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
     super.initState();
     _viewModel = ReceiptListViewModel(item: widget.item);
+    _viewModel.deleteReceiptCommand.addListener(_onSaveCommandChanged);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _viewModel.inicialData(),
     );
@@ -47,6 +56,68 @@ class _ReceiptListView extends State<ReceiptListView> {
   void dispose() {
     _viewModel.dispose();
     super.dispose();
+  }
+
+  Future<void> _onSaveCommandChanged() async {
+    if (_viewModel.deleteReceiptCommand.running) {
+      await _openLoad(isOpen: true);
+    }
+
+    if (_viewModel.deleteReceiptCommand.error) {
+      await _openLoad(isOpen: false);
+
+      await _notification(
+        isSuccess: false,
+        primaryText: ReceiptPtString.doneTitle,
+        message: ReceiptPtString.deleteSuccess,
+      );
+      await _viewModel.inicialData();
+    } else if (_viewModel.deleteReceiptCommand.completed) {
+      await _openLoad(isOpen: false);
+      await _notification(
+        isSuccess: false,
+        primaryText: ReceiptPtString.errorTitle,
+        message: ReceiptPtString.deleteError,
+      );
+    }
+  }
+
+  Future<void> _notification({
+    required bool isSuccess,
+    required String primaryText,
+    required String message,
+  }) async {
+    if (context.mounted) {
+      if (isSuccess) {
+        await displayAlert.notification(context, primaryText, message);
+      } else {
+        await displayAlert.notificationError(context, primaryText, message);
+      }
+    }
+  }
+
+  Future<void> _openLoad({required bool isOpen}) async {
+    if (context.mounted) {
+      if (isOpen) {
+        await alertDisplayLoading.alertLoading(context);
+      } else {
+        alertDisplayLoading.closeLoading(context);
+      }
+    }
+  }
+
+  Future<void> _openReceipt(int index) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ReceiptTabView(
+              item: _viewModel.item,
+              receipt: _viewModel.foundPayment[index],
+            ),
+      ),
+    );
+    await _viewModel.inicialData();
   }
 
   Widget _buildListReceipt() {
@@ -74,8 +145,8 @@ class _ReceiptListView extends State<ReceiptListView> {
             return ReceiptCard(
               item: _viewModel.foundPayment[index],
               moneyConvert: _viewModel.moneyConvert,
-              onDelete: () => _viewModel.deleteReceipt(context, index),
-              onOpen: () => _viewModel.openReceipt(context, index),
+              onDelete: () => _viewModel.deleteReceiptCommand.execute(index),
+              onOpen: () => _openReceipt(index),
             );
           },
         ),
