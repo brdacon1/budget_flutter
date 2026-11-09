@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
+import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -247,6 +248,50 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Widget _buildListView() {
+    final data = _viewModel.getFilteredData();
+    final isEmpty = data.isEmpty &&
+        !_viewModel.isRefreshing &&
+        !_viewModel.isLoadingMore;
+
+    if (isEmpty) {
+      return Expanded(
+        child: RefreshIndicator(
+          color: Colors.cyan[50],
+          backgroundColor: bgColor,
+          onRefresh: () async {
+            await _viewModel.getInformationOrcamento(refresh: true);
+            _viewModel.clearDeleteItens();
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+              Center(
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.folder_open_outlined,
+                      color: Colors.white54,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      BudgetStrings.emptyStateTitle,
+                      style: GoogleFonts.heebo(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: RefreshIndicator(
         color: Colors.cyan[50],
@@ -265,10 +310,10 @@ class _BudgetListView extends State<BudgetListView> {
             top: 0,
           ),
           itemCount:
-              _viewModel.getFilteredData().length +
+              data.length +
               (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index >= _viewModel.getFilteredData().length) {
+            if (index >= data.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
@@ -283,7 +328,7 @@ class _BudgetListView extends State<BudgetListView> {
                 ),
               );
             }
-            final item = _viewModel.getFilteredData()[index];
+            final item = data[index];
             return BudgetListCard(
               item: item,
               moneyConvert: moneyConvert,

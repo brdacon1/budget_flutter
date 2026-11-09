@@ -37,6 +37,8 @@ class BudgetListViewModel extends ChangeNotifier {
     }
   }
 
+  bool get isRefreshing => _isRefreshing;
+
   bool get isLoadingMore => _budgetRepository.isLoadingMoreBudgets;
   bool get hasMoreBudgets => _budgetRepository.hasMoreBudgets;
 
