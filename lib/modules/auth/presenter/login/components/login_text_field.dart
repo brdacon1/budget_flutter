@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/login/presenter/login/login_view_model.dart';
+import 'package:oflite/modules/auth/presenter/login/login_view_model.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 

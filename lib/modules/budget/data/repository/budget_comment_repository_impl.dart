@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_comment_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class BudgetCommentRepositoryImpl extends BudgetCommentRepository {

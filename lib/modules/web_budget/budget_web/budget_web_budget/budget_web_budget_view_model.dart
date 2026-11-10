@@ -8,7 +8,7 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/login/presenter/login/components/login_button.dart';
-import 'package:oflite/modules/login/presenter/login/components/login_footer.dart';
-import 'package:oflite/modules/login/presenter/login/components/login_header.dart';
-import 'package:oflite/modules/login/presenter/login/components/login_text_field.dart';
-import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/modules/login/presenter/singup/singup_view.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_button.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_footer.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_header.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_text_field.dart';
+import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
+import 'package:oflite/modules/auth/presenter/singup/singup_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 import '../../../terms_conditions/presenter/terms_conditions_view.dart';

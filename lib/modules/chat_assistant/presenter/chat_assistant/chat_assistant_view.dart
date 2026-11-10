@@ -9,8 +9,8 @@ import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/pdf_edit_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';

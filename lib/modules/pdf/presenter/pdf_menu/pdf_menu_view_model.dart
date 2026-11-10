@@ -5,7 +5,7 @@ import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comme
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';

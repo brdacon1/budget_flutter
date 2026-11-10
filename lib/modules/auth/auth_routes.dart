@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+
 import 'presenter/login/login_view.dart';
 
-enum LoginRoute { login,  singup}
+enum AuthRoute { login, singup }
 
-extension LoginRouteExtension on LoginRoute {
+extension AuthRouteExtension on AuthRoute {
   String get path {
     switch (this) {
-      case LoginRoute.login:
+      case AuthRoute.login:
         return '/';
-      case LoginRoute.singup:
+      case AuthRoute.singup:
         return '/singup';
     }
   }
 }
 
 final Map<String, WidgetBuilder> loginRoutes = {
-  LoginRoute.login.path: (_) => const LoginView(),
+  AuthRoute.login.path: (_) => const LoginView(),
 };

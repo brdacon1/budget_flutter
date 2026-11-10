@@ -28,7 +28,7 @@ import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_s
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';

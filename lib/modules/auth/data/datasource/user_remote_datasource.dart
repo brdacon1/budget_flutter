@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:oflite/modules/login/data/model/info_user.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/info_user.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 
 class UserRemoteDataSource {
   final FirebaseFirestore _firestore;

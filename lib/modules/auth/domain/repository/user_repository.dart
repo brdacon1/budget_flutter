@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:oflite/modules/login/data/model/info_user.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/info_user.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 abstract class UserRepository extends ChangeNotifier {

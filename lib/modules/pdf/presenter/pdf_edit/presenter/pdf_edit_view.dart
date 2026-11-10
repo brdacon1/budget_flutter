@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 import 'components/pdf_edit_address_card.dart';

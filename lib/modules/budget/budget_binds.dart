@@ -5,7 +5,7 @@ import 'package:oflite/modules/budget/data/repository/budget_comment_repository_
 import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 
 import 'presenter/budget_list/budget_list_view_model.dart';
 import 'presenter/budget_tab/budget_tab_view_model.dart';

@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:oflite/modules/auth/auth_binds.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
 import 'package:oflite/modules/chat_assistant/chat_assistant_binds.dart';
 import 'package:oflite/modules/core/ads/ads_binds.dart';
@@ -12,7 +13,6 @@ import 'package:oflite/modules/core/share_link/share_link_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
 import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
-import 'package:oflite/modules/login/login_binds.dart';
 import 'package:oflite/modules/main_config_menu/main_config_menu_binds.dart';
 import 'package:oflite/modules/main_tab/main_tab_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
@@ -57,7 +57,7 @@ void setupDependencyInjection() {
   registerReceiptDependencies(getIt);
   registerProductDependencies(getIt);
   registerPdfDependencies(getIt);
-  registerLoginDependencies(getIt);
+  registerAuthDependencies(getIt);
   registerChatBudgetDependencies(getIt);
 
   // ViewModels e binds de módulos que antes não tinham registro estruturado

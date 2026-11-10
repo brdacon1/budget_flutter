@@ -1,16 +1,18 @@
-import 'package:oflite/injection.dart';
 import 'dart:core';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
-import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:provider/provider.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+
 import 'app_routes.dart';
 import 'shared/common/constants/constants.dart';
 
@@ -35,7 +37,8 @@ Future<void> main() async {
   if (!kIsWeb) {
     try {
       await GoogleSignIn.instance.initialize(
-        serverClientId: '157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com',
+        serverClientId:
+            '157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com',
       );
     } catch (e) {
       debugPrint('Erro na inicialização do GoogleSignIn: $e');
@@ -49,9 +52,7 @@ Future<void> main() async {
     await getIt<AdsRepository>().initialize();
 
     if (Environment.instance.environment == 'development') {
-      await getIt<AdsRepository>().setTestDevices(
-        _kTestDeviceIds,
-      );
+      await getIt<AdsRepository>().setTestDevices(_kTestDeviceIds);
     }
 
     await getIt<NotificationRepository>().initialize();
@@ -81,35 +82,35 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => MenuControllerApp(),
-        ),
+        ChangeNotifierProvider(create: (context) => MenuControllerApp()),
       ],
       child: AdaptiveTheme(
         light: ThemeData.light().copyWith(
           scaffoldBackgroundColor: creamColor,
-          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
-              .apply(bodyColor: Colors.black),
+          textTheme: GoogleFonts.poppinsTextTheme(
+            Theme.of(context).textTheme,
+          ).apply(bodyColor: Colors.black),
           canvasColor: snowColor,
         ),
         dark: ThemeData.dark().copyWith(
           scaffoldBackgroundColor: bgColor,
-          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
-              .apply(bodyColor: Colors.white),
+          textTheme: GoogleFonts.poppinsTextTheme(
+            Theme.of(context).textTheme,
+          ).apply(bodyColor: Colors.white),
           canvasColor: secondaryColor,
         ),
         initial: AdaptiveThemeMode.dark,
-        builder: (theme, darkTheme) => MaterialApp(
-          title: 'Orçamento de Vendas - PDF',
-          theme: theme,
-          darkTheme: darkTheme,
-          debugShowCheckedModeBanner: false,
-          navigatorKey: globalNavigatorKey,
-          initialRoute: AppRoute.login.path,
-          routes: appRoutes,
-        ),
+        builder:
+            (theme, darkTheme) => MaterialApp(
+              title: 'Orçamento de Vendas - PDF',
+              theme: theme,
+              darkTheme: darkTheme,
+              debugShowCheckedModeBanner: false,
+              navigatorKey: globalNavigatorKey,
+              initialRoute: AppRoute.auth.path,
+              routes: appRoutes,
+            ),
       ),
     );
   }
 }
-
