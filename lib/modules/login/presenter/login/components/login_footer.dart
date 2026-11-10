@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
 
 /// Rodapé do login com o atalho de **Política de privacidade**.
 ///

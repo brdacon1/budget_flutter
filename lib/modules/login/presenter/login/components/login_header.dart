@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
+import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class LoginHeader extends StatelessWidget {

@@ -9,8 +9,8 @@ import 'package:oflite/modules/core/notification/domain/repository/notification_
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/login/presenter/singup/strings/singup_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';

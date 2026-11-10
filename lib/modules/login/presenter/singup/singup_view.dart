@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/enums/singup_field_enum.dart';
-import 'package:oflite/modules/singup/presenter/strings/singup_pt_string.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
-import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
+import 'package:oflite/modules/login/presenter/singup/strings/singup_pt_string.dart';
+import 'package:oflite/shared/common/enums/singup_field_enum.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+
 import 'components/singup_field.dart';
 import 'components/singup_login_link.dart';
 import 'singup_view_model.dart';
@@ -94,7 +95,8 @@ class _SingUpViewState extends State<SingUpView> {
       // Captura a mensagem e consome o estado ANTES de qualquer chamada
       // que possa disparar novas notificações, para que o modal de erro
       // seja exibido apenas uma vez (one-shot).
-      final message = _viewModel.errorMessage ?? SingUpStrings.signUpErrorDefault;
+      final message =
+          _viewModel.errorMessage ?? SingUpStrings.signUpErrorDefault;
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -118,9 +120,10 @@ class _SingUpViewState extends State<SingUpView> {
 
         return AppBottomModal(
           title: SingUpStrings.signUpTitle,
-          buttonLabel: registering
-              ? SingUpStrings.signUpButtonLoading
-              : SingUpStrings.signUpButton,
+          buttonLabel:
+              registering
+                  ? SingUpStrings.signUpButtonLoading
+                  : SingUpStrings.signUpButton,
           onButtonPressed: registering ? () {} : _viewModel.register,
           child: SingleChildScrollView(
             child: Column(
@@ -150,8 +153,7 @@ class _SingUpViewState extends State<SingUpView> {
                   field: SingUpFieldType.password,
                   isPassword: true,
                   ispasswordev: _viewModel.ispasswordev,
-                  onTap: () =>
-                      _viewModel.selectField(SingUpFieldType.password),
+                  onTap: () => _viewModel.selectField(SingUpFieldType.password),
                   togglePassword: _viewModel.togglePasswordVisibility,
                 ),
                 SizedBox(height: he * 0.03),

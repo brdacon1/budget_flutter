@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/singup/presenter/singup_view.dart';
-import '../../terms_conditions/presenter/terms_conditions_view.dart';
-import 'components/login_button.dart';
-import 'components/login_footer.dart';
-import 'components/login_header.dart';
-import 'components/login_text_field.dart';
+import 'package:oflite/modules/login/presenter/login/components/login_button.dart';
+import 'package:oflite/modules/login/presenter/login/components/login_footer.dart';
+import 'package:oflite/modules/login/presenter/login/components/login_header.dart';
+import 'package:oflite/modules/login/presenter/login/components/login_text_field.dart';
+import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
+import 'package:oflite/modules/login/presenter/singup/singup_view.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+
+import '../../../terms_conditions/presenter/terms_conditions_view.dart';
 import 'login_view_model.dart';
 
 class LoginView extends StatefulWidget {
@@ -116,26 +117,32 @@ class _LoginViewState extends State<LoginView> {
                     height: he,
                     obscureText: _viewModel.isPasswordVisible,
                     suffixIcon: IconButton(
-                      icon: _viewModel.isPasswordVisible
-                          ? Icon(
-                              Icons.visibility_off,
-                              color: _viewModel.selectedField == LoginField.password
-                                  ? _viewModel.enabledtxt
-                                  : _viewModel.deaible,
-                            )
-                          : Icon(
-                              Icons.visibility,
-                              color: _viewModel.selectedField == LoginField.password
-                                  ? _viewModel.enabledtxt
-                                  : _viewModel.deaible,
-                            ),
+                      icon:
+                          _viewModel.isPasswordVisible
+                              ? Icon(
+                                Icons.visibility_off,
+                                color:
+                                    _viewModel.selectedField ==
+                                            LoginField.password
+                                        ? _viewModel.enabledtxt
+                                        : _viewModel.deaible,
+                              )
+                              : Icon(
+                                Icons.visibility,
+                                color:
+                                    _viewModel.selectedField ==
+                                            LoginField.password
+                                        ? _viewModel.enabledtxt
+                                        : _viewModel.deaible,
+                              ),
                       onPressed: _viewModel.togglePasswordVisibility,
                     ),
                   ),
                   SizedBox(height: he * 0.02),
                   LoginButton(
                     label: LoginStrings.loginButton,
-                    onPressed: () => _viewModel.loginWithEmailAndPassword(context),
+                    onPressed:
+                        () => _viewModel.loginWithEmailAndPassword(context),
                   ),
                   SizedBox(height: he * 0.015),
                   // Botão de cadastro em destaque: abre o modal de cadastro
@@ -143,8 +150,9 @@ class _LoginViewState extends State<LoginView> {
                   LoginButton(
                     label: LoginStrings.loginRegisterButton,
                     onPressed: () {
-                      showSingUpBottomModal(context)
-                          .then((_) => _viewModel.init());
+                      showSingUpBottomModal(
+                        context,
+                      ).then((_) => _viewModel.init());
                     },
                     backgroundColor: Colors.white,
                     textColor: bgColor,
@@ -152,7 +160,8 @@ class _LoginViewState extends State<LoginView> {
                   SizedBox(height: he * 0.01),
                   LoginButton(
                     label: LoginStrings.loginForgotPassword,
-                    onPressed: () => _displayAlert.dialogChangePassword(context),
+                    onPressed:
+                        () => _displayAlert.dialogChangePassword(context),
                     backgroundColor: bgColor,
                     textColor: buttonColor,
                     fontSize: 14.0,

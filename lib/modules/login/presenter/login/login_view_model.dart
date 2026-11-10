@@ -11,7 +11,7 @@ import 'package:oflite/modules/core/notification/domain/repository/notification_
 import 'package:oflite/modules/login/data/model/info_user.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/modules/login/presenter/strings/login_pt_string.dart';
+import 'package:oflite/modules/login/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
