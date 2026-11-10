@@ -13,8 +13,9 @@ import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_genera
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
-import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
-import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
+
+import 'presenter/pdf_budget/pdf_budget_view_model.dart';
+import 'presenter/pdf_edit/presenter/pdf_edit_view_model.dart';
 
 /// Registra as dependências do módulo PDF.
 void registerPdfDependencies(GetIt sl) {

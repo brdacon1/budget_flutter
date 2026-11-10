@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'pdf_budget/presenter/pdf_budget_view.dart';
-import 'pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/pdf_edit_view.dart';
 
-enum PdfRoute {
-  pdfConfig,
-  pdfBudget,
-  pdfEdit,
-  pdfReceipt,
-  pdfMenu,
-}
+import 'presenter/pdf_budget/pdf_budget_view.dart';
+
+enum PdfRoute { pdfConfig, pdfBudget, pdfEdit, pdfReceipt, pdfMenu }
 
 extension PdfRouteExtension on PdfRoute {
   String get path {

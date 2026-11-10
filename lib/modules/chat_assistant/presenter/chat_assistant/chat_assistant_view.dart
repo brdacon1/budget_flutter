@@ -12,11 +12,11 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
-import 'package:oflite/modules/pdf/pdf_model_select/presenter/pdf_model_select_view.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
-import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';
+import 'package:oflite/modules/product/data/model/product_price_model.dart';
+import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
+import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 

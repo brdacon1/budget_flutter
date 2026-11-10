@@ -6,9 +6,9 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
-import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
+import 'package:oflite/modules/product/data/model/product_price_model.dart';
+import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
+import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
 import 'budget_list_items_view_model.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'product_price_list/presenter/product_price_list_view.dart';
+
+import 'presenter/product_price_list/product_price_list_view.dart';
 
 enum ProductRoute { productPriceList, productPriceCreator }
 
