@@ -1,29 +1,29 @@
 import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
-import 'package:oflite/modules/receipt/data/datasource/budget_payment_remote_datasource.dart';
+import 'package:oflite/modules/receipt/data/datasource/receipt_payment_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
-import 'package:oflite/modules/receipt/data/repository/budget_payment_repository_impl.dart';
+import 'package:oflite/modules/receipt/data/repository/receipt_payment_repository_impl.dart';
 import 'package:oflite/modules/receipt/data/repository/receipt_repository_impl.dart';
-import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 
 void registerReceiptDependencies(GetIt sl) {
-  sl.registerLazySingleton<ReceiptRemoteDataSource>(
-    () => ReceiptRemoteDataSource(),
+  sl.registerLazySingleton<ReceiptRemoteDatasource>(
+    () => ReceiptRemoteDatasource(),
   );
   sl.registerLazySingleton<ReceiptRepository>(
     () => ReceiptRepositoryImpl(
-      sl<ReceiptRemoteDataSource>(),
+      sl<ReceiptRemoteDatasource>(),
       sl<UserRepository>(),
     ),
   );
-  sl.registerLazySingleton<BudgetPaymentRemoteDatasource>(
-    () => BudgetPaymentRemoteDatasource(),
+  sl.registerLazySingleton<ReceiptPaymentRemoteDatasource>(
+    () => ReceiptPaymentRemoteDatasource(),
   );
-  sl.registerLazySingleton<BudgetPaymentRepository>(
+  sl.registerLazySingleton<ReceiptPaymentRepository>(
     () => BudgetPaymentRepositoryImpl(
-      sl<BudgetPaymentRemoteDatasource>(),
-      sl<ReceiptRemoteDataSource>(),
+      sl<ReceiptPaymentRemoteDatasource>(),
+      sl<ReceiptRemoteDatasource>(),
       sl<UserRepository>(),
     ),
   );

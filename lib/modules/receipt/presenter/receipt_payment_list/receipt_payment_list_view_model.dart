@@ -6,14 +6,14 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
-import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/receipt_payment_creator_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptPaymentListViewModel extends ChangeNotifier {
-  final BudgetPaymentRepository _paymentRepository;
+  final ReceiptPaymentRepository _paymentRepository;
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
   late final Command1<void, int> deletePaymentCommand = Command1(
@@ -29,12 +29,12 @@ class ReceiptPaymentListViewModel extends ChangeNotifier {
   ReceiptPaymentListViewModel({
     required this.item,
     required this.receipt,
-    BudgetPaymentRepository? paymentRepository,
+    ReceiptPaymentRepository? paymentRepository,
     DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
     ConvertCoinRepository? convertCoinRepository,
   }) : _paymentRepository =
-           paymentRepository ?? getIt<BudgetPaymentRepository>(),
+           paymentRepository ?? getIt<ReceiptPaymentRepository>(),
        _displayAlert =
            displayAlertRepository ?? getIt<DisplayAlertRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();

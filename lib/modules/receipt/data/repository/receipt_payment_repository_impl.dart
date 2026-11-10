@@ -1,14 +1,14 @@
-import 'package:oflite/modules/receipt/data/datasource/budget_payment_remote_datasource.dart';
-import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
-import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/receipt/data/datasource/receipt_payment_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-class BudgetPaymentRepositoryImpl extends BudgetPaymentRepository {
-  final BudgetPaymentRemoteDatasource _remote;
-  final ReceiptRemoteDataSource _receiptRemote;
+class BudgetPaymentRepositoryImpl extends ReceiptPaymentRepository {
+  final ReceiptPaymentRemoteDatasource _remote;
+  final ReceiptRemoteDatasource _receiptRemote;
   final UserRepository _userRepository;
 
   BudgetPaymentRepositoryImpl(

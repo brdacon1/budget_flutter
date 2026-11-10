@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
-import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
@@ -12,7 +12,7 @@ import 'package:oflite/shared/design_pattern/result.dart';
 enum Gender { descricaoText, precoText, typeText }
 
 class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
-  final BudgetPaymentRepository _paymentRepository;
+  final ReceiptPaymentRepository _paymentRepository;
   final ConvertCoinRepository _moneyConvert;
 
   late final Command0<void> saveCommand;
@@ -31,10 +31,10 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
 
   ReceiptPaymentCreatorViewModel({
     required PaymentCustomer item,
-    BudgetPaymentRepository? paymentRepository,
+    ReceiptPaymentRepository? paymentRepository,
     ConvertCoinRepository? convertCoinRepository,
   }) : _paymentRepository =
-           paymentRepository ?? getIt<BudgetPaymentRepository>(),
+           paymentRepository ?? getIt<ReceiptPaymentRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>() {
     _initFromItem(item);
     saveCommand = Command0(_executeSave);

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
-import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -10,13 +8,15 @@ import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PdfReceiptViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
-  final BudgetPaymentRepository _paymentRepository;
+  final ReceiptPaymentRepository _paymentRepository;
   final ConvertCoinRepository _moneyConvert;
   final PdfGenerateReceiptUseCase _pdfGenerateReceiptUseCase;
   final PdfGenerateReceiptExecutiveUsecase _pdfGenerateReceiptExecutive;
@@ -40,14 +40,14 @@ class PdfReceiptViewModel extends ChangeNotifier {
     required this.receipt,
     required this.item,
     PdfRepository? pdfRepository,
-    BudgetPaymentRepository? paymentRepository,
+    ReceiptPaymentRepository? paymentRepository,
     ConvertCoinRepository? convertCoinRepository,
     PdfGenerateReceiptUseCase? pdfGenerateReceiptUseCase,
     PdfGenerateReceiptExecutiveUsecase? pdfGenerateReceiptExecutive,
     PdfGenerateReceiptProfessionalUsecase? pdfGenerateReceiptProfessional,
   }) : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
        _paymentRepository =
-           paymentRepository ?? getIt<BudgetPaymentRepository>(),
+           paymentRepository ?? getIt<ReceiptPaymentRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
        _pdfGenerateReceiptUseCase =
            pdfGenerateReceiptUseCase ?? getIt<PdfGenerateReceiptUseCase>(),

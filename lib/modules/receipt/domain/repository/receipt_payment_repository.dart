@@ -3,7 +3,7 @@ import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-abstract class BudgetPaymentRepository extends ChangeNotifier {
+abstract class ReceiptPaymentRepository extends ChangeNotifier {
   List<PaymentCustomer> get payments;
 
   double get totalPaid;

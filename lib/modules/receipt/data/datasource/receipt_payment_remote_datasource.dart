@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class BudgetPaymentRemoteDatasource {
+class ReceiptPaymentRemoteDatasource {
   final FirebaseFirestore _firestore;
 
-  BudgetPaymentRemoteDatasource({FirebaseFirestore? firestore})
+  ReceiptPaymentRemoteDatasource({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference _paymentsCollection(
