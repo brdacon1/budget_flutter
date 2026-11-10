@@ -1,7 +1,7 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
-import 'package:oflite/modules/budget/presenter/comment_budget_list/strings/comment_pt_string.dart';
+import 'package:oflite/modules/budget/presenter/budget_comment_list/strings/comment_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 

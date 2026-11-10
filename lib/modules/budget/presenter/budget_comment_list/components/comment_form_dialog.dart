@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
-import 'package:oflite/modules/budget/presenter/comment_budget_list/strings/comment_pt_string.dart';
+import 'package:oflite/modules/budget/presenter/budget_comment_list/strings/comment_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
-import '../comment_list_view_model.dart';
+import '../budget_comment_list_view_model.dart';
 
 /// Exibe o bottom modal de adicionar/editar comentário.
 ///
@@ -15,7 +15,7 @@ import '../comment_list_view_model.dart';
 /// botão no padrão dos botões. Acompanha o teclado.
 Future<bool?> showCommentFormDialog({
   required BuildContext context,
-  required CommentListViewModel viewModel,
+  required BudgetCommentListViewModel viewModel,
   required ObservationBudget comment,
   required DisplayAlertRepository displayAlert,
 }) {
@@ -56,7 +56,7 @@ class _CommentFormModal extends StatefulWidget {
   final String buttonLabel;
   final bool isNew;
   final ObservationBudget comment;
-  final CommentListViewModel viewModel;
+  final BudgetCommentListViewModel viewModel;
   final DisplayAlertRepository displayAlert;
 
   @override

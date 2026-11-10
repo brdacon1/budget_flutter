@@ -6,27 +6,27 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
-import 'comment_list_view_model.dart';
+import 'budget_comment_list_view_model.dart';
 import 'components/comment_form_dialog.dart';
 import 'components/comment_list_item.dart';
 
-class CommentListView extends StatefulWidget {
+class BudgetCommentListView extends StatefulWidget {
   final CustomerInfo item;
 
-  const CommentListView({super.key, required this.item});
+  const BudgetCommentListView({super.key, required this.item});
 
   @override
-  State<CommentListView> createState() => _CommentListView();
+  State<BudgetCommentListView> createState() => _BudgetCommentListView();
 }
 
-class _CommentListView extends State<CommentListView> {
-  late CommentListViewModel _viewModel;
+class _BudgetCommentListView extends State<BudgetCommentListView> {
+  late BudgetCommentListViewModel _viewModel;
   final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = CommentListViewModel(item: widget.item);
+    _viewModel = BudgetCommentListViewModel(item: widget.item);
     _viewModel.addListener(_onViewModelChanged);
     _initData();
   }

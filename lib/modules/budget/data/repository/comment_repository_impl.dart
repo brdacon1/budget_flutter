@@ -1,12 +1,12 @@
 import 'package:intl/intl.dart';
+import 'package:oflite/modules/budget/data/datasource/budget_comment_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
-import 'package:oflite/modules/budget/data/datasource/comment_remote_datasource.dart';
 import 'package:oflite/modules/budget/domain/repository/comment_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class CommentRepositoryImpl extends CommentRepository {
-  final CommentRemoteDataSource _remote;
+  final BudgetCommentRemoteDatasource _remote;
   final UserRepository _userRepository;
 
   CommentRepositoryImpl(this._remote, this._userRepository);

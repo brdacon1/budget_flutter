@@ -6,10 +6,10 @@ import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/comment_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-class CommentListViewModel extends ChangeNotifier {
+class BudgetCommentListViewModel extends ChangeNotifier {
   final CommentRepository _commentRepository = getIt<CommentRepository>();
 
-  CommentListViewModel({required this.item});
+  BudgetCommentListViewModel({required this.item});
 
   final CustomerInfo item;
 
