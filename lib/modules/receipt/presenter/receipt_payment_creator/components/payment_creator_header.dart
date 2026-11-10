@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class PaymentCreatorHeader extends StatelessWidget {

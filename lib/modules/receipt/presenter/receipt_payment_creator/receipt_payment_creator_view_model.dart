@@ -1,24 +1,22 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/data/model/payment_customer.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_payment_repository.dart';
-import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender { descricaoText, precoText, typeText }
 
-class BudgetPaymentCreatorViewModel extends ChangeNotifier {
+class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
   final BudgetPaymentRepository _paymentRepository;
   final ConvertCoinRepository _moneyConvert;
 
   late final Command0<void> saveCommand;
 
-  Color enabledtxt = Colors.white;
-  Color deaible = Colors.white;
   Gender? selected;
   String? nameButton;
   String? titlePage;
@@ -31,7 +29,7 @@ class BudgetPaymentCreatorViewModel extends ChangeNotifier {
     leftSymbol: 'R\$ ',
   );
 
-  BudgetPaymentCreatorViewModel({
+  ReceiptPaymentCreatorViewModel({
     required PaymentCustomer item,
     BudgetPaymentRepository? paymentRepository,
     ConvertCoinRepository? convertCoinRepository,

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 
-import '../budget_payment_creator_view_model.dart';
+import '../receipt_payment_creator_view_model.dart';
 
 class PaymentSaveButton extends StatelessWidget {
-  final BudgetPaymentCreatorViewModel viewModel;
+  final ReceiptPaymentCreatorViewModel viewModel;
   final VoidCallback onPressed;
 
   const PaymentSaveButton({

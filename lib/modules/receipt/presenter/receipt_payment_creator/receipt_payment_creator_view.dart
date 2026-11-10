@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/modules/budget/data/model/payment_customer.dart';
-import 'package:oflite/modules/budget/presenter/budget_payment_creator/budget_payment_creator_view_model.dart';
-import 'package:oflite/modules/budget/presenter/budget_payment_creator/components/payment_creator_field.dart';
-import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/components/payment_creator_field.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/receipt_payment_creator_view_model.dart';
+import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Modal inferior de criação/edição de pagamento.
@@ -22,23 +22,23 @@ import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart
 ///   inteiro.
 /// - Abertura/fechamento do modal fica por conta de quem chama
 ///   (`showPaymentCreatorBottomModal`), mantendo a navegação desacoplada.
-class BudgetPaymentCreatorView extends StatefulWidget {
+class ReceiptPaymentCreatorView extends StatefulWidget {
   final PaymentCustomer item;
 
-  const BudgetPaymentCreatorView({super.key, required this.item});
+  const ReceiptPaymentCreatorView({super.key, required this.item});
 
   @override
-  State<BudgetPaymentCreatorView> createState() =>
-      _BudgetPaymentCreatorViewState();
+  State<ReceiptPaymentCreatorView> createState() =>
+      _ReceiptPaymentCreatorViewState();
 }
 
-class _BudgetPaymentCreatorViewState extends State<BudgetPaymentCreatorView> {
-  late final BudgetPaymentCreatorViewModel _viewModel;
+class _ReceiptPaymentCreatorViewState extends State<ReceiptPaymentCreatorView> {
+  late final ReceiptPaymentCreatorViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = BudgetPaymentCreatorViewModel(item: widget.item);
+    _viewModel = ReceiptPaymentCreatorViewModel(item: widget.item);
     _viewModel.saveCommand.addListener(_onSaveCommandChanged);
   }
 
@@ -137,6 +137,6 @@ Future<bool?> showPaymentCreatorBottomModal(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => BudgetPaymentCreatorView(item: item),
+    builder: (context) => ReceiptPaymentCreatorView(item: item),
   );
 }

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
-enum ReceiptRoute { receiptList, receiptCreator, receiptTab }
+enum ReceiptRoute {
+  receiptList,
+  receiptCreator,
+  receiptTab,
+  paymentList,
+  paymentCreator,
+}
 
 extension ReceiptRouteExtension on ReceiptRoute {
   String get path {
@@ -11,6 +17,10 @@ extension ReceiptRouteExtension on ReceiptRoute {
         return '/receipt/create';
       case ReceiptRoute.receiptTab:
         return '/receipt/tab';
+      case ReceiptRoute.paymentList:
+        return '/payment/list';
+      case ReceiptRoute.paymentCreator:
+        return '/payment/create';
     }
   }
 }

@@ -1,6 +1,6 @@
-import 'package:oflite/modules/budget/data/datasource/budget_payment_remote_datasource.dart';
-import 'package:oflite/modules/budget/data/model/payment_customer.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/data/datasource/budget_payment_remote_datasource.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
 import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';

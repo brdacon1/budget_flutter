@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:oflite/modules/budget/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 

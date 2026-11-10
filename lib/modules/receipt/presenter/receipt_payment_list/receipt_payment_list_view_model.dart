@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/budget/data/model/payment_customer.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_payment_repository.dart';
-import 'package:oflite/modules/budget/presenter/budget_payment_creator/budget_payment_creator_view.dart';
-import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/domain/repository/budget_payment_repository.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/receipt_payment_creator_view.dart';
+import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-class BudgetPaymentListViewModel extends ChangeNotifier {
+class ReceiptPaymentListViewModel extends ChangeNotifier {
   final BudgetPaymentRepository _paymentRepository;
   final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
@@ -26,7 +26,7 @@ class BudgetPaymentListViewModel extends ChangeNotifier {
   List<PaymentCustomer> foundPayment = <PaymentCustomer>[];
   double totalPaid = 0;
 
-  BudgetPaymentListViewModel({
+  ReceiptPaymentListViewModel({
     required this.item,
     required this.receipt,
     BudgetPaymentRepository? paymentRepository,

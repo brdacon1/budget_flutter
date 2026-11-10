@@ -1,14 +1,14 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
-import '../budget_payment_creator_view_model.dart';
+import '../receipt_payment_creator_view_model.dart';
 
 class PaymentDataForm extends StatelessWidget {
-  final BudgetPaymentCreatorViewModel viewModel;
+  final ReceiptPaymentCreatorViewModel viewModel;
 
   const PaymentDataForm({super.key, required this.viewModel});
 
@@ -68,28 +68,16 @@ class PaymentDataForm extends StatelessWidget {
                   decoration: InputDecoration(
                     enabledBorder: InputBorder.none,
                     border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.list_alt,
-                      color:
-                          viewModel.selected == Gender.typeText
-                              ? viewModel.enabledtxt
-                              : viewModel.deaible,
-                    ),
+                    prefixIcon: Icon(Icons.list_alt, color: Colors.white),
                     suffixIcon: Icon(
                       Icons.keyboard_arrow_down_outlined,
-                      color:
-                          viewModel.selected == Gender.precoText
-                              ? viewModel.enabledtxt
-                              : viewModel.deaible,
+                      color: Colors.white,
                     ),
                     hintText: PaymentStrings.paymentHint,
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(
-                    color:
-                        viewModel.selected == Gender.typeText
-                            ? viewModel.enabledtxt
-                            : viewModel.deaible,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -117,20 +105,14 @@ class PaymentDataForm extends StatelessWidget {
                     border: InputBorder.none,
                     prefixIcon: Icon(
                       Icons.price_change_outlined,
-                      color:
-                          viewModel.selected == Gender.precoText
-                              ? viewModel.enabledtxt
-                              : viewModel.deaible,
+                      color: Colors.white,
                     ),
                     hintText: PaymentStrings.priceHint,
                     hintStyle: const TextStyle(color: Colors.grey),
                   ),
                   keyboardType: TextInputType.number,
                   style: TextStyle(
-                    color:
-                        viewModel.selected == Gender.precoText
-                            ? viewModel.enabledtxt
-                            : viewModel.deaible,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -161,10 +143,7 @@ class PaymentDataForm extends StatelessWidget {
                     hintStyle: TextStyle(color: Colors.grey),
                   ),
                   style: TextStyle(
-                    color:
-                        viewModel.selected == Gender.descricaoText
-                            ? viewModel.enabledtxt
-                            : viewModel.deaible,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
