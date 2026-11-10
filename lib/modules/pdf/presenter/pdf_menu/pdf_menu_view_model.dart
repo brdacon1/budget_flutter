@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
+import 'package:oflite/modules/budget/presenter/comment_budget_list/comment_list_view.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';

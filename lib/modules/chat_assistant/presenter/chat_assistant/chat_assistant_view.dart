@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
+import 'package:oflite/modules/budget/presenter/comment_budget_list/comment_list_view.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
-import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/login/data/model/owner_pdf.dart';

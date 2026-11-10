@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
+import 'package:oflite/modules/budget/presenter/comment_budget_list/strings/comment_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/comment/presenter/strings/comment_pt_string.dart';
+import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+
 import '../comment_list_view_model.dart';
 
 /// Exibe o bottom modal de adicionar/editar comentário.
@@ -22,20 +23,22 @@ Future<bool?> showCommentFormDialog({
   descricaoController.text = comment.observacao ?? '';
 
   final bool isNew = comment.id == null || comment.id!.isEmpty;
-  final String textButtonName = isNew ? CommentStrings.addButton : CommentStrings.updateButton;
+  final String textButtonName =
+      isNew ? CommentStrings.addButton : CommentStrings.updateButton;
 
   return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => _CommentFormModal(
-      descricaoController: descricaoController,
-      buttonLabel: textButtonName,
-      isNew: isNew,
-      comment: comment,
-      viewModel: viewModel,
-      displayAlert: displayAlert,
-    ),
+    builder:
+        (context) => _CommentFormModal(
+          descricaoController: descricaoController,
+          buttonLabel: textButtonName,
+          isNew: isNew,
+          comment: comment,
+          viewModel: viewModel,
+          displayAlert: displayAlert,
+        ),
   );
 }
 
@@ -74,17 +77,25 @@ class _CommentFormModalState extends State<_CommentFormModal> {
     setState(() => _submitting = true);
     bool success;
     if (widget.isNew) {
-      success = await widget.viewModel.addComment(widget.descricaoController.text);
+      success = await widget.viewModel.addComment(
+        widget.descricaoController.text,
+      );
       if (success) {
         await widget.viewModel.loadComments();
         if (mounted) {
           await widget.displayAlert.notification(
-              context, CommentStrings.successTitle, CommentStrings.successAddMessage);
+            context,
+            CommentStrings.successTitle,
+            CommentStrings.successAddMessage,
+          );
         }
       } else {
         if (mounted) {
           await widget.displayAlert.notificationError(
-              context, CommentStrings.errorTitle, CommentStrings.errorAddMessage);
+            context,
+            CommentStrings.errorTitle,
+            CommentStrings.errorAddMessage,
+          );
         }
       }
     } else {
@@ -93,12 +104,18 @@ class _CommentFormModalState extends State<_CommentFormModal> {
       if (success) {
         if (mounted) {
           await widget.displayAlert.notification(
-              context, CommentStrings.successTitle, CommentStrings.successUpdateMessage);
+            context,
+            CommentStrings.successTitle,
+            CommentStrings.successUpdateMessage,
+          );
         }
       } else {
         if (mounted) {
           await widget.displayAlert.notificationError(
-              context, CommentStrings.errorTitle, CommentStrings.errorUpdateMessage);
+            context,
+            CommentStrings.errorTitle,
+            CommentStrings.errorUpdateMessage,
+          );
         }
       }
     }
