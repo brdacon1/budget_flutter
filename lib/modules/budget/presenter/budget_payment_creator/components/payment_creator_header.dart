@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
-import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 
 class PaymentCreatorHeader extends StatelessWidget {
   final String? titlePage;
@@ -57,10 +57,7 @@ class PaymentCreatorHeader extends StatelessWidget {
             margin: EdgeInsets.only(left: we * 0.05),
             child: Text(
               PaymentStrings.paymentDataTitle,
-              style: GoogleFonts.heebo(
-                color: Colors.grey,
-                letterSpacing: 1,
-              ),
+              style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
             ),
           ),
         ),

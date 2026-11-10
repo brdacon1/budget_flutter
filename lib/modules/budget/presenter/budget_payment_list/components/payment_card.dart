@@ -1,8 +1,8 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
+import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/payment/data/model/payment_customer.dart';
-import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/modules/budget/data/model/payment_customer.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 

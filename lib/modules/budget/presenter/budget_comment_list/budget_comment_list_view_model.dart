@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
-import 'package:oflite/modules/budget/domain/repository/comment_repository.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class BudgetCommentListViewModel extends ChangeNotifier {
-  final CommentRepository _commentRepository = getIt<CommentRepository>();
+  final BudgetCommentRepository _commentRepository =
+      getIt<BudgetCommentRepository>();
 
   BudgetCommentListViewModel({required this.item});
 

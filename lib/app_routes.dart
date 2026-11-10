@@ -7,7 +7,6 @@ import 'modules/image/image_routes.dart';
 import 'modules/login/login_routes.dart';
 import 'modules/main_config_menu/main_config_menu_routes.dart';
 import 'modules/main_tab/main_tab_routes.dart';
-import 'modules/payment/payment_routes.dart';
 import 'modules/pdf/pdf_routes.dart';
 import 'modules/product/product_routes.dart';
 import 'modules/receipt/receipt_routes.dart';
@@ -28,7 +27,6 @@ enum AppRoute {
   pdfConfig,
   termsConditions,
   chatAssistant,
-  paymentCreator,
   productPriceList,
   singup,
   webBudgetApp,
@@ -53,8 +51,6 @@ extension AppRouteExtension on AppRoute {
         return TermsConditionsRoute.termsConditions.path;
       case AppRoute.chatAssistant:
         return ChatBudgetRoute.chatAssistant.path;
-      case AppRoute.paymentCreator:
-        return PaymentRoute.paymentCreator.path;
       case AppRoute.productPriceList:
         return ProductRoute.productPriceList.path;
       case AppRoute.singup:
@@ -80,7 +76,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   ...termsConditionsRoutes,
   ...chatBudgetRoutes,
   ...imageRoutes,
-  ...paymentRoutes,
   ...productRoutes,
   ...receiptRoutes,
   ...singupRoutes,

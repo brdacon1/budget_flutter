@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_payment_list/budget_payment_list_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_payment_list/components/payment_card.dart';
+import 'package:oflite/modules/budget/presenter/budget_payment_list/components/payment_total_bar.dart';
+import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/payment/presenter/payment_list/components/payment_card.dart';
-import 'package:oflite/modules/payment/presenter/payment_list/components/payment_total_bar.dart';
-import 'package:oflite/modules/payment/presenter/payment_list/payment_list_view_model.dart';
-import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
-class PaymentListView extends StatefulWidget {
+class BudgetPaymentListView extends StatefulWidget {
   final CustomerInfo item;
   final Receipt receipt;
   final void Function(Receipt)? onReceiptUpdated;
 
-  const PaymentListView({
+  const BudgetPaymentListView({
     super.key,
     required this.item,
     required this.receipt,
@@ -24,11 +24,11 @@ class PaymentListView extends StatefulWidget {
   });
 
   @override
-  State<PaymentListView> createState() => _PaymentListView();
+  State<BudgetPaymentListView> createState() => _BudgetPaymentListViewState();
 }
 
-class _PaymentListView extends State<PaymentListView> {
-  late final PaymentListViewModel _viewModel;
+class _BudgetPaymentListViewState extends State<BudgetPaymentListView> {
+  late final BudgetPaymentListViewModel _viewModel;
   final LoadingEventRepository alertDisplayLoading =
       getIt<LoadingEventRepository>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
@@ -36,7 +36,7 @@ class _PaymentListView extends State<PaymentListView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = PaymentListViewModel(
+    _viewModel = BudgetPaymentListViewModel(
       item: widget.item,
       receipt: widget.receipt,
     );

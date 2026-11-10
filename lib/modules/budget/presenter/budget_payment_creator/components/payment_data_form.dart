@@ -1,14 +1,14 @@
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/payment/presenter/strings/payment_pt_string.dart';
+import 'package:oflite/modules/budget/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
-import '../payment_creator_view_model.dart';
+import '../budget_payment_creator_view_model.dart';
 
 class PaymentDataForm extends StatelessWidget {
-  final PaymentCreatorViewModel viewModel;
+  final BudgetPaymentCreatorViewModel viewModel;
 
   const PaymentDataForm({super.key, required this.viewModel});
 

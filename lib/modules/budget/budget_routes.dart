@@ -7,6 +7,8 @@ enum BudgetRoute {
   budgetItems,
   budgetTab,
   commentList,
+  paymentList,
+  paymentCreator,
 }
 
 extension BudgetRouteExtension on BudgetRoute {
@@ -22,6 +24,10 @@ extension BudgetRouteExtension on BudgetRoute {
         return '/budget/tab';
       case BudgetRoute.commentList:
         return '/budget/comments';
+      case BudgetRoute.paymentList:
+        return '/payment/list';
+      case BudgetRoute.paymentCreator:
+        return '/payment/create';
     }
   }
 }

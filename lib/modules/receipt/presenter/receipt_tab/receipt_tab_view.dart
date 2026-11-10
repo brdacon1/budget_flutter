@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/payment/presenter/payment_list/payment_list_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_payment_list/budget_payment_list_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_receipt/presenter/pdf_receipt_view.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/receipt_creator_view.dart';
@@ -68,7 +68,7 @@ class _ReceiptTabView extends State<ReceiptTabView> {
                 onReceiptCreated: _viewModel.updateReceipt,
               );
             case 1:
-              return PaymentListView(
+              return BudgetPaymentListView(
                 item: widget.item,
                 receipt: receipt,
                 onReceiptUpdated: _viewModel.updateReceipt,

@@ -15,7 +15,6 @@ import 'package:oflite/modules/image/image_binds.dart';
 import 'package:oflite/modules/login/login_binds.dart';
 import 'package:oflite/modules/main_config_menu/main_config_menu_binds.dart';
 import 'package:oflite/modules/main_tab/main_tab_binds.dart';
-import 'package:oflite/modules/payment/payment_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
 import 'package:oflite/modules/product/product_binds.dart';
 import 'package:oflite/modules/receipt/receipt_binds.dart';
@@ -57,7 +56,6 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
   registerBudgetDependencies(getIt);
   registerReceiptDependencies(getIt);
-  registerPaymentDependencies(getIt);
   registerProductDependencies(getIt);
   registerPdfDependencies(getIt);
   registerLoginDependencies(getIt);
