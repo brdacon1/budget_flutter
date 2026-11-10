@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'budget_list/presenter/budget_list_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dart';
 
-enum BudgetRoute {
-  budgetList,
-  budgetCreator,
-  budgetItems,
-  budgetTab,
-}
+enum BudgetRoute { budgetList, budgetCreator, budgetItems, budgetTab }
 
 extension BudgetRouteExtension on BudgetRoute {
   String get path {

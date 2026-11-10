@@ -1,4 +1,4 @@
-import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
+import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';

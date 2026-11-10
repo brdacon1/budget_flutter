@@ -4,18 +4,17 @@ import 'package:flutter_contacts/properties/name.dart';
 import 'package:flutter_contacts/properties/phone.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_address_section.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_contact_section.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_save_button.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
-
-import '../../../../shared/common/widgets/header/app_header_second_title.dart';
-import 'budget_creator_view_model.dart';
-import 'components/budget_creator_address_section.dart';
-import 'components/budget_creator_contact_section.dart';
-import 'components/budget_creator_info_section.dart';
-import 'components/budget_creator_save_button.dart';
 
 class BudgetCreatorView extends StatefulWidget {
   final CustomerInfo item;

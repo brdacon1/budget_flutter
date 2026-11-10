@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view_model.dart';
 import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/pdf_menu/presenter/pdf_menu_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-
-import '../../budget_list_items/presenter/budget_list_items_view.dart';
-import 'budget_tab_view_model.dart';
 
 class BudgetTabView extends StatefulWidget {
   final CustomerInfo item;

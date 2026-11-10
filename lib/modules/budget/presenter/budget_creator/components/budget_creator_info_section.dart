@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/budget/budget_creator/presenter/enum/customer_info_enum.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
+import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/modules/budget/budget_creator/presenter/budget_creator_view_model.dart';
 import 'budget_creator_field.dart';
 
 class BudgetCreatorInfoSection extends StatelessWidget {

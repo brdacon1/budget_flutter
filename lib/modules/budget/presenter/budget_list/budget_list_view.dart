@@ -3,8 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/budget_tab/presenter/budget_tab_view.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_delete_bottom_modal_widget.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
+import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -13,11 +17,6 @@ import 'package:oflite/modules/login/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
-
-import 'budget_list_view_model.dart';
-import 'components/card/budget_list_card.dart';
-import 'components/modals/budget_list_delete_bottom_modal_widget.dart';
-import 'components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 
 class BudgetListView extends StatefulWidget {
   const BudgetListView({super.key});

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/modules/budget/budget_list/presenter/components/card/delete_budget_card.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+
+import '../card/delete_budget_card.dart';
 
 /// Bottom modal para confirmar a remoção de orçamentos marcados.
 ///
