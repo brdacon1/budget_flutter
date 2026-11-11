@@ -1,7 +1,7 @@
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Implementação do [ChatScriptRepository].

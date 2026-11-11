@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/modules/core/ads/data/datasource/ads_remote_datasource.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 
 /// Implementação do repositório de anúncios AdMob.

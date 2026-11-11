@@ -1,7 +1,7 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 

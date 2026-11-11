@@ -1,14 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ReceiptRemoteDataSource {
+class ReceiptRemoteDatasource {
   final FirebaseFirestore _firestore;
-  ReceiptRemoteDataSource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  CollectionReference _receiptsCollection(String userUid, String budgetId) => _firestore
-      .collection('EMPRESAS/$userUid/USERS/$userUid/ORCAMENTOS/$budgetId/RECIBOS');
+  ReceiptRemoteDatasource({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  Future<List<Map<String, dynamic>>> getReceipts(String userUid, String budgetId) async {
+  CollectionReference _receiptsCollection(String userUid, String budgetId) =>
+      _firestore.collection(
+        'EMPRESAS/$userUid/USERS/$userUid/ORCAMENTOS/$budgetId/RECIBOS',
+      );
+
+  Future<List<Map<String, dynamic>>> getReceipts(
+    String userUid,
+    String budgetId,
+  ) async {
     final snapshot = await _receiptsCollection(userUid, budgetId).get();
     return snapshot.docs.map((d) {
       final map = Map<String, dynamic>.from(d.data() as Map);
@@ -17,7 +23,12 @@ class ReceiptRemoteDataSource {
     }).toList();
   }
 
-  Future<void> saveReceipt(String userUid, String budgetId, Map<String, dynamic> data, String id) async {
+  Future<void> saveReceipt(
+    String userUid,
+    String budgetId,
+    Map<String, dynamic> data,
+    String id,
+  ) async {
     await _receiptsCollection(userUid, budgetId).doc(id).set(data);
   }
 

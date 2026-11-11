@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/budget_list_items/presenter/budget_list_items_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
-import 'package:oflite/modules/comment/presenter/comment_list_view.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view.dart';
-import 'package:oflite/modules/pdf/pdf_model_select/presenter/pdf_model_select_view.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
-import 'package:oflite/modules/product/product_price_creator/presenter/product_price_creator_view.dart';
-import 'package:oflite/modules/product/product_price_list/presenter/product_price_list_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/pdf_edit_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';
+import 'package:oflite/modules/product/data/model/product_price_model.dart';
+import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
+import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -89,7 +89,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => CommentListView(item: budget)),
+      MaterialPageRoute(builder: (_) => BudgetCommentListView(item: budget)),
     );
 
     // Ao voltar da tela de comentários, finaliza o orçamento

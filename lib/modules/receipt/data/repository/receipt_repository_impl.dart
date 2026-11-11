@@ -1,11 +1,11 @@
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptRepositoryImpl extends ReceiptRepository {
-  final ReceiptRemoteDataSource _remote;
+  final ReceiptRemoteDatasource _remote;
   final UserRepository _userRepository;
 
   ReceiptRepositoryImpl(this._remote, this._userRepository);

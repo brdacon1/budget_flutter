@@ -1,29 +1,26 @@
 import 'package:get_it/get_it.dart';
+import 'package:oflite/modules/auth/auth_binds.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
 import 'package:oflite/modules/chat_assistant/chat_assistant_binds.dart';
-import 'package:oflite/modules/comment/comment_binds.dart';
 import 'package:oflite/modules/core/ads/ads_binds.dart';
+import 'package:oflite/modules/core/cep/cep_binds.dart';
 import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
 import 'package:oflite/modules/core/display_alert/display_alert_binds.dart';
 import 'package:oflite/modules/core/in_app_purchase/in_app_purchase_binds.dart';
 import 'package:oflite/modules/core/loading_event/loading_event_binds.dart';
 import 'package:oflite/modules/core/notification/notification_binds.dart';
-import 'package:oflite/modules/core/cep/cep_binds.dart';
 import 'package:oflite/modules/core/share_link/share_link_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
+import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
-import 'package:oflite/modules/login/login_binds.dart';
 import 'package:oflite/modules/main_config_menu/main_config_menu_binds.dart';
 import 'package:oflite/modules/main_tab/main_tab_binds.dart';
-import 'package:oflite/modules/payment/payment_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
 import 'package:oflite/modules/product/product_binds.dart';
 import 'package:oflite/modules/receipt/receipt_binds.dart';
-import 'package:oflite/modules/singup/singup_binds.dart';
 import 'package:oflite/modules/subscription/subscription_binds.dart';
 import 'package:oflite/modules/terms_conditions/terms_conditions_binds.dart';
 import 'package:oflite/modules/web_budget/web_budget_binds.dart';
-import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 
 /// Instância global do GetIt para injeção de dependências.
 ///
@@ -43,7 +40,7 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
   // Core Modules (serviços transversais — sem presenter, sem tela)
   // ------------------------------------------------------------------
-  
+
   registerConvertCoinDependencies(getIt);
   registerLoadingEventDependencies(getIt);
   registerDisplayAlertDependencies(getIt);
@@ -58,11 +55,9 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
   registerBudgetDependencies(getIt);
   registerReceiptDependencies(getIt);
-  registerPaymentDependencies(getIt);
   registerProductDependencies(getIt);
-  registerCommentDependencies(getIt);
   registerPdfDependencies(getIt);
-  registerLoginDependencies(getIt);
+  registerAuthDependencies(getIt);
   registerChatBudgetDependencies(getIt);
 
   // ViewModels e binds de módulos que antes não tinham registro estruturado
@@ -70,7 +65,6 @@ void setupDependencyInjection() {
   registerImageDependencies(getIt);
   registerMainConfigMenuDependencies(getIt);
   registerMainTabDependencies(getIt);
-  registerSingupDependencies(getIt);
   registerSubscriptionDependencies(getIt);
   registerTermsConditionsDependencies(getIt);
   registerWebBudgetDependencies(getIt);

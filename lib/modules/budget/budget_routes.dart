@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'budget_list/presenter/budget_list_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dart';
 
 enum BudgetRoute {
   budgetList,
   budgetCreator,
   budgetItems,
   budgetTab,
+  commentList,
 }
 
 extension BudgetRouteExtension on BudgetRoute {
@@ -19,6 +20,8 @@ extension BudgetRouteExtension on BudgetRoute {
         return '/budget/items';
       case BudgetRoute.budgetTab:
         return '/budget/tab';
+      case BudgetRoute.commentList:
+        return '/budget/comments';
     }
   }
 }

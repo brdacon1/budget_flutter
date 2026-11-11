@@ -2,8 +2,8 @@ import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.d
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';

@@ -8,7 +8,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageEditViewModel extends ChangeNotifier {

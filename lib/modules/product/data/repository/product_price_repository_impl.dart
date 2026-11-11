@@ -1,7 +1,7 @@
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/product/data/datasource/product_price_remote_datasource.dart';
+import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
-import 'package:oflite/modules/product/product_price/data/model/product_price_model.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceRepositoryImpl extends ProductPriceRepository {

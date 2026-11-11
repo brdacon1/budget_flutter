@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repo
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
-import 'package:oflite/modules/login/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Valida o input de um campo PDF, salva e envia mensagens de confirmação.

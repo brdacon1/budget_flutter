@@ -3,7 +3,7 @@ import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.d
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/login/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/modules/pdf/data/repository/pdf_repository_impl.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
@@ -13,8 +13,9 @@ import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_genera
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
-import 'package:oflite/modules/pdf/pdf_budget/presenter/pdf_budget_view_model.dart';
-import 'package:oflite/modules/pdf/pdf_edit/presenter/pdf_edit_view_model.dart';
+
+import 'presenter/pdf_budget/pdf_budget_view_model.dart';
+import 'presenter/pdf_edit/presenter/pdf_edit_view_model.dart';
 
 /// Registra as dependências do módulo PDF.
 void registerPdfDependencies(GetIt sl) {
