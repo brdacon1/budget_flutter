@@ -7,59 +7,61 @@ class LoginTextField extends StatelessWidget {
     super.key,
     required this.field,
     required this.controller,
-    required this.hintText,
-    required this.prefixIcon,
+    required this.labelText,
     required this.viewModel,
-    required this.width,
-    required this.height,
     this.obscureText = false,
     this.suffixIcon,
+    this.keyboardType,
   });
 
   final LoginField field;
   final TextEditingController controller;
-  final String hintText;
-  final IconData prefixIcon;
+  final String labelText;
   final LoginViewModel viewModel;
-  final double width;
-  final double height;
   final bool obscureText;
   final Widget? suffixIcon;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     final isSelected = viewModel.selectedField == field;
 
-    return Container(
-      width: width * 0.9,
-      height: height * 0.082,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: secondaryColor, width: 2),
-        color: isSelected ? viewModel.enabled : bgColor,
-      ),
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: controller,
-        onTap: () => viewModel.selectField(field),
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          enabledBorder: InputBorder.none,
-          border: InputBorder.none,
-          prefixIcon: Icon(
-            prefixIcon,
-            color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
-          ),
-          suffixIcon: suffixIcon,
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
-          ),
-        ),
-        style: TextStyle(
+    return TextField(
+      controller: controller,
+      onTap: () => viewModel.selectField(field),
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: TextStyle(
           color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+          fontWeight: FontWeight.w600,
+        ),
+        floatingLabelStyle: const TextStyle(
+          color: buttonColor,
           fontWeight: FontWeight.bold,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isSelected
+                ? viewModel.enabledtxt.withValues(alpha: 0.3)
+                : viewModel.deaible.withValues(alpha: 0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: buttonColor),
+        ),
+        suffixIcon: suffixIcon,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
+      style: TextStyle(
+        color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+        fontWeight: FontWeight.bold,
       ),
     );
   }

@@ -9,7 +9,10 @@ class LoginButton extends StatelessWidget {
     required this.onPressed,
     this.backgroundColor = buttonColor,
     this.textColor = Colors.black,
-    this.fontSize = 20.0,
+    this.fontSize = 16.0,
+    this.width,
+    this.borderRadius = 30.0,
+    this.padding = const EdgeInsets.symmetric(vertical: 15.0),
   });
 
   final String label;
@@ -17,25 +20,31 @@ class LoginButton extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final double fontSize;
+  final double? width;
+  final double borderRadius;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: backgroundColor,
-        padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 80),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
+    return SizedBox(
+      width: width,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: backgroundColor,
+          padding: padding,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.heebo(
-          color: textColor,
-          letterSpacing: 0.5,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          label,
+          style: GoogleFonts.heebo(
+            color: textColor,
+            letterSpacing: 0.5,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

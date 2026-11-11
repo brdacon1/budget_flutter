@@ -26,6 +26,12 @@ class LoginStrings {
   static String get loginEmailHint => _isPt ? 'E-mail' : 'Email';
   static String get loginPasswordHint => _isPt ? 'Senha' : 'Password';
 
+  // --- Login: abas ---
+  static String get loginTabLogin => _isPt ? 'Login' : 'Login';
+  static String get loginTabSignUp => _isPt ? 'Cadastrar' : 'Sign up';
+  static String get loginRememberMe =>
+      _isPt ? 'Lembrar de mim' : 'Remember me';
+
   // --- Login: botões ---
   static String get loginButton => _isPt ? 'Entrar' : 'Sign in';
   static String get loginForgotPassword =>

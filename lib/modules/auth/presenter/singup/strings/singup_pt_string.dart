@@ -32,6 +32,8 @@ class SingUpStrings {
   static String get signUpNameHint => _isPt ? 'SEU NOME' : 'YOUR NAME';
   static String get signUpEmailHint => _isPt ? 'E-MAIL' : 'EMAIL';
   static String get signUpPasswordHint => _isPt ? 'SENHA' : 'PASSWORD';
+  static String get signUpConfirmPasswordHint =>
+      _isPt ? 'CONFIRME A SENHA' : 'CONFIRM PASSWORD';
 
   // --- Cadastro: rodapé ---
   static String get signUpLoginPrompt =>
@@ -44,6 +46,8 @@ class SingUpStrings {
       _isPt ? 'Cadastro realizado com sucesso!' : 'Account created successfully!';
   static String get signUpErrorFillAll =>
       _isPt ? 'Por favor preencha todos os campos!' : 'Please fill in all fields!';
+  static String get signUpErrorPasswordsDoNotMatch =>
+      _isPt ? 'As senhas não coincidem.' : 'Passwords do not match.';
   static String get signUpErrorEmailInUse =>
       _isPt ? 'E-mail já cadastrado.' : 'Email already registered.';
   static String get signUpErrorInvalidEmail =>

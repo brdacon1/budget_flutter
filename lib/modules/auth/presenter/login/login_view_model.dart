@@ -45,11 +45,16 @@ class LoginViewModel extends ChangeNotifier {
   LoginState state = LoginState.idle;
   String? errorMessage;
 
+  bool rememberMe = true;
+
   bool _initialized = false;
 
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
+
+    final prefs = await SharedPreferences.getInstance();
+    rememberMe = prefs.getBool('remember_me') ?? true;
 
     try {
       await getIt<InAppPurchaseRepository>().initConnection();
@@ -82,6 +87,13 @@ class LoginViewModel extends ChangeNotifier {
   void consumeState() {
     state = LoginState.idle;
     errorMessage = null;
+  }
+
+  Future<void> toggleRememberMe() async {
+    rememberMe = !rememberMe;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('remember_me', rememberMe);
+    notifyListeners();
   }
 
   Future<void> loginWithEmailAndPassword(BuildContext context) async {
@@ -242,8 +254,13 @@ class LoginViewModel extends ChangeNotifier {
       password: password.trim(),
     );
 
-    await prefs.setString('email', email);
-    await prefs.setString('password', password);
+    if (rememberMe) {
+      await prefs.setString('email', email);
+      await prefs.setString('password', password);
+    } else {
+      await prefs.remove('email');
+      await prefs.remove('password');
+    }
 
     uid = auth.user!.uid.toString();
     final session =
