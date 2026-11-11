@@ -12,6 +12,7 @@ import 'package:oflite/modules/product/domain/repository/product_price_repositor
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/modules/product/presenter/product_price_list/components/modals/product_price_list_delete_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/items_list_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/text_input_bottom_modal_widget.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -220,6 +221,11 @@ class ProductPriceListViewModel extends ChangeNotifier {
   void removeFromDeleteList(int index) {
     if (index < 0 || index >= deleteItems.length) return;
     final removed = deleteItems.removeAt(index);
+    removeFromDeleteListByItem(removed);
+  }
+
+  void removeFromDeleteListByItem(ProductPriceModel removed) {
+    deleteItems.remove(removed);
     final i = _all.indexWhere((e) => e.id == removed.id);
     if (i != -1) {
       _all[i] = _all[i].copyWith(checkBox: false);
@@ -229,6 +235,17 @@ class ProductPriceListViewModel extends ChangeNotifier {
       checkBoxAppear = false;
       checkBoxProductVisible = true;
     }
+    notifyListeners();
+  }
+
+  void clearDeleteState() {
+    deleteItems = <ProductPriceModel>[];
+    deleteVisible = false;
+    checkBoxAppear = false;
+    checkBoxProductVisible = true;
+    _all = _all
+        .map((e) => e.copyWith(checkBox: false, selectProduct: false))
+        .toList();
     notifyListeners();
   }
 
@@ -330,13 +347,11 @@ class ProductPriceListViewModel extends ChangeNotifier {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder:
-          (context) => ItemsListBottomModalWidget(
-            title: ProductPtString.deleteListTitle,
-            items: deleteItems.map((e) => e.toItemsBudget()).toList(),
+          (context) => ProductPriceListDeleteBottomModalWidget(
+            deleteItems: deleteItems,
             moneyConvert: moneyConvert,
-            buttonLabel: ProductPtString.deleteButton,
-            onRemove: (item, index) => removeFromDeleteList(index),
-            onButtonPressed: () => deleteSelected(context),
+            onRemove: removeFromDeleteListByItem,
+            onConfirm: () => deleteSelected(context),
           ),
     );
     notifyListeners();

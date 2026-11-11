@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
@@ -85,39 +86,6 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                   onPressed: () => _viewModel.finalizeSelection(context),
                   child: Text(
                     'Finalizar seleção (${_viewModel.addItems.length})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        // Se estiver no modo de exclusão e houver itens marcados para excluir
-        if (_viewModel.deleteVisible && _viewModel.deleteItems.isNotEmpty) {
-          return BottomAppBar(
-            color: const Color(0xFF1E1E2C),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 231, 15, 87),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () => _viewModel.openDeleteModal(context),
-                  child: Text(
-                    'Excluir itens (${_viewModel.deleteItems.length})',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -217,6 +185,47 @@ class _ProductPriceListView extends State<ProductPriceListView> {
       builder: (context, _) {
         if (_viewModel.selectionMode) return const SizedBox.shrink();
 
+        if (_viewModel.deleteVisible) {
+          return badges.Badge(
+            badgeStyle: badges.BadgeStyle(
+              badgeColor: const Color.fromARGB(255, 231, 15, 87),
+              borderRadius: BorderRadius.circular(40),
+            ),
+            badgeContent: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Center(
+                child: Text(
+                  _viewModel.deleteItems.length.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+            ),
+            child: FloatingActionButton.extended(
+              heroTag: 'delete',
+              onPressed: () => _viewModel.openDeleteModal(context),
+              backgroundColor: buttonColor,
+              elevation: 4,
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.black,
+              ),
+              label: const Text(
+                'Remover todos',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          );
+        }
+
         return FloatingActionButton.extended(
           heroTag: 'adicionar_novo_item',
           onPressed: () => _viewModel.addNew(context),
@@ -241,7 +250,10 @@ class _ProductPriceListView extends State<ProductPriceListView> {
       child: RefreshIndicator(
         color: Colors.cyan[50],
         backgroundColor: bgColor,
-        onRefresh: _viewModel.refresh,
+        onRefresh: () async {
+          await _viewModel.refresh();
+          _viewModel.clearDeleteState();
+        },
         child: ListView.builder(
           shrinkWrap: true,
           padding: const EdgeInsets.only(

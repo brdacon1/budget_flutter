@@ -61,6 +61,24 @@ class ProductPriceCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Checkbox de remoção no lado esquerdo (modo exclusão)
+                if (checkBoxAppear)
+                  Transform.scale(
+                    scale: 1.6,
+                    child: Checkbox(
+                      side: const BorderSide(color: whiteColor),
+                      checkColor: bgColor,
+                      activeColor: whiteColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      value: item.checkBox ?? false,
+                      onChanged: (bool? newValue) => onToggleDelete(),
+                    ),
+                  ),
+
+                if (checkBoxAppear) const SizedBox(width: 12),
+
                 // Informações do item alinhadas à esquerda (Tag, Descrição e Preço)
                 Expanded(
                   child: Column(
@@ -119,22 +137,8 @@ class ProductPriceCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                // Seletor lateral grande mantendo o padrão do seu projeto (Transform.scale)
-                if (checkBoxAppear)
-                  Transform.scale(
-                    scale: 1.6,
-                    child: Checkbox(
-                      side: const BorderSide(color: whiteColor),
-                      checkColor: bgColor,
-                      activeColor: whiteColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      value: item.checkBox ?? false,
-                      onChanged: (bool? newValue) => onToggleDelete(),
-                    ),
-                  )
-                else if (!fromMenu && checkBoxProductVisible)
+                // Seletor lateral direito: carrinho ou círculo vazio
+                if (!checkBoxAppear && !fromMenu && checkBoxProductVisible)
                   Transform.scale(
                     scale: 1.6,
                     child: Checkbox(
@@ -148,7 +152,7 @@ class ProductPriceCard extends StatelessWidget {
                       onChanged: (bool? newValue) => onToggleSelectProduct(),
                     ),
                   )
-                else
+                else if (!checkBoxAppear)
                   Transform.scale(
                     scale: 1.4,
                     child: Container(
