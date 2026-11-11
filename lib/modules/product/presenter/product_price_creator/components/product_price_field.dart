@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Campo de formulário reutilizável do modal de produto/serviço.
@@ -39,34 +38,31 @@ class ProductPriceField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
-          color: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        readOnly: readOnly,
+        enableInteractiveSelection: true,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        onTap: onTap,
+        decoration: InputDecoration(
+          enabledBorder: InputBorder.none,
+          border: InputBorder.none,
+          prefixIcon: Icon(icon, color: AppBottomModal.grayColor),
+          suffixIcon: suffixIcon,
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey[600]),
         ),
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: controller,
-          readOnly: readOnly,
-          enableInteractiveSelection: true,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          onTap: onTap,
-          decoration: InputDecoration(
-            enabledBorder: InputBorder.none,
-            border: InputBorder.none,
-            prefixIcon: Icon(icon, color: AppBottomModal.grayColor),
-            suffixIcon: suffixIcon,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[600]),
-          ),
-          style: const TextStyle(
-            color: AppBottomModal.grayColor,
-            fontWeight: FontWeight.bold,
-          ),
+        style: const TextStyle(
+          color: AppBottomModal.grayColor,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -14,7 +14,6 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   http: ^1.6.0
-  simple_animations: ^5.0.2
   supercharged: ^2.1.1
   cached_network_image: ^3.4.1
   google_fonts: ^6.3.1
@@ -26,13 +25,13 @@ dependencies:
   expansion_tile_card: ^3.0.0
   mask_text_input_formatter: ^2.9.0
   permission_handler: ^13.0.0
-  flutter_contacts: ^1.1.9+2
+  flutter_contacts: ^2.6.0
   badges: ^3.1.2
   extended_masked_text: ^3.0.1
   intl: ^0.20.2
   syncfusion_flutter_pdf: ^35.1.43
   syncfusion_flutter_pdfviewer: ^35.1.43
-  open_file: ^3.5.11
+  open_file: ^4.0.0
   flutter_svg: ^2.0.17
   fl_chart: ^0.70.2
   adaptive_theme: ^3.7.0
@@ -50,7 +49,6 @@ dependencies:
   web: ^1.1.0
   webview_flutter: ^4.11.0
   webview_flutter_android: ^4.3.2
-  awesome_dialog: 3.1.0
   get_it: ^7.6.4
 
 dependency_overrides:

@@ -7,7 +7,6 @@ import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -73,38 +72,35 @@ class _PdfBudgetView extends State<PdfBudgetView> {
                         alignment: Alignment.bottomCenter,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 25),
-                          child: FadeAnimationWidget(
-                            delay: 1,
-                            child: TextButton(
-                              onPressed: () async {
-                                if (_viewModel.fileBytes != null) {
-                                  final xFile = XFile(_viewModel.fileBytes!);
-                                  await SharePlus.instance.share(
-                                    ShareParams(
-                                      files: [xFile],
-                                      text: PdfStrings.sharePdf,
-                                    ),
-                                  );
-                                }
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: buttonColor,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 15.0,
-                                  horizontal: 80,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0),
-                                ),
+                          child: TextButton(
+                            onPressed: () async {
+                              if (_viewModel.fileBytes != null) {
+                                final xFile = XFile(_viewModel.fileBytes!);
+                                await SharePlus.instance.share(
+                                  ShareParams(
+                                    files: [xFile],
+                                    text: PdfStrings.sharePdf,
+                                  ),
+                                );
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: buttonColor,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 15.0,
+                                horizontal: 80,
                               ),
-                              child: Text(
-                                PdfStrings.shareButton,
-                                style: GoogleFonts.heebo(
-                                  color: Colors.black,
-                                  letterSpacing: 0.5,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                            ),
+                            child: Text(
+                              PdfStrings.shareButton,
+                              style: GoogleFonts.heebo(
+                                color: Colors.black,
+                                letterSpacing: 0.5,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
-import 'package:flutter_contacts/properties/name.dart';
-import 'package:flutter_contacts/properties/phone.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
@@ -75,7 +73,14 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
       );
     }
 
-    if (mounted && await user_info.FlutterContacts.requestPermission()) {
+    final permissionStatus = await user_info.FlutterContacts.permissions.request(
+      user_info.PermissionType.readWrite,
+    );
+    final hasPermission =
+        permissionStatus == user_info.PermissionStatus.granted ||
+        permissionStatus == user_info.PermissionStatus.limited;
+
+    if (mounted && hasPermission) {
       if (mounted) {
         final saveContact = await showConfirmBottomModal(
           context,
@@ -83,17 +88,23 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
           message: 'Gostaria de salvar o telefone em sua lista de contatos?',
         );
         if (saveContact) {
-          final newContact =
-              user_info.Contact()
-                ..name = Name(first: _viewModel.nameController.text)
-                ..phones = [
-                  Phone(_viewModel.phoneController.text),
-                  Phone(
-                    _viewModel.phoneController.text,
-                    label: PhoneLabel.work,
-                  ),
-                ];
-          await user_info.FlutterContacts.insertContact(newContact);
+          final newContact = user_info.Contact(
+            name: user_info.Name(
+              first: _viewModel.nameController.text,
+            ),
+            phones: [
+              user_info.Phone(
+                number: _viewModel.phoneController.text,
+              ),
+              user_info.Phone(
+                number: _viewModel.phoneController.text,
+                label: const user_info.Label(
+                  user_info.PhoneLabel.work,
+                ),
+              ),
+            ],
+          );
+          await user_info.FlutterContacts.create(newContact);
         }
       }
     }

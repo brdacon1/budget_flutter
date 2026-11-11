@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
+import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/constants/subscription_constants.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
-import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 
 class ProductScreenBottomPart extends StatefulWidget {
   final String? price;
@@ -97,9 +96,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
 
   Widget _buildDescription() {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenAwareSize(20.0, context),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: screenAwareSize(20.0, context)),
       child: AnimatedCrossFade(
         firstChild: Text(
           desc,
@@ -118,9 +115,8 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
             fontFamily: "Montserrat-Medium",
           ),
         ),
-        crossFadeState: isExpanded
-            ? CrossFadeState.showSecond
-            : CrossFadeState.showFirst,
+        crossFadeState:
+            isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
         duration: kThemeAnimationDuration,
       ),
     );
@@ -128,13 +124,13 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
 
   Widget _buildExpandToggle() {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenAwareSize(20.0, context),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: screenAwareSize(20.0, context)),
       child: GestureDetector(
         onTap: _expand,
         child: Text(
-          isExpanded ? SubscriptionStrings.expandLess : SubscriptionStrings.expandMore,
+          isExpanded
+              ? SubscriptionStrings.expandLess
+              : SubscriptionStrings.expandMore,
           style: const TextStyle(
             color: Color(0xFFFB382F),
             fontWeight: FontWeight.w700,
@@ -176,9 +172,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
 
   Widget _buildPriceValue() {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenAwareSize(20.0, context),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: screenAwareSize(20.0, context)),
       child: Text(
         widget.price ?? SubscriptionStrings.defaultPrice,
         style: TextStyle(
@@ -192,25 +186,22 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
 
   Widget _buildSubscribeButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenAwareSize(20.0, context),
-      ),
-      child: FadeAnimationWidget(
-        delay: 1,
-        child: SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: widget.isLoading ? null : widget.onSubscribe,
-            style: TextButton.styleFrom(
-              backgroundColor: buttonColor,
-              minimumSize: const Size.fromHeight(50),
-              padding: const EdgeInsets.symmetric(vertical: 15.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
+      padding: EdgeInsets.symmetric(horizontal: screenAwareSize(20.0, context)),
+      child: SizedBox(
+        width: double.infinity,
+        child: TextButton(
+          onPressed: widget.isLoading ? null : widget.onSubscribe,
+          style: TextButton.styleFrom(
+            backgroundColor: buttonColor,
+            minimumSize: const Size.fromHeight(50),
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
             ),
-            child: widget.isLoading
-                ? const SizedBox(
+          ),
+          child:
+              widget.isLoading
+                  ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -218,7 +209,7 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                       color: Colors.black,
                     ),
                   )
-                : Text(
+                  : Text(
                     SubscriptionStrings.subscribeButton,
                     style: GoogleFonts.heebo(
                       color: Colors.black,
@@ -226,7 +217,6 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-          ),
         ),
       ),
     );
@@ -248,7 +238,6 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
     );
   }
 
-
   // ---------------- Color selector (interno) ----------------
 
   Widget _colorItem(Color color, bool isSelected, VoidCallback onTap) {
@@ -262,15 +251,16 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(5.0),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .8),
-                      blurRadius: 10.0,
-                      offset: const Offset(0.0, 10.0),
-                    )
-                  ]
-                : [],
+            boxShadow:
+                isSelected
+                    ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .8),
+                        blurRadius: 10.0,
+                        offset: const Offset(0.0, 10.0),
+                      ),
+                    ]
+                    : [],
           ),
           child: ClipPath(
             clipper: _MClipper(),

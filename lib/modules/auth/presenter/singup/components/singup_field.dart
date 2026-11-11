@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Campo de texto estilizado reutilizável do modal de cadastro.
@@ -22,7 +21,7 @@ class SingUpField extends StatelessWidget {
   final IconData icon;
   final SingUpFieldType field;
   final bool isPassword;
-  final bool ispasswordev;
+  final bool isPasswordEv;
   final VoidCallback? onTap;
   final VoidCallback? togglePassword;
 
@@ -33,51 +32,48 @@ class SingUpField extends StatelessWidget {
     required this.icon,
     required this.field,
     this.isPassword = false,
-    this.ispasswordev = true,
+    this.isPasswordEv = true,
     this.onTap,
     this.togglePassword,
   });
 
   @override
   Widget build(BuildContext context) {
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
-          color: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+        color: Colors.white,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        onTap: onTap,
+        obscureText: isPassword ? isPasswordEv : false,
+        keyboardType:
+            field == SingUpFieldType.email
+                ? TextInputType.emailAddress
+                : TextInputType.text,
+        decoration: InputDecoration(
+          enabledBorder: InputBorder.none,
+          border: InputBorder.none,
+          prefixIcon: Icon(icon, color: AppBottomModal.grayColor),
+          suffixIcon:
+              isPassword
+                  ? IconButton(
+                    icon: Icon(
+                      isPasswordEv ? Icons.visibility_off : Icons.visibility,
+                      color: AppBottomModal.grayColor,
+                    ),
+                    onPressed: togglePassword,
+                  )
+                  : null,
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey[600]),
         ),
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: controller,
-          onTap: onTap,
-          obscureText: isPassword ? ispasswordev : false,
-          keyboardType:
-              field == SingUpFieldType.email
-                  ? TextInputType.emailAddress
-                  : TextInputType.text,
-          decoration: InputDecoration(
-            enabledBorder: InputBorder.none,
-            border: InputBorder.none,
-            prefixIcon: Icon(icon, color: AppBottomModal.grayColor),
-            suffixIcon:
-                isPassword
-                    ? IconButton(
-                      icon: Icon(
-                        ispasswordev ? Icons.visibility_off : Icons.visibility,
-                        color: AppBottomModal.grayColor,
-                      ),
-                      onPressed: togglePassword,
-                    )
-                    : null,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[600]),
-          ),
-          style: TextStyle(
-            color: AppBottomModal.grayColor,
-            fontWeight: FontWeight.bold,
-          ),
+        style: TextStyle(
+          color: AppBottomModal.grayColor,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

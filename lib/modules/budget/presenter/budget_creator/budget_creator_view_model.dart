@@ -192,21 +192,33 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     fieldFone = true;
     notifyListeners();
 
-    final hasPermission = await user_info.FlutterContacts.requestPermission();
-    if (!hasPermission) return;
+    final permissionStatus = await user_info.FlutterContacts.permissions.request(
+      user_info.PermissionType.read,
+    );
+    if (permissionStatus != user_info.PermissionStatus.granted &&
+        permissionStatus != user_info.PermissionStatus.limited) {
+      return;
+    }
 
-    final contact = await user_info.FlutterContacts.openExternalPick();
+    final contact = await user_info.FlutterContacts.native.showPicker(
+      properties: {
+        user_info.ContactProperty.name,
+        user_info.ContactProperty.phone,
+      },
+    );
     if (contact == null) return;
 
-    String name = contact.displayName.trim();
+    String name = contact.displayName?.trim() ?? '';
     if (name.isEmpty) {
-      name = '${contact.name.first.trim()} ${contact.name.last.trim()}'.trim();
+      name =
+          '${contact.name?.first?.trim() ?? ''} ${contact.name?.last?.trim() ?? ''}'
+              .trim();
     }
+
     String? tel;
-    if (contact.phones.isNotEmpty) {
-      tel = contact.phones.first.number
-          .replaceAll('+55', '')
-          .replaceAll('+', '');
+    final phones = contact.phones;
+    if (phones.isNotEmpty) {
+      tel = phones.first.number.replaceAll('+55', '').replaceAll('+', '');
     }
 
     nameController.text = name;

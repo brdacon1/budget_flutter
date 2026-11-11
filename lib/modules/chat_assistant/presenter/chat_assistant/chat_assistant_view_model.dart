@@ -504,16 +504,26 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   Future<Result<void>> _pickContact() async {
     try {
-      final hasPermission = await user_info.FlutterContacts.requestPermission();
-      if (!hasPermission) return Result.ok(null);
+      final permissionStatus = await user_info.FlutterContacts.permissions.request(
+        user_info.PermissionType.read,
+      );
+      if (permissionStatus != user_info.PermissionStatus.granted &&
+          permissionStatus != user_info.PermissionStatus.limited) {
+        return Result.ok(null);
+      }
 
-      final contact = await user_info.FlutterContacts.openExternalPick();
+      final contact = await user_info.FlutterContacts.native.showPicker(
+        properties: {
+          user_info.ContactProperty.name,
+          user_info.ContactProperty.phone,
+        },
+      );
       if (contact == null) return Result.ok(null);
 
-      String name = contact.displayName.trim();
+      String name = contact.displayName?.trim() ?? '';
       if (name.isEmpty) {
-        final first = contact.name.first.trim();
-        final last = contact.name.last.trim();
+        final first = contact.name?.first?.trim() ?? '';
+        final last = contact.name?.last?.trim() ?? '';
         name = '$first $last'.trim();
       }
       if (name.isEmpty) name = 'Cliente';
@@ -521,15 +531,15 @@ class ChatAssistantViewModel extends ChangeNotifier {
       String? phone;
       final phones = contact.phones;
       if (phones.isNotEmpty) {
-        phone = phones.first.number
+        final rawPhone = phones.first.number
             .replaceAll('+55', '')
             .replaceAll('+', '')
             .replaceAll(RegExp(r'\D'), '');
-        if (phone.isNotEmpty) {
-          if (phone.length < 10 || phone.length > 11) {
+        if (rawPhone.isNotEmpty) {
+          if (rawPhone.length < 10 || rawPhone.length > 11) {
             phone = null;
           } else {
-            phone = _phoneMask.maskText(phone);
+            phone = _phoneMask.maskText(rawPhone);
           }
         }
       }

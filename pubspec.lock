@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.12.0"
-  awesome_dialog:
-    dependency: "direct main"
-    description:
-      name: awesome_dialog
-      sha256: "7da175ea284fa5da0a4d0cbdfe835c5b71d30c7b38c1770c0f27f48272ff5a08"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   badges:
     dependency: "direct main"
     description:
@@ -410,10 +402,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_contacts
-      sha256: "388d32cd33f16640ee169570128c933b45f3259bddbfae7a100bb49e5ffea9ae"
+      sha256: da04f2541d03e70070370e3e2a0b11d3cc4ce7c987d39918a4dd4952e6d87ac2
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.9+2"
+    version: "2.6.0"
   flutter_inapp_purchase:
     dependency: "direct main"
     description:
@@ -568,14 +560,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  graphs:
-    dependency: transitive
-    description:
-      name: graphs
-      sha256: "741bbf84165310a68ff28fe9e727332eef1407342fca52759cb21ad8177bb8d0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.2"
   http:
     dependency: "direct main"
     description:
@@ -780,66 +764,66 @@ packages:
     dependency: "direct main"
     description:
       name: open_file
-      sha256: b22decdae85b459eac24aeece48f33845c6f16d278a9c63d75c5355345ca236b
+      sha256: "4f9b00d42565249ed4346976bc0d57f91303bec391f6b0b217921277cf8e6e4f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.5.11"
+    version: "4.0.0"
   open_file_android:
     dependency: transitive
     description:
       name: open_file_android
-      sha256: "58141fcaece2f453a9684509a7275f231ac0e3d6ceb9a5e6de310a7dff9084aa"
+      sha256: f48a342b0347bf82bebf68c752f5cfce162965ce8449c5ecdafc406d294aa63d
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.6"
+    version: "1.1.0"
   open_file_ios:
     dependency: transitive
     description:
       name: open_file_ios
-      sha256: a5acd07ba1f304f807a97acbcc489457e1ad0aadff43c467987dd9eef814098f
+      sha256: "0e3e67dcd12f69888128f533cacc092039627dd4f1d7a95a2826b814ae4ea8aa"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.1.0"
   open_file_linux:
     dependency: transitive
     description:
       name: open_file_linux
-      sha256: d189f799eecbb139c97f8bc7d303f9e720954fa4e0fa1b0b7294767e5f2d7550
+      sha256: efd9c1f9679745cf35a54d21d809a1fe5a1196d4a1353fe2d205ba298ae86dc9
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.5"
+    version: "1.1.0"
   open_file_mac:
     dependency: transitive
     description:
       name: open_file_mac
-      sha256: cd293f6750de6438ab2390513c99128ade8c974825d4d8128886d1cda8c64d01
+      sha256: "1abe00e65f792b9baa1e15fdf4d44af5e813b1696ac307d71535543122a01e30"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.1.0"
   open_file_platform_interface:
     dependency: transitive
     description:
       name: open_file_platform_interface
-      sha256: "101b424ca359632699a7e1213e83d025722ab668b9fd1412338221bf9b0e5757"
+      sha256: dc302e4bd5c1d77acec4240bd0dbc1d9f2ee6882b1ce52bca5298369da7acf12
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.1.0"
   open_file_web:
     dependency: transitive
     description:
       name: open_file_web
-      sha256: e3dbc9584856283dcb30aef5720558b90f88036360bd078e494ab80a80130c4f
+      sha256: "4945221c9ee98a5a6cdf26730fe0fabb3a36c1e423148bff4c32c283079ee532"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.4"
+    version: "1.1.0"
   open_file_windows:
     dependency: transitive
     description:
       name: open_file_windows
-      sha256: d26c31ddf935a94a1a3aa43a23f4fff8a5ff4eea395fe7a8cb819cf55431c875
+      sha256: "6a97d8f2a5966fb0a7f613a901f1d502f93456f64e8a7519d3204184413aab79"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.3"
+    version: "1.1.0"
   path:
     dependency: transitive
     description:
@@ -992,22 +976,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
-  rive:
-    dependency: transitive
-    description:
-      name: rive
-      sha256: f2117a96a189758bc79bf7933865625c7a44a420ae537d2a8f6c492900136a71
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.11.17"
-  rive_common:
-    dependency: transitive
-    description:
-      name: rive_common
-      sha256: e41f12917cb58e0c9376836490ebaa431e12744da0c67e19dad8d4bee9fedd46
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.7"
   rxdart:
     dependency: transitive
     description:
@@ -1088,14 +1056,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
-  simple_animations:
-    dependency: "direct main"
-    description:
-      name: simple_animations
-      sha256: "6c0f1d53d351a2187da979cc6883322eb9e76f1147c1aecc1937c498eaa9abff"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.1.0"
   sky_engine:
     dependency: transitive
     description: flutter

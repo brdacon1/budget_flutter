@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 import '../receipt_payment_creator_view_model.dart';
 
@@ -49,72 +48,64 @@ class PaymentDataForm extends StatelessWidget {
             ),
           ),
           children: <Widget>[
-            FadeAnimationWidget(
-              delay: 1,
-              child: Container(
-                width: we * 0.80,
-                height: he * 0.078,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color:
-                      viewModel.selected == Gender.typeText ? bgColor : bgColor,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  readOnly: true,
-                  enableInteractiveSelection: true,
-                  controller: viewModel.typeText,
-                  onTap: () => viewModel.selectType(context),
-                  decoration: InputDecoration(
-                    enabledBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.list_alt, color: Colors.white),
-                    suffixIcon: Icon(
-                      Icons.keyboard_arrow_down_outlined,
-                      color: Colors.white,
-                    ),
-                    hintText: PaymentStrings.paymentHint,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
-                  style: TextStyle(
+            Container(
+              width: we * 0.80,
+              height: he * 0.078,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color:
+                    viewModel.selected == Gender.typeText ? bgColor : bgColor,
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                readOnly: true,
+                enableInteractiveSelection: true,
+                controller: viewModel.typeText,
+                onTap: () => viewModel.selectType(context),
+                decoration: InputDecoration(
+                  enabledBorder: InputBorder.none,
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.list_alt, color: Colors.white),
+                  suffixIcon: Icon(
+                    Icons.keyboard_arrow_down_outlined,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
                   ),
+                  hintText: PaymentStrings.paymentHint,
+                  hintStyle: const TextStyle(color: Colors.grey),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             SizedBox(height: he * 0.02),
-            FadeAnimationWidget(
-              delay: 1,
-              child: Container(
-                width: we * 0.80,
-                height: he * 0.078,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color:
-                      viewModel.selected == Gender.precoText
-                          ? bgColor
-                          : bgColor,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: viewModel.controller,
-                  onTap: () => viewModel.selectField(Gender.precoText),
-                  decoration: InputDecoration(
-                    enabledBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.price_change_outlined,
-                      color: Colors.white,
-                    ),
-                    hintText: PaymentStrings.priceHint,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(
+            Container(
+              width: we * 0.80,
+              height: he * 0.078,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color:
+                    viewModel.selected == Gender.precoText ? bgColor : bgColor,
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: viewModel.controller,
+                onTap: () => viewModel.selectField(Gender.precoText),
+                decoration: InputDecoration(
+                  enabledBorder: InputBorder.none,
+                  border: InputBorder.none,
+                  prefixIcon: Icon(
+                    Icons.price_change_outlined,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
                   ),
+                  hintText: PaymentStrings.priceHint,
+                  hintStyle: const TextStyle(color: Colors.grey),
+                ),
+                keyboardType: TextInputType.number,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

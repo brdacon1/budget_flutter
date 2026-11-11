@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
 import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class BudgetCreatorField extends StatelessWidget {
   const BudgetCreatorField({
@@ -49,38 +48,35 @@ class BudgetCreatorField extends StatelessWidget {
     final we = MediaQuery.of(context).size.width;
     final he = MediaQuery.of(context).size.height;
 
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        width: we * widthFactor,
-        height: he * heightFactor,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          color: bgColor,
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: controller,
-          focusNode: focusNode,
-          onTap: onTap,
-          onChanged: onChanged,
-          obscureText: obscureText,
-          readOnly: readOnly,
+    return Container(
+      width: we * widthFactor,
+      height: he * heightFactor,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.0),
+        color: bgColor,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        onTap: onTap,
+        onChanged: onChanged,
+        obscureText: obscureText,
+        readOnly: readOnly,
+        enabled: enabled,
+        enableInteractiveSelection: enableInteractiveSelection,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters?.cast(),
+        decoration: InputDecoration(
+          enabledBorder: InputBorder.none,
+          border: InputBorder.none,
           enabled: enabled,
-          enableInteractiveSelection: enableInteractiveSelection,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters?.cast(),
-          decoration: InputDecoration(
-            enabledBorder: InputBorder.none,
-            border: InputBorder.none,
-            enabled: enabled,
-            prefixIcon: Icon(prefixIcon, color: Colors.white),
-            suffixIcon: suffixIcon,
-            hintText: hintText,
-            hintStyle: const TextStyle(color: Colors.grey),
-          ),
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          prefixIcon: Icon(prefixIcon, color: Colors.white),
+          suffixIcon: suffixIcon,
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
         ),
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
   }

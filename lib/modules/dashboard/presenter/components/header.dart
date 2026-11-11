@@ -4,12 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
+import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,18 +24,15 @@ class Header extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (!ResponsiveWidget.isDesktop(context))
-          FadeAnimationWidget(
-            delay: 1,
-            child: Container(
-              alignment: Alignment.topLeft,
-              child: Text(
-                DashboardStrings.pageTitle,
-                style: GoogleFonts.heebo(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26,
-                  letterSpacing: 1,
-                ),
+          Container(
+            alignment: Alignment.topLeft,
+            child: Text(
+              DashboardStrings.pageTitle,
+              style: GoogleFonts.heebo(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                letterSpacing: 1,
               ),
             ),
           ),

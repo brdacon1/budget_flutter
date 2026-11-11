@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view_model.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 
 class LoginTextField extends StatelessWidget {
   const LoginTextField({
@@ -31,38 +30,35 @@ class LoginTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSelected = viewModel.selectedField == field;
 
-    return FadeAnimationWidget(
-      delay: 1,
-      child: Container(
-        width: width * 0.9,
-        height: height * 0.082,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: secondaryColor, width: 2),
-          color: isSelected ? viewModel.enabled : bgColor,
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: controller,
-          onTap: () => viewModel.selectField(field),
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            enabledBorder: InputBorder.none,
-            border: InputBorder.none,
-            prefixIcon: Icon(
-              prefixIcon,
-              color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
-            ),
-            suffixIcon: suffixIcon,
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
-            ),
-          ),
-          style: TextStyle(
+    return Container(
+      width: width * 0.9,
+      height: height * 0.082,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: secondaryColor, width: 2),
+        color: isSelected ? viewModel.enabled : bgColor,
+      ),
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        onTap: () => viewModel.selectField(field),
+        obscureText: obscureText,
+        decoration: InputDecoration(
+          enabledBorder: InputBorder.none,
+          border: InputBorder.none,
+          prefixIcon: Icon(
+            prefixIcon,
             color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
-            fontWeight: FontWeight.bold,
           ),
+          suffixIcon: suffixIcon,
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+          ),
+        ),
+        style: TextStyle(
+          color: isSelected ? viewModel.enabledtxt : viewModel.deaible,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

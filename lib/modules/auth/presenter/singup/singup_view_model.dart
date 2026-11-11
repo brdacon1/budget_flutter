@@ -4,12 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
-import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
+import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -29,7 +29,7 @@ class SingUpViewModel extends ChangeNotifier {
   final TextEditingController passwordText = TextEditingController();
   final TextEditingController nomeText = TextEditingController();
 
-  bool ispasswordev = true;
+  bool isPasswordEv = true;
 
   SingUpState state = SingUpState.idle;
   String? errorMessage;
@@ -43,7 +43,7 @@ class SingUpViewModel extends ChangeNotifier {
   }
 
   void togglePasswordVisibility() {
-    ispasswordev = !ispasswordev;
+    isPasswordEv = !isPasswordEv;
     if (state == SingUpState.error) {
       state = SingUpState.idle;
       errorMessage = null;

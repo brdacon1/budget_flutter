@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
-import 'package:oflite/shared/common/widgets/anmition/fade_animation_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
 class PdfReceiptShareButton extends StatelessWidget {
@@ -17,36 +16,30 @@ class PdfReceiptShareButton extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 25),
-        child: FadeAnimationWidget(
-          delay: 1,
-          child: TextButton(
-            onPressed:
-                enabled
-                    ? () async {
-                      final xFile = XFile(filePath!);
-                      await SharePlus.instance.share(
-                        ShareParams(files: [xFile], text: PdfStrings.sharePdf),
-                      );
-                    }
-                    : null,
-            style: TextButton.styleFrom(
-              backgroundColor: buttonColor,
-              padding: const EdgeInsets.symmetric(
-                vertical: 15.0,
-                horizontal: 80,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
+        child: TextButton(
+          onPressed:
+              enabled
+                  ? () async {
+                    final xFile = XFile(filePath!);
+                    await SharePlus.instance.share(
+                      ShareParams(files: [xFile], text: PdfStrings.sharePdf),
+                    );
+                  }
+                  : null,
+          style: TextButton.styleFrom(
+            backgroundColor: buttonColor,
+            padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 80),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
             ),
-            child: Text(
-              PdfStrings.shareButton,
-              style: GoogleFonts.heebo(
-                color: Colors.black,
-                letterSpacing: 0.5,
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          child: Text(
+            PdfStrings.shareButton,
+            style: GoogleFonts.heebo(
+              color: Colors.black,
+              letterSpacing: 0.5,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
