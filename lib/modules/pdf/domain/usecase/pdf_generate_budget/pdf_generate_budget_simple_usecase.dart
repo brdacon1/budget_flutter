@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
@@ -212,16 +214,16 @@ class PdfGenerateBudgetSimpleUsecase {
         final String token = await _getAuthToken(authToken);
         headers['Authorization'] = 'Bearer $token';
       }
-      final http.Response response = await http.get(
-        Uri.parse(endpointUrl),
-        headers: headers,
+      final response = await DioClient().dioClientAuth.get(
+        endpointUrl,
+        options: Options(headers: headers),
       );
 
       if (response.statusCode != 200) {
         return 0;
       }
 
-      final Uint8List fileContent = response.bodyBytes;
+      final Uint8List fileContent = response.data as Uint8List;
       final PdfBitmap image = PdfBitmap(fileContent);
 
       final double originalRatio = image.width / image.height;

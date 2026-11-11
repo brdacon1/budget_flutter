@@ -1,14 +1,15 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageEditViewModel extends ChangeNotifier {
@@ -16,6 +17,8 @@ class ImageEditViewModel extends ChangeNotifier {
   CroppedFile? croppedFile;
   String? fileName;
   String? initialImageUrl;
+
+  final DioClient _dioClient = DioClient();
 
   bool get hasImage =>
       croppedFile != null || pickedFile != null || initialImageUrl != null;
@@ -46,7 +49,7 @@ class ImageEditViewModel extends ChangeNotifier {
     if (pickedFile != null) {
       sourcePath = pickedFile!.path;
     } else {
-      final response = await http.get(Uri.parse(initialImageUrl!));
+      final response = await _dioClient.dioClientAuth.get(initialImageUrl!);
       if (response.statusCode != 200) {
         return;
       }
@@ -54,7 +57,7 @@ class ImageEditViewModel extends ChangeNotifier {
       final Directory appDir = await getApplicationDocumentsDirectory();
       final tempPath = '${appDir.path}/temp_crop_image.jpg';
       final File tempFile = File(tempPath);
-      await tempFile.writeAsBytes(response.bodyBytes);
+      await tempFile.writeAsBytes(response.data as Uint8List);
       sourcePath = tempPath;
     }
 

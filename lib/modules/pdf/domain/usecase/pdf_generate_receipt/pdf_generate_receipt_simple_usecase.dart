@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -87,19 +89,21 @@ class PdfGenerateReceiptUseCase {
 
       final String endpointUrl =
           'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
-      final http.Response response = await http.get(
-        Uri.parse(endpointUrl),
-        headers: <String, String>{
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json;odata=verbose',
-        },
+      final response = await DioClient().dioClientAuth.get(
+        endpointUrl,
+        options: Options(
+          headers: <String, String>{
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json;odata=verbose',
+          },
+        ),
       );
 
       if (response.statusCode != 200) {
         return 0;
       }
 
-      final Uint8List fileContent = response.bodyBytes;
+      final Uint8List fileContent = response.data as Uint8List;
       final PdfBitmap image = PdfBitmap(fileContent);
 
       final double originalRatio = image.width / image.height;

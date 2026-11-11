@@ -1,11 +1,12 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:http/http.dart' as http;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 
 /// Camada de acesso aos dados do orçamento no fluxo **Web público**.
 ///
@@ -24,8 +25,9 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 ///
 /// Este serviço é **aditivo**: nada no app mobile depende dele.
 class WebBudgetService {
-  static const String _firestoreHost =
-      'firestore.googleapis.com';
+  static const String _firestoreHost = 'firestore.googleapis.com';
+
+  final DioClient _dioClient = DioClient();
 
   /// Decodifica o payload de um JWT (Firebase ID Token) sem validar a
   /// assinatura — a validação real de acesso é feita pelo Firestore ao
@@ -71,7 +73,7 @@ class WebBudgetService {
         throw FormatException('Invalid base64url');
     }
     return utf8.decode(base64.decode(output));
-    }
+  }
 
   /// Project ID do Firebase configurado no app.
   static String? _projectId;
@@ -110,12 +112,14 @@ class WebBudgetService {
     required String enderecoNumero,
     required String token,
   }) async {
-    final url = Uri.parse(
-      '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero',
+    final url =
+        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero';
+    final response = await _dioClient.dioClient.get(
+      url,
+      options: Options(headers: _headers(token)),
     );
-    final response = await http.get(url, headers: _headers(token));
     _ensureOk(response, 'getBudget');
-    final fields = _extractFields(response.body);
+    final fields = _extractFields(response.data);
     final model = CustomerInfo.fromMap(fields);
     // Garante o ID documental mesmo que o campo ID não esteja gravado.
     model.id ??= enderecoNumero;
@@ -129,14 +133,16 @@ class WebBudgetService {
     required String enderecoNumero,
     required String token,
   }) async {
-    final url = Uri.parse(
-      '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/ITENS'
-      '?orderBy=CATEGORIA',
+    final url =
+        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/ITENS'
+        '?orderBy=CATEGORIA';
+    final response = await _dioClient.dioClient.get(
+      url,
+      options: Options(headers: _headers(token)),
     );
-    final response = await http.get(url, headers: _headers(token));
     _ensureOk(response, 'getItems');
     final List<ItemsBudget> items = <ItemsBudget>[];
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final body = response.data as Map<String, dynamic>;
     for (final doc in (body['documents'] as List?) ?? const []) {
       final docMap = doc as Map<String, dynamic>;
       final fields = _extractFieldsFromDoc(docMap);
@@ -154,12 +160,14 @@ class WebBudgetService {
     required String ownerUid,
     required String token,
   }) async {
-    final url = Uri.parse(
-      '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/INFOPDF/INFORMATION',
+    final url =
+        '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/INFOPDF/INFORMATION';
+    final response = await _dioClient.dioClient.get(
+      url,
+      options: Options(headers: _headers(token)),
     );
-    final response = await http.get(url, headers: _headers(token));
     _ensureOk(response, 'getOwnerInfo');
-    return _extractFields(response.body);
+    return _extractFields(response.data);
   }
 
   /// Observações/comentários do orçamento, reutilizadas pelo PDF.
@@ -168,13 +176,15 @@ class WebBudgetService {
     required String enderecoNumero,
     required String token,
   }) async {
-    final url = Uri.parse(
-      '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/OBSERVACAO',
+    final url =
+        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/OBSERVACAO';
+    final response = await _dioClient.dioClient.get(
+      url,
+      options: Options(headers: _headers(token)),
     );
-    final response = await http.get(url, headers: _headers(token));
     _ensureOk(response, 'getObservations');
     final List<ObservationPdf> list = <ObservationPdf>[];
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final body = response.data as Map<String, dynamic>;
     for (final doc in (body['documents'] as List?) ?? const []) {
       final docMap = doc as Map<String, dynamic>;
       final fields = _extractFieldsFromDoc(docMap);
@@ -198,16 +208,19 @@ class WebBudgetService {
     required String token,
     required String status,
   }) async {
-    final url = Uri.parse(
-      '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero'
-      '?updateMask.fieldPaths=STATUS',
-    );
+    final url =
+        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero'
+        '?updateMask.fieldPaths=STATUS';
     final body = jsonEncode({
       'fields': {
         'STATUS': {'stringValue': status},
       },
     });
-    final response = await http.patch(url, headers: _headers(token), body: body);
+    final response = await _dioClient.dioClient.patch(
+      url,
+      options: Options(headers: _headers(token)),
+      data: body,
+    );
     _ensureOk(response, 'updateStatus');
   }
 
@@ -240,9 +253,8 @@ class WebBudgetService {
     required String message,
   }) async {
     try {
-      final url = Uri.parse(
-        '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/NOTIFICACOES',
-      );
+      final url =
+          '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/NOTIFICACOES';
       final body = jsonEncode({
         'fields': {
           'TITULO': {'stringValue': title},
@@ -255,14 +267,18 @@ class WebBudgetService {
           'LIDO': {'booleanValue': false},
         },
       });
-      final response =
-          await http.post(url, headers: _headers(token), body: body);
+      final response = await _dioClient.dioClient.post(
+        url,
+        options: Options(headers: _headers(token)),
+        data: body,
+      );
       // 200 = criado com ID gerado pelo servidor. Não lança em falha para não
       // reverter a aprovação já gravada.
-      if (response.statusCode < 200 || response.statusCode >= 300) {
+      final code = response.statusCode ?? 0;
+      if (code < 200 || code >= 300) {
         debugPrint(
             '[WebBudgetService] sendApprovalNotification falhou: '
-            '${response.statusCode} ${response.body}');
+            '$code ${response.data}');
       }
     } catch (e) {
       debugPrint('[WebBudgetService] sendApprovalNotification erro: $e');
@@ -273,8 +289,9 @@ class WebBudgetService {
   // Helpers REST -> map plano (compatível com os `fromMap` dos models)
   // ---------------------------------------------------------------------------
 
-  static Map<String, dynamic> _extractFields(String responseBody) {
-    final Map<String, dynamic> doc = jsonDecode(responseBody);
+  static Map<String, dynamic> _extractFields(dynamic responseData) {
+    final Map<String, dynamic> doc =
+        jsonDecode(jsonEncode(responseData)) as Map<String, dynamic>;
     return _extractFieldsFromDoc(doc);
   }
 
@@ -308,8 +325,8 @@ class WebBudgetService {
     return typed.values.first;
   }
 
-  static void _ensureOk(http.Response response, String op) {
-    final code = response.statusCode;
+  static void _ensureOk(Response<dynamic> response, String op) {
+    final code = response.statusCode ?? 0;
     if (code == 401 || code == 403) {
       throw WebBudgetAccessError(
         'Token inválido ou expirado ($op).',
@@ -323,7 +340,7 @@ class WebBudgetService {
       );
     }
     if (code < 200 || code >= 300) {
-      debugPrint('[WebBudgetService] $op falhou: $code ${response.body}');
+      debugPrint('[WebBudgetService] $op falhou: $code ${response.data}');
       throw WebBudgetAccessError(
         'Erro de comunicação ($op: $code).',
         kind: WebBudgetErrorKind.unknown,

@@ -5,7 +5,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:http/http.dart' as http;
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -169,12 +170,12 @@ class PdfGenerateReceiptExecutiveUsecase {
           final String token = await _getAuthToken(authToken);
           headers['Authorization'] = 'Bearer $token';
         }
-        final response = await http.get(
-          Uri.parse(endpointUrl),
-          headers: headers,
+        final response = await DioClient().dioClientAuth.get(
+          endpointUrl,
+          options: Options(headers: headers),
         );
         if (response.statusCode == 200) {
-          final bytes = response.bodyBytes;
+          final bytes = response.data as Uint8List;
           image = PdfBitmap(bytes);
           final ratio = image.width / image.height;
           if (image.height == image.width) {

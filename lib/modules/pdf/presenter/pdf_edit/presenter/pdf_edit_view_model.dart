@@ -2,8 +2,9 @@ import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:dio/dio.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
@@ -104,17 +105,19 @@ class PdfEditViewModel extends ChangeNotifier {
 
       final endpointUrl =
           'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
-      final response = await http.get(
-        Uri.parse(endpointUrl),
-        headers: <String, String>{
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json;odata=verbose',
-        },
+      final response = await DioClient().dioClientAuth.get(
+        endpointUrl,
+        options: Options(
+          headers: <String, String>{
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json;odata=verbose',
+          },
+        ),
       );
 
       if (response.statusCode == 200 &&
-          response.headers["content-type"]?.startsWith("image/") == true) {
-        fileContent = response.bodyBytes;
+          response.headers.value('content-type')?.startsWith('image/') == true) {
+        fileContent = response.data as Uint8List;
       } else {
         fileContent = null;
       }
