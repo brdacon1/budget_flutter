@@ -22,40 +22,55 @@ class SingUpStrings {
   static bool get _isPt => _code == 'pt';
 
   // --- Cadastro: modal ---
-  static String get signUpTitle =>
-      _isPt ? 'Criar uma conta' : 'Create account';
+  static String get signUpTitle => _isPt ? 'Criar uma conta' : 'Create account';
+
   static String get signUpButton => _isPt ? 'REGISTRAR' : 'SIGN UP';
+
   static String get signUpButtonLoading =>
       _isPt ? 'Registrando...' : 'Signing up...';
 
   // --- Cadastro: campos ---
-  static String get signUpNameHint => _isPt ? 'SEU NOME' : 'YOUR NAME';
-  static String get signUpEmailHint => _isPt ? 'E-MAIL' : 'EMAIL';
-  static String get signUpPasswordHint => _isPt ? 'SENHA' : 'PASSWORD';
+  static String get signUpNameHint => _isPt ? 'Seu nome' : 'Your Name';
+
+  static String get signUpEmailHint => _isPt ? 'E-mail' : 'E-mail';
+
+  static String get signUpPasswordHint => _isPt ? 'Senha' : 'Password';
+
   static String get signUpConfirmPasswordHint =>
-      _isPt ? 'CONFIRME A SENHA' : 'CONFIRM PASSWORD';
+      _isPt ? 'Confirme a senha' : 'Confirm Password';
 
   // --- Cadastro: rodapé ---
   static String get signUpLoginPrompt =>
       _isPt ? 'Já tem uma conta? ' : 'Already have an account? ';
-  static String get signUpLoginAction =>
-      _isPt ? 'Entre' : 'Sign in';
+
+  static String get signUpLoginAction => _isPt ? 'Entre' : 'Sign in';
 
   // --- Cadastro: feedback / erros (ViewModel) ---
   static String get signUpSuccess =>
-      _isPt ? 'Cadastro realizado com sucesso!' : 'Account created successfully!';
+      _isPt
+          ? 'Cadastro realizado com sucesso!'
+          : 'Account created successfully!';
+
   static String get signUpErrorFillAll =>
-      _isPt ? 'Por favor preencha todos os campos!' : 'Please fill in all fields!';
+      _isPt
+          ? 'Por favor preencha todos os campos!'
+          : 'Please fill in all fields!';
+
   static String get signUpErrorPasswordsDoNotMatch =>
       _isPt ? 'As senhas não coincidem.' : 'Passwords do not match.';
+
   static String get signUpErrorEmailInUse =>
       _isPt ? 'E-mail já cadastrado.' : 'Email already registered.';
+
   static String get signUpErrorInvalidEmail =>
       _isPt ? 'E-mail inválido.' : 'Invalid email.';
+
   static String get signUpErrorWeakPassword =>
       _isPt ? 'Senha muito fraca.' : 'Password is too weak.';
+
   static String get signUpErrorDisabled =>
       _isPt ? 'Cadastro desativado.' : 'Sign up disabled.';
+
   static String get signUpErrorDefault =>
       _isPt ? 'Problemas para registrar usuário!' : 'Could not register user!';
 }

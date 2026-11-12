@@ -16,23 +16,23 @@ class LoginGoogleButton extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          backgroundColor: buttonColor,
+          backgroundColor: whiteColor,
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(26),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.g_mobiledata_rounded, color: bgColor, size: 24),
+            Image.asset('assets/icons/google_logo.png', height: 24, width: 24),
             const SizedBox(width: 8),
             Text(
               LoginStrings.loginWithGoogle,
               style: GoogleFonts.heebo(
                 color: bgColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 16,
               ),
             ),
           ],

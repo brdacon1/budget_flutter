@@ -121,6 +121,77 @@ lib/
 
 ---
 
+## 2.1 Componentes de UI (Widgets) — Regra de Separação
+
+> **NÃO** crie widgets no formato de classe privada (`class _MeuWidget`) dentro
+> das Views. Qualquer widget que não seja a própria tela deve ser extraído para
+> um arquivo separado dentro de `presenter/{tela}/components/`.
+
+### Regras
+
+| # | Regra |
+|---|-------|
+| 1 | **Nenhum `class _AlgumaCoisa extends StatelessWidget/StatefulWidget` dentro de `{feature}_view.dart`**. A View deve conter apenas a tela e seu `State`. |
+| 2 | Se um widget é usado apenas dentro de uma tela, crie-o em `presenter/{tela}/components/{nome}.dart` |
+| 3 | Se um widget é reutilizado por mais de uma tela do mesmo módulo, coloque-o em `presenter/components/` do módulo |
+| 4 | O nome do arquivo segue o padrão da convenção: `{feature}_{nome}.dart` (ex: `login_tab.dart`) |
+| 5 | A classe deve ser **pública** (`class LoginTab extends StatelessWidget`) e receber dependências via construtor |
+
+### Exemplo do que NÃO fazer
+
+```dart
+// login_view.dart
+class _LoginTab extends StatelessWidget {
+  const _LoginTab({required this.viewModel, ...});
+  ...
+}
+```
+
+### Exemplo do que FAZER
+
+```dart
+// lib/modules/auth/presenter/login/components/login_tab.dart
+import 'package:flutter/material.dart';
+
+class LoginTab extends StatelessWidget {
+  const LoginTab({
+    super.key,
+    required this.viewModel,
+    required this.onForgotPassword,
+    required this.onGoogleLogin,
+  });
+
+  final LoginViewModel viewModel;
+  final VoidCallback onForgotPassword;
+  final VoidCallback onGoogleLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(...);
+  }
+}
+```
+
+E na `login_view.dart`:
+
+```dart
+import 'package:oflite/modules/auth/presenter/login/components/login_tab.dart';
+
+// ...
+firstChild: LoginTab(
+  viewModel: _viewModel,
+  onForgotPassword: () => ...,
+  onGoogleLogin: () => ...,
+),
+```
+
+> **Motivo**: widgets privados dentro da View dificultam testes, reutilização e
+> leitura do arquivo. Manter cada widget em seu próprio arquivo favorece o
+> princípio da responsabilidade única e alinha a arquitetura modular do
+> projeto.
+
+---
+
 ## 3. O DataSource — Papel, Regras e Exemplo Real
 
 ### 3.1 O que é o DataSource?
@@ -1083,7 +1154,7 @@ etc.
 | 7      | UseCase só existe quando há lógica de negócio complexa ou orquestração multi-repo                                                                        |
 | 8      | UseCase é independente de UI e de fonte de dados                                                                                                         |
 | 9      | Usar `Result<T, E>` (quando aplicável) para fluxos de erro                                                                                               |
-| 10     | Componentes (widgets) ficam em `presenter/components/` ou subpastas                                                                                      |
+| 10     | Componentes (widgets) ficam em `presenter/components/` ou subpastas. **NUNCA crie `class _AlgumaCoisa extends StatelessWidget/StatefulWidget` dentro da View** |
 | 11     | Modais ficam em `presenter/components/modals/`                                                                                                           |
 | 12     | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`**                                                                       |
 | 13     | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |

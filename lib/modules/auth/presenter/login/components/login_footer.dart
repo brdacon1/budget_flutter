@@ -21,7 +21,7 @@ class LoginFooter extends StatelessWidget {
           color: buttonColor.withValues(alpha: 0.9),
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
-          fontSize: 14,
+          fontSize: 16,
         ),
       ),
     );

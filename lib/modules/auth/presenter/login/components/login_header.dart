@@ -8,11 +8,14 @@ class LoginHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/login-initial-page.png',
-      width: width * 0.45,
-      height: height * 0.22,
-      fit: BoxFit.contain,
+    return Container(
+      padding: const EdgeInsets.only(top: 55),
+      child: Image.asset(
+        'assets/login-initial-page.png',
+        width: width * 0.45,
+        height: height * 0.23,
+        fit: BoxFit.contain,
+      ),
     );
   }
 }
