@@ -61,10 +61,7 @@ flutter:
 
   uses-material-design: true
   assets:
-    - assets/360.png
-    - assets/work.png
     - assets/pintor.png
-    - assets/constru_man.png
     - assets/images/
     - assets/icons/
     - assets/login-initial-page.png
