@@ -10,10 +10,14 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Configura o delegate do UserNotifications ANTES do Firebase, pois
+    // FirebaseAppDelegateProxyEnabled=false exige controle manual.
+    UNUserNotificationCenter.current().delegate = self
+
     FirebaseApp.configure()
 
-    // Register for remote notifications and set delegate for flutter_local_notifications.
-    UNUserNotificationCenter.current().delegate = self
+    // Registra o app para notificações remotas (APNs). O token APNs será
+    // repassado ao Firebase Messaging em didRegisterForRemoteNotifications.
     application.registerForRemoteNotifications()
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -26,6 +30,18 @@ import UserNotifications
   ) {
     Messaging.messaging().apnsToken = deviceToken
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+  }
+
+  // Garante que o FCM seja notificado quando o usuário tocar na notificação
+  // vinda do APNs (necessário porque FirebaseAppDelegateProxyEnabled=false).
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    let userInfo = response.notification.request.content.userInfo
+    Messaging.messaging().appDidReceiveMessage(userInfo)
+    completionHandler()
   }
 
   // Show notifications while app is in foreground.

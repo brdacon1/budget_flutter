@@ -95,8 +95,7 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
     invalidosRemovidos: 0,
   };
 
-  const tokensCol = admin
-    .firestore()
+  const tokensCol = db
     .collection(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM`);
 
   let tokens = [];
@@ -143,6 +142,21 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
         defaultVibrateTimings: true,
       },
     },
+    apns: {
+      headers: {
+        "apns-priority": "10",
+      },
+      payload: {
+        aps: {
+          alert: {
+            title: title,
+            body: body,
+          },
+          sound: "default",
+          badge: 1,
+        },
+      },
+    },
   };
 
   const invalidTokens = [];
@@ -183,7 +197,6 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
   }
 
   if (invalidTokens.length > 0) {
-    const db = db;
     const batch = db.batch();
     for (const t of invalidTokens) {
       batch.delete(db.doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/${t}`));

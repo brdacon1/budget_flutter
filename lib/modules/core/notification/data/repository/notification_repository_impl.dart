@@ -100,10 +100,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      final apnsToken = await _dataSource.getApnsToken();
-      if (kDebugMode) {
-        debugPrint('APNs token: $apnsToken');
-      }
+      // A obtenção e log do APNs token agora acontecem dentro de
+      // _acquireTokenWithRetry, que aguarda o APNs token antes de pedir o
+      // FCM token no iOS.
     }
 
     final String? token = await _acquireTokenWithRetry();
@@ -138,6 +137,15 @@ class NotificationRepositoryImpl implements NotificationRepository {
     int maxAttempts = 6,
     Duration delay = const Duration(seconds: 2),
   }) async {
+    // No iOS o FCM token só existe quando o APNs token já foi entregue.
+    // Aguardamos o APNs token explicitamente para evitar race condition.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      await _ensureApnsTokenWithRetry(
+        maxAttempts: maxAttempts,
+        delay: delay,
+      );
+    }
+
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         final t = await _dataSource.getFcmToken();
@@ -159,12 +167,48 @@ class NotificationRepositoryImpl implements NotificationRepository {
     if (kDebugMode) {
       debugPrint(
         'FCM token NULO após $maxAttempts tentativas. Verifique: '
-        '(1) SHA-1 do certificado cadastrado no Console do Firebase; '
-        '(2) google-services.json atualizado; '
-        '(3) Play Services no dispositivo.',
+        '(1) iOS: certificado/chave APNs cadastrado no Console do Firebase; '
+        '(2) Android: SHA-1 do certificado cadastrado; '
+        '(3) google-services.json / GoogleService-Info.plist atualizado.',
       );
     }
     return null;
+  }
+
+  Future<void> _ensureApnsTokenWithRetry({
+    required int maxAttempts,
+    required Duration delay,
+  }) async {
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final apns = await _dataSource.getApnsToken();
+        if (apns != null && apns.isNotEmpty) {
+          if (kDebugMode) {
+            debugPrint('APNs token disponível: $apns');
+          }
+          return;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('getAPNSToken() falhou (tentativa $attempt): $e');
+        }
+      }
+      if (kDebugMode) {
+        debugPrint('APNs token indisponível (tentativa $attempt)');
+      }
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(delay);
+      }
+    }
+    if (kDebugMode) {
+      debugPrint(
+        'APNs token NUNCA ficou disponível. Verifique: '
+        '(1) Push Notifications capability habilitada; '
+        '(2) Background Modes -> Remote notifications habilitado; '
+        '(3) Provisioning profile com permissão para push; '
+        '(4) Teste em device físico (simulador não recebe APNs).',
+      );
+    }
   }
 
   // ---------------------------------------------------------------------------
