@@ -290,13 +290,24 @@ async function deleteDocRecursive(docRef) {
 }
 
 exports.deleteAccount = onRequest(
-  { region: REGION, cors: ["*"], timeoutSeconds: 540, memory: "1GiB" },
+  { region: REGION, timeoutSeconds: 540, memory: "1GiB" },
   async (req, res) => {
+    // CORS manual e explícito para evitar conflitos com o helper `cors` do
+    // Firebase. O preflight (OPTIONS) deve responder ANTES de qualquer
+    // validação/processamento.
     res.set("Access-Control-Allow-Origin", "*");
+    res.set("Vary", "Origin");
+
     if (req.method === "OPTIONS") {
       res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
       res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "86400");
       res.status(204).send("");
+      return;
+    }
+
+    if (req.method !== "POST") {
+      res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
       return;
     }
 
