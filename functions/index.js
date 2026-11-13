@@ -33,7 +33,10 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
+const { getMessaging } = require("firebase-admin/messaging");
 const cors = require("cors")({
   // Domínios oficiais do app + localhost para teste local com `firebase emulators:start`.
   origin: [
@@ -56,7 +59,10 @@ const cors = require("cors")({
 //     (Console Firebase -> Firestore Database -> topo mostra a região).
 const REGION = "southamerica-east1";
 
-admin.initializeApp();
+initializeApp();
+const db = getFirestore();
+const auth = getAuth();
+const messaging = getMessaging();
 
 /**
  * Códigos de erro do FCM v1 que indicam token inválido/expirado e que o
@@ -141,7 +147,7 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
 
   const invalidTokens = [];
   try {
-    const resp = await admin.messaging().sendEachForMulticast({
+    const resp = await messaging.sendEachForMulticast({
       ...message,
       tokens,
     });
@@ -177,7 +183,7 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
   }
 
   if (invalidTokens.length > 0) {
-    const db = admin.firestore();
+    const db = db;
     const batch = db.batch();
     for (const t of invalidTokens) {
       batch.delete(db.doc(`EMPRESAS/${ownerUid}/USERS/${ownerUid}/FCM/${t}`));
@@ -295,7 +301,7 @@ exports.onBudgetApprovalNotification = onDocumentCreated(
  */
 async function deleteDocRecursive(docRef) {
   try {
-    await admin.firestore().recursiveDelete(docRef);
+    await db.recursiveDelete(docRef);
   } catch (e) {
     logger.error("[deleteAccount] erro em recursiveDelete", { path: docRef.path, error: String(e) });
     throw e;
@@ -304,58 +310,124 @@ async function deleteDocRecursive(docRef) {
 
 exports.deleteAccount = onRequest(
   { region: REGION, timeoutSeconds: 540, memory: "1GiB" },
-  (req, res) => {
-    // O middleware `cors` trata o preflight (OPTIONS) automaticamente e
-    // reflete a origem correta, evitando os erros de CORS no Flutter Web.
-    cors(req, res, async (err) => {
-      if (err) {
-        logger.error("[deleteAccount] erro no middleware CORS", { error: String(err) });
-        res.status(500).json({ ok: false, erro: "Erro interno no CORS." });
+  async (req, res) => {
+    // Responde CORS preflight imediatamente, antes de qualquer processamento.
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, X-Requested-With");
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
+    if (req.method !== "POST") {
+      res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
+      return;
+    }
+
+    const email = String(req.body?.email || "").trim();
+    if (!email) {
+      res.status(400).json({ ok: false, erro: "email é obrigatório" });
+      return;
+    }
+
+    logger.info("[deleteAccount] solicitação recebida", { email });
+
+    let uid = null;
+    const deletados = [];
+    const falhas = [];
+
+    try {
+      // 1. Localiza o usuário no Auth
+      const userRecord = await auth.getUserByEmail(email);
+      uid = userRecord.uid;
+      logger.info("[deleteAccount] usuário encontrado", { uid, email });
+    } catch (e) {
+      logger.error("[deleteAccount] erro ao localizar usuário", { email, error: e.message });
+      if (e.code === "auth/user-not-found" || String(e).includes("There is no user record")) {
+        res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
         return;
       }
+      res.status(500).json({ ok: false, erro: "Erro ao localizar usuário.", detalhe: e.message });
+      return;
+    }
 
-      if (req.method !== "POST") {
-        res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
-        return;
-      }
+    // 2. Deleta subcoleções conhecidas do documento da empresa
+    const empresaPath = `EMPRESAS/${uid}`;
+    const subcolecoesEmpresa = [
+      "ORCAMENTOS",
+      "RECIBOS",
+      "INFOPDF",
+      "FCM",
+      "NOTIFICACOES",
+      "USERS",
+      "CLIENTES",
+      "PRODUTOS",
+      "SERVICOS",
+    ];
 
-      const email = String(req.body?.email || "").trim();
-      if (!email) {
-        res.status(400).json({ ok: false, erro: "email é obrigatório" });
-        return;
-      }
-
-      logger.info("[deleteAccount] solicitação recebida", { email });
-
+    for (const sub of subcolecoesEmpresa) {
+      const path = `${empresaPath}/${sub}`;
       try {
-        const userRecord = await admin.auth().getUserByEmail(email);
-        const uid = userRecord.uid;
-        logger.info("[deleteAccount] usuário encontrado", { uid, email });
-
-        // Remove todos os dados da empresa (inclusive subcoleções: ORCAMENTOS, RECIBOS, INFOPDF, FCM, NOTIFICACOES...)
-        const empresaRef = admin.firestore().doc(`EMPRESAS/${uid}`);
-        await deleteDocRecursive(empresaRef);
-        logger.info("[deleteAccount] EMPRESAS/{uid} removido", { uid });
-
-        // Remove o documento do usuário na coleção raiz USUARIOS
-        const usuarioRef = admin.firestore().doc(`USUARIOS/${uid}`);
-        await deleteDocRecursive(usuarioRef);
-        logger.info("[deleteAccount] USUARIOS/{uid} removido", { uid });
-
-        // Remove o usuário do Firebase Authentication
-        await admin.auth().deleteUser(uid);
-        logger.info("[deleteAccount] usuário Auth removido", { uid });
-
-        res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso." });
-      } catch (e) {
-        logger.error("[deleteAccount] erro", { email, error: String(e) });
-        const msg = String(e);
-        if (msg.includes("There is no user record")) {
-          res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
-          return;
+        const snap = await db.collection(path).limit(500).get();
+        if (snap.empty) {
+          deletados.push(path + " (vazio)");
+          continue;
         }
-        res.status(500).json({ ok: false, erro: "Erro interno ao processar a exclusão." });
+        const batch = db.batch();
+        snap.docs.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+        deletados.push(`${path} (${snap.size} docs)`);
+        logger.info("[deleteAccount] subcoleção deletada", { path, qtd: snap.size });
+      } catch (e) {
+        falhas.push({ path, erro: e.message });
+        logger.error("[deleteAccount] falha ao deletar subcoleção", { path, error: e.message });
       }
-    });
+    }
+
+    // 3. Deleta o documento raiz da empresa
+    try {
+      await db.doc(empresaPath).delete();
+      deletados.push(empresaPath);
+      logger.info("[deleteAccount] documento empresa deletado", { uid });
+    } catch (e) {
+      falhas.push({ path: empresaPath, erro: e.message });
+      logger.error("[deleteAccount] falha ao deletar empresa", { uid, error: e.message });
+    }
+
+    // 4. Deleta documento na coleção USUARIOS
+    const usuarioPath = `USUARIOS/${uid}`;
+    try {
+      await db.doc(usuarioPath).delete();
+      deletados.push(usuarioPath);
+      logger.info("[deleteAccount] documento USUARIOS deletado", { uid });
+    } catch (e) {
+      falhas.push({ path: usuarioPath, erro: e.message });
+      logger.error("[deleteAccount] falha ao deletar USUARIOS", { uid, error: e.message });
+    }
+
+    // 5. Deleta o usuário do Firebase Auth
+    try {
+      await auth.deleteUser(uid);
+      deletados.push("auth/user");
+      logger.info("[deleteAccount] usuário Auth removido", { uid });
+    } catch (e) {
+      falhas.push({ path: "auth/user", erro: e.message });
+      logger.error("[deleteAccount] falha ao deletar usuário Auth", { uid, error: e.message });
+    }
+
+    // 6. Responde com resumo
+    if (falhas.length === 0) {
+      res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso.", uid, deletados });
+    } else {
+      res.status(500).json({
+        ok: false,
+        erro: "Algumas etapas da exclusão falharam.",
+        uid,
+        deletados,
+        falhas,
+      });
+    }
   }
 );
