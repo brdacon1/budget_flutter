@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hyodotdev/openiap.git",
       "state" : {
-        "revision" : "a3ad196bebfbb14d1332b80fd0b6027761620fe3",
-        "version" : "4.0.3"
+        "revision" : "7d94718d605a4d5c849b9afe95a2baf49ea7a924",
+        "version" : "4.1.0"
       }
     },
     {
@@ -158,8 +158,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/googleads/swift-package-manager-google-mobile-ads",
       "state" : {
-        "revision" : "d1fa1f5c1dfe3b43d56c73f4de388ad3316618bc",
-        "version" : "13.11.0"
+        "revision" : "f6308a186913b186bdc8baf87d098206ecd75ace",
+        "version" : "13.12.0"
       }
     },
     {
