@@ -41,7 +41,9 @@ import UserNotifications
   ) {
     let userInfo = response.notification.request.content.userInfo
     Messaging.messaging().appDidReceiveMessage(userInfo)
-    completionHandler()
+    // Repassa ao plugin firebase_messaging (dispara onMessageOpenedApp /
+    // getInitialMessage no Dart). Sem o super, o deep-link não funciona no iOS.
+    super.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
   }
 
   // Show notifications while app is in foreground.
