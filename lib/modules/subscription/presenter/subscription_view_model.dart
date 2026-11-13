@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
@@ -23,9 +24,9 @@ class SubscriptionViewModel extends ChangeNotifier {
   StreamSubscription? _purchaseUpdatedSubscription;
   StreamSubscription? _purchaseErrorSubscription;
 
-  // SKU por plataforma
-  final String _androidSku = 'newproduct';
-  final String _iosSku = 'com.housestudio.oflite';
+  // SKU por plataforma, lido dos arquivos de ambiente
+  String get _androidSku => Environment.instance.subscription.androidSku;
+  String get _iosSku => Environment.instance.subscription.iosSku;
 
   String get sku => Platform.isAndroid ? _androidSku : _iosSku;
 

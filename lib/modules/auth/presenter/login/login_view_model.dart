@@ -13,6 +13,7 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,8 +31,8 @@ class LoginViewModel extends ChangeNotifier {
 
   final List<String> productLists =
       Platform.isAndroid
-          ? ['newproduct']
-          : ['com.housestudio.oflite', 'com.housestudio.oflite'];
+          ? [Environment.instance.subscription.androidSku]
+          : [Environment.instance.subscription.iosSku];
 
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;

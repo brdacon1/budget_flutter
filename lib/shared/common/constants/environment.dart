@@ -50,6 +50,9 @@ class Environment {
   /// Configurações do AdMob (preenchidas em [initialize]).
   late final AdMobConfig adMob;
 
+  /// Configurações de assinatura (preenchidas em [initialize]).
+  late final SubscriptionConfig subscription;
+
   /// Nome do arquivo JSON do ambiente correspondente (na pasta `env/`).
   String get _environmentFileName => environment == 'production'
       ? 'env/production_environment.json'
@@ -84,6 +87,9 @@ class Environment {
         (json['ADMOB_INTERSTITIAL_AD_UNIT_ID'] as String?) ??
             (adMobJson?['interstitialAdUnitId'] as String?);
 
+    final androidSubscriptionSku = json['ANDROID_SUBSCRIPTION_SKU'] as String?;
+    final iosSubscriptionSku = json['IOS_SUBSCRIPTION_SKU'] as String?;
+
     if (bannerAdUnitId == null || bannerAdUnitId.isEmpty) {
       throw StateError(
         '[Environment] Chave "ADMOB_BANNER_AD_UNIT_ID" ausente/vazia em '
@@ -96,10 +102,26 @@ class Environment {
         'em "$_environmentFileName".',
       );
     }
+    if (androidSubscriptionSku == null || androidSubscriptionSku.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "ANDROID_SUBSCRIPTION_SKU" ausente/vazia em '
+        '"$_environmentFileName".',
+      );
+    }
+    if (iosSubscriptionSku == null || iosSubscriptionSku.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "IOS_SUBSCRIPTION_SKU" ausente/vazia em '
+        '"$_environmentFileName".',
+      );
+    }
 
     adMob = AdMobConfig(
       bannerAdUnitId: bannerAdUnitId,
       interstitialAdUnitId: interstitialAdUnitId,
+    );
+    subscription = SubscriptionConfig(
+      androidSku: androidSubscriptionSku,
+      iosSku: iosSubscriptionSku,
     );
     _initialized = true;
 
@@ -112,7 +134,9 @@ class Environment {
       'buildMode=${kReleaseMode ? 'release' : 'debug'} '
       'arquivo="$_environmentFileName" '
       'bannerAdUnitId="$bannerAdUnitId" '
-      'interstitialAdUnitId="$interstitialAdUnitId"',
+      'interstitialAdUnitId="$interstitialAdUnitId" '
+      'androidSubscriptionSku="$androidSubscriptionSku" '
+      'iosSubscriptionSku="$iosSubscriptionSku"',
     );
   }
 }
@@ -129,4 +153,18 @@ class AdMobConfig {
 
   /// ID do bloco de anúncios intersticial.
   final String interstitialAdUnitId;
+}
+
+/// Configurações de assinatura por ambiente.
+class SubscriptionConfig {
+  const SubscriptionConfig({
+    required this.androidSku,
+    required this.iosSku,
+  });
+
+  /// SKU da assinatura na Google Play.
+  final String androidSku;
+
+  /// SKU da assinatura na App Store.
+  final String iosSku;
 }
