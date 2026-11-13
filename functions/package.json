@@ -2,7 +2,7 @@
   "name": "oflite-functions",
   "description": "Cloud Functions do OfLite (notificações de aprovação/reprovação de orçamento)",
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "index.js",
   "dependencies": {

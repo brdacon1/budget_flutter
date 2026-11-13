@@ -1,11 +1,11 @@
 {
-    "name": "oflite",
-    "short_name": "oflite",
+    "name": "Orçamentos de vendas - PDF",
+    "short_name": "OfLite",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#2697FF",
+    "theme_color": "#2697FF",
+    "description": "Crie e envie orçamentos de vendas em PDF de forma simples e rápida.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

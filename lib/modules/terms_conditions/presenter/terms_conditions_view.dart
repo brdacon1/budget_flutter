@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oflite/injection.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
+import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
 import 'terms_conditions_view_model.dart';
 
 class TermsConditionsView extends StatefulWidget {
@@ -44,7 +45,7 @@ class _TermsConditionsViewState extends State<TermsConditionsView> {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(TermsConditionsStrings.pageTitle),
+            title: Text(TermsConditionsStrings.pageTitlePrivacyPolicy),
             backgroundColor: bgColor,
           ),
           body: _buildBody(),
