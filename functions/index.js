@@ -34,6 +34,19 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
+const cors = require("cors")({
+  // Domínios oficiais do app + localhost para teste local com `firebase emulators:start`.
+  origin: [
+    "https://orcamentofacil-lite.web.app",
+    "https://orcamentofacil-lite.firebaseapp.com",
+    "http://localhost:5000",
+    "http://localhost:3000",
+  ],
+  methods: ["POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Accept", "Authorization", "X-Requested-With"],
+  credentials: false,
+  optionsSuccessStatus: 204,
+});
 
 // AJUSTE: região do seu Firestore. Padrão para projetos brasileiros via
 // console costuma ser "southamerica-east1"; projetos antigos/defaults usam
@@ -291,62 +304,58 @@ async function deleteDocRecursive(docRef) {
 
 exports.deleteAccount = onRequest(
   { region: REGION, timeoutSeconds: 540, memory: "1GiB" },
-  async (req, res) => {
-    // CORS manual e explícito para evitar conflitos com o helper `cors` do
-    // Firebase. O preflight (OPTIONS) deve responder ANTES de qualquer
-    // validação/processamento.
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Vary", "Origin");
-
-    if (req.method === "OPTIONS") {
-      res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-      res.set("Access-Control-Allow-Headers", "Content-Type");
-      res.set("Access-Control-Max-Age", "86400");
-      res.status(204).send("");
-      return;
-    }
-
-    if (req.method !== "POST") {
-      res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
-      return;
-    }
-
-    const email = String(req.body?.email || "").trim();
-    if (!email) {
-      res.status(400).json({ ok: false, erro: "email é obrigatório" });
-      return;
-    }
-
-    logger.info("[deleteAccount] solicitação recebida", { email });
-
-    try {
-      const userRecord = await admin.auth().getUserByEmail(email);
-      const uid = userRecord.uid;
-      logger.info("[deleteAccount] usuário encontrado", { uid, email });
-
-      // Remove todos os dados da empresa (inclusive subcoleções: ORCAMENTOS, RECIBOS, INFOPDF, FCM, NOTIFICACOES...)
-      const empresaRef = admin.firestore().doc(`EMPRESAS/${uid}`);
-      await deleteDocRecursive(empresaRef);
-      logger.info("[deleteAccount] EMPRESAS/{uid} removido", { uid });
-
-      // Remove o documento do usuário na coleção raiz USUARIOS
-      const usuarioRef = admin.firestore().doc(`USUARIOS/${uid}`);
-      await deleteDocRecursive(usuarioRef);
-      logger.info("[deleteAccount] USUARIOS/{uid} removido", { uid });
-
-      // Remove o usuário do Firebase Authentication
-      await admin.auth().deleteUser(uid);
-      logger.info("[deleteAccount] usuário Auth removido", { uid });
-
-      res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso." });
-    } catch (e) {
-      logger.error("[deleteAccount] erro", { email, error: String(e) });
-      const msg = String(e);
-      if (msg.includes("There is no user record")) {
-        res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
+  (req, res) => {
+    // O middleware `cors` trata o preflight (OPTIONS) automaticamente e
+    // reflete a origem correta, evitando os erros de CORS no Flutter Web.
+    cors(req, res, async (err) => {
+      if (err) {
+        logger.error("[deleteAccount] erro no middleware CORS", { error: String(err) });
+        res.status(500).json({ ok: false, erro: "Erro interno no CORS." });
         return;
       }
-      res.status(500).json({ ok: false, erro: "Erro interno ao processar a exclusão." });
-    }
+
+      if (req.method !== "POST") {
+        res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
+        return;
+      }
+
+      const email = String(req.body?.email || "").trim();
+      if (!email) {
+        res.status(400).json({ ok: false, erro: "email é obrigatório" });
+        return;
+      }
+
+      logger.info("[deleteAccount] solicitação recebida", { email });
+
+      try {
+        const userRecord = await admin.auth().getUserByEmail(email);
+        const uid = userRecord.uid;
+        logger.info("[deleteAccount] usuário encontrado", { uid, email });
+
+        // Remove todos os dados da empresa (inclusive subcoleções: ORCAMENTOS, RECIBOS, INFOPDF, FCM, NOTIFICACOES...)
+        const empresaRef = admin.firestore().doc(`EMPRESAS/${uid}`);
+        await deleteDocRecursive(empresaRef);
+        logger.info("[deleteAccount] EMPRESAS/{uid} removido", { uid });
+
+        // Remove o documento do usuário na coleção raiz USUARIOS
+        const usuarioRef = admin.firestore().doc(`USUARIOS/${uid}`);
+        await deleteDocRecursive(usuarioRef);
+        logger.info("[deleteAccount] USUARIOS/{uid} removido", { uid });
+
+        // Remove o usuário do Firebase Authentication
+        await admin.auth().deleteUser(uid);
+        logger.info("[deleteAccount] usuário Auth removido", { uid });
+
+        res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso." });
+      } catch (e) {
+        logger.error("[deleteAccount] erro", { email, error: String(e) });
+        const msg = String(e);
+        if (msg.includes("There is no user record")) {
+          res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
+          return;
+        }
+        res.status(500).json({ ok: false, erro: "Erro interno ao processar a exclusão." });
+      }
+    });
   }
 );
