@@ -290,7 +290,7 @@ async function deleteDocRecursive(docRef) {
 }
 
 exports.deleteAccount = onRequest(
-  { region: REGION, cors: ["*"] },
+  { region: REGION, cors: ["*"], timeoutSeconds: 540, memory: "1GiB" },
   async (req, res) => {
     res.set("Access-Control-Allow-Origin", "*");
     if (req.method === "OPTIONS") {

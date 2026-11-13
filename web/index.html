@@ -19,20 +19,117 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Orçamento de Vendas - PDF">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="oflite">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="Orçamentos de vendas - PDF">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png?v=2">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png?v=2"/>
 
-  <title>oflite</title>
-  <link rel="manifest" href="manifest.json">
+  <title>Orçamentos de vendas - PDF</title>
+  <link rel="manifest" href="manifest.json?v=2">
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #151a21;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #flutter-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #151a21;
+      z-index: 9999;
+      transition: opacity 0.3s ease;
+    }
+    #flutter-loading.hidden { opacity: 0; pointer-events: none; }
+    #flutter-loading .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #2697FF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #flutter-loading .message { font-size: 14px; color: rgba(255,255,255,0.7); }
+    #flutter-error {
+      display: none;
+      position: fixed;
+      inset: 0;
+      padding: 24px;
+      background-color: #151a21;
+      color: #ff6b6b;
+      z-index: 10000;
+      overflow: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+  </style>
+
+  <script>
+    // Diagnóstico: captura erros que causem tela branca e os exibe.
+    (function() {
+      var errors = [];
+      var originalError = console.error;
+      console.error = function() {
+        var args = Array.prototype.slice.call(arguments);
+        errors.push(args.join(' '));
+        originalError.apply(console, arguments);
+      };
+      window.addEventListener('error', function(e) {
+        errors.push(e.message + ' at ' + e.filename + ':' + e.lineno + ':' + e.colno);
+        showError();
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        errors.push('Unhandled promise rejection: ' + e.reason);
+        showError();
+      });
+      function showError() {
+        var el = document.getElementById('flutter-error');
+        if (el && errors.length > 0) {
+          el.style.display = 'block';
+          el.textContent = 'Erro ao carregar o app:\n\n' + errors.join('\n');
+        }
+        var loading = document.getElementById('flutter-loading');
+        if (loading) loading.classList.add('hidden');
+      }
+      window._showFlutterLoadingError = showError;
+
+      // Se o Flutter não inicializar em 15s, mostra diagnóstico.
+      setTimeout(function() {
+        if (!window._flutterAppLoaded) {
+          errors.push('O aplicativo não iniciou no tempo esperado. Tente recarregar com Ctrl+Shift+R (Cmd+Shift+R no Mac).');
+          showError();
+        }
+      }, 15000);
+    })();
+  </script>
 </head>
 <body>
+  <div id="flutter-loading">
+    <div class="spinner"></div>
+    <div class="message">Carregando Orçamentos de vendas - PDF...</div>
+  </div>
+  <pre id="flutter-error"></pre>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Sinaliza que o Flutter carregou para esconder o loading.
+    window.addEventListener('flutter-first-frame', function () {
+      window._flutterAppLoaded = true;
+      var loading = document.getElementById('flutter-loading');
+      if (loading) loading.classList.add('hidden');
+    });
+  </script>
 </body>
 </html>
