@@ -70,11 +70,11 @@ const messaging = getMessaging();
  * dados, ou o token expirou). Referência:
  *   https://firebase.google.com/docs/cloud-messaging/manage-tokens#detect-invalid-client-tokens
  */
+// NÃO incluir "invalid-argument": ele também é retornado quando o PAYLOAD é
+// inválido, e isso apagava TODOS os tokens (Android e iOS) da lista.
 const INVALID_TOKEN_CODES = [
-  "UNREGISTERED",
   "registration-token-not-registered",
-  "INVALID_ARGUMENT",
-  "invalid-argument",
+  "invalid-registration-token",
 ];
 
 // ---------------------------------------------------------------------------
@@ -135,27 +135,11 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
     },
     android: {
       priority: "high",
-      notification: {
-        channelId: "high_importance_channel",
-        icon: "@mipmap/ic_launcher",
-        priority: "high",
-        defaultVibrateTimings: true,
-      },
+      notification: { channelId: "high_importance_channel", sound: "default" },
     },
     apns: {
-      headers: {
-        "apns-priority": "10",
-      },
-      payload: {
-        aps: {
-          alert: {
-            title: title,
-            body: body,
-          },
-          sound: "default",
-          badge: 1,
-        },
-      },
+      headers: { "apns-priority": "10", "apns-push-type": "alert" },
+      payload: { aps: { sound: "default", badge: 1 } },
     },
   };
 
@@ -185,9 +169,7 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
         message: msg,
       });
       report.falhas.push({ token: tokens[i], code, message: msg });
-      const shouldRemove = INVALID_TOKEN_CODES.some((c) =>
-        code.toUpperCase().includes(c.toUpperCase())
-      );
+      const shouldRemove = INVALID_TOKEN_CODES.some((c) => code.endsWith(c));
       if (shouldRemove) invalidTokens.push(tokens[i]);
     }
   } catch (e) {
