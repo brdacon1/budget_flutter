@@ -31,7 +31,10 @@ class SubscriptionStrings {
       _isPt ? 'Restaurar Compras' : 'Restore Purchases';
 
   static String get subscriptionNotCompleted =>
-      _isPt ? 'Assinatura não realizada' : 'Subscription not completed';
+      _isPt ? 'Pagamento não realizado' : 'Payment not completed';
+
+  static String get paymentSuccess =>
+      _isPt ? 'Pagamento realizado com sucesso!' : 'Payment successful!';
 
   static String offerTokenError(String sku) => _isPt
       ? 'Offer token não encontrado. Verifique se o produto "$sku" está configurado com base plan na Play Console.'

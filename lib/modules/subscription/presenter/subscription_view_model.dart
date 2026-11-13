@@ -21,6 +21,8 @@ class SubscriptionViewModel extends ChangeNotifier {
   SubscriptionState state = SubscriptionState.idle;
   String? errorMessage;
 
+  bool _disposed = false;
+
   StreamSubscription? _purchaseUpdatedSubscription;
   StreamSubscription? _purchaseErrorSubscription;
 
@@ -45,7 +47,7 @@ class SubscriptionViewModel extends ChangeNotifier {
   Future<void> init() async {
     state = SubscriptionState.idle;
     errorMessage = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _iap.initConnection();
@@ -72,6 +74,8 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Não quebra o flow para não travar a UI no emulador
     }
 
+    if (_disposed) return;
+
     _purchaseUpdatedSubscription = _iap.purchaseUpdatedStream.listen(
       _onPurchaseUpdated,
     );
@@ -81,9 +85,11 @@ class SubscriptionViewModel extends ChangeNotifier {
   }
 
   Future<void> requestSubscription() async {
+    if (_disposed) return;
+
     state = SubscriptionState.loading;
     errorMessage = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       // Android precisa do offerToken do produto buscado
@@ -116,13 +122,16 @@ class SubscriptionViewModel extends ChangeNotifier {
       });
       // Sucesso/erro vem pelo listener
     } catch (e) {
+      if (_disposed) return;
       state = SubscriptionState.error;
       errorMessage = e.toString();
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   void _onPurchaseUpdated(Purchase purchase) async {
+    if (_disposed) return;
+
     try {
       _updateSubscriptionSession(
         autoRenewing: purchase.isAutoRenewing,
@@ -145,6 +154,7 @@ class SubscriptionViewModel extends ChangeNotifier {
           await _iap.finishTransaction(purchase: purchase, isConsumable: false);
         }
 
+        if (_disposed) return;
         state = SubscriptionState.success;
       } else if (purchase.purchaseState == PurchaseState.Pending) {
         state = SubscriptionState.success;
@@ -152,15 +162,18 @@ class SubscriptionViewModel extends ChangeNotifier {
         state = SubscriptionState.error;
         errorMessage = SubscriptionStrings.subscriptionNotCompleted;
       }
-      notifyListeners();
+      _safeNotify();
     } catch (e) {
+      if (_disposed) return;
       state = SubscriptionState.error;
       errorMessage = e.toString();
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   void _onPurchaseError(PurchaseError purchaseError) {
+    if (_disposed) return;
+
     if (purchaseError.code == ErrorCode.UserCancelled) {
       state = SubscriptionState.idle;
       errorMessage = null;
@@ -168,26 +181,31 @@ class SubscriptionViewModel extends ChangeNotifier {
       state = SubscriptionState.error;
       errorMessage = purchaseError.message;
     }
-    notifyListeners();
+    _safeNotify();
   }
 
   /// Restaura compras anteriores (obrigatório ter na App Store)
   Future<void> restorePurchases() async {
+    if (_disposed) return;
+
     state = SubscriptionState.loading;
-    notifyListeners();
+    _safeNotify();
 
     try {
       // iOS: restorePurchases dispara as transações pelo listener
       await _iap.restorePurchases();
       // O resultado vem pelo _purchaseUpdatedListener
     } catch (e) {
+      if (_disposed) return;
       state = SubscriptionState.error;
       errorMessage = e.toString();
-      notifyListeners();
+      _safeNotify();
     }
   }
 
   Future<void> checkExistingSubscription() async {
+    if (_disposed) return;
+
     try {
       final result = await _iap.getAvailablePurchases();
 
@@ -218,6 +236,10 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
   }
 
+  void _safeNotify() {
+    if (!_disposed) notifyListeners();
+  }
+
   void _updateSubscriptionSession({
     required bool autoRenewing,
     required String purchaseToken,
@@ -228,10 +250,14 @@ class SubscriptionViewModel extends ChangeNotifier {
     session.purchaseToken = purchaseToken;
     if (productId != null) session.productId = productId;
     getIt<UserRepository>().selectUser.value = session;
+    // Força notificação porque InfoUser é mutável e ValueNotifier não
+    // dispara listeners quando o mesmo objeto é reassinalado.
+    getIt<UserRepository>().selectUser.notifyListeners();
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _purchaseUpdatedSubscription?.cancel();
     _purchaseErrorSubscription?.cancel();
     super.dispose();

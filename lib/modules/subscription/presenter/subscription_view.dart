@@ -16,6 +16,8 @@ class SubscriptionView extends StatefulWidget {
 
 class _SubscriptionView extends State<SubscriptionView> {
   late SubscriptionViewModel _viewModel;
+  bool _handledSuccess = false;
+  bool _handledError = false;
 
   @override
   void initState() {
@@ -33,20 +35,42 @@ class _SubscriptionView extends State<SubscriptionView> {
   }
 
   void _onViewModelChanged() {
-    if (_viewModel.state == SubscriptionState.success && mounted) {
+    if (_viewModel.state == SubscriptionState.loading) {
+      _handledSuccess = false;
+      _handledError = false;
+      return;
+    }
+
+    if (_viewModel.state == SubscriptionState.success &&
+        mounted &&
+        !_handledSuccess) {
+      _handledSuccess = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.pop(context, true);
+        if (!mounted) return;
+        final messenger = ScaffoldMessenger.of(context);
+        Navigator.pop(context, true);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(SubscriptionStrings.paymentSuccess),
+            backgroundColor: Colors.green,
+          ),
+        );
       });
-    } else if (_viewModel.state == SubscriptionState.error && mounted) {
+    } else if (_viewModel.state == SubscriptionState.error &&
+        mounted &&
+        !_handledError) {
+      _handledError = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(_viewModel.errorMessage ?? SubscriptionStrings.subscriptionNotCompleted),
-              backgroundColor: Colors.red,
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _viewModel.errorMessage ??
+                  SubscriptionStrings.subscriptionNotCompleted,
             ),
-          );
-        }
+            backgroundColor: Colors.red,
+          ),
+        );
       });
     }
   }
