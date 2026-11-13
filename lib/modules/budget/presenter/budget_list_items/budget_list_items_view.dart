@@ -32,22 +32,17 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   @override
   void initState() {
     super.initState();
+    _viewModel = BudgetListItemsViewModel(item: widget.item);
     getIt<BudgetRepository>().selectBudget.value = widget.item;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.getListItens();
+    });
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _viewModel = BudgetListItemsViewModel(item: widget.item);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.getListItens();
-    });
   }
 
   Future<void> _dialogDeleteBuilder() async {
