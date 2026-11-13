@@ -1,17 +1,16 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
-import 'package:dio/dio.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 

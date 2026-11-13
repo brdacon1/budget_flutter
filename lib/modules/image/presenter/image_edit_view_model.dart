@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -7,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:path_provider/path_provider.dart';
 

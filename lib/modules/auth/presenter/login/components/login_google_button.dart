@@ -25,7 +25,7 @@ class LoginGoogleButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/icons/google_logo.png', height: 24, width: 24),
+            Image.asset('assets/png/google_logo.png', height: 24, width: 24),
             const SizedBox(width: 8),
             Text(
               LoginStrings.loginWithGoogle,

@@ -31,7 +31,7 @@ class LoginRememberMeSwitch extends StatelessWidget {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: buttonColor,
+          activeThumbColor: buttonColor,
           activeTrackColor: buttonColor.withValues(alpha: 0.5),
           inactiveThumbColor: Colors.white,
           inactiveTrackColor: Colors.white.withValues(alpha: 0.3),

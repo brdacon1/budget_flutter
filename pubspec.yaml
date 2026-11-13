@@ -62,11 +62,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/pintor.png
-    - assets/images/
-    - assets/icons/
     - assets/login-initial-page.png
     - env/development_environment.json
     - env/production_environment.json
+    - assets/png/google_logo.png
   fonts:
     - family: Montserrat-Bold
       fonts:
