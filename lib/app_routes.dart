@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'modules/auth/auth_routes.dart';
 import 'modules/budget/budget_routes.dart';

@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 
 class PdfEditLogoSection extends StatelessWidget {

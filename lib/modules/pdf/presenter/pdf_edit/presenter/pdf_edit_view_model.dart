@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:dio/dio.dart';

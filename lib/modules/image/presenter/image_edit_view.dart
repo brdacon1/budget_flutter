@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';

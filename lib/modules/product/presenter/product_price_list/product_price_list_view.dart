@@ -1,5 +1,5 @@
 import 'package:badges/badges.dart' as badges;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';

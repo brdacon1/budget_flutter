@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/components/payment_creator_field.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/receipt_payment_creator_view_model.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
 import 'package:oflite/shared/common/constants/constants.dart';

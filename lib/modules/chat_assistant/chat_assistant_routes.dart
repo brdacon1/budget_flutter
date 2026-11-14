@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'presenter/chat_assistant/chat_assistant_view.dart';
 
 enum ChatBudgetRoute { chatAssistant }

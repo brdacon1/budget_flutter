@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
