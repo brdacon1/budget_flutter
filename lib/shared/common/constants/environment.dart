@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show debugPrint, kReleaseMode;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, debugPrint, defaultTargetPlatform, kReleaseMode;
 import 'package:flutter/services.dart' show rootBundle;
 
 /// Configurações de ambiente.
@@ -39,12 +40,13 @@ class Environment {
 
   /// Nome do ambiente atual. Pode ser sobrescrito por `--dart-define`.
   String get environment => const String.fromEnvironment(
-        'ENVIRONMENT',
-        defaultValue: _kDefaultEnvironment,
-      );
+    'ENVIRONMENT',
+    defaultValue: _kDefaultEnvironment,
+  );
 
   /// Indica se [initialize] já foi executada com sucesso.
   bool _initialized = false;
+
   bool get isInitialized => _initialized;
 
   /// Configurações do AdMob (preenchidas em [initialize]).
@@ -54,9 +56,10 @@ class Environment {
   late final SubscriptionConfig subscription;
 
   /// Nome do arquivo JSON do ambiente correspondente (na pasta `env/`).
-  String get _environmentFileName => environment == 'production'
-      ? 'env/production_environment.json'
-      : 'env/development_environment.json';
+  String get _environmentFileName =>
+      environment == 'production'
+          ? 'env/production_environment.json'
+          : 'env/development_environment.json';
 
   /// Carrega as chaves do JSON do ambiente atual.
   ///
@@ -81,27 +84,37 @@ class Environment {
     // quanto o aninhado antigo (adMob.*). Sem fallbacks hardcoded: se uma
     // chave faltar, lança erro explícito.
     final adMobJson = json['adMob'] as Map<String, dynamic>?;
-    final bannerAdUnitId = (json['ADMOB_BANNER_AD_UNIT_ID'] as String?) ??
+
+    // As chaves de anúncio são por plataforma; o app usa apenas a da
+    // plataforma atual (iOS → *_IOS, demais → *_ANDROID).
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    final bannerKey =
+        isIOS ? 'ADMOB_BANNER_AD_UNIT_ID_IOS' : 'ADMOB_BANNER_AD_UNIT_ID_ANDROID';
+    final interstitialKey = isIOS
+        ? 'ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS'
+        : 'ADMOB_INTERSTITIAL_AD_UNIT_ID_ANDROID';
+
+    final bannerAdUnitId = (json[bannerKey] as String?) ??
         (adMobJson?['bannerAdUnitId'] as String?);
-    final interstitialAdUnitId =
-        (json['ADMOB_INTERSTITIAL_AD_UNIT_ID'] as String?) ??
-            (adMobJson?['interstitialAdUnitId'] as String?);
+    final interstitialAdUnitId = (json[interstitialKey] as String?) ??
+        (adMobJson?['interstitialAdUnitId'] as String?);
 
     final androidSubscriptionSku = json['ANDROID_SUBSCRIPTION_SKU'] as String?;
     final iosSubscriptionSku = json['IOS_SUBSCRIPTION_SKU'] as String?;
 
     if (bannerAdUnitId == null || bannerAdUnitId.isEmpty) {
       throw StateError(
-        '[Environment] Chave "ADMOB_BANNER_AD_UNIT_ID" ausente/vazia em '
+        '[Environment] Chave "$bannerKey" ausente/vazia em '
         '"$_environmentFileName".',
       );
     }
     if (interstitialAdUnitId == null || interstitialAdUnitId.isEmpty) {
       throw StateError(
-        '[Environment] Chave "ADMOB_INTERSTITIAL_AD_UNIT_ID" ausente/vazia '
-        'em "$_environmentFileName".',
+        '[Environment] Chave "$interstitialKey" ausente/vazia em '
+        '"$_environmentFileName".',
       );
     }
+
     if (androidSubscriptionSku == null || androidSubscriptionSku.isEmpty) {
       throw StateError(
         '[Environment] Chave "ANDROID_SUBSCRIPTION_SKU" ausente/vazia em '
@@ -133,6 +146,7 @@ class Environment {
       '[Environment] ambiente="$environment" '
       'buildMode=${kReleaseMode ? 'release' : 'debug'} '
       'arquivo="$_environmentFileName" '
+      'plataforma="${isIOS ? 'ios' : 'android'}" '
       'bannerAdUnitId="$bannerAdUnitId" '
       'interstitialAdUnitId="$interstitialAdUnitId" '
       'androidSubscriptionSku="$androidSubscriptionSku" '
@@ -148,19 +162,16 @@ class AdMobConfig {
     required this.interstitialAdUnitId,
   });
 
-  /// ID do bloco de anúncios banner.
+  /// ID do bloco de anúncios banner da plataforma atual.
   final String bannerAdUnitId;
 
-  /// ID do bloco de anúncios intersticial.
+  /// ID do bloco de anúncios intersticial da plataforma atual.
   final String interstitialAdUnitId;
 }
 
 /// Configurações de assinatura por ambiente.
 class SubscriptionConfig {
-  const SubscriptionConfig({
-    required this.androidSku,
-    required this.iosSku,
-  });
+  const SubscriptionConfig({required this.androidSku, required this.iosSku});
 
   /// SKU da assinatura na Google Play.
   final String androidSku;
