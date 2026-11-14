@@ -1,165 +1,158 @@
-name: Build iOS Release (IPA)
+name: Build iOS IPA (assinado)
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
     inputs:
-      export_method:
-        description: 'Método de exportação do IPA'
+      profile:
+        description: 'Provisioning profile usado na assinatura'
         required: true
-        default: 'app-store'
+        default: 'publishment'
         type: choice
         options:
-          - app-store
-          - ad-hoc
+          - publishment
           - development
-          - enterprise
 
 jobs:
   build-ios:
     runs-on: macos-latest
+    timeout-minutes: 60
 
     env:
-      FLUTTER_VERSION: 'stable'
-      XCODE_VERSION: '15.0.1'
-      BUNDLE_ID: 'com.housestudio.oflite'
+      BUNDLE_ID: com.housestudio.oflite
+      PROFILE_KIND: ${{ github.event.inputs.profile || 'publishment' }}
 
     steps:
-      # -----------------------------------------------------------------------
-      # 1. Checkout
-      # -----------------------------------------------------------------------
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # 2. Select Xcode version
-      # -----------------------------------------------------------------------
+      # Usa o Xcode estável mais recente disponível no runner
+      # (versões fixas como 15.0.1 deixam de existir nas imagens do GitHub).
       - name: Select Xcode
-        run: |
-          sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer
-          xcodebuild -version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
-      # -----------------------------------------------------------------------
-      # 3. Setup Flutter
-      # -----------------------------------------------------------------------
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
 
-      # -----------------------------------------------------------------------
-      # 4. Install Flutter dependencies
-      # -----------------------------------------------------------------------
       - name: Flutter pub get
         run: flutter pub get
 
       # -----------------------------------------------------------------------
-      # 5. Validate iOS signing secrets
-      # -----------------------------------------------------------------------
-      - name: Validate iOS signing secrets
-        env:
-          IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
-          IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-          IOS_MOBILEPROVISION_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
-          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
-          IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
-          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
-          GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
-        run: |
-          missing=()
-          [ -z "$IOS_P12_BASE64" ] && missing+=("IOS_P12_BASE64")
-          [ -z "$IOS_P12_PASSWORD" ] && missing+=("IOS_P12_PASSWORD")
-          [ -z "$IOS_MOBILEPROVISION_BASE64" ] && missing+=("IOS_MOBILEPROVISION_BASE64")
-          [ -z "$IOS_KEYCHAIN_PASSWORD" ] && missing+=("IOS_KEYCHAIN_PASSWORD")
-          [ -z "$IOS_PROVISIONING_PROFILE_NAME" ] && missing+=("IOS_PROVISIONING_PROFILE_NAME")
-          [ -z "$IOS_TEAM_ID" ] && missing+=("IOS_TEAM_ID")
-          [ -z "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ] && missing+=("GOOGLE_SERVICE_INFO_PLIST_BASE64")
-
-          if [ ${#missing[@]} -ne 0 ]; then
-            echo "ERRO: Os seguintes secrets estão faltando no GitHub Actions:"
-            for s in "${missing[@]}"; do echo "  - $s"; done
-            echo ""
-            echo "Consulte .github/workflows/README_IOS.md para instruções."
-            exit 1
-          fi
-
-          echo "Todos os secrets de signing estão configurados."
-
-      # -----------------------------------------------------------------------
-      # 6. Decode GoogleService-Info.plist
+      # Arquivos e assinatura
       # -----------------------------------------------------------------------
       - name: Decode GoogleService-Info.plist
         env:
           GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
         run: |
-          echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/Runner/GoogleService-Info.plist
-          echo "GoogleService-Info.plist decodificado com sucesso."
+          if [ -z "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
+            echo "::error::Secret GOOGLE_SERVICE_INFO_PLIST_BASE64 não configurado."
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/Runner/GoogleService-Info.plist
 
-      # -----------------------------------------------------------------------
-      # 7. Setup iOS Keychain + Certificate + Provisioning Profile
-      # -----------------------------------------------------------------------
-      - name: Setup iOS signing
+      - name: Install certificate and provisioning profile
         env:
           IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
           IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-          IOS_MOBILEPROVISION_BASE64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
-          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          MOBILE_PROVISION_PUBLISHMENT: ${{ secrets.MOBILE_PROVISION_PUBLISHMENT }}
+          MOBILE_PROVISION_DEVELOPMENT: ${{ secrets.MOBILE_PROVISION_DEVELOPMENT }}
         run: |
-          set -e
+          set -euo pipefail
 
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          P12_PATH=$RUNNER_TEMP/certificate.p12
-          PP_PATH=$RUNNER_TEMP/build.mobileprovision
-          KEYCHAIN_PASSWORD="$IOS_KEYCHAIN_PASSWORD"
+          if [ "$PROFILE_KIND" = "development" ]; then
+            PROFILE_B64="$MOBILE_PROVISION_DEVELOPMENT"; PROFILE_SECRET=MOBILE_PROVISION_DEVELOPMENT
+          else
+            PROFILE_B64="$MOBILE_PROVISION_PUBLISHMENT"; PROFILE_SECRET=MOBILE_PROVISION_PUBLISHMENT
+          fi
 
-          # Decode certificate and provisioning profile
-          echo "$IOS_P12_BASE64" | base64 --decode > "$P12_PATH"
-          echo "$IOS_MOBILEPROVISION_BASE64" | base64 --decode > "$PP_PATH"
+          missing=0
+          [ -z "$IOS_P12_BASE64" ]   && { echo "::error::Secret IOS_P12_BASE64 não configurado."; missing=1; }
+          [ -z "$IOS_P12_PASSWORD" ] && { echo "::error::Secret IOS_P12_PASSWORD não configurado."; missing=1; }
+          [ -z "$PROFILE_B64" ]      && { echo "::error::Secret $PROFILE_SECRET não configurado."; missing=1; }
+          [ "$missing" -eq 0 ] || exit 1
 
-          # Create temporary keychain
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          P12_PATH="$RUNNER_TEMP/certificate.p12"
+          PP_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          PP_PLIST="$RUNNER_TEMP/profile.plist"
+
+          printf '%s' "$IOS_P12_BASE64" | base64 --decode > "$P12_PATH"
+          printf '%s' "$PROFILE_B64"    | base64 --decode > "$PP_PATH"
+
+          # Keychain temporário
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # Add keychain to search list
-          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
-
-          # Import certificate
           security import "$P12_PATH" -P "$IOS_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
 
-          # Install provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build.mobileprovision
+          # Identidade de assinatura (SHA-1 do certificado importado)
+          SIGN_IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | awk 'NR==1 {print $2}')
+          if [ -z "$SIGN_IDENTITY" ]; then
+            echo "::error::Nenhuma identidade de assinatura válida encontrada no .p12."
+            exit 1
+          fi
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
-          echo "iOS signing configurado com sucesso."
+          # Lê os dados direto do provisioning profile
+          security cms -D -i "$PP_PATH" > "$PP_PLIST"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PP_PLIST")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PP_PLIST")
+          TEAM_ID=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$PP_PLIST")
 
-      # -----------------------------------------------------------------------
-      # 8. Force manual signing in Release configuration for CI
-      # -----------------------------------------------------------------------
-      - name: Configure manual signing for CI
+          # Detecta o método de exportação pelo tipo do profile
+          if [ "$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' "$PP_PLIST" 2>/dev/null)" = "true" ]; then
+            EXPORT_METHOD=development
+          elif /usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' "$PP_PLIST" >/dev/null 2>&1; then
+            EXPORT_METHOD=enterprise
+          elif /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$PP_PLIST" >/dev/null 2>&1; then
+            EXPORT_METHOD=ad-hoc
+          else
+            EXPORT_METHOD=app-store
+          fi
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          echo "Profile: $PROFILE_NAME ($PROFILE_UUID)"
+          echo "Team ID: $TEAM_ID"
+          echo "Método:  $EXPORT_METHOD"
+
+          {
+            echo "SIGN_IDENTITY=$SIGN_IDENTITY"
+            echo "PROFILE_UUID=$PROFILE_UUID"
+            echo "TEAM_ID=$TEAM_ID"
+            echo "EXPORT_METHOD=$EXPORT_METHOD"
+          } >> "$GITHUB_ENV"
+
+          rm -f "$P12_PATH"
+
+      # O projeto usa assinatura automática (exige conta Apple logada no Xcode).
+      # No CI trocamos para manual usando o certificado/profile instalados.
+      # Alteração só no runner, não é commitada.
+      - name: Configure manual signing
         run: |
-          # O Xcode no runner não possui a conta Apple vinculada, então
-          # forçamos CODE_SIGN_STYLE = Manual para evitar falhas de signing.
-          # Alteração em memória; não é commitada.
-          sed -i.bak 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-          rm ios/Runner.xcodeproj/project.pbxproj.bak
+          PBXPROJ=ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' \
+            -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' \
+            -e "s/CODE_SIGN_IDENTITY = \"Apple Development\";/CODE_SIGN_IDENTITY = \"$SIGN_IDENTITY\";/g" \
+            -e "s/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = \"iPhone Developer\";/\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$SIGN_IDENTITY\";/g" \
+            -e "s/DEVELOPMENT_TEAM = [A-Z0-9]*;/DEVELOPMENT_TEAM = $TEAM_ID;/g" \
+            -e "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_UUID\";/g" \
+            "$PBXPROJ"
+          grep -nE "CODE_SIGN_STYLE|CODE_SIGN_IDENTITY|PROVISIONING_PROFILE_SPECIFIER|DEVELOPMENT_TEAM" "$PBXPROJ"
 
-          echo "Configuração de signing atualizada para CI:"
-          grep -n "CODE_SIGN_STYLE" ios/Runner.xcodeproj/project.pbxproj
-
-      # -----------------------------------------------------------------------
-      # 9. Generate ExportOptions.plist
-      # -----------------------------------------------------------------------
       - name: Generate ExportOptions.plist
-        env:
-          IOS_PROVISIONING_PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
-          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
-          EXPORT_METHOD: ${{ github.event.inputs.export_method || 'app-store' }}
         run: |
-          cat > ios/ExportOptions.plist <<EOF
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -167,48 +160,41 @@ jobs:
             <key>method</key>
             <string>${EXPORT_METHOD}</string>
             <key>teamID</key>
-            <string>${IOS_TEAM_ID}</string>
+            <string>${TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>${SIGN_IDENTITY}</string>
             <key>provisioningProfiles</key>
             <dict>
               <key>${BUNDLE_ID}</key>
-              <string>${IOS_PROVISIONING_PROFILE_NAME}</string>
+              <string>${PROFILE_UUID}</string>
             </dict>
-            <key>uploadBitcode</key>
-            <false/>
-            <key>compileBitcode</key>
-            <false/>
             <key>uploadSymbols</key>
             <true/>
           </dict>
           </plist>
           EOF
-
-          echo "ExportOptions.plist gerado:"
-          cat ios/ExportOptions.plist
+          cat "$RUNNER_TEMP/ExportOptions.plist"
 
       # -----------------------------------------------------------------------
-      # 10. Build IPA
+      # Build e artefato
       # -----------------------------------------------------------------------
-      - name: Build IPA (Release)
+      - name: Build IPA
         run: |
           flutter build ipa \
             --release \
-            --export-options-plist=ios/ExportOptions.plist \
+            --export-options-plist="$RUNNER_TEMP/ExportOptions.plist" \
             --dart-define-from-file=env/production_environment.json
 
-      # -----------------------------------------------------------------------
-      # 11. Upload IPA artifact
-      # -----------------------------------------------------------------------
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-release-ipa
+          name: oflite-ios-${{ env.PROFILE_KIND }}-${{ github.run_number }}
           path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
 
-      # -----------------------------------------------------------------------
-      # 12. Cleanup keychain
-      # -----------------------------------------------------------------------
       - name: Cleanup keychain
         if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+        run: security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
