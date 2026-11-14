@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_view.dart';
 
 enum DeleteAccountRoute { deleteAccount }

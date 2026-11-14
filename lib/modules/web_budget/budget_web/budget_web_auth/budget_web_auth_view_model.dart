@@ -1,5 +1,5 @@
 import 'package:oflite/injection.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';

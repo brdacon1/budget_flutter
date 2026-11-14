@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/components/product_price_field.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view_model.dart';

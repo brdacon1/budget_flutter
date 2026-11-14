@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'presenter/terms_conditions_view.dart';
 
 enum TermsConditionsRoute { termsConditions }

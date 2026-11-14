@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Barra de input inferior estilo WhatsApp.
 class ChatInputBar extends StatelessWidget {
