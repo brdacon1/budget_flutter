@@ -32,23 +32,27 @@ class BudgetListItemsViewModel extends ChangeNotifier {
   int countService = 0;
 
   Future<void> getListItens() async {
-    budgets.clear();
+    final result = await _budgetRepository.fetchBudgetItems(
+      item.id!,
+      forceRefresh: true,
+    );
+
+    // Cópia própria: `budgets` alimenta o ListView.builder da View e não pode
+    // ser a mesma instância do cache do repositório, que é mutada por
+    // save/delete (ex.: lista de preço) fora do ciclo de build.
+    budgets =
+        result is Ok<List<ItemsBudget>>
+            ? List<ItemsBudget>.of(result.value)
+            : <ItemsBudget>[];
+    for (var o in budgets) {
+      o.checkBox = false;
+    }
+
     totalProducts = 0;
     totalServices = 0;
     totalBudget = 0;
     countProduct = 0;
     countService = 0;
-
-    final result = await _budgetRepository.fetchBudgetItems(
-      item.id!,
-      forceRefresh: true,
-    );
-    if (result is Ok<List<ItemsBudget>>) {
-      budgets = result.value;
-      for (var o in budgets) {
-        o.checkBox = false;
-      }
-    }
 
     for (int index = 0; index < budgets.length; index++) {
       double total = budgets[index].total ?? 0;
@@ -81,6 +85,7 @@ class BudgetListItemsViewModel extends ChangeNotifier {
       deleteItens,
     );
     if (result is Ok<void>) {
+      budgets = budgets.where((i) => !deleteItens.contains(i)).toList();
       deleteItens.clear();
       deleteVisible = false;
     }
