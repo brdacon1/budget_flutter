@@ -4,7 +4,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
@@ -87,14 +87,14 @@ class MyApp extends StatelessWidget {
       child: AdaptiveTheme(
         light: ThemeData.light().copyWith(
           scaffoldBackgroundColor: creamColor,
-          textTheme: GoogleFonts.poppinsTextTheme(
+          textTheme: poppinsTextTheme(
             Theme.of(context).textTheme,
           ).apply(bodyColor: Colors.black),
           canvasColor: snowColor,
         ),
         dark: ThemeData.dark().copyWith(
           scaffoldBackgroundColor: bgColor,
-          textTheme: GoogleFonts.poppinsTextTheme(
+          textTheme: poppinsTextTheme(
             Theme.of(context).textTheme,
           ).apply(bodyColor: Colors.white),
           canvasColor: secondaryColor,

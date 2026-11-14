@@ -2,7 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
 import 'package:oflite/shared/common/constants/constants.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_app/budget_web_app_view.dart';
@@ -53,14 +53,14 @@ class BudgetWebApp extends StatelessWidget {
       light: ThemeData.light().copyWith(
         scaffoldBackgroundColor: creamColor,
         textTheme:
-            GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
+            poppinsTextTheme(Theme.of(context).textTheme)
                 .apply(bodyColor: Colors.black),
         canvasColor: snowColor,
       ),
       dark: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: bgColor,
         textTheme:
-            GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
+            poppinsTextTheme(Theme.of(context).textTheme)
                 .apply(bodyColor: Colors.white),
         canvasColor: secondaryColor,
       ),
