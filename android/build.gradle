@@ -8,17 +8,34 @@ allprojects {
 rootProject.buildDir = '../build'
 
 subprojects {
+    // Silence javac lint warnings/notes coming from third-party Flutter plugins.
+    // Runs at execution time so it wins over flags plugins add (e.g. sqflite).
+    if (project.name != 'app') {
+        tasks.withType(JavaCompile).configureEach {
+            doFirst {
+                options.compilerArgs.removeAll { it.toString().startsWith('-Xlint') }
+                options.compilerArgs += ['-Xlint:none', '-nowarn', '-XDsuppressNotes']
+            }
+        }
+    }
+
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 
     afterEvaluate { subproject ->
+        def kotlinExt = subproject.extensions.findByName('kotlin')
+        if (kotlinExt != null && kotlinExt.hasProperty('compilerOptions')) {
+            kotlinExt.compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
         if (subproject.hasProperty('android')) {
+            // flutter_inapp_purchase adds its Kotlin sources via java.srcDirs, which
+            // Built-in Kotlin (AGP 9) does not compile. Mirror them into kotlin.srcDirs.
+            if (subproject.name == 'flutter_inapp_purchase') {
+                subproject.android.sourceSets.main.kotlin.srcDirs(subproject.android.sourceSets.main.java.srcDirs)
+            }
             subproject.android {
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17
                     targetCompatibility JavaVersion.VERSION_17
-                }
-                kotlinOptions {
-                    jvmTarget = '17'
                 }
                 if (namespace == null) {
                     def manifestFile = subproject.file('src/main/AndroidManifest.xml')

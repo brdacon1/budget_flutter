@@ -1,6 +1,5 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
 }
@@ -40,10 +39,6 @@ android {
         coreLibraryDesugaringEnabled true
     }
 
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
     defaultConfig {
         applicationId "com.housestudio.oflite"
         minSdk = 24
@@ -72,6 +67,12 @@ android {
                 debugSymbolLevel 'SYMBOL_TABLE'
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
