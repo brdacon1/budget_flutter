@@ -15,7 +15,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 
 class BudgetListView extends StatefulWidget {

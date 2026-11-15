@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Rodapé "Já tem uma conta? Entre" da tela de cadastro.
 ///

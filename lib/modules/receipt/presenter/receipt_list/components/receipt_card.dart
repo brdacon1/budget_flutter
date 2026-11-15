@@ -4,7 +4,7 @@ import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart'
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Card de recibo (ExpansionTileCard) da lista de recibos.
 ///

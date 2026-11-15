@@ -8,7 +8,7 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

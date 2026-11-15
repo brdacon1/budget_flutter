@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Toggle de abas Login / Sign up usado no topo do card de autenticação.
 class LoginTabToggle extends StatelessWidget {

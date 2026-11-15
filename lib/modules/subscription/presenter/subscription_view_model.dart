@@ -10,7 +10,7 @@ import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 
-enum SubscriptionState { idle, loading, success, error }
+enum SubscriptionState { idle, loading, success, cancelled, error }
 
 class SubscriptionViewModel extends ChangeNotifier {
   final InAppPurchaseRepository _iap;
@@ -19,7 +19,6 @@ class SubscriptionViewModel extends ChangeNotifier {
     : _iap = iapRepository ?? getIt<InAppPurchaseRepository>();
 
   SubscriptionState state = SubscriptionState.idle;
-  String? errorMessage;
 
   bool _disposed = false;
 
@@ -46,7 +45,6 @@ class SubscriptionViewModel extends ChangeNotifier {
 
   Future<void> init() async {
     state = SubscriptionState.idle;
-    errorMessage = null;
     _safeNotify();
 
     try {
@@ -88,7 +86,6 @@ class SubscriptionViewModel extends ChangeNotifier {
     if (_disposed) return;
 
     state = SubscriptionState.loading;
-    errorMessage = null;
     _safeNotify();
 
     try {
@@ -123,9 +120,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Sucesso/erro vem pelo listener
     } catch (e) {
       if (_disposed) return;
-      state = SubscriptionState.error;
-      errorMessage = e.toString();
-      _safeNotify();
+      _fail(e);
     }
   }
 
@@ -160,27 +155,27 @@ class SubscriptionViewModel extends ChangeNotifier {
         state = SubscriptionState.success;
       } else {
         state = SubscriptionState.error;
-        errorMessage = SubscriptionStrings.subscriptionNotCompleted;
       }
       _safeNotify();
     } catch (e) {
       if (_disposed) return;
-      state = SubscriptionState.error;
-      errorMessage = e.toString();
-      _safeNotify();
+      _fail(e);
     }
   }
 
   void _onPurchaseError(PurchaseError purchaseError) {
     if (_disposed) return;
 
-    if (purchaseError.code == ErrorCode.UserCancelled) {
-      state = SubscriptionState.idle;
-      errorMessage = null;
-    } else {
-      state = SubscriptionState.error;
-      errorMessage = purchaseError.message;
-    }
+    _fail(purchaseError);
+  }
+
+  /// Nunca expõe o erro cru da loja para a UI: só o estado.
+  void _fail(Object e) {
+    if (kDebugMode) print('[SubscriptionViewModel] Erro: $e');
+    state =
+        e is PurchaseError && e.code == ErrorCode.UserCancelled
+            ? SubscriptionState.cancelled
+            : SubscriptionState.error;
     _safeNotify();
   }
 
@@ -197,9 +192,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       // O resultado vem pelo _purchaseUpdatedListener
     } catch (e) {
       if (_disposed) return;
-      state = SubscriptionState.error;
-      errorMessage = e.toString();
-      _safeNotify();
+      _fail(e);
     }
   }
 

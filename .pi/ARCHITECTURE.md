@@ -1160,6 +1160,7 @@ etc.
 | 13     | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |
 | **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`**                                                                            |
 | **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`**                                                                             |
+| **16** | **Toda cor vem de `lib/shared/common/constants/colors.dart` — nunca `Color(0x...)` ou `Colors.*` direto no widget (ver seção 15)**                       |
 
 ---
 
@@ -1559,6 +1560,51 @@ Future<String?> _create({required ProductPriceModel model}) async {
       `fromListItem: this.item != null && !fromMenu`.
 - [ ] `ProductPriceListViewModel.addNew()` não precisa de mudança (delega para
       `openCreator()`).
+
+---
+
+## 15. Regra de Cores — Fonte Única em `colors.dart`
+
+Toda cor usada no app **deve** estar declarada em
+`lib/shared/common/constants/colors.dart` e ser usada **a partir desse
+arquivo**. Isso vale também para as cores do Material (`Colors.red`,
+`Colors.grey.shade300`, `Colors.transparent` etc.).
+
+**Por quê?** Numa migração de paleta ou na implementação de dark mode, basta
+alterar um único arquivo — em vez de caçar `Color(0x...)` e `Colors.*`
+espalhados pelas Views e componentes.
+
+### 15.1 Regras
+
+- **NUNCA** use `Color(0xFF...)` ou `Colors.*` diretamente em View, componente,
+  modal ou tema. Importe a constante de `colors.dart`.
+- Se a cor **não existir** em `colors.dart`, **adicione-a lá** antes de usar.
+- Antes de criar, verifique se já existe uma constante com o mesmo valor —
+  reaproveite em vez de duplicar.
+- **Nomenclatura**: o nome deve remeter ao **uso** da cor (preferível —
+  ex: `errorColor`, `cardBackgroundColor`, `dividerColor`) ou ao **nome da cor**
+  propriamente dita (ex: `slateGray`, `snowColor`, `greyLight`).
+- Cores do Material entram como alias:
+  `const dividerColor = Colors.grey;` / `const transparentColor = Colors.transparent;`.
+
+### 15.2 Exemplo
+
+```dart
+// ❌ NÃO fazer
+Container(color: Colors.grey.shade300);
+Text('Erro', style: TextStyle(color: Color(0xFFB71C1C)));
+
+// ✅ colors.dart
+const greyLightColor = Color(0xFFE0E0E0); // Colors.grey.shade300
+const redColor = Color(0xFFB71C1C);
+
+// ✅ No widget
+Container(color: greyLightColor);
+Text('Erro', style: TextStyle(color: redColor));
+```
+
+> **Diretriz para o Agente**: ao tocar em um arquivo que usa cor hardcoded,
+> mova a cor para `colors.dart` e substitua o uso pela constante.
 
 ---
 

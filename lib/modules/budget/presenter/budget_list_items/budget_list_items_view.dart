@@ -9,7 +9,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'budget_list_items_view_model.dart';
 import 'components/budget_list_items_card.dart';

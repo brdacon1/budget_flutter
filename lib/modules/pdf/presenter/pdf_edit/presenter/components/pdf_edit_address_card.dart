@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../pdf_edit_view_model.dart';
 import 'pdf_edit_field.dart';

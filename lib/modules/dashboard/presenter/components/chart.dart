@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/dashboard/domain/entity/my_budget_dashboard.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class Chart extends StatefulWidget {
   final MyBudgetDashboard item;

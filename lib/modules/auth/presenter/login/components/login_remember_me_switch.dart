@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Row com label "Lembrar de mim" e Switch.
 class LoginRememberMeSwitch extends StatelessWidget {

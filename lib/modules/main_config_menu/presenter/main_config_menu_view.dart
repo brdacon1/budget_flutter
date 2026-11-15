@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'main_config_menu_view_model.dart';
 import 'package:oflite/modules/main_config_menu/presenter/strings/main_config_menu_pt_string.dart';

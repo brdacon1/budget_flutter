@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_auth/budget_web_auth_view.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_app/budget_web_app_view_model.dart';

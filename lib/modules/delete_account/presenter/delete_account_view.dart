@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_view_model.dart';
 import 'package:oflite/modules/delete_account/presenter/strings/delete_account_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Página pública para solicitação de exclusão de conta e dados.
 ///

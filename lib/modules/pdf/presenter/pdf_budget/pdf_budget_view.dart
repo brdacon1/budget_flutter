@@ -6,7 +6,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 

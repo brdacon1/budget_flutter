@@ -8,7 +8,7 @@ import 'package:oflite/modules/receipt/presenter/receipt_payment_list/components
 import 'package:oflite/modules/receipt/presenter/receipt_payment_list/components/payment_total_bar.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_list/receipt_payment_list_view_model.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 class ReceiptPaymentListView extends StatefulWidget {

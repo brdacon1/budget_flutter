@@ -4,7 +4,7 @@ import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/components/receipt_creator_form.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/components/receipt_creator_save_button.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/receipt_creator_view_model.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 /// Tela de criação/edição de recibo.

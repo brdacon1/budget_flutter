@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Campo de telefone da tela de validação Web — visual compatível com os
 /// campos do app mobile (campo estilizado com prefixo e label branca).

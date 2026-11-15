@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/enums/alert_type_enum.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 import 'components/product_screen_bottom_part.dart';
@@ -16,8 +18,7 @@ class SubscriptionView extends StatefulWidget {
 
 class _SubscriptionView extends State<SubscriptionView> {
   late SubscriptionViewModel _viewModel;
-  bool _handledSuccess = false;
-  bool _handledError = false;
+  SubscriptionState _lastState = SubscriptionState.idle;
 
   @override
   void initState() {
@@ -35,44 +36,41 @@ class _SubscriptionView extends State<SubscriptionView> {
   }
 
   void _onViewModelChanged() {
-    if (_viewModel.state == SubscriptionState.loading) {
-      _handledSuccess = false;
-      _handledError = false;
-      return;
-    }
+    if (!mounted) return;
+    final state = _viewModel.state;
+    final changed = state != _lastState;
+    _lastState = state;
+    if (!changed) return setState(() {});
 
-    if (_viewModel.state == SubscriptionState.success &&
-        mounted &&
-        !_handledSuccess) {
-      _handledSuccess = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final messenger = ScaffoldMessenger.of(context);
+    switch (state) {
+      case SubscriptionState.success:
+        AlertSnackBar.show(
+          context,
+          type: AlertType.success,
+          title: SubscriptionStrings.successTitle,
+          message: SubscriptionStrings.paymentSuccess,
+        );
         Navigator.pop(context, true);
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(SubscriptionStrings.paymentSuccess),
-            backgroundColor: Colors.green,
-          ),
+        return;
+      case SubscriptionState.cancelled:
+        AlertSnackBar.show(
+          context,
+          type: AlertType.warning,
+          title: SubscriptionStrings.cancelledTitle,
+          message: SubscriptionStrings.cancelledMessage,
         );
-      });
-    } else if (_viewModel.state == SubscriptionState.error &&
-        mounted &&
-        !_handledError) {
-      _handledError = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _viewModel.errorMessage ??
-                  SubscriptionStrings.subscriptionNotCompleted,
-            ),
-            backgroundColor: Colors.red,
-          ),
+      case SubscriptionState.error:
+        AlertSnackBar.show(
+          context,
+          type: AlertType.error,
+          title: SubscriptionStrings.errorTitle,
+          message: SubscriptionStrings.subscriptionNotCompleted,
         );
-      });
+      case SubscriptionState.idle:
+      case SubscriptionState.loading:
+        break;
     }
+    setState(() {});
   }
 
   @override
@@ -81,7 +79,7 @@ class _SubscriptionView extends State<SubscriptionView> {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF696D77), Color(0xFF292C36)],
+          colors: [slateGray, darkSlate],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           tileMode: TileMode.clamp,
@@ -93,10 +91,7 @@ class _SubscriptionView extends State<SubscriptionView> {
           backgroundColor: Colors.transparent,
           elevation: 0.0,
           leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              size: screenAwareSize(20.0, context),
-            ),
+            icon: Icon(Icons.arrow_back, size: screenAwareSize(20.0, context)),
             onPressed: () async {
               await _viewModel.checkExistingSubscription();
               if (mounted) Navigator.pop(context, true);

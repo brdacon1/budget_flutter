@@ -4,7 +4,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'product_price_list_view_model.dart';
 

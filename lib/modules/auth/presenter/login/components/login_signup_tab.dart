@@ -6,7 +6,7 @@ import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart
 import 'package:oflite/modules/auth/presenter/singup/singup_view_model.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Aba de cadastro exibida inline dentro do card de login.
 ///

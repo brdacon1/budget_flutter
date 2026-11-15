@@ -13,8 +13,7 @@ class SubscriptionStrings {
 
   static String get pageTitle => _isPt ? 'Premium' : 'Premium';
 
-  static String get benefitsTitle =>
-      _isPt ? 'Benefícios' : 'Benefits';
+  static String get benefitsTitle => _isPt ? 'Benefícios' : 'Benefits';
 
   static String get expandLess => _isPt ? 'menos' : 'less';
 
@@ -24,27 +23,41 @@ class SubscriptionStrings {
 
   static String get defaultPrice => _isPt ? 'R\$ 3,59/mês' : r'$ 3.59/month';
 
-  static String get subscribeButton =>
-      _isPt ? 'ASSINAR' : 'SUBSCRIBE';
+  static String get subscribeButton => _isPt ? 'ASSINAR' : 'SUBSCRIBE';
 
   static String get restoreButton =>
       _isPt ? 'Restaurar Compras' : 'Restore Purchases';
 
   static String get subscriptionNotCompleted =>
+      _isPt
+          ? 'Não foi possível concluir o pagamento. Tente novamente.'
+          : 'We could not complete the payment. Please try again.';
+
+  static String get errorTitle =>
       _isPt ? 'Pagamento não realizado' : 'Payment not completed';
+
+  static String get cancelledTitle =>
+      _isPt ? 'Pagamento cancelado' : 'Payment cancelled';
+
+  static String get cancelledMessage =>
+      _isPt
+          ? 'Você pode assinar o Premium quando quiser.'
+          : 'You can subscribe to Premium anytime.';
+
+  static String get successTitle =>
+      _isPt ? 'Bem-vindo ao Premium!' : 'Welcome to Premium!';
 
   static String get paymentSuccess =>
       _isPt ? 'Pagamento realizado com sucesso!' : 'Payment successful!';
 
-  static String offerTokenError(String sku) => _isPt
-      ? 'Offer token não encontrado. Verifique se o produto "$sku" está configurado com base plan na Play Console.'
-      : 'Offer token not found. Please check if product "$sku" is configured with base plan in the Play Console.';
+  static String offerTokenError(String sku) =>
+      _isPt
+          ? 'Offer token não encontrado. Verifique se o produto "$sku" está configurado com base plan na Play Console.'
+          : 'Offer token not found. Please check if product "$sku" is configured with base plan in the Play Console.';
 
-  static String get ratingTitle =>
-      _isPt ? 'Avaliações' : 'Reviews';
+  static String get ratingTitle => _isPt ? 'Avaliações' : 'Reviews';
 
   static String get ratingValue => '5.0';
 
-  static String get bestPrice =>
-      _isPt ? 'Melhor preço' : 'Best price';
+  static String get bestPrice => _isPt ? 'Melhor preço' : 'Best price';
 }

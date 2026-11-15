@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
 class PaymentCard extends StatelessWidget {

@@ -6,7 +6,7 @@ import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_it
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_menu/pdf_menu_view.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class BudgetTabView extends StatefulWidget {
   final CustomerInfo item;

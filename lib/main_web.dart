@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_app/budget_web_app_view.dart';
 import 'package:oflite/modules/delete_account/delete_account_routes.dart';

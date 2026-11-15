@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view_model.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class LoginTextField extends StatelessWidget {
   const LoginTextField({

@@ -5,7 +5,7 @@ import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assi
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'main_tab_view_model.dart';
 

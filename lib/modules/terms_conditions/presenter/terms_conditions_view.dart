@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'terms_conditions_view_model.dart';

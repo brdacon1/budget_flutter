@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../pdf_edit_view_model.dart';
 

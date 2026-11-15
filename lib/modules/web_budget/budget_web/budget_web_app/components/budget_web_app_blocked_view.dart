@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Tela de bloqueio do fluxo Web: link inválido, token expirado ou orçamento
 /// inexistente. Não exibe nenhum dado do orçamento.

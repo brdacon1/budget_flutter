@@ -8,7 +8,7 @@ import 'package:oflite/modules/budget/presenter/budget_creator/components/budget
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_save_button.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';

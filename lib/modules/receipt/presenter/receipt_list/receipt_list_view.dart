@@ -6,7 +6,7 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/receipt_card.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 import 'receipt_list_view_model.dart';

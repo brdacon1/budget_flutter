@@ -10,7 +10,7 @@ import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'image_edit_view_model.dart';
 

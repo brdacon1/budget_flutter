@@ -3,7 +3,7 @@ import 'package:oflite/modules/auth/presenter/login/components/login_button.dart
 import 'package:oflite/modules/auth/presenter/login/components/login_google_button.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_text_field.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../login_view_model.dart';
 

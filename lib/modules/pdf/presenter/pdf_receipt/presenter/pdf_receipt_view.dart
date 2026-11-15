@@ -4,7 +4,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'components/pdf_receipt_share_button.dart';
 import 'pdf_receipt_view_model.dart';

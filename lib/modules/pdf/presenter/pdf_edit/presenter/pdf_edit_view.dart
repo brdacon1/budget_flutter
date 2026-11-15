@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'components/pdf_edit_address_card.dart';
 import 'components/pdf_edit_enterprise_card.dart';

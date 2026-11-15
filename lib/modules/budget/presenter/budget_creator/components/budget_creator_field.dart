@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
 import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class BudgetCreatorField extends StatelessWidget {
   const BudgetCreatorField({

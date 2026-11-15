@@ -9,7 +9,7 @@ import 'package:oflite/modules/auth/presenter/login/components/login_tab_toggle.
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/shared/common/constants/constants.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../../../terms_conditions/presenter/terms_conditions_view.dart';
 import 'login_view_model.dart';
