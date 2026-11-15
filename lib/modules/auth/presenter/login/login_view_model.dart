@@ -7,6 +7,7 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -296,6 +297,7 @@ class LoginViewModel extends ChangeNotifier {
         );
         users.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
+        getIt<CrashlyticsRepository>().setUser(ownerUid);
       }
       getIt<NotificationRepository>().tryOpenPendingBudget();
 

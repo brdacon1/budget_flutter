@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view.dart';
+import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -115,6 +116,7 @@ class _ProfileCard extends State<ProfileCard> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           if (newValue! == DashboardStrings.logout) {
             getIt<NotificationRepository>().stopBudgetApprovalListener();
+            getIt<CrashlyticsRepository>().setUser(null);
             await _logout();
             await prefs.remove('email');
             await prefs.remove('password');

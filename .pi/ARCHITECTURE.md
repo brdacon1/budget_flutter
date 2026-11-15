@@ -67,6 +67,7 @@ lib/
 │   │   ├── notification/              # FCM + local notifications (tem datasource — SDK externo)
 │   │   ├── cep/                       # Consulta externa (tem datasource)
 │   │   ├── share_link/                # Compartilhamento (tem datasource)
+│   │   ├── crashlytics/               # Firebase Crashlytics (tem datasource — SDK externo, mobile only)
 │   │   └── ...
 │   │
 │   ├── dashboard/                     # Dashboard com gráficos
@@ -236,6 +237,7 @@ responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`,
 | `core/ads`             | Sim (Google Mobile Ads SDK)        | ✅ Sim      |
 | `core/in_app_purchase` | Sim (Google Play / App Store SDK)  | ✅ Sim      |
 | `core/notification`    | Sim (FCM + Firestore)              | ✅ Sim      |
+| `core/crashlytics`     | Sim (Firebase Crashlytics SDK)     | ✅ Sim      |
 | `core/convert_coin`    | Não (pura formatação `intl`)       | ❌ Não      |
 | `core/display_alert`   | Não (snackbar local)               | ❌ Não      |
 | `core/loading_event`   | Não (dialog local)                 | ❌ Não      |
@@ -1191,6 +1193,7 @@ etc.
 
 - [x] `core/ads` — Google Mobile Ads (exibe apenas para não-assinantes)
 - [x] `core/cep` — Consulta de CEP
+- [x] `core/crashlytics` — Relatório de crashes (mobile only)
 - [x] `core/in_app_purchase` — Compras dentro do app
 - [x] `core/notification` — Push/local notifications
 - [x] `core/share_link` — Compartilhamento de links

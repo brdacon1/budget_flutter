@@ -8,6 +8,7 @@ import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
@@ -30,6 +31,12 @@ Future<void> main() async {
   // Inicializa o Firebase sempre (mobile e web).
   await Firebase.initializeApp();
 
+  // Crashlytics é mobile-only. Inicializa antes de Ads/Notification para
+  // capturar falhas na inicialização deles.
+  if (!kIsWeb) {
+    await getIt<CrashlyticsRepository>().initialize();
+  }
+
   // Inicializa Google Sign-In exatamente uma vez por execução do app.
   // A biblioteca exige que initialize() seja chamado uma única vez
   // antes de qualquer outro método.
@@ -40,8 +47,9 @@ Future<void> main() async {
         serverClientId:
             '157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com',
       );
-    } catch (e) {
+    } catch (e, s) {
       debugPrint('Erro na inicialização do GoogleSignIn: $e');
+      getIt<CrashlyticsRepository>().recordError(e, s);
     }
   }
 

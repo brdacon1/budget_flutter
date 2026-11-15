@@ -5,6 +5,7 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -192,7 +193,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
           );
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      getIt<CrashlyticsRepository>().recordError(e, s);
       if (context.mounted) {
         await _displayAlert.notificationWarning(
           context,

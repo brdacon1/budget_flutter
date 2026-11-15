@@ -9,6 +9,7 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
+import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
@@ -164,6 +165,7 @@ class SingUpViewModel extends ChangeNotifier {
         );
         infoUser.tokens = tokens;
         getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
+        getIt<CrashlyticsRepository>().setUser(ownerUid);
       }
 
       try {
