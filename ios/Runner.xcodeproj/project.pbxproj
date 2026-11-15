@@ -237,7 +237,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Debug usa DWARF sem dSYM: nada a enviar.\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  exit 0\nfi\n\n# Firebase via Swift Package Manager (sem CocoaPods).\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+			shellScript = "# Debug usa DWARF sem dSYM: nada a enviar.\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  exit 0\nfi\n\n# Firebase via Swift Package Manager (sem CocoaPods).\n# 1) flutter build ios/ipa: pacotes em <projeto>/build/ios/SourcePackages\n# 2) Xcode IDE: pacotes no DerivedData\nfor dir in \"${PROJECT_DIR}/../build/ios/SourcePackages\" \"${BUILD_DIR%/Build/*}/SourcePackages\"; do\n  run=\"${dir}/checkouts/firebase-ios-sdk/Crashlytics/run\"\n  if [ -x \"$run\" ]; then\n    \"$run\"\n    exit $?\n  fi\ndone\n\necho \"warning: Crashlytics run script nao encontrado; dSYM nao enviado.\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
