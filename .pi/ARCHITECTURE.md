@@ -91,7 +91,8 @@ lib/
 │   │       └── main_config_menu_view_model.dart
 │   ├── main_tab/
 │   ├── terms_conditions/
-│   ├── web_budget/
+│   ├── web_budget/                    # 🌐 Fluxo Web público do orçamento (ver seção 16)
+│   ├── delete_account/                # 🌐 Exclusão de conta (Web — /delete-account)
 │   └── ...
 │
 └── shared/
@@ -1161,6 +1162,7 @@ etc.
 | **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`**                                                                            |
 | **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`**                                                                             |
 | **16** | **Toda cor vem de `lib/shared/common/constants/colors.dart` — nunca `Color(0x...)` ou `Colors.*` direto no widget (ver seção 15)**                       |
+| **17** | **Tela Web só existe se for registrada no `main_web.dart` (+ rewrite no `firebase.json`). Nada do app mobile é exposto no Web por padrão (ver seção 16)** |
 
 ---
 
@@ -1605,6 +1607,168 @@ Text('Erro', style: TextStyle(color: redColor));
 
 > **Diretriz para o Agente**: ao tocar em um arquivo que usa cor hardcoded,
 > mova a cor para `colors.dart` e substitua o uso pela constante.
+
+---
+
+## 16. Flutter Web — Como Funciona e Como Criar uma Nova Tela Web
+
+O projeto tem **dois entrypoints**. O Web **não** é o app mobile rodando no
+navegador: ele publica **apenas** telas específicas e públicas.
+
+| Entrypoint          | Plataforma     | O que publica                                                        |
+|---------------------|----------------|----------------------------------------------------------------------|
+| `lib/main.dart`     | Android / iOS  | App completo (`appRoutes` de `app_routes.dart`)                      |
+| `lib/main_web.dart` | Web            | **Só** o fluxo público de orçamento + `/delete-account`              |
+
+### 16.1 O que existe hoje no Web
+
+| URL pública                                       | Tela                               | Módulo           |
+|---------------------------------------------------|------------------------------------|------------------|
+| `/orcamento/{enderecoNumero}?token={idToken}`     | `BudgetWebAppView` (home padrão)   | `web_budget`     |
+| `/delete-account`                                 | `DeleteAccountView`                | `delete_account` |
+
+- **Hosting**: Firebase Hosting, projeto `orcamentofacil-lite`
+  (`https://orcamentofacil-lite.web.app`), servindo `build/web`.
+- **Firebase Web**: configurado em `_webFirebaseOptions` dentro do próprio
+  `main_web.dart` (não mexe no `firebase_options.dart` do mobile).
+- **Tema**: `AdaptiveTheme` próprio no `BudgetWebApp` (inicia em dark).
+
+### 16.2 Como o `main_web.dart` escolhe a tela
+
+O Web **não usa** `appRoutes`. O `BudgetWebApp` lê `Uri.base.path` (URL real
+do navegador) e decide o `home`:
+
+```dart
+final initialPath = Uri.base.path;
+final isDeleteAccount = initialPath == DeleteAccountRoute.deleteAccount.path ||
+    initialPath.startsWith('${DeleteAccountRoute.deleteAccount.path}/');
+return MaterialApp(
+  routes: {...deleteAccountRoutes},          // só rotas Web explícitas
+  home: isDeleteAccount ? const DeleteAccountView() : const BudgetWebAppView(),
+);
+```
+
+Qualquer path não reconhecido cai em `BudgetWebAppView`, que bloqueia o acesso
+se a URL não tiver `/orcamento/{id}?token=...` válido.
+
+### 16.3 Fluxo do orçamento público (`web_budget`)
+
+```
+Mobile (dono)                                      Web (cliente)
+─────────────                                      ─────────────
+ShareLinkRepositoryImpl.buildShareUrl()
+  base = --dart-define BUDGET_WEB_BASE_URL
+         (default https://orcamentofacil-lite.web.app)
+  → {base}/orcamento/{enderecoNumero}?token={Firebase ID Token do dono}
+                                    │
+                                    ▼
+                         BudgetWebAppViewModel.parseAndValidate(Uri.base)
+                           loading → blocked | auth → access
+```
+
+| Fase      | Tela                       | Condição                                                    |
+|-----------|----------------------------|-------------------------------------------------------------|
+| `loading` | spinner                    | validando                                                   |
+| `blocked` | `BudgetWebAppBlockedView`  | sem id, sem token, JWT inválido/expirado, 401/403/404       |
+| `auth`    | `BudgetWebAuthView`        | token ok → cliente confirma o **telefone** (2ª camada)      |
+| `access`  | `BudgetWebBudgetView`      | token + telefone ok → dados, itens, PDF, aprovar/reprovar   |
+
+**Segurança (não negociável):**
+1. `enderecoNumero` (document id) **localiza** o orçamento — nunca o telefone.
+2. O **token** (Firebase ID Token do dono, ~1h) **autoriza** — o `uid` do dono
+   é extraído do JWT para montar o path.
+3. O **telefone** é a segunda validação.
+4. **Nenhum dado** é exibido antes das três checagens passarem.
+
+**Acesso a dados no Web**: `WebBudgetService` usa a **Firestore REST API**
+(`firestore.googleapis.com`) com `Authorization: Bearer {token}`, no mesmo path
+do mobile (`EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{id}`). As regras do
+Firestore continuam sendo a fonte de verdade. Escritas existentes:
+- `updateStatus` → só o campo `STATUS` (mesmos valores do mobile).
+- `sendApprovalNotification` → documento em `.../NOTIFICACOES`, que o app do
+  dono escuta e transforma em notificação local (best-effort).
+
+**PDF**: reutiliza os `PdfGenerateBudget*Usecase` do módulo `pdf` (mesma
+regra do mobile). Download via `budget_web/utils/web_pdf_saver.dart` (import
+condicional: `web_pdf_saver_web.dart` com `package:web` no navegador,
+`web_pdf_saver_io.dart` como stub no mobile).
+
+### 16.4 Estrutura de pastas do `web_budget`
+
+```
+lib/modules/web_budget/
+├── web_budget_binds.dart          # registra BudgetWebAppViewModel (factory)
+├── web_budget_routes.dart         # enum WebBudgetRoute + webBudgetRoutes
+├── services/web_budget_service.dart   # Firestore REST com token do dono
+├── strings/budget_web_strings.dart    # textos do fluxo Web
+└── budget_web/
+    ├── budget_web_app/            # raiz: parse da URL + fases
+    ├── budget_web_auth/           # validação do telefone
+    ├── budget_web_budget/         # orçamento liberado
+    ├── budget_web_pdf_data/       # dados, itens, comentários, PDF, aprovação
+    ├── budget_web_items/          # total bar + modal de aprovação
+    └── utils/web_pdf_saver*.dart  # download de PDF (import condicional)
+```
+
+Cada tela segue o padrão `{tela}_view.dart` + `{tela}_view_model.dart` +
+`components/`. ViewModels que recebem parâmetros (`ownerUid`, `token`,
+`enderecoNumero`) são instanciados na View via construtor — só os sem
+parâmetro vão para o `get_it`.
+
+### 16.5 Passo a passo — Criar uma NOVA tela Web
+
+1. **Decidir onde salvar**
+   - Faz parte do fluxo do orçamento público? → subpasta em
+     `lib/modules/web_budget/budget_web/{nova_tela}/`.
+   - É uma página Web independente (ex.: `delete_account`)? → **módulo
+     próprio** em `lib/modules/{modulo}/` com a estrutura padrão
+     (`data/`, `domain/`, `presenter/`, `{modulo}_binds.dart`,
+     `{modulo}_routes.dart`) — seção 5.
+2. **Criar a rota** no `{modulo}_routes.dart` com enum + `path` em
+   kebab-case (ex.: `/delete-account`).
+3. **Registrar binds** no `injection.dart` (`register{Modulo}Dependencies`) —
+   o `main_web.dart` também chama `setupDependencyInjection()`.
+4. **Expor no `main_web.dart`**:
+   - adicionar o mapa de rotas em `routes: {...}`;
+   - adicionar a checagem de `Uri.base.path` que escolhe o `home` (igual ao
+     `isDeleteAccount`). Sem isso a URL cai no `BudgetWebAppView` e é
+     bloqueada.
+5. **Adicionar rewrite no `firebase.json`** (antes do `"**"`):
+   ```json
+   { "source": "/nova-tela", "destination": "/index.html" }
+   ```
+6. **Dados remotos**: o Web **não** tem usuário autenticado do app.
+   - Se precisa ler/gravar dados do dono → usar o token da URL via REST
+     (padrão `WebBudgetService`), sem criar novo sistema de autenticação.
+   - Se chama Cloud Function → datasource com `DioClient` e
+     `extra: kIsWeb ? {'withCredentials': false} : null` (padrão
+     `DeleteAccountRemoteDataSource`, evita problema de CORS).
+7. **Código só-Web** (`package:web`, `dart:js_interop`): **sempre** atrás de
+   import condicional (`export 'x_io.dart' if (dart.library.html) 'x_web.dart';`)
+   para não quebrar o build mobile. Nunca importar `dart:html`.
+8. **Reutilizar** regras existentes (usecases, models do módulo dono, strings,
+   `colors.dart`). Não duplicar regra de negócio para o Web.
+9. **Responsividade**: a tela abre em celular e desktop — limitar largura do
+   conteúdo (`ConstrainedBox`/`maxWidth`) e testar em telas estreitas.
+10. **Testar e publicar**:
+    ```bash
+    flutter run -d chrome --target lib/main_web.dart
+    flutter build web --target lib/main_web.dart
+    firebase deploy --only hosting
+    ```
+
+### 16.6 Regras de Ouro do Web
+
+- **NUNCA** exponha telas do app mobile no Web “de brinde”: só entra o que
+  estiver explicitamente no `main_web.dart`.
+- **NUNCA** altere o fluxo mobile (`main.dart`, `firebase_options.dart`,
+  repos autenticados) para atender o Web — o Web é **aditivo**.
+- **NUNCA** mostre dados antes de validar o acesso.
+- Use `kIsWeb` só para ajustes pontuais (ex.: `Image.network` vs `Image.file`,
+  pular `File`/`path_provider`); diferença grande de comportamento vira
+  implementação separada com import condicional.
+- Especificações originais detalhadas: `.pi/web_projet_instruction/`
+  (`new_project_web.md` e `create_flutter_web_page.md`).
 
 ---
 
