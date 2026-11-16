@@ -11,8 +11,6 @@ import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
-import 'package:oflite/shared/common/controllers/menu_controller_app.dart';
-import 'package:provider/provider.dart';
 
 import 'app_routes.dart';
 import 'shared/common/constants/colors.dart';
@@ -88,37 +86,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => MenuControllerApp()),
-      ],
-      child: AdaptiveTheme(
-        light: ThemeData.light().copyWith(
-          scaffoldBackgroundColor: creamColor,
-          textTheme: poppinsTextTheme(
-            Theme.of(context).textTheme,
-          ).apply(bodyColor: Colors.black),
-          canvasColor: snowColor,
-        ),
-        dark: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: bgColor,
-          textTheme: poppinsTextTheme(
-            Theme.of(context).textTheme,
-          ).apply(bodyColor: Colors.white),
-          canvasColor: secondaryColor,
-        ),
-        initial: AdaptiveThemeMode.dark,
-        builder:
-            (theme, darkTheme) => MaterialApp(
-              title: 'Orçamento de Vendas - PDF',
-              theme: theme,
-              darkTheme: darkTheme,
-              debugShowCheckedModeBanner: false,
-              navigatorKey: globalNavigatorKey,
-              initialRoute: AppRoute.auth.path,
-              routes: appRoutes,
-            ),
+    return AdaptiveTheme(
+      light: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: creamColor,
+        textTheme: poppinsTextTheme(
+          Theme.of(context).textTheme,
+        ).apply(bodyColor: Colors.black),
+        canvasColor: snowColor,
       ),
+      dark: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: bgColor,
+        textTheme: poppinsTextTheme(
+          Theme.of(context).textTheme,
+        ).apply(bodyColor: Colors.white),
+        canvasColor: secondaryColor,
+      ),
+      initial: AdaptiveThemeMode.dark,
+      builder:
+          (theme, darkTheme) => MaterialApp(
+            title: 'Orçamento de Vendas - PDF',
+            theme: theme,
+            darkTheme: darkTheme,
+            debugShowCheckedModeBanner: false,
+            navigatorKey: globalNavigatorKey,
+            initialRoute: AppRoute.auth.path,
+            routes: appRoutes,
+          ),
     );
   }
 }
