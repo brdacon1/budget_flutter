@@ -73,6 +73,7 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
 
     if (_disposed) return;
+    _safeNotify();
 
     _purchaseUpdatedSubscription = _iap.purchaseUpdatedStream.listen(
       _onPurchaseUpdated,
