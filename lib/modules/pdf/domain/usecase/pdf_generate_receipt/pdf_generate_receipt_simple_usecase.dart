@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:oflite/shared/common/utils/dio_client.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -67,12 +67,12 @@ class PdfGenerateReceiptUseCase {
 
   PdfDocument _createDocument() {
     final PdfDocument document =
-        PdfDocument()
-          ..pageSettings.size = PdfPageSize.a4
-          ..pageSettings.margins.left = 30
-          ..pageSettings.margins.right = 30
-          ..pageSettings.margins.top = 50
-          ..pageSettings.margins.bottom = 50;
+    PdfDocument()
+      ..pageSettings.size = PdfPageSize.a4
+      ..pageSettings.margins.left = 30
+      ..pageSettings.margins.right = 30
+      ..pageSettings.margins.top = 50
+      ..pageSettings.margins.bottom = 50;
     return document;
   }
 
@@ -89,7 +89,8 @@ class PdfGenerateReceiptUseCase {
       final String token = await _getAuthToken();
 
       final String endpointUrl =
-          'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
+          'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner
+          .logoName}?alt=media&token=${owner.fotoId}';
       final response = await DioClient().dioClientAuth.get(
         endpointUrl,
         options: Options(
@@ -162,7 +163,8 @@ class PdfGenerateReceiptUseCase {
   // ---------------------------------------------------------------------------
 
   void _drawOwnerGrid(PdfPage page, OwnerPdf owner, double sizeWithImage) {
-    final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
+    final PdfGrid pdfGrid = PdfGrid()
+      ..columns.add(count: 2);
     pdfGrid.headers.clear();
 
     void addRow(String? value) {
@@ -179,22 +181,23 @@ class PdfGenerateReceiptUseCase {
     addRow(owner.city);
 
     final PdfGridCellStyle style =
-        PdfGridCellStyle()..borders.all = PdfPens.transparent;
+    PdfGridCellStyle()
+      ..borders.all = PdfPens.transparent;
 
     for (int i = 0; i < pdfGrid.rows.count; i++) {
       final PdfGridRow row = pdfGrid.rows[i];
       row.style.font =
-          i == 0
-              ? PdfStandardFont(
-                PdfFontFamily.helvetica,
-                12,
-                style: PdfFontStyle.bold,
-              )
-              : PdfStandardFont(
-                PdfFontFamily.helvetica,
-                8,
-                style: PdfFontStyle.regular,
-              );
+      i == 0
+          ? PdfStandardFont(
+        PdfFontFamily.helvetica,
+        12,
+        style: PdfFontStyle.bold,
+      )
+          : PdfStandardFont(
+        PdfFontFamily.helvetica,
+        8,
+        style: PdfFontStyle.regular,
+      );
       for (int j = 0; j < row.cells.count; j++) {
         row.cells[j].style = style;
       }
@@ -218,8 +221,12 @@ class PdfGenerateReceiptUseCase {
       bounds: Rect.fromLTWH(
         sizeWithImage,
         0,
-        page.getClientSize().width,
-        page.getClientSize().height,
+        page
+            .getClientSize()
+            .width,
+        page
+            .getClientSize()
+            .height,
       ),
     );
   }
@@ -242,7 +249,9 @@ class PdfGenerateReceiptUseCase {
     graphics.drawRectangle(
       brush: PdfSolidBrush(PdfColor(255, 255, 255)),
       pen: PdfPen(PdfColor(211, 211, 211)),
-      bounds: Rect.fromLTWH(0, 95, page.getClientSize().width, 30),
+      bounds: Rect.fromLTWH(0, 95, page
+          .getClientSize()
+          .width, 30),
     );
 
     graphics.drawString(
@@ -252,8 +261,12 @@ class PdfGenerateReceiptUseCase {
       bounds: Rect.fromLTWH(
         0,
         86.5,
-        page.getClientSize().width,
-        page.getClientSize().height,
+        page
+            .getClientSize()
+            .width,
+        page
+            .getClientSize()
+            .height,
       ),
       format: format,
     );
@@ -266,7 +279,8 @@ class PdfGenerateReceiptUseCase {
   double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer) {
     double count = 0;
     try {
-      final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
+      final PdfGrid pdfGrid = PdfGrid()
+        ..columns.add(count: 2);
       pdfGrid.headers.clear();
 
       void addRow(String label, String? value) {
@@ -287,7 +301,8 @@ class PdfGenerateReceiptUseCase {
       }
 
       final PdfGridCellStyle style =
-          PdfGridCellStyle()..borders.all = PdfPens.transparent;
+      PdfGridCellStyle()
+        ..borders.all = PdfPens.transparent;
 
       for (int i = 0; i < pdfGrid.rows.count; i++) {
         final PdfGridRow row = pdfGrid.rows[i];
@@ -312,10 +327,16 @@ class PdfGenerateReceiptUseCase {
       pdfGrid.draw(
         graphics: page.graphics,
         bounds: Rect.fromLTWH(
-          page.getClientSize().width / 2,
+          page
+              .getClientSize()
+              .width / 2,
           135,
-          page.getClientSize().width,
-          page.getClientSize().height,
+          page
+              .getClientSize()
+              .width,
+          page
+              .getClientSize()
+              .height,
         ),
       );
     } catch (_) {
@@ -330,7 +351,8 @@ class PdfGenerateReceiptUseCase {
 
   void _drawReceiptInfoGrid(PdfPage page, Receipt recived) {
     try {
-      final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
+      final PdfGrid pdfGrid = PdfGrid()
+        ..columns.add(count: 2);
       pdfGrid.headers.clear();
 
       void addRow(String label, String? value) {
@@ -345,7 +367,8 @@ class PdfGenerateReceiptUseCase {
       addRow('Nome do recibo :', recived.descricao);
 
       final PdfGridCellStyle style =
-          PdfGridCellStyle()..borders.all = PdfPens.transparent;
+      PdfGridCellStyle()
+        ..borders.all = PdfPens.transparent;
 
       for (int i = 0; i < pdfGrid.rows.count; i++) {
         final PdfGridRow row = pdfGrid.rows[i];
@@ -372,8 +395,12 @@ class PdfGenerateReceiptUseCase {
         bounds: Rect.fromLTWH(
           0,
           135,
-          page.getClientSize().width,
-          page.getClientSize().height,
+          page
+              .getClientSize()
+              .width,
+          page
+              .getClientSize()
+              .height,
         ),
       );
     } catch (_) {
@@ -385,11 +412,9 @@ class PdfGenerateReceiptUseCase {
   // Payments section title
   // ---------------------------------------------------------------------------
 
-  void _drawPaymentsSectionTitle(
-    PdfPage page,
-    PdfGraphics graphics,
-    double count,
-  ) {
+  void _drawPaymentsSectionTitle(PdfPage page,
+      PdfGraphics graphics,
+      double count,) {
     final PdfFont font1 = PdfStandardFont(
       PdfFontFamily.helvetica,
       13,
@@ -403,7 +428,9 @@ class PdfGenerateReceiptUseCase {
     graphics.drawRectangle(
       brush: PdfSolidBrush(PdfColor(255, 255, 255)),
       pen: PdfPen(PdfColor(211, 211, 211)),
-      bounds: Rect.fromLTWH(0, 180 + count, page.getClientSize().width, 30),
+      bounds: Rect.fromLTWH(0, 180 + count, page
+          .getClientSize()
+          .width, 30),
     );
 
     graphics.drawString(
@@ -413,8 +440,12 @@ class PdfGenerateReceiptUseCase {
       bounds: Rect.fromLTWH(
         0,
         187 + count,
-        page.getClientSize().width,
-        page.getClientSize().height,
+        page
+            .getClientSize()
+            .width,
+        page
+            .getClientSize()
+            .height,
       ),
       format: format,
     );
@@ -444,16 +475,16 @@ class PdfGenerateReceiptUseCase {
       style: PdfFontStyle.bold,
     );
     final PdfGridCellStyle headerStyle =
-        PdfGridCellStyle(
-            font: fontHeader,
-            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-            textBrush: PdfBrushes.black,
-            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-          )
-          ..borders.left = PdfPens.transparent
-          ..borders.right = PdfPens.transparent
-          ..borders.top = PdfPens.lightGray
-          ..borders.bottom = PdfPens.lightGray;
+    PdfGridCellStyle(
+      font: fontHeader,
+      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+      textBrush: PdfBrushes.black,
+      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+    )
+      ..borders.left = PdfPens.transparent
+      ..borders.right = PdfPens.transparent
+      ..borders.top = PdfPens.lightGray
+      ..borders.bottom = PdfPens.lightGray;
 
     header.height = 25;
     grid.headers.applyStyle(headerStyle);
@@ -495,8 +526,12 @@ class PdfGenerateReceiptUseCase {
       bounds: Rect.fromLTWH(
         0,
         220 + count,
-        page.getClientSize().width,
-        page.getClientSize().height,
+        page
+            .getClientSize()
+            .width,
+        page
+            .getClientSize()
+            .height,
       ),
     );
   }
@@ -507,31 +542,31 @@ class PdfGenerateReceiptUseCase {
 
   PdfGridCellStyle _createPaymentRowStyle() {
     final PdfGridCellStyle style =
-        PdfGridCellStyle()
-          ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
-          ..borders.left = PdfPens.transparent
-          ..borders.right = PdfPens.transparent
-          ..borders.top = PdfPens.lightGray
-          ..borders.bottom = PdfPens.lightGray;
+    PdfGridCellStyle()
+      ..cellPadding = PdfPaddings(top: 5, left: 5, right: 5, bottom: 5)
+      ..borders.left = PdfPens.transparent
+      ..borders.right = PdfPens.transparent
+      ..borders.top = PdfPens.lightGray
+      ..borders.bottom = PdfPens.lightGray;
     return style;
   }
 
   PdfGridCellStyle _createPaymentTotalRowStyle() {
     final PdfGridCellStyle style =
-        PdfGridCellStyle(
-            font: PdfStandardFont(
-              PdfFontFamily.helvetica,
-              12,
-              style: PdfFontStyle.bold,
-            ),
-            textBrush: PdfBrushes.black,
-            cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
-            backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
-          )
-          ..borders.left = PdfPens.transparent
-          ..borders.right = PdfPens.transparent
-          ..borders.top = PdfPens.lightGray
-          ..borders.bottom = PdfPens.transparent;
+    PdfGridCellStyle(
+      font: PdfStandardFont(
+        PdfFontFamily.helvetica,
+        12,
+        style: PdfFontStyle.bold,
+      ),
+      textBrush: PdfBrushes.black,
+      cellPadding: PdfPaddings(top: 5, left: 5, right: 5, bottom: 5),
+      backgroundBrush: PdfSolidBrush(PdfColor(245, 245, 245)),
+    )
+      ..borders.left = PdfPens.transparent
+      ..borders.right = PdfPens.transparent
+      ..borders.top = PdfPens.lightGray
+      ..borders.bottom = PdfPens.transparent;
     return style;
   }
 

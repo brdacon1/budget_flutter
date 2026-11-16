@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:dio/dio.dart';
 import 'package:oflite/injection.dart';
@@ -14,6 +13,7 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/shared/common/utils/dio_client.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 enum Gender { fullname, email, phone, site, cpf, cep, rua, data, city, bairro }
@@ -116,7 +116,8 @@ class PdfEditViewModel extends ChangeNotifier {
       );
 
       if (response.statusCode == 200 &&
-          response.headers.value('content-type')?.startsWith('image/') == true) {
+          response.headers.value('content-type')?.startsWith('image/') ==
+              true) {
         fileContent = response.data as Uint8List;
       } else {
         fileContent = null;
