@@ -9,8 +9,8 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/common/utils/dio_client.dart';
@@ -29,10 +29,14 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 class PdfGenerateReceiptProfessionalUsecase {
   final ConvertCoinRepository _moneyConvert;
   final UserRepository _userRepository;
+  final PdfSanitizeTextUsecase _sanitizeText;
+  final PdfAddWrappedRowsUsecase _addWrappedRows;
 
   PdfGenerateReceiptProfessionalUsecase(
     this._moneyConvert,
     this._userRepository,
+    this._sanitizeText,
+    this._addWrappedRows,
   );
 
   // ---------------------------------------------------------------------------
@@ -225,7 +229,7 @@ class PdfGenerateReceiptProfessionalUsecase {
 
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        pdfSafeText(owner.empresa!),
+        _sanitizeText(owner.empresa!),
         _fontTitle,
         brush: _brushPrimary,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 24),
@@ -239,7 +243,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
-        pdfSafeText('$label $value'),
+        _sanitizeText('$label $value'),
         infoFont,
         brush: infoBrush,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 13),
@@ -385,7 +389,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     double pad,
   ) {
     g.drawString(
-      pdfSafeText(title),
+      _sanitizeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(x + pad, y + pad, w - pad * 2, 16),
@@ -409,13 +413,13 @@ class PdfGenerateReceiptProfessionalUsecase {
     for (final row in rows) {
       if (row.value == null || row.value!.isEmpty) continue;
       g.drawString(
-        pdfSafeText(row.label),
+        _sanitizeText(row.label),
         _fontRegular,
         brush: _brushGray,
         bounds: Rect.fromLTWH(xOffset + pad, y, contentW * 0.4, 13),
       );
       g.drawString(
-        pdfSafeText(row.value!),
+        _sanitizeText(row.value!),
         _fontRegular,
         brush: _brushBlack,
         bounds: Rect.fromLTWH(
@@ -463,7 +467,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      pdfSafeText(title),
+      _sanitizeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(
@@ -491,9 +495,9 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns.add(count: 3);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = pdfSafeText('Descrição dos pagamentos');
-    header.cells[1].value = pdfSafeText('Método');
-    header.cells[2].value = pdfSafeText('Valor pago');
+    header.cells[0].value = _sanitizeText('Descrição dos pagamentos');
+    header.cells[1].value = _sanitizeText('Método');
+    header.cells[2].value = _sanitizeText('Valor pago');
 
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
       font: _fontHeader,
@@ -509,22 +513,18 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns[1].width = 160;
     grid.columns[2].width = 115;
 
-    final groups = [
-      for (final payment in paymentList)
-        pdfAddWrappedRows(
-          grid,
-          cells: [
-            payment.description ?? '',
-            payment.method ?? '',
-            _moneyConvert.convertFromDouble(payment.price ?? 0),
-          ],
-          font: _fontRegular,
-          horizontalPadding: 12,
-        ),
-    ];
-
-    _applyRowStyle(grid, _itemRowStyle());
-    groups.forEach(pdfJoinRows);
+    final PdfGridCellStyle rowStyle = _itemRowStyle();
+    for (final payment in paymentList) {
+      _addWrappedRows(
+        grid,
+        cells: [
+          payment.description ?? '',
+          payment.method ?? '',
+          _moneyConvert.convertFromDouble(payment.price ?? 0),
+        ],
+        style: rowStyle,
+      );
+    }
 
     _addRightAlignedTotalRow(
       grid: grid,
@@ -563,8 +563,8 @@ class PdfGenerateReceiptProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[1].value = pdfSafeText(label);
-    row.cells[2].value = pdfSafeText(value);
+    row.cells[1].value = _sanitizeText(label);
+    row.cells[2].value = _sanitizeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(
       font: font,
@@ -590,7 +590,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     g.drawLine(PdfPen(_borderGray, width: 0.5), Offset(0, y), Offset(pageW, y));
 
     g.drawString(
-      pdfSafeText('${owner.empresa ?? ''} • Recibo Comercial'),
+      _sanitizeText('${owner.empresa ?? ''} • Recibo Comercial'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(0, y + 4, pageW * 0.5, 14),
@@ -598,7 +598,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      pdfSafeText('Página 1 de 1'),
+      _sanitizeText('Página 1 de 1'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(pageW * 0.5, y + 4, pageW * 0.5, 14),
@@ -646,15 +646,6 @@ class PdfGenerateReceiptProfessionalUsecase {
       ..borders.right = PdfPens.transparent
       ..borders.top = PdfPen(_borderGray, width: 0.5)
       ..borders.bottom = PdfPen(_borderGray, width: 0.5);
-  }
-
-  void _applyRowStyle(PdfGrid grid, PdfGridCellStyle style) {
-    for (int i = 0; i < grid.rows.count; i++) {
-      final PdfGridRow row = grid.rows[i];
-      for (int j = 0; j < row.cells.count; j++) {
-        row.cells[j].style = style;
-      }
-    }
   }
 
   Future<String> _saveDocument(PdfDocument document, String filename) async {

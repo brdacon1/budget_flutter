@@ -854,6 +854,14 @@ e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
 | **Regra de negócio reutilizável**  | Gerar um recibo em PDF exige cálculos de pagamento e layout — `PdfGenerateReceiptUseCase` |
 | **Fluxo com múltiplos passos**     | Chatbot: carregar script → criar rascunho → atualizar endereço → adicionar itens          |
 | **Testabilidade isolada**          | Quando a lógica é complexa o suficiente para merecer testes unitários próprios            |
+| **Regra de negócio isolada (mesmo pequena)** | `PdfSanitizeTextUsecase` (remove caracteres que a fonte do PDF não desenha) e `PdfAddWrappedRowsUsecase` (quebra texto longo em linhas da grade sem deixar página em branco) |
+
+> **Regra de Ouro**: toda função que executa uma **regra de negócio** é um
+> **UseCase** — classe em `domain/usecase/` do módulo dono, injetada por
+> construtor e registrada no `{modulo}_binds.dart`. **Nunca** função solta
+> (top-level) nem pasta `utils/` dentro do módulo.
+> **Única exceção**: conversão/formatação pura de valor, sem regra de negócio
+> (ex.: `lib/shared/common/utils/`) — essa pode ser função/utilitário.
 
 ### 6.3 Quando NÃO criar um UseCase?
 

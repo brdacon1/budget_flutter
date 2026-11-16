@@ -7,8 +7,8 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
-import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/common/utils/dio_client.dart';
@@ -20,8 +20,15 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 class PdfGenerateReceiptUseCase {
   final ConvertCoinRepository _moneyConvert;
   final UserRepository _userRepository;
+  final PdfSanitizeTextUsecase _sanitizeText;
+  final PdfAddWrappedRowsUsecase _addWrappedRows;
 
-  PdfGenerateReceiptUseCase(this._moneyConvert, this._userRepository);
+  PdfGenerateReceiptUseCase(
+    this._moneyConvert,
+    this._userRepository,
+    this._sanitizeText,
+    this._addWrappedRows,
+  );
 
   Future<String> patternPDF({
     required List<PaymentCustomer> paymentList,
@@ -170,7 +177,7 @@ class PdfGenerateReceiptUseCase {
     void addRow(String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = pdfGrid.rows.add();
-      row.cells[0].value = pdfSafeText(value);
+      row.cells[0].value = _sanitizeText(value);
     }
 
     addRow(owner.empresa);
@@ -255,7 +262,7 @@ class PdfGenerateReceiptUseCase {
     );
 
     graphics.drawString(
-      pdfSafeText('\nDADOS DO RECIBO'),
+      _sanitizeText('\nDADOS DO RECIBO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -286,8 +293,8 @@ class PdfGenerateReceiptUseCase {
       void addRow(String label, String? value) {
         if (value == null || value.isEmpty) return;
         final PdfGridRow row = pdfGrid.rows.add();
-        row.cells[0].value = pdfSafeText(label);
-        row.cells[1].value = pdfSafeText(value);
+        row.cells[0].value = _sanitizeText(label);
+        row.cells[1].value = _sanitizeText(value);
       }
 
       addRow('Número do orçamento:', customer.id);
@@ -358,8 +365,8 @@ class PdfGenerateReceiptUseCase {
       void addRow(String label, String? value) {
         if (value == null || value.isEmpty) return;
         final PdfGridRow row = pdfGrid.rows.add();
-        row.cells[0].value = pdfSafeText(label);
-        row.cells[1].value = pdfSafeText(value);
+        row.cells[0].value = _sanitizeText(label);
+        row.cells[1].value = _sanitizeText(value);
       }
 
       addRow('Número do recibo:', recived.id);
@@ -434,7 +441,7 @@ class PdfGenerateReceiptUseCase {
     );
 
     graphics.drawString(
-      pdfSafeText('PAGAMENTOS REALIZADOS'),
+      _sanitizeText('PAGAMENTOS REALIZADOS'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -465,9 +472,9 @@ class PdfGenerateReceiptUseCase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = pdfSafeText('Descrição dos pagamentos');
-    header.cells[1].value = pdfSafeText('Metodo de pagamento');
-    header.cells[2].value = pdfSafeText('Valor pago');
+    header.cells[0].value = _sanitizeText('Descrição dos pagamentos');
+    header.cells[1].value = _sanitizeText('Metodo de pagamento');
+    header.cells[2].value = _sanitizeText('Valor pago');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -492,23 +499,18 @@ class PdfGenerateReceiptUseCase {
     grid.columns[1].width = 180;
     grid.columns[2].width = 105;
 
-    final groups = [
-      for (final payment in paymentList)
-        pdfAddWrappedRows(
-          grid,
-          cells: [
-            payment.description!,
-            payment.method!,
-            _moneyConvert.convertFromDouble(payment.price!),
-          ],
-          // Fonte padrão da grade (o estilo da linha não define fonte).
-          font: PdfStandardFont(PdfFontFamily.helvetica, 8),
-          horizontalPadding: 10,
-        ),
-    ];
-
-    _applyRowStyle(grid, _createPaymentRowStyle());
-    groups.forEach(pdfJoinRows);
+    final PdfGridCellStyle rowStyle = _createPaymentRowStyle();
+    for (final payment in paymentList) {
+      _addWrappedRows(
+        grid,
+        cells: [
+          payment.description!,
+          payment.method!,
+          _moneyConvert.convertFromDouble(payment.price!),
+        ],
+        style: rowStyle,
+      );
+    }
 
     _addTotalRow(
       grid: grid,
@@ -580,22 +582,13 @@ class PdfGenerateReceiptUseCase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[labelCellIndex].value = pdfSafeText(label);
-    totalRow.cells[valueCellIndex].value = pdfSafeText(value);
+    totalRow.cells[labelCellIndex].value = _sanitizeText(label);
+    totalRow.cells[valueCellIndex].value = _sanitizeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }
     totalRow.height = height;
     totalRow.style = style;
-  }
-
-  void _applyRowStyle(PdfGrid grid, PdfGridCellStyle style) {
-    for (int i = 0; i < grid.rows.count; i++) {
-      final PdfGridRow row = grid.rows[i];
-      for (int j = 0; j < row.cells.count; j++) {
-        row.cells[j].style = style;
-      }
-    }
   }
 
   PdfLayoutFormat _paginateLayoutFormat() {

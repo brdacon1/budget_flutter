@@ -13,6 +13,8 @@ import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_genera
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
 
 import 'presenter/pdf_budget/pdf_budget_view_model.dart';
 import 'presenter/pdf_edit/presenter/pdf_edit_view_model.dart';
@@ -30,40 +32,55 @@ void registerPdfDependencies(GetIt sl) {
   );
 
   // Usecases (stateless)
+  sl.registerLazySingleton<PdfSanitizeTextUsecase>(
+    () => const PdfSanitizeTextUsecase(),
+  );
+  sl.registerLazySingleton<PdfAddWrappedRowsUsecase>(
+    () => PdfAddWrappedRowsUsecase(sl<PdfSanitizeTextUsecase>()),
+  );
   sl.registerLazySingleton<PdfGenerateBudgetSimpleUsecase>(
     () => PdfGenerateBudgetSimpleUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateBudgetExecutiveUsecase>(
     () => PdfGenerateBudgetExecutiveUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateBudgetProfessionalUsecase>(
     () => PdfGenerateBudgetProfessionalUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateReceiptExecutiveUsecase>(
     () => PdfGenerateReceiptExecutiveUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
+      sl<PdfAddWrappedRowsUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateReceiptProfessionalUsecase>(
     () => PdfGenerateReceiptProfessionalUsecase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
+      sl<PdfAddWrappedRowsUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateReceiptUseCase>(
     () => PdfGenerateReceiptUseCase(
       sl<ConvertCoinRepository>(),
       sl<UserRepository>(),
+      sl<PdfSanitizeTextUsecase>(),
+      sl<PdfAddWrappedRowsUsecase>(),
     ),
   );
 
