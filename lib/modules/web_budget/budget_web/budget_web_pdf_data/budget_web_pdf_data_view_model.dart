@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -91,10 +92,10 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
         int countService = 0;
         for (final i in items) {
           final total = i.total ?? 0;
-          if (i.category == 'Produtos') {
+          if (ItemCategory.fromValue(i.category) == ItemCategory.products) {
             totalProducts += total;
             countProduct++;
-          } else if (i.category == 'Serviços') {
+          } else if (ItemCategory.fromValue(i.category) == ItemCategory.services) {
             totalServices += total;
             countService++;
           }

@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -297,7 +299,7 @@ class PdfGenerateBudgetSimpleUsecase {
     void addRow(String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = pdfGrid.rows.add();
-      row.cells[0].value = value;
+      row.cells[0].value = pdfSafeText(value);
     }
 
     addRow(owner.empresa);
@@ -375,7 +377,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphics.drawString(
-      '\nDADOS DO ORÇAMENTO',
+      pdfSafeText('\nDADOS DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -414,8 +416,8 @@ class PdfGenerateBudgetSimpleUsecase {
     void addLeftRow(String label, String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = leftGrid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
+      row.cells[0].value = pdfSafeText(label);
+      row.cells[1].value = pdfSafeText(value);
     }
 
     addLeftRow('Número :', customer.id);
@@ -431,8 +433,8 @@ class PdfGenerateBudgetSimpleUsecase {
     void addRightRow(String label, String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = rightGrid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
+      row.cells[0].value = pdfSafeText(label);
+      row.cells[1].value = pdfSafeText(value);
     }
 
     addRightRow('Rua :', customer.street);
@@ -533,7 +535,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphics.drawString(
-      'LISTA DE ITENS DO ORÇAMENTO',
+      pdfSafeText('LISTA DE ITENS DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -567,11 +569,11 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos produtos';
-    header.cells[1].value = 'Medida';
-    header.cells[2].value = 'Qtd';
-    header.cells[3].value = 'Preço';
-    header.cells[4].value = 'Total';
+    header.cells[0].value = pdfSafeText('Descrição dos produtos');
+    header.cells[1].value = pdfSafeText('Medida');
+    header.cells[2].value = pdfSafeText('Qtd');
+    header.cells[3].value = pdfSafeText('Preço');
+    header.cells[4].value = pdfSafeText('Total');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -598,13 +600,17 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.category == 'Produtos') {
+      if (ItemCategory.fromValue(item.category) == ItemCategory.products) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.description!;
-        row.cells[1].value = item.measure!;
-        row.cells[2].value = item.quantity.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);
+        row.cells[0].value = pdfSafeText(item.description!);
+        row.cells[1].value = pdfSafeText(item.measure!);
+        row.cells[2].value = pdfSafeText(item.quantity.toString());
+        row.cells[3].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.price!),
+        );
+        row.cells[4].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.total!),
+        );
       }
     }
 
@@ -660,11 +666,11 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos serviços';
-    header.cells[1].value = 'Medida';
-    header.cells[2].value = 'Qtd';
-    header.cells[3].value = 'Preço';
-    header.cells[4].value = 'Total';
+    header.cells[0].value = pdfSafeText('Descrição dos serviços');
+    header.cells[1].value = pdfSafeText('Medida');
+    header.cells[2].value = pdfSafeText('Qtd');
+    header.cells[3].value = pdfSafeText('Preço');
+    header.cells[4].value = pdfSafeText('Total');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -691,13 +697,17 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.category == 'Serviços') {
+      if (ItemCategory.fromValue(item.category) == ItemCategory.services) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.description!;
-        row.cells[1].value = item.measure!;
-        row.cells[2].value = item.quantity.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);
+        row.cells[0].value = pdfSafeText(item.description!);
+        row.cells[1].value = pdfSafeText(item.measure!);
+        row.cells[2].value = pdfSafeText(item.quantity.toString());
+        row.cells[3].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.price!),
+        );
+        row.cells[4].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.total!),
+        );
       }
     }
 
@@ -759,7 +769,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphicsComment.drawString(
-      'OBSERVAÇÕES DO ORÇAMENTO',
+      pdfSafeText('OBSERVAÇÕES DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -773,8 +783,8 @@ class PdfGenerateBudgetSimpleUsecase {
 
     final PdfGrid commentPdfGrid = PdfGrid()..columns.add(count: 5);
     final PdfGridRow headerComment = commentPdfGrid.headers.add(1)[0];
-    headerComment.cells[0].value = 'Data';
-    headerComment.cells[1].value = 'Observação';
+    headerComment.cells[0].value = pdfSafeText('Data');
+    headerComment.cells[1].value = pdfSafeText('Observação');
 
     final PdfStringFormat formatComment = PdfStringFormat(
       textDirection: PdfTextDirection.leftToRight,
@@ -804,8 +814,8 @@ class PdfGenerateBudgetSimpleUsecase {
 
     for (final obs in observations) {
       final PdfGridRow row = commentPdfGrid.rows.add();
-      row.cells[0].value = obs.data;
-      row.cells[1].value = obs.observacao;
+      row.cells[0].value = pdfSafeText(obs.data);
+      row.cells[1].value = pdfSafeText(obs.observacao);
     }
 
     final PdfGridCellStyle styleComment =
@@ -892,8 +902,8 @@ class PdfGenerateBudgetSimpleUsecase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[3].value = label;
-    totalRow.cells[4].value = value;
+    totalRow.cells[3].value = pdfSafeText(label);
+    totalRow.cells[4].value = pdfSafeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }

@@ -41,8 +41,8 @@ class ProductPtString {
       _isPt ? 'Selecione categoria' : 'Select category';
   static String get categoryHint =>
       _isPt ? 'Definir categoria' : 'Set category';
-  static List<String> get categoryOptions =>
-      _isPt ? <String>['Produtos', 'Serviços'] : <String>['Products', 'Services'];
+  static String get categoryProducts => _isPt ? 'Produtos' : 'Products';
+  static String get categoryServices => _isPt ? 'Serviços' : 'Services';
   static String get unitHint =>
       _isPt ? 'Unidade de medida' : 'Unit of measure';
   static String get priceHint => _isPt ? 'Preço' : 'Price';

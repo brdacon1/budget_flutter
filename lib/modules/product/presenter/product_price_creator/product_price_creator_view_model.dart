@@ -1,5 +1,6 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -24,6 +25,10 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   final ProductPriceModel item;
 
   final TextEditingController categoriaText = TextEditingController();
+
+  /// Categoria escolhida. O texto do campo é só o label; o que é gravado é
+  /// [ItemCategory.value] (ou o valor original, se desconhecido).
+  ItemCategory? _category;
   final TextEditingController unidadeText = TextEditingController();
   final TextEditingController qtdText = TextEditingController();
   final TextEditingController descricaoText = TextEditingController();
@@ -60,7 +65,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     if (isEditing) {
       nameButton = ProductPtString.updateButton;
       titlePage = ProductPtString.editTitle;
-      categoriaText.text = item.categoria ?? '';
+      _category = ItemCategory.fromValue(item.categoria);
+      categoriaText.text = _category?.label ?? item.categoria ?? '';
       unidadeText.text = item.medida ?? '';
       qtdText.text = (item.qtd ?? 0).toString();
       priceController.text = moneyConvert.convertFromDouble(item.preco ?? 0);
@@ -73,7 +79,8 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
       fieldVisible = fromListItem;
       nameButton = ProductPtString.saveButton;
       titlePage = ProductPtString.createTitle;
-      categoriaText.text = 'Serviços';
+      _category = ItemCategory.services;
+      categoriaText.text = _category!.label;
       unidadeText.text = '';
       qtdText.text = '1';
       priceController.text = '';
@@ -90,9 +97,10 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     final value = await showOptionBottomModal(
       context,
       title: ProductPtString.selectCategoryTitle,
-      values: ProductPtString.categoryOptions,
+      values: ItemCategory.values.map((c) => c.label).toList(),
     );
     if (value != null) {
+      _category = ItemCategory.values.firstWhere((c) => c.label == value);
       categoriaText.text = value;
       notifyListeners();
     }
@@ -163,7 +171,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
   ProductPriceModel _buildModel(double preco, double qtd, double? total) {
     return ProductPriceModel(
-      categoria: categoriaText.text,
+      categoria: _category?.value ?? item.categoria,
       descricao: descricaoText.text,
       medida: unidadeText.text,
       preco: preco,
@@ -216,7 +224,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     try {
       final budgetItem = ItemsBudget(
         id: item.idProduct,
-        category: model.categoria ?? 'Serviços',
+        category: model.categoria ?? ItemCategory.services.value,
         description: model.descricao,
         price: model.preco,
         quantity: model.qtd,

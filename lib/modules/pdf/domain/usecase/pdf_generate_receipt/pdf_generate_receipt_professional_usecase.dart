@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -223,7 +225,7 @@ class PdfGenerateReceiptProfessionalUsecase {
 
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!,
+        pdfSafeText(owner.empresa!),
         _fontTitle,
         brush: _brushPrimary,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 24),
@@ -237,7 +239,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
-        '$label $value',
+        pdfSafeText('$label $value'),
         infoFont,
         brush: infoBrush,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 13),
@@ -383,7 +385,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     double pad,
   ) {
     g.drawString(
-      title,
+      pdfSafeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(x + pad, y + pad, w - pad * 2, 16),
@@ -407,13 +409,13 @@ class PdfGenerateReceiptProfessionalUsecase {
     for (final row in rows) {
       if (row.value == null || row.value!.isEmpty) continue;
       g.drawString(
-        row.label,
+        pdfSafeText(row.label),
         _fontRegular,
         brush: _brushGray,
         bounds: Rect.fromLTWH(xOffset + pad, y, contentW * 0.4, 13),
       );
       g.drawString(
-        row.value!,
+        pdfSafeText(row.value!),
         _fontRegular,
         brush: _brushBlack,
         bounds: Rect.fromLTWH(
@@ -461,7 +463,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      title,
+      pdfSafeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(
@@ -489,9 +491,9 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns.add(count: 3);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos pagamentos';
-    header.cells[1].value = 'Método';
-    header.cells[2].value = 'Valor pago';
+    header.cells[0].value = pdfSafeText('Descrição dos pagamentos');
+    header.cells[1].value = pdfSafeText('Método');
+    header.cells[2].value = pdfSafeText('Valor pago');
 
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
       font: _fontHeader,
@@ -507,14 +509,22 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns[1].width = 160;
     grid.columns[2].width = 115;
 
-    for (final payment in paymentList) {
-      final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = payment.description ?? '';
-      row.cells[1].value = payment.method ?? '';
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price ?? 0);
-    }
+    final groups = [
+      for (final payment in paymentList)
+        pdfAddWrappedRows(
+          grid,
+          cells: [
+            payment.description ?? '',
+            payment.method ?? '',
+            _moneyConvert.convertFromDouble(payment.price ?? 0),
+          ],
+          font: _fontRegular,
+          horizontalPadding: 12,
+        ),
+    ];
 
     _applyRowStyle(grid, _itemRowStyle());
+    groups.forEach(pdfJoinRows);
 
     _addRightAlignedTotalRow(
       grid: grid,
@@ -553,8 +563,8 @@ class PdfGenerateReceiptProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[1].value = label;
-    row.cells[2].value = value;
+    row.cells[1].value = pdfSafeText(label);
+    row.cells[2].value = pdfSafeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(
       font: font,
@@ -580,7 +590,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     g.drawLine(PdfPen(_borderGray, width: 0.5), Offset(0, y), Offset(pageW, y));
 
     g.drawString(
-      '${owner.empresa ?? ''} • Recibo Comercial',
+      pdfSafeText('${owner.empresa ?? ''} • Recibo Comercial'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(0, y + 4, pageW * 0.5, 14),
@@ -588,7 +598,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      'Página 1 de 1',
+      pdfSafeText('Página 1 de 1'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(pageW * 0.5, y + 4, pageW * 0.5, 14),

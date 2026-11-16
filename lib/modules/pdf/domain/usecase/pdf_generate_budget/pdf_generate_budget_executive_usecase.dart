@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -294,7 +296,7 @@ class PdfGenerateBudgetExecutiveUsecase {
 
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!,
+        pdfSafeText(owner.empresa!),
         whiteBold,
         brush: white,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 17),
@@ -306,7 +308,7 @@ class PdfGenerateBudgetExecutiveUsecase {
       if (hasCnpj) parts.add('CNPJ: ${owner.cnpj}');
       if (hasFone) parts.add('Tel: ${owner.fone}');
       g.drawString(
-        parts.join(' | '),
+        pdfSafeText(parts.join(' | ')),
         grayReg,
         brush: gray,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 12),
@@ -315,7 +317,7 @@ class PdfGenerateBudgetExecutiveUsecase {
     }
     if (owner.email != null && owner.email!.isNotEmpty) {
       g.drawString(
-        'E-mail: ${owner.email}',
+        pdfSafeText('E-mail: ${owner.email}'),
         grayReg,
         brush: gray,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 12),
@@ -335,7 +337,7 @@ class PdfGenerateBudgetExecutiveUsecase {
     final PdfBrush cyan = PdfSolidBrush(PdfColor(56, 189, 248));
 
     g.drawString(
-      'ORÇAMENTO COMERCIAL',
+      pdfSafeText('ORÇAMENTO COMERCIAL'),
       cyanBold,
       brush: cyan,
       bounds: Rect.fromLTWH(rightX, ry, pageWidth * 0.5 - padH, 14),
@@ -350,7 +352,7 @@ class PdfGenerateBudgetExecutiveUsecase {
     );
     if (customer.id != null && customer.id!.isNotEmpty) {
       g.drawString(
-        '#${customer.id}',
+        pdfSafeText('#${customer.id}'),
         bigWhite,
         brush: white,
         bounds: Rect.fromLTWH(rightX, ry, pageWidth * 0.5 - padH, 22),
@@ -445,7 +447,7 @@ class PdfGenerateBudgetExecutiveUsecase {
     final grid = PdfGrid()..columns.add(count: 2);
 
     final headerRow = grid.headers.add(1)[0];
-    headerRow.cells[0].value = title;
+    headerRow.cells[0].value = pdfSafeText(title);
     headerRow.cells[0].columnSpan = 2;
 
     final PdfFont titleFont = PdfStandardFont(
@@ -472,8 +474,8 @@ class PdfGenerateBudgetExecutiveUsecase {
     for (final (label, value) in rows) {
       if (value == null || value.isEmpty) continue;
       final r = grid.rows.add();
-      r.cells[0].value = label;
-      r.cells[1].value = value;
+      r.cells[0].value = pdfSafeText(label);
+      r.cells[1].value = pdfSafeText(value);
     }
 
     final PdfGridCellStyle labelStyle = PdfGridCellStyle(
@@ -519,11 +521,11 @@ class PdfGenerateBudgetExecutiveUsecase {
       11,
       style: PdfFontStyle.bold,
     );
-    final size = font.measureString(title);
+    final size = font.measureString(pdfSafeText(title));
     const double pad = 8;
 
     g.drawString(
-      title,
+      pdfSafeText(title),
       font,
       brush: PdfSolidBrush(PdfColor(30, 41, 59)),
       bounds: Rect.fromLTWH(0, topY, size.width + 2, 16),
@@ -557,11 +559,11 @@ class PdfGenerateBudgetExecutiveUsecase {
     grid.columns.add(count: 5);
 
     final header = grid.headers.add(1)[0];
-    header.cells[0].value = 'DESCRIÇÃO';
-    header.cells[1].value = 'MEDIDA';
-    header.cells[2].value = 'QTD';
-    header.cells[3].value = 'PREÇO UNIT.';
-    header.cells[4].value = 'TOTAL';
+    header.cells[0].value = pdfSafeText('DESCRIÇÃO');
+    header.cells[1].value = pdfSafeText('MEDIDA');
+    header.cells[2].value = pdfSafeText('QTD');
+    header.cells[3].value = pdfSafeText('PREÇO UNIT.');
+    header.cells[4].value = pdfSafeText('TOTAL');
 
     final PdfFont headerFont = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -588,13 +590,18 @@ class PdfGenerateBudgetExecutiveUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.category == category) {
+      if (ItemCategory.fromValue(item.category) ==
+          ItemCategory.fromValue(category)) {
         final row = grid.rows.add();
-        row.cells[0].value = item.description ?? '';
-        row.cells[1].value = item.measure ?? '';
-        row.cells[2].value = (item.quantity ?? 0).toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price ?? 0);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total ?? 0);
+        row.cells[0].value = pdfSafeText(item.description ?? '');
+        row.cells[1].value = pdfSafeText(item.measure ?? '');
+        row.cells[2].value = pdfSafeText((item.quantity ?? 0).toString());
+        row.cells[3].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.price ?? 0),
+        );
+        row.cells[4].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.total ?? 0),
+        );
       }
     }
 
@@ -727,8 +734,8 @@ class PdfGenerateBudgetExecutiveUsecase {
   ) {
     final grid = PdfGrid()..columns.add(count: 2);
     final header = grid.headers.add(1)[0];
-    header.cells[0].value = 'DATA';
-    header.cells[1].value = 'DESCRIÇÃO DA OBSERVAÇÃO';
+    header.cells[0].value = pdfSafeText('DATA');
+    header.cells[1].value = pdfSafeText('DESCRIÇÃO DA OBSERVAÇÃO');
 
     final PdfFont headerFont = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -753,8 +760,8 @@ class PdfGenerateBudgetExecutiveUsecase {
 
     for (final obs in observations) {
       final row = grid.rows.add();
-      row.cells[0].value = obs.data;
-      row.cells[1].value = obs.observacao;
+      row.cells[0].value = pdfSafeText(obs.data);
+      row.cells[1].value = pdfSafeText(obs.observacao);
     }
 
     final PdfGridCellStyle rowStyle =
@@ -805,7 +812,7 @@ class PdfGenerateBudgetExecutiveUsecase {
       style: PdfFontStyle.regular,
     );
     page.graphics.drawString(
-      '${owner.empresa ?? ''} • Gestão de Orçamentos',
+      pdfSafeText('${owner.empresa ?? ''} • Gestão de Orçamentos'),
       font,
       brush: PdfSolidBrush(PdfColor(150, 150, 150)),
       bounds: Rect.fromLTWH(
@@ -830,8 +837,8 @@ class PdfGenerateBudgetExecutiveUsecase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[3].value = label;
-    totalRow.cells[4].value = value;
+    totalRow.cells[3].value = pdfSafeText(label);
+    totalRow.cells[4].value = pdfSafeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }

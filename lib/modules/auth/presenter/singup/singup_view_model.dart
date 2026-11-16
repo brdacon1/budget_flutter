@@ -96,7 +96,7 @@ class SingUpViewModel extends ChangeNotifier {
       infoUser.purchaseToken = '';
 
       ownerPdf.email = email;
-      ownerPdf.empresa = 'Minha Empresa';
+      ownerPdf.empresa = SingUpStrings.defaultCompanyName;
       ownerPdf.logoName = '';
       ownerPdf.fotoId = '';
 

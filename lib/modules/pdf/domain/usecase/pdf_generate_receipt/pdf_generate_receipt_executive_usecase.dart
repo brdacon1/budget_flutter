@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -245,7 +247,7 @@ class PdfGenerateReceiptExecutiveUsecase {
 
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!,
+        pdfSafeText(owner.empresa!),
         whiteBold,
         brush: white,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 17),
@@ -257,7 +259,7 @@ class PdfGenerateReceiptExecutiveUsecase {
       if (hasCnpj) parts.add('CNPJ: ${owner.cnpj}');
       if (hasFone) parts.add('Tel: ${owner.fone}');
       g.drawString(
-        parts.join(' | '),
+        pdfSafeText(parts.join(' | ')),
         grayReg,
         brush: gray,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 12),
@@ -266,7 +268,7 @@ class PdfGenerateReceiptExecutiveUsecase {
     }
     if (owner.email != null && owner.email!.isNotEmpty) {
       g.drawString(
-        'E-mail: ${owner.email}',
+        pdfSafeText('E-mail: ${owner.email}'),
         grayReg,
         brush: gray,
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 12),
@@ -286,7 +288,7 @@ class PdfGenerateReceiptExecutiveUsecase {
     final PdfBrush cyan = PdfSolidBrush(PdfColor(56, 189, 248));
 
     g.drawString(
-      'RECIBO DE PAGAMENTO',
+      pdfSafeText('RECIBO DE PAGAMENTO'),
       cyanBold,
       brush: cyan,
       bounds: Rect.fromLTWH(rightX, ry, pageWidth * 0.5 - padH, 14),
@@ -301,7 +303,7 @@ class PdfGenerateReceiptExecutiveUsecase {
     );
     if (recived.id != null && recived.id!.isNotEmpty) {
       g.drawString(
-        '#${recived.id}',
+        pdfSafeText('#${recived.id}'),
         bigWhite,
         brush: white,
         bounds: Rect.fromLTWH(rightX, ry, pageWidth * 0.5 - padH, 22),
@@ -409,7 +411,7 @@ class PdfGenerateReceiptExecutiveUsecase {
     final grid = PdfGrid()..columns.add(count: 2);
 
     final headerRow = grid.headers.add(1)[0];
-    headerRow.cells[0].value = title;
+    headerRow.cells[0].value = pdfSafeText(title);
     headerRow.cells[0].columnSpan = 2;
 
     final PdfFont titleFont = PdfStandardFont(
@@ -436,8 +438,8 @@ class PdfGenerateReceiptExecutiveUsecase {
     for (final (label, value) in rows) {
       if (value == null || value.isEmpty) continue;
       final r = grid.rows.add();
-      r.cells[0].value = label;
-      r.cells[1].value = value;
+      r.cells[0].value = pdfSafeText(label);
+      r.cells[1].value = pdfSafeText(value);
     }
 
     final PdfGridCellStyle labelStyle = PdfGridCellStyle(
@@ -483,11 +485,11 @@ class PdfGenerateReceiptExecutiveUsecase {
       11,
       style: PdfFontStyle.bold,
     );
-    final size = font.measureString(title);
+    final size = font.measureString(pdfSafeText(title));
     const double pad = 8;
 
     g.drawString(
-      title,
+      pdfSafeText(title),
       font,
       brush: PdfSolidBrush(PdfColor(30, 41, 59)),
       bounds: Rect.fromLTWH(0, topY, size.width + 2, 16),
@@ -516,9 +518,9 @@ class PdfGenerateReceiptExecutiveUsecase {
     grid.columns.add(count: 3);
 
     final header = grid.headers.add(1)[0];
-    header.cells[0].value = 'DESCRIÇÃO';
-    header.cells[1].value = 'MÉTODO';
-    header.cells[2].value = 'VALOR PAGO';
+    header.cells[0].value = pdfSafeText('DESCRIÇÃO');
+    header.cells[1].value = pdfSafeText('MÉTODO');
+    header.cells[2].value = pdfSafeText('VALOR PAGO');
 
     final PdfFont headerFont = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -542,12 +544,19 @@ class PdfGenerateReceiptExecutiveUsecase {
     grid.columns[1].width = 175;
     grid.columns[2].width = 115;
 
-    for (final payment in paymentList) {
-      final row = grid.rows.add();
-      row.cells[0].value = payment.description ?? '';
-      row.cells[1].value = payment.method ?? '';
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price ?? 0);
-    }
+    final groups = [
+      for (final payment in paymentList)
+        pdfAddWrappedRows(
+          grid,
+          cells: [
+            payment.description ?? '',
+            payment.method ?? '',
+            _moneyConvert.convertFromDouble(payment.price ?? 0),
+          ],
+          font: PdfStandardFont(PdfFontFamily.helvetica, 9),
+          horizontalPadding: 10,
+        ),
+    ];
 
     final PdfGridCellStyle rowStyle =
         PdfGridCellStyle(
@@ -569,6 +578,7 @@ class PdfGenerateReceiptExecutiveUsecase {
         grid.rows[i].cells[j].style = rowStyle;
       }
     }
+    groups.forEach(pdfJoinRows);
 
     // Total
     _addTotalRow(
@@ -624,7 +634,7 @@ class PdfGenerateReceiptExecutiveUsecase {
       style: PdfFontStyle.regular,
     );
     page.graphics.drawString(
-      '${owner.empresa ?? ''} • Gestão de Recibos',
+      pdfSafeText('${owner.empresa ?? ''} • Gestão de Recibos'),
       font,
       brush: PdfSolidBrush(PdfColor(150, 150, 150)),
       bounds: Rect.fromLTWH(
@@ -649,8 +659,8 @@ class PdfGenerateReceiptExecutiveUsecase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[1].value = label;
-    totalRow.cells[2].value = value;
+    totalRow.cells[1].value = pdfSafeText(label);
+    totalRow.cells[2].value = pdfSafeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }

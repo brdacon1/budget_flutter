@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -275,7 +277,7 @@ class PdfGenerateBudgetProfessionalUsecase {
     // Nome empresa — azul escuro, grande
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!,
+        pdfSafeText(owner.empresa!),
         _fontTitle,
         brush: _brushPrimary,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 24),
@@ -289,7 +291,7 @@ class PdfGenerateBudgetProfessionalUsecase {
     void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
-        '$label $value',
+        pdfSafeText('$label $value'),
         infoFont,
         brush: infoBrush,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 13),
@@ -429,7 +431,7 @@ class PdfGenerateBudgetProfessionalUsecase {
     double pad,
   ) {
     g.drawString(
-      title,
+      pdfSafeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(x + pad, y + pad, w - pad * 2, 16),
@@ -454,13 +456,13 @@ class PdfGenerateBudgetProfessionalUsecase {
     for (final row in rows) {
       if (row.value == null || row.value!.isEmpty) continue;
       g.drawString(
-        row.label,
+        pdfSafeText(row.label),
         _fontRegular,
         brush: _brushGray,
         bounds: Rect.fromLTWH(xOffset + pad, y, contentW * 0.4, 13),
       );
       g.drawString(
-        row.value!,
+        pdfSafeText(row.value!),
         _fontRegular,
         brush: _brushBlack,
         bounds: Rect.fromLTWH(
@@ -510,7 +512,7 @@ class PdfGenerateBudgetProfessionalUsecase {
     );
 
     g.drawString(
-      title,
+      pdfSafeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(
@@ -545,11 +547,11 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     // Header
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = descriptionLabel;
-    header.cells[1].value = 'Medida';
-    header.cells[2].value = 'Qtd';
-    header.cells[3].value = 'Preço';
-    header.cells[4].value = 'Total';
+    header.cells[0].value = pdfSafeText(descriptionLabel);
+    header.cells[1].value = pdfSafeText('Medida');
+    header.cells[2].value = pdfSafeText('Qtd');
+    header.cells[3].value = pdfSafeText('Preço');
+    header.cells[4].value = pdfSafeText('Total');
 
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
       font: _fontHeader,
@@ -570,13 +572,18 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     // Linhas
     for (final item in items) {
-      if (item.category == category) {
+      if (ItemCategory.fromValue(item.category) ==
+          ItemCategory.fromValue(category)) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.description ?? '';
-        row.cells[1].value = item.measure ?? '';
-        row.cells[2].value = (item.quantity ?? 0).toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price ?? 0);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total ?? 0);
+        row.cells[0].value = pdfSafeText(item.description ?? '');
+        row.cells[1].value = pdfSafeText(item.measure ?? '');
+        row.cells[2].value = pdfSafeText((item.quantity ?? 0).toString());
+        row.cells[3].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.price ?? 0),
+        );
+        row.cells[4].value = pdfSafeText(
+          _moneyConvert.convertFromDouble(item.total ?? 0),
+        );
       }
     }
 
@@ -658,8 +665,8 @@ class PdfGenerateBudgetProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[3].value = label;
-    row.cells[4].value = value;
+    row.cells[3].value = pdfSafeText(label);
+    row.cells[4].value = pdfSafeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(
       font: font,
@@ -688,8 +695,8 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     final PdfGrid grid = PdfGrid()..columns.add(count: 2);
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Data';
-    header.cells[1].value = 'Observação';
+    header.cells[0].value = pdfSafeText('Data');
+    header.cells[1].value = pdfSafeText('Observação');
 
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
       font: _fontHeader,
@@ -704,8 +711,8 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     for (final obs in observations) {
       final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = obs.data;
-      row.cells[1].value = obs.observacao;
+      row.cells[0].value = pdfSafeText(obs.data);
+      row.cells[1].value = pdfSafeText(obs.observacao);
     }
 
     _applyRowStyle(grid, _itemRowStyle());
@@ -752,7 +759,7 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     // Esquerda
     g.drawString(
-      '${owner.empresa ?? ''} • Orçamento Comercial',
+      pdfSafeText('${owner.empresa ?? ''} • Orçamento Comercial'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(0, y + 4, pageW * 0.5, 14),
@@ -761,7 +768,7 @@ class PdfGenerateBudgetProfessionalUsecase {
 
     // Direita — página
     g.drawString(
-      'Page 1 of 1',
+      pdfSafeText('Page 1 of 1'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(pageW * 0.5, y + 4, pageW * 0.5, 14),

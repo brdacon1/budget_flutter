@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_safe_text.dart';
+import 'package:oflite/modules/pdf/domain/utils/pdf_wrapped_rows.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -166,7 +168,7 @@ class PdfGenerateReceiptUseCase {
     void addRow(String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = pdfGrid.rows.add();
-      row.cells[0].value = value;
+      row.cells[0].value = pdfSafeText(value);
     }
 
     addRow(owner.empresa);
@@ -244,7 +246,7 @@ class PdfGenerateReceiptUseCase {
     );
 
     graphics.drawString(
-      '\nDADOS DO RECIBO',
+      pdfSafeText('\nDADOS DO RECIBO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -270,8 +272,8 @@ class PdfGenerateReceiptUseCase {
       void addRow(String label, String? value) {
         if (value == null || value.isEmpty) return;
         final PdfGridRow row = pdfGrid.rows.add();
-        row.cells[0].value = label;
-        row.cells[1].value = value;
+        row.cells[0].value = pdfSafeText(label);
+        row.cells[1].value = pdfSafeText(value);
       }
 
       addRow('Número do orçamento:', customer.id);
@@ -334,8 +336,8 @@ class PdfGenerateReceiptUseCase {
       void addRow(String label, String? value) {
         if (value == null || value.isEmpty) return;
         final PdfGridRow row = pdfGrid.rows.add();
-        row.cells[0].value = label;
-        row.cells[1].value = value;
+        row.cells[0].value = pdfSafeText(label);
+        row.cells[1].value = pdfSafeText(value);
       }
 
       addRow('Número do recibo:', recived.id);
@@ -405,7 +407,7 @@ class PdfGenerateReceiptUseCase {
     );
 
     graphics.drawString(
-      'PAGAMENTOS REALIZADOS',
+      pdfSafeText('PAGAMENTOS REALIZADOS'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -432,9 +434,9 @@ class PdfGenerateReceiptUseCase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos pagamentos';
-    header.cells[1].value = 'Metodo de pagamento';
-    header.cells[2].value = 'Valor pago';
+    header.cells[0].value = pdfSafeText('Descrição dos pagamentos');
+    header.cells[1].value = pdfSafeText('Metodo de pagamento');
+    header.cells[2].value = pdfSafeText('Valor pago');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -459,14 +461,23 @@ class PdfGenerateReceiptUseCase {
     grid.columns[1].width = 180;
     grid.columns[2].width = 105;
 
-    for (final payment in paymentList) {
-      final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = payment.description!;
-      row.cells[1].value = payment.method!;
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price!);
-    }
+    final groups = [
+      for (final payment in paymentList)
+        pdfAddWrappedRows(
+          grid,
+          cells: [
+            payment.description!,
+            payment.method!,
+            _moneyConvert.convertFromDouble(payment.price!),
+          ],
+          // Fonte padrão da grade (o estilo da linha não define fonte).
+          font: PdfStandardFont(PdfFontFamily.helvetica, 8),
+          horizontalPadding: 10,
+        ),
+    ];
 
     _applyRowStyle(grid, _createPaymentRowStyle());
+    groups.forEach(pdfJoinRows);
 
     _addTotalRow(
       grid: grid,
@@ -534,8 +545,8 @@ class PdfGenerateReceiptUseCase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[labelCellIndex].value = label;
-    totalRow.cells[valueCellIndex].value = value;
+    totalRow.cells[labelCellIndex].value = pdfSafeText(label);
+    totalRow.cells[valueCellIndex].value = pdfSafeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }

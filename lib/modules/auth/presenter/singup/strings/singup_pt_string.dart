@@ -73,4 +73,8 @@ class SingUpStrings {
 
   static String get signUpErrorDefault =>
       _isPt ? 'Problemas para registrar usuário!' : 'Could not register user!';
+
+  // --- Cadastro: dados padrão do novo usuário (gravados no Firestore) ---
+  static String get defaultCompanyName =>
+      _isPt ? 'Minha Empresa' : 'My Company';
 }
