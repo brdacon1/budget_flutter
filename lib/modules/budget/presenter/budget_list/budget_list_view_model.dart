@@ -50,9 +50,15 @@ class BudgetListViewModel extends ChangeNotifier {
     await getInformationOrcamento(refresh: false);
   }
 
+  /// O repositório já mantém o cache paginado em sincronia (save/update/
+  /// delete/duplicate), então só espelhamos — sem buscar a próxima página
+  /// e sem resetar a paginação (preserva o scroll).
   void _onBudgetRepoChanged() {
     if (_disposed || _isRefreshing) return;
-    getInformationOrcamento(refresh: false);
+    _foundUsers
+      ..clear()
+      ..addAll(_budgetRepository.budgets.map((b) => b..checkBox ??= false));
+    notifyListeners();
   }
 
   Future<void> initialScreen() async {

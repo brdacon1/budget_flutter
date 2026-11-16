@@ -339,9 +339,8 @@ class _BudgetListView extends State<BudgetListView> {
                   MaterialPageRoute(
                     builder: (context) => BudgetTabView(item: item),
                   ),
-                ).then((_) async {
+                ).then((_) {
                   getIt<BudgetRepository>().clearSelectBudget();
-                  await _viewModel.getInformationOrcamento(refresh: true);
                   _viewModel.clearDeleteItens();
                 });
               },
