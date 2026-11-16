@@ -59,6 +59,12 @@ class ProductPriceListViewModel extends ChangeNotifier {
         .toList();
   }
 
+  /// Soma de (preço × quantidade) de todos os itens selecionados no carrinho.
+  double get cartTotal => addItems.fold<double>(
+    0.0,
+    (sum, p) => sum + (p.preco ?? 0.0) * (p.qtd ?? 0.0),
+  );
+
   void onSearchChanged() => notifyListeners();
 
   Future<void> inicialData() async {

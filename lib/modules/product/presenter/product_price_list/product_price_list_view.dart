@@ -101,64 +101,85 @@ class _ProductPriceListView extends State<ProductPriceListView> {
           return const SizedBox.shrink();
         }
 
-        double totalPrice = 0.0;
-        for (var p in _viewModel.addItems) {
-          totalPrice += (p.preco ?? 0.0);
-        }
+        final totalPrice = _viewModel.cartTotal;
+        final count = _viewModel.addItems.length;
 
         return BottomAppBar(
           color: const Color(0xFF161622),
           elevation: 10,
+          height: 96,
+          padding: EdgeInsets.zero,
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 6.0,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Color(0xFF00BFA5),
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Total dos itens',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 11,
-                            ),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.shopping_bag_outlined,
+                          color: Color(0xFF00BFA5),
+                          size: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Total dos itens',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: _viewModel.moneyConvert
+                                        .convertFromDouble(totalPrice),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            ' / $count ${count == 1 ? 'item' : 'itens'}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${_viewModel.moneyConvert.convertFromDouble(totalPrice)} / ${_viewModel.addItems.length} ${_viewModel.addItems.length == 1 ? 'item' : 'itens'}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: buttonColor,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
-                        vertical: 10,
+                        vertical: 14,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(24),
                       ),
                     ),
                     onPressed: () => _viewModel.openCartModal(context),
@@ -166,7 +187,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                       'Ver Carrinho',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 16,
                       ),
                     ),
                   ),
