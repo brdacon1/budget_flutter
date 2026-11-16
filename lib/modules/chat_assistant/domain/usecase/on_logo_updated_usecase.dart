@@ -1,66 +1,30 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
-import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 
-/// Envia confirmação após o usuário voltar da tela de edição de logo.
+/// Chamado quando o usuário volta da tela de edição de logo (ou da tela de
+/// assinatura). Segue o mesmo caminho da opção "Ver logo": exibe a logo atual
+/// (ou avisa que não há logo) e reapresenta o menu da logo para o usuário
+/// continuar ou voltar ao início.
 class OnLogoUpdatedUsecase {
   final ChatBudgetRepository _chatRepo;
-  final PdfRepository _pdfRepo;
   final ShowLogoInChatUsecase _showLogoInChat;
-  final ShowPdfEditMenuUsecase _showPdfEditMenu;
 
-  const OnLogoUpdatedUsecase(
-    this._chatRepo,
-    this._pdfRepo,
-    this._showLogoInChat,
-    this._showPdfEditMenu,
-  );
+  const OnLogoUpdatedUsecase(this._chatRepo, this._showLogoInChat);
 
   Future<String> call() async {
-    // Busca a logo atualizada para simular uma "foto enviada" pelo usuário
-    final result = await _pdfRepo.fetchInformationEnterprise();
-    if (result is Ok<OwnerPdf>) {
-      final owner = result.value;
-      final hasLogo = owner.fotoId != null && owner.fotoId!.isNotEmpty;
-      if (hasLogo) {
-        final String fotoId = owner.fotoId ?? '';
-        final imageUrl =
-            fotoId.startsWith('http')
-                ? fotoId
-                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
-                    '${Uri.encodeComponent(owner.logoName ?? '')}?alt=media&token=$fotoId';
-
-        // Mostra a logo como se o usuário tivesse enviado uma foto (estilo WhatsApp)
-        await _chatRepo.sendMessage(
-          ChatMessageEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            sender: ChatSender.user,
-            type: ChatMessageType.image,
-            content: '',
-            payload: {'imageUrl': imageUrl},
-            timestamp: DateTime.now(),
-          ),
-        );
-      }
-    }
+    await _showLogoInChat();
 
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: 'Logo atualizada com sucesso.',
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.logoMenuQuestion,
+        labels: ChatBudgetStrings.logoMenuOptionLabels,
+        step: 'logoMenu',
+        backLabel: ChatBudgetStrings.menuBackLabel,
       ),
     );
 
-    // Mostra a logo novamente no chat com botão de alterar
-    await _showLogoInChat();
-
-    return _showPdfEditMenu();
+    return 'logoMenu';
   }
 }

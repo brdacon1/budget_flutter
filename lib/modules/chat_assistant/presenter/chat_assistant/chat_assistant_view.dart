@@ -194,7 +194,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
 
     if (!mounted) return;
-    // Ao voltar, notifica o ViewModel para confirmar e voltar ao menu de PDF
+    // Ao voltar, mostra a logo e reapresenta o menu da logo (igual a "Ver logo")
     await _vm.onLogoUpdated();
   }
 
