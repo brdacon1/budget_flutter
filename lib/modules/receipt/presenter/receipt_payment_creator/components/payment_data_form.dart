@@ -25,6 +25,8 @@ class PaymentDataForm extends StatelessWidget {
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
+          animateTrailing: true,
+          trailing: const Icon(Icons.expand_more, color: whiteColor),
           leading: const CircleAvatar(
             backgroundColor: bgColor,
             child: Icon(Icons.payments_outlined, color: Colors.white),

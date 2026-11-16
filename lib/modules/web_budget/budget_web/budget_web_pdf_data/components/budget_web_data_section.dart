@@ -37,6 +37,8 @@ class BudgetWebDataSection extends StatelessWidget {
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
+          animateTrailing: true,
+          trailing: const Icon(Icons.expand_more, color: whiteColor),
           leading: CircleAvatar(
             backgroundColor: bgColor,
             child: Icon(icon, color: whiteColor),
