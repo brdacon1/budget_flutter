@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -39,8 +40,7 @@ class ProductPriceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Validação da categoria para colorir a pílula de acordo com o design (mantendo cores do tema)
     final bool isProduct =
-        '${item.categoria}'.toLowerCase().contains('produto') ||
-        item.categoria == '1';
+        ItemCategory.fromValue(item.categoria) == ItemCategory.products;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),

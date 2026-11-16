@@ -173,14 +173,24 @@ class _ProductScreenBottomPartState extends State<ProductScreenBottomPart> {
   Widget _buildPriceValue() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: screenAwareSize(20.0, context)),
-      child: Text(
-        widget.price ?? SubscriptionStrings.defaultPrice,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: screenAwareSize(22.0, context),
-          fontFamily: "Montserrat-Medium",
-        ),
-      ),
+      child:
+          widget.price == null
+              ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+              : Text(
+                widget.price!,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: screenAwareSize(22.0, context),
+                  fontFamily: "Montserrat-Medium",
+                ),
+              ),
     );
   }
 

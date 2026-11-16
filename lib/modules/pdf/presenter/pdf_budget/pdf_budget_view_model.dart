@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -113,10 +114,10 @@ class PdfBudgetViewModel extends ChangeNotifier {
         for (int index = 0; index < budgetItems.length; index++) {
           final item = budgetItems[index];
           final total = item.total ?? 0;
-          if (item.category == 'Produtos') {
+          if (ItemCategory.fromValue(item.category) == ItemCategory.products) {
             totalProducts += total;
             countProduct++;
-          } else if (item.category == 'Serviços') {
+          } else if (ItemCategory.fromValue(item.category) == ItemCategory.services) {
             totalServices += total;
             countService++;
           }

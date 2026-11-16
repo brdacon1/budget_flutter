@@ -21,8 +21,6 @@ class SubscriptionStrings {
 
   static String get priceTitle => _isPt ? 'Preço' : 'Price';
 
-  static String get defaultPrice => _isPt ? 'R\$ 3,59/mês' : r'$ 3.59/month';
-
   static String get subscribeButton => _isPt ? 'ASSINAR' : 'SUBSCRIBE';
 
   static String get restoreButton =>

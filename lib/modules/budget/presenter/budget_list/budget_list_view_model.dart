@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -9,6 +10,8 @@ TextEditingController searchController = TextEditingController();
 
 class BudgetListViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
+  final DuplicateBudgetUsecase _duplicateBudget =
+      getIt<DuplicateBudgetUsecase>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   bool _disposed = false;
@@ -47,9 +50,15 @@ class BudgetListViewModel extends ChangeNotifier {
     await getInformationOrcamento(refresh: false);
   }
 
+  /// O repositório já mantém o cache paginado em sincronia (save/update/
+  /// delete/duplicate), então só espelhamos — sem buscar a próxima página
+  /// e sem resetar a paginação (preserva o scroll).
   void _onBudgetRepoChanged() {
     if (_disposed || _isRefreshing) return;
-    getInformationOrcamento(refresh: false);
+    _foundUsers
+      ..clear()
+      ..addAll(_budgetRepository.budgets.map((b) => b..checkBox ??= false));
+    notifyListeners();
   }
 
   Future<void> initialScreen() async {
@@ -61,15 +70,17 @@ class BudgetListViewModel extends ChangeNotifier {
     bool clientData,
     bool quoteItems,
     bool comments,
+    bool receipts,
   ) async {
     final String? originalId = _budgetRepository.selectBudget.value?.id;
     if (originalId == null || originalId.isEmpty) return;
 
-    final result = await _budgetRepository.duplicateBudget(
+    final result = await _duplicateBudget(
       sourceId: originalId,
       copyClientData: clientData,
       copyItems: quoteItems,
       copyComments: comments,
+      copyReceipts: receipts,
     );
 
     if (result is Ok<CustomerInfo>) {

@@ -41,9 +41,7 @@ class ChatBudgetStrings {
   static String get clientFallback => _isPt ? 'Cliente' : 'Client';
 
   static String get typeOptionInstruction =>
-      _isPt
-          ? 'Digite o numero da opção desejada e envie'
-          : 'Type the desired option number and send';
+      _isPt ? 'Toque na opção desejada' : 'Tap the desired option';
 
   static String get budgetNotAvailable =>
       _isPt
@@ -64,24 +62,30 @@ class ChatBudgetStrings {
   static String get mainMenuQuestion =>
       _isPt ? 'O que eu posso fazer por você?' : 'What can I do for you?';
 
-  static String get mainMenuOptions =>
+  static List<String> get mainMenuOptionLabels =>
       _isPt
-          ? '1. Criar orçamentos\n\n'
-              '2. Cadastrar produtos e serviços\n\n'
-              '3. Editar PDF\n\n'
-              '4. Trocar nome de usuário'
-          : '1. Create budget\n\n'
-              '2. Price list\n\n'
-              '3. Edit PDF\n\n'
-              '4. Change username';
+          ? const [
+            'Criar orçamentos',
+            'Cadastrar produtos e serviços',
+            'Editar PDF',
+            'Trocar nome de usuário',
+          ]
+          : const [
+            'Create budget',
+            'Price list',
+            'Edit PDF',
+            'Change username',
+          ];
 
   static String get menuInvalidOption =>
       _isPt
-          ? 'Opção inválida. Envie o número correspondente.'
-          : 'Invalid option. Send the corresponding number.';
+          ? 'Opção inválida. Toque em uma das opções acima.'
+          : 'Invalid option. Tap one of the options above.';
 
-  static String get menuBackOption =>
-      _isPt ? '0. Voltar ao menu' : '0. Back to menu';
+  static String get menuBackLabel => _isPt ? 'Voltar ao menu' : 'Back to menu';
+
+  static List<String> get yesNoOptionLabels =>
+      _isPt ? const ['Sim', 'Não'] : const ['Yes', 'No'];
 
   static String get budgetTransition =>
       _isPt ? 'Vamos lá! 💪' : 'Let\'s go! 💪';
@@ -94,10 +98,10 @@ class ChatBudgetStrings {
           ? 'Legal, o que você quer fazer?'
           : 'Great, what do you want to do?';
 
-  static String get priceListMenuOptions =>
+  static List<String> get priceListMenuOptionLabels =>
       _isPt
-          ? '1. Ver lista de produtos\n2. Adicionar um novo produto'
-          : '1. View product list\n2. Add new product';
+          ? const ['Ver lista de produtos', 'Adicionar um novo produto']
+          : const ['View product list', 'Add new product'];
 
   // ------------------------------------------------------------------
   // Editar PDF
@@ -107,22 +111,34 @@ class ChatBudgetStrings {
           ? 'Qual informação do PDF você quer mudar?'
           : 'Which PDF information do you want to change?';
 
-  static String get pdfEditMenuOptions =>
+  static List<String> get pdfEditMenuOptionLabels =>
       _isPt
-          ? '1. Nome da empresa\n'
-              '2. Telefone\n'
-              '3. Email\n'
-              '4. CNPJ\n'
-              '5. Endereço\n'
-              '6. Logo\n'
-              '7. Modelo de PDF'
-          : '1. Company name\n'
-              '2. Phone\n'
-              '3. Email\n'
-              '4. CNPJ\n'
-              '5. Address\n'
-              '6. Logo\n'
-              '7. PDF Model';
+          ? const [
+            'Nome da empresa',
+            'Telefone',
+            'Email',
+            'CNPJ',
+            'Endereço',
+            'Logo',
+            'Modelo de PDF',
+          ]
+          : const [
+            'Company name',
+            'Phone',
+            'Email',
+            'CNPJ',
+            'Address',
+            'Logo',
+            'PDF Model',
+          ];
+
+  static String get pdfEditNextQuestion =>
+      _isPt ? 'O que você quer fazer agora?' : 'What do you want to do now?';
+
+  static List<String> get pdfEditNextOptionLabels =>
+      _isPt
+          ? const ['Continuar editando PDF', 'Voltar ao menu principal']
+          : const ['Keep editing PDF', 'Back to main menu'];
 
   static String get pdfEditAskName =>
       _isPt ? 'Digite o novo nome da empresa:' : 'Enter the new company name:';
@@ -200,10 +216,10 @@ class ChatBudgetStrings {
           ? 'O que você quer fazer com a logo?'
           : 'What do you want to do with the logo?';
 
-  static String get logoMenuOptions =>
+  static List<String> get logoMenuOptionLabels =>
       _isPt
-          ? '1. Ver logo da empresa\n2. Inserir/Alterar logo'
-          : '1. View company logo\n2. Insert/Change logo';
+          ? const ['Ver logo da empresa', 'Inserir/Alterar logo']
+          : const ['View company logo', 'Insert/Change logo'];
 
   // ------------------------------------------------------------------
   // Trocar nome de usuário
@@ -213,8 +229,8 @@ class ChatBudgetStrings {
           ? 'Vou abrir o modal para você alterar o nome de usuário.'
           : 'I will open the modal so you can change your username.';
 
-  static String get changeUsernameMenuOptions =>
-      _isPt ? '1. Alterar nome de usuário' : '1. Chance user name';
+  static List<String> get changeUsernameMenuOptionLabels =>
+      _isPt ? const ['Alterar nome de usuário'] : const ['Change username'];
 
   static String get changeUsernameSuccess =>
       _isPt
@@ -230,7 +246,10 @@ class ChatBudgetStrings {
           : 'You did not change the username.';
 
   static String get changeUsernameRetryQuestion =>
+      _isPt ? 'O que você quer fazer agora?' : 'What do you want to do now?';
+
+  static List<String> get changeUsernameRetryOptionLabels =>
       _isPt
-          ? '1. Trocar novamente\n2. Voltar ao menu principal'
-          : '1. Change again\n2. Back to main menu';
+          ? const ['Trocar novamente', 'Voltar ao menu principal']
+          : const ['Change again', 'Back to main menu'];
 }

@@ -27,6 +27,8 @@ class BudgetCreatorInfoSection extends StatelessWidget {
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
+          animateTrailing: true,
+          trailing: const Icon(Icons.expand_more, color: whiteColor),
           leading: const CircleAvatar(
               backgroundColor: bgColor,
               child: Icon(Icons.request_page_outlined, color: whiteColor)),

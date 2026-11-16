@@ -9,6 +9,7 @@ enum ChatMessageType {
   contactPicker,
   inlineButtons,
   image,
+  optionList,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.
@@ -28,6 +29,38 @@ class ChatMessageEntity {
     this.payload,
     required this.timestamp,
   });
+
+  /// Mensagem do bot com opções em botões empilhados ([ChatMessageType.optionList]).
+  ///
+  /// Cada label recebe como `value` sua posição (`1..n`) — o mesmo número que o
+  /// usuário digitaria. [backLabel], quando informado, vira a última opção com
+  /// `value` `0`. [step] identifica o passo do fluxo ao qual o menu pertence.
+  /// [highlight], quando informado, é exibido em destaque dentro do texto.
+  factory ChatMessageEntity.botOptions({
+    required String content,
+    required List<String> labels,
+    required String step,
+    String? backLabel,
+    String? highlight,
+  }) {
+    final now = DateTime.now();
+    return ChatMessageEntity(
+      id: now.millisecondsSinceEpoch.toString(),
+      sender: ChatSender.bot,
+      type: ChatMessageType.optionList,
+      content: content,
+      payload: {
+        'options': [
+          for (var i = 0; i < labels.length; i++)
+            {'label': labels[i], 'value': '${i + 1}'},
+          if (backLabel != null) {'label': backLabel, 'value': '0'},
+        ],
+        'optionsStep': step,
+        if (highlight != null && highlight.isNotEmpty) 'highlight': highlight,
+      },
+      timestamp: now,
+    );
+  }
 
   ChatMessageEntity copyWith({
     String? id,

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:oflite/shared/common/utils/dio_client.dart';
 
 /// Fonte de dados remota para exclusão de conta via Cloud Function.
 ///
@@ -31,16 +31,19 @@ class DeleteAccountRemoteDataSource {
         data: {'email': email},
       );
 
-      final body = response.data is Map<String, dynamic>
-          ? response.data as Map<String, dynamic>
-          : jsonDecode(jsonEncode(response.data)) as Map<String, dynamic>;
+      final body =
+          response.data is Map<String, dynamic>
+              ? response.data as Map<String, dynamic>
+              : jsonDecode(jsonEncode(response.data)) as Map<String, dynamic>;
 
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
           response.statusCode! < 300) {
         return body;
       }
-      throw Exception(body['erro'] ?? 'Erro ao excluir conta (${response.statusCode})');
+      throw Exception(
+        body['erro'] ?? 'Erro ao excluir conta (${response.statusCode})',
+      );
     } on DioException catch (e) {
       // Quando o CORS bloqueia a requisição no navegador, o Dio retorna um
       // erro de conexão/timeout com status nulo. Subimos uma mensagem mais
@@ -52,9 +55,7 @@ class DeleteAccountRemoteDataSource {
         );
       }
       final data = e.response?.data;
-      final msg = data is Map<String, dynamic>
-          ? data['erro']
-          : null;
+      final msg = data is Map<String, dynamic> ? data['erro'] : null;
       throw Exception(msg ?? e.message ?? 'Erro ao excluir conta');
     }
   }

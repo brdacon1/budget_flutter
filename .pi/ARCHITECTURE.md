@@ -94,6 +94,7 @@ lib/
 │   ├── terms_conditions/
 │   ├── web_budget/                    # 🌐 Fluxo Web público do orçamento (ver seção 16)
 │   ├── delete_account/                # 🌐 Exclusão de conta (Web — /delete-account)
+│   ├── support/                       # 🌐 Suporte via WhatsApp (Web — /support, Support URL da App Store)
 │   └── ...
 │
 └── shared/
@@ -853,6 +854,14 @@ e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
 | **Regra de negócio reutilizável**  | Gerar um recibo em PDF exige cálculos de pagamento e layout — `PdfGenerateReceiptUseCase` |
 | **Fluxo com múltiplos passos**     | Chatbot: carregar script → criar rascunho → atualizar endereço → adicionar itens          |
 | **Testabilidade isolada**          | Quando a lógica é complexa o suficiente para merecer testes unitários próprios            |
+| **Regra de negócio isolada (mesmo pequena)** | `PdfSanitizeTextUsecase` (remove caracteres que a fonte do PDF não desenha) e `PdfAddWrappedRowsUsecase` (quebra texto longo em linhas da grade sem deixar página em branco) |
+
+> **Regra de Ouro**: toda função que executa uma **regra de negócio** é um
+> **UseCase** — classe em `domain/usecase/` do módulo dono, injetada por
+> construtor e registrada no `{modulo}_binds.dart`. **Nunca** função solta
+> (top-level) nem pasta `utils/` dentro do módulo.
+> **Única exceção**: conversão/formatação pura de valor, sem regra de negócio
+> (ex.: `lib/shared/common/utils/`) — essa pode ser função/utilitário.
 
 ### 6.3 Quando NÃO criar um UseCase?
 
@@ -862,6 +871,27 @@ e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
 | Apenas repassar chamada para o Repository                      | Não adicionar camada intermediária desnecessária |
 | Lógica puramente de UI (validação de campo, estado de loading) | Fica no **ViewModel**                            |
 | Acesso direto a dados sem transformação                        | Chamar o **Repository** direto                   |
+| Chamada HTTP / download / SDK externo (ex.: baixar o logo)     | **DataSource** faz o I/O; o **RepositoryImpl** monta URL/token, devolve `Result` e **guarda em cache** (só busca de novo quando o dado muda) |
+
+> **UseCase NÃO é wrapper de chamada HTTP.** UseCase existe para **regra de
+> negócio** (ex.: gerar o PDF, editar um pedido). Ele **pode consumir** vários
+> Repositories e outros UseCases injetados, mas **nunca** é criado só para
+> embrulhar uma chamada de rede/I/O — isso é papel do RepositoryImpl +
+> DataSource.
+>
+> ```dart
+> // ❌ ERRADO — usecase só para baixar o logo
+> class PdfLoadLogoUsecase { Future<PdfBitmap?> call(OwnerPdf o) => ... }
+>
+> // ✅ CERTO — a regra de negócio (gerar PDF) consome o repository direto;
+> // o PdfRepositoryImpl baixa via PdfRemoteDataSource e mantém o logo em
+> // cache até o `fotoId` mudar.
+> class PdfGenerateBudgetSimpleUsecase {
+>   final PdfRepository _pdfRepository;
+>   ...
+>   final logo = await _pdfRepository.fetchLogo(owner, authToken: authToken);
+> }
+> ```
 
 ### 6.4 Onde o UseCase fica na arquitetura?
 
@@ -1188,6 +1218,8 @@ etc.
 - [x] `subscription` — Assinaturas/Planos
 - [x] `terms_conditions` — Termos de uso
 - [x] `web_budget` — Orçamento público web (compartilhável)
+- [x] `delete_account` — Exclusão de conta (Web — `/delete-account`)
+- [x] `support` — Suporte via WhatsApp (Web — `/support`)
 
 ### Core — com DataSource (fonte externa)
 
@@ -1621,7 +1653,7 @@ navegador: ele publica **apenas** telas específicas e públicas.
 | Entrypoint          | Plataforma     | O que publica                                                        |
 |---------------------|----------------|----------------------------------------------------------------------|
 | `lib/main.dart`     | Android / iOS  | App completo (`appRoutes` de `app_routes.dart`)                      |
-| `lib/main_web.dart` | Web            | **Só** o fluxo público de orçamento + `/delete-account`              |
+| `lib/main_web.dart` | Web            | **Só** o fluxo público de orçamento + `/delete-account` + `/support` |
 
 ### 16.1 O que existe hoje no Web
 
@@ -1629,6 +1661,7 @@ navegador: ele publica **apenas** telas específicas e públicas.
 |---------------------------------------------------|------------------------------------|------------------|
 | `/orcamento/{enderecoNumero}?token={idToken}`     | `BudgetWebAppView` (home padrão)   | `web_budget`     |
 | `/delete-account`                                 | `DeleteAccountView`                | `delete_account` |
+| `/support`                                        | `SupportView`                      | `support`        |
 
 - **Hosting**: Firebase Hosting, projeto `orcamentofacil-lite`
   (`https://orcamentofacil-lite.web.app`), servindo `build/web`.
@@ -1639,16 +1672,20 @@ navegador: ele publica **apenas** telas específicas e públicas.
 ### 16.2 Como o `main_web.dart` escolhe a tela
 
 O Web **não usa** `appRoutes`. O `BudgetWebApp` lê `Uri.base.path` (URL real
-do navegador) e decide o `home`:
+do navegador) e decide o `home` pelo helper `_homeFor`:
 
 ```dart
-final initialPath = Uri.base.path;
-final isDeleteAccount = initialPath == DeleteAccountRoute.deleteAccount.path ||
-    initialPath.startsWith('${DeleteAccountRoute.deleteAccount.path}/');
 return MaterialApp(
-  routes: {...deleteAccountRoutes},          // só rotas Web explícitas
-  home: isDeleteAccount ? const DeleteAccountView() : const BudgetWebAppView(),
+  routes: {...deleteAccountRoutes, ...supportRoutes}, // só rotas Web explícitas
+  home: _homeFor(Uri.base.path),
 );
+
+Widget _homeFor(String path) {
+  bool match(String p) => path == p || path.startsWith('$p/');
+  if (match(DeleteAccountRoute.deleteAccount.path)) return const DeleteAccountView();
+  if (match(SupportRoute.support.path)) return const SupportView();
+  return const BudgetWebAppView();
+}
 ```
 
 Qualquer path não reconhecido cai em `BudgetWebAppView`, que bloqueia o acesso
@@ -1733,9 +1770,8 @@ parâmetro vão para o `get_it`.
    o `main_web.dart` também chama `setupDependencyInjection()`.
 4. **Expor no `main_web.dart`**:
    - adicionar o mapa de rotas em `routes: {...}`;
-   - adicionar a checagem de `Uri.base.path` que escolhe o `home` (igual ao
-     `isDeleteAccount`). Sem isso a URL cai no `BudgetWebAppView` e é
-     bloqueada.
+   - adicionar um `if (match(...))` no `_homeFor`. Sem isso a URL cai no
+     `BudgetWebAppView` e é bloqueada.
 5. **Adicionar rewrite no `firebase.json`** (antes do `"**"`):
    ```json
    { "source": "/nova-tela", "destination": "/index.html" }
@@ -1746,6 +1782,9 @@ parâmetro vão para o `get_it`.
    - Se chama Cloud Function → datasource com `DioClient` e
      `extra: kIsWeb ? {'withCredentials': false} : null` (padrão
      `DeleteAccountRemoteDataSource`, evita problema de CORS).
+   - Valor fixo de configuração (ex.: número de suporte) → constante no
+     próprio módulo (padrão `SupportViewModel.whatsappNumber`, ver 16.6).
+     O Web não tem token para ler Firestore sem login.
 7. **Código só-Web** (`package:web`, `dart:js_interop`): **sempre** atrás de
    import condicional (`export 'x_io.dart' if (dart.library.html) 'x_web.dart';`)
    para não quebrar o build mobile. Nunca importar `dart:html`.
@@ -1760,7 +1799,37 @@ parâmetro vão para o `get_it`.
     firebase deploy --only hosting
     ```
 
-### 16.6 Regras de Ouro do Web
+### 16.6 Página de suporte (`support`) — Support URL da App Store
+
+`https://orcamentofacil-lite.web.app/support` é a URL cadastrada em
+*App Store Connect → App Information → Support URL*. Mostra um botão central
+**"Falar com suporte"** que abre o WhatsApp (`https://wa.me/{numero}?text=...`)
+via `url_launcher` (`LaunchMode.externalApplication`).
+
+**De onde vem o número**: constante `SupportViewModel.whatsappNumber`
+(só dígitos, com DDI + DDD, ex.: `5515997861271`) + `displayNumber` para
+exibição. Para trocar: editar a constante e fazer deploy do Web.
+
+> Por que não Firestore? O Web não tem usuário autenticado; ler um documento
+> exigiria token ou regra de leitura pública. Para um valor que muda raramente,
+> a constante é o menor código (Ponytail).
+
+Sem `data/` nem `domain/` — não há fonte externa (seção 3.4).
+
+```
+lib/modules/support/
+├── support_binds.dart                 # registerFactory<SupportViewModel>
+├── support_routes.dart                # enum SupportRoute { support } → '/support'
+└── presenter/
+    ├── support_view.dart              # botão central + número selecionável
+    ├── support_view_model.dart        # whatsappNumber + openWhatsApp()
+    └── strings/support_pt_string.dart
+```
+
+O número também aparece como `SelectableText` (fallback para quem não tem
+WhatsApp — a Apple exige um contato visível na página).
+
+### 16.7 Regras de Ouro do Web
 
 - **NUNCA** exponha telas do app mobile no Web “de brinde”: só entra o que
   estiver explicitamente no `main_web.dart`.

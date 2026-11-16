@@ -42,6 +42,7 @@ class ChatMessageEntity {
 | `payload['action']` + `payload['label']` | Botão de ação única (`action: 'open_products'`) |
 | `payload['editableField']` | Permite long-press para editar mensagens do usuário (`clientName`, `clientPhone`) |
 | `payload['imageBase64'` / `imageUrl']` | Renderiza imagem no chat (logo da empresa) |
+| `payload['options']` + `payload['optionsStep']` | Menu em botões empilhados (`optionList`): `[{label, value}]`, onde `value` é o número que o usuário digitaria (`'0'` = voltar). `optionsStep` desativa os botões quando o fluxo sai daquele step |
 
 ### 2.2 Script Configurável — `ChatScriptEntity`
 
@@ -149,13 +150,16 @@ Firestore
 | `productList` | Resumo de itens com ação de editar | Lista formatada com total |
 | `contactPicker` | Botão para abrir agenda do celular | — |
 | `image` | Exibição de logo/imagem | Base64 ou URL |
+| `optionList` | Menu com botões um embaixo do outro (substitui "digite o número") | `"Criar orçamentos"`, `"Editar PDF"`, `"Voltar ao menu"` — criado via `ChatMessageEntity.botOptions(...)` |
 
 ### 4.2 Convenções de Conteúdo
 
-- **Menu Principal:**  
-  `O que eu posso fazer por você?\n\n1. Criar orçamentos\n2. Lista de preço\n3. Editar PDF\n4. Trocar nome de usuário`
+- **Menu Principal:** `optionList` com a pergunta `O que eu posso fazer por você?` e os botões
+  `[Criar orçamentos] [Cadastrar produtos e serviços] [Editar PDF] [Trocar nome de usuário]` empilhados.
+  O toque envia o `value` (`1..4`) pelo mesmo caminho do texto digitado (`selectOptionCommand` → `_sendText`)
+  e exibe o `label` na bolha do usuário. Digitar o número continua funcionando.
 
-- **Escape Global:** digitar `0` em qualquer fluxo volta ao `mainMenu`
+- **Escape Global:** botão `Voltar ao menu` (ou digitar `0`) em qualquer fluxo volta ao `mainMenu`
 
 - **Confirmação de Dados:** botões inline `[Confirmar dados, Editar nome, Editar telefone]`
 

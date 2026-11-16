@@ -5,6 +5,8 @@ import 'package:oflite/modules/budget/data/repository/budget_comment_repository_
 import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 
 import 'presenter/budget_list/budget_list_view_model.dart';
@@ -19,6 +21,13 @@ void registerBudgetDependencies(GetIt sl) {
     () => BudgetRepositoryImpl(
       sl<BudgetRemoteDataSource>(),
       sl<UserRepository>(),
+    ),
+  );
+
+  sl.registerFactory<DuplicateBudgetUsecase>(
+    () => DuplicateBudgetUsecase(
+      sl<BudgetRepository>(),
+      sl<ReceiptRepository>(),
     ),
   );
 

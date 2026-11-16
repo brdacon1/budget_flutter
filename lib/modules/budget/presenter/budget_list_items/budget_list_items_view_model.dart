@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -56,10 +57,10 @@ class BudgetListItemsViewModel extends ChangeNotifier {
 
     for (int index = 0; index < budgets.length; index++) {
       double total = budgets[index].total ?? 0;
-      if (budgets[index].category == 'Produtos') {
+      if (ItemCategory.fromValue(budgets[index].category) == ItemCategory.products) {
         totalProducts += total;
         countProduct++;
-      } else if (budgets[index].category == 'Serviços') {
+      } else if (ItemCategory.fromValue(budgets[index].category) == ItemCategory.services) {
         totalServices += total;
         countService++;
       }

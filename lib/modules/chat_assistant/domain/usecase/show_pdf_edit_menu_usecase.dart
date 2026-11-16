@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_s
 
 /// Configura o submenu "Editar PDF" no chat.
 ///
-/// Envia mensagem de texto com opções numeradas.
+/// Envia mensagem de texto com opções em botões.
 class ShowPdfEditMenuUsecase {
   final ChatBudgetRepository _chatRepo;
 
@@ -12,18 +12,12 @@ class ShowPdfEditMenuUsecase {
 
   /// Exibe o submenu de edição de PDF.
   Future<String> call() async {
-    final content = '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n'
-        '${ChatBudgetStrings.pdfEditMenuOptions}\n\n'
-        '${ChatBudgetStrings.menuBackOption}';
-
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: content,
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.pdfEditMenuQuestion,
+        labels: ChatBudgetStrings.pdfEditMenuOptionLabels,
+        step: 'pdfEditMenu',
+        backLabel: ChatBudgetStrings.menuBackLabel,
       ),
     );
 

@@ -2,14 +2,14 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
-import 'package:dio/dio.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,11 +26,15 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 /// - Rodapé com linha cinza.
 class PdfGenerateReceiptProfessionalUsecase {
   final ConvertCoinRepository _moneyConvert;
-  final UserRepository _userRepository;
+  final PdfRepository _pdfRepository;
+  final PdfSanitizeTextUsecase _sanitizeText;
+  final PdfAddWrappedRowsUsecase _addWrappedRows;
 
   PdfGenerateReceiptProfessionalUsecase(
     this._moneyConvert,
-    this._userRepository,
+    this._pdfRepository,
+    this._sanitizeText,
+    this._addWrappedRows,
   );
 
   // ---------------------------------------------------------------------------
@@ -178,44 +182,26 @@ class PdfGenerateReceiptProfessionalUsecase {
     final PdfGraphics g = page.graphics;
     double logoH = 0;
     double logoW = 0;
+
     PdfBitmap? image;
-
-    if (owner.fotoId != null && owner.fotoId!.isNotEmpty) {
-      try {
-        final String fotoId = owner.fotoId ?? '';
-        final String endpointUrl =
-            fotoId.startsWith('http')
-                ? fotoId
-                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
-
-        final Map<String, String> headers = <String, String>{
-          'Accept': 'application/json;odata=verbose',
-        };
-        if (!kIsWeb) {
-          final String token = await _getAuthToken(authToken);
-          headers['Authorization'] = 'Bearer $token';
-        }
-
-        final response = await DioClient().dioClientAuth.get(
-          endpointUrl,
-          options: Options(headers: headers),
-        );
-
-        if (response.statusCode == 200) {
-          image = PdfBitmap(response.data as Uint8List);
-          final double ratio = image.width / image.height;
-          if (image.height > image.width) {
-            logoW = 55;
-            logoH = 70;
-          } else {
-            logoW = 70 * ratio;
-            logoH = 70;
-          }
-          g.drawImage(image, Rect.fromLTWH(0, 0, logoW, logoH));
-        }
-      } catch (_) {
-        if (!kIsWeb) rethrow;
+    try {
+      final logo = await _pdfRepository.fetchLogo(owner, authToken: authToken);
+      if (logo case Ok<Uint8List?>(:final value?)) image = PdfBitmap(value);
+      if (logo case Error<Uint8List?>(:final error)) throw error;
+    } catch (_) {
+      // Web: falha no logo (CORS/rede) não derruba o PDF — segue sem logo.
+      if (!kIsWeb) rethrow;
+    }
+    if (image != null) {
+      final double ratio = image.width / image.height;
+      if (image.height > image.width) {
+        logoW = 55;
+        logoH = 70;
+      } else {
+        logoW = 70 * ratio;
+        logoH = 70;
       }
+      g.drawImage(image, Rect.fromLTWH(0, 0, logoW, logoH));
     }
 
     final double textX = logoW > 0 ? logoW + 12 : 0;
@@ -223,7 +209,7 @@ class PdfGenerateReceiptProfessionalUsecase {
 
     if (owner.empresa != null && owner.empresa!.isNotEmpty) {
       g.drawString(
-        owner.empresa!,
+        _sanitizeText(owner.empresa!),
         _fontTitle,
         brush: _brushPrimary,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 24),
@@ -237,7 +223,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     void infoLine(String label, String? value) {
       if (value == null || value.isEmpty) return;
       g.drawString(
-        '$label $value',
+        _sanitizeText('$label $value'),
         infoFont,
         brush: infoBrush,
         bounds: Rect.fromLTWH(textX, y, pageW - textX, 13),
@@ -383,7 +369,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     double pad,
   ) {
     g.drawString(
-      title,
+      _sanitizeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(x + pad, y + pad, w - pad * 2, 16),
@@ -407,13 +393,13 @@ class PdfGenerateReceiptProfessionalUsecase {
     for (final row in rows) {
       if (row.value == null || row.value!.isEmpty) continue;
       g.drawString(
-        row.label,
+        _sanitizeText(row.label),
         _fontRegular,
         brush: _brushGray,
         bounds: Rect.fromLTWH(xOffset + pad, y, contentW * 0.4, 13),
       );
       g.drawString(
-        row.value!,
+        _sanitizeText(row.value!),
         _fontRegular,
         brush: _brushBlack,
         bounds: Rect.fromLTWH(
@@ -461,7 +447,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      title,
+      _sanitizeText(title),
       _fontSectionTitle,
       brush: _brushPrimary,
       bounds: Rect.fromLTWH(
@@ -489,9 +475,9 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns.add(count: 3);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos pagamentos';
-    header.cells[1].value = 'Método';
-    header.cells[2].value = 'Valor pago';
+    header.cells[0].value = _sanitizeText('Descrição dos pagamentos');
+    header.cells[1].value = _sanitizeText('Método');
+    header.cells[2].value = _sanitizeText('Valor pago');
 
     final PdfGridCellStyle headerStyle = PdfGridCellStyle(
       font: _fontHeader,
@@ -507,14 +493,18 @@ class PdfGenerateReceiptProfessionalUsecase {
     grid.columns[1].width = 160;
     grid.columns[2].width = 115;
 
+    final PdfGridCellStyle rowStyle = _itemRowStyle();
     for (final payment in paymentList) {
-      final PdfGridRow row = grid.rows.add();
-      row.cells[0].value = payment.description ?? '';
-      row.cells[1].value = payment.method ?? '';
-      row.cells[2].value = _moneyConvert.convertFromDouble(payment.price ?? 0);
+      _addWrappedRows(
+        grid,
+        cells: [
+          payment.description ?? '',
+          payment.method ?? '',
+          _moneyConvert.convertFromDouble(payment.price ?? 0),
+        ],
+        style: rowStyle,
+      );
     }
-
-    _applyRowStyle(grid, _itemRowStyle());
 
     _addRightAlignedTotalRow(
       grid: grid,
@@ -553,8 +543,8 @@ class PdfGenerateReceiptProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[1].value = label;
-    row.cells[2].value = value;
+    row.cells[1].value = _sanitizeText(label);
+    row.cells[2].value = _sanitizeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(
       font: font,
@@ -580,7 +570,7 @@ class PdfGenerateReceiptProfessionalUsecase {
     g.drawLine(PdfPen(_borderGray, width: 0.5), Offset(0, y), Offset(pageW, y));
 
     g.drawString(
-      '${owner.empresa ?? ''} • Recibo Comercial',
+      _sanitizeText('${owner.empresa ?? ''} • Recibo Comercial'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(0, y + 4, pageW * 0.5, 14),
@@ -588,39 +578,12 @@ class PdfGenerateReceiptProfessionalUsecase {
     );
 
     g.drawString(
-      'Página 1 de 1',
+      _sanitizeText('Página 1 de 1'),
       _fontSmall,
       brush: _brushGray,
       bounds: Rect.fromLTWH(pageW * 0.5, y + 4, pageW * 0.5, 14),
       format: PdfStringFormat(alignment: PdfTextAlignment.right),
     );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Autenticação
-  // ---------------------------------------------------------------------------
-
-  Future<String> _getAuthToken(String? authToken) async {
-    if (authToken != null && authToken.isNotEmpty) return authToken;
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final token = await currentUser.getIdToken();
-      if (token != null && token.isNotEmpty) return token;
-    }
-    final session = _userRepository.selectUser.value;
-    if (session == null) return '';
-    if (session.googleAuth == true) return '';
-    if (session.email == null ||
-        session.email!.isEmpty ||
-        session.password == null ||
-        session.password!.isEmpty) {
-      return '';
-    }
-    final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: session.email!.trim(),
-      password: session.password!.trim(),
-    );
-    return (await auth.user?.getIdToken()) ?? '';
   }
 
   // ---------------------------------------------------------------------------
@@ -636,15 +599,6 @@ class PdfGenerateReceiptProfessionalUsecase {
       ..borders.right = PdfPens.transparent
       ..borders.top = PdfPen(_borderGray, width: 0.5)
       ..borders.bottom = PdfPen(_borderGray, width: 0.5);
-  }
-
-  void _applyRowStyle(PdfGrid grid, PdfGridCellStyle style) {
-    for (int i = 0; i < grid.rows.count; i++) {
-      final PdfGridRow row = grid.rows[i];
-      for (int j = 0; j < row.cells.count; j++) {
-        row.cells[j].style = style;
-      }
-    }
   }
 
   Future<String> _saveDocument(PdfDocument document, String filename) async {

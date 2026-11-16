@@ -131,13 +131,11 @@ class LoginViewModel extends ChangeNotifier {
         'GoogleSignInException no _performLogin: ${e.code} - ${e.description}',
       );
       if (e.code == GoogleSignInExceptionCode.providerConfigurationError) {
-        errorMessage =
-            'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.';
+        errorMessage = LoginStrings.loginErrorGoogleConfig;
       } else if (e.code == GoogleSignInExceptionCode.uiUnavailable) {
-        errorMessage =
-            'A tela de login do Google não está disponível no momento. Tente novamente.';
+        errorMessage = LoginStrings.loginErrorGoogleUnavailable;
       } else {
-        errorMessage = 'Erro no login com Google. Tente novamente.';
+        errorMessage = LoginStrings.loginErrorGoogleDefault;
       }
     } catch (e) {
       state = LoginState.error;
@@ -163,7 +161,7 @@ class LoginViewModel extends ChangeNotifier {
         final session =
             InfoUser()
               ..user = uid
-              ..name = currentUser.displayName ?? 'User'
+              ..name = currentUser.displayName ?? LoginStrings.userFallback
               ..password = isGoogle ? 'NO_PASS' : storedPassword
               ..googleAuth = isGoogle
               ..email = currentUser.email ?? prefs.getString('email') ?? '';
@@ -237,7 +235,7 @@ class LoginViewModel extends ChangeNotifier {
         InfoUser()
           ..user = uid
           ..email = auth.user?.email
-          ..name = auth.user?.displayName ?? 'User'
+          ..name = auth.user?.displayName ?? LoginStrings.userFallback
           ..password = 'NO_PASS'
           ..googleAuth = true;
     _userRepository.selectUser.value = session;
@@ -353,7 +351,7 @@ class LoginViewModel extends ChangeNotifier {
     infoUser.name = value?.displayName ?? '';
     infoUser.id = value?.uid ?? '';
     ownerPdf.email = value?.email ?? '';
-    ownerPdf.empresa = "Minha Empresa";
+    ownerPdf.empresa = LoginStrings.defaultCompanyName;
     ownerPdf.logoName = '';
     ownerPdf.fotoId = '';
     await _userRepository.createDefaultUserData(infoUser, ownerPdf);

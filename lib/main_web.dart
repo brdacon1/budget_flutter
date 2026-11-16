@@ -8,6 +8,8 @@ import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_app/budget_web_app_view.dart';
 import 'package:oflite/modules/delete_account/delete_account_routes.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_view.dart';
+import 'package:oflite/modules/support/presenter/support_view.dart';
+import 'package:oflite/modules/support/support_routes.dart';
 import 'package:oflite/injection.dart';
 
 /// Entry point **Web** do fluxo público de orçamento.
@@ -66,18 +68,25 @@ class BudgetWebApp extends StatelessWidget {
       ),
       initial: AdaptiveThemeMode.dark,
       builder: (theme, darkTheme) {
-        final initialPath = Uri.base.path;
-        final isDeleteAccount = initialPath == DeleteAccountRoute.deleteAccount.path ||
-            initialPath.startsWith('${DeleteAccountRoute.deleteAccount.path}/');
         return MaterialApp(
           title: 'Orçamento',
           debugShowCheckedModeBanner: false,
           routes: {
             ...deleteAccountRoutes,
+            ...supportRoutes,
           },
-          home: isDeleteAccount ? const DeleteAccountView() : const BudgetWebAppView(),
+          home: _homeFor(Uri.base.path),
         );
       },
     );
   }
+}
+
+/// Escolhe a tela inicial pelo path real do navegador. Path não reconhecido
+/// cai no fluxo público de orçamento (que bloqueia sem token válido).
+Widget _homeFor(String path) {
+  bool match(String p) => path == p || path.startsWith('$p/');
+  if (match(DeleteAccountRoute.deleteAccount.path)) return const DeleteAccountView();
+  if (match(SupportRoute.support.path)) return const SupportView();
+  return const BudgetWebAppView();
 }

@@ -129,16 +129,14 @@ void registerChatBudgetDependencies(GetIt sl) {
     ),
   );
   sl.registerLazySingleton<HandlePdfEditConfirmOptionUsecase>(
-    () => HandlePdfEditConfirmOptionUsecase(sl<ChatBudgetRepository>()),
+    () => HandlePdfEditConfirmOptionUsecase(sl<ShowPdfEditMenuUsecase>()),
   );
   sl.registerLazySingleton<HandleChangeUsernameOptionUsecase>(
     () => HandleChangeUsernameOptionUsecase(sl<ChatBudgetRepository>()),
   );
   sl.registerLazySingleton<ShowLogoInChatUsecase>(
-    () => ShowLogoInChatUsecase(
-      sl<PdfRepository>(),
-      sl<ChatBudgetRepository>(),
-    ),
+    () =>
+        ShowLogoInChatUsecase(sl<PdfRepository>(), sl<ChatBudgetRepository>()),
   );
   sl.registerLazySingleton<HandleLogoMenuOptionUsecase>(
     () => HandleLogoMenuOptionUsecase(
@@ -149,7 +147,6 @@ void registerChatBudgetDependencies(GetIt sl) {
   sl.registerLazySingleton<OnLogoUpdatedUsecase>(
     () => OnLogoUpdatedUsecase(
       sl<ChatBudgetRepository>(),
-      sl<PdfRepository>(),
       sl<ShowLogoInChatUsecase>(),
     ),
   );

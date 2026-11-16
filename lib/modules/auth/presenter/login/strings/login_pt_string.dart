@@ -62,6 +62,20 @@ class LoginStrings {
   static String get loginErrorDefault => _isPt
       ? 'Problemas para realizar seu login. Verifique sua senha e e-mail.'
       : 'Could not sign in. Please check your email and password.';
+  static String get loginErrorGoogleConfig => _isPt
+      ? 'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.'
+      : 'Google Sign-In configuration error. Check that the app is signed with the correct certificate.';
+  static String get loginErrorGoogleUnavailable => _isPt
+      ? 'A tela de login do Google não está disponível no momento. Tente novamente.'
+      : 'The Google sign-in screen is not available right now. Please try again.';
+  static String get loginErrorGoogleDefault => _isPt
+      ? 'Erro no login com Google. Tente novamente.'
+      : 'Google sign-in failed. Please try again.';
+
+  // --- Login: dados padrão do novo usuário (gravados no Firestore) ---
+  static String get defaultCompanyName =>
+      _isPt ? 'Minha Empresa' : 'My Company';
+  static String get userFallback => _isPt ? 'Usuário' : 'User';
 
   // --- Comum (login + outras telas de auth) ---
   static String get errorTitle => _isPt ? 'Erro!' : 'Error!';

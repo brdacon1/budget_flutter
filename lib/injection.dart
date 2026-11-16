@@ -20,6 +20,7 @@ import 'package:oflite/modules/pdf/pdf_binds.dart';
 import 'package:oflite/modules/product/product_binds.dart';
 import 'package:oflite/modules/receipt/receipt_binds.dart';
 import 'package:oflite/modules/subscription/subscription_binds.dart';
+import 'package:oflite/modules/support/support_binds.dart';
 import 'package:oflite/modules/terms_conditions/terms_conditions_binds.dart';
 import 'package:oflite/modules/web_budget/web_budget_binds.dart';
 
@@ -71,6 +72,7 @@ void setupDependencyInjection() {
   registerTermsConditionsDependencies(getIt);
   registerWebBudgetDependencies(getIt);
   registerDeleteAccountDependencies(getIt);
+  registerSupportDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)

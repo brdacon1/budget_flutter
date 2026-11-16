@@ -15,6 +15,15 @@ class HandleLogoMenuOptionUsecase {
     switch (option) {
       case '1':
         await _showLogoInChat();
+        // Retoma o menu da logo para o usuário seguir editando
+        await _chatRepo.sendMessage(
+          ChatMessageEntity.botOptions(
+            content: ChatBudgetStrings.logoMenuQuestion,
+            labels: ChatBudgetStrings.logoMenuOptionLabels,
+            step: 'logoMenu',
+            backLabel: ChatBudgetStrings.menuBackLabel,
+          ),
+        );
         return const ChatMenuResult('logoMenu');
       case '2':
         await _chatRepo.sendMessage(

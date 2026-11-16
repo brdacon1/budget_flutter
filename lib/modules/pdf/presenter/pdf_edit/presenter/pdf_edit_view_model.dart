@@ -1,10 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:dio/dio.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
@@ -81,45 +78,15 @@ class PdfEditViewModel extends ChangeNotifier {
         owner = result.value;
       }
 
-      String? token;
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        token = await currentUser.getIdToken();
-      }
-      if (token == null || token.isEmpty) {
-        final session = getIt<UserRepository>().selectUser.value;
-        if (session != null && session.googleAuth != true) {
-          final email = session.email?.trim() ?? '';
-          final password = session.password?.trim() ?? '';
-          if (email.isNotEmpty && password.isNotEmpty) {
-            final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-              email: email,
-              password: password,
-            );
-            token = await auth.user?.getIdToken();
-          }
-        }
-      }
-
       _syncFormFromOwner();
 
-      final endpointUrl =
-          'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=${owner.fotoId}';
-      final response = await DioClient().dioClientAuth.get(
-        endpointUrl,
-        options: Options(
-          headers: <String, String>{
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json;odata=verbose',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200 &&
-          response.headers.value('content-type')?.startsWith('image/') == true) {
-        fileContent = response.data as Uint8List;
-      } else {
-        fileContent = null;
+      final logo = await _pdfRepository.fetchLogo(owner, requireImage: true);
+      switch (logo) {
+        case Ok<Uint8List?>(:final value):
+          fileContent = value;
+        case Error<Uint8List?>():
+          hasError = true;
+          fileContent = null;
       }
     } catch (_) {
       hasError = true;

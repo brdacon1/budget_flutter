@@ -103,19 +103,16 @@ class HandlePdfFieldInputUsecase {
         sender: ChatSender.bot,
         type: ChatMessageType.text,
         content: successMsg,
+        payload: {'highlight': value},
         timestamp: DateTime.now(),
       ),
     );
 
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content:
-            'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.pdfEditNextQuestion,
+        labels: ChatBudgetStrings.pdfEditNextOptionLabels,
+        step: 'pdfEditConfirm',
       ),
     );
 

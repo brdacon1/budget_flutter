@@ -26,52 +26,46 @@ class HandlePdfEditMenuOptionUsecase {
         final msg = current.isNotEmpty
             ? 'O nome da empresa atual é "$current".\n${ChatBudgetStrings.pdfEditAskName}'
             : ChatBudgetStrings.pdfEditAskName;
-        await _sendTextWithBackOption(msg);
+        await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'name');
       case '2':
         final current = owner?.fone?.trim() ?? '';
         final msg = current.isNotEmpty
             ? 'O telefone atual é "$current".\n${ChatBudgetStrings.pdfEditAskPhone}'
             : ChatBudgetStrings.pdfEditAskPhone;
-        await _sendTextWithBackOption(msg);
+        await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'phone');
       case '3':
         final current = owner?.email?.trim() ?? '';
         final msg = current.isNotEmpty
             ? 'O email atual é "$current".\n${ChatBudgetStrings.pdfEditAskEmail}'
             : ChatBudgetStrings.pdfEditAskEmail;
-        await _sendTextWithBackOption(msg);
+        await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'email');
       case '4':
         final current = owner?.cnpj?.trim() ?? '';
         final msg = current.isNotEmpty
             ? 'O CNPJ atual é "$current".\n${ChatBudgetStrings.pdfEditAskCnpj}'
             : ChatBudgetStrings.pdfEditAskCnpj;
-        await _sendTextWithBackOption(msg);
+        await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'cnpj');
       case '5':
         await _chatRepo.sendMessage(
-          ChatMessageEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            sender: ChatSender.bot,
-            type: ChatMessageType.text,
-            content:
-                '${ChatBudgetStrings.pdfEditAskHasCep}\n\n1. Sim\n2. Não\n\n${ChatBudgetStrings.menuBackOption}',
-            payload: {'showMenuHint': true},
-            timestamp: DateTime.now(),
+          ChatMessageEntity.botOptions(
+            content: ChatBudgetStrings.pdfEditAskHasCep,
+            labels: ChatBudgetStrings.yesNoOptionLabels,
+            step: 'askHasCep',
+            backLabel: ChatBudgetStrings.menuBackLabel,
           ),
         );
         return const ChatMenuResult('askHasCep');
       case '6':
         await _chatRepo.sendMessage(
-          ChatMessageEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            sender: ChatSender.bot,
-            type: ChatMessageType.text,
-            content:
-                '${ChatBudgetStrings.logoMenuQuestion}\n\n${ChatBudgetStrings.logoMenuOptions}',
-            payload: {'showMenuHint': true},
-            timestamp: DateTime.now(),
+          ChatMessageEntity.botOptions(
+            content: ChatBudgetStrings.logoMenuQuestion,
+            labels: ChatBudgetStrings.logoMenuOptionLabels,
+            step: 'logoMenu',
+            backLabel: ChatBudgetStrings.menuBackLabel,
           ),
         );
         return const ChatMenuResult('logoMenu');
@@ -84,14 +78,17 @@ class HandlePdfEditMenuOptionUsecase {
     }
   }
 
-  Future<void> _sendTextWithBackOption(String text) async {
+  Future<void> _sendTextWithBackOption(
+    String text, {
+    String? highlight,
+  }) async {
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: '$text\n\n${ChatBudgetStrings.menuBackOption}',
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: text,
+        labels: const [],
+        step: 'pdfEditFieldInput',
+        backLabel: ChatBudgetStrings.menuBackLabel,
+        highlight: highlight,
       ),
     );
   }

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:oflite/shared/common/utils/dio_client.dart';
 
 /// Camada de acesso aos dados do orçamento no fluxo **Web público**.
 ///
@@ -77,6 +77,7 @@ class WebBudgetService {
 
   /// Project ID do Firebase configurado no app.
   static String? _projectId;
+
   static String get projectId {
     if (_projectId != null) return _projectId!;
     // Reutiliza a config já inicializada pelo Firebase.initializeApp().
@@ -89,10 +90,10 @@ class WebBudgetService {
       'https://$_firestoreHost/v1/projects/$projectId/databases/(default)/documents';
 
   static Map<String, String> _headers(String token) => {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      };
+    'Authorization': 'Bearer $token',
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  };
 
   /// Path raiz dos orçamentos de um dono, no formato do Firestore REST.
   /// `EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS`
@@ -188,10 +189,12 @@ class WebBudgetService {
     for (final doc in (body['documents'] as List?) ?? const []) {
       final docMap = doc as Map<String, dynamic>;
       final fields = _extractFieldsFromDoc(docMap);
-      list.add(ObservationPdf(
-        data: (fields['DATA'] ?? '').toString(),
-        observacao: (fields['OBSERVACAO'] ?? '').toString(),
-      ));
+      list.add(
+        ObservationPdf(
+          data: (fields['DATA'] ?? '').toString(),
+          observacao: (fields['OBSERVACAO'] ?? '').toString(),
+        ),
+      );
     }
     return list;
   }
@@ -262,7 +265,7 @@ class WebBudgetService {
           'STATUS': {'stringValue': status},
           'ORCAMENTO_ID': {'stringValue': enderecoNumero},
           'CRIADO_EM': {
-            'timestampValue': DateTime.now().toUtc().toIso8601String()
+            'timestampValue': DateTime.now().toUtc().toIso8601String(),
           },
           'LIDO': {'booleanValue': false},
         },
@@ -277,8 +280,9 @@ class WebBudgetService {
       final code = response.statusCode ?? 0;
       if (code < 200 || code >= 300) {
         debugPrint(
-            '[WebBudgetService] sendApprovalNotification falhou: '
-            '$code ${response.data}');
+          '[WebBudgetService] sendApprovalNotification falhou: '
+          '$code ${response.data}',
+        );
       }
     } catch (e) {
       debugPrint('[WebBudgetService] sendApprovalNotification erro: $e');
@@ -354,6 +358,7 @@ enum WebBudgetErrorKind { token, notFound, unknown }
 class WebBudgetAccessError implements Exception {
   final String message;
   final WebBudgetErrorKind kind;
+
   WebBudgetAccessError(this.message, {required this.kind});
 
   @override

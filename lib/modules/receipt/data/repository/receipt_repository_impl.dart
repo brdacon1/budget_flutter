@@ -1,4 +1,5 @@
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/receipt/data/datasource/receipt_payment_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/datasource/receipt_remote_datasource.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
@@ -6,9 +7,10 @@ import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptRepositoryImpl extends ReceiptRepository {
   final ReceiptRemoteDatasource _remote;
+  final ReceiptPaymentRemoteDatasource _paymentRemote;
   final UserRepository _userRepository;
 
-  ReceiptRepositoryImpl(this._remote, this._userRepository);
+  ReceiptRepositoryImpl(this._remote, this._paymentRemote, this._userRepository);
 
   String? get _userUid => _userRepository.selectUser.value?.user;
 
@@ -117,6 +119,46 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
       }
       _receipts.removeWhere((r) => receipts.any((d) => d.id == r.id));
       notifyListeners();
+      return Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> duplicateReceipts({
+    required String sourceBudgetId,
+    required String targetBudgetId,
+  }) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+    try {
+      final receiptsRaw = await _remote.getReceipts(userUid, sourceBudgetId);
+      for (final raw in receiptsRaw) {
+        final receiptId = (raw['ID'] as String?) ?? raw['id'] as String;
+        final receipt = Receipt.fromJson(raw).copyWith(id: receiptId);
+        await _remote.saveReceipt(
+          userUid,
+          targetBudgetId,
+          receipt.toJson(),
+          receiptId,
+        );
+        final paymentsRaw = await _paymentRemote.getPayments(
+          userUid,
+          sourceBudgetId,
+          raw['id'] as String,
+        );
+        for (final payment in paymentsRaw) {
+          await _paymentRemote.savePayment(
+            userUid,
+            targetBudgetId,
+            receiptId,
+            Map<String, dynamic>.from(payment)..remove('id'),
+          );
+        }
+      }
       return Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));

@@ -8,14 +8,30 @@ import 'package:oflite/shared/design_pattern/result.dart';
 abstract class PdfRepository extends ChangeNotifier {
   OwnerPdf? get ownerPdf;
 
-  Future<Result<OwnerPdf>> fetchInformationEnterprise({bool forceRefresh = false});
+  Future<Result<OwnerPdf>> fetchInformationEnterprise({
+    bool forceRefresh = false,
+  });
   Future<Result<void>> saveInformationEnterprise(OwnerPdf pdf);
   Future<Result<void>> updateInformationEnterprise(OwnerPdf pdf);
 
-  Future<Result<List<ItemsBudget>>> fetchBudgetItems(String budgetId,
-      {bool forceRefresh = false});
-  Future<Result<CustomerInfo>> fetchBudgetById(String budgetId,
-      {bool forceRefresh = false});
-  Future<Result<List<ObservationPdf>>> fetchBudgetComments(String budgetId,
-      {bool forceRefresh = false});
+  Future<Result<List<ItemsBudget>>> fetchBudgetItems(
+    String budgetId, {
+    bool forceRefresh = false,
+  });
+  Future<Result<CustomerInfo>> fetchBudgetById(
+    String budgetId, {
+    bool forceRefresh = false,
+  });
+  Future<Result<List<ObservationPdf>>> fetchBudgetComments(
+    String budgetId, {
+    bool forceRefresh = false,
+  });
+
+  /// Bytes do logo da empresa (null quando não há logo ou o download não
+  /// retornou 200). [authToken] opcional tem prioridade sobre a sessão atual.
+  Future<Result<Uint8List?>> fetchLogo(
+    OwnerPdf owner, {
+    String? authToken,
+    bool requireImage = false,
+  });
 }

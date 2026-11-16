@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -21,6 +22,10 @@ class PdfRepositoryImpl extends PdfRepository {
   final Map<String, List<ItemsBudget>> _itemsCache = {};
   final Map<String, CustomerInfo> _budgetCache = {};
   final Map<String, List<ObservationPdf>> _commentCache = {};
+
+  /// Cache do logo: só baixa de novo quando o `fotoId` muda (logo trocado).
+  String? _logoFotoId;
+  ({Uint8List bytes, bool isImage})? _logo;
 
   @override
   OwnerPdf? get ownerPdf => _ownerPdf;
@@ -142,5 +147,51 @@ class PdfRepositoryImpl extends PdfRepository {
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
+  }
+
+  @override
+  Future<Result<Uint8List?>> fetchLogo(
+    OwnerPdf owner, {
+    String? authToken,
+    bool requireImage = false,
+  }) async {
+    final String fotoId = owner.fotoId ?? '';
+    if (fotoId.isEmpty) return const Result.ok(null);
+
+    if (_logoFotoId != fotoId || _logo == null) {
+      try {
+        // `fotoId` novo já é a URL completa (token público embutido); dados
+        // antigos guardam só o token e a URL é montada a partir do `logoName`.
+        final String url =
+            fotoId.startsWith('http')
+                ? fotoId
+                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
+        // Web: sem header Authorization (dispara preflight CORS no Storage).
+        final String? bearer =
+            kIsWeb ? null : await _resolveAuthToken(authToken);
+        final logo = await _pdfRemote.downloadLogo(url, bearerToken: bearer);
+        if (logo == null) return const Result.ok(null);
+        _logo = logo;
+        _logoFotoId = fotoId;
+      } catch (e) {
+        return Result.error(Exception(e.toString()));
+      }
+    }
+
+    final logo = _logo!;
+    if (requireImage && !logo.isImage) return const Result.ok(null);
+    return Result.ok(logo.bytes);
+  }
+
+  Future<String> _resolveAuthToken(String? authToken) async {
+    if (authToken != null && authToken.isNotEmpty) return authToken;
+    final current = await _pdfRemote.getCurrentIdToken();
+    if (current != null && current.isNotEmpty) return current;
+    final session = _userRepository.selectUser.value;
+    if (session == null || session.googleAuth == true) return '';
+    final email = session.email?.trim() ?? '';
+    final password = session.password?.trim() ?? '';
+    if (email.isEmpty || password.isEmpty) return '';
+    return (await _pdfRemote.signInAndGetIdToken(email, password)) ?? '';
   }
 }

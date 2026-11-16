@@ -1,29 +1,16 @@
-import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
-import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 
 /// Processa a opção de confirmação após editar um campo PDF.
 class HandlePdfEditConfirmOptionUsecase {
-  final ChatBudgetRepository _chatRepo;
+  final ShowPdfEditMenuUsecase _showPdfEditMenu;
 
-  const HandlePdfEditConfirmOptionUsecase(this._chatRepo);
+  const HandlePdfEditConfirmOptionUsecase(this._showPdfEditMenu);
 
   Future<ChatMenuResult> call(String option) async {
     switch (option) {
       case '1':
-        await _chatRepo.sendMessage(
-          ChatMessageEntity(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            sender: ChatSender.bot,
-            type: ChatMessageType.text,
-            content:
-                '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n${ChatBudgetStrings.pdfEditMenuOptions}\n\n${ChatBudgetStrings.menuBackOption}',
-            payload: {'showMenuHint': true},
-            timestamp: DateTime.now(),
-          ),
-        );
-        return const ChatMenuResult('pdfEditMenu');
+        return ChatMenuResult(await _showPdfEditMenu());
       case '2':
         return const ChatMenuResult('mainMenu');
       default:

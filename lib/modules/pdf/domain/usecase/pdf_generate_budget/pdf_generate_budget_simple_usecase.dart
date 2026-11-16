@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/shared/utils/interceptor/dio_client.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -18,9 +18,14 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 /// tabela de produtos, tabela de serviços e observações).
 class PdfGenerateBudgetSimpleUsecase {
   final ConvertCoinRepository _moneyConvert;
-  final UserRepository _userRepository;
+  final PdfRepository _pdfRepository;
+  final PdfSanitizeTextUsecase _sanitizeText;
 
-  PdfGenerateBudgetSimpleUsecase(this._moneyConvert, this._userRepository);
+  PdfGenerateBudgetSimpleUsecase(
+    this._moneyConvert,
+    this._pdfRepository,
+    this._sanitizeText,
+  );
 
   Future<String> patternPDF({
     required int countService,
@@ -176,109 +181,40 @@ class PdfGenerateBudgetSimpleUsecase {
     OwnerPdf owner,
     String? authToken,
   ) async {
-    if (owner.fotoId == null || owner.fotoId!.isEmpty) {
-      return 0;
-    }
-
+    PdfBitmap? image;
     try {
-      // `owner.fotoId` NÃO é apenas o token de download: é a URL completa
-      // retornada pelo `getDownloadURL()` do Firebase Storage (o mesmo valor
-      // usado em `Image.network`/`http.get` na edição do logo). Antes o código
-      // montava `...?alt=media&token=${fotoId}`, anexando a URL inteira como
-      // parâmetro `token=` — o que produzia uma URL inválida. No mobile isso
-      // ainda funcionava porque o header `Authorization: Bearer` do dono
-      // autenticava o acesso (o `token=` inválido era ignorado); no Web, sem o
-      // header, o Firebase Storage rejeitava (403) e o logo sumia do PDF.
-      //
-      // Usar a URL completa direto resolve nas duas plataformas: o token
-      // real embutido nela já concede o download público, então no Web não
-      // precisa de auth (e nem de preflight CORS). O caminho legado montado a
-      // partir do `logoName` continua disponível para dados antigos onde o
-      // `fotoId` não seja uma URL completa.
-      final String fotoId = owner.fotoId ?? '';
-      final String endpointUrl =
-          fotoId.startsWith('http')
-              ? fotoId
-              : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
-
-      // No Flutter Web, enviar um header `Authorization: Bearer` dispara um
-      // preflight CORS que o Firebase Storage pode rejeitar, fazendo a
-      // geração do PDF (e portanto a pré-visualização) falhar inteira. Como
-      // a URL de download já carrega o token público, no Web omitimos o
-      // header. No mobile mantemos o comportamento existente (auth do dono).
-      final Map<String, String> headers = <String, String>{
-        'Accept': 'application/json;odata=verbose',
-      };
-      if (!kIsWeb) {
-        final String token = await _getAuthToken(authToken);
-        headers['Authorization'] = 'Bearer $token';
-      }
-      final response = await DioClient().dioClientAuth.get(
-        endpointUrl,
-        options: Options(headers: headers),
-      );
-
-      if (response.statusCode != 200) {
-        return 0;
-      }
-
-      final Uint8List fileContent = response.data as Uint8List;
-      final PdfBitmap image = PdfBitmap(fileContent);
-
-      final double originalRatio = image.width / image.height;
-      final double sizeH = image.height.toDouble();
-      final double sizeW = image.width.toDouble();
-
-      Rect bounds;
-      double sizeWithImage;
-
-      if (sizeH == sizeW) {
-        sizeWithImage = 80 + 10;
-        bounds = const Rect.fromLTWH(0, 0, 80, 80);
-      } else if (sizeH > sizeW) {
-        sizeWithImage = 60 + 10;
-        bounds = const Rect.fromLTWH(0, 0, 60, 80);
-      } else {
-        sizeWithImage = (80 * originalRatio) + 10;
-        bounds = Rect.fromLTWH(0, 0, 80 * originalRatio, 80);
-      }
-
-      page.graphics.drawImage(
-        image,
-        Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height),
-      );
-      return sizeWithImage;
+      final logo = await _pdfRepository.fetchLogo(owner, authToken: authToken);
+      if (logo case Ok<Uint8List?>(:final value?)) image = PdfBitmap(value);
+      if (logo case Error<Uint8List?>(:final error)) throw error;
     } catch (_) {
-      // Web: o download do logo pode falhar (CORS/rede). Em vez de derrubar
-      // toda a geração do PDF — o que impede a pré-visualização —, simplesmente
-      // pulamos o logo e seguimos com o documento. No mobile mantemos o
-      // comportamento existente (repropaga o erro).
-      if (kIsWeb) return 0;
-      rethrow;
+      // Web: falha no logo (CORS/rede) não derruba o PDF — segue sem logo.
+      if (!kIsWeb) rethrow;
     }
-  }
+    if (image == null) return 0;
 
-  Future<String> _getAuthToken(String? authToken) async {
-    if (authToken != null && authToken.isNotEmpty) return authToken;
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final token = await currentUser.getIdToken();
-      if (token != null && token.isNotEmpty) return token;
+    final double originalRatio = image.width / image.height;
+    final double sizeH = image.height.toDouble();
+    final double sizeW = image.width.toDouble();
+
+    Rect bounds;
+    double sizeWithImage;
+
+    if (sizeH == sizeW) {
+      sizeWithImage = 80 + 10;
+      bounds = const Rect.fromLTWH(0, 0, 80, 80);
+    } else if (sizeH > sizeW) {
+      sizeWithImage = 60 + 10;
+      bounds = const Rect.fromLTWH(0, 0, 60, 80);
+    } else {
+      sizeWithImage = (80 * originalRatio) + 10;
+      bounds = Rect.fromLTWH(0, 0, 80 * originalRatio, 80);
     }
-    final session = _userRepository.selectUser.value;
-    if (session == null) return '';
-    if (session.googleAuth == true) return '';
-    if (session.email == null ||
-        session.email!.isEmpty ||
-        session.password == null ||
-        session.password!.isEmpty) {
-      return '';
-    }
-    final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: session.email!.trim(),
-      password: session.password!.trim(),
+
+    page.graphics.drawImage(
+      image,
+      Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height),
     );
-    return (await auth.user?.getIdToken()) ?? '';
+    return sizeWithImage;
   }
 
   // ---------------------------------------------------------------------------
@@ -297,7 +233,7 @@ class PdfGenerateBudgetSimpleUsecase {
     void addRow(String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = pdfGrid.rows.add();
-      row.cells[0].value = value;
+      row.cells[0].value = _sanitizeText(value);
     }
 
     addRow(owner.empresa);
@@ -375,7 +311,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphics.drawString(
-      '\nDADOS DO ORÇAMENTO',
+      _sanitizeText('\nDADOS DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -414,8 +350,8 @@ class PdfGenerateBudgetSimpleUsecase {
     void addLeftRow(String label, String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = leftGrid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
+      row.cells[0].value = _sanitizeText(label);
+      row.cells[1].value = _sanitizeText(value);
     }
 
     addLeftRow('Número :', customer.id);
@@ -431,8 +367,8 @@ class PdfGenerateBudgetSimpleUsecase {
     void addRightRow(String label, String? value) {
       if (value == null || value.isEmpty) return;
       final PdfGridRow row = rightGrid.rows.add();
-      row.cells[0].value = label;
-      row.cells[1].value = value;
+      row.cells[0].value = _sanitizeText(label);
+      row.cells[1].value = _sanitizeText(value);
     }
 
     addRightRow('Rua :', customer.street);
@@ -533,7 +469,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphics.drawString(
-      'LISTA DE ITENS DO ORÇAMENTO',
+      _sanitizeText('LISTA DE ITENS DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -567,11 +503,11 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos produtos';
-    header.cells[1].value = 'Medida';
-    header.cells[2].value = 'Qtd';
-    header.cells[3].value = 'Preço';
-    header.cells[4].value = 'Total';
+    header.cells[0].value = _sanitizeText('Descrição dos produtos');
+    header.cells[1].value = _sanitizeText('Medida');
+    header.cells[2].value = _sanitizeText('Qtd');
+    header.cells[3].value = _sanitizeText('Preço');
+    header.cells[4].value = _sanitizeText('Total');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -598,13 +534,17 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.category == 'Produtos') {
+      if (ItemCategory.fromValue(item.category) == ItemCategory.products) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.description!;
-        row.cells[1].value = item.measure!;
-        row.cells[2].value = item.quantity.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);
+        row.cells[0].value = _sanitizeText(item.description!);
+        row.cells[1].value = _sanitizeText(item.measure!);
+        row.cells[2].value = _sanitizeText(item.quantity.toString());
+        row.cells[3].value = _sanitizeText(
+          _moneyConvert.convertFromDouble(item.price!),
+        );
+        row.cells[4].value = _sanitizeText(
+          _moneyConvert.convertFromDouble(item.total!),
+        );
       }
     }
 
@@ -660,11 +600,11 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns.add(count: 5);
 
     final PdfGridRow header = grid.headers.add(1)[0];
-    header.cells[0].value = 'Descrição dos serviços';
-    header.cells[1].value = 'Medida';
-    header.cells[2].value = 'Qtd';
-    header.cells[3].value = 'Preço';
-    header.cells[4].value = 'Total';
+    header.cells[0].value = _sanitizeText('Descrição dos serviços');
+    header.cells[1].value = _sanitizeText('Medida');
+    header.cells[2].value = _sanitizeText('Qtd');
+    header.cells[3].value = _sanitizeText('Preço');
+    header.cells[4].value = _sanitizeText('Total');
 
     final PdfFont fontHeader = PdfStandardFont(
       PdfFontFamily.helvetica,
@@ -691,13 +631,17 @@ class PdfGenerateBudgetSimpleUsecase {
     grid.columns[4].width = 105;
 
     for (final item in items) {
-      if (item.category == 'Serviços') {
+      if (ItemCategory.fromValue(item.category) == ItemCategory.services) {
         final PdfGridRow row = grid.rows.add();
-        row.cells[0].value = item.description!;
-        row.cells[1].value = item.measure!;
-        row.cells[2].value = item.quantity.toString();
-        row.cells[3].value = _moneyConvert.convertFromDouble(item.price!);
-        row.cells[4].value = _moneyConvert.convertFromDouble(item.total!);
+        row.cells[0].value = _sanitizeText(item.description!);
+        row.cells[1].value = _sanitizeText(item.measure!);
+        row.cells[2].value = _sanitizeText(item.quantity.toString());
+        row.cells[3].value = _sanitizeText(
+          _moneyConvert.convertFromDouble(item.price!),
+        );
+        row.cells[4].value = _sanitizeText(
+          _moneyConvert.convertFromDouble(item.total!),
+        );
       }
     }
 
@@ -759,7 +703,7 @@ class PdfGenerateBudgetSimpleUsecase {
     );
 
     graphicsComment.drawString(
-      'OBSERVAÇÕES DO ORÇAMENTO',
+      _sanitizeText('OBSERVAÇÕES DO ORÇAMENTO'),
       font1,
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
@@ -773,8 +717,8 @@ class PdfGenerateBudgetSimpleUsecase {
 
     final PdfGrid commentPdfGrid = PdfGrid()..columns.add(count: 5);
     final PdfGridRow headerComment = commentPdfGrid.headers.add(1)[0];
-    headerComment.cells[0].value = 'Data';
-    headerComment.cells[1].value = 'Observação';
+    headerComment.cells[0].value = _sanitizeText('Data');
+    headerComment.cells[1].value = _sanitizeText('Observação');
 
     final PdfStringFormat formatComment = PdfStringFormat(
       textDirection: PdfTextDirection.leftToRight,
@@ -804,8 +748,8 @@ class PdfGenerateBudgetSimpleUsecase {
 
     for (final obs in observations) {
       final PdfGridRow row = commentPdfGrid.rows.add();
-      row.cells[0].value = obs.data;
-      row.cells[1].value = obs.observacao;
+      row.cells[0].value = _sanitizeText(obs.data);
+      row.cells[1].value = _sanitizeText(obs.observacao);
     }
 
     final PdfGridCellStyle styleComment =
@@ -892,8 +836,8 @@ class PdfGenerateBudgetSimpleUsecase {
     required double height,
   }) {
     final PdfGridRow totalRow = grid.rows.add();
-    totalRow.cells[3].value = label;
-    totalRow.cells[4].value = value;
+    totalRow.cells[3].value = _sanitizeText(label);
+    totalRow.cells[4].value = _sanitizeText(value);
     for (int i = 0; i < totalRow.cells.count; i++) {
       totalRow.cells[i].style = style;
     }

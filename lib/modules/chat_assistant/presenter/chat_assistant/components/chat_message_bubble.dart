@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
@@ -14,12 +15,18 @@ class ChatMessageBubble extends StatelessWidget {
   final void Function(String action)? onAction;
   final void Function(String field, String currentText, String messageId)?
   onEditMessage;
+  final void Function(String value, String label)? onOptionSelect;
+
+  /// `false` deixa todos os botões da mensagem desativados (opacos).
+  final bool buttonsEnabled;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     this.onAction,
     this.onEditMessage,
+    this.onOptionSelect,
+    this.buttonsEnabled = false,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
@@ -145,7 +152,7 @@ class ChatMessageBubble extends StatelessWidget {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
-                    ] else if (message.payload?['showMenuHint'] == true) ...[
+                    ] else if (_hasSelectableOptions) ...[
                       const SizedBox(height: 8),
                       Text(
                         ChatBudgetStrings.typeOptionInstruction,
@@ -189,6 +196,33 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
+  static const _highlightStyle = TextStyle(
+    color: Color(0xFF00BFA5),
+    fontWeight: FontWeight.bold,
+  );
+
+  /// Valor do dado (ex: nome atual da empresa) exibido em destaque no texto.
+  String? get _highlight {
+    final value = message.payload?['highlight'];
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
+  /// Quebra a linha nas ocorrências de [_highlight], destacando-as.
+  List<TextSpan> _highlightSpans(String line) {
+    final highlight = _highlight;
+    if (highlight == null || !line.contains(highlight)) {
+      return [TextSpan(text: line)];
+    }
+    final parts = line.split(highlight);
+    return [
+      for (var i = 0; i < parts.length; i++) ...[
+        if (parts[i].isNotEmpty) TextSpan(text: parts[i]),
+        if (i < parts.length - 1)
+          TextSpan(text: highlight, style: _highlightStyle),
+      ],
+    ];
+  }
+
   TextSpan _buildMessageText(String text) {
     final spans = <TextSpan>[];
     final lines = text.split('\n');
@@ -203,7 +237,7 @@ class ChatMessageBubble extends StatelessWidget {
           ),
         );
       } else {
-        spans.add(TextSpan(text: line));
+        spans.addAll(_highlightSpans(line));
       }
       if (i < lines.length - 1) {
         spans.add(const TextSpan(text: '\n'));
@@ -225,9 +259,24 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   Widget _buildExtraContent() {
+    final onAction = buttonsEnabled ? this.onAction : null;
     switch (message.type) {
       case ChatMessageType.inlineButtons:
-        return _InlineButtons(actions: _parseActions(), onTap: onAction);
+        final backLabel = message.payload?['backLabel'] as String?;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _InlineButtons(actions: _parseActions(), onTap: onAction),
+            if (backLabel != null)
+              ChatMessageOptionButtons(
+                options: [
+                  {'label': backLabel, 'value': '0'},
+                ],
+                enabled: buttonsEnabled,
+                onSelect: (_, __) => onAction?.call('back_to_menu'),
+              ),
+          ],
+        );
       case ChatMessageType.contactPicker:
         return _ContactPickerButton(onTap: onAction);
       case ChatMessageType.action:
@@ -238,13 +287,35 @@ class ChatMessageBubble extends StatelessWidget {
         );
       case ChatMessageType.productList:
         return _ProductListActions(
-          onEdit: () => onAction?.call('edit_products'),
+          onEdit: onAction == null ? null : () => onAction('edit_products'),
         );
       case ChatMessageType.image:
         return _ImageContent(payload: message.payload, onTap: onAction);
+      case ChatMessageType.optionList:
+        return ChatMessageOptionButtons(
+          options: _parseOptions(),
+          enabled: buttonsEnabled,
+          onSelect: onOptionSelect,
+        );
       case ChatMessageType.text:
         return const SizedBox.shrink();
     }
+  }
+
+  /// Dica "Toque na opção" só quando há opções além do "Voltar ao menu".
+  bool get _hasSelectableOptions =>
+      message.type == ChatMessageType.optionList &&
+      _parseOptions().any((o) => o['value'] != '0');
+
+  List<Map<String, String>> _parseOptions() {
+    final raw = message.payload?['options'];
+    if (raw is! List) return [];
+    return raw.whereType<Map>().map((e) {
+      return <String, String>{
+        'label': e['label']?.toString() ?? '',
+        'value': e['value']?.toString() ?? '',
+      };
+    }).toList();
   }
 
   List<String> _parseActions() {
@@ -287,7 +358,7 @@ class _InlineButtons extends StatelessWidget {
                   vertical: 8,
                 ),
               ),
-              onPressed: () => onTap?.call(label),
+              onPressed: onTap == null ? null : () => onTap!(label),
               child: Text(
                 label,
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -317,7 +388,7 @@ class _ContactPickerButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () => onTap?.call('pick_contact'),
+        onPressed: onTap == null ? null : () => onTap!('pick_contact'),
       ),
     );
   }
@@ -344,34 +415,37 @@ class _ActionButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () => onTap?.call(action),
+        onPressed: onTap == null ? null : () => onTap!(action),
       ),
     );
   }
 }
 
 class _ProductListActions extends StatelessWidget {
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
-  const _ProductListActions({required this.onEdit});
+  const _ProductListActions({this.onEdit});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: OutlinedButton.icon(
-        icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
-        label: const Text(
-          'Editar seleção',
-          style: TextStyle(color: Colors.cyanAccent),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.cyanAccent),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      child: Opacity(
+        opacity: onEdit == null ? 0.4 : 1,
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
+          label: const Text(
+            'Editar seleção',
+            style: TextStyle(color: Colors.cyanAccent),
           ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.cyanAccent),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          onPressed: onEdit,
         ),
-        onPressed: onEdit,
       ),
     );
   }
@@ -426,7 +500,7 @@ class _ImageContent extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             ),
-            onPressed: () => onTap?.call(changeAction),
+            onPressed: onTap == null ? null : () => onTap!(changeAction),
           ),
         ],
       ],
