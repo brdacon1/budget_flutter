@@ -138,8 +138,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           context,
           MaterialPageRoute(builder: (_) => const PdfModelSelectView()),
         );
-        if (mounted && result == true) {
+        if (!mounted) break;
+        if (result == true) {
           await _vm.onPdfModelSelected();
+        } else {
+          await _vm.repeatCurrentMenu();
         }
         break;
     }
@@ -154,6 +157,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     if (result == true) {
       // Modal salvou com sucesso — notifica o ViewModel para buscar o produto
       await _vm.onProductCreatedFromChat();
+    } else if (mounted) {
+      // Cancelou — reexibe o menu, pois o anterior ficou opaco
+      await _vm.repeatCurrentMenu();
     }
   }
 
@@ -276,14 +282,19 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                     final msg = _vm.messages[index];
                     return ChatMessageBubble(
                       message: msg,
-                      onAction: (action) => _handleAction(action, msg),
-                      optionsEnabled: _vm.isOptionsActive(msg),
-                      onOptionSelect:
-                          (value, label) => _vm.selectOptionCommand.execute((
-                            value: value,
-                            label: label,
-                            step: msg.payload?['optionsStep'] as String? ?? '',
-                          )),
+                      onAction: (action) {
+                        _vm.markButtonUsed(msg, action);
+                        _handleAction(action, msg);
+                      },
+                      buttonsEnabled: _vm.isButtonsActive(msg),
+                      onOptionSelect: (value, label) {
+                        _vm.markButtonUsed(msg, value);
+                        _vm.selectOptionCommand.execute((
+                          value: value,
+                          label: label,
+                          step: msg.payload?['optionsStep'] as String? ?? '',
+                        ));
+                      },
                       onEditMessage:
                           (field, text, msgId) =>
                               _vm.prepareEditMessage(field, text, msgId),

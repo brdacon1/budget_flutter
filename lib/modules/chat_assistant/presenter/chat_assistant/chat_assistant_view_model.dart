@@ -25,6 +25,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
@@ -199,6 +200,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   Future<Result<void>> _initialize() async {
     _clearLocalState();
+    // Pré-carrega o intersticial do "compartilhar link" (ignorado p/ assinante)
+    getIt<AdsRepository>().loadInterstitial();
     try {
       await _fetchScriptUsecase.call();
     } catch (_) {}
@@ -216,6 +219,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   void _clearLocalState() {
+    _usedButtonMsgIds.clear();
     _chatRepo.clearSession();
     _chatRepo.setCurrentFlowStep(null);
     _currentDraftItems.clear();
@@ -265,9 +269,74 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Toque em botão de opção (ChatMessageType.optionList)
   // ------------------------------------------------------------------
 
-  /// Botões só ficam ativos enquanto o fluxo está no step do menu.
-  bool isOptionsActive(ChatMessageEntity msg) =>
-      msg.payload?['optionsStep'] == _step.name;
+  // ------------------------------------------------------------------
+  // Botões ativos x desativados (ficam opacos após uso)
+  // ------------------------------------------------------------------
+
+  /// Mensagens cujos botões já foram tocados.
+  final Set<String> _usedButtonMsgIds = {};
+
+  /// Ações que abrem tela/modal/picker que o usuário pode cancelar —
+  /// continuam ativas após o toque e só desativam quando a conversa avança.
+  static const _repeatableActions = {
+    'pick_contact',
+    'open_products',
+    'edit_products',
+    'edit_comments',
+    'Editar comentários',
+    'share_link',
+    'open_logo_edit',
+  };
+
+  /// Chamado pela View a cada toque em botão de mensagem.
+  void markButtonUsed(ChatMessageEntity msg, String action) {
+    if (_repeatableActions.contains(action)) return;
+    _usedButtonMsgIds.add(msg.id);
+    notifyListeners();
+  }
+
+  /// Define se os botões de [msg] estão ativos.
+  ///
+  /// Inativo após o toque ou quando chega outra mensagem com botões.
+  /// - `optionList`: também só fica ativo no step do menu. Texto digitado
+  ///   (ex: opção inválida) não desativa — o menu continua utilizável.
+  /// - Demais: também desativa quando há mensagem do usuário depois dela.
+  bool isButtonsActive(ChatMessageEntity msg) {
+    final isOptionList = msg.type == ChatMessageType.optionList;
+    if (isOptionList && msg.payload?['optionsStep'] != _step.name) {
+      return false;
+    }
+    if (_usedButtonMsgIds.contains(msg.id)) return false;
+    final list = _chatRepo.messages;
+    final index = list.indexOf(msg);
+    if (index < 0) return false;
+    for (final later in list.skip(index + 1)) {
+      if (_hasButtons(later)) return false;
+      if (!isOptionList && later.sender == ChatSender.user) return false;
+    }
+    return true;
+  }
+
+  /// Reenvia o menu do step atual quando o usuário volta de uma tela
+  /// sem concluir (ex: cancelou o cadastro de produto) — o menu tocado
+  /// já ficou opaco.
+  Future<void> repeatCurrentMenu() async {
+    String? step;
+    if (_step == ChatFlowStep.priceListMenu) {
+      step = await _showPriceListUsecase();
+    } else if (_step == ChatFlowStep.pdfEditMenu) {
+      step = await _showPdfEditUsecase();
+    }
+    if (step == null) return;
+    _setStepFromName(step);
+    notifyListeners();
+  }
+
+  bool _hasButtons(ChatMessageEntity msg) => switch (msg.type) {
+    ChatMessageType.text => false,
+    ChatMessageType.image => msg.payload?['changeAction'] != null,
+    _ => true,
+  };
 
   /// Envia o `value` da opção pelo mesmo caminho do texto digitado,
   /// exibindo o `label` na bolha do usuário.
@@ -771,11 +840,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
       'Encontrei o endereço:\n'
       '${_upper(address.logradouro)}\n'
       '${address.bairro != null && address.bairro!.isNotEmpty ? '${_upper(address.bairro)}\n' : ''}'
-      '${_upper(address.localidade)}\n\n'
-      '${ChatBudgetStrings.menuBackOption}',
+      '${_upper(address.localidade)}',
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['Confirmar endereço', 'Corrigir endereço'],
+        'backLabel': ChatBudgetStrings.menuBackLabel,
       },
     );
     return Result.ok(null);
@@ -1102,6 +1171,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await SharePlus.instance.share(
       ShareParams(text: url, subject: 'Orçamento'),
     );
+    // A cada compartilhamento, não assinantes veem um intersticial.
+    // `showInterstitial` já suprime para assinantes e recarrega o próximo.
+    getIt<AdsRepository>().showInterstitial();
     return Result.ok(null);
   }
 
@@ -1195,6 +1267,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
     switch (action) {
       case 'pick_contact':
         await pickContactCommand.execute();
+        break;
+      case 'back_to_menu':
+        if (_step == ChatFlowStep.mainMenu) break;
+        await _sendUserMessageWithId(
+          _generateMessageId(),
+          ChatBudgetStrings.menuBackLabel,
+        );
+        await _backToMainMenu();
         break;
       case 'SIM':
         if (_step == ChatFlowStep.askAddress) {

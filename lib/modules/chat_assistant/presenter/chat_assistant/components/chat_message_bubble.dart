@@ -16,7 +16,9 @@ class ChatMessageBubble extends StatelessWidget {
   final void Function(String field, String currentText, String messageId)?
   onEditMessage;
   final void Function(String value, String label)? onOptionSelect;
-  final bool optionsEnabled;
+
+  /// `false` deixa todos os botões da mensagem desativados (opacos).
+  final bool buttonsEnabled;
 
   const ChatMessageBubble({
     super.key,
@@ -24,7 +26,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onAction,
     this.onEditMessage,
     this.onOptionSelect,
-    this.optionsEnabled = false,
+    this.buttonsEnabled = false,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
@@ -257,9 +259,24 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   Widget _buildExtraContent() {
+    final onAction = buttonsEnabled ? this.onAction : null;
     switch (message.type) {
       case ChatMessageType.inlineButtons:
-        return _InlineButtons(actions: _parseActions(), onTap: onAction);
+        final backLabel = message.payload?['backLabel'] as String?;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _InlineButtons(actions: _parseActions(), onTap: onAction),
+            if (backLabel != null)
+              ChatMessageOptionButtons(
+                options: [
+                  {'label': backLabel, 'value': '0'},
+                ],
+                enabled: buttonsEnabled,
+                onSelect: (_, __) => onAction?.call('back_to_menu'),
+              ),
+          ],
+        );
       case ChatMessageType.contactPicker:
         return _ContactPickerButton(onTap: onAction);
       case ChatMessageType.action:
@@ -270,14 +287,14 @@ class ChatMessageBubble extends StatelessWidget {
         );
       case ChatMessageType.productList:
         return _ProductListActions(
-          onEdit: () => onAction?.call('edit_products'),
+          onEdit: onAction == null ? null : () => onAction('edit_products'),
         );
       case ChatMessageType.image:
         return _ImageContent(payload: message.payload, onTap: onAction);
       case ChatMessageType.optionList:
         return ChatMessageOptionButtons(
           options: _parseOptions(),
-          enabled: optionsEnabled,
+          enabled: buttonsEnabled,
           onSelect: onOptionSelect,
         );
       case ChatMessageType.text:
@@ -341,7 +358,7 @@ class _InlineButtons extends StatelessWidget {
                   vertical: 8,
                 ),
               ),
-              onPressed: () => onTap?.call(label),
+              onPressed: onTap == null ? null : () => onTap!(label),
               child: Text(
                 label,
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -371,7 +388,7 @@ class _ContactPickerButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () => onTap?.call('pick_contact'),
+        onPressed: onTap == null ? null : () => onTap!('pick_contact'),
       ),
     );
   }
@@ -398,34 +415,37 @@ class _ActionButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
         ),
-        onPressed: () => onTap?.call(action),
+        onPressed: onTap == null ? null : () => onTap!(action),
       ),
     );
   }
 }
 
 class _ProductListActions extends StatelessWidget {
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
-  const _ProductListActions({required this.onEdit});
+  const _ProductListActions({this.onEdit});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: OutlinedButton.icon(
-        icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
-        label: const Text(
-          'Editar seleção',
-          style: TextStyle(color: Colors.cyanAccent),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.cyanAccent),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      child: Opacity(
+        opacity: onEdit == null ? 0.4 : 1,
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
+          label: const Text(
+            'Editar seleção',
+            style: TextStyle(color: Colors.cyanAccent),
           ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.cyanAccent),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          onPressed: onEdit,
         ),
-        onPressed: onEdit,
       ),
     );
   }
@@ -480,7 +500,7 @@ class _ImageContent extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             ),
-            onPressed: () => onTap?.call(changeAction),
+            onPressed: onTap == null ? null : () => onTap!(changeAction),
           ),
         ],
       ],

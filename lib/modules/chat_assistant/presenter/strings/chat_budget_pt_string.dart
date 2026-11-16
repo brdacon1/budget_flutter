@@ -82,9 +82,6 @@ class ChatBudgetStrings {
           ? 'Opção inválida. Toque em uma das opções acima.'
           : 'Invalid option. Tap one of the options above.';
 
-  static String get menuBackOption =>
-      _isPt ? '0. Voltar ao menu' : '0. Back to menu';
-
   static String get menuBackLabel => _isPt ? 'Voltar ao menu' : 'Back to menu';
 
   static List<String> get yesNoOptionLabels =>
