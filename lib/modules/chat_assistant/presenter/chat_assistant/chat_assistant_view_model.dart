@@ -172,6 +172,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   late final Command0<void> initializeChat = Command0(_initialize);
   late final Command1<void, String> sendTextCommand = Command1(_sendText);
+  late final Command1<void, ChatOptionTap> selectOptionCommand = Command1(
+    _selectOption,
+  );
   late final Command0<void> pickContactCommand = Command0(_pickContact);
   late final Command0<void> createDraftCommand = Command0(_createDraftFromName);
   late final Command0<void> skipAddressCommand = Command0(_skipAddress);
@@ -259,14 +262,32 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   // ------------------------------------------------------------------
+  // Toque em botão de opção (ChatMessageType.optionList)
+  // ------------------------------------------------------------------
+
+  /// Botões só ficam ativos enquanto o fluxo está no step do menu.
+  bool isOptionsActive(ChatMessageEntity msg) =>
+      msg.payload?['optionsStep'] == _step.name;
+
+  /// Envia o `value` da opção pelo mesmo caminho do texto digitado,
+  /// exibindo o `label` na bolha do usuário.
+  Future<Result<void>> _selectOption(ChatOptionTap option) async {
+    if (option.step != _step.name) return Result.ok(null); // menu antigo
+    return _sendText(option.value, displayText: option.label);
+  }
+
+  // ------------------------------------------------------------------
   // Envia texto do usuário
   // ------------------------------------------------------------------
-  Future<Result<void>> _sendText(String text) async {
+  Future<Result<void>> _sendText(String text, {String? displayText}) async {
     if (text.trim().isEmpty) return Result.ok(null);
     final clean = text.trim();
 
     // Em qualquer fluxo, "0" volta ao menu principal
     if (clean == '0' && _step != ChatFlowStep.mainMenu) {
+      if (displayText != null) {
+        await _sendUserMessageWithId(_generateMessageId(), displayText);
+      }
       await _backToMainMenu();
       return Result.ok(null);
     }
@@ -294,7 +315,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatFlowStep.askPhone => {'editableField': 'clientPhone'},
       _ => null,
     };
-    await _sendUserMessageWithId(msgId, clean, payload: userPayload);
+    await _sendUserMessageWithId(
+      msgId,
+      displayText ?? clean,
+      payload: userPayload,
+    );
 
     if (_step == ChatFlowStep.askClient) {
       _clientNameMsgId = msgId;
@@ -346,7 +371,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           await _goToManualAddress();
         } else {
           await _addBotMessage(
-            'Opção inválida. Digite 1 para Sim ou 2 para Não.',
+            ChatBudgetStrings.menuInvalidOption,
             type: ChatMessageType.text,
           );
         }
@@ -457,11 +482,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
       );
     }
 
-    await _addBotMessage(
-      '${ChatBudgetStrings.changeUsernameRetryQuestion}\n\n'
-      '${ChatBudgetStrings.menuBackOption}',
-      type: ChatMessageType.text,
-      payload: {'showMenuHint': true},
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.changeUsernameRetryQuestion,
+        labels: ChatBudgetStrings.changeUsernameRetryOptionLabels,
+        step: ChatFlowStep.changeUsernameResult.name,
+      ),
     );
     _setStep(ChatFlowStep.changeUsernameResult);
     notifyListeners();
@@ -674,10 +700,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _askForCep() async {
     _setStep(ChatFlowStep.askCep);
-    await _addBotMessage(
-      '${_script?.askCep ?? ChatScriptEntity.fallback.askCep}\n\n'
-      '${ChatBudgetStrings.menuBackOption}',
-      type: ChatMessageType.text,
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: _script?.askCep ?? ChatScriptEntity.fallback.askCep,
+        labels: const [],
+        step: ChatFlowStep.askCep.name,
+        backLabel: ChatBudgetStrings.menuBackLabel,
+      ),
     );
     return Result.ok(null);
   }
@@ -690,10 +719,15 @@ class ChatAssistantViewModel extends ChangeNotifier {
     cityController.clear();
     neighborhoodController.clear();
     _setStep(ChatFlowStep.askStreetManual);
-    await _addBotMessage(
-      '${_script?.askStreetFallback ?? ChatScriptEntity.fallback.askStreetFallback}\n\n'
-      '${ChatBudgetStrings.menuBackOption}',
-      type: ChatMessageType.text,
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content:
+            _script?.askStreetFallback ??
+            ChatScriptEntity.fallback.askStreetFallback,
+        labels: const [],
+        step: ChatFlowStep.askStreetManual.name,
+        backLabel: ChatBudgetStrings.menuBackLabel,
+      ),
     );
     return Result.ok(null);
   }
@@ -796,10 +830,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatBudgetStrings.pdfEditSuccessAddress,
       type: ChatMessageType.text,
     );
-    await _addBotMessage(
-      'O que você quer fazer agora?\n\n1. Continuar editando PDF\n2. Voltar ao menu principal',
-      type: ChatMessageType.text,
-      payload: {'showMenuHint': true},
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.pdfEditNextQuestion,
+        labels: ChatBudgetStrings.pdfEditNextOptionLabels,
+        step: ChatFlowStep.pdfEditConfirm.name,
+      ),
     );
     _setStep(ChatFlowStep.pdfEditConfirm);
   }
@@ -1314,14 +1350,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatBudgetStrings.pdfModelSelected,
       type: ChatMessageType.text,
     );
-    await _addBotMessage(
-      '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n'
-      '${ChatBudgetStrings.pdfEditMenuOptions}\n\n'
-      '${ChatBudgetStrings.menuBackOption}',
-      type: ChatMessageType.text,
-      payload: {'showMenuHint': true},
-    );
-    _setStep(ChatFlowStep.pdfEditMenu);
+    final step = await _showPdfEditUsecase();
+    _setStepFromName(step);
     notifyListeners();
   }
 
@@ -1340,3 +1370,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Toque em um botão de [ChatMessageType.optionList].
+typedef ChatOptionTap = ({String value, String label, String step});

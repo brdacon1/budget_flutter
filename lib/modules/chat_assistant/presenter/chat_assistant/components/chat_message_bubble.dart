@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
@@ -14,12 +15,16 @@ class ChatMessageBubble extends StatelessWidget {
   final void Function(String action)? onAction;
   final void Function(String field, String currentText, String messageId)?
   onEditMessage;
+  final void Function(String value, String label)? onOptionSelect;
+  final bool optionsEnabled;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     this.onAction,
     this.onEditMessage,
+    this.onOptionSelect,
+    this.optionsEnabled = false,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
@@ -145,7 +150,7 @@ class ChatMessageBubble extends StatelessWidget {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
-                    ] else if (message.payload?['showMenuHint'] == true) ...[
+                    ] else if (_hasSelectableOptions) ...[
                       const SizedBox(height: 8),
                       Text(
                         ChatBudgetStrings.typeOptionInstruction,
@@ -189,6 +194,33 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
+  static const _highlightStyle = TextStyle(
+    color: Color(0xFF00BFA5),
+    fontWeight: FontWeight.bold,
+  );
+
+  /// Valor do dado (ex: nome atual da empresa) exibido em destaque no texto.
+  String? get _highlight {
+    final value = message.payload?['highlight'];
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
+  /// Quebra a linha nas ocorrências de [_highlight], destacando-as.
+  List<TextSpan> _highlightSpans(String line) {
+    final highlight = _highlight;
+    if (highlight == null || !line.contains(highlight)) {
+      return [TextSpan(text: line)];
+    }
+    final parts = line.split(highlight);
+    return [
+      for (var i = 0; i < parts.length; i++) ...[
+        if (parts[i].isNotEmpty) TextSpan(text: parts[i]),
+        if (i < parts.length - 1)
+          TextSpan(text: highlight, style: _highlightStyle),
+      ],
+    ];
+  }
+
   TextSpan _buildMessageText(String text) {
     final spans = <TextSpan>[];
     final lines = text.split('\n');
@@ -203,7 +235,7 @@ class ChatMessageBubble extends StatelessWidget {
           ),
         );
       } else {
-        spans.add(TextSpan(text: line));
+        spans.addAll(_highlightSpans(line));
       }
       if (i < lines.length - 1) {
         spans.add(const TextSpan(text: '\n'));
@@ -242,9 +274,31 @@ class ChatMessageBubble extends StatelessWidget {
         );
       case ChatMessageType.image:
         return _ImageContent(payload: message.payload, onTap: onAction);
+      case ChatMessageType.optionList:
+        return ChatMessageOptionButtons(
+          options: _parseOptions(),
+          enabled: optionsEnabled,
+          onSelect: onOptionSelect,
+        );
       case ChatMessageType.text:
         return const SizedBox.shrink();
     }
+  }
+
+  /// Dica "Toque na opção" só quando há opções além do "Voltar ao menu".
+  bool get _hasSelectableOptions =>
+      message.type == ChatMessageType.optionList &&
+      _parseOptions().any((o) => o['value'] != '0');
+
+  List<Map<String, String>> _parseOptions() {
+    final raw = message.payload?['options'];
+    if (raw is! List) return [];
+    return raw.whereType<Map>().map((e) {
+      return <String, String>{
+        'label': e['label']?.toString() ?? '',
+        'value': e['value']?.toString() ?? '',
+      };
+    }).toList();
   }
 
   List<String> _parseActions() {

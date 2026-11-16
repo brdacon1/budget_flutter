@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_s
 
 /// Configura o submenu "Lista de preço" no chat.
 ///
-/// Envia mensagem de texto com opções numeradas.
+/// Envia mensagem de texto com opções em botões.
 class ShowPriceListMenuUsecase {
   final ChatBudgetRepository _chatRepo;
 
@@ -12,18 +12,12 @@ class ShowPriceListMenuUsecase {
 
   /// Exibe o submenu de lista de preço.
   Future<String> call() async {
-    final content = '${ChatBudgetStrings.priceListMenuQuestion}\n\n'
-        '${ChatBudgetStrings.priceListMenuOptions}\n\n'
-        '${ChatBudgetStrings.menuBackOption}';
-
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: content,
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.priceListMenuQuestion,
+        labels: ChatBudgetStrings.priceListMenuOptionLabels,
+        step: 'priceListMenu',
+        backLabel: ChatBudgetStrings.menuBackLabel,
       ),
     );
 

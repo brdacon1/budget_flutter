@@ -5,7 +5,7 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 
 /// Configura o submenu "Trocar nome de usuário" no chat.
 ///
-/// Envia mensagem de texto com opções numeradas.
+/// Envia mensagem de texto com opções em botões.
 class ShowChangeUsernameMenuUsecase {
   final ChatBudgetRepository _chatRepo;
   final UserRepository _userRepository;
@@ -17,21 +17,15 @@ class ShowChangeUsernameMenuUsecase {
     final currentName = _userRepository.selectUser.value?.name?.trim() ?? '';
     final content =
         currentName.isNotEmpty
-            ? 'O nome de usuário atual é "$currentName".\n\n'
-                '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
-                '${ChatBudgetStrings.menuBackOption}'
-            : '${ChatBudgetStrings.changeUsernameInstructions}\n\n'
-                '${ChatBudgetStrings.changeUsernameMenuOptions}\n\n'
-                '${ChatBudgetStrings.menuBackOption}';
+            ? 'O nome de usuário atual é "$currentName".'
+            : ChatBudgetStrings.changeUsernameInstructions;
 
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
+      ChatMessageEntity.botOptions(
         content: content,
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
+        labels: ChatBudgetStrings.changeUsernameMenuOptionLabels,
+        step: 'changeUsername',
+        backLabel: ChatBudgetStrings.menuBackLabel,
       ),
     );
 

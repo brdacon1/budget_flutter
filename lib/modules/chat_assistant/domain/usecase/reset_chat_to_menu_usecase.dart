@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_s
 
 /// Reseta o estado do chat e restaura o menu principal como ponto de entrada.
 ///
-/// Envia a mensagem de menu no estilo bot do WhatsApp (opções numeradas).
+/// Envia a mensagem de menu no estilo bot do WhatsApp (opções em botões).
 class ResetChatToMenuUsecase {
   final ChatBudgetRepository _chatRepo;
 
@@ -15,17 +15,11 @@ class ResetChatToMenuUsecase {
     _chatRepo.clearSession();
     _chatRepo.setCurrentFlowStep(null);
 
-    final content = '${ChatBudgetStrings.mainMenuQuestion}\n\n'
-        '${ChatBudgetStrings.mainMenuOptions}';
-
     await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content: content,
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
+      ChatMessageEntity.botOptions(
+        content: ChatBudgetStrings.mainMenuQuestion,
+        labels: ChatBudgetStrings.mainMenuOptionLabels,
+        step: 'mainMenu',
       ),
     );
 

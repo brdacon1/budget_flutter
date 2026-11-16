@@ -1,7 +1,7 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -11,11 +11,13 @@ class OnLogoUpdatedUsecase {
   final ChatBudgetRepository _chatRepo;
   final PdfRepository _pdfRepo;
   final ShowLogoInChatUsecase _showLogoInChat;
+  final ShowPdfEditMenuUsecase _showPdfEditMenu;
 
   const OnLogoUpdatedUsecase(
     this._chatRepo,
     this._pdfRepo,
     this._showLogoInChat,
+    this._showPdfEditMenu,
   );
 
   Future<String> call() async {
@@ -26,10 +28,11 @@ class OnLogoUpdatedUsecase {
       final hasLogo = owner.fotoId != null && owner.fotoId!.isNotEmpty;
       if (hasLogo) {
         final String fotoId = owner.fotoId ?? '';
-        final imageUrl = fotoId.startsWith('http')
-            ? fotoId
-            : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
-              '${Uri.encodeComponent(owner.logoName ?? '')}?alt=media&token=$fotoId';
+        final imageUrl =
+            fotoId.startsWith('http')
+                ? fotoId
+                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
+                    '${Uri.encodeComponent(owner.logoName ?? '')}?alt=media&token=$fotoId';
 
         // Mostra a logo como se o usuário tivesse enviado uma foto (estilo WhatsApp)
         await _chatRepo.sendMessage(
@@ -58,18 +61,6 @@ class OnLogoUpdatedUsecase {
     // Mostra a logo novamente no chat com botão de alterar
     await _showLogoInChat();
 
-    await _chatRepo.sendMessage(
-      ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        sender: ChatSender.bot,
-        type: ChatMessageType.text,
-        content:
-            '${ChatBudgetStrings.pdfEditMenuQuestion}\n\n${ChatBudgetStrings.pdfEditMenuOptions}\n\n${ChatBudgetStrings.menuBackOption}',
-        payload: {'showMenuHint': true},
-        timestamp: DateTime.now(),
-      ),
-    );
-
-    return 'pdfEditMenu';
+    return _showPdfEditMenu();
   }
 }

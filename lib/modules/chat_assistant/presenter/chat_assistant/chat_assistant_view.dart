@@ -277,6 +277,13 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                     return ChatMessageBubble(
                       message: msg,
                       onAction: (action) => _handleAction(action, msg),
+                      optionsEnabled: _vm.isOptionsActive(msg),
+                      onOptionSelect:
+                          (value, label) => _vm.selectOptionCommand.execute((
+                            value: value,
+                            label: label,
+                            step: msg.payload?['optionsStep'] as String? ?? '',
+                          )),
                       onEditMessage:
                           (field, text, msgId) =>
                               _vm.prepareEditMessage(field, text, msgId),
