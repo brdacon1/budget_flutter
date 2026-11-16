@@ -5,8 +5,12 @@ import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart
 class BudgetListDuplicateBottomModalWidget extends StatefulWidget {
   const BudgetListDuplicateBottomModalWidget({super.key, required this.onConfirm});
 
-  final Future<void> Function(bool clientData, bool quoteItems, bool comments)
-      onConfirm;
+  final Future<void> Function(
+    bool clientData,
+    bool quoteItems,
+    bool comments,
+    bool receipts,
+  ) onConfirm;
 
   @override
   State<BudgetListDuplicateBottomModalWidget> createState() =>
@@ -18,12 +22,14 @@ class _BudgetListDuplicateBottomModalWidgetState
   bool duplicateClientData = false;
   bool duplicateQuoteItems = false;
   bool duplicateComments = false;
+  bool duplicateReceipts = false;
   bool _processing = false;
 
   Future<void> _confirm() async {
     if (!duplicateClientData &&
         !duplicateQuoteItems &&
-        !duplicateComments) {
+        !duplicateComments &&
+        !duplicateReceipts) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor selecione alguma opção')),
       );
@@ -32,7 +38,11 @@ class _BudgetListDuplicateBottomModalWidgetState
     if (_processing) return;
     setState(() => _processing = true);
     await widget.onConfirm(
-        duplicateClientData, duplicateQuoteItems, duplicateComments);
+      duplicateClientData,
+      duplicateQuoteItems,
+      duplicateComments,
+      duplicateReceipts,
+    );
     if (mounted) {
       setState(() => _processing = false);
     }
@@ -63,6 +73,11 @@ class _BudgetListDuplicateBottomModalWidgetState
               title: 'Duplicar comentários',
               value: duplicateComments,
               onChanged: (v) => setState(() => duplicateComments = v ?? false),
+            ),
+            _CheckTile(
+              title: 'Duplicar recibos e pagamentos',
+              value: duplicateReceipts,
+              onChanged: (v) => setState(() => duplicateReceipts = v ?? false),
             ),
           ],
         ),

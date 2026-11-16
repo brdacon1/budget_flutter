@@ -14,6 +14,7 @@ void registerReceiptDependencies(GetIt sl) {
   sl.registerLazySingleton<ReceiptRepository>(
     () => ReceiptRepositoryImpl(
       sl<ReceiptRemoteDatasource>(),
+      sl<ReceiptPaymentRemoteDatasource>(),
       sl<UserRepository>(),
     ),
   );

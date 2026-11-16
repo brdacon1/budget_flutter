@@ -64,13 +64,18 @@ class _BudgetListView extends State<BudgetListView> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext dialogContext) {
         return BudgetListDuplicateBottomModalWidget(
-          onConfirm: (clientData, quoteItems, comments) async {
+          onConfirm: (clientData, quoteItems, comments, receipts) async {
             Navigator.of(dialogContext).pop();
             if (!mounted) return;
             final alertDisplayLoading = getIt<LoadingEventRepository>();
             try {
               await alertDisplayLoading.alertLoading(viewContext);
-              await _viewModel.duplicateEvent(clientData, quoteItems, comments);
+              await _viewModel.duplicateEvent(
+                clientData,
+                quoteItems,
+                comments,
+                receipts,
+              );
               await _viewModel.getInformationOrcamento(refresh: true);
             } finally {
               if (mounted) {

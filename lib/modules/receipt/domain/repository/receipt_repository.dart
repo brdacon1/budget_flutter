@@ -12,4 +12,11 @@ abstract class ReceiptRepository extends ChangeNotifier {
   Future<Result<void>> saveReceipt(Receipt receipt);
   Future<Result<void>> deleteReceipt(Receipt receipt);
   Future<Result<void>> deleteReceipts(List<Receipt> receipts);
+
+  /// Copia todos os recibos (e seus pagamentos) de um orçamento para outro.
+  /// Não altera o [budgetId] atual nem o cache de [receipts].
+  Future<Result<void>> duplicateReceipts({
+    required String sourceBudgetId,
+    required String targetBudgetId,
+  });
 }
