@@ -871,6 +871,27 @@ e **independente de fonte de dados** (não conhece Firebase, HTTP, etc.).
 | Apenas repassar chamada para o Repository                      | Não adicionar camada intermediária desnecessária |
 | Lógica puramente de UI (validação de campo, estado de loading) | Fica no **ViewModel**                            |
 | Acesso direto a dados sem transformação                        | Chamar o **Repository** direto                   |
+| Chamada HTTP / download / SDK externo (ex.: baixar o logo)     | **DataSource** faz o I/O; o **RepositoryImpl** monta URL/token, devolve `Result` e **guarda em cache** (só busca de novo quando o dado muda) |
+
+> **UseCase NÃO é wrapper de chamada HTTP.** UseCase existe para **regra de
+> negócio** (ex.: gerar o PDF, editar um pedido). Ele **pode consumir** vários
+> Repositories e outros UseCases injetados, mas **nunca** é criado só para
+> embrulhar uma chamada de rede/I/O — isso é papel do RepositoryImpl +
+> DataSource.
+>
+> ```dart
+> // ❌ ERRADO — usecase só para baixar o logo
+> class PdfLoadLogoUsecase { Future<PdfBitmap?> call(OwnerPdf o) => ... }
+>
+> // ✅ CERTO — a regra de negócio (gerar PDF) consome o repository direto;
+> // o PdfRepositoryImpl baixa via PdfRemoteDataSource e mantém o logo em
+> // cache até o `fotoId` mudar.
+> class PdfGenerateBudgetSimpleUsecase {
+>   final PdfRepository _pdfRepository;
+>   ...
+>   final logo = await _pdfRepository.fetchLogo(owner, authToken: authToken);
+> }
+> ```
 
 ### 6.4 Onde o UseCase fica na arquitetura?
 

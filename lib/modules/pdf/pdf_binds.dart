@@ -41,28 +41,28 @@ void registerPdfDependencies(GetIt sl) {
   sl.registerLazySingleton<PdfGenerateBudgetSimpleUsecase>(
     () => PdfGenerateBudgetSimpleUsecase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateBudgetExecutiveUsecase>(
     () => PdfGenerateBudgetExecutiveUsecase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateBudgetProfessionalUsecase>(
     () => PdfGenerateBudgetProfessionalUsecase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
     ),
   );
   sl.registerLazySingleton<PdfGenerateReceiptExecutiveUsecase>(
     () => PdfGenerateReceiptExecutiveUsecase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
       sl<PdfAddWrappedRowsUsecase>(),
     ),
@@ -70,7 +70,7 @@ void registerPdfDependencies(GetIt sl) {
   sl.registerLazySingleton<PdfGenerateReceiptProfessionalUsecase>(
     () => PdfGenerateReceiptProfessionalUsecase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
       sl<PdfAddWrappedRowsUsecase>(),
     ),
@@ -78,7 +78,7 @@ void registerPdfDependencies(GetIt sl) {
   sl.registerLazySingleton<PdfGenerateReceiptUseCase>(
     () => PdfGenerateReceiptUseCase(
       sl<ConvertCoinRepository>(),
-      sl<UserRepository>(),
+      sl<PdfRepository>(),
       sl<PdfSanitizeTextUsecase>(),
       sl<PdfAddWrappedRowsUsecase>(),
     ),

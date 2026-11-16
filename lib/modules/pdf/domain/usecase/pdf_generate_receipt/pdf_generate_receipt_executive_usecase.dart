@@ -3,18 +3,16 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
-import 'package:oflite/shared/common/utils/dio_client.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -36,13 +34,13 @@ class _TableResult {
 /// - Rodapé centralizado.
 class PdfGenerateReceiptExecutiveUsecase {
   final ConvertCoinRepository _moneyConvert;
-  final UserRepository _userRepository;
+  final PdfRepository _pdfRepository;
   final PdfSanitizeTextUsecase _sanitizeText;
   final PdfAddWrappedRowsUsecase _addWrappedRows;
 
   PdfGenerateReceiptExecutiveUsecase(
     this._moneyConvert,
-    this._userRepository,
+    this._pdfRepository,
     this._sanitizeText,
     this._addWrappedRows,
   );
@@ -165,45 +163,25 @@ class PdfGenerateReceiptExecutiveUsecase {
     double logoW = 0;
     double logoH = 0;
     PdfBitmap? image;
-    if (owner.fotoId != null && owner.fotoId!.isNotEmpty) {
-      try {
-        final String fotoId = owner.fotoId ?? '';
-        final String endpointUrl =
-            fotoId.startsWith('http')
-                ? fotoId
-                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
-        final Map<String, String> headers = <String, String>{
-          'Accept': 'application/json;odata=verbose',
-        };
-        if (!kIsWeb) {
-          final String token = await _getAuthToken(authToken);
-          headers['Authorization'] = 'Bearer $token';
-        }
-        final response = await DioClient().dioClientAuth.get(
-          endpointUrl,
-          options: Options(headers: headers),
-        );
-        if (response.statusCode == 200) {
-          final bytes = response.data as Uint8List;
-          image = PdfBitmap(bytes);
-          final ratio = image.width / image.height;
-          if (image.height == image.width) {
-            logoW = 70;
-            logoH = 70;
-          } else if (image.height > image.width) {
-            logoW = 50;
-            logoH = 70;
-          } else {
-            logoW = 70 * ratio;
-            logoH = 70;
-          }
-        }
-      } catch (_) {
-        if (kIsWeb) {
-          // ignora falha de logo no Web
-        } else {
-          rethrow;
-        }
+    try {
+      final logo = await _pdfRepository.fetchLogo(owner, authToken: authToken);
+      if (logo case Ok<Uint8List?>(:final value?)) image = PdfBitmap(value);
+      if (logo case Error<Uint8List?>(:final error)) throw error;
+    } catch (_) {
+      // Web: falha no logo (CORS/rede) não derruba o PDF — segue sem logo.
+      if (!kIsWeb) rethrow;
+    }
+    if (image != null) {
+      final ratio = image.width / image.height;
+      if (image.height == image.width) {
+        logoW = 70;
+        logoH = 70;
+      } else if (image.height > image.width) {
+        logoW = 50;
+        logoH = 70;
+      } else {
+        logoW = 70 * ratio;
+        logoH = 70;
       }
     }
 
@@ -319,33 +297,6 @@ class PdfGenerateReceiptExecutiveUsecase {
     }
 
     return headerH + 10;
-  }
-
-  // -------------------------------------------------------------------------
-  // Autenticação
-  // -------------------------------------------------------------------------
-
-  Future<String> _getAuthToken(String? authToken) async {
-    if (authToken != null && authToken.isNotEmpty) return authToken;
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final token = await currentUser.getIdToken();
-      if (token != null && token.isNotEmpty) return token;
-    }
-    final session = _userRepository.selectUser.value;
-    if (session == null) return '';
-    if (session.googleAuth == true) return '';
-    if (session.email == null ||
-        session.email!.isEmpty ||
-        session.password == null ||
-        session.password!.isEmpty) {
-      return '';
-    }
-    final auth = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: session.email!.trim(),
-      password: session.password!.trim(),
-    );
-    return (await auth.user?.getIdToken()) ?? '';
   }
 
   // -------------------------------------------------------------------------
