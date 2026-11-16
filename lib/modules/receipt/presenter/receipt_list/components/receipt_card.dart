@@ -70,6 +70,7 @@ class ReceiptCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
         child: ExpansionTileCard(
+          trailing: const SizedBox.shrink(),
           expandedTextColor: whiteColor,
           baseColor: secondaryColor,
           expandedColor: secondaryColor,
