@@ -1,53 +1,41 @@
 import 'dart:async';
 
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 
 /// Fonte externa para compras in-app (Google Play / App Store).
 ///
-/// Não conhece entidades de negócio; espelha a API do plugin.
+/// Não conhece entidades de negócio; espelha a API do plugin `in_app_purchase`.
 class InAppPurchaseRemoteDataSource {
-  Future<void> initConnection() => FlutterInappPurchase.instance.initConnection();
+  final InAppPurchase _iap;
 
-  Future<void> endConnection() => FlutterInappPurchase.instance.endConnection();
+  InAppPurchaseRemoteDataSource({InAppPurchase? iap})
+    : _iap = iap ?? InAppPurchase.instance;
 
-  Future<List<T>> fetchProducts<T extends ProductCommon>({
-    required List<String> skus,
-  }) {
-    return FlutterInappPurchase.instance.fetchProducts<T>(
-      skus: skus,
-      type: ProductQueryType.Subs,
-    );
-  }
+  Future<bool> isAvailable() => _iap.isAvailable();
 
-  Future<void> requestPurchaseWithBuilder(
-    void Function(RequestPurchaseBuilder builder) build,
-  ) {
-    return FlutterInappPurchase.instance.requestPurchaseWithBuilder(build: build);
-  }
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) =>
+      _iap.queryProductDetails(ids);
 
-  Future<void> restorePurchases() => FlutterInappPurchase.instance.restorePurchases();
+  Future<bool> buyNonConsumable(PurchaseParam param) =>
+      _iap.buyNonConsumable(purchaseParam: param);
 
-  Future<void> acknowledgePurchaseAndroid(String purchaseToken) {
-    return FlutterInappPurchase.instance.acknowledgePurchaseAndroid(purchaseToken);
-  }
+  Future<void> restorePurchases() => _iap.restorePurchases();
 
-  Future<void> finishTransaction({
-    required Purchase purchase,
-    required bool isConsumable,
-  }) {
-    return FlutterInappPurchase.instance.finishTransaction(
-      purchase: purchase,
-      isConsumable: isConsumable,
-    );
-  }
+  Future<void> completePurchase(PurchaseDetails purchase) =>
+      _iap.completePurchase(purchase);
 
-  Future<List<Purchase>> getAvailablePurchases() {
-    return FlutterInappPurchase.instance.getAvailablePurchases();
-  }
+  Stream<List<PurchaseDetails>> get purchaseStream => _iap.purchaseStream;
 
-  Stream<Purchase> get purchaseUpdatedStream =>
-      FlutterInappPurchase.instance.purchaseUpdatedListener;
+  /// Android: assinaturas ativas (Billing `queryPurchasesAsync`).
+  Future<QueryPurchaseDetailsResponse> queryPastPurchasesAndroid() =>
+      _iap
+          .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>()
+          .queryPastPurchases();
 
-  Stream<PurchaseError> get purchaseErrorStream =>
-      FlutterInappPurchase.instance.purchaseErrorListener;
+  /// iOS: assinaturas vigentes (StoreKit 2 `Transaction.currentEntitlements`).
+  /// Não pede senha da Apple ID, diferente de `restorePurchases`.
+  Future<List<SK2Transaction>> currentEntitlementsIos() =>
+      SK2Transaction.currentEntitlements();
 }

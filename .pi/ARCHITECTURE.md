@@ -202,7 +202,7 @@ firstChild: LoginTab(
 
 O **DataSource** é a classe que **fala diretamente com o mundo externo**:</br>
 `FirebaseFirestore`, `FirebaseAuth`, `http` (APIs REST), `SharedPreferences`,
-`FirebaseStorage`, SDKs de terceiros (Google Mobile Ads, FlutterInappPurchase,
+`FirebaseStorage`, SDKs de terceiros (Google Mobile Ads, in_app_purchase,
 etc.), sensores do celular.
 
 Ele **não conhece** models de negócio, entidades ou regras do domínio. Sua única
