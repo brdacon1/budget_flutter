@@ -41,8 +41,6 @@ class BudgetListActionsBottomModalWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = item.checkBox ?? false;
-
     return Container(
       decoration: const BoxDecoration(
         color: secondaryColor,
@@ -104,14 +102,8 @@ class BudgetListActionsBottomModalWidget extends StatelessWidget {
               children: [
                 Expanded(
                   child: ActionButton(
-                    icon:
-                        selected
-                            ? Icons.check_circle_outline
-                            : Icons.delete_outline_rounded,
-                    label:
-                        selected
-                            ? BudgetStrings.actionSelected
-                            : BudgetStrings.actionDelete,
+                    icon: Icons.delete_outline_rounded,
+                    label: BudgetStrings.actionDelete,
                     backgroundColor: statusRejectedColor.withValues(
                       alpha: 0.15,
                     ),

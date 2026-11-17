@@ -22,12 +22,17 @@ class BudgetListViewModel extends ChangeNotifier {
 
   CustomerInfo customerBudget = CustomerInfo();
   final _foundUsers = <CustomerInfo>[];
-  final deleteItems = <CustomerInfo>[];
   CustomerInfo _customerInfoNew = CustomerInfo();
 
-  bool deleteVisible = false;
-  bool checkBoxAppear = false;
+  /// Ids dos orçamentos selecionados para exclusão. Guardar o id (e não o
+  /// objeto) mantém a seleção correta mesmo quando a lista é recarregada.
+  final Set<String> selectedIds = <String>{};
+  bool deleting = false;
   bool _isRefreshing = false;
+
+  bool get selectionMode => selectedIds.isNotEmpty;
+
+  bool isSelected(CustomerInfo b) => selectedIds.contains(b.id);
 
   int _totalBudgetCount = 0;
   int get totalBudgetCount => _totalBudgetCount;
@@ -57,7 +62,7 @@ class BudgetListViewModel extends ChangeNotifier {
     if (_disposed || _isRefreshing) return;
     _foundUsers
       ..clear()
-      ..addAll(_budgetRepository.budgets.map((b) => b..checkBox ??= false));
+      ..addAll(_budgetRepository.budgets);
     notifyListeners();
   }
 
@@ -92,30 +97,34 @@ class BudgetListViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteData() async {
-    final result = await _budgetRepository.deleteBudgets(deleteItems);
+  /// Remove os orçamentos selecionados. Retorna `true` em caso de sucesso.
+  Future<bool> deleteSelected() async {
+    if (selectedIds.isEmpty || deleting) return false;
+    deleting = true;
+    if (!_disposed) notifyListeners();
+    final items = _foundUsers.where(isSelected).toList();
+    final result = await _budgetRepository.deleteBudgets(items);
+    deleting = false;
     if (result is Ok<void>) {
-      _totalBudgetCount -= deleteItems.length;
-      if (!_disposed) notifyListeners();
-      deleteItems.clear();
-      deleteVisible = false;
+      _totalBudgetCount -= items.length;
+      selectedIds.clear();
       await getInformationOrcamento(refresh: true);
       return true;
     }
+    if (!_disposed) notifyListeners();
     return false;
   }
 
-  Future<List<CustomerInfo>> getInformationOrcamento(
-      {bool refresh = true}) async {
+  Future<List<CustomerInfo>> getInformationOrcamento({
+    bool refresh = true,
+  }) async {
     _isRefreshing = true;
-    final result =
-        await _budgetRepository.fetchBudgetsPaginated(refresh: refresh);
+    final result = await _budgetRepository.fetchBudgetsPaginated(
+      refresh: refresh,
+    );
     _foundUsers.clear();
     if (result is Ok<List<CustomerInfo>>) {
-      for (final b in result.value) {
-        b.checkBox = false;
-        _foundUsers.add(b);
-      }
+      _foundUsers.addAll(result.value);
     }
     _isRefreshing = false;
     if (!_disposed) notifyListeners();
@@ -140,32 +149,25 @@ class BudgetListViewModel extends ChangeNotifier {
     }
   }
 
-  void toggleDeleteItem(int index) {
-    if (!getFilteredData()[index].checkBox!) {
-      getFilteredData()[index].checkBox = true;
-      getFilteredData()[index].index = index;
-      deleteItems.add(getFilteredData()[index]);
-      if (deleteItems.isNotEmpty) {
-        deleteVisible = true;
-      }
+  void toggleSelect(CustomerInfo b) {
+    final id = b.id;
+    if (id == null) return;
+    if (!selectedIds.remove(id)) selectedIds.add(id);
+    if (!_disposed) notifyListeners();
+  }
+
+  void selectAllFiltered() {
+    final ids = getFilteredData().map((b) => b.id).whereType<String>();
+    if (ids.every(selectedIds.contains)) {
+      selectedIds.removeAll(ids);
+    } else {
+      selectedIds.addAll(ids);
     }
     if (!_disposed) notifyListeners();
   }
 
-  void removeDeleteItem(CustomerInfo item) {
-    getFilteredData()[item.index].checkBox = false;
-    deleteItems.remove(item);
-    if (deleteItems.isEmpty) {
-      deleteVisible = false;
-      checkBoxAppear = false;
-    }
-    if (!_disposed) notifyListeners();
-  }
-
-  void clearDeleteItens() {
-    deleteItems.clear();
-    deleteVisible = false;
-    checkBoxAppear = false;
+  void clearSelection() {
+    selectedIds.clear();
     if (!_disposed) notifyListeners();
   }
 

@@ -9,19 +9,20 @@ class BudgetListCard extends StatelessWidget {
   const BudgetListCard({
     super.key,
     required this.item,
+    required this.selected,
     required this.moneyConvert,
     required this.onTap,
     required this.onMore,
   });
 
   final CustomerInfo item;
+  final bool selected;
   final ConvertCoinRepository moneyConvert;
   final VoidCallback onTap;
   final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
-    final selected = item.checkBox ?? false;
     final name = item.customerName ?? '';
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
 

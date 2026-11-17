@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart' as badges;
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +7,6 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
-import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_delete_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
@@ -19,6 +17,7 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
+import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
 class BudgetListView extends StatefulWidget {
   const BudgetListView({super.key});
@@ -90,159 +89,158 @@ class _BudgetListView extends State<BudgetListView> {
     );
   }
 
-  Future<void> _dialogDeleteBuilder() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: transparentColor,
-      builder: (BuildContext context) {
-        return BudgetListDeleteBottomModalWidget(
-          deleteItens: _viewModel.deleteItems,
-          onRemove: (item) => _viewModel.removeDeleteItem(item),
-          onConfirm: () async {
-            await _viewModel.deleteData();
-            _viewModel.clearDeleteItens();
-            if (!mounted) return;
-            await _viewModel.displayAlert.notification(
-              context,
-              "Tudo Certo!",
-              "Orçamentos removidos com sucesso!",
-            );
-          },
-        );
-      },
-    ).then((value) {
-      setState(() {});
-    });
+  Future<void> _confirmDelete() async {
+    final count = _viewModel.selectedIds.length;
+    final confirm = await showConfirmBottomModal(
+      context,
+      title: BudgetStrings.removeTitle(count),
+      message: BudgetStrings.removeMessage,
+    );
+    if (!confirm || !mounted) return;
+
+    final ok = await _viewModel.deleteSelected();
+    if (!mounted) return;
+    if (ok) {
+      await _viewModel.displayAlert.notificationNotCloseScreen(
+        context,
+        BudgetStrings.removeSuccessTitle,
+        BudgetStrings.removeSuccessMessage,
+      );
+    } else {
+      await _viewModel.displayAlert.notificationError(
+        context,
+        BudgetStrings.removeErrorTitle,
+        BudgetStrings.removeErrorMessage,
+      );
+    }
   }
 
   Widget _buildDeleteFloatingButton() {
-    return AnimatedBuilder(
-      animation: _viewModel,
-      builder: (context, _) {
-        return Visibility(
-          visible: _viewModel.deleteVisible,
-          child: badges.Badge(
-            badgeStyle: badges.BadgeStyle(
-              badgeColor: badgeColor,
-              borderRadius: BorderRadius.circular(40),
-            ),
-            badgeContent: Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: Center(
-                child: Text(
-                  _viewModel.deleteItems.length.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: whiteColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                  ),
+    return FloatingActionButton.extended(
+      heroTag: 'delete',
+      onPressed: _viewModel.deleting ? null : _confirmDelete,
+      backgroundColor: statusRejectedColor,
+      shape: const StadiumBorder(),
+      icon:
+          _viewModel.deleting
+              ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: whiteColor,
                 ),
-              ),
-            ),
-            child: FloatingActionButton.extended(
-              heroTag: "delete",
-              onPressed: _dialogDeleteBuilder,
-              backgroundColor: buttonColor,
-              elevation: 4,
-              shape: const StadiumBorder(),
-              icon: const Icon(Icons.delete_outline_rounded, color: blackColor),
-              label: Text(
-                BudgetStrings.removeAll,
-                style: const TextStyle(
-                  color: blackColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+              )
+              : const Icon(Icons.delete_outline_rounded, color: whiteColor),
+      label: Text(
+        BudgetStrings.removeCount(_viewModel.selectedIds.length),
+        style: const TextStyle(
+          color: whiteColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
     );
   }
 
   Widget _buildAddItemsFloatingButton() {
-    return AnimatedBuilder(
-      animation: _viewModel,
-      builder: (context, _) {
-        return Visibility(
-          visible: !_viewModel.deleteVisible,
-          child: FloatingActionButton.extended(
-            heroTag: "adicionar",
-            onPressed: () async {
-              if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
-                  false)) {
-                final value = await _viewModel.displayAlert.adsNotification(
-                  context,
-                );
-                if (!mounted) return;
-                if (value == "Ver anuncio") {
-                  getIt<AdsRepository>().showInterstitial();
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              BudgetTabView(item: _viewModel.customerInfoNew()),
-                    ),
-                  );
-                  if (!mounted) return;
-                  getIt<BudgetRepository>().clearSelectBudget();
-                  await _viewModel.getInformationOrcamento(refresh: true);
-                  _viewModel.clearDeleteItens();
-                } else if (value == "Se tornar premium") {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SubscriptionView()),
-                  );
-                }
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            BudgetTabView(item: _viewModel.customerInfoNew()),
-                  ),
-                ).then((_) async {
-                  getIt<BudgetRepository>().clearSelectBudget();
-                  await _viewModel.getInformationOrcamento(refresh: true);
-                  _viewModel.clearDeleteItens();
-                });
-              }
-            },
-            backgroundColor: buttonColor,
-            elevation: 4,
-            shape: const StadiumBorder(),
-            icon: const Icon(Icons.add, color: blackColor, size: 20),
-            label: Text(
-              BudgetStrings.newBudget,
-              style: const TextStyle(
-                color: blackColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+    return FloatingActionButton.extended(
+      heroTag: "adicionar",
+      onPressed: () async {
+        if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
+            false)) {
+          final value = await _viewModel.displayAlert.adsNotification(context);
+          if (!mounted) return;
+          if (value == "Ver anuncio") {
+            getIt<AdsRepository>().showInterstitial();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) =>
+                        BudgetTabView(item: _viewModel.customerInfoNew()),
               ),
+            );
+            if (!mounted) return;
+            getIt<BudgetRepository>().clearSelectBudget();
+            await _viewModel.getInformationOrcamento(refresh: true);
+          } else if (value == "Se tornar premium") {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SubscriptionView()),
+            );
+          }
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) =>
+                      BudgetTabView(item: _viewModel.customerInfoNew()),
             ),
-          ),
-        );
+          ).then((_) async {
+            getIt<BudgetRepository>().clearSelectBudget();
+            await _viewModel.getInformationOrcamento(refresh: true);
+          });
+        }
       },
+      backgroundColor: buttonColor,
+      elevation: 4,
+      shape: const StadiumBorder(),
+      icon: const Icon(Icons.add, color: blackColor, size: 20),
+      label: Text(
+        BudgetStrings.newBudget,
+        style: const TextStyle(
+          color: blackColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
     );
   }
 
-  Widget _buildFloatingButton({required double height}) {
+  Widget _buildFloatingButton() {
     return AnimatedBuilder(
       animation: _viewModel,
-      builder: (context, _) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            _buildDeleteFloatingButton(),
-            _buildAddItemsFloatingButton(),
-          ],
-        );
-      },
+      builder:
+          (context, _) =>
+              _viewModel.selectionMode
+                  ? _buildDeleteFloatingButton()
+                  : _buildAddItemsFloatingButton(),
+    );
+  }
+
+  Widget _buildSelectionBar() {
+    final count = _viewModel.selectedIds.length;
+    final data = _viewModel.getFilteredData();
+    final allSelected = data.isNotEmpty && data.every(_viewModel.isSelected);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 20, 8),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: BudgetStrings.cancelSelection,
+            onPressed: _viewModel.clearSelection,
+            icon: const Icon(Icons.close, color: whiteColor),
+          ),
+          Text(
+            BudgetStrings.selectedCount(count),
+            style: GoogleFonts.heebo(
+              color: whiteColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: _viewModel.selectAllFiltered,
+            style: TextButton.styleFrom(foregroundColor: buttonColor),
+            child: Text(
+              allSelected ? BudgetStrings.clearAll : BudgetStrings.selectAll,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -253,7 +251,6 @@ class _BudgetListView extends State<BudgetListView> {
       MaterialPageRoute(builder: (context) => BudgetTabView(item: item)),
     ).then((_) {
       getIt<BudgetRepository>().clearSelectBudget();
-      _viewModel.clearDeleteItens();
     });
   }
 
@@ -276,7 +273,7 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
-  Future<void> _openActions(CustomerInfo item, int index) {
+  Future<void> _openActions(CustomerInfo item) {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: transparentColor,
@@ -287,7 +284,7 @@ class _BudgetListView extends State<BudgetListView> {
             onOpen: () => _openBudget(item),
             onDuplicate: () => _duplicateBudget(item),
             onDelete: () {
-              if (!(item.checkBox ?? false)) _viewModel.toggleDeleteItem(index);
+              if (!_viewModel.isSelected(item)) _viewModel.toggleSelect(item);
             },
           ),
     );
@@ -305,7 +302,6 @@ class _BudgetListView extends State<BudgetListView> {
           backgroundColor: bgColor,
           onRefresh: () async {
             await _viewModel.getInformationOrcamento(refresh: true);
-            _viewModel.clearDeleteItens();
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -343,7 +339,6 @@ class _BudgetListView extends State<BudgetListView> {
         backgroundColor: bgColor,
         onRefresh: () async {
           await _viewModel.getInformationOrcamento(refresh: true);
-          _viewModel.clearDeleteItens();
         },
         child: ListView.builder(
           controller: _scrollController,
@@ -369,9 +364,18 @@ class _BudgetListView extends State<BudgetListView> {
             final item = data[index];
             return BudgetListCard(
               item: item,
+              selected: _viewModel.isSelected(item),
               moneyConvert: moneyConvert,
-              onTap: () => _openBudget(item),
-              onMore: () => _openActions(item, index),
+              onTap:
+                  () =>
+                      _viewModel.selectionMode
+                          ? _viewModel.toggleSelect(item)
+                          : _openBudget(item),
+              onMore:
+                  () =>
+                      _viewModel.selectionMode
+                          ? _viewModel.toggleSelect(item)
+                          : _openActions(item),
             );
           },
         ),
@@ -424,6 +428,7 @@ class _BudgetListView extends State<BudgetListView> {
       children: <Widget>[
         _buildHeaderScreen(),
         _buildSearchBar(),
+        if (_viewModel.selectionMode) _buildSelectionBar(),
         _buildListView(),
       ],
     );
@@ -431,7 +436,6 @@ class _BudgetListView extends State<BudgetListView> {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
@@ -441,7 +445,7 @@ class _BudgetListView extends State<BudgetListView> {
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: _buildFloatingButton(height: he),
+      floatingActionButton: _buildFloatingButton(),
       bottomNavigationBar: const BannerAdWidget(),
     );
   }
