@@ -34,6 +34,19 @@ jobs:
           cache: true
 
       # -----------------------------------------------------------------------
+      # 3.1 Android SDK: CMake + NDK pré-instalados
+      #     O plugin `jni` (dep. transitiva de path_provider_android /
+      #     shared_preferences_android) compila código nativo com CMake 3.22.1.
+      #     Se o Gradle baixar sozinho durante o build, o zip pode vir corrompido
+      #     ("Archive is not a ZIP archive"). Instalar antes evita isso.
+      # -----------------------------------------------------------------------
+      - name: Install Android CMake and NDK
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "cmake;3.22.1" "ndk;28.2.13676358"
+
+      # -----------------------------------------------------------------------
       # 4. Dependências
       # -----------------------------------------------------------------------
       - name: Flutter pub get
