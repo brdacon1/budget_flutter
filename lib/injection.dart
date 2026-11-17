@@ -14,6 +14,7 @@ import 'package:oflite/modules/core/share_link/share_link_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
 import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
+import 'package:oflite/modules/legal/legal_binds.dart';
 import 'package:oflite/modules/main_config_menu/main_config_menu_binds.dart';
 import 'package:oflite/modules/main_tab/main_tab_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
@@ -73,6 +74,7 @@ void setupDependencyInjection() {
   registerWebBudgetDependencies(getIt);
   registerDeleteAccountDependencies(getIt);
   registerSupportDependencies(getIt);
+  registerLegalDependencies(getIt);
 
   // ------------------------------------------------------------------
   // Feature ViewModels (sempre Factory)

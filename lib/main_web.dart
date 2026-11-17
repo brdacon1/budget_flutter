@@ -10,6 +10,7 @@ import 'package:oflite/modules/delete_account/delete_account_routes.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_view.dart';
 import 'package:oflite/modules/support/presenter/support_view.dart';
 import 'package:oflite/modules/support/support_routes.dart';
+import 'package:oflite/modules/legal/legal_routes.dart';
 import 'package:oflite/injection.dart';
 
 /// Entry point **Web** do fluxo público de orçamento.
@@ -74,6 +75,7 @@ class BudgetWebApp extends StatelessWidget {
           routes: {
             ...deleteAccountRoutes,
             ...supportRoutes,
+            ...legalRoutes,
           },
           home: _homeFor(Uri.base.path),
         );
@@ -88,5 +90,8 @@ Widget _homeFor(String path) {
   bool match(String p) => path == p || path.startsWith('$p/');
   if (match(DeleteAccountRoute.deleteAccount.path)) return const DeleteAccountView();
   if (match(SupportRoute.support.path)) return const SupportView();
+  for (final route in LegalRoute.values) {
+    if (match(route.path)) return route.view;
+  }
   return const BudgetWebAppView();
 }

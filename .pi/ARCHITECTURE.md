@@ -95,6 +95,7 @@ lib/
 │   ├── web_budget/                    # 🌐 Fluxo Web público do orçamento (ver seção 16)
 │   ├── delete_account/                # 🌐 Exclusão de conta (Web — /delete-account)
 │   ├── support/                       # 🌐 Suporte via WhatsApp (Web — /support, Support URL da App Store)
+│   ├── legal/                         # 🌐 EULA + Política de Privacidade pt/en (Web — ver 16.8)
 │   └── ...
 │
 └── shared/
@@ -1223,6 +1224,7 @@ etc.
 - [x] `web_budget` — Orçamento público web (compartilhável)
 - [x] `delete_account` — Exclusão de conta (Web — `/delete-account`)
 - [x] `support` — Suporte via WhatsApp (Web — `/support`)
+- [x] `legal` — EULA + Política de Privacidade pt/en (Web — `/termos-de-uso`, `/politica-de-privacidade`, `/terms-of-use`, `/privacy-policy`)
 
 ### Core — com DataSource (fonte externa)
 
@@ -1656,7 +1658,7 @@ navegador: ele publica **apenas** telas específicas e públicas.
 | Entrypoint          | Plataforma     | O que publica                                                        |
 |---------------------|----------------|----------------------------------------------------------------------|
 | `lib/main.dart`     | Android / iOS  | App completo (`appRoutes` de `app_routes.dart`)                      |
-| `lib/main_web.dart` | Web            | **Só** o fluxo público de orçamento + `/delete-account` + `/support` |
+| `lib/main_web.dart` | Web            | **Só** o fluxo público de orçamento + `/delete-account` + `/support` + páginas legais (16.8) |
 
 ### 16.1 O que existe hoje no Web
 
@@ -1665,6 +1667,8 @@ navegador: ele publica **apenas** telas específicas e públicas.
 | `/orcamento/{enderecoNumero}?token={idToken}`     | `BudgetWebAppView` (home padrão)   | `web_budget`     |
 | `/delete-account`                                 | `DeleteAccountView`                | `delete_account` |
 | `/support`                                        | `SupportView`                      | `support`        |
+| `/termos-de-uso` · `/terms-of-use`                | `LegalView` (EULA pt/en)           | `legal`          |
+| `/politica-de-privacidade` · `/privacy-policy`    | `LegalView` (Privacidade pt/en)    | `legal`          |
 
 - **Hosting**: Firebase Hosting, projeto `orcamentofacil-lite`
   (`https://orcamentofacil-lite.web.app`), servindo `build/web`.
@@ -1844,6 +1848,36 @@ WhatsApp — a Apple exige um contato visível na página).
   implementação separada com import condicional.
 - Especificações originais detalhadas: `.pi/web_projet_instruction/`
   (`new_project_web.md` e `create_flutter_web_page.md`).
+
+### 16.8 Páginas legais (`legal`) — EULA e Política de Privacidade
+
+URLs cadastradas na App Store / Play Console:
+
+| Documento               | Português                    | English            |
+|-------------------------|------------------------------|--------------------|
+| Termos de Uso (EULA)    | `/termos-de-uso`             | `/terms-of-use`    |
+| Política de Privacidade | `/politica-de-privacidade`   | `/privacy-policy`  |
+
+- O **idioma vem da URL** (não do Locale do navegador) — cada link é estável.
+- Uma única `LegalView` recebe um `LegalDocument` (entity do módulo); os
+  textos ficam em `presenter/strings/legal_{pt,en}_string.dart`. Para alterar
+  um texto: editar a string, atualizar `lastUpdated` e fazer deploy do Web.
+- Links entre documentos/idiomas recarregam a URL real
+  (`LegalViewModel.open` → `url_launcher` com `_self`), pois o
+  `main_web.dart` escolhe a tela pelo path.
+- Nova rota legal = novo valor em `LegalRoute` + rewrite no `firebase.json`.
+
+```
+lib/modules/legal/
+├── legal_binds.dart                   # registerFactory<LegalViewModel>
+├── legal_routes.dart                  # enum LegalRoute (path + view) → legalRoutes
+├── domain/entity/legal_document.dart  # LegalDocument + LegalSection
+└── presenter/
+    ├── legal_view.dart
+    ├── legal_view_model.dart          # open(path)
+    ├── components/legal_body.dart, legal_link_chip.dart
+    └── strings/legal_pt_string.dart, legal_en_string.dart
+```
 
 ---
 
