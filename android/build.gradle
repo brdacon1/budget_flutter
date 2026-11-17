@@ -27,11 +27,6 @@ subprojects {
             kotlinExt.compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
         }
         if (subproject.hasProperty('android')) {
-            // flutter_inapp_purchase adds its Kotlin sources via java.srcDirs, which
-            // Built-in Kotlin (AGP 9) does not compile. Mirror them into kotlin.srcDirs.
-            if (subproject.name == 'flutter_inapp_purchase') {
-                subproject.android.sourceSets.main.kotlin.srcDirs(subproject.android.sourceSets.main.java.srcDirs)
-            }
             subproject.android {
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17

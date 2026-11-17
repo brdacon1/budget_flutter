@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
@@ -60,9 +59,7 @@ class LoginViewModel extends ChangeNotifier {
 
     try {
       await getIt<InAppPurchaseRepository>().initConnection();
-      await getIt<InAppPurchaseRepository>().fetchProducts<ProductSubscription>(
-        skus: productLists,
-      );
+      await getIt<InAppPurchaseRepository>().fetchProducts(skus: productLists);
     } catch (_) {}
 
     await _checkAutoLogin();
@@ -313,15 +310,13 @@ class LoginViewModel extends ChangeNotifier {
 
           final session = _userRepository.selectUser.value ?? InfoUser();
           session.autoRenewing = latestSubscription.isAutoRenewing;
-          session.purchaseToken = latestSubscription.purchaseToken ?? '';
+          session.purchaseToken = latestSubscription.purchaseToken;
           session.productId = latestSubscription.productId;
           _userRepository.selectUser.value = session;
 
-          if (Platform.isAndroid &&
-              latestSubscription is PurchaseAndroid &&
-              latestSubscription.isAcknowledgedAndroid != true) {
+          if (Platform.isAndroid && latestSubscription.needsCompletion) {
             await getIt<InAppPurchaseRepository>().acknowledgePurchaseAndroid(
-              latestSubscription.purchaseToken ?? '',
+              latestSubscription,
             );
           }
         } else {
