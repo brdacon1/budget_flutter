@@ -3,9 +3,11 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_delete_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
@@ -61,7 +63,7 @@ class _BudgetListView extends State<BudgetListView> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
       builder: (BuildContext dialogContext) {
         return BudgetListDuplicateBottomModalWidget(
           onConfirm: (clientData, quoteItems, comments, receipts) async {
@@ -92,7 +94,7 @@ class _BudgetListView extends State<BudgetListView> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
       builder: (BuildContext context) {
         return BudgetListDeleteBottomModalWidget(
           deleteItens: _viewModel.deleteItems,
@@ -122,7 +124,7 @@ class _BudgetListView extends State<BudgetListView> {
           visible: _viewModel.deleteVisible,
           child: badges.Badge(
             badgeStyle: badges.BadgeStyle(
-              badgeColor: const Color.fromARGB(255, 231, 15, 87),
+              badgeColor: badgeColor,
               borderRadius: BorderRadius.circular(40),
             ),
             badgeContent: Padding(
@@ -132,7 +134,7 @@ class _BudgetListView extends State<BudgetListView> {
                   _viewModel.deleteItems.length.toString(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: whiteColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                   ),
@@ -144,14 +146,12 @@ class _BudgetListView extends State<BudgetListView> {
               onPressed: _dialogDeleteBuilder,
               backgroundColor: buttonColor,
               elevation: 4,
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: Colors.black,
-              ),
-              label: const Text(
-                'Remover todos',
-                style: TextStyle(
-                  color: Colors.black,
+              shape: const StadiumBorder(),
+              icon: const Icon(Icons.delete_outline_rounded, color: blackColor),
+              label: Text(
+                BudgetStrings.removeAll,
+                style: const TextStyle(
+                  color: blackColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -215,11 +215,12 @@ class _BudgetListView extends State<BudgetListView> {
             },
             backgroundColor: buttonColor,
             elevation: 4,
-            icon: const Icon(Icons.add, color: Colors.black, size: 20),
-            label: const Text(
-              'Novo orçamento',
-              style: TextStyle(
-                color: Colors.black,
+            shape: const StadiumBorder(),
+            icon: const Icon(Icons.add, color: blackColor, size: 20),
+            label: Text(
+              BudgetStrings.newBudget,
+              style: const TextStyle(
+                color: blackColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -245,6 +246,53 @@ class _BudgetListView extends State<BudgetListView> {
     );
   }
 
+  void _openBudget(CustomerInfo item) {
+    getIt<BudgetRepository>().selectBudget.value = item;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BudgetTabView(item: item)),
+    ).then((_) {
+      getIt<BudgetRepository>().clearSelectBudget();
+      _viewModel.clearDeleteItens();
+    });
+  }
+
+  Future<void> _duplicateBudget(CustomerInfo item) async {
+    if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ?? false) &&
+        _viewModel.totalBudgetCount > 10) {
+      await _viewModel.displayAlert.notificationError(
+        context,
+        "Erro!",
+        "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
+      );
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SubscriptionView()),
+      );
+    } else {
+      getIt<BudgetRepository>().selectBudget.value = item;
+      await _dialogDuplicate();
+    }
+  }
+
+  Future<void> _openActions(CustomerInfo item, int index) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: transparentColor,
+      builder:
+          (_) => BudgetListActionsBottomModalWidget(
+            item: item,
+            moneyConvert: moneyConvert,
+            onOpen: () => _openBudget(item),
+            onDuplicate: () => _duplicateBudget(item),
+            onDelete: () {
+              if (!(item.checkBox ?? false)) _viewModel.toggleDeleteItem(index);
+            },
+          ),
+    );
+  }
+
   Widget _buildListView() {
     final data = _viewModel.getFilteredData();
     final isEmpty =
@@ -253,7 +301,7 @@ class _BudgetListView extends State<BudgetListView> {
     if (isEmpty) {
       return Expanded(
         child: RefreshIndicator(
-          color: Colors.cyan[50],
+          color: refreshIndicatorColor,
           backgroundColor: bgColor,
           onRefresh: () async {
             await _viewModel.getInformationOrcamento(refresh: true);
@@ -268,14 +316,14 @@ class _BudgetListView extends State<BudgetListView> {
                   children: [
                     const Icon(
                       Icons.folder_open_outlined,
-                      color: Colors.white54,
+                      color: emptyStateIconColor,
                       size: 48,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       BudgetStrings.emptyStateTitle,
                       style: GoogleFonts.heebo(
-                        color: Colors.white70,
+                        color: loadingIndicatorColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -291,7 +339,7 @@ class _BudgetListView extends State<BudgetListView> {
 
     return Expanded(
       child: RefreshIndicator(
-        color: Colors.cyan[50],
+        color: refreshIndicatorColor,
         backgroundColor: bgColor,
         onRefresh: () async {
           await _viewModel.getInformationOrcamento(refresh: true);
@@ -300,12 +348,7 @@ class _BudgetListView extends State<BudgetListView> {
         child: ListView.builder(
           controller: _scrollController,
           shrinkWrap: true,
-          padding: const EdgeInsets.only(
-            bottom: 170,
-            left: 15,
-            right: 15,
-            top: 0,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
           itemCount: data.length + (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= data.length) {
@@ -317,7 +360,7 @@ class _BudgetListView extends State<BudgetListView> {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white70,
+                      color: loadingIndicatorColor,
                     ),
                   ),
                 ),
@@ -327,42 +370,8 @@ class _BudgetListView extends State<BudgetListView> {
             return BudgetListCard(
               item: item,
               moneyConvert: moneyConvert,
-              onDelete: () {
-                if (!item.checkBox!) {
-                  _viewModel.toggleDeleteItem(index);
-                }
-              },
-              onOpen: () {
-                getIt<BudgetRepository>().selectBudget.value = item;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BudgetTabView(item: item),
-                  ),
-                ).then((_) {
-                  getIt<BudgetRepository>().clearSelectBudget();
-                  _viewModel.clearDeleteItens();
-                });
-              },
-              onDuplicate: () async {
-                if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
-                        false) &&
-                    _viewModel.totalBudgetCount > 10) {
-                  await _viewModel.displayAlert.notificationError(
-                    context,
-                    "Erro!",
-                    "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
-                  );
-                  if (!mounted) return;
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SubscriptionView()),
-                  );
-                } else {
-                  getIt<BudgetRepository>().selectBudget.value = item;
-                  await _dialogDuplicate();
-                }
-              },
+              onTap: () => _openBudget(item),
+              onMore: () => _openActions(item, index),
             );
           },
         ),
@@ -371,51 +380,49 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      height: 50.0,
-      margin: const EdgeInsets.only(right: 13.0, left: 13.0, bottom: 26),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: CupertinoSearchTextField(
-        placeholder: "Digite o nome do cliente...",
-        style: const TextStyle(
-          color: whiteColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 18.0,
+        placeholder: BudgetStrings.searchPlaceholder,
+        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+        style: GoogleFonts.heebo(color: whiteColor, fontSize: 16),
+        placeholderStyle: GoogleFonts.heebo(
+          color: mutedTextColor,
+          fontSize: 16,
         ),
-        backgroundColor: Colors.white12,
-        itemColor: whiteColor,
+        backgroundColor: secondaryColor,
+        borderRadius: BorderRadius.circular(14),
+        itemColor: mutedTextColor,
         controller: searchController,
         onChanged: _viewModel.onSearchTextChanged,
       ),
     );
   }
 
-  Widget _buildHeaderScreen({required double height}) {
-    return Column(
-      children: [
-        SizedBox(height: height * 0.04),
-        SizedBox(height: height * 0.03),
-        Container(
-          margin: const EdgeInsets.only(right: 125.0),
+  Widget _buildHeaderScreen() {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+        child: Align(
+          alignment: Alignment.centerLeft,
           child: Text(
-            "Meus orçamentos",
+            BudgetStrings.screenTitle,
             style: GoogleFonts.heebo(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 26,
-              letterSpacing: 2,
+              color: whiteColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 28,
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildScreen({required double height}) {
+  Widget _buildScreen() {
     return Column(
-      mainAxisSize: MainAxisSize.max,
       children: <Widget>[
-        _buildHeaderScreen(height: height),
-        SizedBox(height: height * 0.03),
+        _buildHeaderScreen(),
         _buildSearchBar(),
         _buildListView(),
       ],
@@ -430,7 +437,7 @@ class _BudgetListView extends State<BudgetListView> {
       body: AnimatedBuilder(
         animation: _viewModel,
         builder: (context, _) {
-          return _buildScreen(height: he);
+          return _buildScreen();
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
