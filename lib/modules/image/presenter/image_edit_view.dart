@@ -1,15 +1,14 @@
 import 'dart:io';
 
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
@@ -70,21 +69,21 @@ class _ImageEditView extends State<ImageEditView> {
                 ),
               ),
             ),
-          Expanded(child: _body()),
+          Expanded(child: _buildBody()),
         ],
       ),
     );
   }
 
-  Widget _body() {
+  Widget _buildBody() {
     if (_viewModel.hasImage) {
-      return _imageCard();
+      return _buildImageCard();
     } else {
       return _uploaderCard();
     }
   }
 
-  Widget _imageCard() {
+  Widget _buildImageCard() {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -99,18 +98,18 @@ class _ImageEditView extends State<ImageEditView> {
               elevation: 4.0,
               child: Padding(
                 padding: const EdgeInsets.all(kIsWeb ? 24.0 : 16.0),
-                child: _image(),
+                child: _buildImage(),
               ),
             ),
           ),
           const SizedBox(height: 24.0),
-          _menu(),
+          _buildMenu(),
         ],
       ),
     );
   }
 
-  Widget _image() {
+  Widget _buildImage() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     if (_viewModel.croppedFile != null) {
@@ -169,7 +168,7 @@ class _ImageEditView extends State<ImageEditView> {
     );
   }
 
-  Widget _menu() {
+  Widget _buildMenu() {
     if (!_viewModel.hasImage) {
       return FloatingActionButton(
         heroTag: "Upload",
@@ -276,21 +275,16 @@ class _ImageEditView extends State<ImageEditView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DottedBorder(
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(12),
-                padding: const EdgeInsets.all(6),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  child: Container(
-                    height: 204,
-                    width: 204,
-                    color: Colors.grey[100],
-                    child: const Icon(
-                      Icons.cloud_upload_outlined,
-                      color: Colors.grey,
-                      size: 64,
-                    ),
+              ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                child: Container(
+                  height: 204,
+                  width: 204,
+                  color: Colors.grey[100],
+                  child: const Icon(
+                    Icons.cloud_upload_outlined,
+                    color: Colors.grey,
+                    size: 64,
                   ),
                 ),
               ),

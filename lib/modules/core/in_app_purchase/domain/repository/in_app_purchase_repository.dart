@@ -1,45 +1,36 @@
 import 'dart:async';
 
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:oflite/modules/core/in_app_purchase/data/model/iap_product.dart';
+import 'package:oflite/modules/core/in_app_purchase/data/model/iap_purchase.dart';
 
 /// Contrato para gerenciamento de compras in-app (assinaturas).
 ///
-/// Abstrai o plugin `flutter_inapp_purchase`.
+/// Abstrai o plugin `in_app_purchase`; só expõe models do módulo.
 abstract class InAppPurchaseRepository {
-  /// Inicializa a conexão com a loja (Google Play / App Store).
+  /// Verifica se a loja (Google Play / App Store) está disponível.
   Future<void> initConnection();
 
-  /// Finaliza a conexão com a loja.
-  Future<void> endConnection();
+  /// Busca as assinaturas disponíveis para os [skus] informados.
+  Future<List<IapProduct>> fetchProducts({required List<String> skus});
 
-  /// Busca os produtos / assinaturas disponíveis para os [skus] informados.
-  Future<List<T>> fetchProducts<T extends ProductCommon>({
-    required List<String> skus,
-  });
+  /// Solicita a assinatura do [sku]. O resultado chega pelos streams.
+  Future<void> requestSubscription(String sku);
 
-  /// Solicita a compra/assinatura via builder.
-  Future<void> requestPurchaseWithBuilder(
-    void Function(RequestPurchaseBuilder builder) build,
-  );
-
-  /// Restaura compras anteriores.
+  /// Restaura compras anteriores. O resultado chega pelos streams.
   Future<void> restorePurchases();
 
   /// Confirma (acknowledge) uma compra no Android.
-  Future<void> acknowledgePurchaseAndroid(String purchaseToken);
+  Future<void> acknowledgePurchaseAndroid(IapPurchase purchase);
 
   /// Finaliza uma transação (obrigatório no iOS).
-  Future<void> finishTransaction({
-    required Purchase purchase,
-    required bool isConsumable,
-  });
+  Future<void> finishTransaction(IapPurchase purchase);
 
-  /// Retorna compras disponíveis / pendentes.
-  Future<List<Purchase>> getAvailablePurchases();
+  /// Assinaturas ativas do usuário na loja.
+  Future<List<IapPurchase>> getAvailablePurchases();
 
-  /// Stream de compras bem-sucedidas.
-  Stream<Purchase> get purchaseUpdatedStream;
+  /// Compras concluídas/pendentes (restauradas chegam como `purchased`).
+  Stream<IapPurchase> get purchaseUpdatedStream;
 
-  /// Stream de erros de compra.
-  Stream<PurchaseError> get purchaseErrorStream;
+  /// Compras com erro ou canceladas pelo usuário.
+  Stream<IapPurchase> get purchaseErrorStream;
 }

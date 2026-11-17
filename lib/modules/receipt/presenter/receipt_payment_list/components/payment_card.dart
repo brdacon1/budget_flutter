@@ -1,108 +1,101 @@
-import 'package:expansion_tile_card/expansion_tile_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/button/action_button.dart';
 
+/// Card compacto do pagamento. Toque ou "⋮" abrem as ações.
 class PaymentCard extends StatelessWidget {
   final PaymentCustomer item;
   final ConvertCoinRepository moneyConvert;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final VoidCallback onTap;
 
   const PaymentCard({
     super.key,
     required this.item,
     required this.moneyConvert,
-    required this.onDelete,
-    required this.onEdit,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          trailing: const SizedBox.shrink(),
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          leading: const CircleAvatar(
-            backgroundColor: bgColor,
-            child: Icon(Icons.payments_outlined, color: whiteColor),
-          ),
-          title: Text(
-            item.description!,
-            maxLines: 2,
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            PaymentStrings.paymentValueLabel(
-              moneyConvert.convertFromDouble(item.price!),
-            ),
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-            ),
-          ),
-          children: <Widget>[
-            const Divider(thickness: 1.0, height: 1.0),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: secondaryColor,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 4, 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: buttonColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.payments_outlined, color: buttonColor),
                 ),
-                child: Text(
-                  PaymentStrings.paymentMethodLabel("${item.method}"),
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.description ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.heebo(
+                          color: whiteColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: bgColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              item.method ?? '',
+                              style: GoogleFonts.heebo(
+                                color: mutedTextColor,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            moneyConvert.convertFromDouble(item.price ?? 0),
+                            style: GoogleFonts.heebo(
+                              color: whiteColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                IconButton(
+                  onPressed: onTap,
+                  icon: const Icon(Icons.more_vert, color: mutedTextColor),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 5, top: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ActionButton(
-                        icon: Icons.delete_outline_rounded,
-                        label: PaymentStrings.deleteLabel,
-                        onPressed: onDelete,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ActionButton(
-                        icon: Icons.edit,
-                        label: PaymentStrings.editLabel,
-                        onPressed: onEdit,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/in_app_purchase/data/model/iap_product.dart';
+import 'package:oflite/modules/core/in_app_purchase/data/model/iap_purchase.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
@@ -32,9 +33,9 @@ class SubscriptionViewModel extends ChangeNotifier {
   String get sku => Platform.isAndroid ? _androidSku : _iosSku;
 
   /// Guarda os produtos buscados (para obter offerToken no Android)
-  List<ProductSubscription> _availableProducts = [];
+  List<IapProduct> _availableProducts = [];
 
-  List<ProductSubscription> get availableProducts => _availableProducts;
+  List<IapProduct> get availableProducts => _availableProducts;
 
   bool get hasProducts => _availableProducts.isNotEmpty;
 
@@ -50,21 +51,16 @@ class SubscriptionViewModel extends ChangeNotifier {
     try {
       await _iap.initConnection();
 
-      final products = await _iap.fetchProducts<ProductSubscription>(
-        skus: [sku],
-      );
+      final products = await _iap.fetchProducts(skus: [sku]);
 
       _availableProducts = products;
 
       if (kDebugMode) {
         print('[SubscriptionViewModel] Produtos: ${products.length}');
         for (final p in products) {
-          print('  • ${p.id} - ${p.displayPrice}');
-          if (p is ProductSubscriptionAndroid) {
-            for (final o in p.subscriptionOffers) {
-              print('    offer: ${o.id} token: ${o.offerTokenAndroid}');
-            }
-          }
+          print(
+            '  • ${p.id} - ${p.displayPrice} token: ${p.offerTokenAndroid}',
+          );
         }
       }
     } catch (e) {
@@ -93,31 +89,19 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Android precisa do offerToken do produto buscado
       String? offerToken;
       if (Platform.isAndroid) {
-        final product = _availableProducts
-            .cast<ProductSubscription?>()
-            .firstWhere((p) => p?.id == sku, orElse: () => null);
+        final product = _availableProducts.cast<IapProduct?>().firstWhere(
+          (p) => p?.id == sku,
+          orElse: () => null,
+        );
 
-        if (product != null && product is ProductSubscriptionAndroid) {
-          if (product.subscriptionOffers.isNotEmpty) {
-            offerToken = product.subscriptionOffers.first.offerTokenAndroid;
-          }
-        }
+        offerToken = product?.offerTokenAndroid;
 
         if (offerToken == null) {
           throw Exception(SubscriptionStrings.offerTokenError(sku));
         }
       }
 
-      await _iap.requestPurchaseWithBuilder((builder) {
-        builder.type = ProductQueryType.Subs;
-
-        if (Platform.isAndroid) {
-          builder.android.skus = [sku];
-          builder.android.offerToken = offerToken;
-        } else {
-          builder.ios.sku = sku;
-        }
-      });
+      await _iap.requestSubscription(sku);
       // Sucesso/erro vem pelo listener
     } catch (e) {
       if (_disposed) return;
@@ -125,34 +109,30 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
   }
 
-  void _onPurchaseUpdated(Purchase purchase) async {
+  void _onPurchaseUpdated(IapPurchase purchase) async {
     if (_disposed) return;
 
     try {
       _updateSubscriptionSession(
         autoRenewing: purchase.isAutoRenewing,
-        purchaseToken: purchase.purchaseToken ?? '',
+        purchaseToken: purchase.purchaseToken,
         productId: purchase.productId,
       );
 
-      if (purchase.purchaseState == PurchaseState.Purchased) {
+      if (purchase.status == IapPurchaseStatus.purchased) {
         // Android: acknowledge obrigatório em até 3 dias
-        if (Platform.isAndroid &&
-            purchase is PurchaseAndroid &&
-            purchase.isAcknowledgedAndroid != true) {
-          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
-            purchase.purchaseToken ?? '',
-          );
+        if (Platform.isAndroid && purchase.needsCompletion) {
+          await _iap.acknowledgePurchaseAndroid(purchase);
         }
 
         // iOS: FINALIZAR TRANSAÇÃO é obrigatório!
         if (Platform.isIOS) {
-          await _iap.finishTransaction(purchase: purchase, isConsumable: false);
+          await _iap.finishTransaction(purchase);
         }
 
         if (_disposed) return;
         state = SubscriptionState.success;
-      } else if (purchase.purchaseState == PurchaseState.Pending) {
+      } else if (purchase.status == IapPurchaseStatus.pending) {
         state = SubscriptionState.success;
       } else {
         state = SubscriptionState.error;
@@ -164,7 +144,7 @@ class SubscriptionViewModel extends ChangeNotifier {
     }
   }
 
-  void _onPurchaseError(PurchaseError purchaseError) {
+  void _onPurchaseError(IapPurchase purchaseError) {
     if (_disposed) return;
 
     _fail(purchaseError);
@@ -174,7 +154,7 @@ class SubscriptionViewModel extends ChangeNotifier {
   void _fail(Object e) {
     if (kDebugMode) print('[SubscriptionViewModel] Erro: $e');
     state =
-        e is PurchaseError && e.code == ErrorCode.UserCancelled
+        e is IapPurchase && e.status == IapPurchaseStatus.cancelled
             ? SubscriptionState.cancelled
             : SubscriptionState.error;
     _safeNotify();
@@ -211,16 +191,12 @@ class SubscriptionViewModel extends ChangeNotifier {
 
         _updateSubscriptionSession(
           autoRenewing: latest.isAutoRenewing,
-          purchaseToken: latest.purchaseToken ?? '',
+          purchaseToken: latest.purchaseToken,
           productId: latest.productId,
         );
 
-        if (Platform.isAndroid &&
-            latest is PurchaseAndroid &&
-            latest.isAcknowledgedAndroid != true) {
-          await FlutterInappPurchase.instance.acknowledgePurchaseAndroid(
-            latest.purchaseToken ?? '',
-          );
+        if (Platform.isAndroid && latest.needsCompletion) {
+          await _iap.acknowledgePurchaseAndroid(latest);
         }
       } else {
         _updateSubscriptionSession(autoRenewing: false, purchaseToken: '');
