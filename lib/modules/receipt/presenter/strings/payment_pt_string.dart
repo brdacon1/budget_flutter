@@ -88,4 +88,31 @@ class PaymentStrings {
 
   static String get emptyPaymentsMessage =>
       _isPt ? 'Você ainda não adicionou pagamentos' : 'No payments added yet';
+
+  static String get paymentsSubtitleEmpty =>
+      _isPt ? 'Pagamentos do recibo' : 'Receipt payments';
+
+  static String paymentsCount(int n) => _isPt
+      ? (n == 1 ? '1 pagamento' : '$n pagamentos')
+      : (n == 1 ? '1 payment' : '$n payments');
+
+  static String get totalPaidLabel => _isPt ? 'Total pago' : 'Total paid';
+
+  static String get detailMethod => _isPt ? 'Método' : 'Method';
+
+  static String get detailValue => _isPt ? 'Valor' : 'Value';
+
+  static String get addPayment =>
+      _isPt ? 'Adicionar pagamento' : 'Add payment';
+
+  static String get removeTitle =>
+      _isPt ? 'Remover pagamento' : 'Remove payment';
+
+  static String get removeMessage => _isPt
+      ? 'Essa ação não pode ser desfeita.'
+      : 'This action cannot be undone.';
+
+  static String get emptyPaymentsSubtitle => _isPt
+      ? 'Os pagamentos recebidos aparecem aqui com o total pago.'
+      : 'Received payments show up here with the total paid.';
 }
