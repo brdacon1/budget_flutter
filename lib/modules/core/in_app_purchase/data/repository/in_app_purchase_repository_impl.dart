@@ -27,16 +27,24 @@ class InAppPurchaseRepositoryImpl implements InAppPurchaseRepository {
 
   @override
   Future<void> initConnection() async {
-    if (!await _dataSource.isAvailable()) {
-      throw StateError('Loja indisponível');
+    // Só diagnóstico: não barra o fluxo (o pacote antigo também não barrava).
+    // No Android a Billing reconecta sozinha no `queryProductDetails`.
+    final available = await _dataSource.isAvailable();
+    if (kDebugMode && !available) {
+      debugPrint('[InAppPurchaseRepository] isAvailable=false');
     }
   }
 
   @override
   Future<List<IapProduct>> fetchProducts({required List<String> skus}) async {
     final response = await _dataSource.queryProductDetails(skus.toSet());
-    if (kDebugMode && response.error != null) {
-      debugPrint('[InAppPurchaseRepository] fetchProducts: ${response.error}');
+    if (kDebugMode) {
+      debugPrint(
+        '[InAppPurchaseRepository] fetchProducts $skus → '
+        '${response.productDetails.map((p) => p.id).toList()} '
+        'notFound=${response.notFoundIDs} '
+        'error=${response.error?.code}/${response.error?.message}',
+      );
     }
 
     final result = <IapProduct>[];
