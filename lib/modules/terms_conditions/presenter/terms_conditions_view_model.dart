@@ -1,12 +1,13 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:oflite/modules/terms_conditions/presenter/strings/terms_conditions_pt_string.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 enum TermsConditionsState { idle, loading, loaded, error }
 
 class TermsConditionsViewModel extends ChangeNotifier {
   static const String routeName = '/terms-and-conditions';
-  static const String _pageUrl = 'https://orcamentofacilbr.wordpress.com/';
+  static const String _pageUrl =
+      'https://orcamentofacil-lite.web.app/politica-de-privacidade';
 
   late final WebViewController controller;
 
