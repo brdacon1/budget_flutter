@@ -1,150 +1,125 @@
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_status_chip.dart';
+import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/button/action_button.dart';
-import 'package:oflite/shared/common/widgets/label/expansion_card_label.dart';
 
 class BudgetListCard extends StatelessWidget {
   const BudgetListCard({
     super.key,
     required this.item,
+    required this.selected,
     required this.moneyConvert,
-    required this.onDelete,
-    required this.onOpen,
-    required this.onDuplicate,
+    required this.onTap,
+    required this.onMore,
   });
 
   final CustomerInfo item;
+  final bool selected;
   final ConvertCoinRepository moneyConvert;
-  final VoidCallback onDelete;
-  final VoidCallback onOpen;
-  final VoidCallback onDuplicate;
-
-  Widget _buildLabels() {
-    return Column(
-      children: [
-        ExpansionCardLabel(
-          nameText: 'Data do orçamento:',
-          textData: '${item.data}',
-          horizontalPadding: 12,
-          verticalPadding: 5,
-        ),
-        ExpansionCardLabel(
-          nameText: 'Status:',
-          textData: "${item.status}",
-          horizontalPadding: 12,
-          verticalPadding: 5,
-        ),
-        ExpansionCardLabel(
-          nameText: 'Telefone:',
-          textData: '${item.phone}',
-          horizontalPadding: 12,
-          verticalPadding: 5,
-        ),
-        ExpansionCardLabel(
-          nameText: 'Valor do orçamento:',
-          textData: moneyConvert.convertFromDouble(item.totalValue!),
-          horizontalPadding: 12,
-          verticalPadding: 5,
-        ),
-      ],
-    );
-  }
+  final VoidCallback onTap;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
+    final name = item.customerName ?? '';
+    final initial = name.isEmpty ? '?' : name[0].toUpperCase();
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          trailing: const SizedBox.shrink(),
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          leading: const CircleAvatar(
-            backgroundColor: bgColor,
-            child: Icon(
-              Icons.account_balance_wallet_outlined,
-              color: whiteColor,
-            ),
-          ),
-          title: Text(
-            "${item.customerName}",
-            maxLines: 2,
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            "Nº orçamento: ${item.id}",
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-            ),
-          ),
-          children: <Widget>[
-            const Divider(thickness: 1.0, height: 1.0),
-            _buildLabels(),
-            Padding(
-              padding: const EdgeInsets.only(
-                bottom: 12,
-                top: 12,
-                left: 16,
-                right: 16,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ActionButton(
-                        icon:
-                            item.checkBox!
-                                ? Icons.check_circle_outline
-                                : Icons.delete_outline_rounded,
-                        label: item.checkBox! ? 'Select' : 'Excluir',
-                        onPressed: onDelete,
-                        backgroundColor:
-                            item.checkBox!
-                                ? buttonColor.withValues(alpha: 0.20)
-                                : whiteColor.withValues(alpha: 0.08),
+      child: Material(
+        color: secondaryColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: selected ? buttonColor : cardBorderColor),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onMore,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(13, 13, 4, 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: buttonColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child:
+                      selected
+                          ? const Icon(Icons.check_rounded, color: buttonColor)
+                          : Text(
+                            initial,
+                            style: const TextStyle(
+                              color: buttonColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: whiteColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${BudgetStrings.budgetNumber} ${item.id}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: whiteColor, fontSize: 12),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.data ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: mutedTextColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      moneyConvert.convertFromDouble(item.totalValue ?? 0),
+                      style: const TextStyle(
+                        color: whiteColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ActionButton(
-                        icon: Icons.copy_rounded,
-                        label: 'Duplicar',
-                        onPressed: onDuplicate,
-                      ),
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: ActionButton(
-                        icon: Icons.open_in_new_rounded,
-                        label: 'Abrir',
-                        onPressed: onOpen,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 4),
+                    BudgetListStatusChip(status: item.status),
+                  ],
+                ),
+                IconButton(
+                  onPressed: onMore,
+                  icon: const Icon(Icons.more_vert, color: mutedTextColor),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

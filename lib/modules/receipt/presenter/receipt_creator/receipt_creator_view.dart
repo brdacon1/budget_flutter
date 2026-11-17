@@ -2,9 +2,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/components/receipt_creator_form.dart';
-import 'package:oflite/modules/receipt/presenter/receipt_creator/components/receipt_creator_save_button.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_creator/components/receipt_creator_summary_card.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_creator/receipt_creator_view_model.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 /// Tela de criação/edição de recibo.
@@ -15,7 +17,8 @@ import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart
 ///
 /// A View apenas compõe a estrutura (header + formulário + botão) e delega
 /// as ações ao ViewModel. Os blocos visuais repetidos vivem em `components/`
-/// ([ReceiptCreatorHeader], [ReceiptCreatorForm], [ReceiptCreatorSaveButton]).
+/// ([ReceiptCreatorSummaryCard], [ReceiptCreatorForm]) e em
+/// `shared/common/widgets/form/` ([AppFormSaveButton]).
 ///
 /// Como o [Receipt] é imutável (padrão canônico, seção 10 do SDD), o recibo
 /// recém-criado é propagado às abas irmãs via [onReceiptCreated] (callback do
@@ -77,44 +80,54 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          // O conteúdo preenche apenas a área do body do Scaffold pai (a aba
-          // atual dentro do ReceiptTabView). Antes havia um SizedBox(height: he)
-          // forçando a altura cheia da tela dentro de um SingleChildScrollView,
-          // o que fazia o formulário/botão extrapolarem por cima da tab bar.
-          return Column(
-            children: <Widget>[
-              AppHeaderSecondTitle(
-                titlePage: _viewModel.titlePage,
-                secondTitle: 'Pagamentos do orçamento',
-                onBack: () => Navigator.pop(context, true),
-                isBottomPadding: false,
-              ),
-              Expanded(
-                child: ListView(
-                  children: <Widget>[
-                    ReceiptCreatorForm(
-                      descricaoController: _viewModel.descricaoText,
-                      idController: _viewModel.idText,
-                      dataController: _viewModel.dataText,
-                      fieldVisible: _viewModel.fieldVisible,
-                      subtitle: _viewModel.formSubtitle,
-                      selectedField: _viewModel.selectedField,
-                      onSelectField: _viewModel.selectField,
-                    ),
-                    ReceiptCreatorSaveButton(
-                      label: _viewModel.nameButton,
-                      onPressed: () => _viewModel.save(context),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: AnimatedBuilder(
+          animation: _viewModel,
+          builder: (context, _) {
+            final receipt = _viewModel.receipt;
+            return Column(
+              children: <Widget>[
+                AppHeaderSecondTitle(
+                  titlePage: _viewModel.titlePage,
+                  secondTitle: ReceiptPtString.subtitle,
+                  onBack: () => Navigator.pop(context, true),
+                  isBottomPadding: false,
                 ),
-              ),
-            ],
-          );
-        },
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.only(top: 16, bottom: 16),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: <Widget>[
+                      if (_viewModel.isEditing)
+                        ReceiptCreatorSummaryCard(
+                          id: receipt.id ?? '',
+                          date: receipt.data ?? '-',
+                          total: receipt.valorTotal ?? 0,
+                        ),
+                      ReceiptCreatorForm(
+                        descricaoController: _viewModel.descricaoText,
+                        descricaoNode: _viewModel.descricaoNode,
+                        descricaoError: _viewModel.descricaoError,
+                        onSubmitted: () => _viewModel.save(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                  child: AppFormSaveButton(
+                    label: _viewModel.nameButton,
+                    highlighted: _viewModel.isDirty,
+                    loading: _viewModel.saving,
+                    onPressed: () => _viewModel.save(context),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

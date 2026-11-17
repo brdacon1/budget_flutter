@@ -19,6 +19,22 @@
         "destination": "/index.html"
       },
       {
+        "source": "/termos-de-uso",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/politica-de-privacidade",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/terms-of-use",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/index.html"
+      },
+      {
         "source": "/orcamento/**",
         "destination": "/index.html"
       },

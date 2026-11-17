@@ -1,51 +1,57 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 
+/// Barra de totais fixa acima da tab bar: total em destaque + detalhamento.
 class BudgetListItemsTotalBar extends StatelessWidget {
-  const BudgetListItemsTotalBar({super.key, required this.viewModel});
+  const BudgetListItemsTotalBar({
+    super.key,
+    required this.total,
+    required this.products,
+    required this.services,
+  });
 
-  final dynamic viewModel;
+  /// Valores já formatados em moeda.
+  final String total;
+  final String products;
+  final String services;
 
   @override
   Widget build(BuildContext context) {
-    final ConvertCoinRepository moneyConvert = viewModel.moneyConvert;
+    final muted = GoogleFonts.heebo(color: mutedTextColor, fontSize: 12);
     return Container(
-      height: 65.0,
-      color: buttonColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      decoration: const BoxDecoration(
+        color: secondaryColor,
+        border: Border(top: BorderSide(color: sheetHandleColor)),
+      ),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Text(
-              "Total Serviços: ${moneyConvert.convertFromDouble(viewModel.totalServices)}",
-              style: const TextStyle(
-                color: bgColor,
-                fontWeight: FontWeight.bold,
-              ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Produtos  $products', style: muted),
+                const SizedBox(height: 2),
+                Text('Serviços  $services', style: muted),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Text(
-              "Total produtos: ${moneyConvert.convertFromDouble(viewModel.totalProducts)}",
-              style: const TextStyle(
-                color: bgColor,
-                fontWeight: FontWeight.bold,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Total', style: muted),
+              Text(
+                total,
+                style: GoogleFonts.heebo(
+                  color: buttonColor,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Text(
-              "Total orçamento: ${moneyConvert.convertFromDouble(viewModel.totalBudget)}",
-              style: const TextStyle(
-                color: bgColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
         ],
       ),

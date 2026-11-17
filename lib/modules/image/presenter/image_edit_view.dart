@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
@@ -11,6 +12,7 @@ import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/data/datasource/pdf_remote_datasource.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 
 import 'image_edit_view_model.dart';
 
@@ -151,12 +153,28 @@ class _ImageEditView extends State<ImageEditView> {
     }
   }
 
+  /// Pergunta se o logotipo vem da câmera ou da galeria e repassa ao ViewModel.
+  Future<void> _selectImageSource() async {
+    final camera = ImageStrings.imageSourceCamera;
+    final gallery = ImageStrings.imageSourceGallery;
+    final choice = await showOptionBottomModal(
+      context,
+      title: ImageStrings.imageSourceTitle,
+      values: [camera, gallery],
+    );
+    if (choice == null) return;
+
+    await _viewModel.pickImage(
+      choice == camera ? ImageSource.camera : ImageSource.gallery,
+    );
+  }
+
   Widget _menu() {
     if (!_viewModel.hasImage) {
       return FloatingActionButton(
         heroTag: "Upload",
         onPressed: () async {
-          await _viewModel.pickImage();
+          await _selectImageSource();
         },
         backgroundColor: buttonColor,
         tooltip: ImageStrings.tooltipUpload,
@@ -285,7 +303,7 @@ class _ImageEditView extends State<ImageEditView> {
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 child: TextButton(
                   onPressed: () async {
-                    await _viewModel.pickImage();
+                    await _selectImageSource();
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: buttonColor,

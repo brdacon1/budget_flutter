@@ -29,9 +29,10 @@ class ImageEditViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> pickImage() async {
+  /// Seleciona o logotipo pela [source] escolhida: câmera ou galeria.
+  Future<void> pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
       this.pickedFile = pickedFile;

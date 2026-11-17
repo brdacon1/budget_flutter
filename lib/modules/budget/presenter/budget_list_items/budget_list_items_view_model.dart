@@ -8,29 +8,33 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
-TextEditingController searchController = TextEditingController();
-
 class BudgetListItemsViewModel extends ChangeNotifier {
   final CustomerInfo item;
 
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final ProductPriceRepository _productRepository =
       getIt<ProductPriceRepository>();
+  final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   BudgetListItemsViewModel({required this.item});
 
-  var budgets = <ItemsBudget>[];
-  var deleteItens = <ItemsBudget>[];
+  final searchController = TextEditingController();
 
+  List<ItemsBudget> budgets = <ItemsBudget>[];
+
+  /// Itens marcados pelo check circular para remoção.
+  final Set<ItemsBudget> selected = <ItemsBudget>{};
+
+  bool loading = true;
+  bool deleting = false;
   ItemsBudget newItemsBudget = ItemsBudget();
-  ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
-  bool deleteVisible = false;
-  bool checkBoxAppear = false;
   double totalProducts = 0;
   double totalServices = 0;
   double totalBudget = 0;
-  int countProduct = 0;
-  int countService = 0;
+
+  bool get selectionMode => selected.isNotEmpty;
+
+  bool isSelected(ItemsBudget i) => selected.contains(i);
 
   Future<void> getListItens() async {
     final result = await _budgetRepository.fetchBudgetItems(
@@ -38,111 +42,92 @@ class BudgetListItemsViewModel extends ChangeNotifier {
       forceRefresh: true,
     );
 
-    // Cópia própria: `budgets` alimenta o ListView.builder da View e não pode
-    // ser a mesma instância do cache do repositório, que é mutada por
-    // save/delete (ex.: lista de preço) fora do ciclo de build.
+    // Cópia própria: não compartilhar a instância do cache do repositório.
     budgets =
         result is Ok<List<ItemsBudget>>
             ? List<ItemsBudget>.of(result.value)
             : <ItemsBudget>[];
-    for (var o in budgets) {
-      o.checkBox = false;
-    }
+    selected.clear();
+    loading = false;
 
     totalProducts = 0;
     totalServices = 0;
     totalBudget = 0;
-    countProduct = 0;
-    countService = 0;
-
-    for (int index = 0; index < budgets.length; index++) {
-      double total = budgets[index].total ?? 0;
-      if (ItemCategory.fromValue(budgets[index].category) == ItemCategory.products) {
+    for (final b in budgets) {
+      final total = b.total ?? 0;
+      final category = ItemCategory.fromValue(b.category);
+      if (category == ItemCategory.products) {
         totalProducts += total;
-        countProduct++;
-      } else if (ItemCategory.fromValue(budgets[index].category) == ItemCategory.services) {
+      } else if (category == ItemCategory.services) {
         totalServices += total;
-        countService++;
       }
       totalBudget += total;
     }
+
     final currentSelectBudget = _budgetRepository.selectBudget.value;
     if (currentSelectBudget != null &&
         currentSelectBudget.totalValue != totalBudget) {
-      _budgetRepository.selectBudget.value = item.copyWith(
-        totalValue: totalBudget,
-      );
-      // Atualiza o orçamento com o total recalculado
       final budgetUpdate = item.copyWith(totalValue: totalBudget);
+      _budgetRepository.selectBudget.value = budgetUpdate;
       await _budgetRepository.updateBudget(budgetUpdate);
     }
 
     notifyListeners();
   }
 
-  Future<bool> deleteData() async {
+  List<ItemsBudget> get filteredItems {
+    final q = searchController.text.trim().toLowerCase();
+    if (q.isEmpty) return budgets;
+    return budgets
+        .where((x) => (x.description ?? '').toLowerCase().contains(q))
+        .toList();
+  }
+
+  void onSearchTextChanged(String _) => notifyListeners();
+
+  void toggleSelect(ItemsBudget i) {
+    if (!selected.remove(i)) selected.add(i);
+    notifyListeners();
+  }
+
+  void selectAllFiltered() {
+    final items = filteredItems;
+    if (items.every(selected.contains)) {
+      selected.removeAll(items);
+    } else {
+      selected.addAll(items);
+    }
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    selected.clear();
+    notifyListeners();
+  }
+
+  /// Remove os itens selecionados. Retorna `true` em caso de sucesso.
+  Future<bool> deleteSelected() async {
+    if (selected.isEmpty || deleting) return false;
+    deleting = true;
+    notifyListeners();
     final result = await _budgetRepository.deleteBudgetItems(
       item.id!,
-      deleteItens,
+      selected.toList(),
     );
+    deleting = false;
     if (result is Ok<void>) {
-      budgets = budgets.where((i) => !deleteItens.contains(i)).toList();
-      deleteItens.clear();
-      deleteVisible = false;
-    }
-    return result is Ok<void>;
-  }
-
-  void onSearchTextChanged(String value) {
-    notifyListeners();
-  }
-
-  List<ItemsBudget> getFilteredData() {
-    if (searchController.text.isEmpty) {
-      return budgets;
-    } else {
-      return budgets
-          .where(
-            (x) => x.description!.toLowerCase().contains(
-              searchController.text.toLowerCase(),
-            ),
-          )
-          .toList();
-    }
-  }
-
-  void toggleDeleteItem(int index) {
-    if (!getFilteredData()[index].checkBox!) {
-      getFilteredData()[index].checkBox = true;
-      getFilteredData()[index].selectProduct = false;
-      getFilteredData()[index].indice = index;
-      deleteItens.add(getFilteredData()[index]);
-      if (deleteItens.isNotEmpty) {
-        deleteVisible = true;
-      }
+      await getListItens();
+      return true;
     }
     notifyListeners();
+    return false;
   }
 
-  void removeDeleteItem(ItemsBudget item) {
-    getFilteredData()[item.indice].checkBox = false;
-    deleteItens.remove(item);
-    if (deleteItens.isEmpty) {
-      deleteVisible = false;
-      checkBoxAppear = false;
-    }
-    notifyListeners();
-  }
+  Future<int> getProductCount() => _productRepository.getProductCount();
 
-  void clearDeleteItens() {
-    deleteItens.clear();
-    deleteVisible = false;
-    checkBoxAppear = false;
-    notifyListeners();
-  }
-
-  Future<int> getProductCount() async {
-    final result = await _productRepository.getProductCount();
-    return result;
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }

@@ -1,146 +1,107 @@
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/shared/common/widgets/button/action_button.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-/// Card de recibo (ExpansionTileCard) da lista de recibos.
+/// Card de recibo da lista de recibos (mesmo padrão do `BudgetListCard`).
 ///
-/// Component `Stateless` puro — recebe o item, o utilitário de moeda e os
-/// callbacks de excluir/abrir. **Não** acessa services nem o ViewModel
-/// inteiro (segue o padrão do SDD: dados + callbacks). Espelha fielmente o
-/// layout original da View, inclusive os rótulos "Excluir"/"Abrir".
+/// Toque abre o recibo; toque longo ou `⋮` abre o modal de ações.
 class ReceiptCard extends StatelessWidget {
   const ReceiptCard({
     super.key,
     required this.item,
     required this.moneyConvert,
-    required this.onDelete,
-    required this.onOpen,
+    required this.onTap,
+    required this.onMore,
   });
 
   final Receipt item;
   final ConvertCoinRepository moneyConvert;
-  final VoidCallback onDelete;
-  final VoidCallback onOpen;
-
-  Widget _buildButtons() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12, top: 12, left: 16, right: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: SizedBox(
-                height: 46.0,
-                child: ActionButton(
-                  icon: Icons.delete_outline_rounded,
-                  label: ReceiptPtString.deleteLabel,
-                  onPressed: onDelete,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: SizedBox(
-                height: 46.0,
-                child: ActionButton(
-                  icon: Icons.open_in_new_rounded,
-                  label: ReceiptPtString.openLabel,
-                  onPressed: onOpen,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final VoidCallback onTap;
+  final VoidCallback onMore;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          trailing: const SizedBox.shrink(),
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          leading: const CircleAvatar(
-            backgroundColor: bgColor,
-            child: Icon(Icons.receipt_long_rounded, color: whiteColor),
-          ),
-          title: Text(
-            item.descricao!,
-            maxLines: 2,
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            '${ReceiptPtString.totalValueLabel}'
-            '${moneyConvert.convertFromDouble(item.valorTotal!)}',
-            style: const TextStyle(
-              color: whiteColor,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
-            ),
-          ),
-          children: <Widget>[
-            const Divider(
-              thickness: 1.0,
-              height: 1.0,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  '${ReceiptPtString.dateLabel}${item.data}',
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
+      child: Material(
+        color: secondaryColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: cardBorderColor),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onMore,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(13, 13, 4, 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: buttonColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long_rounded,
+                    color: buttonColor,
                   ),
                 ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
-                ),
-                child: Text(
-                  '${ReceiptPtString.quantityLabel}${item.id}',
-                  style: const TextStyle(
-                    color: whiteColor,
-                    letterSpacing: 0.5,
-                    fontSize: 12.0,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.descricao ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: whiteColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${ReceiptPtString.receiptNumber} ${item.id}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: whiteColor, fontSize: 12),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.data ?? '',
+                        style: const TextStyle(
+                          color: mutedTextColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  moneyConvert.convertFromDouble(item.valorTotal ?? 0),
+                  style: const TextStyle(
+                    color: whiteColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                IconButton(
+                  onPressed: onMore,
+                  icon: const Icon(Icons.more_vert, color: mutedTextColor),
+                ),
+              ],
             ),
-            _buildButtons(),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-

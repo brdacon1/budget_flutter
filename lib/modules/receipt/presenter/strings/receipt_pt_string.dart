@@ -47,6 +47,46 @@ class ReceiptPtString {
   static String get descriptionHint =>
       _isPt ? 'Digite nome do recibo...' : 'Type the receipt name...';
 
+  static String get formCardTitleSimple => _isPt ? 'Recibo' : 'Receipt';
+
+  static String get descriptionLabel =>
+      _isPt ? 'Descrição do recibo *' : 'Receipt description *';
+
+  static String get descriptionExample =>
+      _isPt ? 'Antecipação de transporte' : 'Transport advance';
+
+  static String get descriptionRequired =>
+      _isPt ? 'Informe a descrição do recibo' : 'Enter the receipt description';
+
+  static String get summaryLabel => _isPt ? 'Recibo' : 'Receipt';
+
+  static String createdOn(String date) =>
+      _isPt ? 'Criado em $date' : 'Created on $date';
+
+  static String get continueButton => _isPt ? 'Continuar' : 'Continue';
+
+  static String get saveChangesButton =>
+      _isPt ? 'Salvar alterações' : 'Save changes';
+
+  static String get saveErrorTitle =>
+      _isPt ? 'Não foi possível salvar' : "Couldn't save";
+
+  static String get saveErrorMessage =>
+      _isPt
+          ? 'Verifique sua conexão e tente novamente.'
+          : 'Check your connection and try again.';
+
+  static String get createdNextStep =>
+      _isPt
+          ? 'Recibo criado. Agora adicione os pagamentos.'
+          : 'Receipt created. Now add the payments.';
+
+  static String get changesSaved =>
+      _isPt ? 'Alterações salvas' : 'Changes saved';
+
+  static String get changesSavedMessage =>
+      _isPt ? 'Dados do recibo atualizados.' : 'Receipt data updated.';
+
   // --- Botões ---
   static String get saveButton => _isPt ? 'SALVAR' : 'SAVE';
 
@@ -84,6 +124,22 @@ class ReceiptPtString {
   static String get dateLabel => _isPt ? 'Data do recibo: ' : 'Receipt date: ';
 
   static String get quantityLabel => _isPt ? 'Quantidade: ' : 'Quantity: ';
+
+  static String get listTitle => _isPt ? 'Recibos' : 'Receipts';
+
+  static String get listSubtitle =>
+      _isPt ? 'Recibos do orçamento' : 'Budget receipts';
+
+  static String get emptyList =>
+      _isPt ? 'O orçamento não possui recibos' : 'This budget has no receipts';
+
+  static String get newReceipt => _isPt ? 'Novo recibo' : 'New receipt';
+
+  static String get receiptNumber => _isPt ? 'Nº' : 'No.';
+
+  static String get detailDate => _isPt ? 'Data' : 'Date';
+
+  static String get detailValue => _isPt ? 'Valor' : 'Value';
 
   // --- Abas ---
   static String get tabReceipt => _isPt ? 'Recibo' : 'Receipt';

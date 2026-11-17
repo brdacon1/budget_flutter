@@ -3,6 +3,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_list/components/modals/receipt_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/receipt_card.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
@@ -121,13 +122,27 @@ class _ReceiptListView extends State<ReceiptListView> {
     await _viewModel.refresh();
   }
 
+  Future<void> _openActions(int index) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: transparentColor,
+      builder:
+          (_) => ReceiptListActionsBottomModalWidget(
+            item: _viewModel.foundPayment[index],
+            moneyConvert: _viewModel.moneyConvert,
+            onDelete: () => _viewModel.deleteReceiptCommand.execute(index),
+            onOpen: () => _openReceipt(index),
+          ),
+    );
+  }
+
   Widget _buildListReceipt() {
     if (_viewModel.foundPayment.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
         child: Text(
-          "O orçamento não possui recibos",
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          ReceiptPtString.emptyList,
+          style: const TextStyle(fontSize: 14, color: emptyTextColor),
           textAlign: TextAlign.center,
         ),
       );
@@ -135,19 +150,19 @@ class _ReceiptListView extends State<ReceiptListView> {
 
     return Expanded(
       child: RefreshIndicator(
-        color: Colors.cyan[50],
+        color: refreshIndicatorColor,
         backgroundColor: bgColor,
         onRefresh: _viewModel.refresh,
         child: ListView.builder(
           shrinkWrap: true,
-          padding: const EdgeInsets.only(bottom: 150, left: 16, right: 16),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
           itemCount: _viewModel.foundPayment.length,
           itemBuilder: (context, index) {
             return ReceiptCard(
               item: _viewModel.foundPayment[index],
               moneyConvert: _viewModel.moneyConvert,
-              onDelete: () => _viewModel.deleteReceiptCommand.execute(index),
-              onOpen: () => _openReceipt(index),
+              onTap: () => _openReceipt(index),
+              onMore: () => _openActions(index),
             );
           },
         ),
@@ -164,11 +179,12 @@ class _ReceiptListView extends State<ReceiptListView> {
           onPressed: () => _viewModel.addReceipt(context),
           backgroundColor: buttonColor,
           elevation: 4,
-          icon: const Icon(Icons.add, color: Colors.black, size: 20),
-          label: const Text(
-            'Novo Recibo',
-            style: TextStyle(
-              color: Colors.black,
+          shape: const StadiumBorder(),
+          icon: const Icon(Icons.add, color: blackColor, size: 20),
+          label: Text(
+            ReceiptPtString.newReceipt,
+            style: const TextStyle(
+              color: blackColor,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -189,8 +205,8 @@ class _ReceiptListView extends State<ReceiptListView> {
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               AppHeaderSecondTitle(
-                titlePage: 'Recibos',
-                secondTitle: 'Recibos do orçamento',
+                titlePage: ReceiptPtString.listTitle,
+                secondTitle: ReceiptPtString.listSubtitle,
                 onBack: () => Navigator.pop(context, true),
               ),
               _buildListReceipt(),

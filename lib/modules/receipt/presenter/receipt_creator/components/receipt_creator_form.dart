@@ -1,179 +1,45 @@
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
-import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_field.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_section_card.dart';
 
-/// Formulário (ExpansionTileCard) de criação/edição de recibo.
+/// Formulário de criação/edição de recibo (ARCHITECTURE §17).
 ///
-/// Component `Stateless` puro — recebe os controllers, o estado de seleção de
-/// campo, a visibilidade dos campos de número/data e callbacks. **Não**
-/// acessa services nem o ViewModel inteiro (segue o padrão do SDD: dados +
-/// callbacks).
-///
-/// Espelha fielmente o layout original da View, inclusive o destaque de campo
-/// focado (que usa [selectedField] — visualmente neutro, mas preservado para
-/// manter o comportamento original).
+/// Component `Stateless` puro — recebe controller, erro e callbacks.
+/// Nº e data **não** aparecem aqui: no modo editar eles vão para o
+/// [ReceiptCreatorSummaryCard] como texto informativo (§17.5).
 class ReceiptCreatorForm extends StatelessWidget {
   const ReceiptCreatorForm({
     super.key,
     required this.descricaoController,
-    required this.idController,
-    required this.dataController,
-    required this.fieldVisible,
-    required this.subtitle,
-    required this.selectedField,
-    required this.onSelectField,
+    required this.descricaoNode,
+    this.descricaoError,
+    this.onSubmitted,
   });
 
   final TextEditingController descricaoController;
-  final TextEditingController idController;
-  final TextEditingController dataController;
-  final bool fieldVisible;
-  final String subtitle;
-  final ReceiptFieldType? selectedField;
-  final ValueChanged<ReceiptFieldType> onSelectField;
+  final FocusNode descricaoNode;
+  final String? descricaoError;
+  final VoidCallback? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
-    final double we = MediaQuery.of(context).size.width;
-    final double he = MediaQuery.of(context).size.height;
-
-    // Cores do estado original (ambas brancas → destaque visualmente neutro,
-    // preservado para não alterar o comportamento).
-    const Color enableTxt = Colors.white;
-    const Color disableTxt = Colors.white;
-    final bool isDescription = selectedField == ReceiptFieldType.isDescription;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          initiallyExpanded: true,
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          animateTrailing: true,
-          trailing: const Icon(Icons.expand_more, color: whiteColor),
-          leading: const CircleAvatar(
-            backgroundColor: bgColor,
-            child: Icon(Icons.receipt_long_rounded, color: whiteColor),
-          ),
-          title: Text(
-            ReceiptPtString.formCardTitle,
-            style: GoogleFonts.heebo(
-              color: whiteColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              letterSpacing: 1,
-            ),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: GoogleFonts.heebo(
-              color: whiteColor,
-              fontWeight: FontWeight.normal,
-              fontSize: 13,
-              letterSpacing: 1,
-            ),
-          ),
-          children: <Widget>[
-            Visibility(
-              visible: fieldVisible,
-              child: Container(
-                width: we * 0.8,
-                height: he * 0.078,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: isDescription ? bgColor : bgColor,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: idController,
-                  onTap: () => onSelectField(ReceiptFieldType.isDescription),
-                  decoration: InputDecoration(
-                    enabled: false,
-                    enabledBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.confirmation_number_outlined,
-                      color: isDescription ? enableTxt : disableTxt,
-                    ),
-                    hintText: ReceiptPtString.numberHint,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
-                  style: TextStyle(
-                    color: isDescription ? enableTxt : disableTxt,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: he * 0.02),
-            Visibility(
-              visible: fieldVisible,
-              child: Container(
-                width: we * 0.8,
-                height: he * 0.078,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: isDescription ? bgColor : bgColor,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: dataController,
-                  onTap: () => onSelectField(ReceiptFieldType.isDescription),
-                  decoration: InputDecoration(
-                    enabled: false,
-                    enabledBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.calendar_month_outlined,
-                      color: isDescription ? enableTxt : disableTxt,
-                    ),
-                    hintText: ReceiptPtString.dateHint,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
-                  style: TextStyle(
-                    color: isDescription ? enableTxt : disableTxt,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Container(
-                width: we * 0.80,
-                height: he * 0.075,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: isDescription ? bgColor : bgColor,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: descricaoController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 1,
-                  onTap: () => onSelectField(ReceiptFieldType.isDescription),
-                  decoration: InputDecoration(
-                    enabledBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    hintText: ReceiptPtString.descriptionHint,
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
-                  style: TextStyle(
-                    color: isDescription ? enableTxt : disableTxt,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
+    return AppFormSectionCard(
+      icon: Icons.receipt_long_outlined,
+      title: ReceiptPtString.formCardTitleSimple,
+      children: [
+        AppFormField(
+          label: ReceiptPtString.descriptionLabel,
+          hintText: ReceiptPtString.descriptionExample,
+          prefixIcon: Icons.edit_note_outlined,
+          controller: descricaoController,
+          focusNode: descricaoNode,
+          errorText: descricaoError,
+          textCapitalization: TextCapitalization.sentences,
+          textInputAction: TextInputAction.done,
+          onSubmitted: onSubmitted,
         ),
-      ),
+      ],
     );
   }
 }
