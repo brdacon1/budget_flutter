@@ -1,38 +1,33 @@
-import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/injection.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
-
 
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+
+enum CepLookupState { idle, loading, found, notFound }
 
 class BudgetCreatorViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final CustomerInfo item;
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   BudgetCreatorViewModel({required this.item});
 
-  CustomerInfoEnum? selected;
-  String? nameButton;
-  String? titlePage;
-  String? titleBox;
-  bool fieldVisible = false;
-  bool fieldFone = true;
+  /// Valores persistidos — fixos (nunca traduzir; só o label muda).
+  static const statusOptions = ['PENDENTE', 'APROVADO', 'REPROVADO', 'FINALIZADO'];
+  static const _defaultStatus = 'PENDENTE';
+
+  String? nameError;
+  CepLookupState cepState = CepLookupState.idle;
+  String _snapshot = '';
 
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  final dataController = TextEditingController();
-  final idController = TextEditingController();
   final cepController = TextEditingController();
   final ruaController = TextEditingController();
   final cityController = TextEditingController();
@@ -46,50 +41,59 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final cityNode = FocusNode();
   final bairroNode = FocusNode();
 
-  var maskFormatter = MaskTextInputFormatter(
+  final maskFormatter = MaskTextInputFormatter(
       mask: '(##) #####-####',
       filter: {"#": RegExp(r'[0-9]')},
       type: MaskAutoCompletionType.lazy);
 
-  var maskCep = MaskTextInputFormatter(
+  final maskCep = MaskTextInputFormatter(
       mask: '#####-###',
       filter: {"#": RegExp(r'[0-9]')},
       type: MaskAutoCompletionType.lazy);
 
-  var maskDate = MaskTextInputFormatter(
-      mask: '',
-      filter: {"#": RegExp(r'[0-9]')},
-      type: MaskAutoCompletionType.lazy);
+  bool get isEditing => (item.id ?? '').isNotEmpty;
 
-  final GlobalKey<ExpansionTileCardState> cardA = GlobalKey<ExpansionTileCardState>();
+  String get titlePage => isEditing ? 'Editar orçamento' : 'Criar orçamento';
+  String get nameButton => isEditing ? 'Salvar alterações' : 'Continuar';
 
-  bool get _isEditing => (item.id ?? '').isNotEmpty;
-  bool get isEditing => _isEditing;
+  List<TextEditingController> get _editable => [
+        nameController,
+        phoneController,
+        statusController,
+        cepController,
+        ruaController,
+        cityController,
+        bairroController,
+      ];
 
-  void _setupUiState() {
-    final editing = _isEditing;
-    nameButton = editing ? 'Atualizar' : 'Continuar';
-    titlePage = editing ? 'Editar orçamento' : 'Criar orçamento';
-    titleBox = editing ? 'Clique para editar' : 'Clique para inserir';
-    fieldVisible = editing;
-  }
+  String _currentValues() => _editable.map((c) => c.text).join('|');
 
-  void _setNullableController(TextEditingController controller, String? value) {
-    controller.text = (value == null || value == 'null') ? '' : value;
-  }
+  /// Há alterações não salvas? No modo criar o botão fica sempre destacado.
+  bool get isDirty => !isEditing || _currentValues() != _snapshot;
+
+  void _takeSnapshot() => _snapshot = _currentValues();
+
+  String _clean(String? value) =>
+      (value == null || value == 'null') ? '' : value;
 
   void _fillControllers() {
-    nameController.text = item.customerName ?? '';
-    dataController.text = item.data ?? '';
-    idController.text = item.id ?? '';
-    _setNullableController(ruaController, item.street);
-    _setNullableController(cityController, item.city);
-    _setNullableController(bairroController, item.neighborhood);
-    _setNullableController(statusController, item.status);
-    phoneController.text =
-        (item.phone == null) ? '' : maskFormatter.maskText(item.phone.toString());
-    cepController.text =
-        (item.zip == null) ? '' : maskCep.maskText(item.zip.toString());
+    nameController.text = _clean(item.customerName);
+    ruaController.text = _clean(item.street);
+    cityController.text = _clean(item.city);
+    bairroController.text = _clean(item.neighborhood);
+    final status = _clean(item.status);
+    statusController.text = status.isEmpty ? _defaultStatus : status;
+    final phone = _clean(item.phone);
+    phoneController.text = phone.isEmpty ? '' : maskFormatter.maskText(phone);
+    final zip = _clean(item.zip);
+    cepController.text = zip.isEmpty ? '' : maskCep.maskText(zip);
+  }
+
+  void _onFieldChanged() {
+    if (nameError != null && nameController.text.trim().isNotEmpty) {
+      nameError = null;
+    }
+    notifyListeners();
   }
 
   void _applyToItem(CustomerInfo source) {
@@ -109,15 +113,6 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       ..totalValue = source.totalValue;
   }
 
-  void _enterEditMode(CustomerInfo budget) {
-    nameButton = 'Atualizar';
-    titlePage = 'Editar orçamento';
-    titleBox = 'Clique para editar';
-    fieldVisible = true;
-    dataController.text = budget.data ?? '';
-    idController.text = budget.id ?? '';
-  }
-
   CustomerInfo _buildBudget(bool isUpdate, String formattedDate) {
     return CustomerInfo(
       id: isUpdate ? item.id : DateTime.now().millisecondsSinceEpoch.toString(),
@@ -126,7 +121,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       email: item.email,
       address: item.address,
       generated: item.generated,
-      customerName: nameController.text,
+      customerName: nameController.text.trim(),
       phone: phoneController.text,
       status: statusController.text,
       zip: cepController.text,
@@ -137,61 +132,49 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   }
 
   void init() {
-    try {
-      _setupUiState();
-      _fillControllers();
-      notifyListeners();
-    } catch (_) {}
-  }
-
-  Future<void> saveBudget(CustomerInfo budget) async {
-    await _budgetRepository.saveBudget(budget);
-  }
-
-  Future<void> updateItensDADOS(CustomerInfo budget) async {
-    await _budgetRepository.updateBudget(budget);
-  }
-
-  void selectField(CustomerInfoEnum field) {
-    selected = field;
-    notifyListeners();
-  }
-
-  void setFieldFone(bool value) {
-    fieldFone = value;
-    notifyListeners();
-  }
-
-  Future<void> onCepChanged(String value) async {
-    if (value.length == 9) {
-      final adress = await getIt<CepRepository>().getAddress(value);
-      ruaController.text = adress.logradouro!.toUpperCase();
-      cityController.text = adress.localidade!.toUpperCase();
-      bairroController.text = adress.bairro!.toUpperCase();
-      notifyListeners();
+    _fillControllers();
+    _takeSnapshot();
+    for (final c in _editable) {
+      c.addListener(_onFieldChanged);
     }
+    notifyListeners();
   }
 
   void setStatus(String value) {
     statusController.text = value;
+  }
+
+  Future<void> onCepChanged(String value) async {
+    if (value.length != 9) {
+      if (cepState != CepLookupState.idle) {
+        cepState = CepLookupState.idle;
+        notifyListeners();
+      }
+      return;
+    }
+    cepState = CepLookupState.loading;
+    notifyListeners();
+    try {
+      final address = await getIt<CepRepository>().getAddress(value);
+      final street = address.logradouro ?? '';
+      final city = address.localidade ?? '';
+      final district = address.bairro ?? '';
+      if (street.isEmpty && city.isEmpty) {
+        cepState = CepLookupState.notFound;
+      } else {
+        if (street.isNotEmpty) ruaController.text = street.toUpperCase();
+        if (city.isNotEmpty) cityController.text = city.toUpperCase();
+        if (district.isNotEmpty) bairroController.text = district.toUpperCase();
+        cepState = CepLookupState.found;
+      }
+    } catch (_) {
+      cepState = CepLookupState.notFound;
+    }
     notifyListeners();
   }
 
-  Future<void> pickContact(double we, BuildContext context) async {
-    nameNode.requestFocus();
-    final confirm = await showConfirmBottomModal(
-      context,
-      title: 'Lista de contatos',
-      message: 'Gostaria de buscar cliente em sua lista de contatos?',
-    );
-    if (!confirm) {
-      fieldFone = false;
-      notifyListeners();
-      return;
-    }
-    fieldFone = true;
-    notifyListeners();
-
+  /// Ação explícita "Importar da agenda" (§17.3) — sem modal ao focar campo.
+  Future<void> pickContact() async {
     final permissionStatus = await user_info.FlutterContacts.permissions.request(
       user_info.PermissionType.read,
     );
@@ -214,38 +197,43 @@ class BudgetCreatorViewModel extends ChangeNotifier {
           '${contact.name?.first?.trim() ?? ''} ${contact.name?.last?.trim() ?? ''}'
               .trim();
     }
+    if (name.isNotEmpty) nameController.text = name;
 
-    String? tel;
     final phones = contact.phones;
     if (phones.isNotEmpty) {
-      tel = phones.first.number.replaceAll('+55', '').replaceAll('+', '');
+      final tel = phones.first.number
+          .replaceAll('+55', '')
+          .replaceAll(RegExp(r'[^0-9]'), '');
+      if (tel.isNotEmpty) phoneController.text = maskFormatter.maskText(tel);
     }
+  }
 
-    nameController.text = name;
-    if (tel != null && tel.isNotEmpty) {
-      phoneController.text = maskFormatter.maskText(tel);
+  /// Validação no submit, erro abaixo do campo (§17.4).
+  bool validate() {
+    if (nameController.text.trim().isEmpty) {
+      nameError = 'Informe o nome do cliente';
+      notifyListeners();
+      nameNode.requestFocus();
+      return false;
     }
-    notifyListeners();
+    return true;
   }
 
   late final Command0<void> saveBudgetCommand = Command0(_executeSaveBudget);
 
   Future<Result<void>> _executeSaveBudget() async {
-    final isUpdate = _isEditing;
+    final isUpdate = isEditing;
     final formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
     final budget = _buildBudget(isUpdate, formattedDate);
 
     try {
       if (isUpdate) {
-        await updateItensDADOS(budget);
+        await _budgetRepository.updateBudget(budget);
       } else {
-        await saveBudget(budget);
+        await _budgetRepository.saveBudget(budget);
       }
-
       _applyToItem(budget);
-      if (!isUpdate) {
-        _enterEditMode(budget);
-      }
+      _takeSnapshot();
       notifyListeners();
       return Result.ok(null);
     } catch (e) {
@@ -255,21 +243,16 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    for (final c in _editable) {
+      c.removeListener(_onFieldChanged);
+      c.dispose();
+    }
     nameNode.dispose();
     phoneNode.dispose();
     cepNode.dispose();
     ruaNode.dispose();
     cityNode.dispose();
     bairroNode.dispose();
-    nameController.dispose();
-    phoneController.dispose();
-    dataController.dispose();
-    idController.dispose();
-    cepController.dispose();
-    ruaController.dispose();
-    cityController.dispose();
-    bairroController.dispose();
-    statusController.dispose();
     super.dispose();
   }
 }

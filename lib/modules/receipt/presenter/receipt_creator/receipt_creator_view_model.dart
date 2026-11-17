@@ -3,9 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
-import 'package:oflite/shared/common/enums/receipt_field_enum.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -14,27 +12,46 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class ReceiptCreatorViewModel extends ChangeNotifier {
   final ReceiptRepository _receiptRepository = getIt<ReceiptRepository>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
-  final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
 
   Receipt receipt;
   final CustomerInfo item;
   final ValueChanged<Receipt>? onReceiptCreated;
 
   final TextEditingController descricaoText = TextEditingController();
-  final TextEditingController idText = TextEditingController();
-  final TextEditingController dataText = TextEditingController();
+  final FocusNode descricaoNode = FocusNode();
 
-  ReceiptFieldType? selectedField;
-  late bool fieldVisible;
-  late String nameButton;
-  late String titlePage;
+  String? descricaoError;
+  bool saving = false;
+  String _snapshot = '';
 
   ReceiptCreatorViewModel({
     required this.receipt,
     required this.item,
     this.onReceiptCreated,
   }) {
-    _initFromReceipt();
+    descricaoText.text = isEditing ? receipt.descricao! : '';
+    _snapshot = descricaoText.text;
+    descricaoText.addListener(_onChanged);
+  }
+
+  bool get isEditing =>
+      receipt.descricao != null && receipt.descricao.toString() != 'null';
+
+  String get titlePage =>
+      isEditing ? ReceiptPtString.editTitle : ReceiptPtString.createTitle;
+
+  String get nameButton => isEditing
+      ? ReceiptPtString.saveChangesButton
+      : ReceiptPtString.continueButton;
+
+  /// No modo criar o botão fica sempre destacado; no editar, só com mudanças.
+  bool get isDirty => !isEditing || descricaoText.text != _snapshot;
+
+  void _onChanged() {
+    if (descricaoError != null && descricaoText.text.trim().isNotEmpty) {
+      descricaoError = null;
+    }
+    notifyListeners();
   }
 
   void updateReceipt(Receipt newReceipt) {
@@ -42,94 +59,75 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _initFromReceipt() {
-    if (receipt.descricao.toString() != 'null') {
-      nameButton = ReceiptPtString.updateButton;
-      titlePage = ReceiptPtString.editTitle;
-      descricaoText.text = receipt.descricao!;
-      idText.text = receipt.id!;
-      dataText.text = receipt.data!;
-      fieldVisible = true;
-    } else {
-      nameButton = ReceiptPtString.saveButton;
-      titlePage = ReceiptPtString.createTitle;
-      descricaoText.text = '';
-      idText.text = '';
-      dataText.text = '';
-      fieldVisible = false;
+  bool _validate() {
+    if (descricaoText.text.trim().isEmpty) {
+      descricaoError = ReceiptPtString.descriptionRequired;
+      descricaoNode.requestFocus();
+      notifyListeners();
+      return false;
     }
-  }
-
-  String get formSubtitle =>
-      fieldVisible && nameButton == ReceiptPtString.updateButton
-          ? ReceiptPtString.formCardSubtitleEdit
-          : ReceiptPtString.formCardSubtitleCreate;
-
-  void selectField(ReceiptFieldType field) {
-    selectedField = field;
-    notifyListeners();
+    return true;
   }
 
   Future<void> save(BuildContext context) async {
-    loadingEvent.alertLoading(context);
+    FocusScope.of(context).unfocus();
+    if (saving || !_validate()) return;
 
-    // Garante que o repositório sabe qual orçamento está ativo
     _receiptRepository.budgetId = item.id;
+    final creating = !isEditing;
+    final descricao = descricaoText.text.trim();
 
-    if (nameButton == ReceiptPtString.saveButton) {
-      final DateTime now = DateTime.now();
-      final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      final String formatted = formatter.format(now);
+    final Receipt target = creating
+        ? Receipt(
+            descricao: descricao,
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            data: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+            valorTotal: 0,
+          )
+        : receipt.copyWith(descricao: descricao);
 
-      final Receipt novo = Receipt(
-        descricao: descricaoText.text,
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        data: formatted,
-        valorTotal: 0,
+    saving = true;
+    notifyListeners();
+    final result = await _receiptRepository.saveReceipt(target);
+    saving = false;
+    if (!context.mounted) return;
+
+    if (result is Error<void>) {
+      notifyListeners();
+      await displayAlert.notificationError(
+        context,
+        ReceiptPtString.saveErrorTitle,
+        ReceiptPtString.saveErrorMessage,
       );
-
-      final result = await _receiptRepository.saveReceipt(novo);
-      if (!context.mounted) return;
-      loadingEvent.closeLoading(context);
-
-      if (result is Ok<void>) {
-        await displayAlert.notificationNotCloseScreen(
-            context, ReceiptPtString.doneTitle, ReceiptPtString.createSuccess);
-        onReceiptCreated?.call(novo);
-        dataText.text = novo.data!;
-        descricaoText.text = novo.descricao!;
-        idText.text = novo.id!;
-        fieldVisible = true;
-        notifyListeners();
-      } else if (result is Error<void>) {
-        await displayAlert.notificationError(
-            context, ReceiptPtString.errorTitle, 'Erro ao salvar recibo');
-      }
       return;
     }
 
-    if (nameButton == ReceiptPtString.updateButton && fieldVisible) {
-      final Receipt atualizado = receipt.copyWith(descricao: descricaoText.text);
-      final result = await _receiptRepository.saveReceipt(atualizado);
-      if (!context.mounted) return;
-      loadingEvent.closeLoading(context);
+    // Após criar, a tela passa ao modo editar (evita criar duplicado).
+    receipt = target;
+    _snapshot = descricao;
+    notifyListeners();
 
-      if (result is Ok<void>) {
-        await displayAlert.notificationNotCloseScreen(
-            context, ReceiptPtString.doneTitle, ReceiptPtString.updateSuccess);
-        notifyListeners();
-      } else if (result is Error<void>) {
-        await displayAlert.notificationError(
-            context, ReceiptPtString.errorTitle, 'Erro ao atualizar recibo');
-      }
+    if (creating) {
+      onReceiptCreated?.call(target);
+      await displayAlert.notificationNotCloseScreen(
+        context,
+        ReceiptPtString.doneTitle,
+        ReceiptPtString.createdNextStep,
+      );
+    } else {
+      await displayAlert.notificationNotCloseScreen(
+        context,
+        ReceiptPtString.changesSaved,
+        ReceiptPtString.changesSavedMessage,
+      );
     }
   }
 
   @override
   void dispose() {
+    descricaoText.removeListener(_onChanged);
     descricaoText.dispose();
-    idText.dispose();
-    dataText.dispose();
+    descricaoNode.dispose();
     super.dispose();
   }
 }

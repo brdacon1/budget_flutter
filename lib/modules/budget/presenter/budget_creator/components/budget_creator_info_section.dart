@@ -1,99 +1,60 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
-import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'budget_creator_field.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_section_card.dart';
 
+/// Status em chips: poucas opções fixas → um toque (Lei de Hick, §17.2).
 class BudgetCreatorInfoSection extends StatelessWidget {
-  const BudgetCreatorInfoSection({
-    super.key,
-    required this.viewModel,
-    required this.onSelectStatus,
-  });
+  const BudgetCreatorInfoSection({super.key, required this.viewModel});
 
   final BudgetCreatorViewModel viewModel;
-  final Future<void> Function() onSelectStatus;
+
+  static Color colorFor(String status) {
+    switch (status) {
+      case 'APROVADO':
+      case 'FINALIZADO':
+        return statusApprovedColor;
+      case 'REPROVADO':
+        return statusRejectedColor;
+      default:
+        return statusPendingColor;
+    }
+  }
+
+  static String labelFor(String status) =>
+      status.isEmpty ? '' : status[0] + status.substring(1).toLowerCase();
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          animateTrailing: true,
-          trailing: const Icon(Icons.expand_more, color: whiteColor),
-          leading: const CircleAvatar(
+    return AppFormSectionCard(
+      icon: Icons.flag_outlined,
+      title: 'Status',
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: BudgetCreatorViewModel.statusOptions.map((status) {
+            final selected = viewModel.statusController.text == status;
+            final color = colorFor(status);
+            return ChoiceChip(
+              label: Text(labelFor(status)),
+              selected: selected,
+              showCheckmark: false,
+              onSelected: (_) => viewModel.setStatus(status),
               backgroundColor: bgColor,
-              child: Icon(Icons.request_page_outlined, color: whiteColor)),
-          title: Text(
-            "Informações do orçamento",
-            style: GoogleFonts.heebo(
-                color: whiteColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 1),
-          ),
-          subtitle: Text(
-            viewModel.titleBox!,
-            style: GoogleFonts.heebo(
-                color: whiteColor,
-                fontWeight: FontWeight.normal,
+              selectedColor: color.withValues(alpha: 0.15),
+              side: BorderSide(color: selected ? color : sheetHandleColor),
+              shape: const StadiumBorder(),
+              labelStyle: GoogleFonts.heebo(
+                color: selected ? color : whiteColor,
                 fontSize: 13,
-                letterSpacing: 1),
-          ),
-          children: <Widget>[
-            SizedBox(height: he * 0.02),
-            BudgetCreatorField(
-              field: CustomerInfoEnum.status,
-              viewModel: viewModel,
-              hintText: 'Status do orçamentos',
-              prefixIcon: Icons.domain_verification_outlined,
-              controller: viewModel.statusController,
-              readOnly: true,
-              enableInteractiveSelection: true,
-              onTap: onSelectStatus,
-              suffixIcon: Icon(
-                Icons.keyboard_arrow_down_outlined,
-                color: Colors.white,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
-            ),
-            SizedBox(height: he * 0.02),
-            Visibility(
-              visible: viewModel.fieldVisible,
-              child: BudgetCreatorField(
-                field: CustomerInfoEnum.data,
-                viewModel: viewModel,
-                hintText: 'Data do orçamento',
-                prefixIcon: Icons.calendar_month_outlined,
-                controller: viewModel.dataController,
-                enabled: false,
-                onTap: () => viewModel.selectField(CustomerInfoEnum.data),
-              ),
-            ),
-            SizedBox(height: he * 0.02),
-            Visibility(
-              visible: viewModel.fieldVisible,
-              child: BudgetCreatorField(
-                field: CustomerInfoEnum.id,
-                viewModel: viewModel,
-                hintText: 'Número do orçamento',
-                prefixIcon: Icons.confirmation_number_outlined,
-                controller: viewModel.idController,
-                enabled: false,
-                onTap: () => viewModel.selectField(CustomerInfoEnum.id),
-              ),
-            ),
-            SizedBox(height: he * 0.02),
-          ],
+            );
+          }).toList(),
         ),
-      ),
+      ],
     );
   }
 }

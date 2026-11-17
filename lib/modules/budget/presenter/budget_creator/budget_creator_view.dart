@@ -6,13 +6,13 @@ import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_vi
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_address_section.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_contact_section.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
-import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_save_button.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
+import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_summary_card.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
-import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 
 class BudgetCreatorView extends StatefulWidget {
   final CustomerInfo item;
@@ -42,36 +42,54 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     super.dispose();
   }
 
+  void _onSave() {
+    FocusScope.of(context).unfocus();
+    if (!_viewModel.validate()) return;
+    _wasCreating = !_viewModel.isEditing;
+    _viewModel.saveBudgetCommand.execute();
+  }
+
   Future<void> _onSaveCommandChanged() async {
     final cmd = _viewModel.saveBudgetCommand;
-
     if (cmd.running) {
-      setState(() {});
+      if (mounted) setState(() {});
       return;
     }
+    if (!mounted) return;
 
+    final alert = getIt<DisplayAlertRepository>();
+    if (cmd.error) {
+      cmd.clearResult();
+      await alert.notificationError(
+        context,
+        'Não foi possível salvar',
+        'Verifique sua conexão e tente novamente.',
+      );
+      return;
+    }
     if (!cmd.completed) return;
-
     cmd.clearResult();
 
     if (!_wasCreating) {
-      if (mounted) {
-        await getIt<DisplayAlertRepository>().notification(
-          context,
-          'Feito!',
-          'Dados do orçamento atualizado com sucesso!',
-        );
-      }
+      await alert.notificationNotCloseScreen(
+        context,
+        'Alterações salvas',
+        'Dados do orçamento atualizados.',
+      );
       return;
     }
 
-    if (mounted) {
-      await getIt<DisplayAlertRepository>().notification(
-        context,
-        'Feito!',
-        'Orçamento criado com sucesso!',
-      );
-    }
+    await alert.notification(
+      context,
+      'Feito!',
+      'Orçamento criado. Agora adicione os itens.',
+    );
+    await _offerSaveContact();
+  }
+
+  Future<void> _offerSaveContact() async {
+    final phone = _viewModel.phoneController.text;
+    if (phone.isEmpty) return;
 
     final permissionStatus = await user_info.FlutterContacts.permissions.request(
       user_info.PermissionType.readWrite,
@@ -79,136 +97,80 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     final hasPermission =
         permissionStatus == user_info.PermissionStatus.granted ||
         permissionStatus == user_info.PermissionStatus.limited;
+    if (!mounted || !hasPermission) return;
 
-    if (mounted && hasPermission) {
-      if (mounted) {
-        final saveContact = await showConfirmBottomModal(
-          context,
-          title: 'Salvar contato',
-          message: 'Gostaria de salvar o telefone em sua lista de contatos?',
-        );
-        if (saveContact) {
-          final newContact = user_info.Contact(
-            name: user_info.Name(
-              first: _viewModel.nameController.text,
-            ),
-            phones: [
-              user_info.Phone(
-                number: _viewModel.phoneController.text,
-              ),
-              user_info.Phone(
-                number: _viewModel.phoneController.text,
-                label: const user_info.Label(
-                  user_info.PhoneLabel.work,
-                ),
-              ),
-            ],
-          );
-          await user_info.FlutterContacts.create(newContact);
-        }
-      }
-    }
-  }
-
-  Future<void> _selectStatus() async {
-    List<String> values = ['APROVADO', 'PENDENTE', 'REPROVADO', 'FINALIZADO'];
-    final value = await showOptionBottomModal(
+    final saveContact = await showConfirmBottomModal(
       context,
-      title: 'Selecione status',
-      values: values,
+      title: 'Salvar contato',
+      message: 'Gostaria de salvar o telefone em sua lista de contatos?',
     );
-    if (value != null && mounted) {
-      _viewModel.setStatus(value);
-    }
+    if (!saveContact) return;
+
+    await user_info.FlutterContacts.create(
+      user_info.Contact(
+        name: user_info.Name(first: _viewModel.nameController.text),
+        phones: [user_info.Phone(number: phone)],
+      ),
+    );
   }
 
-  Widget _buildBudgetFields({required double height, required double we}) {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: SizedBox(
-          child: Column(
-            children: <Widget>[
-              BudgetCreatorContactSection(
-                viewModel: _viewModel,
-                onPickContact: () => _viewModel.pickContact(we, context),
-              ),
-              BudgetCreatorInfoSection(
-                viewModel: _viewModel,
-                onSelectStatus: _selectStatus,
-              ),
-              BudgetCreatorAddressSection(viewModel: _viewModel),
-              SizedBox(height: height * 0.20),
-            ],
+  Widget _buildBottomBar() {
+    final running = _viewModel.saveBudgetCommand.running;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+          child: AppFormSaveButton(
+            label: _viewModel.nameButton,
+            highlighted: _viewModel.isDirty,
+            loading: running,
+            onPressed: _onSave,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildButtonSaveBudget({required double we}) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: AnimatedBuilder(
-        animation: _viewModel,
-        builder: (context, _) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: BudgetCreatorSaveButton(
-                  label: _viewModel.nameButton ?? '',
-                  onPressed:
-                      _viewModel.saveBudgetCommand.running
-                          ? null
-                          : () {
-                            _wasCreating = !_viewModel.isEditing;
-                            _viewModel.saveBudgetCommand.execute();
-                          },
-                ),
-              ),
-              const SizedBox(height: 10),
-              const BannerAdWidget(),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildScreen({required double height, required double we}) {
-    return AnimatedBuilder(
-      animation: _viewModel,
-      builder: (context, _) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            AppHeaderSecondTitle(
-              titlePage: _viewModel.titlePage ?? '',
-              secondTitle: 'Informações do orçamento',
-              onBack: () => Navigator.pop(context, true),
-            ),
-            _buildBudgetFields(height: height, we: we),
-          ],
-        );
-      },
+        const BannerAdWidget(),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    var we = MediaQuery.of(context).size.width;
-    var he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
-      body: Stack(
-        children: [
-          _buildScreen(height: he, we: he),
-          _buildButtonSaveBudget(we: we),
-        ],
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: AnimatedBuilder(
+          animation: _viewModel,
+          builder: (context, _) {
+            return Column(
+              children: [
+                AppHeaderSecondTitle(
+                  titlePage: _viewModel.titlePage,
+                  secondTitle: 'Dados do cliente',
+                  onBack: () => Navigator.pop(context, true),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.only(top: 8, bottom: 16),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: [
+                      if (_viewModel.isEditing)
+                        BudgetCreatorSummaryCard(viewModel: _viewModel),
+                      BudgetCreatorContactSection(
+                        viewModel: _viewModel,
+                        onPickContact: _viewModel.pickContact,
+                      ),
+                      BudgetCreatorInfoSection(viewModel: _viewModel),
+                      BudgetCreatorAddressSection(viewModel: _viewModel),
+                    ],
+                  ),
+                ),
+                _buildBottomBar(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

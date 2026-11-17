@@ -446,8 +446,11 @@ class _BudgetCreateViewState extends State<BudgetCreateView> {
       Navigator.pop(context);
     } else if (cmd.error) {
       // erro: extrair mensagem de cmd.result
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar: ${cmd.result}')),
+      // NUNCA SnackBar cru — use o padrão do app (ver §18)
+      getIt<DisplayAlertRepository>().notificationError(
+        context,
+        'Não foi possível salvar',
+        'Verifique sua conexão e tente novamente.',
       );
     }
     // quando running == true, o próprio build mostra loading no botão
@@ -1841,6 +1844,114 @@ WhatsApp — a Apple exige um contato visível na página).
   implementação separada com import condicional.
 - Especificações originais detalhadas: `.pi/web_projet_instruction/`
   (`new_project_web.md` e `create_flutter_web_page.md`).
+
+---
+
+## 17. UX de Formulários — Regras Obrigatórias
+
+Todo formulário do app (criar/editar orçamento, item, cliente, etc.) segue os
+princípios abaixo. Base: Gestalt, Lei de Hick, carga cognitiva e validação
+resiliente.
+
+### 17.1 Gestalt
+- **Proximidade:** label colado ao seu campo; campos relacionados no mesmo card;
+  espaço maior **entre** cards do que **dentro** deles.
+- **Continuidade:** uma única coluna vertical, de cima para baixo. Nada de
+  campos lado a lado (exceto pares curtos e óbvios, ex.: número/complemento).
+- **Fechamento:** cada grupo vive num contêiner (card) com padding e raio
+  consistentes; o usuário deve ver onde o formulário começa e termina.
+
+### 17.2 Lei de Hick
+- **Menos campos é mais:** peça só o necessário para o objetivo atual; campos
+  opcionais ficam agrupados e marcados como "opcional".
+- **Poucas opções, visíveis:** até ~5 opções fixas (ex.: status) → chips/segmented
+  em vez de dropdown + bottom sheet (um toque em vez de dois).
+- **Etapas:** fluxos longos são divididos em passos com indicador de progresso.
+  Se já existir navegação por abas (ex.: Cliente/Itens/PDF), ela **é** o stepper —
+  não duplicar.
+
+### 17.3 Carga cognitiva
+- **Label sempre visível** (floating/fixed label). Placeholder só como exemplo
+  de valor, nunca como único rótulo.
+- **Máscaras automáticas** para telefone, CEP, CPF, moeda, data.
+- **Autopreenchimento** quando houver fonte (CEP → endereço, agenda → contato),
+  sempre com feedback visual do que foi preenchido e possibilidade de editar.
+- Ações auxiliares (ex.: "Importar da agenda") são **botões explícitos**; nunca
+  dispare modal ao focar um campo.
+
+### 17.4 Feedback e validação
+- Erro **abaixo do campo afetado**, texto humano ("Informe o nome do cliente"),
+  nunca alerta genérico no topo nem exceção crua.
+- Validar **on blur** ou no submit — nunca enquanto o usuário digita.
+- Erro **preserva** o que já foi digitado.
+- Sucesso de save: feedback leve via snackbar padrão do app (§18), sem bloquear a tela.
+
+### 17.5 Modo Criar × Modo Editar
+A mesma tela atende criação e atualização; o estado deve ficar óbvio:
+
+| Elemento | Criar | Editar |
+|---|---|---|
+| Título | "Criar orçamento" | "Editar orçamento" |
+| Identificação (nº e data) | oculta (gerada no save) | **card de resumo somente leitura** no topo (nº, data, status) — não aparece como campo de input |
+| Campos editáveis | vazios | preenchidos |
+| Botão principal | "Continuar" | "Salvar alterações" — só destaca quando há mudanças (dirty) |
+
+- **Campos imutáveis** (nº do orçamento, data de criação) **nunca** são
+  `TextField` desabilitado: exibir como texto/badge informativo. Campo cinza
+  "desabilitado" confunde e parece erro.
+- Após o primeiro save no modo criar, a tela passa ao modo editar sem
+  recarregar e já exibe o card de resumo.
+
+### 17.6 Componentes compartilhados
+Use os widgets de `shared/common/widgets/form/` em todo formulário:
+`AppFormSectionCard` (grupo), `AppFormField` (label visível + erro inline) e
+`AppFormSaveButton` (destaque por dirty + loading). Referências:
+`budget_creator` e `receipt_creator`.
+
+### 17.7 Layout fixo
+- **Não alterar a tab bar / bottom navigation** existente ao redesenhar telas.
+- Botão principal fica em barra fixa acima do banner de anúncio e **nunca**
+  sobrepõe campos (reserve padding inferior no scroll).
+
+---
+
+## 18. Feedback ao Usuário — Snackbar Padrão do App
+
+Todo feedback de sucesso, aviso ou erro usa o **snackbar padrão**
+(`AlertSnackBar`, em `shared/common/widgets/alert/alert_snack_bar_widget.dart`),
+que mantém cores (verde/laranja/vermelho), ícone, título + mensagem e estilo
+flutuante consistentes em todo o app.
+
+### 18.1 Como usar
+Na View, **sempre via `DisplayAlertRepository`** (injetado pelo `get_it`) —
+ele é a porta de entrada e já delega para o `AlertSnackBar`:
+
+| Situação | Método |
+|---|---|
+| Sucesso sem sair da tela | `notificationNotCloseScreen(context, título, mensagem)` |
+| Aviso | `notificationWarning(context, título, mensagem)` |
+| Erro | `notificationError(context, título, mensagem)` |
+
+```dart
+await getIt<DisplayAlertRepository>().notificationNotCloseScreen(
+  context,
+  'Alterações salvas',
+  'Dados do orçamento atualizados.',
+);
+```
+
+### 18.2 Regras
+- **NUNCA** use `ScaffoldMessenger.of(context).showSnackBar(SnackBar(...))`
+  direto em telas/componentes.
+- **NUNCA** chame `AlertSnackBar.show` direto na View — use o
+  `DisplayAlertRepository` (permite trocar a implementação num só lugar).
+- **NUNCA** exiba exceção crua (`${cmd.result}`, `e.toString()`) ao usuário:
+  escreva o que aconteceu + o que fazer (§17.4).
+- Todo `Command` de save trata **os dois** desfechos: `completed` (sucesso) e
+  `error` (falha) — falha silenciosa é bug.
+- Verifique `mounted` antes de usar `context` após `await`.
+- Para erro de **campo específico**, use erro inline abaixo do campo (§17.4),
+  não snackbar.
 
 ---
 

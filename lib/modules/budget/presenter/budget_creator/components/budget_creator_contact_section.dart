@@ -1,10 +1,9 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
-import 'package:oflite/modules/budget/presenter/enum/customer_info_enum.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'budget_creator_field.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_field.dart';
+import 'package:oflite/shared/common/widgets/form/app_form_section_card.dart';
 
 class BudgetCreatorContactSection extends StatelessWidget {
   const BudgetCreatorContactSection({
@@ -14,70 +13,46 @@ class BudgetCreatorContactSection extends StatelessWidget {
   });
 
   final BudgetCreatorViewModel viewModel;
-  final Future<void> Function() onPickContact;
+  final VoidCallback onPickContact;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-      child: Theme(
-        data: Theme.of(context).copyWith(unselectedWidgetColor: whiteColor),
-        child: ExpansionTileCard(
-          initiallyExpanded: true,
-          expandedTextColor: whiteColor,
-          baseColor: secondaryColor,
-          expandedColor: secondaryColor,
-          animateTrailing: true,
-          trailing: const Icon(Icons.expand_more, color: whiteColor),
-          leading: const CircleAvatar(
-              backgroundColor: bgColor,
-              child: Icon(Icons.person_outlined, color: whiteColor)),
-          title: Text(
-            "Contato do cliente",
-            style: GoogleFonts.heebo(
-                color: whiteColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 1),
-          ),
-          subtitle: Text(
-            viewModel.titleBox!,
-            style: GoogleFonts.heebo(
-                color: whiteColor,
-                fontWeight: FontWeight.normal,
-                fontSize: 13,
-                letterSpacing: 1),
-          ),
-          children: <Widget>[
-            BudgetCreatorField(
-              field: CustomerInfoEnum.fullname,
-              viewModel: viewModel,
-              hintText: 'Nome do cliente',
-              prefixIcon: Icons.person_outlined,
-              controller: viewModel.nameController,
-              focusNode: viewModel.nameNode,
-              readOnly: viewModel.fieldFone,
-              onTap: onPickContact,
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            BudgetCreatorField(
-              field: CustomerInfoEnum.phone,
-              viewModel: viewModel,
-              hintText: 'Telefone',
-              prefixIcon: Icons.phone_android_outlined,
-              controller: viewModel.phoneController,
-              focusNode: viewModel.phoneNode,
-              keyboardType: TextInputType.number,
-              inputFormatters: [viewModel.maskFormatter],
-              onTap: () {
-                viewModel.phoneNode.requestFocus();
-                viewModel.selectField(CustomerInfoEnum.phone);
-              },
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          ],
+    return AppFormSectionCard(
+      icon: Icons.person_outline,
+      title: 'Cliente',
+      trailing: TextButton.icon(
+        onPressed: onPickContact,
+        style: TextButton.styleFrom(
+          foregroundColor: buttonColor,
+          visualDensity: VisualDensity.compact,
+        ),
+        icon: const Icon(Icons.contacts_outlined, size: 18),
+        label: Text(
+          viewModel.isEditing ? 'Trocar' : 'Importar da agenda',
+          style: GoogleFonts.heebo(fontSize: 13, fontWeight: FontWeight.w500),
         ),
       ),
+      children: [
+        AppFormField(
+          label: 'Nome do cliente *',
+          hintText: 'Maria Souza',
+          prefixIcon: Icons.person_outline,
+          controller: viewModel.nameController,
+          focusNode: viewModel.nameNode,
+          textCapitalization: TextCapitalization.words,
+          errorText: viewModel.nameError,
+        ),
+        const SizedBox(height: 12),
+        AppFormField(
+          label: 'Telefone',
+          hintText: '(11) 98765-4321',
+          prefixIcon: Icons.phone_android_outlined,
+          controller: viewModel.phoneController,
+          focusNode: viewModel.phoneNode,
+          keyboardType: TextInputType.phone,
+          inputFormatters: [viewModel.maskFormatter],
+        ),
+      ],
     );
   }
 }

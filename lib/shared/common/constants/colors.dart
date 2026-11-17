@@ -24,3 +24,4 @@ const transparentColor = Colors.transparent;
 const loadingIndicatorColor = Colors.white70;
 const emptyStateIconColor = Colors.white54;
 const refreshIndicatorColor = Color(0xFFE0F7FA); // Colors.cyan[50]
+const emptyTextColor = Colors.grey;
