@@ -34,4 +34,13 @@ class ImageStrings {
 
   static String get cropperTitle =>
       _isPt ? 'Cortador' : 'Cropper';
+
+  static String get imageSourceTitle =>
+      _isPt ? 'Adicionar logotipo' : 'Add logo';
+
+  static String get imageSourceCamera =>
+      _isPt ? 'Tirar foto' : 'Take photo';
+
+  static String get imageSourceGallery =>
+      _isPt ? 'Escolher da galeria' : 'Choose from gallery';
 }

@@ -38,17 +38,15 @@
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-5106035309089315~3055777786</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to take photos.</string>
+	<string>A câmera é usada para fotografar o logotipo da sua empresa. Por exemplo: você tira uma foto do seu logo e ele é inserido no cabeçalho dos PDFs de orçamento enviados aos seus clientes.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>Reason we need access to the contact list</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone for video recording.</string>
+	<string>Seus contatos são usados para preencher os dados do cliente ao criar um orçamento e, se você quiser, salvar um novo cliente na agenda. Por exemplo: ao escolher "Maria" na sua lista, o nome e o telefone dela são preenchidos automaticamente no orçamento.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to select images.</string>
+	<string>Suas fotos são usadas para escolher a imagem do logotipo da sua empresa. Por exemplo: você seleciona o logo na galeria e ele aparece no cabeçalho dos PDFs de orçamento enviados aos seus clientes.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

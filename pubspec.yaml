@@ -31,7 +31,7 @@ dependencies:
   fl_chart: ^0.70.2
   adaptive_theme: 3.8.0
   image_picker: ^1.1.2
-  image_cropper: ^9.0.0
+  image_cropper: ^13.0.0
   dotted_border: ^2.0.0+3
   shared_preferences: ^2.5.3
   google_mobile_ads: ^9.2.0
