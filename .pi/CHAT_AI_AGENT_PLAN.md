@@ -7,6 +7,11 @@
 > sobre os usecases reais) e complementa `CHAT_ASSISTANT_SPEC.md`.
 > **Modelo:** Gemini Flash / Flash-Lite via pacote `firebase_ai` (Firebase AI Logic)
 
+> **Status (2026-11-18):** Fases 1–5 implementadas + "digitando…", opção
+> Relatórios e rede de segurança. Pendente: suíte de avaliação contra o modelo
+> real (Fase 7). **Referência viva da implementação: `ARCHITECTURE.md` §20** —
+> este arquivo guarda o plano e o raciocínio original.
+
 ---
 
 ## 0. Objetivo

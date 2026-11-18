@@ -1201,6 +1201,8 @@ etc.
 | **16** | **Toda cor vem de `lib/shared/common/constants/colors.dart` — nunca `Color(0x...)` ou `Colors.*` direto no widget (ver seção 15)**                       |
 | **17** | **Tela Web só existe se for registrada no `main_web.dart` (+ rewrite no `firebase.json`). Nada do app mobile é exposto no Web por padrão (ver seção 16)** |
 | **18** | **Modal complexo é TELA: pasta própria com `{modal}_view.dart` + `{modal}_view_model.dart` + `components/` (um widget por arquivo). Só modal simples (sem usecase/repository, sem estado) dispensa ViewModel (ver seção 19)** |
+| **19** | **IA opera o app só via tools que chamam UseCases. `firebase_ai` só no DataSource; o modelo nunca calcula; toda escrita é confirmada pelo usuário; falha da IA cai no modo padrão (ver seção 20)** |
+| **20** | **Nenhuma URL/endpoint de fonte externa fora do DataSource (ex.: URL do Firebase Storage fica em `PdfRemoteDataSource.logoUrl`)** |
 
 ---
 
@@ -1209,7 +1211,7 @@ etc.
 ### Features com Router + ViewModel + View
 
 - [x] `budget` — Orçamentos (list, creator, items, tab)
-- [x] `chat_budget` — Assistente de orçamento por chat
+- [x] `chat_assistant` — Assistente por chat (modo padrão + modo IA, ver §20)
 - [x] `comment` — Comentários nos orçamentos
 - [x] `dashboard` — Dashboard com gráficos
 - [x] `image` — Edição de imagens/logo
@@ -1231,6 +1233,7 @@ etc.
 ### Core — com DataSource (fonte externa)
 
 - [x] `core/ads` — Google Mobile Ads (exibe apenas para não-assinantes)
+- [x] `core/app_check` — Firebase App Check (protege o Firebase AI Logic; mobile only)
 - [x] `core/cep` — Consulta de CEP
 - [x] `core/crashlytics` — Relatório de crashes (mobile only)
 - [x] `core/in_app_purchase` — Compras dentro do app
@@ -2046,6 +2049,207 @@ presenter/
 - **Modal-tela**: `budget/presenter/budget_item_quantity/` (detalhes do item +
   edição de quantidade), `product/presenter/product_price_creator/`.
 - **Modal simples**: `shared/common/widgets/modals/confirm_bottom_modal_widget.dart`.
+
+---
+
+## 20. Assistente com IA (Gemini via Firebase AI Logic)
+
+O chat do assistente (`modules/chat_assistant`) tem dois modos:
+
+| Modo | Quem | Como responde |
+|------|------|---------------|
+| **Padrão (determinístico)** | Usuário free — e qualquer usuário quando a IA falha (§20.8) | State machine (`ChatFlowStep`) + menus de botões. **Nunca muda por causa da IA.** |
+| **IA** | Assinante (`autoRenewing`) ou `FORCE_PREMIUM` em development | Texto livre no menu principal vai para o Gemini, que **opera o app chamando tools** (function calling) que executam os **mesmos UseCases das telas**. |
+
+> Plano completo e histórico das decisões: `.pi/CHAT_AI_AGENT_PLAN.md`.
+
+### 20.1 Princípios (não negociáveis)
+
+| # | Princípio |
+|---|-----------|
+| P1 | **LLM decide, UseCase executa.** O modelo só escolhe a tool e os argumentos; a regra de negócio está no UseCase do módulo dono (`budget`, `receipt`…). |
+| P2 | **LLM nunca calcula.** Somas, contagens e totais vêm do UseCase, já formatados (`ConvertCoinRepository`). O modelo só repete. |
+| P3 | **`firebase_ai` só no DataSource** (`ChatAiRemoteDatasource`). O domínio declara tools como dados neutros (`AgentToolSpec`) e nunca importa o SDK. |
+| P4 | **Toda escrita é confirmada pelo usuário.** A tool de escrita só devolve uma prévia + botões *Confirmar/Cancelar*; quem grava é o `ConfirmAgentActionUsecase`, sem chamar a IA. |
+| P5 | **Valor persistido fixo** (Regra Zero do i18n): status trafega como `PENDENTE/APROVADO/REPROVADO/FINALIZADO` (`BudgetStatus`); só o label é traduzido. |
+| P6 | **Resposta é UI.** A lista completa vai para um card nativo; ao modelo vai no máximo 20 itens enxutos. |
+| P7 | **Free não sente nada.** Sem acesso à IA o chat é idêntico ao de antes. |
+| P8 | **Nunca trava.** Timeout + rede de segurança devolvem o usuário ao modo padrão (§20.8). |
+
+### 20.2 Fluxo de um turno
+
+```
+ChatAssistantView ── texto livre (step mainMenu, _aiMode) ──► ChatAssistantViewModel
+                                                                │ isAiThinking = true  → ChatTypingIndicator
+                                                                ▼
+RunAgentTurnUsecase  (limite diário → system prompt → loop máx. 5)
+   │  ChatAiRepository.send(history, tools)
+   │      └─ ChatAiRemoteDatasource ── firebase_ai (timeout 20s) ──► Gemini
+   │  modelo pediu tool?
+   │      sim → DispatchAgentToolUsecase(call) → UseCases (budget/receipt/share_link)
+   │             leitura  → functionResponse enxuto volta ao modelo → repete
+   │             escrita  → para: AgentPendingAction + prévia (Confirmar/Cancelar)
+   │             start_flow / open_budget → para: handoff / navegação
+   │      não → texto final
+   ▼
+AgentTurnResult { text, messages (cards), pending?, menuOption?, navigation? }
+   ▼
+ViewModel publica texto + cards; Confirmar → ConfirmAgentActionUsecase (grava, sem IA)
+```
+
+- **Teto do turno:** 45 s no ViewModel (cobre Firestore pendurado nas tools).
+- **Histórico:** `ChatAiRepository` guarda as últimas 20 mensagens e sempre recomeça
+  numa mensagem de texto do usuário (nunca numa tool órfã).
+- **Thought signature:** turnos do modelo com tool calls são guardados como as
+  *parts* cruas (`Map`) e reenviados com `UnknownPart` — o Gemini exige a
+  assinatura original e o domínio continua sem conhecer o SDK.
+
+### 20.3 Tools disponíveis
+
+| Tool | Tipo | Executa | Saída |
+|------|------|---------|-------|
+| `start_flow` | handoff | `HandleMainMenuOptionUsecase` (opção `1..4`) | Abre o fluxo guiado existente (orçamento, preços, PDF, nome) |
+| `list_budgets` | leitura | `ListBudgetsUsecase` (budget) | Card `budgetList` (toque abre o orçamento) |
+| `get_month_summary` | leitura | `GetMonthSummaryUsecase` (budget) | Card `summaryCard` (total + por status) |
+| `list_receipts` | leitura | `ListReceiptsByBudgetUsecase` (receipt) | Texto (recibos, recebido, saldo) |
+| `get_budget_link` | leitura | `ShareLinkRepository.buildShareUrl` | Botão *Compartilhar link* (`share_url|<url>`) |
+| `open_budget` | navegação | — | Abre `BudgetTabView` (`open_budget|<id>`) |
+| `create_receipt` | **escrita** | `CreateReceiptForBudgetUsecase` (receipt) | Prévia + Confirmar/Cancelar |
+| `update_budget_status` | **escrita** | `UpdateBudgetStatusUsecase` (budget) | Prévia + Confirmar/Cancelar |
+
+Argumento inválido (data fora de `yyyy-MM-dd`, status inexistente, orçamento não
+encontrado, tool desconhecida) **não lança**: vira `{error: ...}` no
+`functionResponse` e o modelo se corrige sozinho.
+
+**Adicionar uma tool nova:**
+1. Regra de negócio → UseCase no módulo dono (com teste).
+2. Declarar em `DispatchAgentToolUsecase.tools` (`AgentToolSpec`; `type`: `enum`/`string`/`number`; `required: true` quando obrigatório).
+3. Tratar no `switch` do `call`: leitura devolve `modelPayload` enxuto (+ card); escrita devolve só `pending` + `previewText`.
+4. Escrita: executar em `ConfirmAgentActionUsecase`.
+5. Se precisar, citar a regra no `aiSystemPrompt` (strings).
+
+### 20.4 Arquivos
+
+```
+modules/chat_assistant/
+├── data/
+│   ├── datasource/chat_ai_remote_datasource.dart   # ÚNICO com firebase_ai (modelo, timeout, tools → Schema)
+│   ├── datasource/chat_ai_local_datasource.dart    # contador diário (SharedPreferences)
+│   └── repository/chat_ai_repository_impl.dart     # histórico (janela 20), Map ↔ entity, log de tokens
+├── domain/
+│   ├── entity/agent_message_entity.dart            # user | model (texto ou parts cruas) | tool
+│   ├── entity/agent_tool_entity.dart               # AgentToolSpec, chamadas, outcome, turn result, pending, AiDailyLimitException
+│   ├── repository/chat_ai_repository.dart
+│   └── usecase/
+│       ├── check_ai_access_usecase.dart            # assinante || FORCE_PREMIUM; kill switch aiChatEnabled
+│       ├── run_agent_turn_usecase.dart             # loop de function calling + limite diário
+│       ├── dispatch_agent_tool_usecase.dart        # declara tools, valida args, leituras e prévias
+│       ├── confirm_agent_action_usecase.dart       # grava/cancela a escrita confirmada
+│       ├── resolve_ai_failure_usecase.dart         # rede de segurança (§20.8)
+│       └── show_reports_prompt_usecase.dart        # opção "Relatórios"
+└── presenter/chat_assistant/components/
+    ├── chat_budget_list_card.dart
+    ├── chat_month_summary_card.dart
+    ├── chat_ai_status_dot.dart
+    └── chat_typing_indicator.dart                  # "digitando…" (3 pontinhos)
+
+modules/budget/domain/
+├── entity/budget_status.dart  ·  entity/budget_filter.dart
+└── usecase/list_budgets_usecase.dart · get_month_summary_usecase.dart · update_budget_status_usecase.dart
+
+modules/receipt/domain/usecase/
+├── create_receipt_for_budget_usecase.dart      # recibo + pagamento opcional
+└── list_receipts_by_budget_usecase.dart        # recibos + total pago
+
+modules/core/app_check/                          # Firebase App Check (datasource + repo + binds)
+```
+
+### 20.5 Regras de domínio relevantes
+
+- **Período de orçamentos:** o ID do orçamento é o timestamp (ms) de criação. O
+  período vira range de IDs no Firestore (`fetchBudgetsByMonthRange`), do início
+  do dia `from` até **23:59:59.999** do dia `to` (o último dia entra inteiro).
+- **Recibo = descrição + pagamentos** (`RECIBOS/{id}/…` pagamentos). O valor
+  recebido é um `PaymentCustomer` dentro do recibo — mesmo formato das telas.
+- **Estado compartilhado dos repositórios de recibo:** `ReceiptRepository.budgetId`
+  e `ReceiptPaymentRepository.budgetId/receiptId` são usados pelas telas. Todo
+  UseCase que os altera **restaura o valor anterior no `finally`**.
+- **Forma de pagamento:** usa `PaymentStrings.paymentTypeOptions` (o que as telas
+  gravam hoje em `METODO`). ⚠️ Débito técnico: é label traduzido persistido.
+
+### 20.6 UX do chat no modo IA
+
+- **Opção "Relatórios"** (5ª do menu, só no modo IA): mostra "Descreva o que você
+  precisa saber" + exemplo em destaque; o texto seguinte vai para a IA.
+- **Digitando…:** `ChatTypingIndicator` no fim da lista enquanto
+  `ChatAssistantViewModel.isAiThinking` (modelo pensando ou ação confirmada gravando).
+- **Cards:** `budgetList` e `summaryCard` são `ChatMessageType` próprios e ficam
+  sempre clicáveis; botão de link (`share_url|`) também.
+- **Confirmação:** reaproveita `inlineButtons` com `aiConfirmLabel`/`aiCancelLabel`.
+  Nova mensagem digitada descarta a confirmação pendente.
+- **Handoff:** `start_flow` entra no fluxo determinístico do menu — fluxos ricos
+  em UI (contato, CEP, modal de produto, logo) **não são reescritos para a IA**.
+
+### 20.7 Custo
+
+| Controle | Onde |
+|----------|------|
+| Modelo `gemini-3.5-flash-lite`, `temperature 0.2`, `maxOutputTokens 512` | `ChatAiRemoteDatasource` |
+| Toque em botão/confirmação **nunca** chama a IA | ViewModel / `ConfirmAgentActionUsecase` |
+| Máx. 20 itens por `functionResponse`; lista completa só no card | `DispatchAgentToolUsecase` |
+| Histórico de 20 mensagens | `ChatAiRepositoryImpl` |
+| **100 mensagens/dia por usuário** (`RunAgentTurnUsecase.dailyLimit`) | contador local |
+| Log `[ChatAI] tokens in=… out=…` por chamada | `ChatAiRepositoryImpl` |
+
+Faturamento: Gemini Developer API (AI Studio). Usar **recarga automática** com
+teto e alerta de orçamento — com créditos zerados toda chamada falha (e o chat
+cai no modo padrão).
+
+### 20.8 Rede de segurança (IA falhou → modo padrão)
+
+`ResolveAiFailureUsecase` decide; o ViewModel só conta falhas e aplica:
+
+| Situação | Resultado |
+|----------|-----------|
+| 1ª falha (erro, timeout, cota, resposta vazia, exceção) | Mensagem `aiFallback`; segue no modo IA |
+| `maxConsecutiveFailures` (2) falhas seguidas | Mensagem `aiUnavailable`, `_aiMode = false`, menu reenviado **sem apagar a conversa** (`ResetChatToMenuUsecase(clearSession: false)`) — chat igual ao free |
+| Limite diário | Mensagem `aiDailyLimit` + modo padrão já na 1ª vez |
+| Resposta boa | Zera o contador |
+| Reiniciar conversa (↻) | Reavalia o acesso e volta a tentar a IA |
+
+Timeouts: **20 s** por chamada ao modelo (DataSource) e **45 s** por turno (ViewModel).
+
+### 20.9 Configuração e ambiente
+
+- **Acesso:** `CheckAiAccessUsecase` = `aiChatEnabled && (FORCE_PREMIUM || autoRenewing)`.
+- **`FORCE_PREMIUM`** (bool, opcional) só em `env/development_environment.json`.
+  `Environment.forcePremium` é sempre `false` em release. Libera **apenas a IA** —
+  nunca grava `AutoRenewing` no usuário (o `UserRemoteDataSource` persiste o model).
+- **App Check** (`core/app_check`, ativado no `main` só em mobile): release usa
+  Play Integrity / App Attest (com fallback DeviceCheck); debug usa o provider de
+  debug.
+  - **Android:** token fixo via `--dart-define-from-file=env/app_check_debug.json`
+    (arquivo no `.gitignore`, chave `APP_CHECK_DEBUG_TOKEN`).
+  - **iOS (simulador):** o SDK ignora o token do `dart-define` e usa um token
+    local por instalação. Pegue-o no log nativo e cadastre no Console:
+    `xcrun simctl spawn booted log show --last 30m --style compact --predicate 'eventMessage CONTAINS "Firebase App Check debug token"' | grep -o "token: .*" | tail -1`
+  - Tokens de debug: Console → App Check → Apps → ⋮ → Gerenciar tokens de depuração.
+- **Android Studio:** em *Additional run args* da config `development`:
+  `--dart-define-from-file=env/development_environment.json --dart-define-from-file=env/app_check_debug.json`.
+
+### 20.10 Testes
+
+| Arquivo | Cobre |
+|---------|-------|
+| `test/modules/chat_assistant/run_agent_turn_usecase_test.dart` | acesso, loop texto/tool/escrita/handoff, limite diário, corte de loop, parts cruas |
+| `test/modules/chat_assistant/dispatch_agent_tool_usecase_test.dart` | payload enxuto × card completo, validação de args, prévias, `ConfirmAgentActionUsecase` |
+| `test/modules/chat_assistant/resolve_ai_failure_usecase_test.dart` | rede de segurança |
+| `test/modules/chat_assistant/reports_menu_usecase_test.dart` | opção Relatórios e menu com/sem ela |
+| `test/modules/budget/domain/usecase/list_budgets_and_summary_usecase_test.dart` | período, acento, agregação, status |
+| `test/modules/receipt/create_receipt_for_budget_usecase_test.dart` | recibo + pagamento + restauração de estado |
+
+Pendente: suíte de avaliação contra o modelo real (frases → tool + args esperados),
+a rodar a cada troca de modelo/prompt.
 
 ---
 
