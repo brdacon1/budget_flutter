@@ -26,7 +26,10 @@ class AppCheckRemoteDataSource {
           : const AndroidPlayIntegrityProvider(),
       providerApple: kDebugMode
           ? AppleDebugProvider(debugToken: token)
-          : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+          // DeviceCheck: não exige entitlement nem mudança no provisioning
+          // profile. Migrar para App Attest exige o entitlement
+          // `appattest-environment` + App ID + novo profile no CI.
+          : const AppleDeviceCheckProvider(),
     );
   }
 }

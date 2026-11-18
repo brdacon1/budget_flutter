@@ -2226,7 +2226,8 @@ Timeouts: **20 s** por chamada ao modelo (DataSource) e **45 s** por turno (View
   `Environment.forcePremium` é sempre `false` em release. Libera **apenas a IA** —
   nunca grava `AutoRenewing` no usuário (o `UserRemoteDataSource` persiste o model).
 - **App Check** (`core/app_check`, ativado no `main` só em mobile): release usa
-  Play Integrity / App Attest (com fallback DeviceCheck); debug usa o provider de
+  Play Integrity (Android) / **DeviceCheck** (iOS — não exige entitlement nem
+  novo provisioning profile; App Attest exigiria ambos); debug usa o provider de
   debug.
   - **Android:** token fixo via `--dart-define-from-file=env/app_check_debug.json`
     (arquivo no `.gitignore`, chave `APP_CHECK_DEBUG_TOKEN`).
