@@ -242,6 +242,7 @@ class PdfGenerateBudgetSimpleUsecase {
     addRow(owner.fone);
     addRow(owner.rua);
     addRow(owner.city);
+    if (owner.cep != null && owner.cep!.isNotEmpty) addRow('CEP: ${owner.cep}');
 
     final PdfGridCellStyle style =
         PdfGridCellStyle()..borders.all = PdfPens.transparent;

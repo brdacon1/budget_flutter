@@ -964,6 +964,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     if (_isPdfEditAddressMode) {
       await _savePdfAddress(
+        zip:
+            _isCorrectingAddress
+                ? _cepMask.maskText(cepController.text.trim())
+                : null,
         street: fullStreet,
         city: city,
         neighborhood: neighborhood.isEmpty ? null : neighborhood,
