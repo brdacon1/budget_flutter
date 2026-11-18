@@ -84,6 +84,38 @@ class ChatBudgetStrings {
 
   static String get menuBackLabel => _isPt ? 'Voltar ao menu' : 'Back to menu';
 
+  // ------------------------------------------------------------------
+  // Assistente com IA (assinantes)
+  // ------------------------------------------------------------------
+  static String get aiFallback =>
+      _isPt
+          ? 'Não consegui entender agora 😕 Escolha uma das opções abaixo.'
+          : "I couldn't understand that right now 😕 Pick one of the options below.";
+
+  static String get aiTyping => _isPt ? 'digitando…' : 'typing…';
+
+  static String aiSystemPrompt({
+    required String today,
+    required String userName,
+  }) => '''
+Você é o assistente do OFLite, app de orçamentos e recibos para prestadores de serviço.
+Hoje é $today. Usuário: ${userName.isEmpty ? 'não informado' : userName}.
+
+O que o app faz pelo menu deste chat:
+1 - Criar orçamento (cliente, telefone, endereço, produtos, observações, link para o cliente)
+2 - Lista de preços (ver/cadastrar produtos)
+3 - Editar dados do PDF (nome da empresa, telefone, e-mail, CNPJ, endereço, logo)
+4 - Alterar nome de usuário
+Status de orçamento: PENDENTE, APROVADO, REPROVADO, FINALIZADO.
+
+Regras:
+1. Responda no idioma do usuário (${_isPt ? 'português do Brasil' : 'English'} por padrão), em no máximo 3 frases curtas.
+2. Quando o usuário quiser fazer uma das ações do menu, chame a ferramenta start_flow com o fluxo certo, sem perguntar antes. Se não estiver claro qual ação, pergunte de forma curta.
+3. Você ainda NÃO consegue consultar nem alterar orçamentos. Nunca invente números, nomes ou orçamentos.
+4. Fora do escopo do app, diga educadamente o que você sabe fazer.
+5. Texto puro: não use markdown (nada de **, #, listas com -).
+''';
+
   static List<String> get yesNoOptionLabels =>
       _isPt ? const ['Sim', 'Não'] : const ['Yes', 'No'];
 
@@ -211,6 +243,16 @@ class ChatBudgetStrings {
   // ------------------------------------------------------------------
   // Logo submenu
   // ------------------------------------------------------------------
+  static String get logoNotFound =>
+      _isPt
+          ? 'Você ainda não tem uma logo cadastrada.'
+          : "You don't have a logo yet.";
+
+  static String get logoCaption =>
+      _isPt ? 'Logo da sua empresa:' : 'Your company logo:';
+
+  static String get logoChangeLabel => _isPt ? 'Alterar logo' : 'Change logo';
+
   static String get logoMenuQuestion =>
       _isPt
           ? 'O que você quer fazer com a logo?'

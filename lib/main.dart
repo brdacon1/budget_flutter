@@ -8,6 +8,7 @@ import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/core/app_check/domain/repository/app_check_repository.dart';
 import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
@@ -33,6 +34,8 @@ Future<void> main() async {
   // capturar falhas na inicialização deles.
   if (!kIsWeb) {
     await getIt<CrashlyticsRepository>().initialize();
+    // App Check protege a cota do Firebase AI Logic (chat com IA).
+    await getIt<AppCheckRepository>().initialize();
   }
 
   // Inicializa Google Sign-In exatamente uma vez por execução do app.

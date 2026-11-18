@@ -14,10 +14,7 @@ class UpdatePdfFieldUsecase {
 
   /// Atualiza o campo [field] com o [value] informado.
   /// Retorna o OwnerPdf atualizado ou erro.
-  Future<Result<OwnerPdf>> call(
-    String field,
-    String value,
-  ) async {
+  Future<Result<OwnerPdf>> call(String field, String value) async {
     // 1. Busca o OwnerPdf atual
     final fetchResult = await _pdfRepo.fetchInformationEnterprise();
     if (fetchResult is Error<OwnerPdf>) {

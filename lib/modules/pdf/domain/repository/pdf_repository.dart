@@ -27,6 +27,9 @@ abstract class PdfRepository extends ChangeNotifier {
     bool forceRefresh = false,
   });
 
+  /// URL do logo da empresa, ou null quando não há logo cadastrado.
+  String? logoUrl(OwnerPdf owner);
+
   /// Bytes do logo da empresa (null quando não há logo ou o download não
   /// retornou 200). [authToken] opcional tem prioridade sobre a sessão atual.
   Future<Result<Uint8List?>> fetchLogo(

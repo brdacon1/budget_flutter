@@ -2,7 +2,12 @@ import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_budget_repository_impl.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_script_repository_impl.dart';
@@ -39,6 +44,9 @@ void registerChatBudgetDependencies(GetIt sl) {
   sl.registerLazySingleton<ChatBudgetRemoteDataSource>(
     () => ChatBudgetRemoteDataSource(),
   );
+  sl.registerLazySingleton<ChatAiRemoteDatasource>(
+    () => ChatAiRemoteDatasource(),
+  );
 
   // ------------------------------------------------------------------
   // Repositories (interface -> implementation)
@@ -48,6 +56,9 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ChatScriptRemoteDataSource>(),
       sl<UserRepository>(),
     ),
+  );
+  sl.registerLazySingleton<ChatAiRepository>(
+    () => ChatAiRepositoryImpl(sl<ChatAiRemoteDatasource>()),
   );
   sl.registerLazySingleton<ChatBudgetRepository>(
     () => ChatBudgetRepositoryImpl(
@@ -152,6 +163,16 @@ void registerChatBudgetDependencies(GetIt sl) {
   );
 
   // ------------------------------------------------------------------
+  // Usecases IA (assinantes)
+  // ------------------------------------------------------------------
+  sl.registerLazySingleton<CheckAiAccessUsecase>(
+    () => CheckAiAccessUsecase(sl<UserRepository>()),
+  );
+  sl.registerLazySingleton<RunAgentTurnUsecase>(
+    () => RunAgentTurnUsecase(sl<ChatAiRepository>(), sl<UserRepository>()),
+  );
+
+  // ------------------------------------------------------------------
   // ViewModels (Factory)
   // ------------------------------------------------------------------
   sl.registerFactory<ChatAssistantViewModel>(
@@ -172,6 +193,9 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<HandleLogoMenuOptionUsecase>(),
       sl<OnLogoUpdatedUsecase>(),
       sl<PdfRepository>(),
+      sl<ChatAiRepository>(),
+      sl<CheckAiAccessUsecase>(),
+      sl<RunAgentTurnUsecase>(),
     ),
   );
 }
