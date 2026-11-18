@@ -240,6 +240,30 @@ class PdfGenerateBudgetExecutiveUsecase {
     if (hasCnpj || hasFone) leftH += 12;
     if (owner.email != null && owner.email!.isNotEmpty) leftH += 12;
 
+    // Endereço completo (mesma composição do layout Profissional).
+    final String address = [
+      owner.rua,
+      owner.bairro,
+      owner.city,
+      if (owner.cep != null && owner.cep!.isNotEmpty) 'CEP: ${owner.cep}',
+    ].where((p) => p != null && p.isNotEmpty).join(' - ');
+    final double textLeft = logoW > 0 ? padH + logoW + 12 : padH;
+    final double addressW = pageWidth * 0.5 - textLeft - 8;
+    final PdfFont grayReg = PdfStandardFont(
+      PdfFontFamily.helvetica,
+      9,
+      style: PdfFontStyle.regular,
+    );
+    final double addressH = address.isEmpty
+        ? 0
+        : grayReg
+              .measureString(
+                _sanitizeText('Endereço: $address'),
+                layoutArea: Size(addressW, 0),
+              )
+              .height;
+    leftH += addressH;
+
     // --- Altura do conteúdo direito ---
     const double rightH = 14 + 22; // título ciano + número grande
 
@@ -261,18 +285,12 @@ class PdfGenerateBudgetExecutiveUsecase {
     }
 
     // --- Texto esquerdo ---
-    final double textLeft = logoW > 0 ? padH + logoW + 12 : padH;
     double y = padV + (contentH - leftH) / 2;
 
     final PdfFont whiteBold = PdfStandardFont(
       PdfFontFamily.helvetica,
       13,
       style: PdfFontStyle.bold,
-    );
-    final PdfFont grayReg = PdfStandardFont(
-      PdfFontFamily.helvetica,
-      9,
-      style: PdfFontStyle.regular,
     );
     final PdfBrush white = PdfBrushes.white;
     final PdfBrush gray = PdfSolidBrush(PdfColor(180, 190, 200));
@@ -306,6 +324,15 @@ class PdfGenerateBudgetExecutiveUsecase {
         bounds: Rect.fromLTWH(textLeft, y, pageWidth * 0.5, 12),
       );
       y += 12;
+    }
+    if (address.isNotEmpty) {
+      g.drawString(
+        _sanitizeText('Endereço: $address'),
+        grayReg,
+        brush: gray,
+        bounds: Rect.fromLTWH(textLeft, y, addressW, addressH),
+      );
+      y += addressH;
     }
 
     // --- Texto direito ---
