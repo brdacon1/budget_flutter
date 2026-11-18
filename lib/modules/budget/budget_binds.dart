@@ -6,6 +6,7 @@ import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dar
 import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/update_budget_item_quantity_usecase.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 
@@ -25,10 +26,12 @@ void registerBudgetDependencies(GetIt sl) {
   );
 
   sl.registerFactory<DuplicateBudgetUsecase>(
-    () => DuplicateBudgetUsecase(
-      sl<BudgetRepository>(),
-      sl<ReceiptRepository>(),
-    ),
+    () =>
+        DuplicateBudgetUsecase(sl<BudgetRepository>(), sl<ReceiptRepository>()),
+  );
+
+  sl.registerFactory<UpdateBudgetItemQuantityUsecase>(
+    () => UpdateBudgetItemQuantityUsecase(sl<BudgetRepository>()),
   );
 
   // ViewModels

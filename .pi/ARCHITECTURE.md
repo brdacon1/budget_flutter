@@ -113,7 +113,8 @@ lib/
 | View (página)          | `{feature}_view.dart`                       | `budget_list_view.dart`                       |
 | ViewModel              | `{feature}_view_model.dart`                 | `budget_list_view_model.dart`                 |
 | Componente             | `{feature}_{nome}.dart`                     | `budget_list_card.dart`                       |
-| Modal                  | `{feature}_{acao}_bottom_modal_widget.dart` | `budget_list_delete_bottom_modal_widget.dart` |
+| Modal simples          | `{feature}_{acao}_bottom_modal_widget.dart` | `budget_list_delete_bottom_modal_widget.dart` |
+| Modal complexo (tela)  | `presenter/{modal}/{modal}_view.dart` + `_view_model.dart` | `budget_item_quantity_view.dart` (ver §19) |
 | Strings do módulo      | `{modulo}_pt_string.dart`                   | `login_pt_string.dart`                        |
 | DataSource             | `{feature}_remote_datasource.dart`          | `budget_remote_datasource.dart`               |
 | Repository (impl)      | `{feature}_repository_impl.dart`            | `budget_repository_impl.dart`                 |
@@ -1192,13 +1193,14 @@ etc.
 | 8      | UseCase é independente de UI e de fonte de dados                                                                                                         |
 | 9      | Usar `Result<T, E>` (quando aplicável) para fluxos de erro                                                                                               |
 | 10     | Componentes (widgets) ficam em `presenter/components/` ou subpastas. **NUNCA crie `class _AlgumaCoisa extends StatelessWidget/StatefulWidget` dentro da View** |
-| 11     | Modais ficam em `presenter/components/modals/`                                                                                                           |
+| 11     | Modais **simples** ficam em `presenter/components/modals/`. Modais **complexos** são **telas**: pasta própria com View + ViewModel + `components/` (§19) |
 | 12     | **Strings ficam dentro do módulo, em `presenter/strings/{modulo}_pt_string.dart`**                                                                       |
 | 13     | **Models/Entities de feature ficam no módulo dono (`data/model/` ou `domain/entity/`). `shared/models/` é EXCEÇÃO — só infra global (`Result<T>` etc.)** |
 | **14** | **Todo módulo que tem `presenter/` (tela) deve expor `{module}_routes.dart`**                                                                            |
 | **15** | **Todo módulo `core/` que acessa fonte externa deve ter `data/datasource/`**                                                                             |
 | **16** | **Toda cor vem de `lib/shared/common/constants/colors.dart` — nunca `Color(0x...)` ou `Colors.*` direto no widget (ver seção 15)**                       |
 | **17** | **Tela Web só existe se for registrada no `main_web.dart` (+ rewrite no `firebase.json`). Nada do app mobile é exposto no Web por padrão (ver seção 16)** |
+| **18** | **Modal complexo é TELA: pasta própria com `{modal}_view.dart` + `{modal}_view_model.dart` + `components/` (um widget por arquivo). Só modal simples (sem usecase/repository, sem estado) dispensa ViewModel (ver seção 19)** |
 
 ---
 
@@ -1373,6 +1375,10 @@ criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
 5. Atualizar o componente de PDF se necessário
 
 ### Criar um modal de ações
+
+> Antes, classifique o modal (§19): se for **complexo**, ele é uma **tela**
+> (pasta própria com View + ViewModel + `components/`). Os passos abaixo valem
+> só para modal **simples**.
 
 1. Criar em `presenter/components/modals/{nome}_bottom_modal_widget.dart`
 2. Usar `showModalBottomSheet` na View
@@ -1986,6 +1992,60 @@ await getIt<DisplayAlertRepository>().notificationNotCloseScreen(
 - Verifique `mounted` antes de usar `context` após `await`.
 - Para erro de **campo específico**, use erro inline abaixo do campo (§17.4),
   não snackbar.
+
+
+---
+
+## 19. Modais — Simples × Complexos (Modal-Tela)
+
+> **Regra de Ouro**: modal complexo **é uma tela**. Tem pasta própria, View,
+> ViewModel e `components/` — exatamente como qualquer tela de `presenter/`.
+> A única diferença é que é aberto com `showModalBottomSheet` em vez de rota.
+> Colocar vários widgets, estado e regra dentro de um único arquivo
+> `*_bottom_modal_widget.dart` é **inadmissível**.
+
+### 19.1 Como classificar
+
+| O modal… | Tipo | Estrutura |
+|---|---|---|
+| Só exibe texto/opções e devolve uma escolha (`Sim/Não`, lista de ações, aviso) | **Simples** | 1 arquivo `{feature}_{acao}_bottom_modal_widget.dart`, sem ViewModel |
+| Usa **UseCase ou Repository** (salva, busca, atualiza) | **Complexo** | Modal-tela |
+| Tem **estado** de formulário (controller, validação, dirty, erro inline, valor calculado ao vivo) | **Complexo** | Modal-tela |
+| Precisa de **mais de um widget** próprio para ser montado | **Complexo** | Modal-tela |
+
+> Na dúvida, é complexo. Modal simples **não** chama UseCase nem Repository de
+> implementação — se precisar, vira modal-tela.
+
+### 19.2 Estrutura do modal-tela
+
+```
+presenter/
+└── budget_item_quantity/                       # pasta própria (= tela)
+    ├── budget_item_quantity_view.dart          # View + helper show...BottomModal
+    ├── budget_item_quantity_view_model.dart    # estado + Command de save
+    └── components/                             # 1 widget público por arquivo
+        ├── budget_item_quantity_input.dart
+        └── budget_item_quantity_read_only_field.dart
+```
+
+### 19.3 Regras
+
+| # | Regra |
+|---|-------|
+| 1 | A **View** é `StatefulWidget`: cria o ViewModel no `initState`, descarta no `dispose`, reconstrói via `AnimatedBuilder`. Usa `AppBottomModal` como base visual. |
+| 2 | O **ViewModel** detém estado (controllers, erro inline, dirty, valores calculados) e executa a ação async via **`Command`** (§4.4) chamando o **UseCase/Repository**. |
+| 3 | **Nenhuma classe de widget além da View** no arquivo da View, nem `class _Algo` (§2.1). Todo widget auxiliar vai em `components/` do próprio modal, **um por arquivo**, público, recebendo dados + callbacks (nunca o ViewModel inteiro). |
+| 4 | O helper `show{Modal}BottomModal(context, …)` fica no arquivo da View e **retorna o resultado** (`bool`/valor) para a tela de origem — ex.: `true` quando salvou. |
+| 5 | **Quem salva é o modal.** Em erro, o modal continua aberto (preserva o que foi digitado) e mostra o feedback (§18). Em sucesso, fecha com `pop(true)`. |
+| 6 | A **tela de origem** só reage ao retorno (recarregar lista/totais + snackbar de sucesso). Ela **não** recebe o valor cru para salvar por conta própria. |
+| 7 | Strings em `presenter/strings/` do módulo; cores de `colors.dart` (§15). |
+| 8 | **Altura máxima de 80%** da área visível (tela − teclado), garantida pelo `AppBottomModal` (`maxHeightFactor`). Header (handle + título + fechar) fica fixo e **nunca** vai para baixo da status bar; o conteúdo **rola por dentro**: o `child` é um `SingleChildScrollView`/`ListView`, ou passe `scrollable: true` quando o conteúdo é fixo (Column/Padding). Nunca abrir modal em tela cheia sem SafeArea. |
+
+### 19.4 Referências no projeto
+
+- **Modal-tela**: `budget/presenter/budget_item_quantity/` (detalhes do item +
+  edição de quantidade), `product/presenter/product_price_creator/`.
+- **Modal simples**: `shared/common/widgets/modals/confirm_bottom_modal_widget.dart`.
 
 ---
 

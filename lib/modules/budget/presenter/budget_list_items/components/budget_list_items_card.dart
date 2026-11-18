@@ -8,20 +8,23 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Card de item do orçamento.
 ///
 /// Todas as informações ficam visíveis (sem expandir): descrição, categoria,
-/// quantidade × preço e total. A seleção para remoção é feita direto na tela
-/// pelo check circular (mesmo padrão da lista de preços).
+/// quantidade × preço e total. Tocar no card abre os detalhes do item
+/// ([onTap]); a seleção para remoção é feita só pelo check circular
+/// ([onToggleSelect]).
 class BudgetListItemsCard extends StatelessWidget {
   const BudgetListItemsCard({
     super.key,
     required this.item,
     required this.selected,
     required this.moneyConvert,
+    required this.onTap,
     required this.onToggleSelect,
   });
 
   final ItemsBudget item;
   final bool selected;
   final ConvertCoinRepository moneyConvert;
+  final VoidCallback onTap;
   final VoidCallback onToggleSelect;
 
   String _qty(double? q) {
@@ -42,9 +45,9 @@ class BudgetListItemsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onToggleSelect,
+          onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.fromLTRB(14, 14, 3, 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
@@ -85,14 +88,18 @@ class BudgetListItemsCard extends StatelessWidget {
                         '${_qty(item.quantity)}${measure.isEmpty ? '' : ' $measure'}'
                         ' × ${moneyConvert.convertFromDouble(item.price ?? 0)}',
                         style: GoogleFonts.heebo(
-                            color: mutedTextColor, fontSize: 12),
+                          color: mutedTextColor,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: bgColor,
                               borderRadius: BorderRadius.circular(20),
@@ -100,7 +107,9 @@ class BudgetListItemsCard extends StatelessWidget {
                             child: Text(
                               category?.label ?? (item.category ?? ''),
                               style: GoogleFonts.heebo(
-                                  color: mutedTextColor, fontSize: 11),
+                                color: mutedTextColor,
+                                fontSize: 11,
+                              ),
                             ),
                           ),
                           const Spacer(),
@@ -117,8 +126,16 @@ class BudgetListItemsCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                _SelectCircle(selected: selected),
+                const SizedBox(width: 1),
+                // Área de toque de 48px só para o check (26 + 2 × 11).
+                InkResponse(
+                  onTap: onToggleSelect,
+                  radius: 24,
+                  child: Padding(
+                    padding: const EdgeInsets.all(11),
+                    child: _SelectCircle(selected: selected),
+                  ),
+                ),
               ],
             ),
           ),
@@ -147,9 +164,8 @@ class _SelectCircle extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: selected
-          ? const Icon(Icons.check, size: 16, color: bgColor)
-          : null,
+      child:
+          selected ? const Icon(Icons.check, size: 16, color: bgColor) : null,
     );
   }
 }

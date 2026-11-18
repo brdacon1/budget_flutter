@@ -15,7 +15,6 @@ class BudgetListItemsViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository =
       getIt<ProductPriceRepository>();
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
-
   BudgetListItemsViewModel({required this.item});
 
   final searchController = TextEditingController();
@@ -47,7 +46,11 @@ class BudgetListItemsViewModel extends ChangeNotifier {
         result is Ok<List<ItemsBudget>>
             ? List<ItemsBudget>.of(result.value)
             : <ItemsBudget>[];
-    selected.clear();
+    // Mantém a seleção (por id) entre recargas: as instâncias são novas.
+    final keepIds = selected.map((e) => e.id).toSet();
+    selected
+      ..clear()
+      ..addAll(budgets.where((b) => keepIds.contains(b.id)));
     loading = false;
 
     totalProducts = 0;

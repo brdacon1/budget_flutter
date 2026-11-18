@@ -127,6 +127,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: CommentStrings.title,
       buttonLabel: _submitting ? CommentStrings.saving : widget.buttonLabel,
       onButtonPressed: _submitting ? () {} : _submit,
