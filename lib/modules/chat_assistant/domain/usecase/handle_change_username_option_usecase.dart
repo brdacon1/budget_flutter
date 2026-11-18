@@ -21,7 +21,10 @@ class HandleChangeUsernameOptionUsecase {
             timestamp: DateTime.now(),
           ),
         );
-        return const ChatMenuResult('changeUsername', navigation: 'open_change_name');
+        return const ChatMenuResult(
+          'changeUsername',
+          navigation: 'open_change_name',
+        );
       case '0':
         return const ChatMenuResult('mainMenu');
       default:

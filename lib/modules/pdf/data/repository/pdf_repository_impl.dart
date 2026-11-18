@@ -150,6 +150,12 @@ class PdfRepositoryImpl extends PdfRepository {
   }
 
   @override
+  String? logoUrl(OwnerPdf owner) {
+    final fotoId = owner.fotoId ?? '';
+    return fotoId.isEmpty ? null : _pdfRemote.logoUrl(fotoId, owner.logoName);
+  }
+
+  @override
   Future<Result<Uint8List?>> fetchLogo(
     OwnerPdf owner, {
     String? authToken,
@@ -160,12 +166,7 @@ class PdfRepositoryImpl extends PdfRepository {
 
     if (_logoFotoId != fotoId || _logo == null) {
       try {
-        // `fotoId` novo já é a URL completa (token público embutido); dados
-        // antigos guardam só o token e a URL é montada a partir do `logoName`.
-        final String url =
-            fotoId.startsWith('http')
-                ? fotoId
-                : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/${owner.logoName}?alt=media&token=$fotoId';
+        final String url = _pdfRemote.logoUrl(fotoId, owner.logoName);
         // Web: sem header Authorization (dispara preflight CORS no Storage).
         final String? bearer =
             kIsWeb ? null : await _resolveAuthToken(authToken);

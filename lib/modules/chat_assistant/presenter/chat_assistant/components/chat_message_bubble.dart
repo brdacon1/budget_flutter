@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_budget_list_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_month_summary_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
@@ -297,6 +299,13 @@ class ChatMessageBubble extends StatelessWidget {
           enabled: buttonsEnabled,
           onSelect: onOptionSelect,
         );
+      case ChatMessageType.budgetList:
+        return ChatBudgetListCard(
+          payload: message.payload ?? {},
+          onTap: onAction,
+        );
+      case ChatMessageType.summaryCard:
+        return ChatMonthSummaryCard(payload: message.payload ?? {});
       case ChatMessageType.text:
         return const SizedBox.shrink();
     }

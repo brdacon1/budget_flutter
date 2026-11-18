@@ -22,32 +22,54 @@ class ShowPdfEditConfirmEntryUsecase {
 
     final dataRows = <Map<String, String>>[];
 
-    dataRows.add(_row(
-      '🏢 Nome da empresa:',
-      owner?.empresa?.trim().isNotEmpty == true ? owner!.empresa!.trim() : 'Não cadastrado',
-    ));
-    dataRows.add(_row(
-      '📞 Telefone:',
-      owner?.fone?.trim().isNotEmpty == true ? owner!.fone!.trim() : 'Não cadastrado',
-    ));
-    dataRows.add(_row(
-      '📧 Email:',
-      owner?.email?.trim().isNotEmpty == true ? owner!.email!.trim() : 'Não cadastrado',
-    ));
-    dataRows.add(_row(
-      '🏛️ CNPJ:',
-      owner?.cnpj?.trim().isNotEmpty == true ? owner!.cnpj!.trim() : 'Não cadastrado',
-    ));
+    dataRows.add(
+      _row(
+        '🏢 Nome da empresa:',
+        owner?.empresa?.trim().isNotEmpty == true
+            ? owner!.empresa!.trim()
+            : 'Não cadastrado',
+      ),
+    );
+    dataRows.add(
+      _row(
+        '📞 Telefone:',
+        owner?.fone?.trim().isNotEmpty == true
+            ? owner!.fone!.trim()
+            : 'Não cadastrado',
+      ),
+    );
+    dataRows.add(
+      _row(
+        '📧 Email:',
+        owner?.email?.trim().isNotEmpty == true
+            ? owner!.email!.trim()
+            : 'Não cadastrado',
+      ),
+    );
+    dataRows.add(
+      _row(
+        '🏛️ CNPJ:',
+        owner?.cnpj?.trim().isNotEmpty == true
+            ? owner!.cnpj!.trim()
+            : 'Não cadastrado',
+      ),
+    );
 
     final addressParts = <String>[];
-    if (owner?.rua?.trim().isNotEmpty == true) addressParts.add(owner!.rua!.trim());
-    if (owner?.bairro?.trim().isNotEmpty == true) addressParts.add(owner!.bairro!.trim());
-    if (owner?.city?.trim().isNotEmpty == true) addressParts.add(owner!.city!.trim());
-    if (owner?.cep?.trim().isNotEmpty == true) addressParts.add('CEP: ${owner!.cep!.trim()}');
-    dataRows.add(_row(
-      '📍 Endereço:',
-      addressParts.isNotEmpty ? addressParts.join(' - ') : 'Não cadastrado',
-    ));
+    if (owner?.rua?.trim().isNotEmpty == true)
+      addressParts.add(owner!.rua!.trim());
+    if (owner?.bairro?.trim().isNotEmpty == true)
+      addressParts.add(owner!.bairro!.trim());
+    if (owner?.city?.trim().isNotEmpty == true)
+      addressParts.add(owner!.city!.trim());
+    if (owner?.cep?.trim().isNotEmpty == true)
+      addressParts.add('CEP: ${owner!.cep!.trim()}');
+    dataRows.add(
+      _row(
+        '📍 Endereço:',
+        addressParts.isNotEmpty ? addressParts.join(' - ') : 'Não cadastrado',
+      ),
+    );
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(

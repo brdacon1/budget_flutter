@@ -64,6 +64,15 @@ class PdfRemoteDataSource {
     return credential.user?.getIdToken();
   }
 
+  /// URL pública do logo no Firebase Storage.
+  ///
+  /// `fotoId` novo já é a URL completa (token embutido); dados antigos guardam
+  /// só o token e a URL é montada a partir do `logoName`.
+  String logoUrl(String fotoId, String? logoName) => fotoId.startsWith('http')
+      ? fotoId
+      : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
+            '${Uri.encodeComponent(logoName ?? '')}?alt=media&token=$fotoId';
+
   /// Baixa o logo do Firebase Storage. Retorna null se o status não for 200.
   /// [bearerToken] null = sem header Authorization (Web, evita preflight CORS).
   Future<({Uint8List bytes, bool isImage})?> downloadLogo(

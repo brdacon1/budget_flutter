@@ -2,7 +2,22 @@ import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/update_budget_status_usecase.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_local_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_remote_datasource.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_action_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_budget_repository_impl.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_script_repository_impl.dart';
@@ -19,6 +34,8 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_field_in
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_confirm_entry_usecase.dart';
@@ -39,6 +56,12 @@ void registerChatBudgetDependencies(GetIt sl) {
   sl.registerLazySingleton<ChatBudgetRemoteDataSource>(
     () => ChatBudgetRemoteDataSource(),
   );
+  sl.registerLazySingleton<ChatAiRemoteDatasource>(
+    () => ChatAiRemoteDatasource(),
+  );
+  sl.registerLazySingleton<ChatAiLocalDatasource>(
+    () => ChatAiLocalDatasource(),
+  );
 
   // ------------------------------------------------------------------
   // Repositories (interface -> implementation)
@@ -47,6 +70,12 @@ void registerChatBudgetDependencies(GetIt sl) {
     () => ChatScriptRepositoryImpl(
       sl<ChatScriptRemoteDataSource>(),
       sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<ChatAiRepository>(
+    () => ChatAiRepositoryImpl(
+      sl<ChatAiRemoteDatasource>(),
+      sl<ChatAiLocalDatasource>(),
     ),
   );
   sl.registerLazySingleton<ChatBudgetRepository>(
@@ -152,6 +181,43 @@ void registerChatBudgetDependencies(GetIt sl) {
   );
 
   // ------------------------------------------------------------------
+  // Usecases IA (assinantes)
+  // ------------------------------------------------------------------
+  sl.registerLazySingleton<CheckAiAccessUsecase>(
+    () => CheckAiAccessUsecase(sl<UserRepository>()),
+  );
+  sl.registerLazySingleton<DispatchAgentToolUsecase>(
+    () => DispatchAgentToolUsecase(
+      sl<ListBudgetsUsecase>(),
+      sl<GetMonthSummaryUsecase>(),
+      sl<ListReceiptsByBudgetUsecase>(),
+      sl<BudgetRepository>(),
+      sl<ShareLinkRepository>(),
+      sl<ConvertCoinRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<RunAgentTurnUsecase>(
+    () => RunAgentTurnUsecase(
+      sl<ChatAiRepository>(),
+      sl<UserRepository>(),
+      sl<DispatchAgentToolUsecase>(),
+    ),
+  );
+  sl.registerLazySingleton<ShowReportsPromptUsecase>(
+    () => ShowReportsPromptUsecase(sl<ChatBudgetRepository>()),
+  );
+  sl.registerLazySingleton<ResolveAiFailureUsecase>(
+    () => const ResolveAiFailureUsecase(),
+  );
+  sl.registerLazySingleton<ConfirmAgentActionUsecase>(
+    () => ConfirmAgentActionUsecase(
+      sl<ChatAiRepository>(),
+      sl<CreateReceiptForBudgetUsecase>(),
+      sl<UpdateBudgetStatusUsecase>(),
+    ),
+  );
+
+  // ------------------------------------------------------------------
   // ViewModels (Factory)
   // ------------------------------------------------------------------
   sl.registerFactory<ChatAssistantViewModel>(
@@ -172,6 +238,12 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<HandleLogoMenuOptionUsecase>(),
       sl<OnLogoUpdatedUsecase>(),
       sl<PdfRepository>(),
+      sl<ChatAiRepository>(),
+      sl<CheckAiAccessUsecase>(),
+      sl<RunAgentTurnUsecase>(),
+      sl<ConfirmAgentActionUsecase>(),
+      sl<ResolveAiFailureUsecase>(),
+      sl<ShowReportsPromptUsecase>(),
     ),
   );
 }

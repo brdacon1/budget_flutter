@@ -7,9 +7,15 @@ class HandlePriceListMenuOptionUsecase {
   ChatMenuResult call(String option) {
     switch (option) {
       case '1':
-        return const ChatMenuResult('priceListMenu', navigation: 'open_price_list');
+        return const ChatMenuResult(
+          'priceListMenu',
+          navigation: 'open_price_list',
+        );
       case '2':
-        return const ChatMenuResult('priceListMenu', navigation: 'open_product_creator');
+        return const ChatMenuResult(
+          'priceListMenu',
+          navigation: 'open_product_creator',
+        );
       case '0':
         return const ChatMenuResult('mainMenu');
       default:

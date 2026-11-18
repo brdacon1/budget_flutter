@@ -8,11 +8,10 @@ class ChatScriptRemoteDataSource {
   final FirebaseFirestore _firestore;
 
   ChatScriptRemoteDataSource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  DocumentReference _scriptDoc(String userUid) => _firestore
-      .collection('EMPRESAS/$userUid/CONFIG')
-      .doc('CHAT_SCRIPT');
+  DocumentReference _scriptDoc(String userUid) =>
+      _firestore.collection('EMPRESAS/$userUid/CONFIG').doc('CHAT_SCRIPT');
 
   /// Retorna o mapa do script ou null se não existir.
   Future<Map<String, dynamic>?> getScript(String userUid) async {

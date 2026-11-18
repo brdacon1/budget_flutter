@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
@@ -103,6 +105,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     // Limpa imediatamente para evitar re-executar no próximo build
     _vm.clearPendingNavigation();
+
+    if (nav.startsWith('open_budget|')) {
+      await _openBudget(nav.substring('open_budget|'.length));
+      return;
+    }
 
     switch (nav) {
       case 'open_price_list':
@@ -277,8 +284,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: _vm.messages.length,
+                  itemCount: _vm.messages.length + (_vm.isAiThinking ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index == _vm.messages.length) {
+                      return const ChatTypingIndicator();
+                    }
                     final msg = _vm.messages[index];
                     return ChatMessageBubble(
                       message: msg,
@@ -353,7 +363,21 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     );
   }
 
+  /// Abre a tela do orçamento (card da IA ou tool `open_budget`).
+  Future<void> _openBudget(String id) async {
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => BudgetTabView(item: budget)),
+    );
+  }
+
   void _handleAction(String action, ChatMessageEntity msg) async {
+    if (action.startsWith('open_budget|')) {
+      await _openBudget(action.substring('open_budget|'.length));
+      return;
+    }
     switch (action) {
       case 'pick_contact':
         await _vm.pickContactCommand.execute();

@@ -5,6 +5,7 @@ import 'package:oflite/modules/chat_assistant/chat_assistant_binds.dart';
 import 'package:oflite/modules/core/ads/ads_binds.dart';
 import 'package:oflite/modules/core/cep/cep_binds.dart';
 import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
+import 'package:oflite/modules/core/app_check/app_check_binds.dart';
 import 'package:oflite/modules/core/crashlytics/crashlytics_binds.dart';
 import 'package:oflite/modules/core/display_alert/display_alert_binds.dart';
 import 'package:oflite/modules/core/in_app_purchase/in_app_purchase_binds.dart';
@@ -45,6 +46,7 @@ void setupDependencyInjection() {
   // ------------------------------------------------------------------
 
   registerCrashlyticsDependencies(getIt);
+  registerAppCheckDependencies(getIt);
   registerConvertCoinDependencies(getIt);
   registerLoadingEventDependencies(getIt);
   registerDisplayAlertDependencies(getIt);

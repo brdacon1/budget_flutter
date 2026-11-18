@@ -1,10 +1,13 @@
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Exibe a logo da empresa no chat (mensagem tipo image).
+///
+/// A URL vem do [PdfRepository] — quem conhece o Storage é o DataSource.
 class ShowLogoInChatUsecase {
   final PdfRepository _pdfRepo;
   final ChatBudgetRepository _chatRepo;
@@ -15,42 +18,34 @@ class ShowLogoInChatUsecase {
     final result = await _pdfRepo.fetchInformationEnterprise();
     if (result is Error<OwnerPdf>) return false;
 
-    final owner = (result as Ok<OwnerPdf>).value;
-    final hasLogo = owner.fotoId != null && owner.fotoId!.isNotEmpty;
+    final imageUrl = _pdfRepo.logoUrl((result as Ok<OwnerPdf>).value);
+    final now = DateTime.now();
 
-    if (!hasLogo) {
+    if (imageUrl == null) {
       await _chatRepo.sendMessage(
         ChatMessageEntity(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: now.millisecondsSinceEpoch.toString(),
           sender: ChatSender.bot,
           type: ChatMessageType.text,
-          content: 'Você ainda não tem uma logo cadastrada.',
-          timestamp: DateTime.now(),
+          content: ChatBudgetStrings.logoNotFound,
+          timestamp: now,
         ),
       );
       return false;
     }
 
-    // `fotoId` pode ser a URL completa do Firebase (novo comportamento)
-    // ou apenas o token (legado). Tratamos ambos.
-    final String fotoId = owner.fotoId ?? '';
-    final imageUrl = fotoId.startsWith('http')
-        ? fotoId
-        : 'https://firebasestorage.googleapis.com/v0/b/orcamentofacil-lite.appspot.com/o/'
-          '${Uri.encodeComponent(owner.logoName ?? '')}?alt=media&token=$fotoId';
-
     await _chatRepo.sendMessage(
       ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: now.millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.image,
-        content: 'Logo da sua empresa:',
+        content: ChatBudgetStrings.logoCaption,
         payload: {
           'imageUrl': imageUrl,
           'changeAction': 'open_logo_edit',
-          'changeLabel': 'Alterar logo',
+          'changeLabel': ChatBudgetStrings.logoChangeLabel,
         },
-        timestamp: DateTime.now(),
+        timestamp: now,
       ),
     );
     return true;
