@@ -202,3 +202,8 @@ migrate_working_dir/
 # =============================================================================
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 /nul
+
+# Token de depuração do App Check (segredo local)
+env/app_check_debug.json
+# Widget Preview related
+.widget_preview/

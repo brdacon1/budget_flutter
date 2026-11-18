@@ -6,6 +6,9 @@ import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dar
 import 'package:oflite/modules/budget/domain/repository/budget_comment_repository.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/update_budget_status_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/update_budget_item_quantity_usecase.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
@@ -32,6 +35,16 @@ void registerBudgetDependencies(GetIt sl) {
 
   sl.registerFactory<UpdateBudgetItemQuantityUsecase>(
     () => UpdateBudgetItemQuantityUsecase(sl<BudgetRepository>()),
+  );
+
+  sl.registerLazySingleton<ListBudgetsUsecase>(
+    () => ListBudgetsUsecase(sl<BudgetRepository>()),
+  );
+  sl.registerLazySingleton<GetMonthSummaryUsecase>(
+    () => GetMonthSummaryUsecase(sl<ListBudgetsUsecase>()),
+  );
+  sl.registerLazySingleton<UpdateBudgetStatusUsecase>(
+    () => UpdateBudgetStatusUsecase(sl<BudgetRepository>()),
   );
 
   // ViewModels

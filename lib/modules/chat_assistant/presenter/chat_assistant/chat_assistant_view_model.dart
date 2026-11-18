@@ -6,10 +6,15 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_action_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/create_budget_from_chat_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/fetch_chat_script_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_change_username_option_usecase.dart';
@@ -21,6 +26,9 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_field_in
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
@@ -58,6 +66,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final HandleLogoMenuOptionUsecase _handleLogoMenuOption;
   final OnLogoUpdatedUsecase _onLogoUpdated;
   final PdfRepository _pdfRepo;
+  final ChatAiRepository _aiRepo;
+  final CheckAiAccessUsecase _checkAiAccess;
+  final RunAgentTurnUsecase _runAgentTurn;
+  final ConfirmAgentActionUsecase _confirmAgentAction;
+  final ResolveAiFailureUsecase _resolveAiFailure;
+  final ShowReportsPromptUsecase _showReportsPrompt;
 
   bool _disposed = false;
 
@@ -78,6 +92,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._handleLogoMenuOption,
     this._onLogoUpdated,
     this._pdfRepo,
+    this._aiRepo,
+    this._checkAiAccess,
+    this._runAgentTurn,
+    this._confirmAgentAction,
+    this._resolveAiFailure,
+    this._showReportsPrompt,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -106,6 +126,34 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   List<ChatMessageEntity> get messages => _chatRepo.messages;
+
+  /// Assinante: texto livre no menu principal vai para a IA.
+  /// Decidido uma vez por sessão no [_initialize].
+  bool _aiMode = false;
+
+  bool get aiMode => _aiMode;
+
+  /// IA processando (modelo ou ação confirmada) → View mostra "digitando…".
+  bool _isAiThinking = false;
+
+  bool get isAiThinking => _isAiThinking;
+
+  /// Falhas seguidas da IA nesta sessão (zera a cada resposta boa).
+  int _aiFailures = 0;
+
+  void _setAiThinking(bool value) {
+    _isAiThinking = value;
+    if (!_disposed) notifyListeners();
+  }
+
+  /// Escrita preparada pela IA aguardando "Confirmar"/"Cancelar".
+  AgentPendingAction? _pendingAgentAction;
+
+  /// Opções numéricas do menu principal (seguem o fluxo determinístico).
+  static const _mainMenuOptions = {'1', '2', '3', '4'};
+
+  /// Opção "Relatórios" do menu (só existe no modo IA).
+  static const _reportsOption = '5';
 
   CustomerInfo? get draftBudget => _chatRepo.draftBudget;
 
@@ -200,12 +248,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   Future<Result<void>> _initialize() async {
     _clearLocalState();
+    _aiMode = _checkAiAccess();
+    _aiFailures = 0;
     // Pré-carrega o intersticial do "compartilhar link" (ignorado p/ assinante)
     getIt<AdsRepository>().loadInterstitial();
     try {
       await _fetchScriptUsecase.call();
     } catch (_) {}
-    final step = await _resetToMenuUsecase();
+    final step = await _resetToMenuUsecase(withReports: _aiMode);
     _setStepFromName(step);
     notifyListeners();
     return Result.ok(null);
@@ -213,7 +263,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<void> _backToMainMenu() async {
     _clearLocalState();
-    final step = await _resetToMenuUsecase();
+    final step = await _resetToMenuUsecase(withReports: _aiMode);
     _setStepFromName(step);
     notifyListeners();
   }
@@ -244,6 +294,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pdfEditField = null;
     _pendingNavigation = null;
     _isPdfEditAddressMode = false;
+    _aiRepo.clearHistory();
+    _pendingAgentAction = null;
   }
 
   // ------------------------------------------------------------------
@@ -290,7 +342,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Chamado pela View a cada toque em botão de mensagem.
   void markButtonUsed(ChatMessageEntity msg, String action) {
-    if (_repeatableActions.contains(action)) return;
+    if (_repeatableActions.contains(action) || _isAiRepeatable(action)) return;
     _usedButtonMsgIds.add(msg.id);
     notifyListeners();
   }
@@ -301,7 +353,15 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// - `optionList`: também só fica ativo no step do menu. Texto digitado
   ///   (ex: opção inválida) não desativa — o menu continua utilizável.
   /// - Demais: também desativa quando há mensagem do usuário depois dela.
+  /// Cards da IA (abrir orçamento, compartilhar link) seguem clicáveis.
+  bool _isAiRepeatable(String action) =>
+      action.startsWith('open_budget|') || action.startsWith('share_url|');
+
   bool isButtonsActive(ChatMessageEntity msg) {
+    if (msg.type == ChatMessageType.budgetList ||
+        _isAiRepeatable(msg.payload?['action'] as String? ?? '')) {
+      return true;
+    }
     final isOptionList = msg.type == ChatMessageType.optionList;
     if (isOptionList && msg.payload?['optionsStep'] != _step.name) {
       return false;
@@ -397,7 +457,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     try {
-      if (_step == ChatFlowStep.mainMenu) {
+      if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          clean == _reportsOption) {
+        _setStepFromName(await _showReportsPrompt());
+        notifyListeners();
+      } else if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          !_mainMenuOptions.contains(clean)) {
+        await _handleAiMessage(clean);
+      } else if (_step == ChatFlowStep.mainMenu) {
         await _handleMainMenu(clean);
       } else if (_step == ChatFlowStep.priceListMenu) {
         await _handlePriceList(clean);
@@ -456,6 +525,107 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   // Handlers de menus delegando para UseCases
   // ------------------------------------------------------------------
+  /// Texto livre do assinante. Em falha (rede, cota, resposta vazia) mostra
+  /// o fallback — o menu acima continua ativo, o usuário nunca fica travado.
+  Future<void> _handleAiMessage(String text) async {
+    _pendingAgentAction = null; // nova mensagem descarta confirmação antiga
+    _setAiThinking(true);
+    Result<AgentTurnResult> result;
+    try {
+      // Teto do turno inteiro (modelo + consultas das tools): nunca trava.
+      result = await _runAgentTurn(text).timeout(const Duration(seconds: 45));
+    } catch (e) {
+      // Qualquer exceção inesperada conta como falha da IA (nunca trava).
+      result = Result.error(e is Exception ? e : Exception('$e'));
+    } finally {
+      _setAiThinking(false);
+    }
+    if (result case Error(:final error)) {
+      await _onAiFailure(error);
+      return;
+    }
+    _aiFailures = 0;
+    final turn = (result as Ok<AgentTurnResult>).value;
+
+    if (turn.menuOption != null) {
+      // Handoff: abre o mesmo fluxo da opção do menu.
+      await _handleMainMenu(turn.menuOption!);
+      return;
+    }
+    if (turn.pending != null) {
+      for (final card in turn.messages) {
+        await _chatRepo.sendMessage(card);
+      }
+      _pendingAgentAction = turn.pending;
+      await _addBotMessage(
+        turn.text,
+        type: ChatMessageType.inlineButtons,
+        payload: {
+          'actions': [
+            ChatBudgetStrings.aiConfirmLabel,
+            ChatBudgetStrings.aiCancelLabel,
+          ],
+        },
+      );
+      return;
+    }
+    if (turn.text.isNotEmpty) {
+      await _addBotMessage(turn.text, type: ChatMessageType.text);
+    }
+    for (final card in turn.messages) {
+      await _chatRepo.sendMessage(card);
+    }
+    if (turn.navigation != null) {
+      _pendingNavigation = turn.navigation;
+      notifyListeners();
+    }
+  }
+
+  /// Orçamento para a View abrir a tela (card da IA / tool `open_budget`).
+  Future<CustomerInfo?> budgetForNavigation(String id) async {
+    final result = await getIt<BudgetRepository>().getBudgetById(id);
+    return switch (result) {
+      Ok(:final value) when value.id != null => value,
+      _ => null,
+    };
+  }
+
+  /// Rede de segurança: avisa e, se a IA seguir falhando (ou bater o limite
+  /// diário), o chat continua no modo padrão — igual ao usuário free.
+  Future<void> _onAiFailure(Exception error) async {
+    _aiFailures++;
+    final decision = _resolveAiFailure(error, consecutiveFailures: _aiFailures);
+    await _addBotMessage(decision.message, type: ChatMessageType.text);
+    if (!decision.fallbackToStandard) return;
+
+    _aiMode = false;
+    _pendingAgentAction = null;
+    final step = await _resetToMenuUsecase(clearSession: false);
+    _setStepFromName(step);
+    notifyListeners();
+  }
+
+  /// Toque em Confirmar/Cancelar do card da IA. Não chama o modelo.
+  Future<void> _resolveAgentAction({required bool confirmed}) async {
+    final action = _pendingAgentAction;
+    if (action == null) return;
+    _pendingAgentAction = null;
+    await _sendUserMessageWithId(
+      _generateMessageId(),
+      confirmed
+          ? ChatBudgetStrings.aiConfirmLabel
+          : ChatBudgetStrings.aiCancelLabel,
+    );
+    _setAiThinking(true);
+    final String feedback;
+    try {
+      feedback = await _confirmAgentAction(action, confirmed: confirmed);
+    } finally {
+      _setAiThinking(false);
+    }
+    await _addBotMessage(feedback, type: ChatMessageType.text);
+  }
+
   Future<void> _handleMainMenu(String option) async {
     final result = await _handleMainMenuOption(option);
     _setStepFromName(result.nextStep);
@@ -599,9 +769,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   Future<Result<void>> _pickContact() async {
     try {
-      final permissionStatus = await user_info.FlutterContacts.permissions.request(
-        user_info.PermissionType.read,
-      );
+      final permissionStatus = await user_info.FlutterContacts.permissions
+          .request(user_info.PermissionType.read);
       if (permissionStatus != user_info.PermissionStatus.granted &&
           permissionStatus != user_info.PermissionStatus.limited) {
         return Result.ok(null);
@@ -1186,7 +1355,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       await _chatRepo.deleteDraft();
     }
     _clearLocalState();
-    final step = await _resetToMenuUsecase();
+    final step = await _resetToMenuUsecase(withReports: _aiMode);
     _setStepFromName(step);
     return Result.ok(null);
   }
@@ -1268,6 +1437,20 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Ação de botões inline
   // ------------------------------------------------------------------
   Future<void> handleAction(String action) async {
+    if (_pendingAgentAction != null &&
+        (action == ChatBudgetStrings.aiConfirmLabel ||
+            action == ChatBudgetStrings.aiCancelLabel)) {
+      await _resolveAgentAction(
+        confirmed: action == ChatBudgetStrings.aiConfirmLabel,
+      );
+      return;
+    }
+    if (action.startsWith('share_url|')) {
+      await SharePlus.instance.share(
+        ShareParams(text: action.substring('share_url|'.length)),
+      );
+      return;
+    }
     switch (action) {
       case 'pick_contact':
         await pickContactCommand.execute();

@@ -23,8 +23,11 @@ class HandlePdfFieldInputUsecase {
   Future<ChatMenuResult> call(String field, String value) async {
     switch (field) {
       case 'name':
-        return await _save('name', value,
-            successMsg: '${ChatBudgetStrings.pdfEditSuccessName} $value');
+        return await _save(
+          'name',
+          value,
+          successMsg: '${ChatBudgetStrings.pdfEditSuccessName} $value',
+        );
       case 'phone':
         final digits = value.replaceAll(RegExp(r'\D'), '');
         if (digits.length < 10 || digits.length > 11) {
@@ -40,8 +43,11 @@ class HandlePdfFieldInputUsecase {
           return const ChatMenuResult('pdfEditFieldInput', pdfField: 'phone');
         }
         final formatted = _phoneMask.maskText(digits);
-        return await _save('phone', formatted,
-            successMsg: '${ChatBudgetStrings.pdfEditSuccessPhone} $formatted');
+        return await _save(
+          'phone',
+          formatted,
+          successMsg: '${ChatBudgetStrings.pdfEditSuccessPhone} $formatted',
+        );
       case 'email':
         if (!value.contains('@') || !value.contains('.')) {
           await _chatRepo.sendMessage(
@@ -55,8 +61,11 @@ class HandlePdfFieldInputUsecase {
           );
           return const ChatMenuResult('pdfEditFieldInput', pdfField: 'email');
         }
-        return await _save('email', value,
-            successMsg: '${ChatBudgetStrings.pdfEditSuccessEmail} $value');
+        return await _save(
+          'email',
+          value,
+          successMsg: '${ChatBudgetStrings.pdfEditSuccessEmail} $value',
+        );
       case 'cnpj':
         final digits = value.replaceAll(RegExp(r'\D'), '');
         if (digits.length != 14) {
@@ -73,15 +82,21 @@ class HandlePdfFieldInputUsecase {
         }
         final masked =
             '${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/${digits.substring(8, 12)}-${digits.substring(12, 14)}';
-        return await _save('cnpj', masked,
-            successMsg: '${ChatBudgetStrings.pdfEditSuccessCnpj} $masked');
+        return await _save(
+          'cnpj',
+          masked,
+          successMsg: '${ChatBudgetStrings.pdfEditSuccessCnpj} $masked',
+        );
       default:
         return const ChatMenuResult('pdfEditFieldInput');
     }
   }
 
-  Future<ChatMenuResult> _save(String field, String value,
-      {required String successMsg}) async {
+  Future<ChatMenuResult> _save(
+    String field,
+    String value, {
+    required String successMsg,
+  }) async {
     final result = await _updatePdfField(field, value);
 
     if (result is Error<OwnerPdf>) {

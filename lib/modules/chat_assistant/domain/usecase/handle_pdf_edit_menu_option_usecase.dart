@@ -23,30 +23,34 @@ class HandlePdfEditMenuOptionUsecase {
     switch (option) {
       case '1':
         final current = owner?.empresa?.trim() ?? '';
-        final msg = current.isNotEmpty
-            ? 'O nome da empresa atual é "$current".\n${ChatBudgetStrings.pdfEditAskName}'
-            : ChatBudgetStrings.pdfEditAskName;
+        final msg =
+            current.isNotEmpty
+                ? 'O nome da empresa atual é "$current".\n${ChatBudgetStrings.pdfEditAskName}'
+                : ChatBudgetStrings.pdfEditAskName;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'name');
       case '2':
         final current = owner?.fone?.trim() ?? '';
-        final msg = current.isNotEmpty
-            ? 'O telefone atual é "$current".\n${ChatBudgetStrings.pdfEditAskPhone}'
-            : ChatBudgetStrings.pdfEditAskPhone;
+        final msg =
+            current.isNotEmpty
+                ? 'O telefone atual é "$current".\n${ChatBudgetStrings.pdfEditAskPhone}'
+                : ChatBudgetStrings.pdfEditAskPhone;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'phone');
       case '3':
         final current = owner?.email?.trim() ?? '';
-        final msg = current.isNotEmpty
-            ? 'O email atual é "$current".\n${ChatBudgetStrings.pdfEditAskEmail}'
-            : ChatBudgetStrings.pdfEditAskEmail;
+        final msg =
+            current.isNotEmpty
+                ? 'O email atual é "$current".\n${ChatBudgetStrings.pdfEditAskEmail}'
+                : ChatBudgetStrings.pdfEditAskEmail;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'email');
       case '4':
         final current = owner?.cnpj?.trim() ?? '';
-        final msg = current.isNotEmpty
-            ? 'O CNPJ atual é "$current".\n${ChatBudgetStrings.pdfEditAskCnpj}'
-            : ChatBudgetStrings.pdfEditAskCnpj;
+        final msg =
+            current.isNotEmpty
+                ? 'O CNPJ atual é "$current".\n${ChatBudgetStrings.pdfEditAskCnpj}'
+                : ChatBudgetStrings.pdfEditAskCnpj;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'cnpj');
       case '5':
@@ -70,7 +74,10 @@ class HandlePdfEditMenuOptionUsecase {
         );
         return const ChatMenuResult('logoMenu');
       case '7':
-        return const ChatMenuResult('pdfEditMenu', navigation: 'open_pdf_model_select');
+        return const ChatMenuResult(
+          'pdfEditMenu',
+          navigation: 'open_pdf_model_select',
+        );
       case '0':
         return const ChatMenuResult('mainMenu');
       default:
@@ -78,10 +85,7 @@ class HandlePdfEditMenuOptionUsecase {
     }
   }
 
-  Future<void> _sendTextWithBackOption(
-    String text, {
-    String? highlight,
-  }) async {
+  Future<void> _sendTextWithBackOption(String text, {String? highlight}) async {
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
         content: text,

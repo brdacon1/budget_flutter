@@ -55,6 +55,13 @@ class Environment {
   /// Configurações de assinatura (preenchidas em [initialize]).
   late final SubscriptionConfig subscription;
 
+  /// Libera o premium para testes (chave opcional `FORCE_PREMIUM` do JSON).
+  ///
+  /// Só existe no `development_environment.json`. Ausente/vazia → `false`, e
+  /// o premium segue a regra do pagamento. Nunca vale em build release.
+  bool get forcePremium => !kReleaseMode && _forcePremium;
+  bool _forcePremium = false;
+
   /// Nome do arquivo JSON do ambiente correspondente (na pasta `env/`).
   String get _environmentFileName =>
       environment == 'production'
@@ -128,6 +135,8 @@ class Environment {
       );
     }
 
+    _forcePremium = json['FORCE_PREMIUM'] == true;
+
     adMob = AdMobConfig(
       bannerAdUnitId: bannerAdUnitId,
       interstitialAdUnitId: interstitialAdUnitId,
@@ -150,7 +159,8 @@ class Environment {
       'bannerAdUnitId="$bannerAdUnitId" '
       'interstitialAdUnitId="$interstitialAdUnitId" '
       'androidSubscriptionSku="$androidSubscriptionSku" '
-      'iosSubscriptionSku="$iosSubscriptionSku"',
+      'iosSubscriptionSku="$iosSubscriptionSku" '
+      'forcePremium=$forcePremium',
     );
   }
 }

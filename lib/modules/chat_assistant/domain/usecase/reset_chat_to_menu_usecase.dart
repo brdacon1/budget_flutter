@@ -11,14 +11,23 @@ class ResetChatToMenuUsecase {
   const ResetChatToMenuUsecase(this._chatRepo);
 
   /// Executa o reset completo e retorna o nome do step a ser definido.
-  Future<String> call() async {
-    _chatRepo.clearSession();
+  /// [clearSession] false mantém a conversa e só reenvia o menu.
+  /// [withReports] acrescenta a opção "Relatórios" (só no modo IA — sem a IA
+  /// não há como responder perguntas livres).
+  Future<String> call({
+    bool clearSession = true,
+    bool withReports = false,
+  }) async {
+    if (clearSession) _chatRepo.clearSession();
     _chatRepo.setCurrentFlowStep(null);
 
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
         content: ChatBudgetStrings.mainMenuQuestion,
-        labels: ChatBudgetStrings.mainMenuOptionLabels,
+        labels: [
+          ...ChatBudgetStrings.mainMenuOptionLabels,
+          if (withReports) ChatBudgetStrings.reportsOptionLabel,
+        ],
         step: 'mainMenu',
       ),
     );

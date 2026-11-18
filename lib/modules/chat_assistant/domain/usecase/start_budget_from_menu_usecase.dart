@@ -34,8 +34,8 @@ class StartBudgetFromMenuUsecase {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.contactPicker,
-        content: script?.askClientName ??
-            ChatScriptEntity.fallback.askClientName,
+        content:
+            script?.askClientName ?? ChatScriptEntity.fallback.askClientName,
         timestamp: DateTime.now(),
       ),
     );
