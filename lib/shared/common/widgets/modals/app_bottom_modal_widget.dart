@@ -21,6 +21,7 @@ class AppBottomModal extends StatelessWidget {
     required this.buttonLabel,
     required this.onButtonPressed,
     this.buttonVisible = true,
+    this.scrollable = false,
   });
 
   final String title;
@@ -29,17 +30,31 @@ class AppBottomModal extends StatelessWidget {
   final VoidCallback onButtonPressed;
   final bool buttonVisible;
 
+  /// `true` envolve o [child] num scroll. Use quando o conteúdo é fixo
+  /// (Column/Padding) e pode passar do limite de [maxHeightFactor] (ex.:
+  /// teclado aberto). Deixe `false` se o [child] já rola (ListView,
+  /// SingleChildScrollView).
+  final bool scrollable;
+
   /// Cor cinza "máxima" usada em todos os textos do modal.
   static const Color grayColor = Color(0xFF424242);
 
+  /// Fração máxima da área visível (tela − teclado) que o modal ocupa. O
+  /// header (handle + título + fechar) nunca chega à status bar; o que passar
+  /// disso rola dentro do [child].
+  static const double maxHeightFactor = 0.8;
+
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final maxHeight =
+        (mq.size.height - mq.viewInsets.bottom) * maxHeightFactor;
+
     return Padding(
       // Acompanha o teclado: ao abrir o campo, o conteúdo sobe junto.
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+      padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),
       child: Container(
+        constraints: BoxConstraints(maxHeight: maxHeight),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -54,7 +69,10 @@ class AppBottomModal extends StatelessWidget {
               _DragHandle(),
               _Header(title: title),
               const Divider(color: Color(0xFFE0E0E0), thickness: 1),
-              Flexible(fit: FlexFit.loose, child: child),
+              Flexible(
+                fit: FlexFit.loose,
+                child: scrollable ? SingleChildScrollView(child: child) : child,
+              ),
               if (buttonVisible) ...[
                 const SizedBox(height: 16),
                 _ModalButton(label: buttonLabel, onPressed: onButtonPressed),
@@ -155,6 +173,7 @@ Future<void> showAppBottomModal(
   required String buttonLabel,
   required VoidCallback onButtonPressed,
   bool buttonVisible = true,
+  bool scrollable = false,
   bool isScrollControlled = true,
   bool dismissible = true,
 }) {
@@ -170,6 +189,7 @@ Future<void> showAppBottomModal(
           buttonLabel: buttonLabel,
           onButtonPressed: onButtonPressed,
           buttonVisible: buttonVisible,
+          scrollable: scrollable,
           child: child,
         ),
   );

@@ -57,4 +57,28 @@ class BudgetStrings {
       _isPt
           ? 'Verifique sua conexão e tente novamente.'
           : 'Check your connection and try again.';
+
+  // Itens do orçamento — modal de detalhes/quantidade
+  static String get itemDetailTitle =>
+      _isPt ? 'Detalhes do item' : 'Item details';
+  static String get itemLabelDescription => _isPt ? 'Descrição' : 'Description';
+  static String get itemLabelCategory => _isPt ? 'Categoria' : 'Category';
+  static String get itemLabelMeasure => _isPt ? 'Unidade' : 'Unit';
+  static String get itemLabelPrice => _isPt ? 'Preço unitário' : 'Unit price';
+  static String get itemLabelQuantity => _isPt ? 'Quantidade' : 'Quantity';
+  static String get itemLabelTotal => _isPt ? 'Total do item' : 'Item total';
+  static String get itemQuantityError =>
+      _isPt
+          ? 'Informe uma quantidade maior que zero'
+          : 'Enter a quantity greater than zero';
+  static String get itemSaveQuantity =>
+      _isPt ? 'Salvar quantidade' : 'Save quantity';
+  static String get itemQuantitySuccessTitle =>
+      _isPt ? 'Quantidade atualizada' : 'Quantity updated';
+  static String get itemQuantitySuccessMessage =>
+      _isPt
+          ? 'O total do orçamento foi atualizado.'
+          : 'The budget total has been updated.';
+  static String get itemQuantityErrorTitle =>
+      _isPt ? 'Não foi possível atualizar' : "Couldn't update";
 }

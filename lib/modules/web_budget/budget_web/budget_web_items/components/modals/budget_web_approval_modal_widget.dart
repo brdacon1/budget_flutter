@@ -22,6 +22,7 @@ class BudgetWebApprovalModalWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: BudgetWebStrings.approvalTitle,
       buttonLabel: '',
       onButtonPressed: () {},

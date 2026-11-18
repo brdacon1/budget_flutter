@@ -51,6 +51,7 @@ class _BudgetListDuplicateBottomModalWidgetState
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: 'Duplicar orçamento',
       buttonLabel: _processing ? 'Aguarde...' : 'DUPLICAR',
       onButtonPressed: _processing ? () {} : _confirm,

@@ -43,6 +43,7 @@ class _ChangeNameBottomModalWidgetState
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: 'Trocar nome de usuário',
       buttonLabel: _submitting ? 'Salvando...' : 'SALVAR',
       onButtonPressed: _submitting ? () {} : _handleSubmit,

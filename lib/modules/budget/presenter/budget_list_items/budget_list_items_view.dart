@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/budget_item_quantity/budget_item_quantity_view.dart';
+import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
+import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
@@ -70,6 +73,22 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     }
   }
 
+  Future<void> _openItem(ItemsBudget item) async {
+    final saved = await showBudgetItemQuantityBottomModal(
+      context,
+      budgetId: widget.item.id!,
+      item: item,
+    );
+    if (!saved || !mounted) return;
+    await _viewModel.getListItens();
+    if (!mounted) return;
+    await _displayAlert.notificationNotCloseScreen(
+      context,
+      BudgetStrings.itemQuantitySuccessTitle,
+      BudgetStrings.itemQuantitySuccessMessage,
+    );
+  }
+
   Future<void> _addItem() async {
     if (await _viewModel.getProductCount() > 0) {
       if (!mounted) return;
@@ -97,8 +116,9 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ProductPriceListView(item: widget.item, fromMenu: false),
+        builder:
+            (context) =>
+                ProductPriceListView(item: widget.item, fromMenu: false),
       ),
     );
     await _viewModel.getListItens();
@@ -119,15 +139,16 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
           hintText: 'Buscar item',
           hintStyle: GoogleFonts.heebo(color: slateGray, fontSize: 15),
           prefixIcon: const Icon(Icons.search, color: mutedTextColor),
-          suffixIcon: _viewModel.searchController.text.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close, color: mutedTextColor),
-                  onPressed: () {
-                    _viewModel.searchController.clear();
-                    _viewModel.onSearchTextChanged('');
-                  },
-                ),
+          suffixIcon:
+              _viewModel.searchController.text.isEmpty
+                  ? null
+                  : IconButton(
+                    icon: const Icon(Icons.close, color: mutedTextColor),
+                    onPressed: () {
+                      _viewModel.searchController.clear();
+                      _viewModel.onSearchTextChanged('');
+                    },
+                  ),
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -140,7 +161,8 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
 
   Widget _buildSelectionBar() {
     final count = _viewModel.selected.length;
-    final allSelected = _viewModel.filteredItems.isNotEmpty &&
+    final allSelected =
+        _viewModel.filteredItems.isNotEmpty &&
         _viewModel.filteredItems.every(_viewModel.selected.contains);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 20, 8),
@@ -154,7 +176,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
           Text(
             count == 1 ? '1 selecionado' : '$count selecionados',
             style: GoogleFonts.heebo(
-                color: whiteColor, fontSize: 15, fontWeight: FontWeight.bold),
+              color: whiteColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const Spacer(),
           TextButton(
@@ -182,7 +207,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
           searching ? 'Nenhum item encontrado' : 'Adicione o primeiro item',
           textAlign: TextAlign.center,
           style: GoogleFonts.heebo(
-              color: whiteColor, fontSize: 17, fontWeight: FontWeight.bold),
+            color: whiteColor,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -198,30 +226,30 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
 
   Widget _buildList() {
     if (_viewModel.loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: buttonColor),
-      );
+      return const Center(child: CircularProgressIndicator(color: buttonColor));
     }
     final items = _viewModel.filteredItems;
     return RefreshIndicator(
       color: refreshIndicatorColor,
       backgroundColor: bgColor,
       onRefresh: _viewModel.getListItens,
-      child: items.isEmpty
-          ? _buildEmpty()
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final it = items[index];
-                return BudgetListItemsCard(
-                  item: it,
-                  selected: _viewModel.isSelected(it),
-                  moneyConvert: _viewModel.moneyConvert,
-                  onToggleSelect: () => _viewModel.toggleSelect(it),
-                );
-              },
-            ),
+      child:
+          items.isEmpty
+              ? _buildEmpty()
+              : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final it = items[index];
+                  return BudgetListItemsCard(
+                    item: it,
+                    selected: _viewModel.isSelected(it),
+                    moneyConvert: _viewModel.moneyConvert,
+                    onTap: () => _openItem(it),
+                    onToggleSelect: () => _viewModel.toggleSelect(it),
+                  );
+                },
+              ),
     );
   }
 
@@ -231,18 +259,24 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
         heroTag: 'delete',
         onPressed: _viewModel.deleting ? null : _confirmDelete,
         backgroundColor: statusRejectedColor,
-        icon: _viewModel.deleting
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: whiteColor),
-              )
-            : const Icon(Icons.delete_outline_rounded, color: whiteColor),
+        icon:
+            _viewModel.deleting
+                ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: whiteColor,
+                  ),
+                )
+                : const Icon(Icons.delete_outline_rounded, color: whiteColor),
         label: Text(
           'Remover (${_viewModel.selected.length})',
           style: GoogleFonts.heebo(
-              color: whiteColor, fontWeight: FontWeight.bold, fontSize: 14),
+            color: whiteColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
         ),
       );
     }
@@ -254,7 +288,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       label: Text(
         'Adicionar item',
         style: GoogleFonts.heebo(
-            color: blackColor, fontWeight: FontWeight.bold, fontSize: 14),
+          color: blackColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
       ),
     );
   }

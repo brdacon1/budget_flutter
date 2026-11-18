@@ -43,6 +43,7 @@ class _ChangePasswordBottomModalWidgetState
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: 'Recuperação de senha',
       buttonLabel: _submitting ? 'Enviando...' : 'Solicitar senha',
       onButtonPressed: _submitting ? () {} : _handleSubmit,

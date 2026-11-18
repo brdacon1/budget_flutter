@@ -47,6 +47,7 @@ class _TextInputBottomModalWidgetState extends State<TextInputBottomModalWidget>
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
+      scrollable: true,
       title: widget.title,
       buttonLabel: _submitting ? 'Salvando...' : widget.buttonLabel,
       onButtonPressed: _handleSubmit,
