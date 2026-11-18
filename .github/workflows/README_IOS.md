@@ -6,9 +6,9 @@ Este documento explica como o workflow `.github/workflows/ios_build.yml` gera o 
 
 ## O que foi configurado
 
-- Runner: `macos-latest` (obrigatório para builds iOS)
+- Runner: `xcode-27` (imagem macOS 27 Apple Silicon com Xcode 27)
 - Flutter stable com cache
-- Xcode 15.0.1
+- Xcode 27 (SDK iOS 27 — exigido pela Apple a partir de abril/2027)
 - Keychain temporário no runner
 - Importação do certificado `.p12` e provisioning profile `.mobileprovision`
 - Geração do `ExportOptions.plist` em tempo de execução

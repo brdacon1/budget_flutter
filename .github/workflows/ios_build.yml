@@ -16,7 +16,9 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    # Imagem dedicada ao Xcode 27 (macOS 27, Apple Silicon).
+    # A partir de abril/2027 a Apple exige o SDK do iOS 27 para upload.
+    runs-on: xcode-27
     timeout-minutes: 60
 
     env:
@@ -27,12 +29,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Usa o Xcode estável mais recente disponível no runner
-      # (versões fixas como 15.0.1 deixam de existir nas imagens do GitHub).
+      # Fixa o Xcode 27 (SDK iOS 27), pega o patch mais recente da imagem.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: '27'
+
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
