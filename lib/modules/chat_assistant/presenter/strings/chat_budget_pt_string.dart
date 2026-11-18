@@ -92,28 +92,117 @@ class ChatBudgetStrings {
           ? 'Não consegui entender agora 😕 Escolha uma das opções abaixo.'
           : "I couldn't understand that right now 😕 Pick one of the options below.";
 
+  /// Opção "Relatórios" do menu principal (só no modo IA) — valor `'5'`.
+  static String get reportsOptionLabel => _isPt ? 'Relatórios' : 'Reports';
+
+  static String get reportsPrompt =>
+      _isPt
+          ? 'Descreva o que você precisa saber'
+          : 'Describe what you need to know';
+
+  static String get reportsExample =>
+      _isPt
+          ? 'Ex: Quantos orçamentos eu tenho aprovado nesse mês?'
+          : 'E.g.: How many approved budgets do I have this month?';
+
+  static String get aiUnavailable =>
+      _isPt
+          ? 'O assistente inteligente está indisponível no momento 😕 Segui no modo padrão: escolha uma das opções abaixo.'
+          : 'The smart assistant is unavailable right now 😕 Switched to standard mode: pick one of the options below.';
+
   static String get aiTyping => _isPt ? 'digitando…' : 'typing…';
+
+  static String get aiDailyLimit =>
+      _isPt
+          ? 'Você atingiu o limite de mensagens com o assistente por hoje. Use as opções do menu ou volte amanhã. 🙂'
+          : "You've reached today's assistant message limit. Use the menu options or come back tomorrow. 🙂";
+
+  static String get aiConfirmLabel => _isPt ? 'Confirmar' : 'Confirm';
+
+  static String get aiCancelLabel => _isPt ? 'Cancelar' : 'Cancel';
+
+  static String get aiActionCancelled =>
+      _isPt
+          ? 'Ok, cancelei. Nada foi alterado.'
+          : 'Ok, cancelled. Nothing was changed.';
+
+  static String get aiActionFailed =>
+      _isPt
+          ? 'Não consegui concluir a ação. Tente de novo.'
+          : "I couldn't complete the action. Please try again.";
+
+  static String aiReceiptPreview({
+    required String client,
+    required String description,
+    String? amount,
+    String? method,
+  }) =>
+      _isPt
+          ? 'Criar recibo no orçamento de $client?\nDescrição: $description'
+              '${amount == null ? '' : '\nValor recebido: $amount${method == null ? '' : ' ($method)'}'}'
+          : 'Create a receipt on $client\'s budget?\nDescription: $description'
+              '${amount == null ? '' : '\nAmount received: $amount${method == null ? '' : ' ($method)'}'}';
+
+  static String aiReceiptCreated(String client) =>
+      _isPt
+          ? 'Recibo criado no orçamento de $client ✅'
+          : 'Receipt created on $client\'s budget ✅';
+
+  static String aiStatusPreview(String client, String status) =>
+      _isPt
+          ? 'Alterar o status do orçamento de $client para ${budgetStatusLabel(status)}?'
+          : 'Change $client\'s budget status to ${budgetStatusLabel(status)}?';
+
+  static String aiStatusUpdated(String client, String status) =>
+      _isPt
+          ? 'Orçamento de $client agora está ${budgetStatusLabel(status)} ✅'
+          : '$client\'s budget is now ${budgetStatusLabel(status)} ✅';
+
+  /// Label do status persistido (o valor gravado nunca é traduzido).
+  static String budgetStatusLabel(String status) => switch (status) {
+    'APROVADO' => _isPt ? 'Aprovado' : 'Approved',
+    'REPROVADO' => _isPt ? 'Reprovado' : 'Rejected',
+    'FINALIZADO' => _isPt ? 'Finalizado' : 'Finished',
+    _ => _isPt ? 'Pendente' : 'Pending',
+  };
+
+  static String get aiBudgetListTitle => _isPt ? 'Orçamentos' : 'Budgets';
+
+  static String aiBudgetListFooter(int count, String total) =>
+      _isPt ? '$count orçamento(s) · $total' : '$count budget(s) · $total';
+
+  static String aiSummaryTitle(String month) =>
+      _isPt ? 'Resumo de $month' : '$month summary';
+
+  static String get aiSummaryTotal => _isPt ? 'Total gerado' : 'Total created';
+
+  static String get aiOpenBudget => _isPt ? 'Abrir' : 'Open';
+
+  static String get aiShareLinkLabel =>
+      _isPt ? 'Compartilhar link' : 'Share link';
 
   static String aiSystemPrompt({
     required String today,
     required String userName,
   }) => '''
 Você é o assistente do OFLite, app de orçamentos e recibos para prestadores de serviço.
-Hoje é $today. Usuário: ${userName.isEmpty ? 'não informado' : userName}.
+Hoje é $today (formato yyyy-MM-dd). Usuário: ${userName.isEmpty ? 'não informado' : userName}.
 
-O que o app faz pelo menu deste chat:
-1 - Criar orçamento (cliente, telefone, endereço, produtos, observações, link para o cliente)
-2 - Lista de preços (ver/cadastrar produtos)
-3 - Editar dados do PDF (nome da empresa, telefone, e-mail, CNPJ, endereço, logo)
-4 - Alterar nome de usuário
-Status de orçamento: PENDENTE, APROVADO, REPROVADO, FINALIZADO.
+Domínio:
+- Orçamento: cliente, telefone, endereço, itens, observações, valor total e status.
+- Status (use EXATAMENTE): PENDENTE, APROVADO, REPROVADO, FINALIZADO.
+- Recibo: sempre pertence a UM orçamento; tem descrição e pagamentos (valor e forma).
+- "Esse mês" = mês de hoje. "Mês passado" = mês anterior. Datas das ferramentas em yyyy-MM-dd; mês em yyyy-MM.
 
 Regras:
-1. Responda no idioma do usuário (${_isPt ? 'português do Brasil' : 'English'} por padrão), em no máximo 3 frases curtas.
-2. Quando o usuário quiser fazer uma das ações do menu, chame a ferramenta start_flow com o fluxo certo, sem perguntar antes. Se não estiver claro qual ação, pergunte de forma curta.
-3. Você ainda NÃO consegue consultar nem alterar orçamentos. Nunca invente números, nomes ou orçamentos.
-4. Fora do escopo do app, diga educadamente o que você sabe fazer.
-5. Texto puro: não use markdown (nada de **, #, listas com -).
+1. Responda no idioma do usuário (${_isPt ? 'português do Brasil' : 'English'} por padrão), em no máximo 2 frases curtas. Texto puro, sem markdown.
+2. Use SEMPRE as ferramentas para obter dados. Nunca invente números, nomes ou ids.
+3. Nunca some nem calcule valores: repita os totais formatados que as ferramentas devolvem.
+4. A lista/card do resultado já aparece na tela: não repita os itens, só comente em 1 frase.
+5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
+6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
+7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
+8. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
 ''';
 
   static List<String> get yesNoOptionLabels =>

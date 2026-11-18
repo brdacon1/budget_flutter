@@ -16,4 +16,9 @@ abstract class ChatAiRepository {
   void addMessage(AgentMessageEntity message);
 
   void clearHistory();
+
+  /// Mensagens com IA já usadas em [day] (`yyyy-MM-dd`).
+  Future<int> usageOf(String day);
+
+  Future<void> saveUsage(String day, int count);
 }

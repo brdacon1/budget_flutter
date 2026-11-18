@@ -6,6 +6,8 @@ import 'package:oflite/modules/receipt/data/repository/receipt_payment_repositor
 import 'package:oflite/modules/receipt/data/repository/receipt_repository_impl.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
+import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 
 void registerReceiptDependencies(GetIt sl) {
   sl.registerLazySingleton<ReceiptRemoteDatasource>(
@@ -26,6 +28,18 @@ void registerReceiptDependencies(GetIt sl) {
       sl<ReceiptPaymentRemoteDatasource>(),
       sl<ReceiptRemoteDatasource>(),
       sl<UserRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<CreateReceiptForBudgetUsecase>(
+    () => CreateReceiptForBudgetUsecase(
+      sl<ReceiptRepository>(),
+      sl<ReceiptPaymentRepository>(),
+    ),
+  );
+  sl.registerLazySingleton<ListReceiptsByBudgetUsecase>(
+    () => ListReceiptsByBudgetUsecase(
+      sl<ReceiptRepository>(),
+      sl<ReceiptPaymentRepository>(),
     ),
   );
 }

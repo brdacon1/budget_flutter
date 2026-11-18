@@ -17,6 +17,7 @@ const mutedTextColor = Color(0xFF8D89A6);
 const statusApprovedColor = Color(0xFF2ED573);
 const statusRejectedColor = Color(0xFFFF6B6B);
 const statusPendingColor = Color(0xFFFFB800);
+const chatBotAvatarColor = Colors.cyan;
 const sheetHandleColor = Color(0xFF3A3654);
 const badgeColor = Color.fromARGB(255, 231, 15, 87);
 const blackColor = Colors.black;

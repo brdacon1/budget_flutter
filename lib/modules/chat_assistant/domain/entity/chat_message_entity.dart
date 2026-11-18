@@ -10,6 +10,12 @@ enum ChatMessageType {
   inlineButtons,
   image,
   optionList,
+
+  /// Card com lista de orçamentos vinda da IA (payload: title, footer, items).
+  budgetList,
+
+  /// Card de resumo do mês vindo da IA (payload: title, total, rows).
+  summaryCard,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.
