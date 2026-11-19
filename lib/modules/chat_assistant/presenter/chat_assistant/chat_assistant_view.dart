@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/injection.dart';
@@ -310,42 +311,51 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
             });
           }
 
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: _vm.messages.length + (_vm.isAiThinking ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == _vm.messages.length) {
-                      return const ChatTypingIndicator();
-                    }
-                    final msg = _vm.messages[index];
-                    return ChatMessageBubble(
-                      message: msg,
-                      onAction: (action) {
-                        _vm.markButtonUsed(msg, action);
-                        _handleAction(action, msg);
+          return LayoutBuilder(
+            builder: (context, _) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      itemCount:
+                          _vm.messages.length + (_vm.isAiThinking ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _vm.messages.length) {
+                          return const ChatTypingIndicator();
+                        }
+                        final msg = _vm.messages[index];
+                        return ChatMessageBubble(
+                          message: msg,
+                          onAction: (action) {
+                            _vm.markButtonUsed(msg, action);
+                            _handleAction(action, msg);
+                          },
+                          buttonsEnabled: _vm.isButtonsActive(msg),
+                          onOptionSelect: (value, label) {
+                            _vm.markButtonUsed(msg, value);
+                            _vm.selectOptionCommand.execute((
+                              value: value,
+                              label: label,
+                              step:
+                                  msg.payload?['optionsStep'] as String? ?? '',
+                            ));
+                          },
+                          onEditMessage:
+                              (field, text, msgId) =>
+                                  _vm.prepareEditMessage(field, text, msgId),
+                        );
                       },
-                      buttonsEnabled: _vm.isButtonsActive(msg),
-                      onOptionSelect: (value, label) {
-                        _vm.markButtonUsed(msg, value);
-                        _vm.selectOptionCommand.execute((
-                          value: value,
-                          label: label,
-                          step: msg.payload?['optionsStep'] as String? ?? '',
-                        ));
-                      },
-                      onEditMessage:
-                          (field, text, msgId) =>
-                              _vm.prepareEditMessage(field, text, msgId),
-                    );
-                  },
-                ),
-              ),
-              _buildInputArea(),
-            ],
+                    ),
+                  ),
+                  AppKeyboardDismissBar(label: ChatBudgetStrings.closeKeyboard),
+                  _buildInputArea(),
+                ],
+              );
+            },
           );
         },
       ),

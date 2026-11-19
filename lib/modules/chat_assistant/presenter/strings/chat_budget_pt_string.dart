@@ -14,6 +14,8 @@ class ChatBudgetStrings {
   static String get assistantName => _isPt ? 'Assistente' : 'Assistant';
 
   static String get online => _isPt ? 'online' : 'online';
+  static String get closeKeyboard =>
+      _isPt ? 'Fechar teclado' : 'Close keyboard';
 
   static String get restartTooltip =>
       _isPt ? 'Reiniciar conversa' : 'Restart conversation';
@@ -105,9 +107,7 @@ class ChatBudgetStrings {
           : "Which client's budget do you want to find?";
 
   static String findBudgetSelect(String name) =>
-      _isPt
-          ? 'Selecione o orçamento de $name'
-          : 'Select the budget for $name';
+      _isPt ? 'Selecione o orçamento de $name' : 'Select the budget for $name';
 
   static String get findBudgetReopenQuestion =>
       _isPt

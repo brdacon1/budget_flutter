@@ -1976,6 +1976,8 @@ Use os widgets de `shared/common/widgets/form/` em todo formulário:
   fecha. Nada pode cobrir o campo em edição.
 - **Sempre dar um jeito de fechar o teclado**: enquanto ele está aberto,
   exiba `AppKeyboardDismissBar` (barra "Fechar teclado" acima do teclado).
+  A barra se mostra/esconde sozinha (escuta `didChangeMetrics`): coloque-a
+  sem `if` na View.
   Mantenha também o tap fora (`GestureDetector` → `unfocus`) e
   `keyboardDismissBehavior: onDrag` no scroll.
 - **Telas de formulário não têm banner de anúncio** (`BannerAdWidget`): ele

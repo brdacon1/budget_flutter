@@ -7,13 +7,50 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Dá ao usuário um jeito explícito de fechar o teclado quando desiste de
 /// editar o campo. Substitui o [AppFormSaveButton] enquanto o teclado está
 /// visível.
-class AppKeyboardDismissBar extends StatelessWidget {
+///
+/// Se esconde sozinha quando o teclado fecha: escuta `didChangeMetrics` e lê
+/// o inset real do [View] — não depende de a tela pai reconstruir.
+class AppKeyboardDismissBar extends StatefulWidget {
   const AppKeyboardDismissBar({super.key, required this.label});
 
   final String label;
 
   @override
+  State<AppKeyboardDismissBar> createState() => _AppKeyboardDismissBarState();
+}
+
+class _AppKeyboardDismissBarState extends State<AppKeyboardDismissBar>
+    with WidgetsBindingObserver {
+  bool _keyboardOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _keyboardOpen = View.of(context).viewInsets.bottom > 0;
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (!mounted) return;
+    final open = View.of(context).viewInsets.bottom > 0;
+    if (open != _keyboardOpen) setState(() => _keyboardOpen = open);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_keyboardOpen) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       height: 44,
@@ -27,7 +64,7 @@ class AppKeyboardDismissBar extends StatelessWidget {
         onPressed: () => FocusManager.instance.primaryFocus?.unfocus(),
         icon: const Icon(Icons.keyboard_hide_outlined, color: buttonColor),
         label: Text(
-          label,
+          widget.label,
           style: GoogleFonts.heebo(
             color: buttonColor,
             fontSize: 15,
