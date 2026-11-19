@@ -171,6 +171,21 @@ class ChatBudgetStrings {
           ? 'Selecione o orçamento que deseja criar o recibo'
           : 'Select the budget you want to create the receipt for';
 
+  static String get aiSelectDuplicateBudget =>
+      _isPt
+          ? 'Selecione o orçamento que deseja duplicar'
+          : 'Select the budget you want to duplicate';
+
+  static String aiBudgetDuplicated(String client) =>
+      _isPt
+          ? 'Orçamento de $client duplicado ✅'
+          : '$client\'s budget duplicated ✅';
+
+  static String get aiBudgetDuplicateFailed =>
+      _isPt
+          ? 'Não consegui duplicar o orçamento. Tente novamente.'
+          : 'Could not duplicate the budget. Please try again.';
+
   static String get aiSelectBudgetLabel =>
       _isPt ? 'Selecionar orçamento' : 'Select budget';
 
@@ -221,7 +236,7 @@ Regras:
 5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
 6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
-8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto).
+8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito.
 9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
 ''';
 

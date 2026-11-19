@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
@@ -73,6 +74,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final ConfirmAgentActionUsecase _confirmAgentAction;
   final ResolveAiFailureUsecase _resolveAiFailure;
   final ShowReportsPromptUsecase _showReportsPrompt;
+  final DuplicateBudgetUsecase _duplicateBudget;
 
   bool _disposed = false;
 
@@ -99,6 +101,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._confirmAgentAction,
     this._resolveAiFailure,
     this._showReportsPrompt,
+    this._duplicateBudget,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -358,7 +361,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   bool _isAiRepeatable(String action) =>
       action.startsWith('open_budget|') ||
       action.startsWith('share_url|') ||
-      action == DispatchAgentToolUsecase.selectReceiptBudget;
+      action == DispatchAgentToolUsecase.selectReceiptBudget ||
+      action == DispatchAgentToolUsecase.selectDuplicateBudget;
 
   bool isButtonsActive(ChatMessageEntity msg) {
     if (msg.type == ChatMessageType.budgetList ||
@@ -582,6 +586,28 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _pendingNavigation = turn.navigation;
       notifyListeners();
     }
+  }
+
+  /// Duplica [budget] com as opções do modal (mesmo fluxo da lista de
+  /// orçamentos) e confirma no chat.
+  Future<void> duplicateBudget(
+    CustomerInfo budget, {
+    required bool clientData,
+    required bool items,
+    required bool comments,
+    required bool receipts,
+  }) async {
+    final result = await _duplicateBudget(
+      sourceId: budget.id!,
+      copyClientData: clientData,
+      copyItems: items,
+      copyComments: comments,
+      copyReceipts: receipts,
+    );
+    await _addBotMessage(switch (result) {
+      Ok() => ChatBudgetStrings.aiBudgetDuplicated(budget.customerName ?? ''),
+      Error() => ChatBudgetStrings.aiBudgetDuplicateFailed,
+    });
   }
 
   /// Orçamento para a View abrir a tela (card da IA / tool `open_budget`).

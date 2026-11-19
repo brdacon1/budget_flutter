@@ -52,9 +52,13 @@ class DispatchAgentToolUsecase {
   /// Valores fixos do arg `purpose` de `list_budgets` (nunca traduzir).
   static const purposeReceipts = 'receipts';
   static const purposeView = 'view';
+  static const purposeDuplicate = 'duplicate';
 
   /// Navegação/ação que abre o modal de seleção de orçamento para recibo.
   static const selectReceiptBudget = 'select_receipt_budget';
+
+  /// Navegação/ação que abre o modal de seleção de orçamento para duplicar.
+  static const selectDuplicateBudget = 'select_duplicate_budget';
 
   /// Fluxo do menu (valor enviado pela IA) → opção do menu principal.
   static const flowToMenuOption = {
@@ -99,11 +103,11 @@ class DispatchAgentToolUsecase {
         },
         'purpose': {
           'type': 'enum',
-          'values': [purposeView, purposeReceipts],
+          'values': [purposeView, purposeReceipts, purposeDuplicate],
           'description':
               'use "receipts" quando o usuário precisa escolher o orçamento '
-              'para criar/ver recibos (abre um modal de seleção); senão '
-              '"view"',
+              'para criar/ver recibos, "duplicate" para duplicar/clonar um '
+              'orçamento (ambos abrem um modal de seleção); senão "view"',
         },
       },
     ),
@@ -195,7 +199,18 @@ class DispatchAgentToolUsecase {
   }
 
   Future<AgentToolOutcome> _list(Map<String, Object?> args) async {
-    if (args['purpose'] == purposeReceipts) return _selectReceiptBudget();
+    if (args['purpose'] == purposeReceipts) {
+      return _selectBudget(
+        selectReceiptBudget,
+        ChatBudgetStrings.aiSelectReceiptBudget,
+      );
+    }
+    if (args['purpose'] == purposeDuplicate) {
+      return _selectBudget(
+        selectDuplicateBudget,
+        ChatBudgetStrings.aiSelectDuplicateBudget,
+      );
+    }
     final status =
         args['status'] == null
             ? null
@@ -256,9 +271,10 @@ class DispatchAgentToolUsecase {
     );
   }
 
-  /// Recibo sem orçamento escolhido: em vez do card, abre o modal de seleção
-  /// e deixa no chat a mensagem com "Selecionar orçamento" / voltar ao menu.
-  AgentToolOutcome _selectReceiptBudget() {
+  /// Recibo/duplicar sem orçamento escolhido: em vez do card, abre o modal de
+  /// seleção e deixa no chat a mensagem com "Selecionar orçamento" / voltar
+  /// ao menu. [action] diz o que acontece após a escolha.
+  AgentToolOutcome _selectBudget(String action, String text) {
     final now = DateTime.now();
     return AgentToolOutcome(
       modelPayload: const {'shown': 'budget_picker'},
@@ -267,16 +283,16 @@ class DispatchAgentToolUsecase {
           id: '${now.microsecondsSinceEpoch}',
           sender: ChatSender.bot,
           type: ChatMessageType.action,
-          content: ChatBudgetStrings.aiSelectReceiptBudget,
+          content: text,
           payload: {
             'label': ChatBudgetStrings.aiSelectBudgetLabel,
-            'action': selectReceiptBudget,
+            'action': action,
             'backLabel': ChatBudgetStrings.menuBackLabel,
           },
           timestamp: now,
         ),
       ],
-      navigation: selectReceiptBudget,
+      navigation: action,
     );
   }
 

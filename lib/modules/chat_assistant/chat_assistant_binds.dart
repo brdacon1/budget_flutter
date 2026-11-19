@@ -11,6 +11,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_actio
 import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
@@ -251,6 +252,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ConfirmAgentActionUsecase>(),
       sl<ResolveAiFailureUsecase>(),
       sl<ShowReportsPromptUsecase>(),
+      sl<DuplicateBudgetUsecase>(),
     ),
   );
 }

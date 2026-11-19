@@ -1,4 +1,7 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/injection.dart';
@@ -127,6 +130,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
     if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
+      return;
+    }
+    if (nav == DispatchAgentToolUsecase.selectDuplicateBudget) {
+      await _pickBudgetToDuplicate();
       return;
     }
 
@@ -400,6 +407,40 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     await _openReceipts(id);
   }
 
+  /// Modal de seleção → modal de opções de duplicação (o mesmo da lista de
+  /// orçamentos). Fechar qualquer um dos dois não muda o chat.
+  Future<void> _pickBudgetToDuplicate() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: transparentColor,
+      builder:
+          (dialogContext) => BudgetListDuplicateBottomModalWidget(
+            onConfirm: (clientData, items, comments, receipts) async {
+              Navigator.of(dialogContext).pop();
+              if (!mounted) return;
+              final loading = getIt<LoadingEventRepository>();
+              try {
+                await loading.alertLoading(context);
+                await _vm.duplicateBudget(
+                  budget,
+                  clientData: clientData,
+                  items: items,
+                  comments: comments,
+                  receipts: receipts,
+                );
+              } finally {
+                if (mounted) loading.closeLoading(context);
+              }
+            },
+          ),
+    );
+  }
+
   Future<void> _openReceipts(String id) async {
     final budget = await _vm.budgetForNavigation(id);
     if (budget == null || !mounted) return;
@@ -412,6 +453,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   void _handleAction(String action, ChatMessageEntity msg) async {
     if (action == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
+      return;
+    }
+    if (action == DispatchAgentToolUsecase.selectDuplicateBudget) {
+      await _pickBudgetToDuplicate();
       return;
     }
     if (action.startsWith('open_budget|')) {
