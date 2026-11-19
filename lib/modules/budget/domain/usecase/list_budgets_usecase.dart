@@ -6,7 +6,10 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Lista orçamentos por período, status e nome do cliente.
 ///
 /// O ID do orçamento é o timestamp (ms) de criação: o período vira um range
-/// de IDs consultado direto no Firestore. Status e cliente filtram em memória.
+/// de IDs consultado direto no Firestore. Sem período, o nome do cliente vira
+/// uma query de prefixo no banco ("David" → "David Elias", "David Souza") e,
+/// sem nome, o status vira uma query por status. O que sobrar filtra em
+/// memória.
 class ListBudgetsUsecase {
   final BudgetRepository _repo;
 
@@ -26,6 +29,14 @@ class ListBudgetsUsecase {
       result = await _repo.fetchBudgetsByMonthRange(
         start.millisecondsSinceEpoch.toString(),
         end.millisecondsSinceEpoch.toString(),
+      );
+    } else if ((filter.clientName ?? '').trim().isNotEmpty) {
+      result = await _repo.searchBudgetsByName(
+        _caseVariants(filter.clientName!.trim()),
+      );
+    } else if (filter.status != null) {
+      result = await _repo.fetchBudgetsByStatus(
+        _caseVariants(filter.status!.value),
       );
     } else {
       result = await _repo.fetchBudgets();
@@ -47,6 +58,17 @@ class ListBudgetsUsecase {
           }).toList()
           ..sort((a, b) => (b.id ?? '').compareTo(a.id ?? ''));
     return Result.ok(list);
+  }
+
+  /// O Firestore compara com caixa exata: consulta o texto como digitado,
+  /// minúsculo, MAIÚSCULO e Com Iniciais Maiúsculas.
+  static List<String> _caseVariants(String s) {
+    final lower = s.toLowerCase();
+    final title = lower
+        .split(' ')
+        .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
+        .join(' ');
+    return {s, lower, s.toUpperCase(), title}.toList();
   }
 
   static String _normalize(String s) {

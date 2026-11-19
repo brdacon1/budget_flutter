@@ -9,6 +9,8 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/receipt/domain/entity/receipts_report.dart';
+import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/receipt/presenter/strings/payment_pt_string.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -26,6 +28,7 @@ class DispatchAgentToolUsecase {
   final BudgetRepository _budgetRepo;
   final ShareLinkRepository _shareLink;
   final ConvertCoinRepository _coin;
+  final GetReceiptsReportUsecase _receiptsReport;
 
   const DispatchAgentToolUsecase(
     this._listBudgets,
@@ -34,6 +37,7 @@ class DispatchAgentToolUsecase {
     this._budgetRepo,
     this._shareLink,
     this._coin,
+    this._receiptsReport,
   );
 
   // Nomes das tools.
@@ -45,9 +49,21 @@ class DispatchAgentToolUsecase {
   static const openBudget = 'open_budget';
   static const createReceipt = 'create_receipt';
   static const updateStatus = 'update_budget_status';
+  static const receiptsReport = 'get_receipts_report';
 
   /// Máximo de itens devolvidos ao modelo (a lista completa vai para a UI).
   static const _maxItemsToModel = 20;
+
+  /// Valores fixos do arg `purpose` de `list_budgets` (nunca traduzir).
+  static const purposeReceipts = 'receipts';
+  static const purposeView = 'view';
+  static const purposeDuplicate = 'duplicate';
+
+  /// Navegação/ação que abre o modal de seleção de orçamento para recibo.
+  static const selectReceiptBudget = 'select_receipt_budget';
+
+  /// Navegação/ação que abre o modal de seleção de orçamento para duplicar.
+  static const selectDuplicateBudget = 'select_duplicate_budget';
 
   /// Fluxo do menu (valor enviado pela IA) → opção do menu principal.
   static const flowToMenuOption = {
@@ -90,6 +106,14 @@ class DispatchAgentToolUsecase {
           'type': 'string',
           'description': 'parte do nome do cliente',
         },
+        'purpose': {
+          'type': 'enum',
+          'values': [purposeView, purposeReceipts, purposeDuplicate],
+          'description':
+              'use "receipts" quando o usuário precisa escolher o orçamento '
+              'para criar/ver recibos, "duplicate" para duplicar/clonar um '
+              'orçamento (ambos abrem um modal de seleção); senão "view"',
+        },
       },
     ),
     AgentToolSpec(
@@ -107,6 +131,32 @@ class DispatchAgentToolUsecase {
       listReceipts,
       'Lista os recibos de um orçamento com o valor pago em cada um.',
       {'budget_id': _budgetIdParam},
+    ),
+    AgentToolSpec(
+      receiptsReport,
+      'Relatório de recibos de TODOS os orçamentos num período (semana, mês, '
+      'intervalo): quantidade, valor emitido e valor recebido (pagamentos).',
+      {
+        'from': {
+          'type': 'string',
+          'description': 'data inicial yyyy-MM-dd (semana começa na segunda)',
+          'required': true,
+        },
+        'to': {
+          'type': 'string',
+          'description': 'data final yyyy-MM-dd (inclusive)',
+          'required': true,
+        },
+        'group_by': {
+          'type': 'enum',
+          'values': [for (final g in ReceiptsReportGroupBy.values) g.value],
+          'description': 'quebra por dia ou semana; auto se não pedido',
+        },
+        'compare_previous': {
+          'type': 'boolean',
+          'description': 'compara com o período anterior de mesmo tamanho',
+        },
+      },
     ),
     AgentToolSpec(
       budgetLink,
@@ -155,6 +205,7 @@ class DispatchAgentToolUsecase {
         listBudgets => await _list(args),
         monthSummary => await _summary(args),
         listReceipts => await _receipts(args),
+        receiptsReport => await _report(args),
         budgetLink => await _link(args),
         openBudget => await _open(args),
         createReceipt => await _previewReceipt(args),
@@ -180,6 +231,18 @@ class DispatchAgentToolUsecase {
   }
 
   Future<AgentToolOutcome> _list(Map<String, Object?> args) async {
+    if (args['purpose'] == purposeReceipts) {
+      return _selectBudget(
+        selectReceiptBudget,
+        ChatBudgetStrings.aiSelectReceiptBudget,
+      );
+    }
+    if (args['purpose'] == purposeDuplicate) {
+      return _selectBudget(
+        selectDuplicateBudget,
+        ChatBudgetStrings.aiSelectDuplicateBudget,
+      );
+    }
     final status =
         args['status'] == null
             ? null
@@ -237,6 +300,31 @@ class DispatchAgentToolUsecase {
                   ],
                 }),
               ],
+    );
+  }
+
+  /// Recibo/duplicar sem orçamento escolhido: em vez do card, abre o modal de
+  /// seleção e deixa no chat a mensagem com "Selecionar orçamento" / voltar
+  /// ao menu. [action] diz o que acontece após a escolha.
+  AgentToolOutcome _selectBudget(String action, String text) {
+    final now = DateTime.now();
+    return AgentToolOutcome(
+      modelPayload: const {'shown': 'budget_picker'},
+      messages: [
+        ChatMessageEntity(
+          id: '${now.microsecondsSinceEpoch}',
+          sender: ChatSender.bot,
+          type: ChatMessageType.action,
+          content: text,
+          payload: {
+            'label': ChatBudgetStrings.aiSelectBudgetLabel,
+            'action': action,
+            'backLabel': ChatBudgetStrings.menuBackLabel,
+          },
+          timestamp: now,
+        ),
+      ],
+      navigation: action,
     );
   }
 
@@ -310,6 +398,96 @@ class DispatchAgentToolUsecase {
       },
     );
   }
+
+  Future<AgentToolOutcome> _report(Map<String, Object?> args) async {
+    final from = _date(args['from']);
+    final to = _date(args['to']);
+    if (from == null || to == null) return _error('from_and_to_required');
+    final groupBy = ReceiptsReportGroupBy.fromValue(
+      args['group_by'] as String?,
+    );
+    if (groupBy == null) return _error('invalid_group_by');
+
+    final result = await _receiptsReport(
+      ReceiptsReportFilter(
+        from: from,
+        to: to,
+        groupBy: groupBy,
+        comparePrevious: args['compare_previous'] == true,
+      ),
+    );
+    if (result case Error(:final error)) {
+      return _error(
+        error is FormatException
+            ? error.message
+            : 'receipts_report_unavailable',
+      );
+    }
+    final r = (result as Ok<ReceiptsReport>).value;
+    final money = _coin.convertFromDouble;
+    final change = r.paidChangePercent?.round();
+    final top = r.topBudgets.firstOrNull;
+
+    return AgentToolOutcome(
+      modelPayload: {
+        'count': r.count,
+        'issued': money(r.issued),
+        'paid': money(r.paid),
+        if (r.previous != null)
+          'previous': {
+            'count': r.previous!.count,
+            'paid': money(r.previous!.paid),
+          },
+        if (change != null) 'paid_change_percent': change,
+        if (top != null) 'top_client': top.client,
+      },
+      messages: [
+        _card(ChatMessageType.receiptsReportCard, {
+          'title': ChatBudgetStrings.aiReceiptsReportTitle(
+            _dm(r.from),
+            _dm(r.to),
+          ),
+          'countLabel': ChatBudgetStrings.aiReceiptsCountLabel,
+          'count': r.count,
+          'issuedLabel': ChatBudgetStrings.aiReceiptsIssuedLabel,
+          'issued': money(r.issued),
+          'paidLabel': ChatBudgetStrings.aiReceiptsPaidLabel,
+          'paid': money(r.paid),
+          if (r.previous != null)
+            'previous': ChatBudgetStrings.aiReceiptsPrevious(
+              r.previous!.count,
+              money(r.previous!.paid),
+            ),
+          if (change != null) 'change': change,
+          'buckets': [
+            for (final b in r.buckets)
+              {
+                'label':
+                    r.groupBy == ReceiptsReportGroupBy.day
+                        ? _dm(b.start)
+                        : '${_dm(b.start)}–${_dm(b.end)}',
+                'count': b.count,
+                'paid': money(b.paid),
+                'paidRaw': b.paid,
+              },
+          ],
+          'topLabel': ChatBudgetStrings.aiReceiptsTopLabel,
+          'top': [
+            for (final t in r.topBudgets)
+              {
+                'id': t.budgetId,
+                'name': t.client,
+                'count': t.count,
+                'paid': money(t.paid),
+              },
+          ],
+        }),
+      ],
+    );
+  }
+
+  static String _dm(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
   Future<AgentToolOutcome> _link(Map<String, Object?> args) async {
     final budget = await _budget(args);

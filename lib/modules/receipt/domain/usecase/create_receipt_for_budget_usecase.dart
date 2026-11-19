@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_ledger_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_payment_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -15,7 +16,14 @@ class CreateReceiptForBudgetUsecase {
   final ReceiptRepository _receiptRepo;
   final ReceiptPaymentRepository _paymentRepo;
 
-  const CreateReceiptForBudgetUsecase(this._receiptRepo, this._paymentRepo);
+  /// Cache do relatório de recibos: descartado após gravar.
+  final ReceiptLedgerRepository? _ledger;
+
+  const CreateReceiptForBudgetUsecase(
+    this._receiptRepo,
+    this._paymentRepo, [
+    this._ledger,
+  ]);
 
   Future<Result<Receipt>> call({
     required String budgetId,
@@ -61,6 +69,7 @@ class CreateReceiptForBudgetUsecase {
       }
       return Result.ok(receipt);
     } finally {
+      _ledger?.invalidate();
       _receiptRepo.budgetId = prevBudget;
       _paymentRepo.budgetId = prevPayBudget;
       _paymentRepo.receiptId = prevPayReceipt;

@@ -26,28 +26,33 @@ class AppFormSaveButton extends StatelessWidget {
       child: TextButton(
         onPressed: loading ? null : onPressed,
         style: TextButton.styleFrom(
-          backgroundColor: highlighted ? buttonColor : transparentColor,
+          backgroundColor: highlighted ? buttonColor : cardBorderColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: highlighted
-                ? BorderSide.none
-                : const BorderSide(color: sheetHandleColor),
+            side:
+                highlighted
+                    ? BorderSide.none
+                    : const BorderSide(color: sheetHandleColor),
           ),
         ),
-        child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2, color: blackColor),
-              )
-            : Text(
-                label,
-                style: GoogleFonts.heebo(
-                  color: highlighted ? blackColor : mutedTextColor,
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
+        child:
+            loading
+                ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: blackColor,
+                  ),
+                )
+                : Text(
+                  label,
+                  style: GoogleFonts.heebo(
+                    color: highlighted ? blackColor : mutedTextColor,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
       ),
     );
   }

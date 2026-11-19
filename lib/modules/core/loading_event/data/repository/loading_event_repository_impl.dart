@@ -38,6 +38,7 @@ class LoadingEventRepositoryImpl implements LoadingEventRepository {
   @override
   void closeLoading(BuildContext context) {
     if (_isLoading) {
+      _isLoading = false;
       Navigator.of(context, rootNavigator: true).pop();
     }
   }

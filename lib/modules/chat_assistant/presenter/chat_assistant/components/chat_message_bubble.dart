@@ -5,6 +5,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_budget_list_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_month_summary_card.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_receipts_report_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
@@ -282,10 +283,24 @@ class ChatMessageBubble extends StatelessWidget {
       case ChatMessageType.contactPicker:
         return _ContactPickerButton(onTap: onAction);
       case ChatMessageType.action:
-        return _ActionButton(
-          label: message.payload?['label'] as String? ?? 'Abrir',
-          action: message.payload?['action'] as String? ?? 'action',
-          onTap: onAction,
+        final actionBackLabel = message.payload?['backLabel'] as String?;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ActionButton(
+              label: message.payload?['label'] as String? ?? 'Abrir',
+              action: message.payload?['action'] as String? ?? 'action',
+              onTap: onAction,
+            ),
+            if (actionBackLabel != null)
+              ChatMessageOptionButtons(
+                options: [
+                  {'label': actionBackLabel, 'value': '0'},
+                ],
+                enabled: buttonsEnabled,
+                onSelect: (_, __) => onAction?.call('back_to_menu'),
+              ),
+          ],
         );
       case ChatMessageType.productList:
         return _ProductListActions(
@@ -306,6 +321,11 @@ class ChatMessageBubble extends StatelessWidget {
         );
       case ChatMessageType.summaryCard:
         return ChatMonthSummaryCard(payload: message.payload ?? {});
+      case ChatMessageType.receiptsReportCard:
+        return ChatReceiptsReportCard(
+          payload: message.payload ?? {},
+          onTap: onAction,
+        );
       case ChatMessageType.text:
         return const SizedBox.shrink();
     }

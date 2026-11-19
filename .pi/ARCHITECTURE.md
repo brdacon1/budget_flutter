@@ -1953,8 +1953,36 @@ Use os widgets de `shared/common/widgets/form/` em todo formulário:
 
 ### 17.7 Layout fixo
 - **Não alterar a tab bar / bottom navigation** existente ao redesenhar telas.
-- Botão principal fica em barra fixa acima do banner de anúncio e **nunca**
-  sobrepõe campos (reserve padding inferior no scroll).
+- Botão principal flutua sobre o formulário (`Stack` + `Positioned` no
+  rodapé), com **fundo sólido** mesmo sem
+  alterações (senão some sobre os cards). Reserve padding inferior no scroll
+  (~96) para o último campo não ficar sob o botão.
+
+### 17.8 Teclado e foco de campo
+- **Campo focado em evidência**: `AppFormField` usa `scrollPadding` de ~30% da
+  altura da tela, então ao focar o campo rola para perto do centro da área
+  visível. Campos fora do `AppFormField` devem fazer o mesmo.
+- **Tela de formulário rola inteira**: o header (`AppHeaderSecondTitle`) é o
+  primeiro item do `ListView`, não fica fixo no topo — assim sobra espaço
+  para o campo focado aparecer acima do teclado. Envolva o scroll em
+  `SafeArea(bottom: false)` para o conteúdo não passar sob a status bar e
+  passe `insideSafeArea: true` ao `AppHeaderSecondTitle` (senão o espaço do
+  topo dobra).
+- **Teclado aberto → botão some**: detecte com
+  `View.of(context).viewInsets.bottom > 0` dentro de um `LayoutBuilder`.
+  **Não use `MediaQuery.viewInsetsOf`**: as telas ficam dentro da `Scaffold`
+  das abas, que já consome o inset, e ele volta sempre 0. Não renderize o
+  `AppFormSaveButton`; ele volta quando o teclado
+  fecha. Nada pode cobrir o campo em edição.
+- **Sempre dar um jeito de fechar o teclado**: enquanto ele está aberto,
+  exiba `AppKeyboardDismissBar` (barra "Fechar teclado" acima do teclado).
+  A barra se mostra/esconde sozinha (escuta `didChangeMetrics`): coloque-a
+  sem `if` na View.
+  Mantenha também o tap fora (`GestureDetector` → `unfocus`) e
+  `keyboardDismissBehavior: onDrag` no scroll.
+- **Telas de formulário não têm banner de anúncio** (`BannerAdWidget`): ele
+  rouba espaço do campo em edição.
+- Referências: `budget_creator_view.dart` e `receipt_creator_view.dart`.
 
 ---
 
@@ -2112,6 +2140,7 @@ ViewModel publica texto + cards; Confirmar → ConfirmAgentActionUsecase (grava,
 | `list_budgets` | leitura | `ListBudgetsUsecase` (budget) | Card `budgetList` (toque abre o orçamento) |
 | `get_month_summary` | leitura | `GetMonthSummaryUsecase` (budget) | Card `summaryCard` (total + por status) |
 | `list_receipts` | leitura | `ListReceiptsByBudgetUsecase` (receipt) | Texto (recibos, recebido, saldo) |
+| `get_receipts_report` | leitura | `GetReceiptsReportUsecase` (receipt) | Card `receiptsReportCard` (qtd, emitido, recebido, por dia/semana, top orçamentos) |
 | `get_budget_link` | leitura | `ShareLinkRepository.buildShareUrl` | Botão *Compartilhar link* (`share_url|<url>`) |
 | `open_budget` | navegação | — | Abre `BudgetTabView` (`open_budget|<id>`) |
 | `create_receipt` | **escrita** | `CreateReceiptForBudgetUsecase` (receipt) | Prévia + Confirmar/Cancelar |
@@ -2150,6 +2179,7 @@ modules/chat_assistant/
 └── presenter/chat_assistant/components/
     ├── chat_budget_list_card.dart
     ├── chat_month_summary_card.dart
+    ├── chat_receipts_report_card.dart              # relatório de recibos por período
     ├── chat_ai_status_dot.dart
     └── chat_typing_indicator.dart                  # "digitando…" (3 pontinhos)
 
@@ -2158,8 +2188,15 @@ modules/budget/domain/
 └── usecase/list_budgets_usecase.dart · get_month_summary_usecase.dart · update_budget_status_usecase.dart
 
 modules/receipt/domain/usecase/
-├── create_receipt_for_budget_usecase.dart      # recibo + pagamento opcional
-└── list_receipts_by_budget_usecase.dart        # recibos + total pago
+├── create_receipt_for_budget_usecase.dart      # recibo + pagamento opcional (invalida o ledger)
+├── list_receipts_by_budget_usecase.dart        # recibos + total pago
+└── get_receipts_report_usecase.dart            # relatório por período (todos os orçamentos)
+
+modules/receipt/
+├── domain/entity/receipt_ledger.dart            # LedgerReceipt{issued, paid} — fonte única de "pago"
+├── domain/entity/receipts_report.dart
+├── domain/repository/receipt_ledger_repository.dart
+└── data/repository/receipt_ledger_repository_impl.dart   # junta recibos+pagamentos; cache 1 min
 
 modules/core/app_check/                          # Firebase App Check (datasource + repo + binds)
 ```
@@ -2174,6 +2211,15 @@ modules/core/app_check/                          # Firebase App Check (datasourc
 - **Estado compartilhado dos repositórios de recibo:** `ReceiptRepository.budgetId`
   e `ReceiptPaymentRepository.budgetId/receiptId` são usados pelas telas. Todo
   UseCase que os altera **restaura o valor anterior no `finally`**.
+- **Ledger de recibos (relatórios/saldo):** `ReceiptLedgerRepository` lê TODOS
+  os recibos e pagamentos do usuário em 2 consultas `collectionGroup`
+  (`RECIBOS`, `PAGAMENTOS`) limitadas ao prefixo `EMPRESAS/{uid}/USERS/{uid}/`
+  via `orderBy(documentId)`+`startAt/endAt`. Data do recibo = ID (timestamp ms);
+  legado → `DATA`. `issued` = `VALORTOTAL`; `paid` = Σ `PRECO` dos pagamentos.
+  **Nenhum outro lugar calcula "pago"** (o saldo do orçamento, Fase 10, usa o
+  mesmo ledger). Não toca no `budgetId`/`receiptId` compartilhado. Exige regras
+  `match /{path=**}/RECIBOS|PAGAMENTOS/{id}` restritas a `EMPRESAS/{auth.uid}`.
+- **Semana:** segunda a domingo; período máximo do relatório: 366 dias.
 - **Forma de pagamento:** usa `PaymentStrings.paymentTypeOptions` (o que as telas
   gravam hoje em `METODO`). ⚠️ Débito técnico: é label traduzido persistido.
 

@@ -16,6 +16,10 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
+import 'package:oflite/modules/receipt/domain/entity/receipt_ledger.dart';
+import 'package:oflite/modules/receipt/domain/repository/receipt_ledger_repository.dart';
+import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -23,6 +27,22 @@ class _FakeBudgetRepo extends ChangeNotifier implements BudgetRepository {
   _FakeBudgetRepo(this.all);
 
   final List<CustomerInfo> all;
+
+  @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(
+    List<String> values,
+  ) async => Result.ok([
+    for (final b in all)
+      if (values.contains(b.status)) b,
+  ]);
+
+  @override
+  Future<Result<List<CustomerInfo>>> searchBudgetsByName(
+    List<String> prefixes,
+  ) async => Result.ok([
+    for (final b in all)
+      if (prefixes.any((p) => (b.customerName ?? '').startsWith(p))) b,
+  ]);
 
   @override
   Future<Result<List<CustomerInfo>>> fetchBudgets({
@@ -52,6 +72,27 @@ class _FakeReceipts implements ListReceiptsByBudgetUsecase {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeLedger implements ReceiptLedgerRepository {
+  @override
+  Future<Result<ReceiptLedger>> fetchLedger({
+    bool forceRefresh = false,
+  }) async => Result.ok(
+    ReceiptLedger({
+      '1763000000000': [
+        LedgerReceipt(
+          receipt: const Receipt(id: 'r1', valorTotal: 100),
+          budgetId: '1763000000000',
+          createdAt: DateTime(2026, 11, 17, 10),
+          payments: [PaymentCustomer(price: 60)],
+        ),
+      ],
+    }),
+  );
+
+  @override
+  void invalidate() {}
 }
 
 class _FakeShare implements ShareLinkRepository {
@@ -131,6 +172,7 @@ void main() {
       repo,
       _FakeShare(),
       _FakeCoin(),
+      GetReceiptsReportUsecase(_FakeLedger(), repo),
     );
   });
 
@@ -254,6 +296,46 @@ void main() {
       expect(create.got, isNull);
       // Desfecho registrado em pares user/model para o histórico seguir válido.
       expect(ai.log.length, 6);
+    });
+  });
+
+  group('get_receipts_report', () {
+    test('devolve totais enxutos ao modelo e card completo', () async {
+      final out = await run(DispatchAgentToolUsecase.receiptsReport, {
+        'from': '2026-11-16',
+        'to': '2026-11-22',
+      });
+      expect(out.modelPayload['count'], 1);
+      expect(out.modelPayload['issued'], 'R\$ 100.00');
+      expect(out.modelPayload['paid'], 'R\$ 60.00');
+      expect(out.modelPayload['top_client'], 'Cliente 0');
+      expect(out.modelPayload.containsKey('buckets'), isFalse);
+      expect(out.messages.single.type, ChatMessageType.receiptsReportCard);
+      expect((out.messages.single.payload!['buckets'] as List).length, 7);
+    });
+
+    test('args inválidos viram erro para o modelo', () async {
+      expect(
+        (await run(DispatchAgentToolUsecase.receiptsReport, {
+          'from': '2026-11-22',
+          'to': '2026-11-16',
+        })).modelPayload['error'],
+        'from_after_to',
+      );
+      expect(
+        (await run(DispatchAgentToolUsecase.receiptsReport, {
+          'from': '2026-11-16',
+        })).modelPayload['error'],
+        'from_and_to_required',
+      );
+      expect(
+        (await run(DispatchAgentToolUsecase.receiptsReport, {
+          'from': '2026-11-16',
+          'to': '2026-11-22',
+          'group_by': 'month',
+        })).modelPayload['error'],
+        'invalid_group_by',
+      );
     });
   });
 }

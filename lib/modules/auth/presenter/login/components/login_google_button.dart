@@ -17,7 +17,7 @@ class LoginGoogleButton extends StatelessWidget {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           backgroundColor: whiteColor,
-          padding: const EdgeInsets.symmetric(vertical: 15),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(26),
           ),
@@ -27,12 +27,17 @@ class LoginGoogleButton extends StatelessWidget {
           children: [
             Image.asset('assets/png/google_logo.png', height: 24, width: 24),
             const SizedBox(width: 8),
-            Text(
-              LoginStrings.loginWithGoogle,
-              style: GoogleFonts.heebo(
-                color: bgColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  LoginStrings.loginWithGoogle,
+                  style: GoogleFonts.heebo(
+                    color: bgColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ],

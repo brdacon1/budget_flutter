@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_ai_status_dot.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_budget_row.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Lista de orçamentos devolvida pela IA. Cada linha abre o orçamento
@@ -38,43 +37,12 @@ class ChatBudgetListCard extends StatelessWidget {
   }
 
   Widget _row(Map<dynamic, dynamic> item) {
-    final status = item['status'] as String? ?? '';
-    return InkWell(
+    return ChatBudgetRow(
+      name: item['name'] as String? ?? '',
+      date: item['date'] as String? ?? '',
+      status: item['status'] as String? ?? '',
+      value: item['value'] as String? ?? '',
       onTap: onTap == null ? null : () => onTap!('open_budget|${item['id']}'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          children: [
-            ChatAiStatusDot(status: status),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['name'] as String? ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: whiteColor),
-                  ),
-                  Text(
-                    '${item['date'] ?? ''} · ${ChatBudgetStrings.budgetStatusLabel(status)}',
-                    style: const TextStyle(color: mutedTextColor, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              item['value'] as String? ?? '',
-              style: const TextStyle(
-                color: whiteColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: mutedTextColor, size: 18),
-          ],
-        ),
-      ),
     );
   }
 }

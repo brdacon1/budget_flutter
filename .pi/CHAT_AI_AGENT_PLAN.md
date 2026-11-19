@@ -7,8 +7,9 @@
 > sobre os usecases reais) e complementa `CHAT_ASSISTANT_SPEC.md`.
 > **Modelo:** Gemini Flash / Flash-Lite via pacote `firebase_ai` (Firebase AI Logic)
 
-> **Status (2026-11-18):** Fases 1–5 implementadas + "digitando…", opção
-> Relatórios e rede de segurança. Pendente: suíte de avaliação contra o modelo
+> **Status (2026-11-19):** Fases 1–5 implementadas + "digitando…", opção
+> Relatórios e rede de segurança. Fase 9 (relatório de recibos) implementada;
+> pendente publicar regras/índices `collectionGroup` no Firestore (§14.4). Pendente: suíte de avaliação contra o modelo
 > real (Fase 7). **Referência viva da implementação: `ARCHITECTURE.md` §20** —
 > este arquivo guarda o plano e o raciocínio original.
 
@@ -383,6 +384,8 @@ separada).
 | **6. Polimento UX** | "digitando…", sugestões rápidas (chips) no início, mensagens de erro amigáveis, en/pt | Revisão de UX (§17 da arquitetura) | 1 d |
 | **7. Qualidade** | Testes + suíte de avaliação (§11) | ≥90% de acerto de tool na suíte | 1–2 d |
 | 8. (opcional) | RAG/FAQ de ajuda, voz, Remote Config de modelo | — | — |
+| **9. Relatório de recibos** | `GetReceiptsReportUseCase` (receipt) + tool `get_receipts_report` + card `receiptsReportCard` (ver §14) | "recibos dessa semana" / "quanto recebi em novembro" mostram contagem e valores iguais à soma das telas de recibo | 2–3 d |
+| **10. Saldo do orçamento** | `GetBudgetBalanceUseCase` (receipt) = total do orçamento − pagamentos dos recibos; tool `get_budget_balance` + saldo nos relatórios (ver §14.9) | "quanto falta o João pagar?" e "orçamentos com saldo em aberto" batem com as telas | 1–2 d |
 
 Total MVP (fases 1–7): **~10–14 dias**.
 
@@ -428,3 +431,172 @@ Total MVP (fases 1–7): **~10–14 dias**.
 - [ ] Usage de tokens logado; limite diário ativo
 - [ ] Usecases novos no módulo dono (budget/receipt), não em utils
 - [ ] Componentes novos: 1 widget por arquivo, cores de `colors.dart`
+
+---
+
+## 14. Fase 9 — Relatório de recibos por semana/mês (só assinantes)
+
+### 14.1 Problema
+
+Hoje, na opção **Relatórios**, a pergunta "crie um relatório de recibos gerados
+essa semana" cai no texto do modelo: *"O OFLite não possui relatórios semanais
+de recibos…"*. O motivo é que só existe `list_receipts(budget_id)`, ou seja,
+recibos de **um** orçamento. Não há tool que agregue recibos de todos os
+orçamentos por período.
+
+### 14.2 Escopo
+
+- Perguntas como: "quantos recibos gerei essa semana?", "valor dos recibos de
+  novembro", "recibos do mês passado comparado com este", "relatório de recibos
+  de 01/11 a 15/11".
+- Saída: **quantidade** de recibos, **valor total** (`VALORTOTAL`), quebra por
+  dia (semana) ou por semana (mês), top 5 orçamentos/clientes e comparação
+  opcional com o período anterior.
+- **Só assinantes.** A tool só existe no modo `aiAssistant`, que já é decidido
+  por `CheckAiAccessUseCase` (§2). Não-assinante: mudança zero (P7). O usecase
+  **não** checa assinatura de novo, porque o gate é do modo e não da regra.
+
+### 14.3 Regras de domínio
+
+| Regra | Decisão |
+|-------|---------|
+| Data do recibo | O **ID do recibo é o timestamp (ms)** de criação (`CreateReceiptForBudgetUseCase` e telas). Usar o ID. Fallback: `DATA` (`dd/MM/yyyy`) se o ID não for numérico (docs legados). |
+| "Essa semana" | Segunda 00:00 → domingo 23:59:59.999 (`America/Sao_Paulo`). "Semana passada" = semana anterior. O modelo resolve as datas a partir de `today` (já no system prompt) e manda `from`/`to` em `yyyy-MM-dd`. |
+| "Esse mês" | Igual ao §6: mês de `today`, último dia inteiro (mesma regra de `ListBudgetsUseCase`, §20.5 da arquitetura). |
+| Valor emitido | Soma de `VALORTOTAL` dos recibos, feita **no usecase** (P2). Recibo sem valor conta na quantidade com 0. |
+| Valor recebido | Soma de `PRECO` dos `PAGAMENTOS` de cada recibo (mesma regra de `ListReceiptsByBudgetUsecase`). **É este número que a Fase 10 subtrai do total do orçamento.** O relatório mostra os dois (emitido e recebido), porque podem divergir. |
+| Data do pagamento | Para o relatório por período, conta a data do **recibo** (pagamento não tem data própria). Se um dia o pagamento ganhar data, só o agregador muda. |
+| Período máximo | 366 dias. Acima disso, a tool devolve `{error}` e o modelo pede um período menor. |
+| Orçamento excluído | Recibo órfão não aparece (consequência natural do caminho no Firestore). |
+
+### 14.4 Dados — como buscar recibos de todos os orçamentos
+
+Recibos moram em `EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{budgetId}/RECIBOS/{id}`.
+Não existe consulta por período hoje. Opções:
+
+| Opção | Custo de leitura | Decisão |
+|-------|------------------|---------|
+| A. Iterar `fetchBudgets()` e buscar `RECIBOS` de cada um | N consultas (1 por orçamento) | ❌ lento e caro |
+| B. `collectionGroup('RECIBOS')` limitado ao caminho do usuário via `orderBy(FieldPath.documentId)` + `startAt/endAt` no prefixo `EMPRESAS/{uid}/USERS/{uid}/` e filtro de período local | 1 consulta; lê os recibos do usuário | ✅ **MVP** |
+| B+. Igual a B, mais uma 2ª consulta `collectionGroup('PAGAMENTOS')` com o mesmo prefixo; junta pelo caminho (`budgetId`/`receiptId`) | 2 consultas por sessão | ✅ **MVP** (necessário para "recebido" e para a Fase 10) |
+| C. Gravar campo novo `CRIADOEM` (Timestamp) e consultar `collectionGroup` com `where` por período | 1 consulta, só o período | ⏭️ evolução, porque recibos antigos não têm o campo |
+
+**Decisão:** B+ agora, com cache em memória de 1 minuto (as telas de recibo
+gravam sem passar pelo ledger) e `invalidate()` após `CreateReceiptForBudgetUseCase`. C fica como débito técnico, porque mudar o formato
+gravado exige migração (e `Receipt.toJson` mantém as 4 chaves por regra).
+
+Configuração necessária:
+- `firestore.rules`: liberar `match /{path=**}/RECIBOS/{id}` para leitura só
+  quando `path` começa com `EMPRESAS/{request.auth.uid}`.
+- Mesma regra para `match /{path=**}/PAGAMENTOS/{id}`.
+- Índices de collection group em `RECIBOS` e `PAGAMENTOS` (`__name__` ASC), em
+  `firestore.indexes.json`.
+
+### 14.5 Arquivos novos e alterados (fluxo UseCase → Repo → DataSource)
+
+**Módulo `receipt`**
+
+| Arquivo | O que faz |
+|---------|-----------|
+| `data/datasource/receipt_remote_datasource.dart` | **+** `getAllUserReceipts(uid)`: a consulta `collectionGroup('RECIBOS')` da opção B+. Devolve `Map` com `id`, `budgetId` (= `doc.reference.parent.parent!.id`) e os campos. |
+| `data/datasource/receipt_payment_remote_datasource.dart` | **+** `getAllUserPayments(uid)`: `collectionGroup('PAGAMENTOS')` com o mesmo prefixo. Devolve `Map` com `budgetId`, `receiptId` (tirados do caminho) e os campos. |
+| `domain/repository/receipt_ledger_repository.dart` + `data/repository/receipt_ledger_repository_impl.dart` | **Repo novo, só leitura:** `fetchLedger({forceRefresh})` → `Result<ReceiptLedger>`. Junta recibos e pagamentos. **Não** usa nem altera os `budgetId`/`receiptId` compartilhados. Cache em memória, invalidado por `invalidate()` (chamado após `CreateReceiptForBudgetUseCase` e quando a tela de recibos salvar/excluir). |
+| `domain/entity/receipt_ledger.dart` | **Base comum das Fases 9 e 10.** `ReceiptLedger{Map<budgetId, List<LedgerReceipt>>}`; `LedgerReceipt{Receipt receipt, String budgetId, DateTime createdAt, List<PaymentCustomer> payments, double issued, double paid}`. `issued`/`paid` calculados uma vez na montagem. |
+| `domain/entity/receipts_report.dart` | `{from, to, count, issued, paid, buckets:[{label, start, count, issued, paid}], topBudgets:[{budgetId, cliente, count, paid}], previous?{count,issued,paid}}`. Campos com nome igual aos da Fase 10 (`paid`).. |
+| `domain/usecase/get_receipts_report_usecase.dart` | Lê o `ReceiptLedger`. Recebe `ReceiptsReportFilter{from, to, groupBy(day/week/auto), comparePrevious}`. Valida o período, filtra por `createdAt`, soma `issued` e `paid`, monta os buckets e busca o nome do cliente dos top 5 via `BudgetRepository.getBudgetById` (cache). `comparePrevious` calcula o período anterior com o mesmo tamanho. |
+| `receipt_binds.dart` | Registrar o usecase. |
+
+**Módulo `chat_assistant`**
+
+| Arquivo | O que faz |
+|---------|-----------|
+| `domain/usecase/dispatch_agent_tool_usecase.dart` | Declarar `get_receipts_report` (`AgentToolSpec`): `from` (string, req.), `to` (string, req.), `group_by` (enum `day`/`week`/`auto`), `compare_previous` (bool). Validar datas e `from ≤ to`. Devolver o `modelPayload` enxuto `{count, total, previous?, topCliente}` (sem buckets: o card mostra) e o uiBlock `receiptsReportCard` com o relatório completo. |
+| `domain/entity/chat_message_entity.dart` | **+** `ChatMessageType.receiptsReportCard`. |
+| `presenter/chat_assistant/components/chat_receipts_report_card.dart` | Card: período, nº de recibos, total (moeda local), variação vs. anterior (▲/▼ %, calculada no usecase), mini-barras por bucket, top clientes clicáveis (`open_budget|<id>`). 1 widget por arquivo, cores de `colors.dart`. |
+| `presenter/.../chat_message_bubble.dart` | Switch do tipo novo. |
+| `presenter/strings/chat_budget_pt_string.dart` (+ en) | Labels do card; no `aiSystemPrompt`, linha nova: *"Recibos por período (semana/mês) → get_receipts_report. Semana = segunda a domingo."*; exemplo na opção Relatórios: *"Ex.: Quantos recibos gerei essa semana?"*. |
+| `show_reports_prompt_usecase.dart` | Incluir o exemplo de recibos no texto do prompt de Relatórios. |
+
+### 14.6 Contrato da tool
+
+```
+get_receipts_report(from: "2026-11-16", to: "2026-11-22", group_by: "day", compare_previous: true)
+→ modelo: {"count":7,"issued":3450.0,"paid":3000.0,"previous":{"count":4,"paid":2100.0},"topCliente":"João"}
+→ UI:     receiptsReportCard { ...relatório completo }
+→ texto:  "Você gerou 7 recibos nesta semana (R$ 3.450,00), com R$ 3.000,00 recebidos (↑ vs. semana passada)."
+```
+
+Leitura → executa direto, sem confirmação (P4 vale só para escrita).
+Erros (`datas inválidas`, `período > 366 dias`, falha de rede) viram `{error}`
+no `functionResponse` e seguem a rede de segurança do §20.8.
+
+### 14.7 Testes
+
+- **Unit `GetReceiptsReportUseCase`** (repo fake): semana segunda–domingo;
+  último dia inteiro; ID não numérico → usa `DATA`; recibo sem valor; buckets
+  por dia e por semana; `comparePrevious` com mesmo tamanho; período > 366 →
+  erro; top 5 ordenado por total.
+- **Unit `ReceiptLedgerRepositoryImpl`**: junta pagamentos ao recibo certo pelo caminho; recibo sem pagamento → `paid = 0`; pagamento órfão ignorado; não altera `budgetId`/`receiptId`; cache e `invalidate()`.
+- **Dispatcher:** `from > to`, data inválida, `group_by` desconhecido → `{error}`.
+- **Eval (§11):** adicionar casos:
+  "recibos dessa semana" → `get_receipts_report{from:2026-11-16,to:2026-11-22}`;
+  "quanto recebi em outubro" → `{from:2026-10-01,to:2026-10-31}`;
+  "recibos do mês comparado ao passado" → `compare_previous:true`;
+  "recibos do João" → continua `find_client` + `list_receipts` (não confundir).
+- **Regressão:** não-assinante não vê a opção nem a tool.
+
+### 14.8 Checklist da fase
+
+- [ ] Soma/contagem/variação só no usecase (P2)
+- [ ] Firestore só em `ReceiptRemoteDatasource` (P3)
+- [ ] `ReceiptRepository.budgetId` intocado pelo relatório
+- [ ] Regras + índice `collectionGroup` publicados antes do release
+- [ ] `ARCHITECTURE.md` §20.3/§20.4 atualizados com a tool e os arquivos
+- [ ] Custo: 1 leitura de coleção por sessão (cache); logar `usage` como os outros turnos
+
+### 14.9 Preparação para a Fase 10 — Saldo do orçamento (total − pagamentos)
+
+A Fase 9 é desenhada para que a Fase 10 seja **só um usecase + uma tool**, sem
+consulta nova nem regra duplicada.
+
+**Regra da Fase 10:**
+
+```
+saldo = totalOrçamento − Σ paid (pagamentos de todos os recibos do orçamento)
+```
+
+- `totalOrçamento` vem da mesma regra que o PDF/tela usam hoje (itens − desconto
+  + acréscimos, se houver). **Não recalcular no chat**: reusar o usecase/getter
+  do módulo `budget` que já produz o total exibido. Se ele estiver em VM,
+  extrair para usecase primeiro (débito técnico, igual ao do Dashboard no §9).
+- `paid` vem **do mesmo `ReceiptLedger`** da Fase 9, não de `VALORTOTAL`.
+- Saldo negativo = pago a mais. O usecase marca como `overpaid` (não bloqueia),
+  coerente com o aviso de `CreateReceiptForBudgetUseCase`.
+- Status: `quitado` (saldo ≤ 0), `parcial` (0 < pago < total), `emAberto`
+  (pago = 0). É um **valor calculado**, nunca persistido, e o label vem das strings.
+
+**O que a Fase 9 já deixa pronto:**
+
+| Peça da Fase 9 | Uso na Fase 10 |
+|----------------|----------------|
+| `ReceiptLedgerRepository` + cache/`invalidate()` | Fonte única de "quanto foi pago" por orçamento |
+| `LedgerReceipt.paid` | Soma direta por `budgetId` |
+| Nomes `issued`/`paid` no payload | Modelo e cards já conhecem os termos |
+| Consulta `collectionGroup('PAGAMENTOS')` + regras/índices | Nada novo no Firestore |
+
+**Entregas da Fase 10 (resumo):**
+
+- `receipt/domain/usecase/get_budget_balance_usecase.dart`: `(budgetId)` →
+  `BudgetBalance{budgetId, cliente, total, paid, balance, state}`.
+- `receipt/domain/usecase/list_open_balances_usecase.dart`: todos os orçamentos
+  com `balance > 0`, ordenados por saldo (≤ 20 ao modelo, lista completa na UI).
+- Tool `get_budget_balance(budget_id?)` (sem id = lista de saldos em aberto).
+- `ListReceiptsByBudgetUsecase` e `create_receipt` passam a usar o
+  `GetBudgetBalanceUseCase` para o "saldo restante" do preview, para que haja
+  **uma só fórmula de saldo** no app.
+- Card `chat_budget_balance_card.dart` (total, pago, saldo e barra de progresso).
+- Opcional: `GetReceiptsReportUseCase` ganha `openBalanceTotal` (soma dos
+  saldos em aberto dos orçamentos do período).
+
+> **Regra para a Fase 9 não travar a 10:** nenhum cálculo de "pago" fora do
+> `ReceiptLedger`, e nenhum campo novo gravado no Firestore.

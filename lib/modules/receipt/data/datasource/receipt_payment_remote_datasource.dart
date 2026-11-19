@@ -28,6 +28,27 @@ class ReceiptPaymentRemoteDatasource {
     }).toList();
   }
 
+  /// Todos os pagamentos do usuário em 1 consulta `collectionGroup`, limitada
+  /// ao caminho do usuário. Cada item traz `budgetId` e `receiptId` (do caminho).
+  Future<List<Map<String, dynamic>>> getAllUserPayments(String userUid) async {
+    final prefix = 'EMPRESAS/$userUid/USERS/$userUid/';
+    final snapshot =
+        await _firestore
+            .collectionGroup('PAGAMENTOS')
+            .orderBy(FieldPath.documentId)
+            .startAt([prefix])
+            .endAt(['$prefix\uf8ff'])
+            .get();
+    return snapshot.docs.map((d) {
+      final map = Map<String, dynamic>.from(d.data());
+      final receipt = d.reference.parent.parent;
+      map['id'] = d.id;
+      map['receiptId'] = receipt?.id;
+      map['budgetId'] = receipt?.parent.parent?.id;
+      return map;
+    }).toList();
+  }
+
   Future<void> savePayment(
     String userUid,
     String budgetId,

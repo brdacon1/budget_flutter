@@ -1,11 +1,17 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
@@ -19,6 +25,7 @@ import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_mode
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -40,8 +47,19 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     super.initState();
     _vm = getIt<ChatAssistantViewModel>();
     _vm.addListener(_onVmChanged);
+    _inputFocusNode.addListener(_onInputFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _vm.initializeChat.execute();
+    });
+  }
+
+  /// Ao focar o campo, rola até o fim depois que o teclado sobe (a área
+  /// da lista encolhe durante a animação do teclado).
+  void _onInputFocusChanged() {
+    if (!_inputFocusNode.hasFocus) return;
+    _scrollToBottom();
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (mounted) _scrollToBottom();
     });
   }
 
@@ -54,6 +72,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     _vm.removeListener(_onVmChanged);
     _vm.dispose();
     _scrollController.dispose();
+    _inputFocusNode.removeListener(_onInputFocusChanged);
     _inputFocusNode.dispose();
     super.dispose();
   }
@@ -108,6 +127,20 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     if (nav.startsWith('open_budget|')) {
       await _openBudget(nav.substring('open_budget|'.length));
+      return;
+    }
+    if (nav.startsWith(ChatAssistantViewModel.findBudgetAction)) {
+      await _findBudget(
+        nav.substring(ChatAssistantViewModel.findBudgetAction.length),
+      );
+      return;
+    }
+    if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
+      await _pickBudgetForReceipts();
+      return;
+    }
+    if (nav == DispatchAgentToolUsecase.selectDuplicateBudget) {
+      await _pickBudgetToDuplicate();
       return;
     }
 
@@ -278,42 +311,51 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
             });
           }
 
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: _vm.messages.length + (_vm.isAiThinking ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == _vm.messages.length) {
-                      return const ChatTypingIndicator();
-                    }
-                    final msg = _vm.messages[index];
-                    return ChatMessageBubble(
-                      message: msg,
-                      onAction: (action) {
-                        _vm.markButtonUsed(msg, action);
-                        _handleAction(action, msg);
+          return LayoutBuilder(
+            builder: (context, _) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      itemCount:
+                          _vm.messages.length + (_vm.isAiThinking ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _vm.messages.length) {
+                          return const ChatTypingIndicator();
+                        }
+                        final msg = _vm.messages[index];
+                        return ChatMessageBubble(
+                          message: msg,
+                          onAction: (action) {
+                            _vm.markButtonUsed(msg, action);
+                            _handleAction(action, msg);
+                          },
+                          buttonsEnabled: _vm.isButtonsActive(msg),
+                          onOptionSelect: (value, label) {
+                            _vm.markButtonUsed(msg, value);
+                            _vm.selectOptionCommand.execute((
+                              value: value,
+                              label: label,
+                              step:
+                                  msg.payload?['optionsStep'] as String? ?? '',
+                            ));
+                          },
+                          onEditMessage:
+                              (field, text, msgId) =>
+                                  _vm.prepareEditMessage(field, text, msgId),
+                        );
                       },
-                      buttonsEnabled: _vm.isButtonsActive(msg),
-                      onOptionSelect: (value, label) {
-                        _vm.markButtonUsed(msg, value);
-                        _vm.selectOptionCommand.execute((
-                          value: value,
-                          label: label,
-                          step: msg.payload?['optionsStep'] as String? ?? '',
-                        ));
-                      },
-                      onEditMessage:
-                          (field, text, msgId) =>
-                              _vm.prepareEditMessage(field, text, msgId),
-                    );
-                  },
-                ),
-              ),
-              _buildInputArea(),
-            ],
+                    ),
+                  ),
+                  AppKeyboardDismissBar(label: ChatBudgetStrings.closeKeyboard),
+                  _buildInputArea(),
+                ],
+              );
+            },
           );
         },
       ),
@@ -373,7 +415,81 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     );
   }
 
+  /// "Encontrar orçamentos": modal já buscando [name] no banco → tela do
+  /// orçamento → ao voltar, oferece abrir de novo ou voltar ao menu.
+  Future<void> _findBudget(String name) async {
+    final id = await ChatBudgetPickerView.show(context, initialQuery: name);
+    if (id == null || !mounted) return;
+    await _openBudget(id);
+    if (mounted) await _vm.onFoundBudgetClosed(id);
+  }
+
+  /// Modal de seleção → lista de recibos do orçamento escolhido. Ao voltar
+  /// (ou fechar o modal) o chat fica na mensagem com "Selecionar orçamento".
+  Future<void> _pickBudgetForReceipts() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    await _openReceipts(id);
+  }
+
+  /// Modal de seleção → modal de opções de duplicação (o mesmo da lista de
+  /// orçamentos). Fechar qualquer um dos dois não muda o chat.
+  Future<void> _pickBudgetToDuplicate() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: transparentColor,
+      builder:
+          (dialogContext) => BudgetListDuplicateBottomModalWidget(
+            onConfirm: (clientData, items, comments, receipts) async {
+              Navigator.of(dialogContext).pop();
+              if (!mounted) return;
+              final loading = getIt<LoadingEventRepository>();
+              try {
+                await loading.alertLoading(context);
+                await _vm.duplicateBudget(
+                  budget,
+                  clientData: clientData,
+                  items: items,
+                  comments: comments,
+                  receipts: receipts,
+                );
+              } finally {
+                if (mounted) loading.closeLoading(context);
+              }
+            },
+          ),
+    );
+  }
+
+  Future<void> _openReceipts(String id) async {
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ReceiptListView(item: budget)),
+    );
+  }
+
   void _handleAction(String action, ChatMessageEntity msg) async {
+    if (action.startsWith(ChatAssistantViewModel.findBudgetAction)) {
+      await _findBudget(
+        action.substring(ChatAssistantViewModel.findBudgetAction.length),
+      );
+      return;
+    }
+    if (action == DispatchAgentToolUsecase.selectReceiptBudget) {
+      await _pickBudgetForReceipts();
+      return;
+    }
+    if (action == DispatchAgentToolUsecase.selectDuplicateBudget) {
+      await _pickBudgetToDuplicate();
+      return;
+    }
     if (action.startsWith('open_budget|')) {
       await _openBudget(action.substring('open_budget|'.length));
       return;
@@ -514,12 +630,18 @@ class _EditAwareInputBar extends StatelessWidget {
                 ),
               ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: TextField(
                     controller: controller,
                     focusNode: focusNode,
                     enabled: enabled,
+                    minLines: 1,
+                    maxLines: 5,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    textCapitalization: TextCapitalization.sentences,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText:
@@ -538,7 +660,6 @@ class _EditAwareInputBar extends StatelessWidget {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    onSubmitted: (_) => onSend(),
                   ),
                 ),
                 const SizedBox(width: 6),

@@ -16,6 +16,10 @@ enum ChatMessageType {
 
   /// Card de resumo do mês vindo da IA (payload: title, total, rows).
   summaryCard,
+
+  /// Card do relatório de recibos por período (payload: ver
+  /// `ChatReceiptsReportCard`).
+  receiptsReportCard,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.

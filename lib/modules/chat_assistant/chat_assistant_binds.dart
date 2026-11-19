@@ -11,7 +11,9 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_actio
 import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
@@ -35,6 +37,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_m
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
@@ -44,6 +47,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_men
 import 'package:oflite/modules/chat_assistant/domain/usecase/start_budget_from_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
 
 /// Registra as dependências do módulo Chat Budget (Assistente).
 void registerChatBudgetDependencies(GetIt sl) {
@@ -194,6 +198,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<BudgetRepository>(),
       sl<ShareLinkRepository>(),
       sl<ConvertCoinRepository>(),
+      sl<GetReceiptsReportUsecase>(),
     ),
   );
   sl.registerLazySingleton<RunAgentTurnUsecase>(
@@ -205,6 +210,9 @@ void registerChatBudgetDependencies(GetIt sl) {
   );
   sl.registerLazySingleton<ShowReportsPromptUsecase>(
     () => ShowReportsPromptUsecase(sl<ChatBudgetRepository>()),
+  );
+  sl.registerLazySingleton<ShowFindBudgetPromptUsecase>(
+    () => ShowFindBudgetPromptUsecase(sl<ChatBudgetRepository>()),
   );
   sl.registerLazySingleton<ResolveAiFailureUsecase>(
     () => const ResolveAiFailureUsecase(),
@@ -220,6 +228,12 @@ void registerChatBudgetDependencies(GetIt sl) {
   // ------------------------------------------------------------------
   // ViewModels (Factory)
   // ------------------------------------------------------------------
+  sl.registerFactory<ChatBudgetPickerViewModel>(
+    () => ChatBudgetPickerViewModel(
+      sl<ListBudgetsUsecase>(),
+      sl<ConvertCoinRepository>(),
+    ),
+  );
   sl.registerFactory<ChatAssistantViewModel>(
     () => ChatAssistantViewModel(
       sl<ChatBudgetRepository>(),
@@ -244,6 +258,8 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ConfirmAgentActionUsecase>(),
       sl<ResolveAiFailureUsecase>(),
       sl<ShowReportsPromptUsecase>(),
+      sl<DuplicateBudgetUsecase>(),
+      sl<ShowFindBudgetPromptUsecase>(),
     ),
   );
 }

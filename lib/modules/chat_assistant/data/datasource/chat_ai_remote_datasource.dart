@@ -101,6 +101,7 @@ class ChatAiRemoteDatasource {
         description: description,
       ),
       'number' => Schema.number(description: description),
+      'boolean' => Schema.boolean(description: description),
       _ => Schema.string(description: description),
     };
   }

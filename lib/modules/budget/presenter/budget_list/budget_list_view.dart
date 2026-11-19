@@ -5,6 +5,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
@@ -428,6 +429,17 @@ class _BudgetListView extends State<BudgetListView> {
       children: <Widget>[
         _buildHeaderScreen(),
         _buildSearchBar(),
+        if (_viewModel.canFilterStatus)
+          BudgetListStatusFilter(
+            status: _viewModel.status,
+            onStatus: _viewModel.selectStatus,
+          ),
+        if (_viewModel.isSearching)
+          const LinearProgressIndicator(
+            minHeight: 2,
+            color: loadingIndicatorColor,
+            backgroundColor: transparentColor,
+          ),
         if (_viewModel.selectionMode) _buildSelectionBar(),
         _buildListView(),
       ],

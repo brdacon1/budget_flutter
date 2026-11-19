@@ -8,11 +8,16 @@ class AppHeaderSecondTitle extends StatelessWidget {
     required this.secondTitle,
     required this.onBack,
     this.isBottomPadding = true,
+    this.insideSafeArea = false,
   });
 
   final String titlePage;
   final String secondTitle;
   final bool isBottomPadding;
+
+  /// true quando a tela já tem `SafeArea` no topo: troca o espaço de 7% da
+  /// altura (que existe para pular a status bar) por um espaço pequeno.
+  final bool insideSafeArea;
   final VoidCallback onBack;
 
   @override
@@ -23,7 +28,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: he * 0.07),
+        SizedBox(height: insideSafeArea ? 16 : he * 0.07),
         GestureDetector(
           onTap: onBack,
           child: Container(

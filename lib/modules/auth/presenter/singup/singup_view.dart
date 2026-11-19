@@ -85,7 +85,7 @@ class _SingUpViewState extends State<SingUpView> {
         );
         // O modal é a rota atual: substitui-o pelo `/menu`, deixando a
         // navegação idêntica a um login bem-sucedido.
-        Navigator.pushReplacementNamed(context, '/menu');
+        Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
       });
       return;
     }

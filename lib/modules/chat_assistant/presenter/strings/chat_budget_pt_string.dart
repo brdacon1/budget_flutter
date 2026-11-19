@@ -14,6 +14,8 @@ class ChatBudgetStrings {
   static String get assistantName => _isPt ? 'Assistente' : 'Assistant';
 
   static String get online => _isPt ? 'online' : 'online';
+  static String get closeKeyboard =>
+      _isPt ? 'Fechar teclado' : 'Close keyboard';
 
   static String get restartTooltip =>
       _isPt ? 'Reiniciar conversa' : 'Restart conversation';
@@ -95,6 +97,26 @@ class ChatBudgetStrings {
   /// Opção "Relatórios" do menu principal (só no modo IA) — valor `'5'`.
   static String get reportsOptionLabel => _isPt ? 'Relatórios' : 'Reports';
 
+  /// Opção "Encontrar orçamentos" do menu (só no modo IA) — valor `'6'`.
+  static String get findBudgetOptionLabel =>
+      _isPt ? 'Encontrar orçamentos' : 'Find budgets';
+
+  static String get findBudgetPrompt =>
+      _isPt
+          ? 'De qual cliente você quer encontrar o orçamento?'
+          : "Which client's budget do you want to find?";
+
+  static String findBudgetSelect(String name) =>
+      _isPt ? 'Selecione o orçamento de $name' : 'Select the budget for $name';
+
+  static String get findBudgetReopenQuestion =>
+      _isPt
+          ? 'Deseja abrir o orçamento novamente?'
+          : 'Do you want to open the budget again?';
+
+  static String get findBudgetReopenLabel =>
+      _isPt ? 'Abrir novamente' : 'Open again';
+
   static String get reportsPrompt =>
       _isPt
           ? 'Descreva o que você precisa saber'
@@ -102,8 +124,10 @@ class ChatBudgetStrings {
 
   static String get reportsExample =>
       _isPt
-          ? 'Ex: Quantos orçamentos eu tenho aprovado nesse mês?'
-          : 'E.g.: How many approved budgets do I have this month?';
+          ? 'Ex: Quantos orçamentos eu tenho aprovado nesse mês?\n'
+              'Ex: Quantos recibos gerei essa semana e quanto recebi?'
+          : 'E.g.: How many approved budgets do I have this month?\n'
+              'E.g.: How many receipts did I issue this week and how much did I receive?';
 
   static String get aiUnavailable =>
       _isPt
@@ -166,6 +190,40 @@ class ChatBudgetStrings {
     _ => _isPt ? 'Pendente' : 'Pending',
   };
 
+  static String get aiSelectReceiptBudget =>
+      _isPt
+          ? 'Selecione o orçamento que deseja criar o recibo'
+          : 'Select the budget you want to create the receipt for';
+
+  static String get aiSelectDuplicateBudget =>
+      _isPt
+          ? 'Selecione o orçamento que deseja duplicar'
+          : 'Select the budget you want to duplicate';
+
+  static String aiBudgetDuplicated(String client) =>
+      _isPt
+          ? 'Orçamento de $client duplicado ✅'
+          : '$client\'s budget duplicated ✅';
+
+  static String get aiBudgetDuplicateFailed =>
+      _isPt
+          ? 'Não consegui duplicar o orçamento. Tente novamente.'
+          : 'Could not duplicate the budget. Please try again.';
+
+  static String get aiSelectBudgetLabel =>
+      _isPt ? 'Selecionar orçamento' : 'Select budget';
+
+  static String get budgetPickerTitle =>
+      _isPt ? 'Selecione o orçamento' : 'Select a budget';
+
+  static String get budgetPickerSearchHint =>
+      _isPt ? 'Buscar cliente...' : 'Search client...';
+
+  static String get budgetPickerAllStatus => _isPt ? 'Todos' : 'All';
+
+  static String get budgetPickerEmpty =>
+      _isPt ? 'Nenhum orçamento encontrado' : 'No budgets found';
+
   static String get aiBudgetListTitle => _isPt ? 'Orçamentos' : 'Budgets';
 
   static String aiBudgetListFooter(int count, String total) =>
@@ -175,6 +233,23 @@ class ChatBudgetStrings {
       _isPt ? 'Resumo de $month' : '$month summary';
 
   static String get aiSummaryTotal => _isPt ? 'Total gerado' : 'Total created';
+
+  static String aiReceiptsReportTitle(String from, String to) =>
+      _isPt ? 'Recibos de $from a $to' : 'Receipts from $from to $to';
+
+  static String get aiReceiptsCountLabel => _isPt ? 'Recibos' : 'Receipts';
+
+  static String get aiReceiptsIssuedLabel => _isPt ? 'Emitido' : 'Issued';
+
+  static String get aiReceiptsPaidLabel => _isPt ? 'Recebido' : 'Received';
+
+  static String aiReceiptsPrevious(int count, String paid) =>
+      _isPt
+          ? 'Período anterior: $count recibo(s) · $paid recebido'
+          : 'Previous period: $count receipt(s) · $paid received';
+
+  static String get aiReceiptsTopLabel =>
+      _isPt ? 'Orçamentos com mais recebido' : 'Top budgets by received';
 
   static String get aiOpenBudget => _isPt ? 'Abrir' : 'Open';
 
@@ -191,7 +266,8 @@ Hoje é $today (formato yyyy-MM-dd). Usuário: ${userName.isEmpty ? 'não inform
 Domínio:
 - Orçamento: cliente, telefone, endereço, itens, observações, valor total e status.
 - Status (use EXATAMENTE): PENDENTE, APROVADO, REPROVADO, FINALIZADO.
-- Recibo: sempre pertence a UM orçamento; tem descrição e pagamentos (valor e forma).
+- Recibo: sempre pertence a UM orçamento; tem descrição e pagamentos (valor e forma). "Recebido" = soma dos pagamentos.
+- Relatório de recibos de um período (semana, mês, intervalo, de todos os orçamentos) → get_receipts_report. Semana = segunda a domingo. Recibos de UM orçamento → list_receipts.
 - "Esse mês" = mês de hoje. "Mês passado" = mês anterior. Datas das ferramentas em yyyy-MM-dd; mês em yyyy-MM.
 
 Regras:
@@ -202,7 +278,9 @@ Regras:
 5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
 6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
-8. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
+8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito.
+9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
+10. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
 ''';
 
   static List<String> get yesNoOptionLabels =>
