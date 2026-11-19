@@ -166,6 +166,25 @@ class ChatBudgetStrings {
     _ => _isPt ? 'Pendente' : 'Pending',
   };
 
+  static String get aiSelectReceiptBudget =>
+      _isPt
+          ? 'Selecione o orçamento que deseja criar o recibo'
+          : 'Select the budget you want to create the receipt for';
+
+  static String get aiSelectBudgetLabel =>
+      _isPt ? 'Selecionar orçamento' : 'Select budget';
+
+  static String get budgetPickerTitle =>
+      _isPt ? 'Selecione o orçamento' : 'Select a budget';
+
+  static String get budgetPickerSearchHint =>
+      _isPt ? 'Buscar cliente...' : 'Search client...';
+
+  static String get budgetPickerAllStatus => _isPt ? 'Todos' : 'All';
+
+  static String get budgetPickerEmpty =>
+      _isPt ? 'Nenhum orçamento encontrado' : 'No budgets found';
+
   static String get aiBudgetListTitle => _isPt ? 'Orçamentos' : 'Budgets';
 
   static String aiBudgetListFooter(int count, String total) =>
@@ -202,7 +221,8 @@ Regras:
 5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
 6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
-8. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
+8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto).
+9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
 ''';
 
   static List<String> get yesNoOptionLabels =>

@@ -49,6 +49,13 @@ class DispatchAgentToolUsecase {
   /// Máximo de itens devolvidos ao modelo (a lista completa vai para a UI).
   static const _maxItemsToModel = 20;
 
+  /// Valores fixos do arg `purpose` de `list_budgets` (nunca traduzir).
+  static const purposeReceipts = 'receipts';
+  static const purposeView = 'view';
+
+  /// Navegação/ação que abre o modal de seleção de orçamento para recibo.
+  static const selectReceiptBudget = 'select_receipt_budget';
+
   /// Fluxo do menu (valor enviado pela IA) → opção do menu principal.
   static const flowToMenuOption = {
     'create_budget': '1',
@@ -89,6 +96,14 @@ class DispatchAgentToolUsecase {
         'client_name': {
           'type': 'string',
           'description': 'parte do nome do cliente',
+        },
+        'purpose': {
+          'type': 'enum',
+          'values': [purposeView, purposeReceipts],
+          'description':
+              'use "receipts" quando o usuário precisa escolher o orçamento '
+              'para criar/ver recibos (abre um modal de seleção); senão '
+              '"view"',
         },
       },
     ),
@@ -180,6 +195,7 @@ class DispatchAgentToolUsecase {
   }
 
   Future<AgentToolOutcome> _list(Map<String, Object?> args) async {
+    if (args['purpose'] == purposeReceipts) return _selectReceiptBudget();
     final status =
         args['status'] == null
             ? null
@@ -237,6 +253,30 @@ class DispatchAgentToolUsecase {
                   ],
                 }),
               ],
+    );
+  }
+
+  /// Recibo sem orçamento escolhido: em vez do card, abre o modal de seleção
+  /// e deixa no chat a mensagem com "Selecionar orçamento" / voltar ao menu.
+  AgentToolOutcome _selectReceiptBudget() {
+    final now = DateTime.now();
+    return AgentToolOutcome(
+      modelPayload: const {'shown': 'budget_picker'},
+      messages: [
+        ChatMessageEntity(
+          id: '${now.microsecondsSinceEpoch}',
+          sender: ChatSender.bot,
+          type: ChatMessageType.action,
+          content: ChatBudgetStrings.aiSelectReceiptBudget,
+          payload: {
+            'label': ChatBudgetStrings.aiSelectBudgetLabel,
+            'action': selectReceiptBudget,
+            'backLabel': ChatBudgetStrings.menuBackLabel,
+          },
+          timestamp: now,
+        ),
+      ],
+      navigation: selectReceiptBudget,
     );
   }
 

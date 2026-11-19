@@ -5,7 +5,9 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
@@ -19,6 +21,7 @@ import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_mode
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -40,8 +43,19 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     super.initState();
     _vm = getIt<ChatAssistantViewModel>();
     _vm.addListener(_onVmChanged);
+    _inputFocusNode.addListener(_onInputFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _vm.initializeChat.execute();
+    });
+  }
+
+  /// Ao focar o campo, rola até o fim depois que o teclado sobe (a área
+  /// da lista encolhe durante a animação do teclado).
+  void _onInputFocusChanged() {
+    if (!_inputFocusNode.hasFocus) return;
+    _scrollToBottom();
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (mounted) _scrollToBottom();
     });
   }
 
@@ -54,6 +68,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     _vm.removeListener(_onVmChanged);
     _vm.dispose();
     _scrollController.dispose();
+    _inputFocusNode.removeListener(_onInputFocusChanged);
     _inputFocusNode.dispose();
     super.dispose();
   }
@@ -108,6 +123,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
     if (nav.startsWith('open_budget|')) {
       await _openBudget(nav.substring('open_budget|'.length));
+      return;
+    }
+    if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
+      await _pickBudgetForReceipts();
       return;
     }
 
@@ -373,7 +392,28 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     );
   }
 
+  /// Modal de seleção → lista de recibos do orçamento escolhido. Ao voltar
+  /// (ou fechar o modal) o chat fica na mensagem com "Selecionar orçamento".
+  Future<void> _pickBudgetForReceipts() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    await _openReceipts(id);
+  }
+
+  Future<void> _openReceipts(String id) async {
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ReceiptListView(item: budget)),
+    );
+  }
+
   void _handleAction(String action, ChatMessageEntity msg) async {
+    if (action == DispatchAgentToolUsecase.selectReceiptBudget) {
+      await _pickBudgetForReceipts();
+      return;
+    }
     if (action.startsWith('open_budget|')) {
       await _openBudget(action.substring('open_budget|'.length));
       return;

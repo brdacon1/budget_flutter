@@ -44,6 +44,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_men
 import 'package:oflite/modules/chat_assistant/domain/usecase/start_budget_from_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
 
 /// Registra as dependências do módulo Chat Budget (Assistente).
 void registerChatBudgetDependencies(GetIt sl) {
@@ -220,6 +221,12 @@ void registerChatBudgetDependencies(GetIt sl) {
   // ------------------------------------------------------------------
   // ViewModels (Factory)
   // ------------------------------------------------------------------
+  sl.registerFactory<ChatBudgetPickerViewModel>(
+    () => ChatBudgetPickerViewModel(
+      sl<ListBudgetsUsecase>(),
+      sl<ConvertCoinRepository>(),
+    ),
+  );
   sl.registerFactory<ChatAssistantViewModel>(
     () => ChatAssistantViewModel(
       sl<ChatBudgetRepository>(),

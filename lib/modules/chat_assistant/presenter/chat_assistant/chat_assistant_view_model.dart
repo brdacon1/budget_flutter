@@ -8,6 +8,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
@@ -355,7 +356,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// - Demais: também desativa quando há mensagem do usuário depois dela.
   /// Cards da IA (abrir orçamento, compartilhar link) seguem clicáveis.
   bool _isAiRepeatable(String action) =>
-      action.startsWith('open_budget|') || action.startsWith('share_url|');
+      action.startsWith('open_budget|') ||
+      action.startsWith('share_url|') ||
+      action == DispatchAgentToolUsecase.selectReceiptBudget;
 
   bool isButtonsActive(ChatMessageEntity msg) {
     if (msg.type == ChatMessageType.budgetList ||
@@ -1456,7 +1459,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await pickContactCommand.execute();
         break;
       case 'back_to_menu':
-        if (_step == ChatFlowStep.mainMenu) break;
+        // No modo IA o step fica em mainMenu: o voltar ainda precisa funcionar.
+        if (_step == ChatFlowStep.mainMenu && !_aiMode) break;
         await _sendUserMessageWithId(
           _generateMessageId(),
           ChatBudgetStrings.menuBackLabel,

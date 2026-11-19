@@ -282,10 +282,24 @@ class ChatMessageBubble extends StatelessWidget {
       case ChatMessageType.contactPicker:
         return _ContactPickerButton(onTap: onAction);
       case ChatMessageType.action:
-        return _ActionButton(
-          label: message.payload?['label'] as String? ?? 'Abrir',
-          action: message.payload?['action'] as String? ?? 'action',
-          onTap: onAction,
+        final actionBackLabel = message.payload?['backLabel'] as String?;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ActionButton(
+              label: message.payload?['label'] as String? ?? 'Abrir',
+              action: message.payload?['action'] as String? ?? 'action',
+              onTap: onAction,
+            ),
+            if (actionBackLabel != null)
+              ChatMessageOptionButtons(
+                options: [
+                  {'label': actionBackLabel, 'value': '0'},
+                ],
+                enabled: buttonsEnabled,
+                onSelect: (_, __) => onAction?.call('back_to_menu'),
+              ),
+          ],
         );
       case ChatMessageType.productList:
         return _ProductListActions(
