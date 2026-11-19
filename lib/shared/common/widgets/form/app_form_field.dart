@@ -51,6 +51,11 @@ class AppFormField extends StatelessWidget {
         TextField(
           controller: controller,
           focusNode: focusNode,
+          // Ao focar, rola o campo até perto do centro da área visível
+          // (acima do teclado + barra de fechar teclado) — §17.8.
+          scrollPadding: EdgeInsets.only(
+            bottom: MediaQuery.sizeOf(context).height * 0.3,
+          ),
           onChanged: onChanged,
           onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
           keyboardType: keyboardType,
@@ -72,17 +77,25 @@ class AppFormField extends StatelessWidget {
             prefixIcon: Icon(prefixIcon, color: mutedTextColor, size: 20),
             suffixIcon: suffix,
             errorText: errorText,
-            errorStyle: GoogleFonts.heebo(color: statusRejectedColor, fontSize: 12),
+            errorStyle: GoogleFonts.heebo(
+              color: statusRejectedColor,
+              fontSize: 12,
+            ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: statusRejectedColor),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: statusRejectedColor, width: 1.5),
+              borderSide: const BorderSide(
+                color: statusRejectedColor,
+                width: 1.5,
+              ),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: sheetHandleColor),

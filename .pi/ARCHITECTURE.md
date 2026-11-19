@@ -1953,8 +1953,34 @@ Use os widgets de `shared/common/widgets/form/` em todo formulário:
 
 ### 17.7 Layout fixo
 - **Não alterar a tab bar / bottom navigation** existente ao redesenhar telas.
-- Botão principal fica em barra fixa acima do banner de anúncio e **nunca**
-  sobrepõe campos (reserve padding inferior no scroll).
+- Botão principal flutua sobre o formulário (`Stack` + `Positioned` no
+  rodapé), com **fundo sólido** mesmo sem
+  alterações (senão some sobre os cards). Reserve padding inferior no scroll
+  (~96) para o último campo não ficar sob o botão.
+
+### 17.8 Teclado e foco de campo
+- **Campo focado em evidência**: `AppFormField` usa `scrollPadding` de ~30% da
+  altura da tela, então ao focar o campo rola para perto do centro da área
+  visível. Campos fora do `AppFormField` devem fazer o mesmo.
+- **Tela de formulário rola inteira**: o header (`AppHeaderSecondTitle`) é o
+  primeiro item do `ListView`, não fica fixo no topo — assim sobra espaço
+  para o campo focado aparecer acima do teclado. Envolva o scroll em
+  `SafeArea(bottom: false)` para o conteúdo não passar sob a status bar e
+  passe `insideSafeArea: true` ao `AppHeaderSecondTitle` (senão o espaço do
+  topo dobra).
+- **Teclado aberto → botão some**: detecte com
+  `View.of(context).viewInsets.bottom > 0` dentro de um `LayoutBuilder`.
+  **Não use `MediaQuery.viewInsetsOf`**: as telas ficam dentro da `Scaffold`
+  das abas, que já consome o inset, e ele volta sempre 0. Não renderize o
+  `AppFormSaveButton`; ele volta quando o teclado
+  fecha. Nada pode cobrir o campo em edição.
+- **Sempre dar um jeito de fechar o teclado**: enquanto ele está aberto,
+  exiba `AppKeyboardDismissBar` (barra "Fechar teclado" acima do teclado).
+  Mantenha também o tap fora (`GestureDetector` → `unfocus`) e
+  `keyboardDismissBehavior: onDrag` no scroll.
+- **Telas de formulário não têm banner de anúncio** (`BannerAdWidget`): ele
+  rouba espaço do campo em edição.
+- Referências: `budget_creator_view.dart` e `receipt_creator_view.dart`.
 
 ---
 

@@ -7,6 +7,7 @@ import 'package:oflite/modules/receipt/presenter/receipt_creator/receipt_creator
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
+import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 /// Tela de criação/edição de recibo.
@@ -84,49 +85,84 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: AnimatedBuilder(
           animation: _viewModel,
-          builder: (context, _) {
-            final receipt = _viewModel.receipt;
-            return Column(
-              children: <Widget>[
-                AppHeaderSecondTitle(
-                  titlePage: _viewModel.titlePage,
-                  secondTitle: ReceiptPtString.subtitle,
-                  onBack: () => Navigator.pop(context, true),
-                  isBottomPadding: false,
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.only(top: 16, bottom: 16),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+          // LayoutBuilder: reconstrói quando a área muda com o teclado.
+          builder:
+              (context, _) => LayoutBuilder(
+                builder: (context, _) {
+                  final receipt = _viewModel.receipt;
+                  // Teclado aberto: esconde o botão e mostra a barra de fechar
+                  // teclado (§17.8).
+                  // Lê do View (não do MediaQuery): a Scaffold das abas já consome o
+                  // viewInsets, então MediaQuery aqui sempre retorna 0.
+                  final keyboardOpen = View.of(context).viewInsets.bottom > 0;
+                  return Column(
                     children: <Widget>[
-                      if (_viewModel.isEditing)
-                        ReceiptCreatorSummaryCard(
-                          id: receipt.id ?? '',
-                          date: receipt.data ?? '-',
-                          total: receipt.valorTotal ?? 0,
+                      Expanded(
+                        // SafeArea: o conteúdo rolado não passa por baixo da status bar.
+                        child: SafeArea(
+                          bottom: false,
+                          child: Stack(
+                            children: <Widget>[
+                              ListView(
+                                // Espaço para o último campo não ficar sob o botão.
+                                padding: const EdgeInsets.only(bottom: 96),
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                children: <Widget>[
+                                  AppHeaderSecondTitle(
+                                    titlePage: _viewModel.titlePage,
+                                    secondTitle: ReceiptPtString.subtitle,
+                                    onBack: () => Navigator.pop(context, true),
+                                    insideSafeArea: true,
+                                    isBottomPadding: false,
+                                  ),
+                                  if (_viewModel.isEditing)
+                                    ReceiptCreatorSummaryCard(
+                                      id: receipt.id ?? '',
+                                      date: receipt.data ?? '-',
+                                      total: receipt.valorTotal ?? 0,
+                                    ),
+                                  ReceiptCreatorForm(
+                                    descricaoController:
+                                        _viewModel.descricaoText,
+                                    descricaoNode: _viewModel.descricaoNode,
+                                    descricaoError: _viewModel.descricaoError,
+                                    onSubmitted: () => _viewModel.save(context),
+                                  ),
+                                ],
+                              ),
+                              if (!keyboardOpen)
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      8,
+                                      20,
+                                      16,
+                                    ),
+                                    child: AppFormSaveButton(
+                                      label: _viewModel.nameButton,
+                                      highlighted: _viewModel.isDirty,
+                                      loading: _viewModel.saving,
+                                      onPressed: () => _viewModel.save(context),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ReceiptCreatorForm(
-                        descricaoController: _viewModel.descricaoText,
-                        descricaoNode: _viewModel.descricaoNode,
-                        descricaoError: _viewModel.descricaoError,
-                        onSubmitted: () => _viewModel.save(context),
                       ),
+                      if (keyboardOpen)
+                        AppKeyboardDismissBar(
+                          label: ReceiptPtString.closeKeyboard,
+                        ),
                     ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                  child: AppFormSaveButton(
-                    label: _viewModel.nameButton,
-                    highlighted: _viewModel.isDirty,
-                    loading: _viewModel.saving,
-                    onPressed: () => _viewModel.save(context),
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
         ),
       ),
     );

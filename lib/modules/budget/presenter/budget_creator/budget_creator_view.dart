@@ -7,10 +7,10 @@ import 'package:oflite/modules/budget/presenter/budget_creator/components/budget
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_contact_section.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
 import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
+import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_summary_card.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
@@ -91,9 +91,8 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     final phone = _viewModel.phoneController.text;
     if (phone.isEmpty) return;
 
-    final permissionStatus = await user_info.FlutterContacts.permissions.request(
-      user_info.PermissionType.readWrite,
-    );
+    final permissionStatus = await user_info.FlutterContacts.permissions
+        .request(user_info.PermissionType.readWrite);
     final hasPermission =
         permissionStatus == user_info.PermissionStatus.granted ||
         permissionStatus == user_info.PermissionStatus.limited;
@@ -114,22 +113,15 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     );
   }
 
-  Widget _buildBottomBar() {
-    final running = _viewModel.saveBudgetCommand.running;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-          child: AppFormSaveButton(
-            label: _viewModel.nameButton,
-            highlighted: _viewModel.isDirty,
-            loading: running,
-            onPressed: _onSave,
-          ),
-        ),
-        const BannerAdWidget(),
-      ],
+  Widget _buildSaveButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      child: AppFormSaveButton(
+        label: _viewModel.nameButton,
+        highlighted: _viewModel.isDirty,
+        loading: _viewModel.saveBudgetCommand.running,
+        onPressed: _onSave,
+      ),
     );
   }
 
@@ -141,35 +133,69 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: AnimatedBuilder(
           animation: _viewModel,
-          builder: (context, _) {
-            return Column(
-              children: [
-                AppHeaderSecondTitle(
-                  titlePage: _viewModel.titlePage,
-                  secondTitle: 'Dados do cliente',
-                  onBack: () => Navigator.pop(context, true),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.only(top: 8, bottom: 16),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+          // LayoutBuilder: reconstrói quando a área muda com o teclado.
+          builder:
+              (context, _) => LayoutBuilder(
+                builder: (context, _) {
+                  // Teclado aberto: esconde botão e banner e mostra a barra de
+                  // fechar teclado (§17.8).
+                  // Lê do View (não do MediaQuery): a Scaffold das abas já consome o
+                  // viewInsets, então MediaQuery aqui sempre retorna 0.
+                  final keyboardOpen = View.of(context).viewInsets.bottom > 0;
+                  return Column(
                     children: [
-                      if (_viewModel.isEditing)
-                        BudgetCreatorSummaryCard(viewModel: _viewModel),
-                      BudgetCreatorContactSection(
-                        viewModel: _viewModel,
-                        onPickContact: _viewModel.pickContact,
+                      Expanded(
+                        // SafeArea: o conteúdo rolado não passa por baixo da status bar.
+                        child: SafeArea(
+                          bottom: false,
+                          child: Stack(
+                            children: [
+                              ListView(
+                                // Espaço extra no fim para o último campo não ficar sob o
+                                // botão flutuante.
+                                padding: const EdgeInsets.only(bottom: 96),
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                children: [
+                                  AppHeaderSecondTitle(
+                                    titlePage: _viewModel.titlePage,
+                                    secondTitle: 'Dados do cliente',
+                                    onBack: () => Navigator.pop(context, true),
+                                    insideSafeArea: true,
+                                  ),
+                                  if (_viewModel.isEditing)
+                                    BudgetCreatorSummaryCard(
+                                      viewModel: _viewModel,
+                                    ),
+                                  BudgetCreatorContactSection(
+                                    viewModel: _viewModel,
+                                    onPickContact: _viewModel.pickContact,
+                                  ),
+                                  BudgetCreatorInfoSection(
+                                    viewModel: _viewModel,
+                                  ),
+                                  BudgetCreatorAddressSection(
+                                    viewModel: _viewModel,
+                                  ),
+                                ],
+                              ),
+                              if (!keyboardOpen)
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  child: _buildSaveButton(),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
-                      BudgetCreatorInfoSection(viewModel: _viewModel),
-                      BudgetCreatorAddressSection(viewModel: _viewModel),
+                      if (keyboardOpen)
+                        const AppKeyboardDismissBar(label: 'Fechar teclado'),
                     ],
-                  ),
-                ),
-                _buildBottomBar(),
-              ],
-            );
-          },
+                  );
+                },
+              ),
         ),
       ),
     );

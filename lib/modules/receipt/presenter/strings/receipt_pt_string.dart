@@ -28,6 +28,8 @@ class ReceiptPtString {
   static String get createTitle => _isPt ? 'Criar recibo' : 'Create receipt';
 
   static String get subtitle => _isPt ? 'Dados do recibo' : 'Receipt data';
+  static String get closeKeyboard =>
+      _isPt ? 'Fechar teclado' : 'Close keyboard';
 
   // --- Card de formulário ---
   static String get formCardTitle =>
