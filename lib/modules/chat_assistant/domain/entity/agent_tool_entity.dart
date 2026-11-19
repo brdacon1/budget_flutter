@@ -8,7 +8,7 @@ class AgentToolSpec {
   final String name;
   final String description;
 
-  /// `{param: {'type': 'enum'|'string'|'number', 'values': [...],
+  /// `{param: {'type': 'enum'|'string'|'number'|'boolean', 'values': [...],
   /// 'description': '...', 'required': true}}`. Sem `required` → opcional.
   final Map<String, Map<String, Object>> params;
 

@@ -13,6 +13,7 @@ import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
 import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
@@ -196,6 +197,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<BudgetRepository>(),
       sl<ShareLinkRepository>(),
       sl<ConvertCoinRepository>(),
+      sl<GetReceiptsReportUsecase>(),
     ),
   );
   sl.registerLazySingleton<RunAgentTurnUsecase>(

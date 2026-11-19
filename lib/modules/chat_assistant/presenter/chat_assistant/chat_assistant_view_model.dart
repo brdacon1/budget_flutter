@@ -366,6 +366,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   bool isButtonsActive(ChatMessageEntity msg) {
     if (msg.type == ChatMessageType.budgetList ||
+        msg.type == ChatMessageType.receiptsReportCard ||
         _isAiRepeatable(msg.payload?['action'] as String? ?? '')) {
       return true;
     }
