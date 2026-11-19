@@ -55,7 +55,7 @@ class _LoginViewState extends State<LoginView> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/menu');
+          Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
         }
       });
       return;

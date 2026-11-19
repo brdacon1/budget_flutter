@@ -49,6 +49,12 @@ class LoginViewModel extends ChangeNotifier {
   bool rememberMe = true;
 
   bool _initialized = false;
+  bool _disposed = false;
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
 
   Future<void> init() async {
     if (_initialized) return;
@@ -143,7 +149,15 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> _checkAutoLogin() async {
-    final currentUser = _auth.currentUser;
+    // No iOS o Firebase restaura a sessão do Keychain de forma assíncrona:
+    // `currentUser` pode ser null logo na abertura. Aguarda o primeiro evento.
+    final currentUser =
+        _auth.currentUser ??
+        await _auth
+            .authStateChanges()
+            .first
+            .timeout(const Duration(seconds: 5), onTimeout: () => null);
+    if (_disposed) return;
     if (currentUser != null) {
       try {
         state = LoginState.loading;
@@ -370,6 +384,7 @@ class LoginViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     emailController.dispose();
     passwordController.dispose();
     super.dispose();

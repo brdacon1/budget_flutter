@@ -48,7 +48,7 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/menu');
+          Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
         }
       });
       return;

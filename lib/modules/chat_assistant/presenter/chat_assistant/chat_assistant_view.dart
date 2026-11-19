@@ -514,12 +514,18 @@ class _EditAwareInputBar extends StatelessWidget {
                 ),
               ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: TextField(
                     controller: controller,
                     focusNode: focusNode,
                     enabled: enabled,
+                    minLines: 1,
+                    maxLines: 5,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    textCapitalization: TextCapitalization.sentences,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText:
@@ -538,7 +544,6 @@ class _EditAwareInputBar extends StatelessWidget {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    onSubmitted: (_) => onSend(),
                   ),
                 ),
                 const SizedBox(width: 6),

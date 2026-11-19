@@ -31,12 +31,18 @@ class ChatInputBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: TextField(
                 controller: controller,
                 focusNode: focusNode,
                 enabled: enabled,
+                minLines: 1,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                textCapitalization: TextCapitalization.sentences,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Digite uma mensagem...',
@@ -52,7 +58,6 @@ class ChatInputBar extends StatelessWidget {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                onSubmitted: (_) => onSend(),
               ),
             ),
             const SizedBox(width: 6),
