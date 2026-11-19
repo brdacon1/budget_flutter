@@ -3,6 +3,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_card_clipper.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_footer.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_header.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_session_loading.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_signup_tab.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_tab.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_tab_toggle.dart';
@@ -47,6 +48,12 @@ class _LoginViewState extends State<LoginView> {
 
     if (state == LoginState.loading) {
       _loadingEvent.alertLoading(context);
+      return;
+    }
+
+    // Cancelamento (ex.: fechou o picker do Google) volta para idle.
+    if (state == LoginState.idle) {
+      _loadingEvent.closeLoading(context);
       return;
     }
 
@@ -112,6 +119,7 @@ class _LoginViewState extends State<LoginView> {
                             () => _displayAlert.dialogChangePassword(context),
                         onGoogleLogin:
                             () => _viewModel.loginWithGoogle(context),
+                        onAppleLogin: _viewModel.loginWithApple,
                       ),
                       secondChild: const LoginSignUpTab(),
                       crossFadeState:
@@ -155,6 +163,9 @@ class _LoginViewState extends State<LoginView> {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, child) {
+        if (_viewModel.state == LoginState.checkingSession) {
+          return const LoginSessionLoading();
+        }
         return Scaffold(
           backgroundColor: secondaryColor,
           body: Column(

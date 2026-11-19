@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_apple_button.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_button.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_google_button.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_text_field.dart';
@@ -13,11 +14,13 @@ class LoginTab extends StatelessWidget {
     required this.viewModel,
     required this.onForgotPassword,
     required this.onGoogleLogin,
+    required this.onAppleLogin,
   });
 
   final LoginViewModel viewModel;
   final VoidCallback onForgotPassword;
   final VoidCallback onGoogleLogin;
+  final VoidCallback onAppleLogin;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +66,16 @@ class LoginTab extends StatelessWidget {
           textColor: bgColor,
         ),
         const SizedBox(height: 20),
-        LoginGoogleButton(onPressed: onGoogleLogin),
+        if (viewModel.showAppleLogin)
+          Row(
+            children: [
+              Expanded(child: LoginAppleButton(onPressed: onAppleLogin)),
+              const SizedBox(width: 10),
+              Expanded(child: LoginGoogleButton(onPressed: onGoogleLogin)),
+            ],
+          )
+        else
+          LoginGoogleButton(onPressed: onGoogleLogin),
         const SizedBox(height: 15),
         Align(
           alignment: Alignment.center,

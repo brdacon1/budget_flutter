@@ -38,6 +38,8 @@ class LoginStrings {
       _isPt ? 'Esqueceu sua senha?' : 'Forgot your password?';
   static String get loginWithGoogle =>
       _isPt ? 'Login com Google' : 'Sign in with Google';
+  static String get loginWithApple =>
+      _isPt ? 'Login com Apple' : 'Sign in with Apple';
   static String get loginPrivacyPolicy =>
       _isPt ? 'Política de privacidade' : 'Privacy policy';
 
@@ -71,6 +73,9 @@ class LoginStrings {
   static String get loginErrorGoogleDefault => _isPt
       ? 'Erro no login com Google. Tente novamente.'
       : 'Google sign-in failed. Please try again.';
+  static String get loginErrorAppleDefault => _isPt
+      ? 'Erro no login com Apple. Tente novamente.'
+      : 'Apple sign-in failed. Please try again.';
 
   // --- Login: dados padrão do novo usuário (gravados no Firestore) ---
   static String get defaultCompanyName =>

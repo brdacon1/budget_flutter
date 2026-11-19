@@ -2,29 +2,30 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/domain/exception/auth_cancelled_exception.dart';
+import 'package:oflite/modules/auth/domain/usecase/restore_session_usecase.dart';
+import 'package:oflite/modules/auth/domain/usecase/sign_in_email_usecase.dart';
+import 'package:oflite/modules/auth/domain/usecase/sign_in_social_usecase.dart';
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
-import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
-import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/auth/data/model/info_user.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/common/constants/environment.dart';
-import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 enum LoginField { email, password }
 
-enum LoginState { idle, loading, success, error }
+/// `checkingSession`: abertura da tela, verificando sessão/credenciais
+/// salvas. A View mostra só um loading em tela cheia (sem botões).
+enum LoginState { checkingSession, idle, loading, success, error }
 
 class LoginViewModel extends ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final UserRepository _userRepository = getIt<UserRepository>();
-  final PdfRepository _pdfRepository = getIt<PdfRepository>();
+  final SignInEmailUseCase _signInEmail = getIt<SignInEmailUseCase>();
+  final SignInSocialUseCase _signInSocial = getIt<SignInSocialUseCase>();
+  final RestoreSessionUseCase _restoreSession = getIt<RestoreSessionUseCase>();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -40,13 +41,14 @@ class LoginViewModel extends ChangeNotifier {
 
   bool isPasswordVisible = true;
   LoginField? selectedField;
-  String uid = '';
-  InfoUser users = InfoUser();
 
-  LoginState state = LoginState.idle;
+  LoginState state = LoginState.checkingSession;
   String? errorMessage;
 
   bool rememberMe = true;
+
+  /// Login com Apple só em dispositivos Apple.
+  final bool showAppleLogin = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
   bool _initialized = false;
   bool _disposed = false;
@@ -103,19 +105,23 @@ class LoginViewModel extends ChangeNotifier {
 
   Future<void> loginWithEmailAndPassword(BuildContext context) async {
     await _performLogin(
-      context,
-      () => _emailAndPassword(emailController.text, passwordController.text),
+      () => _signInEmail(
+        emailController.text,
+        passwordController.text,
+        rememberMe: rememberMe,
+      ),
     );
   }
 
   Future<void> loginWithGoogle(BuildContext context) async {
-    await _performLogin(context, _signInWithGoogle);
+    await _performLogin(() => _signInSocial(SocialProvider.google));
   }
 
-  Future<void> _performLogin(
-    BuildContext context,
-    Future<void> Function() action,
-  ) async {
+  Future<void> loginWithApple() async {
+    await _performLogin(() => _signInSocial(SocialProvider.apple));
+  }
+
+  Future<void> _performLogin(Future<void> Function() action) async {
     state = LoginState.loading;
     errorMessage = null;
     notifyListeners();
@@ -126,7 +132,7 @@ class LoginViewModel extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       state = LoginState.error;
       errorMessage = _mapFirebaseAuthError(e);
-    } on _LoginCancelledException catch (_) {
+    } on AuthCancelledException catch (_) {
       state = LoginState.idle;
     } on GoogleSignInException catch (e) {
       state = LoginState.error;
@@ -140,7 +146,12 @@ class LoginViewModel extends ChangeNotifier {
       } else {
         errorMessage = LoginStrings.loginErrorGoogleDefault;
       }
-    } catch (e) {
+    } on SignInWithAppleAuthorizationException catch (e) {
+      debugPrint('SignInWithAppleAuthorizationException: ${e.code} - ${e.message}');
+      state = LoginState.error;
+      errorMessage = LoginStrings.loginErrorAppleDefault;
+    } catch (e, stack) {
+      debugPrint('Erro inesperado no login: $e\n$stack');
       state = LoginState.error;
       errorMessage = LoginStrings.loginErrorDefault;
     } finally {
@@ -149,222 +160,10 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> _checkAutoLogin() async {
-    // No iOS o Firebase restaura a sessão do Keychain de forma assíncrona:
-    // `currentUser` pode ser null logo na abertura. Aguarda o primeiro evento.
-    final currentUser =
-        _auth.currentUser ??
-        await _auth
-            .authStateChanges()
-            .first
-            .timeout(const Duration(seconds: 5), onTimeout: () => null);
+    final loggedIn = await _restoreSession(rememberMe: rememberMe);
     if (_disposed) return;
-    if (currentUser != null) {
-      try {
-        state = LoginState.loading;
-        notifyListeners();
-
-        uid = currentUser.uid;
-
-        final prefs = await SharedPreferences.getInstance();
-        final storedPassword = prefs.getString('password');
-        final isGoogle = storedPassword == null || storedPassword == 'NO_PASS';
-
-        final session =
-            InfoUser()
-              ..user = uid
-              ..name = currentUser.displayName ?? LoginStrings.userFallback
-              ..password = isGoogle ? 'NO_PASS' : storedPassword
-              ..googleAuth = isGoogle
-              ..email = currentUser.email ?? prefs.getString('email') ?? '';
-        _userRepository.selectUser.value = session;
-
-        await _getUserInfo();
-        state = LoginState.success;
-      } catch (e) {
-        state = LoginState.idle;
-      } finally {
-        notifyListeners();
-      }
-      return;
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email');
-    final password = prefs.getString('password');
-
-    if (email == null || password == null || password == 'NO_PASS') return;
-
-    try {
-      state = LoginState.loading;
-      notifyListeners();
-      await _emailAndPassword(email, password);
-      state = LoginState.success;
-    } catch (e) {
-      state = LoginState.idle;
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  Future<void> _signInWithGoogle() async {
-    try {
-      final googleUser = await GoogleSignIn.instance.authenticate();
-
-      final googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null || idToken.isEmpty) {
-        throw Exception('Google Sign-In retornou idToken nulo ou vazio.');
-      }
-
-      final credential = GoogleAuthProvider.credential(idToken: idToken);
-
-      await _signInWithCredential(credential);
-    } on GoogleSignInException catch (e) {
-      debugPrint(
-        'GoogleSignInException: code=${e.code}, description=${e.description}, details=${e.details}',
-      );
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        throw _LoginCancelledException();
-      }
-      rethrow;
-    } catch (e, stack) {
-      debugPrint('Erro inesperado no Google Sign-In: $e\n$stack');
-      rethrow;
-    }
-  }
-
-  Future<void> _signInWithCredential(AuthCredential credential) async {
-    final prefs = await SharedPreferences.getInstance();
-    final auth = await _auth.signInWithCredential(credential);
-
-    await prefs.setString('email', auth.user?.email ?? '');
-    await prefs.setString('password', 'NO_PASS');
-
-    uid = auth.user?.uid ?? '';
-    final session =
-        InfoUser()
-          ..user = uid
-          ..email = auth.user?.email
-          ..name = auth.user?.displayName ?? LoginStrings.userFallback
-          ..password = 'NO_PASS'
-          ..googleAuth = true;
-    _userRepository.selectUser.value = session;
-
-    final user = await _getUserInfo();
-
-    if (user?.user != auth.user?.uid) {
-      await _createUserWithGoogle(auth.user);
-    }
-  }
-
-  Future<void> _emailAndPassword(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final auth = await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password.trim(),
-    );
-
-    if (rememberMe) {
-      await prefs.setString('email', email);
-      await prefs.setString('password', password);
-    } else {
-      await prefs.remove('email');
-      await prefs.remove('password');
-    }
-
-    uid = auth.user!.uid.toString();
-    final session =
-        InfoUser()
-          ..user = uid
-          ..email = email
-          ..password = password.trim()
-          ..googleAuth = false;
-    _userRepository.selectUser.value = session;
-
-    await _getUserInfo();
-  }
-
-  Future<InfoUser?> _getUserInfo() async {
-    final result = await _userRepository.getUserInfo(uid);
-    if (result is Ok<InfoUser?>) {
-      final user = result.value;
-      if (user != null) {
-        // Preserva Senha e googleAuth que nunca vêm do Firestore
-        final prev = _userRepository.selectUser.value;
-        if (prev != null) {
-          user.password = prev.password;
-          user.googleAuth = prev.googleAuth;
-        }
-        users = user;
-        _userRepository.selectUser.value = user;
-      }
-      final ownerUid = _userRepository.selectUser.value?.user;
-      if (ownerUid != null && ownerUid.isNotEmpty) {
-        final tokens = await getIt<NotificationRepository>().loadFcmTokens(
-          ownerUid,
-        );
-        users.tokens = tokens;
-        getIt<NotificationRepository>().startBudgetApprovalListener(ownerUid);
-        getIt<CrashlyticsRepository>().setUser(ownerUid);
-      }
-      getIt<NotificationRepository>().tryOpenPendingBudget();
-
-      try {
-        final resultSubscription =
-            await getIt<InAppPurchaseRepository>().getAvailablePurchases();
-
-        if (resultSubscription.isNotEmpty) {
-          final latestSubscription = resultSubscription.reduce(
-            (current, next) =>
-                (current.transactionDate) > (next.transactionDate)
-                    ? current
-                    : next,
-          );
-
-          final session = _userRepository.selectUser.value ?? InfoUser();
-          session.autoRenewing = latestSubscription.isAutoRenewing;
-          session.purchaseToken = latestSubscription.purchaseToken;
-          session.productId = latestSubscription.productId;
-          _userRepository.selectUser.value = session;
-
-          if (Platform.isAndroid && latestSubscription.needsCompletion) {
-            await getIt<InAppPurchaseRepository>().acknowledgePurchaseAndroid(
-              latestSubscription,
-            );
-          }
-        } else {
-          final session = _userRepository.selectUser.value ?? InfoUser();
-          session.autoRenewing = false;
-          session.purchaseToken = '';
-          _userRepository.selectUser.value = session;
-        }
-      } catch (_) {
-        final session = _userRepository.selectUser.value ?? InfoUser();
-        session.autoRenewing = false;
-        session.purchaseToken = '';
-        _userRepository.selectUser.value = session;
-      }
-
-      return user;
-    }
-    return null;
-  }
-
-  Future<void> _createUserWithGoogle(User? value) async {
-    final infoUser = InfoUser();
-    final ownerPdf = OwnerPdf();
-    infoUser.email = value?.email ?? '';
-    infoUser.phone = value?.phoneNumber ?? '';
-    infoUser.user = value?.uid ?? '';
-    infoUser.name = value?.displayName ?? '';
-    infoUser.id = value?.uid ?? '';
-    ownerPdf.email = value?.email ?? '';
-    ownerPdf.empresa = LoginStrings.defaultCompanyName;
-    ownerPdf.logoName = '';
-    ownerPdf.fotoId = '';
-    await _userRepository.createDefaultUserData(infoUser, ownerPdf);
-    await _pdfRepository.saveInformationEnterprise(ownerPdf);
+    state = loggedIn ? LoginState.success : LoginState.idle;
+    notifyListeners();
   }
 
   String _mapFirebaseAuthError(FirebaseAuthException error) {
@@ -390,7 +189,3 @@ class LoginViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-
-/// Exceção interna para sinalizar que o usuário cancelou o fluxo
-/// de login (ex.: fechou o picker do Google Sign-In).
-class _LoginCancelledException implements Exception {}
