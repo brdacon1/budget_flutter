@@ -12,22 +12,17 @@ class ConvertCoinRepositoryImpl implements ConvertCoinRepository {
 
   @override
   double convertFromString(String? value) {
-    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    String valorClean = value!
-        .replaceAll(formatter.currencySymbol, '')
-        .replaceAll(',', '')
-        .replaceAll('.', '');
-
-    return double.parse(valorClean) / 100;
+    // Mantém só dígitos: cobre campo vazio, símbolo, espaços (inclusive NBSP).
+    final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return 0;
+    return (double.tryParse(digits) ?? 0) / 100;
   }
 
   @override
   double convertQtdFromString(String? value) {
-    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    String valorClean = value!
-        .replaceAll(formatter.currencySymbol, '')
+    final clean = (value ?? '')
+        .replaceAll(RegExp(r'[^0-9,.]'), '')
         .replaceAll(',', '.');
-
-    return double.parse(valorClean);
+    return double.tryParse(clean) ?? 0;
   }
 }
