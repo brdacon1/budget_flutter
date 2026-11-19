@@ -128,6 +128,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       await _openBudget(nav.substring('open_budget|'.length));
       return;
     }
+    if (nav.startsWith(ChatAssistantViewModel.findBudgetAction)) {
+      await _findBudget(
+        nav.substring(ChatAssistantViewModel.findBudgetAction.length),
+      );
+      return;
+    }
     if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
       return;
@@ -399,6 +405,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     );
   }
 
+  /// "Encontrar orçamentos": modal já buscando [name] no banco → tela do
+  /// orçamento → ao voltar, oferece abrir de novo ou voltar ao menu.
+  Future<void> _findBudget(String name) async {
+    final id = await ChatBudgetPickerView.show(context, initialQuery: name);
+    if (id == null || !mounted) return;
+    await _openBudget(id);
+    if (mounted) await _vm.onFoundBudgetClosed(id);
+  }
+
   /// Modal de seleção → lista de recibos do orçamento escolhido. Ao voltar
   /// (ou fechar o modal) o chat fica na mensagem com "Selecionar orçamento".
   Future<void> _pickBudgetForReceipts() async {
@@ -451,6 +466,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   void _handleAction(String action, ChatMessageEntity msg) async {
+    if (action.startsWith(ChatAssistantViewModel.findBudgetAction)) {
+      await _findBudget(
+        action.substring(ChatAssistantViewModel.findBudgetAction.length),
+      );
+      return;
+    }
     if (action == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
       return;

@@ -37,6 +37,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_m
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
@@ -210,6 +211,9 @@ void registerChatBudgetDependencies(GetIt sl) {
   sl.registerLazySingleton<ShowReportsPromptUsecase>(
     () => ShowReportsPromptUsecase(sl<ChatBudgetRepository>()),
   );
+  sl.registerLazySingleton<ShowFindBudgetPromptUsecase>(
+    () => ShowFindBudgetPromptUsecase(sl<ChatBudgetRepository>()),
+  );
   sl.registerLazySingleton<ResolveAiFailureUsecase>(
     () => const ResolveAiFailureUsecase(),
   );
@@ -255,6 +259,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ResolveAiFailureUsecase>(),
       sl<ShowReportsPromptUsecase>(),
       sl<DuplicateBudgetUsecase>(),
+      sl<ShowFindBudgetPromptUsecase>(),
     ),
   );
 }

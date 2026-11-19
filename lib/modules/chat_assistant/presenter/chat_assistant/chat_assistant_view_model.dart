@@ -30,6 +30,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_use
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
@@ -75,6 +76,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final ResolveAiFailureUsecase _resolveAiFailure;
   final ShowReportsPromptUsecase _showReportsPrompt;
   final DuplicateBudgetUsecase _duplicateBudget;
+  final ShowFindBudgetPromptUsecase _showFindBudgetPrompt;
 
   bool _disposed = false;
 
@@ -102,6 +104,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._resolveAiFailure,
     this._showReportsPrompt,
     this._duplicateBudget,
+    this._showFindBudgetPrompt,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -158,6 +161,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Opção "Relatórios" do menu (só existe no modo IA).
   static const _reportsOption = '5';
+
+  /// Opção "Encontrar orçamentos" do menu (só existe no modo IA).
+  static const _findBudgetOption = '6';
+
+  /// Ação/navegação que abre o modal de orçamentos já buscando o nome.
+  static const findBudgetAction = 'find_budget|';
 
   CustomerInfo? get draftBudget => _chatRepo.draftBudget;
 
@@ -361,6 +370,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   bool _isAiRepeatable(String action) =>
       action.startsWith('open_budget|') ||
       action.startsWith('share_url|') ||
+      action.startsWith(findBudgetAction) ||
       action == DispatchAgentToolUsecase.selectReceiptBudget ||
       action == DispatchAgentToolUsecase.selectDuplicateBudget;
 
@@ -470,6 +480,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
           clean == _reportsOption) {
         _setStepFromName(await _showReportsPrompt());
         notifyListeners();
+      } else if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          clean == _findBudgetOption) {
+        _setStepFromName(await _showFindBudgetPrompt());
+        notifyListeners();
+      } else if (_step == ChatFlowStep.findBudgetAskName) {
+        await _findBudget(clean);
       } else if (_step == ChatFlowStep.mainMenu &&
           _aiMode &&
           !_mainMenuOptions.contains(clean)) {
@@ -587,6 +604,39 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _pendingNavigation = turn.navigation;
       notifyListeners();
     }
+  }
+
+  /// "Encontrar orçamentos": deixa no chat o botão para reabrir o modal e já
+  /// abre o modal buscando [name] no banco. Volta ao step do menu (modo IA).
+  Future<void> _findBudget(String name) async {
+    final action = '$findBudgetAction$name';
+    _setStep(ChatFlowStep.mainMenu);
+    await _addBotMessage(
+      ChatBudgetStrings.findBudgetSelect(name),
+      type: ChatMessageType.action,
+      payload: {
+        'label': ChatBudgetStrings.aiSelectBudgetLabel,
+        'action': action,
+        'backLabel': ChatBudgetStrings.menuBackLabel,
+      },
+    );
+    _pendingNavigation = action;
+    notifyListeners();
+  }
+
+  /// Ao voltar da tela do orçamento encontrado: oferece abrir de novo ou
+  /// voltar ao menu.
+  Future<void> onFoundBudgetClosed(String id) async {
+    await _addBotMessage(
+      ChatBudgetStrings.findBudgetReopenQuestion,
+      type: ChatMessageType.action,
+      payload: {
+        'label': ChatBudgetStrings.findBudgetReopenLabel,
+        'action': 'open_budget|$id',
+        'backLabel': ChatBudgetStrings.menuBackLabel,
+      },
+    );
+    notifyListeners();
   }
 
   /// Duplica [budget] com as opções do modal (mesmo fluxo da lista de
@@ -821,6 +871,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
         name = '$first $last'.trim();
       }
       if (name.isEmpty) name = 'Cliente';
+
+      if (_step == ChatFlowStep.findBudgetAskName) {
+        await _sendUserMessageWithId(_generateMessageId(), name);
+        await _findBudget(name);
+        return Result.ok(null);
+      }
 
       String? phone;
       final phones = contact.phones;

@@ -24,4 +24,5 @@ enum ChatFlowStep {
   changeUsernameResult,
   logoMenu,
   logoViewResult,
+  findBudgetAskName,
 }

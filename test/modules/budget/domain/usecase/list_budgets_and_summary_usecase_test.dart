@@ -13,6 +13,22 @@ class _FakeBudgetRepo extends ChangeNotifier implements BudgetRepository {
   _FakeBudgetRepo(this.all);
 
   final List<CustomerInfo> all;
+
+  @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(
+    List<String> values,
+  ) async => Result.ok([
+    for (final b in all)
+      if (values.contains(b.status)) b,
+  ]);
+
+  @override
+  Future<Result<List<CustomerInfo>>> searchBudgetsByName(
+    List<String> prefixes,
+  ) async => Result.ok([
+    for (final b in all)
+      if (prefixes.any((p) => (b.customerName ?? '').startsWith(p))) b,
+  ]);
   String? rangeStart;
   String? rangeEnd;
   CustomerInfo? updated;
@@ -83,9 +99,9 @@ void main() {
       expect(names, ['José Álvares', 'João Silva']);
     });
 
-    test('nome do cliente ignora acento e caixa', () async {
+    test('nome do cliente busca por prefixo ignorando a caixa', () async {
       final result = await ListBudgetsUsecase(_FakeBudgetRepo(budgets))(
-        const BudgetFilter(clientName: 'jose alv'),
+        const BudgetFilter(clientName: 'josé álv'),
       );
       expect(
         (result as Ok<List<CustomerInfo>>).value.single.customerName,

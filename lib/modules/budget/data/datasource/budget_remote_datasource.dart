@@ -130,6 +130,44 @@ class BudgetRemoteDataSource {
     return getBudgetItems(userUid, budgetId);
   }
 
+  /// Todos os orçamentos cujo STATUS é um dos [values] (variações de caixa
+  /// do mesmo status). Sem orderBy: dispensa índice composto; quem chama
+  /// ordena.
+  Future<List<Map<String, dynamic>>> getBudgetsByStatus(
+    String userUid,
+    List<String> values,
+  ) async {
+    final snapshot =
+        await _budgetsCollection(userUid).where('STATUS', whereIn: values).get();
+    return snapshot.docs
+        .map((d) => Map<String, dynamic>.from(d.data() as Map))
+        .toList();
+  }
+
+  /// Orçamentos cujo NOMECLIENTE começa com algum dos [prefixes]. O Firestore
+  /// não tem "contains"/case-insensitive: uma query de range por prefixo,
+  /// resultados unidos por ID.
+  Future<List<Map<String, dynamic>>> searchBudgetsByNamePrefix(
+    String userUid,
+    List<String> prefixes,
+  ) async {
+    final snapshots = await Future.wait([
+      for (final p in prefixes)
+        _budgetsCollection(userUid)
+            .where('NOMECLIENTE', isGreaterThanOrEqualTo: p)
+            .where('NOMECLIENTE', isLessThan: '$p')
+            .limit(100)
+            .get(),
+    ]);
+    final byId = <String, Map<String, dynamic>>{};
+    for (final s in snapshots) {
+      for (final d in s.docs) {
+        byId[d.id] = Map<String, dynamic>.from(d.data() as Map);
+      }
+    }
+    return byId.values.toList();
+  }
+
   /// Busca orçamentos cujo ID (timestamp) está dentro do range de datas.
   Future<List<Map<String, dynamic>>> getBudgetsByMonthRange(
       String userUid, String startId, String endId) async {

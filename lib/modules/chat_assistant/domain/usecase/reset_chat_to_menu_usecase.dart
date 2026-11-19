@@ -12,8 +12,8 @@ class ResetChatToMenuUsecase {
 
   /// Executa o reset completo e retorna o nome do step a ser definido.
   /// [clearSession] false mantém a conversa e só reenvia o menu.
-  /// [withReports] acrescenta a opção "Relatórios" (só no modo IA — sem a IA
-  /// não há como responder perguntas livres).
+  /// [withReports] acrescenta as opções de IA "Relatórios" e "Encontrar
+  /// orçamentos" (só no modo IA — recursos pagos).
   Future<String> call({
     bool clearSession = true,
     bool withReports = false,
@@ -26,7 +26,10 @@ class ResetChatToMenuUsecase {
         content: ChatBudgetStrings.mainMenuQuestion,
         labels: [
           ...ChatBudgetStrings.mainMenuOptionLabels,
-          if (withReports) ChatBudgetStrings.reportsOptionLabel,
+          if (withReports) ...[
+            ChatBudgetStrings.reportsOptionLabel,
+            ChatBudgetStrings.findBudgetOptionLabel,
+          ],
         ],
         step: 'mainMenu',
       ),

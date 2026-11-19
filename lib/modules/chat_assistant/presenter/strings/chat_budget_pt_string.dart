@@ -95,6 +95,28 @@ class ChatBudgetStrings {
   /// Opção "Relatórios" do menu principal (só no modo IA) — valor `'5'`.
   static String get reportsOptionLabel => _isPt ? 'Relatórios' : 'Reports';
 
+  /// Opção "Encontrar orçamentos" do menu (só no modo IA) — valor `'6'`.
+  static String get findBudgetOptionLabel =>
+      _isPt ? 'Encontrar orçamentos' : 'Find budgets';
+
+  static String get findBudgetPrompt =>
+      _isPt
+          ? 'De qual cliente você quer encontrar o orçamento?'
+          : "Which client's budget do you want to find?";
+
+  static String findBudgetSelect(String name) =>
+      _isPt
+          ? 'Selecione o orçamento de $name'
+          : 'Select the budget for $name';
+
+  static String get findBudgetReopenQuestion =>
+      _isPt
+          ? 'Deseja abrir o orçamento novamente?'
+          : 'Do you want to open the budget again?';
+
+  static String get findBudgetReopenLabel =>
+      _isPt ? 'Abrir novamente' : 'Open again';
+
   static String get reportsPrompt =>
       _isPt
           ? 'Descreva o que você precisa saber'

@@ -6,6 +6,7 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Cabeçalho do modal: alça, título, busca por cliente e filtro de status.
 class ChatBudgetPickerHeader extends StatelessWidget {
   final FocusNode searchFocus;
+  final String initialQuery;
   final BudgetStatus? status;
   final ValueChanged<String> onSearch;
   final ValueChanged<BudgetStatus?> onStatus;
@@ -13,6 +14,7 @@ class ChatBudgetPickerHeader extends StatelessWidget {
   const ChatBudgetPickerHeader({
     super.key,
     required this.searchFocus,
+    this.initialQuery = '',
     required this.status,
     required this.onSearch,
     required this.onStatus,
@@ -43,7 +45,8 @@ class ChatBudgetPickerHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        TextField(
+        TextFormField(
+          initialValue: initialQuery,
           focusNode: searchFocus,
           onChanged: onSearch,
           style: const TextStyle(color: whiteColor),

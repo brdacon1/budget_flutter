@@ -42,6 +42,13 @@ abstract class BudgetRepository extends ChangeNotifier {
   Future<Result<List<CustomerInfo>>> fetchBudgetsByMonthRange(
       String startId, String endId);
 
+  /// Busca no banco todos os orçamentos cujo STATUS é um dos [values].
+  Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(List<String> values);
+
+  /// Busca no banco orçamentos cujo nome do cliente começa com um dos
+  /// [prefixes].
+  Future<Result<List<CustomerInfo>>> searchBudgetsByName(List<String> prefixes);
+
   /// Busca um orçamento por ID (atualiza [selectedBudget]).
   Future<Result<CustomerInfo>> getBudgetById(String id);
 

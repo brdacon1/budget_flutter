@@ -11,14 +11,17 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Ocupa 50% da tela; 80% enquanto a busca está em foco. Fecha devolvendo o
 /// id do orçamento tocado, ou `null` se o usuário sair sem escolher.
 class ChatBudgetPickerView extends StatefulWidget {
-  const ChatBudgetPickerView({super.key});
+  const ChatBudgetPickerView({super.key, this.initialQuery = ''});
 
-  static Future<String?> show(BuildContext context) {
+  /// Busca inicial (ex.: nome do cliente digitado no chat).
+  final String initialQuery;
+
+  static Future<String?> show(BuildContext context, {String initialQuery = ''}) {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: transparentColor,
-      builder: (_) => const ChatBudgetPickerView(),
+      builder: (_) => ChatBudgetPickerView(initialQuery: initialQuery),
     );
   }
 
@@ -34,7 +37,7 @@ class _ChatBudgetPickerViewState extends State<ChatBudgetPickerView> {
   void initState() {
     super.initState();
     _searchFocus.addListener(() => setState(() {}));
-    _vm.init();
+    _vm.init(widget.initialQuery);
   }
 
   @override
@@ -66,6 +69,7 @@ class _ChatBudgetPickerViewState extends State<ChatBudgetPickerView> {
                 children: [
                   ChatBudgetPickerHeader(
                     searchFocus: _searchFocus,
+                    initialQuery: widget.initialQuery,
                     status: _vm.status,
                     onSearch: _vm.search,
                     onStatus: _vm.selectStatus,

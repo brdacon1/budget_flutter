@@ -19,6 +19,15 @@ class BudgetStrings {
   static String get screenTitle => _isPt ? 'Meus orçamentos' : 'My budgets';
   static String get searchPlaceholder =>
       _isPt ? 'Buscar cliente' : 'Search client';
+  static String get filterAllStatus => _isPt ? 'Todos' : 'All';
+
+  /// Label do status persistido (o valor gravado nunca é traduzido).
+  static String statusLabel(String status) => switch (status) {
+    'APROVADO' => _isPt ? 'Aprovado' : 'Approved',
+    'REPROVADO' => _isPt ? 'Reprovado' : 'Rejected',
+    'FINALIZADO' => _isPt ? 'Finalizado' : 'Finished',
+    _ => _isPt ? 'Pendente' : 'Pending',
+  };
   static String get newBudget => _isPt ? 'Novo orçamento' : 'New budget';
   static String get budgetNumber => _isPt ? 'Nº' : 'No.';
   static String get detailDate => _isPt ? 'Data' : 'Date';

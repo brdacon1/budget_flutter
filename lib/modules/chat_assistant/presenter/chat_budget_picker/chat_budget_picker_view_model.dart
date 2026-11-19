@@ -32,7 +32,10 @@ class ChatBudgetPickerViewModel extends ChangeNotifier {
   int _requestId = 0;
   bool _disposed = false;
 
-  Future<void> init() => _load();
+  Future<void> init([String query = '']) {
+    _query = query;
+    return _load();
+  }
 
   void selectStatus(BudgetStatus? status) {
     if (status == _status) return;

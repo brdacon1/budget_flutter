@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/budget/domain/entity/budget_filter.dart';
+import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -13,6 +19,22 @@ class BudgetListViewModel extends ChangeNotifier {
   final DuplicateBudgetUsecase _duplicateBudget =
       getIt<DuplicateBudgetUsecase>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
+  final ListBudgetsUsecase _listBudgets = getIt<ListBudgetsUsecase>();
+
+  /// Filtro por status: recurso só de assinantes.
+  bool get canFilterStatus =>
+      getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
+
+  BudgetStatus? _status;
+  BudgetStatus? get status => _status;
+
+  /// Resultado da busca no banco (nome e/ou status). `null` = sem filtro,
+  /// a tela mostra a lista paginada.
+  List<CustomerInfo>? _searchResults;
+  bool _searching = false;
+  bool get isSearching => _searching;
+  Timer? _debounce;
+  int _searchRequest = 0;
 
   bool _disposed = false;
 
@@ -51,7 +73,7 @@ class BudgetListViewModel extends ChangeNotifier {
   bool get hasMoreBudgets => _budgetRepository.hasMoreBudgets;
 
   Future<void> loadMore() async {
-    if (_isRefreshing || !hasMoreBudgets) return;
+    if (_searchResults != null || _isRefreshing || !hasMoreBudgets) return;
     await getInformationOrcamento(refresh: false);
   }
 
@@ -102,7 +124,7 @@ class BudgetListViewModel extends ChangeNotifier {
     if (selectedIds.isEmpty || deleting) return false;
     deleting = true;
     if (!_disposed) notifyListeners();
-    final items = _foundUsers.where(isSelected).toList();
+    final items = getFilteredData().where(isSelected).toList();
     final result = await _budgetRepository.deleteBudgets(items);
     deleting = false;
     if (result is Ok<void>) {
@@ -128,26 +150,50 @@ class BudgetListViewModel extends ChangeNotifier {
     }
     _isRefreshing = false;
     if (!_disposed) notifyListeners();
+    if (searchController.text.trim().isNotEmpty || _status != null) {
+      await _search();
+    }
     return _foundUsers;
   }
 
   void onSearchTextChanged(String value) {
-    if (!_disposed) notifyListeners();
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), _search);
   }
 
-  List<CustomerInfo> getFilteredData() {
-    if (searchController.text.isEmpty) {
-      return _foundUsers;
-    } else {
-      return _foundUsers
-          .where(
-            (x) => x.customerName!.toLowerCase().contains(
-              searchController.text.toLowerCase(),
-            ),
-          )
-          .toList();
-    }
+  void selectStatus(BudgetStatus? status) {
+    if (status == _status) return;
+    _status = status;
+    _search();
   }
+
+  /// Busca no banco por nome (prefixo) e/ou status. Sem filtro, volta para
+  /// a lista paginada.
+  Future<void> _search() async {
+    final name = searchController.text.trim();
+    final request = ++_searchRequest;
+    if (name.isEmpty && _status == null) {
+      _searchResults = null;
+      _searching = false;
+      if (!_disposed) notifyListeners();
+      return;
+    }
+    _searching = true;
+    if (!_disposed) notifyListeners();
+    final result = await _listBudgets(
+      BudgetFilter(status: _status, clientName: name),
+    );
+    // Ignora respostas de buscas antigas ou após sair da tela.
+    if (_disposed || request != _searchRequest) return;
+    _searchResults = switch (result) {
+      Ok(:final value) => value,
+      _ => const [],
+    };
+    _searching = false;
+    notifyListeners();
+  }
+
+  List<CustomerInfo> getFilteredData() => _searchResults ?? _foundUsers;
 
   void toggleSelect(CustomerInfo b) {
     final id = b.id;
@@ -193,6 +239,7 @@ class BudgetListViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _debounce?.cancel();
     _budgetRepository.removeListener(_onBudgetRepoChanged);
     super.dispose();
   }

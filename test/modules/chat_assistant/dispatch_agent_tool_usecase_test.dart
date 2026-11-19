@@ -29,6 +29,22 @@ class _FakeBudgetRepo extends ChangeNotifier implements BudgetRepository {
   final List<CustomerInfo> all;
 
   @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(
+    List<String> values,
+  ) async => Result.ok([
+    for (final b in all)
+      if (values.contains(b.status)) b,
+  ]);
+
+  @override
+  Future<Result<List<CustomerInfo>>> searchBudgetsByName(
+    List<String> prefixes,
+  ) async => Result.ok([
+    for (final b in all)
+      if (prefixes.any((p) => (b.customerName ?? '').startsWith(p))) b,
+  ]);
+
+  @override
   Future<Result<List<CustomerInfo>>> fetchBudgets({
     bool forceRefresh = false,
   }) async => Result.ok(all);

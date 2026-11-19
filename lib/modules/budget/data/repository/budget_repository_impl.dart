@@ -449,6 +449,38 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(
+    List<String> values,
+  ) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+    try {
+      final raw = await _remote.getBudgetsByStatus(userUid, values);
+      return Result.ok(raw.map((e) => CustomerInfo.fromMap(e)).toList());
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<CustomerInfo>>> searchBudgetsByName(
+    List<String> prefixes,
+  ) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+    try {
+      final raw = await _remote.searchBudgetsByNamePrefix(userUid, prefixes);
+      return Result.ok(raw.map((e) => CustomerInfo.fromMap(e)).toList());
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
   void clearItemsCache(String budgetId) {
     _itemsCache.remove(budgetId);
   }
