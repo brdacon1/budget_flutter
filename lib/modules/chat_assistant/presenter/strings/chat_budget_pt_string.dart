@@ -461,4 +461,21 @@ Regras:
       _isPt
           ? const ['Trocar novamente', 'Voltar ao menu principal']
           : const ['Change again', 'Back to main menu'];
+
+  static String get budgetCreatedSuccess =>
+      _isPt
+          ? 'Orçamento criado com sucesso! 👍🎉'
+          : 'Budget created successfully! 👍🎉';
+
+  static String get copyLinkLabel => _isPt ? 'Copiar link' : 'Copy link';
+
+  static String get generatePdfLabel => _isPt ? 'Gerar PDF' : 'Generate PDF';
+
+  static String get linkCopied =>
+      _isPt ? 'Link do orçamento copiado' : 'Budget link copied';
+
+  static String get pdfUnavailable =>
+      _isPt
+          ? 'Não foi possível gerar o PDF. Tente novamente.'
+          : 'Could not generate the PDF. Please try again.';
 }
