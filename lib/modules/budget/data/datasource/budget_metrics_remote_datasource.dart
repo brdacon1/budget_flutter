@@ -54,8 +54,31 @@ class BudgetMetricsRemoteDatasource {
   Future<int> receiptsCount(String uid, String budgetId) =>
       _count(uid, budgetId, 'RECIBOS');
 
-  Future<int> proofsCount(String uid, String budgetId) =>
-      _count(uid, budgetId, 'COMPROVANTES');
+  /// Quantidade e soma de `VALOR` dos comprovantes em 1 agregação
+  /// (sem filtro → não exige índice composto).
+  Future<({int count, double total})> proofsSummary(
+    String uid,
+    String budgetId,
+  ) {
+    final col = _col(uid, budgetId, 'COMPROVANTES');
+    return _aggregateOr(
+      'COMPROVANTES',
+      () async {
+        final agg = await col.aggregate(count(), sum('VALOR')).get();
+        return (count: agg.count ?? 0, total: agg.getSum('VALOR') ?? 0);
+      },
+      () async {
+        final docs = (await col.get()).docs;
+        return (
+          count: docs.length,
+          total: docs.fold<double>(
+            0,
+            (s, d) => s + ((d.data()['VALOR'] as num?)?.toDouble() ?? 0),
+          ),
+        );
+      },
+    );
+  }
 
   /// Pagamentos de todos os recibos do orçamento em 1 consulta
   /// `collectionGroup` limitada ao caminho do orçamento. Se o Firestore

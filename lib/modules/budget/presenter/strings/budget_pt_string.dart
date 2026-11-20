@@ -101,6 +101,15 @@ class BudgetStrings {
   static String metricsReceivedPercent(int p) =>
       _isPt ? '$p% recebido' : '$p% received';
   static String get metricsItems => _isPt ? 'Itens' : 'Items';
+  static String get metricsProducts => _isPt ? 'Produtos' : 'Products';
+  static String get metricsProofCoverage =>
+      _isPt ? 'Comprovação dos recebimentos' : 'Payment proof coverage';
+  static String metricsProofCoveragePercent(int p) =>
+      _isPt
+          ? '$p% do valor recebido tem comprovante'
+          : '$p% of received value has proof';
+  static String get metricsUnproven =>
+      _isPt ? 'Recebido sem comprovante' : 'Received without proof';
   static String get metricsServices => _isPt ? 'Serviços' : 'Services';
   static String get metricsReceipts => _isPt ? 'Recibos' : 'Receipts';
   static String get metricsProofs => _isPt ? 'Comprovantes' : 'Proofs';

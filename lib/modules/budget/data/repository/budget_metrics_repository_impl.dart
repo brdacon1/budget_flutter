@@ -21,7 +21,7 @@ class BudgetMetricsRepositoryImpl implements BudgetMetricsRepository {
           await (
             _remote.items(uid, budgetId),
             _remote.receiptsCount(uid, budgetId),
-            _remote.proofsCount(uid, budgetId),
+            _remote.proofsSummary(uid, budgetId),
             _remote.budgetPayments(uid, budgetId),
           ).wait;
       return Result.ok((
@@ -30,7 +30,8 @@ class BudgetMetricsRepositoryImpl implements BudgetMetricsRepository {
             (category: i['CATEGORIA'] as String?, total: _toDouble(i['TOTAL'])),
         ],
         receiptsCount: receipts,
-        proofsCount: proofs,
+        proofsCount: proofs.count,
+        proofsTotal: proofs.total,
         payments: [
           for (final p in payments)
             (method: p['METODO'] as String?, price: _toDouble(p['PRECO'])),

@@ -3,6 +3,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_metrics/budget_metrics_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_metrics/components/budget_metrics_hero_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_metrics/components/budget_metrics_methods_card.dart';
+import 'package:oflite/modules/budget/presenter/budget_metrics/components/budget_metrics_proof_coverage_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_metrics/components/budget_metrics_tile.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -81,47 +82,73 @@ class _BudgetMetricsViewState extends State<BudgetMetricsView> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
         children: [
+          _pair(
+            BudgetMetricsTile(
+              icon: Icons.inventory_2_outlined,
+              title: BudgetStrings.metricsProducts,
+              value: _vm.money(m.productsTotal),
+              count: m.productsCount,
+            ),
+            BudgetMetricsTile(
+              icon: Icons.handyman_outlined,
+              title: BudgetStrings.metricsServices,
+              value: _vm.money(m.servicesTotal),
+              count: m.servicesCount,
+            ),
+          ),
+          const SizedBox(height: 12),
           BudgetMetricsHeroCard(
             total: _vm.money(m.budgetTotal),
             toReceive: _vm.money(m.toReceive),
             ratio: m.receivedRatio,
           ),
           const SizedBox(height: 12),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.6,
-            children: [
-              BudgetMetricsTile(
-                icon: Icons.list_alt_rounded,
-                title: BudgetStrings.metricsItems,
-                value: '${m.itemsCount}',
-              ),
-              BudgetMetricsTile(
-                icon: Icons.handyman_outlined,
-                title: BudgetStrings.metricsServices,
-                value: _vm.money(m.servicesTotal),
-              ),
-              BudgetMetricsTile(
-                icon: Icons.receipt_long_outlined,
-                title: BudgetStrings.metricsReceipts,
-                value: '${m.receiptsCount}',
-              ),
-              BudgetMetricsTile(
-                icon: Icons.attach_file_rounded,
-                title: BudgetStrings.metricsProofs,
-                value: '${m.proofsCount}',
-              ),
-            ],
+          _pair(
+            BudgetMetricsTile(
+              icon: Icons.receipt_long_outlined,
+              title: BudgetStrings.metricsReceipts,
+              value: _vm.money(m.receiptsTotal),
+              count: m.receiptsCount,
+            ),
+            BudgetMetricsTile(
+              icon: Icons.attach_file_rounded,
+              title: BudgetStrings.metricsProofs,
+              value: _vm.money(m.proofsTotal),
+              count: m.proofsCount,
+            ),
           ),
           const SizedBox(height: 12),
           BudgetMetricsMethodsCard(metrics: m, money: _vm.money),
+          const SizedBox(height: 12),
+          BudgetMetricsProofCoverageCard(
+            ratio: m.provenRatio,
+            unproven: _vm.money(m.unprovenTotal),
+            hasUnproven: m.unprovenTotal > 0,
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 92,
+            child: BudgetMetricsTile(
+              icon: Icons.list_alt_rounded,
+              title: BudgetStrings.metricsItems,
+              value: '${m.itemsCount}',
+            ),
+          ),
         ],
       ),
     );
   }
+
+  /// Dois cards lado a lado com a mesma altura.
+  Widget _pair(Widget left, Widget right) => SizedBox(
+    height: 108,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 12),
+        Expanded(child: right),
+      ],
+    ),
+  );
 }

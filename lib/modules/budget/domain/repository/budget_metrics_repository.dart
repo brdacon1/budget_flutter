@@ -6,6 +6,7 @@ typedef BudgetMetricsRaw =
       List<({String? category, double total})> items,
       int receiptsCount,
       int proofsCount,
+      double proofsTotal,
       List<({String? method, double price})> payments,
     });
 

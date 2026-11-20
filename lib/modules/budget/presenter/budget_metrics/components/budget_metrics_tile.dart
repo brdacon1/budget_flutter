@@ -10,11 +10,15 @@ class BudgetMetricsTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.value,
+    this.count,
   });
 
   final IconData icon;
   final String title;
   final String value;
+
+  /// Quando informado, mostra a quantidade abaixo do valor.
+  final int? count;
 
   @override
   Widget build(BuildContext context) {
@@ -36,20 +40,27 @@ class BudgetMetricsTile extends StatelessWidget {
               ),
             ],
           ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: GoogleFonts.heebo(
-                color: whiteColor,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          if (count == null)
+            _line(value, 22, whiteColor)
+          else ...[
+            _line(value, 18, whiteColor),
+            _line('$count', 14, whiteColor),
+          ],
         ],
       ),
     );
   }
+
+  Widget _line(String text, double size, Color color) => FittedBox(
+    fit: BoxFit.scaleDown,
+    alignment: Alignment.centerLeft,
+    child: Text(
+      text,
+      style: GoogleFonts.heebo(
+        color: color,
+        fontSize: size,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
 }

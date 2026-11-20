@@ -23,20 +23,34 @@ class GetBudgetMetricsUsecase {
           final m = PaymentMethod.fromValue(p.method);
           byMethod[m] = (byMethod[m] ?? 0) + p.price;
         }
+        var products = 0.0;
+        var services = 0.0;
+        var productsCount = 0;
+        var servicesCount = 0;
+        for (final i in value.items) {
+          switch (ItemCategory.fromValue(i.category)) {
+            case ItemCategory.products:
+              products += i.total;
+              productsCount++;
+            case ItemCategory.services:
+              services += i.total;
+              servicesCount++;
+            case null:
+              break;
+          }
+        }
         return Result.ok(
           BudgetMetrics(
             budgetTotal: budget.totalValue ?? 0,
-            servicesTotal: value.items
-                .where(
-                  (i) =>
-                      ItemCategory.fromValue(i.category) ==
-                      ItemCategory.services,
-                )
-                .fold(0.0, (s, i) => s + i.total),
+            productsTotal: products,
+            servicesTotal: services,
+            productsCount: productsCount,
+            servicesCount: servicesCount,
             itemsCount: value.items.length,
             byMethod: byMethod,
             receiptsCount: value.receiptsCount,
             proofsCount: value.proofsCount,
+            proofsTotal: value.proofsTotal,
           ),
         );
     }
