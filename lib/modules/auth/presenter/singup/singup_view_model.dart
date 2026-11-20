@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/product/domain/usecase/create_sample_product_usecase.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
@@ -101,6 +102,8 @@ class SingUpViewModel extends ChangeNotifier {
 
       await _userRepository.createDefaultUserData(infoUser, ownerPdf);
       await _pdfRepository.saveInformationEnterprise(ownerPdf);
+      // Produto de exemplo na lista de preço; erro não bloqueia o cadastro.
+      await getIt<CreateSampleProductUseCase>()();
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);

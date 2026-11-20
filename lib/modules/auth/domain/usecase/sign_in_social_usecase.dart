@@ -8,6 +8,7 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/domain/usecase/load_user_session_usecase.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/product/domain/usecase/create_sample_product_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -27,12 +28,14 @@ class SignInSocialUseCase {
     this._userRepository,
     this._pdfRepository,
     this._loadUserSession,
+    this._createSampleProduct,
   );
 
   final AuthRepository _authRepository;
   final UserRepository _userRepository;
   final PdfRepository _pdfRepository;
   final LoadUserSessionUseCase _loadUserSession;
+  final CreateSampleProductUseCase _createSampleProduct;
 
   Future<void> call(SocialProvider provider) async {
     final auth = await _authenticate(provider);
@@ -98,5 +101,7 @@ class SignInSocialUseCase {
           ..fotoId = '';
     await _userRepository.createDefaultUserData(infoUser, ownerPdf);
     await _pdfRepository.saveInformationEnterprise(ownerPdf);
+    // Produto de exemplo na lista de preço; erro não bloqueia o login.
+    await _createSampleProduct();
   }
 }

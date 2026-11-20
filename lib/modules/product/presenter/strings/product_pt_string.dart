@@ -128,6 +128,13 @@ class ProductPtString {
   static String get qtyInputHint =>
       _isPt ? 'Digite a quantidade' : 'Type the quantity';
 
+  // --- Produto de exemplo (criado no cadastro) ---
+  static String get sampleProductDescription =>
+      _isPt
+          ? 'Produto exemplo (pode editar ou excluir)'
+          : 'Sample product (you can edit or delete it)';
+  static String get sampleProductMeasure => _isPt ? 'un' : 'unit';
+
   // --- Plano premium ---
   static String get premiumError =>
       _isPt
