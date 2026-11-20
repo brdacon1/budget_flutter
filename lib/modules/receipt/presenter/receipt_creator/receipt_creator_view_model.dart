@@ -32,7 +32,12 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
     descricaoText.text = isEditing ? receipt.descricao! : '';
     _snapshot = descricaoText.text;
     descricaoText.addListener(_onChanged);
+    descricaoNode.addListener(notifyListeners);
   }
+
+  /// Campo em foco = teclado aberto: a View esconde o botão e mostra a barra
+  /// de fechar teclado. Baseado no foco (determinístico), não em viewInsets.
+  bool get fieldFocused => descricaoNode.hasFocus;
 
   bool get isEditing =>
       receipt.descricao != null && receipt.descricao.toString() != 'null';
@@ -40,9 +45,10 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   String get titlePage =>
       isEditing ? ReceiptPtString.editTitle : ReceiptPtString.createTitle;
 
-  String get nameButton => isEditing
-      ? ReceiptPtString.saveChangesButton
-      : ReceiptPtString.continueButton;
+  String get nameButton =>
+      isEditing
+          ? ReceiptPtString.saveChangesButton
+          : ReceiptPtString.createButton;
 
   /// No modo criar o botão fica sempre destacado; no editar, só com mudanças.
   bool get isDirty => !isEditing || descricaoText.text != _snapshot;
@@ -77,14 +83,15 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
     final creating = !isEditing;
     final descricao = descricaoText.text.trim();
 
-    final Receipt target = creating
-        ? Receipt(
-            descricao: descricao,
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            data: DateFormat('dd/MM/yyyy').format(DateTime.now()),
-            valorTotal: 0,
-          )
-        : receipt.copyWith(descricao: descricao);
+    final Receipt target =
+        creating
+            ? Receipt(
+              descricao: descricao,
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              data: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+              valorTotal: 0,
+            )
+            : receipt.copyWith(descricao: descricao);
 
     saving = true;
     notifyListeners();
@@ -126,6 +133,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
   @override
   void dispose() {
     descricaoText.removeListener(_onChanged);
+    descricaoNode.removeListener(notifyListeners);
     descricaoText.dispose();
     descricaoNode.dispose();
     super.dispose();

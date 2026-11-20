@@ -19,6 +19,7 @@ class PaymentCreatorField extends StatelessWidget {
     this.suffixIcon,
     this.keyboardType,
     this.maxLines,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -30,12 +31,19 @@ class PaymentCreatorField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLines;
 
+  /// Mensagem de validação exibida abaixo do campo (borda fica vermelha).
+  final String? errorText;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final hasError = errorText != null;
+    final field = Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFF9E9E9E), width: 2),
+        border: Border.all(
+          color: hasError ? Colors.red : const Color(0xFF9E9E9E),
+          width: 2,
+        ),
         color: Colors.white,
       ),
       padding: const EdgeInsets.all(8.0),
@@ -59,6 +67,21 @@ class PaymentCreatorField extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+    if (!hasError) return field;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        field,
+        Padding(
+          padding: const EdgeInsets.only(left: 8, top: 4),
+          child: Text(
+            errorText!,
+            style: const TextStyle(color: Colors.red, fontSize: 12),
+          ),
+        ),
+      ],
     );
   }
 }

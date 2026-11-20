@@ -65,7 +65,7 @@ class ReceiptPtString {
   static String createdOn(String date) =>
       _isPt ? 'Criado em $date' : 'Created on $date';
 
-  static String get continueButton => _isPt ? 'Continuar' : 'Continue';
+  static String get createButton => _isPt ? 'Criar recibo' : 'Create receipt';
 
   static String get saveChangesButton =>
       _isPt ? 'Salvar alterações' : 'Save changes';

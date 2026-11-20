@@ -23,6 +23,12 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
   bool fieldVisible = false;
   PaymentCustomer _item = PaymentCustomer();
 
+  String? priceError;
+  String? descricaoError;
+
+  /// Editar = pagamento já persistido (tem id). Não depende da descrição.
+  bool get isEditing => _item.id != null && _item.id!.isNotEmpty;
+
   final TextEditingController typeText = TextEditingController();
   final TextEditingController descricaoText = TextEditingController();
   final MoneyMaskedTextController controller = MoneyMaskedTextController(
@@ -38,21 +44,56 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>() {
     _initFromItem(item);
     saveCommand = Command0(_executeSave);
+    controller.addListener(_clearPriceError);
+    descricaoText.addListener(_clearDescricaoError);
+  }
+
+  void _clearPriceError() {
+    if (priceError != null &&
+        _moneyConvert.convertFromString(controller.text) > 0) {
+      priceError = null;
+      notifyListeners();
+    }
+  }
+
+  void _clearDescricaoError() {
+    if (descricaoError != null && descricaoText.text.trim().isNotEmpty) {
+      descricaoError = null;
+      notifyListeners();
+    }
+  }
+
+  /// Valor pago (> 0) e descrição são obrigatórios.
+  bool _validate() {
+    final price =
+        controller.text.trim().isEmpty
+            ? 0.0
+            : _moneyConvert.convertFromString(controller.text);
+    priceError = price > 0 ? null : PaymentStrings.priceRequired;
+    descricaoError =
+        descricaoText.text.trim().isNotEmpty
+            ? null
+            : PaymentStrings.descriptionRequired;
+    notifyListeners();
+    return priceError == null && descricaoError == null;
+  }
+
+  /// Valida e, se ok, dispara o salvamento.
+  void submit() {
+    if (saveCommand.running || !_validate()) return;
+    saveCommand.execute();
   }
 
   void _initFromItem(PaymentCustomer item) {
     _item = item;
-    final hasDescricao =
-        item.description != null &&
-        item.description.toString() != 'null' &&
-        item.description.toString().isNotEmpty;
 
-    if (hasDescricao) {
+    if (isEditing) {
       nameButton = PaymentStrings.updateButton;
       titlePage = PaymentStrings.editPaymentTitle;
       typeText.text = item.method.toString();
       controller.text = _moneyConvert.convertFromDouble(item.price ?? 0);
-      descricaoText.text = item.description.toString();
+      final desc = item.description;
+      descricaoText.text = (desc == null || desc == 'null') ? '' : desc;
     } else {
       nameButton = PaymentStrings.saveButton;
       titlePage = PaymentStrings.createPaymentTitle;
@@ -89,17 +130,14 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
       final currentItem =
           PaymentCustomer()
             ..method = typeText.text
-            ..description = descricaoText.text
+            ..description = descricaoText.text.trim()
             ..price = cleanAmount;
 
-      if (nameButton == PaymentStrings.saveButton) {
-        await _paymentRepository.savePayment(currentItem);
-      } else {
+      if (isEditing) {
         currentItem.id = _item.id;
-        await _paymentRepository.updatePayment(currentItem);
+        return await _paymentRepository.updatePayment(currentItem);
       }
-
-      return Result.ok(null);
+      return await _paymentRepository.savePayment(currentItem);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -107,6 +145,8 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    controller.removeListener(_clearPriceError);
+    descricaoText.removeListener(_clearDescricaoError);
     typeText.dispose();
     descricaoText.dispose();
     controller.dispose();
