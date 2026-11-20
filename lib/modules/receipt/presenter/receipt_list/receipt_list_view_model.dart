@@ -4,6 +4,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
+import 'package:oflite/modules/receipt/domain/usecase/sum_receipts_total_usecase.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -19,7 +20,12 @@ class ReceiptListViewModel extends ChangeNotifier {
   final CustomerInfo item;
   List<Receipt> foundPayment = <Receipt>[];
 
+  final SumReceiptsTotalUsecase _sumTotal = const SumReceiptsTotalUsecase();
+
   ReceiptListViewModel({required this.item});
+
+  /// Soma dos recibos gerados no orçamento, formatada em moeda.
+  String get totalText => moneyConvert.convertFromDouble(_sumTotal(foundPayment));
 
   Future<void> inicialData({bool forceRefresh = false}) async {
     _receiptRepository.budgetId = item.id;
