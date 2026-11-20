@@ -27,9 +27,6 @@ class AdsRepositoryImpl implements AdsRepository {
       !(_userRepository.selectUser.value?.autoRenewing ?? false);
 
   @override
-  String get bannerAdUnitId => Environment.instance.adMob.bannerAdUnitId;
-
-  @override
   String get interstitialAdUnitId =>
       Environment.instance.adMob.interstitialAdUnitId;
 

@@ -137,7 +137,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
           builder:
               (context, _) => LayoutBuilder(
                 builder: (context, _) {
-                  // Teclado aberto: esconde botão e banner e mostra a barra de
+                  // Teclado aberto: esconde botão e mostra a barra de
                   // fechar teclado (§17.8).
                   // Lê do View (não do MediaQuery): a Scaffold das abas já consome o
                   // viewInsets, então MediaQuery aqui sempre retorna 0.

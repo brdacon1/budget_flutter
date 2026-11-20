@@ -17,7 +17,6 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
 class BudgetListView extends StatefulWidget {
@@ -458,7 +457,6 @@ class _BudgetListView extends State<BudgetListView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingButton(),
-      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }
