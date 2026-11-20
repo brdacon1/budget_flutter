@@ -17,6 +17,10 @@ abstract class AdsRepository {
   /// Exibe o intersticial carregado, se houver.
   void showInterstitial();
 
+  /// Exibe o intersticial e completa quando ele é fechado (ou falha /
+  /// não está carregado / usuário é assinante). Nunca trava o fluxo.
+  Future<void> showInterstitialAndWait();
+
   /// Retorna o ID do bloco de banner.
   String get bannerAdUnitId;
 

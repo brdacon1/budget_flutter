@@ -25,7 +25,10 @@ import 'package:oflite/modules/chat_assistant/data/repository/chat_budget_reposi
 import 'package:oflite/modules/chat_assistant/data/repository/chat_script_repository_impl.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/create_budget_from_chat_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
+import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/fetch_chat_script_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_change_username_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_logo_menu_option_usecase.dart';
@@ -184,6 +187,17 @@ void registerChatBudgetDependencies(GetIt sl) {
     ),
   );
 
+  sl.registerLazySingleton<BuildBudgetFinalActionsUsecase>(
+    () => BuildBudgetFinalActionsUsecase(sl<AdsRepository>()),
+  );
+  sl.registerLazySingleton<GenerateBudgetPdfFromChatUsecase>(
+    () => GenerateBudgetPdfFromChatUsecase(
+      sl<ChatBudgetRepository>(),
+      sl<BudgetRepository>(),
+      sl<AdsRepository>(),
+    ),
+  );
+
   // ------------------------------------------------------------------
   // Usecases IA (assinantes)
   // ------------------------------------------------------------------
@@ -260,6 +274,8 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ShowReportsPromptUsecase>(),
       sl<DuplicateBudgetUsecase>(),
       sl<ShowFindBudgetPromptUsecase>(),
+      sl<BuildBudgetFinalActionsUsecase>(),
+      sl<GenerateBudgetPdfFromChatUsecase>(),
     ),
   );
 }

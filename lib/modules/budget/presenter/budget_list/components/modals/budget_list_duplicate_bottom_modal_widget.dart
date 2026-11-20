@@ -103,7 +103,9 @@ class _CheckTile extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: CheckboxListTile(
-        side: const BorderSide(color: Color(0xFF9E9E9E)),
+        checkboxShape: const CircleBorder(),
+        checkboxScaleFactor: 1.2,
+        side: const BorderSide(color: Color(0xFF9E9E9E), width: 1.5),
         checkColor: Colors.white,
         activeColor: AppBottomModal.grayColor,
         title: Text(

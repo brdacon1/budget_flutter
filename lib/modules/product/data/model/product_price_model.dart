@@ -165,7 +165,7 @@ class ProductPriceModel {
   }
 
   /// Converte para o model legado compartilhado entre as telas de orçamento,
-  /// lista de preço e o modal `ItemsListBottomModalWidget`.
+  /// lista de preço e o picker de itens do orçamento.
   ItemsBudget toItemsBudget() {
     return ItemsBudget(
       id: id,

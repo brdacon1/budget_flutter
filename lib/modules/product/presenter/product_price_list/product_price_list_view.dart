@@ -1,6 +1,5 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
@@ -19,18 +18,7 @@ import 'product_price_list_view_model.dart';
 /// ao ViewModel. Os blocos visuais repetidos vivem em `components/`
 /// ([ProductPriceListHeader], [ProductPriceCard]).
 class ProductPriceListView extends StatefulWidget {
-  final CustomerInfo? item;
-  final bool? fromMenu;
-  final bool selectionMode;
-
-  /// Quando [selectionMode] é true, a tela funciona como picker multi-seleção
-  /// e retorna [List<ItemsBudget>] via Navigator.pop.
-  const ProductPriceListView({
-    super.key,
-    this.item,
-    this.fromMenu,
-    this.selectionMode = false,
-  });
+  const ProductPriceListView({super.key});
 
   @override
   State<ProductPriceListView> createState() => _ProductPriceListView();
@@ -42,11 +30,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ProductPriceListViewModel(
-      item: widget.item,
-      fromMenu: widget.fromMenu ?? false,
-      selectionMode: widget.selectionMode,
-    );
+    _viewModel = ProductPriceListViewModel();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _viewModel.inicialData(),
     );
@@ -58,154 +42,10 @@ class _ProductPriceListView extends State<ProductPriceListView> {
     super.dispose();
   }
 
-  /// Barra inferior inspirada no print (estilo iFood): ocupa toda a largura do rodapé
-  Widget _buildBottomAppBar() {
-    return AnimatedBuilder(
-      animation: _viewModel,
-      builder: (context, _) {
-        // Se estiver em modo seleção, usa o botão de finalizar seleção original
-        if (_viewModel.selectionMode) {
-          if (_viewModel.addItems.isEmpty) return const SizedBox.shrink();
-          return BottomAppBar(
-            color: const Color(0xFF1E1E2C),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00BFA5),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  onPressed: () => _viewModel.finalizeSelection(context),
-                  child: Text(
-                    'Finalizar seleção (${_viewModel.addItems.length})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (_viewModel.fromMenu || _viewModel.addItems.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        final totalPrice = _viewModel.cartTotal;
-        final count = _viewModel.addItems.length;
-
-        return BottomAppBar(
-          color: const Color(0xFF161622),
-          elevation: 10,
-          height: 96,
-          padding: EdgeInsets.zero,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Color(0xFF00BFA5),
-                          size: 32,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Total dos itens',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text.rich(
-                                  TextSpan(
-                                    text: _viewModel.moneyConvert
-                                        .convertFromDouble(totalPrice),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text:
-                                            ' / $count ${count == 1 ? 'item' : 'itens'}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-                    onPressed: () => _viewModel.openCartModal(context),
-                    child: const Text(
-                      'Ver Carrinho',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
-        if (_viewModel.selectionMode) return const SizedBox.shrink();
-
         if (_viewModel.deleteVisible) {
           return badges.Badge(
             badgeStyle: badges.BadgeStyle(
@@ -288,19 +128,9 @@ class _ProductPriceListView extends State<ProductPriceListView> {
             return ProductPriceCard(
               item: list[index],
               moneyConvert: _viewModel.moneyConvert,
-              fromMenu: _viewModel.fromMenu,
               checkBoxAppear: _viewModel.checkBoxAppear,
-              checkBoxProductVisible:
-                  _viewModel.checkBoxProductVisible || _viewModel.selectionMode,
-              onLongPress:
-                  _viewModel.selectionMode ? () {} : _viewModel.onLongPress,
-              onTap:
-                  _viewModel.selectionMode
-                      ? () => _viewModel.toggleSelectProduct(context, index)
-                      : () =>
-                          _viewModel.openCreator(context, item: list[index]),
-              onToggleSelectProduct:
-                  () => _viewModel.toggleSelectProduct(context, index),
+              onLongPress: _viewModel.onLongPress,
+              onTap: () => _viewModel.openCreator(context, item: list[index]),
               onToggleDelete: () => _viewModel.toggleDeleteCheckbox(index),
             );
           },
@@ -322,8 +152,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
             children: <Widget>[
               ProductPriceListHeader(
                 searchController: _viewModel.searchController,
-                title: _viewModel.selectionMode ? 'Selecionar produtos' : null,
-                onBack: () => _viewModel.onBack(context),
+                onBack: () => Navigator.pop(context, true),
                 onSearchChanged: (_) => _viewModel.onSearchChanged(),
               ),
               _buildList(list: list),
@@ -333,7 +162,6 @@ class _ProductPriceListView extends State<ProductPriceListView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingActionButton(),
-      bottomNavigationBar: _buildBottomAppBar(),
     );
   }
 }

@@ -20,6 +20,8 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/pdf_edit_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
@@ -117,6 +119,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     await _vm.finalizeAfterComments();
   }
 
+  /// Abre o PDF do orçamento recém-criado (só compartilhar + voltar na nav).
+  Future<void> _openBudgetPdf() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PdfBudgetView()),
+    );
+    getIt<BudgetRepository>().clearSelectBudget();
+  }
+
   /// Processa navegações pendentes disparadas pela ViewModel (telas/modais externas).
   Future<void> _handlePendingNavigation() async {
     final nav = _vm.pendingNavigation;
@@ -135,6 +146,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       );
       return;
     }
+    if (nav == ChatAssistantViewModel.openBudgetPdfAction) {
+      await _openBudgetPdf();
+      return;
+    }
     if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
       return;
@@ -149,7 +164,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const ProductPriceListView(fromMenu: true),
+            builder: (_) => const ProductPriceListView(),
           ),
         );
         if (mounted) {
@@ -296,7 +311,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           });
 
           // Mostra SnackBar quando share dá erro
-          if (_vm.shareLinkCommand.error && mounted) {
+          if ((_vm.shareLinkCommand.error ||
+                  _vm.copyLinkCommand.error ||
+                  _vm.generatePdfCommand.error) &&
+              mounted) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               final msg = _vm.shareErrorMessage ?? 'Erro ao compartilhar';
@@ -492,6 +510,22 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
     if (action.startsWith('open_budget|')) {
       await _openBudget(action.substring('open_budget|'.length));
+      return;
+    }
+    if (action == ChatBudgetStrings.copyLinkLabel) {
+      await _vm.copyLinkCommand.execute();
+      if (mounted && _vm.copyLinkCommand.completed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ChatBudgetStrings.linkCopied),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+    if (action == ChatBudgetStrings.generatePdfLabel) {
+      await _vm.generatePdfCommand.execute();
       return;
     }
     switch (action) {

@@ -1,3 +1,4 @@
+import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -251,10 +252,15 @@ class BudgetRepositoryImpl extends BudgetRepository {
       final formatted = DateFormat('dd/MM/yyyy').format(now);
       final newId = DateTime.now().millisecondsSinceEpoch.toString();
 
+      // Origem só é lida quando algo dela é copiado. O VALORTOTAL é derivado
+      // dos itens: só acompanha a cópia quando os itens também são copiados.
+      final CustomerInfo? source = (copyClientData || copyItems)
+          ? CustomerInfo.fromMap(await _remote.getBudgetById(userUid, sourceId))
+          : null;
+      final double? totalValue = copyItems ? source?.totalValue : 0;
+
       final CustomerInfo newBudget;
-      if (copyClientData) {
-        final sourceRaw = await _remote.getBudgetById(userUid, sourceId);
-        final source = CustomerInfo.fromMap(sourceRaw);
+      if (copyClientData && source != null) {
         newBudget = CustomerInfo(
           id: newId,
           data: formatted,
@@ -268,14 +274,15 @@ class BudgetRepositoryImpl extends BudgetRepository {
           street: source.street,
           city: source.city,
           neighborhood: source.neighborhood,
-          totalValue: source.totalValue,
+          totalValue: totalValue,
         );
       } else {
         newBudget = CustomerInfo(
           id: newId,
           data: formatted,
           customerName: 'Duplicado de: $sourceId',
-          status: '',
+          status: BudgetStatus.pendente.value,
+          totalValue: totalValue,
         );
       }
 

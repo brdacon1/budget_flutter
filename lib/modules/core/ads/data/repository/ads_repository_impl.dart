@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
@@ -71,32 +73,45 @@ class AdsRepositoryImpl implements AdsRepository {
   }
 
   @override
-  void showInterstitial() {
+  void showInterstitial() => showInterstitialAndWait();
+
+  @override
+  Future<void> showInterstitialAndWait() {
+    final done = Completer<void>();
+    void finish() {
+      if (!done.isCompleted) done.complete();
+    }
+
     if (!shouldShowAds) {
       debugPrint(
         '[AdsRepositoryImpl] Usuário premium — intersticial suprimido.',
       );
-      return;
+      finish();
+      return done.future;
     }
     if (_interstitialAd == null) {
       debugPrint('[AdsRepositoryImpl] Intersticial não carregado.');
       loadInterstitial();
-      return;
+      finish();
+      return done.future;
     }
     _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (InterstitialAd ad) {
         ad.dispose();
         _interstitialAd = null;
         loadInterstitial();
+        finish();
       },
       onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
         debugPrint('[AdsRepositoryImpl] Falha ao exibir: $error');
         ad.dispose();
         _interstitialAd = null;
         loadInterstitial();
+        finish();
       },
     );
     _interstitialAd!.show();
     _interstitialAd = null;
+    return done.future;
   }
 }

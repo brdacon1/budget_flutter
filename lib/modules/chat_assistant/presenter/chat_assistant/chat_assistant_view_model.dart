@@ -36,7 +36,10 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
@@ -77,6 +80,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final ShowReportsPromptUsecase _showReportsPrompt;
   final DuplicateBudgetUsecase _duplicateBudget;
   final ShowFindBudgetPromptUsecase _showFindBudgetPrompt;
+  final BuildBudgetFinalActionsUsecase _buildFinalActions;
+  final GenerateBudgetPdfFromChatUsecase _generatePdf;
 
   bool _disposed = false;
 
@@ -105,11 +110,18 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._showReportsPrompt,
     this._duplicateBudget,
     this._showFindBudgetPrompt,
+    this._buildFinalActions,
+    this._generatePdf,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
     shareLinkCommand.addListener(_onCommandDone);
+    copyLinkCommand.addListener(_onCommandDone);
+    generatePdfCommand.addListener(_onCommandDone);
   }
+
+  /// Navegação para a tela de PDF do orçamento criado no chat.
+  static const openBudgetPdfAction = 'open_budget_pdf';
 
   ChatFlowStep _step = ChatFlowStep.idle;
 
@@ -254,6 +266,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _editProducts,
   );
   late final Command0<void> shareLinkCommand = Command0(_shareLink);
+  late final Command0<void> copyLinkCommand = Command0(_copyLink);
+  late final Command0<void> generatePdfCommand = Command0(_generateBudgetPdf);
   late final Command0<void> resetChatCommand = Command0(_resetChat);
 
   // ------------------------------------------------------------------
@@ -1394,11 +1408,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (result is Ok<CustomerInfo>) {
       _setStep(ChatFlowStep.shareLink);
       await _addBotMessage(
-        _script?.finalMessage ?? ChatScriptEntity.fallback.finalMessage,
-        type: ChatMessageType.action,
+        ChatBudgetStrings.budgetCreatedSuccess,
+        type: ChatMessageType.inlineButtons,
         payload: {
-          'label': _script?.shareLabel ?? ChatScriptEntity.fallback.shareLabel,
-          'action': 'share_link',
+          'actions': _buildFinalActions(),
+          'backLabel': ChatBudgetStrings.menuBackLabel,
         },
       );
     } else {
@@ -1433,6 +1447,37 @@ class ChatAssistantViewModel extends ChangeNotifier {
     // A cada compartilhamento, não assinantes veem um intersticial.
     // `showInterstitial` já suprime para assinantes e recarrega o próximo.
     getIt<AdsRepository>().showInterstitial();
+    return Result.ok(null);
+  }
+
+  Future<Result<void>> _copyLink() async {
+    final budgetId = _chatRepo.draftBudget?.id;
+    if (budgetId == null || budgetId.isEmpty) {
+      _shareErrorMessage = 'Orçamento não disponível para compartilhar';
+      return Result.error(Exception(_shareErrorMessage));
+    }
+    final url = await getIt<ShareLinkRepository>().buildShareUrl(
+      enderecoNumero: budgetId,
+    );
+    if (url == null || url.isEmpty) {
+      _shareErrorMessage =
+          'Não foi possível gerar o link. Verifique sua conexão.';
+      return Result.error(Exception(_shareErrorMessage));
+    }
+    _shareErrorMessage = null;
+    await Clipboard.setData(ClipboardData(text: url));
+    return Result.ok(null);
+  }
+
+  Future<Result<void>> _generateBudgetPdf() async {
+    final result = await _generatePdf();
+    if (result is Error<void>) {
+      _shareErrorMessage = ChatBudgetStrings.pdfUnavailable;
+      return result;
+    }
+    _shareErrorMessage = null;
+    _pendingNavigation = openBudgetPdfAction;
+    notifyListeners();
     return Result.ok(null);
   }
 
@@ -1509,7 +1554,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   void _onCommandDone() {
-    if (!_disposed && (shareLinkCommand.error || shareLinkCommand.completed)) {
+    if (!_disposed &&
+        (shareLinkCommand.error ||
+            shareLinkCommand.completed ||
+            copyLinkCommand.error ||
+            copyLinkCommand.completed ||
+            generatePdfCommand.error ||
+            generatePdfCommand.completed)) {
       notifyListeners();
     }
   }
@@ -1517,6 +1568,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   void clearShareError() {
     _shareErrorMessage = null;
     shareLinkCommand.clearResult();
+    copyLinkCommand.clearResult();
+    generatePdfCommand.clearResult();
   }
 
   // ------------------------------------------------------------------
@@ -1715,6 +1768,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _chatRepo.removeListener(_onRepoChanged);
     _scriptRepo.removeListener(_onRepoChanged);
     shareLinkCommand.removeListener(_onCommandDone);
+    copyLinkCommand.removeListener(_onCommandDone);
+    generatePdfCommand.removeListener(_onCommandDone);
     textController.dispose();
     cepController.dispose();
     streetController.dispose();

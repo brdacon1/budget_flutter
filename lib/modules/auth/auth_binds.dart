@@ -13,6 +13,7 @@ import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_re
 import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_purchase_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/product/domain/usecase/create_sample_product_usecase.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view_model.dart';
 import 'package:oflite/modules/auth/presenter/singup/singup_view_model.dart';
 
@@ -48,6 +49,7 @@ void registerAuthDependencies(GetIt sl) {
       sl<UserRepository>(),
       sl<PdfRepository>(),
       sl<LoadUserSessionUseCase>(),
+      sl<CreateSampleProductUseCase>(),
     ),
   );
   sl.registerLazySingleton<RestoreSessionUseCase>(

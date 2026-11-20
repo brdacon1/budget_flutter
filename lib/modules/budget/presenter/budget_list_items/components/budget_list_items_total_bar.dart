@@ -25,35 +25,41 @@ class BudgetListItemsTotalBar extends StatelessWidget {
         color: secondaryColor,
         border: Border(top: BorderSide(color: sheetHandleColor)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // Aberta fora da tab bar (ex.: pelo chat), a barra fica colada na
+      // borda inferior; o SafeArea afasta o conteúdo do home indicator.
+      // Dentro da tab bar o padding inferior já foi consumido (fica 0).
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Produtos  $products', style: muted),
+                  const SizedBox(height: 2),
+                  Text('Serviços  $services', style: muted),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Produtos  $products', style: muted),
-                const SizedBox(height: 2),
-                Text('Serviços  $services', style: muted),
+                Text('Total', style: muted),
+                Text(
+                  total,
+                  style: GoogleFonts.heebo(
+                    color: buttonColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Total', style: muted),
-              Text(
-                total,
-                style: GoogleFonts.heebo(
-                  color: buttonColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
