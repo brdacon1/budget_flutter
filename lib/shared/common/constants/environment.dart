@@ -95,26 +95,16 @@ class Environment {
     // As chaves de anúncio são por plataforma; o app usa apenas a da
     // plataforma atual (iOS → *_IOS, demais → *_ANDROID).
     final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
-    final bannerKey =
-        isIOS ? 'ADMOB_BANNER_AD_UNIT_ID_IOS' : 'ADMOB_BANNER_AD_UNIT_ID_ANDROID';
     final interstitialKey = isIOS
         ? 'ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS'
         : 'ADMOB_INTERSTITIAL_AD_UNIT_ID_ANDROID';
 
-    final bannerAdUnitId = (json[bannerKey] as String?) ??
-        (adMobJson?['bannerAdUnitId'] as String?);
     final interstitialAdUnitId = (json[interstitialKey] as String?) ??
         (adMobJson?['interstitialAdUnitId'] as String?);
 
     final androidSubscriptionSku = json['ANDROID_SUBSCRIPTION_SKU'] as String?;
     final iosSubscriptionSku = json['IOS_SUBSCRIPTION_SKU'] as String?;
 
-    if (bannerAdUnitId == null || bannerAdUnitId.isEmpty) {
-      throw StateError(
-        '[Environment] Chave "$bannerKey" ausente/vazia em '
-        '"$_environmentFileName".',
-      );
-    }
     if (interstitialAdUnitId == null || interstitialAdUnitId.isEmpty) {
       throw StateError(
         '[Environment] Chave "$interstitialKey" ausente/vazia em '
@@ -138,7 +128,6 @@ class Environment {
     _forcePremium = json['FORCE_PREMIUM'] == true;
 
     adMob = AdMobConfig(
-      bannerAdUnitId: bannerAdUnitId,
       interstitialAdUnitId: interstitialAdUnitId,
     );
     subscription = SubscriptionConfig(
@@ -156,7 +145,6 @@ class Environment {
       'buildMode=${kReleaseMode ? 'release' : 'debug'} '
       'arquivo="$_environmentFileName" '
       'plataforma="${isIOS ? 'ios' : 'android'}" '
-      'bannerAdUnitId="$bannerAdUnitId" '
       'interstitialAdUnitId="$interstitialAdUnitId" '
       'androidSubscriptionSku="$androidSubscriptionSku" '
       'iosSubscriptionSku="$iosSubscriptionSku" '
@@ -168,12 +156,8 @@ class Environment {
 /// Configurações do AdMob por ambiente.
 class AdMobConfig {
   const AdMobConfig({
-    required this.bannerAdUnitId,
     required this.interstitialAdUnitId,
   });
-
-  /// ID do bloco de anúncios banner da plataforma atual.
-  final String bannerAdUnitId;
 
   /// ID do bloco de anúncios intersticial da plataforma atual.
   final String interstitialAdUnitId;

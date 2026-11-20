@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 import 'components/header.dart';
 import 'components/month_evolution.dart';
@@ -86,7 +85,6 @@ class _DashboardView extends State<DashboardView> {
           ),
         ),
       ),
-      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }

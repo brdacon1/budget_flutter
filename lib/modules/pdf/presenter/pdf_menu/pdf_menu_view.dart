@@ -3,7 +3,6 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_menu/pdf_menu_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
-import 'package:oflite/shared/common/widgets/ads/banner_ad_widget.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 import 'components/pdf_menu_card.dart';
@@ -68,7 +67,6 @@ class _PdfMenuView extends State<PdfMenuView> {
           );
         },
       ),
-      bottomNavigationBar: const BannerAdWidget(),
     );
   }
 }

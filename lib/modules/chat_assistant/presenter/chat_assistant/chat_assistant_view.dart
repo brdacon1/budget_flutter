@@ -30,6 +30,15 @@ import 'package:oflite/modules/product/presenter/product_price_list/product_pric
 import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_panel.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_proof_preview/chat_proof_preview_view.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
+import 'package:oflite/modules/payment_proof/presenter/payment_proof_viewer/payment_proof_viewer_view.dart';
+import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
 class ChatAssistantView extends StatefulWidget {
@@ -50,10 +59,122 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     _vm = getIt<ChatAssistantViewModel>();
     _vm.addListener(_onVmChanged);
     _inputFocusNode.addListener(_onInputFocusChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _vm.initializeChat.execute();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _vm.initializeChat.execute();
+      // Câmera/fotos pedidas logo ao abrir o chat (modo IA).
+      await _vm.ensureMediaPermissions();
+      await _consumeSharedProof();
     });
   }
+
+  // ------------------------------------------------------------------
+  // Comprovantes (§15 do CHAT_AI_AGENT_PLAN)
+  // ------------------------------------------------------------------
+
+  /// Arquivos vindos da folha de compartilhamento → prévia → chat.
+  Future<void> _consumeSharedProof() async {
+    final shared = _vm.takeSharedProof();
+    if (shared == null || !mounted) return;
+    await _previewAndSend(shared, origin: PaymentProofOrigin.share);
+  }
+
+  void _showProofIssue(ProofAttachmentValidation v) {
+    final alert = getIt<DisplayAlertRepository>();
+    // Arquivos cortados (só os 2 primeiros / só o PDF) = aviso; recusa = erro.
+    final isWarning = v.issue == null || v.issue == ProofAttachmentIssue.mixed;
+    final msg = switch (v.issue) {
+      ProofAttachmentIssue.tooBig => PaymentProofStrings.tooBig,
+      ProofAttachmentIssue.invalidType => PaymentProofStrings.invalidType,
+      ProofAttachmentIssue.mixed => PaymentProofStrings.mixedTypes,
+      ProofAttachmentIssue.empty => null,
+      null => v.trimmed ? PaymentProofStrings.onlyFirstFiles : null,
+    };
+    if (msg == null || !mounted) return;
+    if (isWarning) {
+      alert.notificationWarning(context, PaymentProofStrings.warningTitle, msg);
+    } else {
+      alert.notificationError(context, PaymentProofStrings.errorTitle, msg);
+    }
+  }
+
+  Future<void> _previewAndSend(
+    ProofAttachmentValidation? v, {
+    PaymentProofOrigin origin = PaymentProofOrigin.chat,
+  }) async {
+    if (v == null || !mounted) return;
+    _showProofIssue(v);
+    if (v.files.isEmpty || (v.issue != null && v.issue != ProofAttachmentIssue.mixed)) {
+      return;
+    }
+    final result = await ChatProofPreviewView.show(
+      context,
+      v.files,
+      onCrop: _vm.cropProofImage,
+    );
+    if (result == null || !mounted) return;
+    await _vm.sendProofAttachments(
+      result.files,
+      result.caption,
+      origin: origin,
+    );
+  }
+
+  /// "+": painel de anexos em modal, por cima da tab bar.
+  Future<void> _openAttachPanel() async {
+    FocusScope.of(context).unfocus();
+    final choice = await ChatAttachmentPanel.show(context);
+    if (!mounted) return;
+    switch (choice) {
+      case ChatAttachmentChoice.photos:
+        await _attachPhotos();
+      case ChatAttachmentChoice.camera:
+        await _attachCamera();
+      case ChatAttachmentChoice.document:
+        await _attachDocument();
+      case null:
+        break;
+    }
+  }
+
+  Future<void> _attachPhotos() async {
+    if (!await _vm.canUseMedia(camera: false) || !mounted) return;
+    final result = await ChatMediaPickerView.show(context);
+    if (result == null || !mounted) return;
+    _showProofIssue(result.validation);
+    if (!result.validation.isValid) return;
+    await _vm.sendProofAttachments(result.validation.files, result.caption);
+  }
+
+  Future<void> _attachCamera() async {
+    if (!await _vm.canUseMedia(camera: true) || !mounted) return;
+    await _previewAndSend(await _vm.captureProofPhoto());
+  }
+
+  Future<void> _attachDocument() async {
+    await _previewAndSend(await _vm.pickProofDocument());
+  }
+
+  Future<void> _pickBudgetForProof() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (!mounted) return;
+    await _vm.onProofBudgetSelected(id);
+  }
+
+  Future<void> _openProofs(String budgetId) async {
+    final budget = await _vm.budgetForNavigation(budgetId);
+    if (budget == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PaymentProofListView(item: budget)),
+    );
+  }
+
+  void _openAttachment(ProofAttachment f) => PaymentProofViewerView.open(
+    context,
+    title: f.name,
+    type: f.type,
+    localPath: f.path,
+  );
 
   /// Ao focar o campo, rola até o fim depois que o teclado sobe (a área
   /// da lista encolhe durante a animação do teclado).
@@ -66,7 +187,19 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   void _onVmChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    if (_vm.mediaPermissionDenied) {
+      _vm.consumeMediaPermissionDenied();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        getIt<DisplayAlertRepository>().notificationError(
+          context,
+          PaymentProofStrings.errorTitle,
+          PaymentProofStrings.permissionDenied,
+        );
+      });
+    }
+    setState(() {});
   }
 
   @override
@@ -152,6 +285,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
     if (nav == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
+      return;
+    }
+    if (nav == ChatAssistantViewModel.selectProofBudgetAction) {
+      await _pickBudgetForProof();
       return;
     }
     if (nav == DispatchAgentToolUsecase.selectDuplicateBudget) {
@@ -353,6 +490,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
                             _handleAction(action, msg);
                           },
                           buttonsEnabled: _vm.isButtonsActive(msg),
+                          onOpenAttachment: _openAttachment,
                           onOptionSelect: (value, label) {
                             _vm.markButtonUsed(msg, value);
                             _vm.selectOptionCommand.execute((
@@ -403,7 +541,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       });
     }
 
-    return _EditAwareInputBar(
+    final bar = _EditAwareInputBar(
+      onAttach: _vm.canAttach ? _openAttachPanel : null,
       controller: _vm.textController,
       focusNode: _inputFocusNode,
       isEditing: _vm.isEditingMessage,
@@ -412,7 +551,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           !_vm.isLoading &&
           step != ChatFlowStep.askAddress &&
           step != ChatFlowStep.reviewProducts &&
-          step != ChatFlowStep.shareLink,
+          step != ChatFlowStep.shareLink &&
+          !_vm.isSavingProof,
       onSend: () {
         final text = _vm.textController.text.trim();
         if (text.isNotEmpty) {
@@ -421,6 +561,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         }
       },
     );
+    return bar;
   }
 
   /// Abre a tela do orçamento (card da IA ou tool `open_budget`).
@@ -502,6 +643,16 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
     if (action == DispatchAgentToolUsecase.selectReceiptBudget) {
       await _pickBudgetForReceipts();
+      return;
+    }
+    if (action == ChatAssistantViewModel.selectProofBudgetAction) {
+      await _pickBudgetForProof();
+      return;
+    }
+    if (action.startsWith(ChatAssistantViewModel.openProofsAction)) {
+      await _openProofs(
+        action.substring(ChatAssistantViewModel.openProofsAction.length),
+      );
       return;
     }
     if (action == DispatchAgentToolUsecase.selectDuplicateBudget) {
@@ -606,7 +757,11 @@ class _EditAwareInputBar extends StatelessWidget {
   final bool enabled;
   final bool isEditing;
 
+  /// "+" de anexos (só modo IA). `null` esconde o botão.
+  final VoidCallback? onAttach;
+
   const _EditAwareInputBar({
+    this.onAttach,
     required this.controller,
     required this.onSend,
     required this.onCancelEdit,
@@ -666,6 +821,12 @@ class _EditAwareInputBar extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                if (onAttach != null && !isEditing)
+                  IconButton(
+                    onPressed: enabled ? onAttach : null,
+                    tooltip: PaymentProofStrings.attach,
+                    icon: const Icon(Icons.add, color: Colors.white, size: 28),
+                  ),
                 Expanded(
                   child: TextField(
                     controller: controller,

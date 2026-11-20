@@ -24,23 +24,27 @@ class CommentStrings {
 
   static String get successTitle => _isPt ? 'Feito!' : 'Done!';
 
-  static String get successAddMessage => _isPt
-      ? 'Comentário adicionado com sucesso!'
-      : 'Comment added successfully!';
+  static String get successAddMessage =>
+      _isPt
+          ? 'Comentário adicionado com sucesso!'
+          : 'Comment added successfully!';
 
-  static String get successUpdateMessage => _isPt
-      ? 'Comentário atualizado com sucesso!'
-      : 'Comment updated successfully!';
+  static String get successUpdateMessage =>
+      _isPt
+          ? 'Comentário atualizado com sucesso!'
+          : 'Comment updated successfully!';
 
   static String get errorTitle => _isPt ? 'Erro!' : 'Error!';
 
-  static String get errorAddMessage => _isPt
-      ? 'Não foi possível adicionar o comentário'
-      : 'Could not add the comment';
+  static String get errorAddMessage =>
+      _isPt
+          ? 'Não foi possível adicionar o comentário'
+          : 'Could not add the comment';
 
-  static String get errorUpdateMessage => _isPt
-      ? 'Não foi possível atualizar o comentário'
-      : 'Could not update the comment';
+  static String get errorUpdateMessage =>
+      _isPt
+          ? 'Não foi possível atualizar o comentário'
+          : 'Could not update the comment';
 
   static String get deleteLabel => _isPt ? 'Excluir' : 'Delete';
 

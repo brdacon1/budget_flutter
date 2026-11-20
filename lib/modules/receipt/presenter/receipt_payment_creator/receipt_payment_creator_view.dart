@@ -76,7 +76,7 @@ class _ReceiptPaymentCreatorViewState extends State<ReceiptPaymentCreatorView> {
         return AppBottomModal(
           title: _viewModel.titlePage ?? '',
           buttonLabel: saving ? 'Aguarde...' : (_viewModel.nameButton ?? ''),
-          onButtonPressed: saving ? () {} : _viewModel.saveCommand.execute,
+          onButtonPressed: saving ? () {} : _viewModel.submit,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -100,6 +100,7 @@ class _ReceiptPaymentCreatorViewState extends State<ReceiptPaymentCreatorView> {
                   hintText: PaymentStrings.priceHint,
                   icon: Icons.price_change_outlined,
                   keyboardType: TextInputType.number,
+                  errorText: _viewModel.priceError,
                   onTap: () => _viewModel.selectField(Gender.precoText),
                 ),
                 const SizedBox(height: 16),
@@ -109,6 +110,7 @@ class _ReceiptPaymentCreatorViewState extends State<ReceiptPaymentCreatorView> {
                   icon: Icons.edit_note,
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
+                  errorText: _viewModel.descricaoError,
                   onTap: () => _viewModel.selectField(Gender.descricaoText),
                 ),
                 const SizedBox(height: 8),

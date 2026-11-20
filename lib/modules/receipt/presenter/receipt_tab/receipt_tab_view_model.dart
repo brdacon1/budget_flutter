@@ -45,8 +45,8 @@ class ReceiptTabViewModel extends ChangeNotifier {
 
   /// Rótulos das abas, centralizados em [ReceiptPtString].
   List<String> get tabLabels => <String>[
-        ReceiptPtString.tabReceipt,
-        ReceiptPtString.tabPayments,
-        ReceiptPtString.tabPdf,
-      ];
+    ReceiptPtString.tabReceipt,
+    ReceiptPtString.tabPayments,
+    ReceiptPtString.tabPdf,
+  ];
 }

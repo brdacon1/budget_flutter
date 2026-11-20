@@ -19,7 +19,12 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   BudgetCreatorViewModel({required this.item});
 
   /// Valores persistidos — fixos (nunca traduzir; só o label muda).
-  static const statusOptions = ['PENDENTE', 'APROVADO', 'REPROVADO', 'FINALIZADO'];
+  static const statusOptions = [
+    'PENDENTE',
+    'APROVADO',
+    'REPROVADO',
+    'FINALIZADO',
+  ];
   static const _defaultStatus = 'PENDENTE';
 
   String? nameError;
@@ -42,14 +47,16 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final bairroNode = FocusNode();
 
   final maskFormatter = MaskTextInputFormatter(
-      mask: '(##) #####-####',
-      filter: {"#": RegExp(r'[0-9]')},
-      type: MaskAutoCompletionType.lazy);
+    mask: '(##) #####-####',
+    filter: {"#": RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy,
+  );
 
   final maskCep = MaskTextInputFormatter(
-      mask: '#####-###',
-      filter: {"#": RegExp(r'[0-9]')},
-      type: MaskAutoCompletionType.lazy);
+    mask: '#####-###',
+    filter: {"#": RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy,
+  );
 
   bool get isEditing => (item.id ?? '').isNotEmpty;
 
@@ -57,14 +64,14 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   String get nameButton => isEditing ? 'Salvar alterações' : 'Continuar';
 
   List<TextEditingController> get _editable => [
-        nameController,
-        phoneController,
-        statusController,
-        cepController,
-        ruaController,
-        cityController,
-        bairroController,
-      ];
+    nameController,
+    phoneController,
+    statusController,
+    cepController,
+    ruaController,
+    cityController,
+    bairroController,
+  ];
 
   String _currentValues() => _editable.map((c) => c.text).join('|');
 
@@ -175,9 +182,8 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   /// Ação explícita "Importar da agenda" (§17.3) — sem modal ao focar campo.
   Future<void> pickContact() async {
-    final permissionStatus = await user_info.FlutterContacts.permissions.request(
-      user_info.PermissionType.read,
-    );
+    final permissionStatus = await user_info.FlutterContacts.permissions
+        .request(user_info.PermissionType.read);
     if (permissionStatus != user_info.PermissionStatus.granted &&
         permissionStatus != user_info.PermissionStatus.limited) {
       return;

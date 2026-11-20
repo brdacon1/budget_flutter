@@ -25,4 +25,12 @@ enum ChatFlowStep {
   logoMenu,
   logoViewResult,
   findBudgetAskName,
+
+  // Comprovantes de pagamento (§15 do CHAT_AI_AGENT_PLAN)
+  proofSelectBudget,
+  proofAskName,
+  proofAskValue,
+  proofSaving,
+  proofSaveError,
+  proofDone,
 }

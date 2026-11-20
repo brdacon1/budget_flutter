@@ -50,6 +50,15 @@ import 'package:oflite/modules/product/domain/repository/product_price_repositor
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
+import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 
 /// ViewModel do assistente de chat.
 ///
@@ -82,6 +91,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final ShowFindBudgetPromptUsecase _showFindBudgetPrompt;
   final BuildBudgetFinalActionsUsecase _buildFinalActions;
   final GenerateBudgetPdfFromChatUsecase _generatePdf;
+  final CheckProofLimitUsecase _checkProofLimit;
+  final CreatePaymentProofUsecase _createProof;
+  final ParseMoneyInputUsecase _parseMoney;
+  final PickProofAttachmentsUsecase _pickProof;
+  final ReceiveSharedProofUsecase _receiveShared;
 
   bool _disposed = false;
 
@@ -112,6 +126,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._showFindBudgetPrompt,
     this._buildFinalActions,
     this._generatePdf,
+    this._checkProofLimit,
+    this._createProof,
+    this._parseMoney,
+    this._pickProof,
+    this._receiveShared,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -323,6 +342,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _isPdfEditAddressMode = false;
     _aiRepo.clearHistory();
     _pendingAgentAction = null;
+    _clearProofDraft();
   }
 
   // ------------------------------------------------------------------
@@ -386,7 +406,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action.startsWith('share_url|') ||
       action.startsWith(findBudgetAction) ||
       action == DispatchAgentToolUsecase.selectReceiptBudget ||
-      action == DispatchAgentToolUsecase.selectDuplicateBudget;
+      action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+      action == selectProofBudgetAction ||
+      action.startsWith(openProofsAction);
 
   bool isButtonsActive(ChatMessageEntity msg) {
     if (msg.type == ChatMessageType.budgetList ||
@@ -426,6 +448,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   bool _hasButtons(ChatMessageEntity msg) => switch (msg.type) {
     ChatMessageType.text => false,
+    ChatMessageType.attachment => false,
     ChatMessageType.image => msg.payload?['changeAction'] != null,
     _ => true,
   };
@@ -452,6 +475,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       await _backToMainMenu();
       return Result.ok(null);
     }
+
+    // Texto livre após "Comprovante salvo": volta a valer o menu principal.
+    if (_step == ChatFlowStep.proofDone) _setStep(ChatFlowStep.mainMenu);
 
     // Modo edição
     if (_editingMsgId != null && _editingField != null) {
@@ -489,7 +515,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
 
     try {
-      if (_step == ChatFlowStep.mainMenu &&
+      if (_isProofStep) {
+        await _handleProofText(clean);
+      } else if (_step == ChatFlowStep.mainMenu &&
           _aiMode &&
           clean == _reportsOption) {
         _setStepFromName(await _showReportsPrompt());
@@ -618,6 +646,319 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _pendingNavigation = turn.navigation;
       notifyListeners();
     }
+  }
+
+  // ------------------------------------------------------------------
+  // Comprovantes de pagamento (§15 do CHAT_AI_AGENT_PLAN) — sem LLM (R8).
+  // Toda mensagem do bot no fluxo tem "Voltar ao menu" (R10): o botão envia
+  // "0", que descarta o rascunho em [_backToMainMenu].
+  // ------------------------------------------------------------------
+
+  /// Ação/navegação que abre o modal de orçamentos para o comprovante.
+  static const selectProofBudgetAction = 'proof_select_budget';
+
+  /// Ação que abre a lista de comprovantes: `open_proofs|{budgetId}`.
+  static const openProofsAction = 'open_proofs|';
+
+  List<ProofAttachment> _proofFiles = [];
+  String? _proofComment;
+  double? _proofValue;
+  String? _proofBudgetId;
+  String? _proofName;
+  PaymentProofOrigin _proofOrigin = PaymentProofOrigin.chat;
+
+  bool get _isProofStep => switch (_step) {
+    ChatFlowStep.proofSelectBudget ||
+    ChatFlowStep.proofAskName ||
+    ChatFlowStep.proofAskValue ||
+    ChatFlowStep.proofSaving ||
+    ChatFlowStep.proofSaveError => true,
+    _ => false,
+  };
+
+  /// O "+" só aparece no modo IA (R1) e fora de outros fluxos.
+  bool get canAttach =>
+      _aiMode &&
+      (_step == ChatFlowStep.mainMenu ||
+          _step == ChatFlowStep.idle ||
+          _step == ChatFlowStep.proofDone);
+
+  bool get isSavingProof => _step == ChatFlowStep.proofSaving;
+
+  /// Câmera/fotos liberadas? `null` = ainda não perguntado.
+  ({bool camera, bool gallery})? _mediaPermissions;
+
+  /// View mostra o snack "Não consigo seguir sem liberação da permissão."
+  bool _mediaPermissionDenied = false;
+
+  bool get mediaPermissionDenied => _mediaPermissionDenied;
+
+  void consumeMediaPermissionDenied() => _mediaPermissionDenied = false;
+
+  /// Pede câmera + fotos ao abrir o chat (só modo IA). Alguma recusada →
+  /// snack. Não bloqueia o "+": cada opção confere a sua com [canUseMedia].
+  Future<void> ensureMediaPermissions() async {
+    if (!_aiMode) return;
+    final p = await _pickProof.requestPermissions();
+    _mediaPermissions = p;
+    if (!p.camera || !p.gallery) {
+      _mediaPermissionDenied = true;
+      notifyListeners();
+    }
+  }
+
+  /// Confere (e pede de novo, se preciso) a permissão da opção escolhida.
+  /// Recusada → snack e `false`.
+  Future<bool> canUseMedia({required bool camera}) async {
+    bool ok(({bool camera, bool gallery}) p) => camera ? p.camera : p.gallery;
+    final cached = _mediaPermissions;
+    if (cached != null && ok(cached)) return true;
+    final p = await _pickProof.requestPermissions();
+    _mediaPermissions = p;
+    if (ok(p)) return true;
+    _mediaPermissionDenied = true;
+    notifyListeners();
+    return false;
+  }
+
+  Future<ProofAttachment> cropProofImage(ProofAttachment f) =>
+      _pickProof.crop(f, title: PaymentProofStrings.cropTitle);
+
+  Future<ProofAttachmentValidation?> captureProofPhoto() => _pickProof.camera();
+
+  Future<ProofAttachmentValidation?> pickProofDocument() =>
+      _pickProof.document();
+
+  /// Arquivos recebidos pelo compartilhamento do sistema, se houver (só
+  /// assinante, ver [ReceiveSharedProofUsecase]).
+  ProofAttachmentValidation? takeSharedProof() =>
+      _aiMode ? _receiveShared.takePending() : null;
+
+  /// Compartilhamento recebido no meio de outro fluxo: abandona o fluxo
+  /// (sem apagar a conversa) e segue para o comprovante.
+  void _clearLocalStateKeepingMessages() {
+    _pendingAgentAction = null;
+    _pendingNavigation = null;
+    _editingMsgId = null;
+    _editingField = null;
+    _setStep(ChatFlowStep.mainMenu);
+  }
+
+  void _clearProofDraft() {
+    _proofFiles = [];
+    _proofComment = null;
+    _proofValue = null;
+    _proofBudgetId = null;
+    _proofName = null;
+    _proofOrigin = PaymentProofOrigin.chat;
+  }
+
+  /// Usuário enviou 1–2 imagens ou 1 PDF (painel "+" ou compartilhamento).
+  /// A legenda só com valor vira o valor; qualquer outro texto, comentário.
+  Future<void> sendProofAttachments(
+    List<ProofAttachment> files,
+    String caption, {
+    PaymentProofOrigin origin = PaymentProofOrigin.chat,
+  }) async {
+    if (!_aiMode || files.isEmpty) return;
+    if (_step != ChatFlowStep.mainMenu && _step != ChatFlowStep.idle) {
+      _clearLocalStateKeepingMessages();
+    }
+    _clearProofDraft();
+    _proofFiles = files;
+    _proofOrigin = origin;
+    final text = caption.trim();
+    // Legenda = nome e/ou valor (ex.: "Pix entrada R$ 500"): não pergunta
+    // de novo o que já veio junto com o arquivo.
+    final parsed = _parseMoney.caption(text);
+    _proofName = parsed.name;
+    _proofValue = parsed.value;
+
+    await _chatRepo.sendMessage(
+      ChatMessageEntity(
+        id: _generateMessageId(),
+        sender: ChatSender.user,
+        type: ChatMessageType.attachment,
+        content: text,
+        payload: {
+          'files': [for (final f in files) f.toPayload()],
+          'caption': text,
+        },
+        timestamp: DateTime.now(),
+      ),
+    );
+    await _askProofBudget(PaymentProofStrings.askBudget);
+  }
+
+  Future<void> _askProofBudget(String message) async {
+    _setStep(ChatFlowStep.proofSelectBudget);
+    await _addBotMessage(
+      message,
+      type: ChatMessageType.action,
+      payload: {
+        'label': PaymentProofStrings.selectBudgetLabel,
+        'action': selectProofBudgetAction,
+        'backLabel': ChatBudgetStrings.menuBackLabel,
+      },
+    );
+    _pendingNavigation = selectProofBudgetAction;
+    notifyListeners();
+  }
+
+  /// Volta do modal de orçamentos. `null` = fechou sem escolher: o botão
+  /// "Selecionar orçamento" continua ativo para tentar de novo.
+  Future<void> onProofBudgetSelected(String? budgetId) async {
+    if (budgetId == null || _step != ChatFlowStep.proofSelectBudget) return;
+    final budget = await budgetForNavigation(budgetId);
+    final name = budget?.customerName ?? '';
+    await _sendUserMessageWithId(
+      _generateMessageId(),
+      PaymentProofStrings.budgetChosen(name),
+    );
+
+    final limit = await _checkProofLimit(
+      budgetId,
+      adding: _proofFiles.length,
+    );
+    switch (limit) {
+      case Error():
+        await _showProofSaveError();
+        return;
+      case Ok(:final value) when !value.fits:
+        _setStep(ChatFlowStep.proofSelectBudget);
+        await _chatRepo.sendMessage(
+          ChatMessageEntity.botOptions(
+            content:
+                value.count >= 15
+                    ? PaymentProofStrings.limitReached
+                    : PaymentProofStrings.limitWouldExceed(value.count),
+            labels: [PaymentProofStrings.chooseAnother],
+            backLabel: ChatBudgetStrings.menuBackLabel,
+            step: ChatFlowStep.proofSelectBudget.name,
+          ),
+        );
+        notifyListeners();
+        return;
+      case Ok():
+        break;
+    }
+    _proofBudgetId = budgetId;
+    await _askNextProofField();
+  }
+
+  /// Pergunta o que falta (nome → valor) ou salva. Os dois são obrigatórios.
+  Future<void> _askNextProofField() async {
+    if (_proofName == null || _proofName!.isEmpty) {
+      await _askProofName(PaymentProofStrings.askName);
+    } else if (_proofValue == null) {
+      await _askProofValue(PaymentProofStrings.askValue);
+    } else {
+      await _saveProof();
+    }
+  }
+
+  Future<void> _askProofName(String message) async {
+    _setStep(ChatFlowStep.proofAskName);
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: message,
+        labels: const [],
+        backLabel: ChatBudgetStrings.menuBackLabel,
+        step: ChatFlowStep.proofAskName.name,
+      ),
+    );
+    notifyListeners();
+  }
+
+  Future<void> _askProofValue(String message) async {
+    _setStep(ChatFlowStep.proofAskValue);
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: message,
+        labels: const [],
+        backLabel: ChatBudgetStrings.menuBackLabel,
+        step: ChatFlowStep.proofAskValue.name,
+      ),
+    );
+    notifyListeners();
+  }
+
+  Future<void> _handleProofText(String text) async {
+    switch (_step) {
+      case ChatFlowStep.proofSelectBudget:
+        // "Escolher outro orçamento" (1) ou texto qualquer → reabre o modal.
+        _pendingNavigation = selectProofBudgetAction;
+        notifyListeners();
+      case ChatFlowStep.proofAskName:
+        if (text.trim().isEmpty) {
+          await _askProofName(PaymentProofStrings.nameRequired);
+          return;
+        }
+        _proofName = text.trim();
+        await _askNextProofField();
+      case ChatFlowStep.proofAskValue:
+        final value = _parseMoney(text);
+        if (value == null) {
+          await _askProofValue(PaymentProofStrings.invalidValue);
+          return;
+        }
+        _proofValue = value;
+        await _saveProof();
+      case ChatFlowStep.proofSaveError:
+        if (text.trim() == '1') await _saveProof();
+      default:
+        break;
+    }
+  }
+
+  Future<void> _saveProof() async {
+    final budgetId = _proofBudgetId;
+    final name = _proofName;
+    if (budgetId == null || name == null) return;
+    _setStep(ChatFlowStep.proofSaving);
+    _setAiThinking(true);
+    final result = await _createProof(
+      budgetId: budgetId,
+      files: _proofFiles,
+      name: name,
+      value: _proofValue,
+      comment: _proofComment,
+      origin: _proofOrigin,
+    );
+    _setAiThinking(false);
+    switch (result) {
+      case Ok():
+        _clearProofDraft();
+        _setStep(ChatFlowStep.proofDone);
+        await _addBotMessage(
+          PaymentProofStrings.saved,
+          type: ChatMessageType.action,
+          payload: {
+            'label': PaymentProofStrings.seeProofs,
+            'action': '$openProofsAction$budgetId',
+            'backLabel': ChatBudgetStrings.menuBackLabel,
+          },
+        );
+      case Error(:final error) when error is PaymentProofLimitReached:
+        _proofBudgetId = null;
+        await _askProofBudget(PaymentProofStrings.limitReached);
+      case Error():
+        await _showProofSaveError();
+    }
+    notifyListeners();
+  }
+
+  Future<void> _showProofSaveError() async {
+    _setStep(ChatFlowStep.proofSaveError);
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: PaymentProofStrings.saveError,
+        labels: [PaymentProofStrings.tryAgain],
+        backLabel: ChatBudgetStrings.menuBackLabel,
+        step: ChatFlowStep.proofSaveError.name,
+      ),
+    );
+    notifyListeners();
   }
 
   /// "Encontrar orçamentos": deixa no chat o botão para reabrir o modal e já

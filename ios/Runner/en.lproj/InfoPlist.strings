@@ -1,4 +1,4 @@
 /* Permission messages (English) */
-"NSCameraUsageDescription" = "The camera is used to take a photo of your company logo. For example: you take a picture of your logo and it is added to the header of the quote PDFs you send to your customers.";
+"NSCameraUsageDescription" = "The camera is used to take photos of your company logo and payment receipts. For example: you photograph a payment receipt and it is saved in the customer quote.";
 "NSContactsUsageDescription" = "Your contacts are used to fill in the customer details when creating a quote and, if you choose, to save a new customer to your address book. For example: when you pick \"Maria\" from your list, her name and phone number are filled in on the quote automatically.";
-"NSPhotoLibraryUsageDescription" = "Your photos are used to choose the image of your company logo. For example: you select your logo from the gallery and it appears in the header of the quote PDFs you send to your customers.";
+"NSPhotoLibraryUsageDescription" = "Your photos are used to choose your company logo and attach payment receipts to quotes. For example: you select a payment screenshot and it is saved in the customer quote.";

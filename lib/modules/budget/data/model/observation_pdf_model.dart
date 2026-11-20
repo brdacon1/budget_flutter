@@ -4,10 +4,7 @@ class ObservationPdf {
   String data;
   String observacao;
 
-  ObservationPdf({
-    required this.data,
-    required this.observacao,
-  });
+  ObservationPdf({required this.data, required this.observacao});
 
   factory ObservationPdf.fromMap(Map<String, dynamic> map) {
     return ObservationPdf(
@@ -22,9 +19,6 @@ class ObservationPdf {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'DATA': data,
-      'OBSERVACAO': observacao,
-    };
+    return {'DATA': data, 'OBSERVACAO': observacao};
   }
 }

@@ -42,22 +42,22 @@ class Receipt {
   });
 
   factory Receipt.fromJson(Map<String, dynamic> json) => Receipt(
-        id: json['ID'] as String?,
-        data: json['DATA'] as String?,
-        descricao: json['DESCRICAO'] as String?,
-        valorTotal: _toDouble(json['VALORTOTAL']),
-        checkBox: json['checkBox'] as bool?,
-        indice: (json['indice'] as int?) ?? 0,
-      );
+    id: json['ID'] as String?,
+    data: json['DATA'] as String?,
+    descricao: json['DESCRICAO'] as String?,
+    valorTotal: _toDouble(json['VALORTOTAL']),
+    checkBox: json['checkBox'] as bool?,
+    indice: (json['indice'] as int?) ?? 0,
+  );
 
   /// Mantém somente as 4 chaves originais gravadas no Firebase — preserva o
   /// formato dos documentos já existentes (sem introduzir `checkBox`/`indice`).
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'ID': id,
-        'DATA': data,
-        'DESCRICAO': descricao,
-        'VALORTOTAL': valorTotal,
-      };
+    'ID': id,
+    'DATA': data,
+    'DESCRICAO': descricao,
+    'VALORTOTAL': valorTotal,
+  };
 
   Receipt copyWith({
     String? id,

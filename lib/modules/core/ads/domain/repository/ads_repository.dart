@@ -3,7 +3,7 @@
 /// Responsabilidades:
 /// - Inicializar o SDK de anúncios (mobile-only).
 /// - Carregar e exibir anúncios intersticiais.
-/// - Fornecer IDs de blocos de anúncios (banner / interstitial).
+/// - Fornecer IDs de blocos de anúncios (interstitial).
 abstract class AdsRepository {
   /// Inicializa o SDK do Google Mobile Ads.
   Future<void> initialize();
@@ -20,9 +20,6 @@ abstract class AdsRepository {
   /// Exibe o intersticial e completa quando ele é fechado (ou falha /
   /// não está carregado / usuário é assinante). Nunca trava o fluxo.
   Future<void> showInterstitialAndWait();
-
-  /// Retorna o ID do bloco de banner.
-  String get bannerAdUnitId;
 
   /// Retorna o ID do bloco intersticial.
   String get interstitialAdUnitId;

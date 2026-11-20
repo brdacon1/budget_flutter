@@ -1,3 +1,4 @@
+import 'package:oflite/modules/receipt/domain/entity/payment_method.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -38,7 +39,10 @@ class PaymentCard extends StatelessWidget {
                     color: buttonColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.payments_outlined, color: buttonColor),
+                  child: const Icon(
+                    Icons.payments_outlined,
+                    color: buttonColor,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -68,7 +72,7 @@ class PaymentCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              item.method ?? '',
+                              PaymentMethod.labelOf(item.method),
                               style: GoogleFonts.heebo(
                                 color: mutedTextColor,
                                 fontSize: 12,

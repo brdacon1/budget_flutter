@@ -10,7 +10,11 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
   final ReceiptPaymentRemoteDatasource _paymentRemote;
   final UserRepository _userRepository;
 
-  ReceiptRepositoryImpl(this._remote, this._paymentRemote, this._userRepository);
+  ReceiptRepositoryImpl(
+    this._remote,
+    this._paymentRemote,
+    this._userRepository,
+  );
 
   String? get _userUid => _userRepository.selectUser.value?.user;
 

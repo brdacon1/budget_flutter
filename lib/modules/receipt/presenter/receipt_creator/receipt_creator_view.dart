@@ -90,11 +90,13 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
               (context, _) => LayoutBuilder(
                 builder: (context, _) {
                   final receipt = _viewModel.receipt;
-                  // Teclado aberto: esconde o botão e mostra a barra de fechar
+                  // Campo em foco: esconde o botão e mostra a barra de fechar
                   // teclado (§17.8).
-                  // Lê do View (não do MediaQuery): a Scaffold das abas já consome o
-                  // viewInsets, então MediaQuery aqui sempre retorna 0.
-                  final keyboardOpen = View.of(context).viewInsets.bottom > 0;
+                  // Exige foco: o inset do View pode ficar defasado e esconder o
+                  // botão indevidamente com o campo já sem foco.
+                  final keyboardOpen =
+                      _viewModel.fieldFocused &&
+                      View.of(context).viewInsets.bottom > 0;
                   return Column(
                     children: <Widget>[
                       Expanded(

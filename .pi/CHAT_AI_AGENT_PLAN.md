@@ -385,6 +385,7 @@ separada).
 | **7. Qualidade** | Testes + suíte de avaliação (§11) | ≥90% de acerto de tool na suíte | 1–2 d |
 | 8. (opcional) | RAG/FAQ de ajuda, voz, Remote Config de modelo | — | — |
 | **9. Relatório de recibos** | `GetReceiptsReportUseCase` (receipt) + tool `get_receipts_report` + card `receiptsReportCard` (ver §14) | "recibos dessa semana" / "quanto recebi em novembro" mostram contagem e valores iguais à soma das telas de recibo | 2–3 d |
+| **11. Comprovantes de pagamento** | Botão "+" com painel de anexos (Fotos/Câmera/Documento), envio por compartilhamento do sistema (Android/iOS), vínculo a orçamento, lista `COMPROVANTES` com visualizador (ver §15) | Assinante anexa até 2 imagens ou 1 PDF, escolhe o orçamento, dá nome (e valor opcional) e vê o item na lista de comprovantes do orçamento | 5–7 d |
 | **10. Saldo do orçamento** | `GetBudgetBalanceUseCase` (receipt) = total do orçamento − pagamentos dos recibos; tool `get_budget_balance` + saldo nos relatórios (ver §14.9) | "quanto falta o João pagar?" e "orçamentos com saldo em aberto" batem com as telas | 1–2 d |
 
 Total MVP (fases 1–7): **~10–14 dias**.
@@ -600,3 +601,280 @@ saldo = totalOrçamento − Σ paid (pagamentos de todos os recibos do orçament
 
 > **Regra para a Fase 9 não travar a 10:** nenhum cálculo de "pago" fora do
 > `ReceiptLedger`, e nenhum campo novo gravado no Firestore.
+
+---
+
+## 15. Fase 11 — Comprovantes de pagamento pelo chat (só assinantes)
+
+> **Status (2026-11-20):** código Flutter implementado (módulo `payment_proof`,
+> "+", galeria, prévia, fluxo `proof*` com "Voltar ao menu", lista no menu do
+> orçamento, intent filters Android). **Pendente:** criar o target *Share
+> Extension* no Xcode (arquivos já em `ios/Share Extension/`), registrar o App
+> Group `group.com.housestudio.oflite.share`, publicar regras do Firestore e do
+> Storage, tool `start_flow(attach_payment_proof)` e teste em aparelho real.
+> Desvio do plano: fechar o modal de orçamentos **não** cancela o envio; o botão
+> "Selecionar orçamento" continua ativo (e "Voltar ao menu" descarta).
+
+> Referência visual: o painel de anexos do WhatsApp (grade com Fotos, Câmera,
+> Documento…) e a tela de seleção de fotos com miniaturas, contador no botão de
+> enviar e campo "Adicione uma legenda…".
+
+### 15.1 Objetivo
+
+O assinante envia **comprovantes de pagamento** (foto ou PDF) pelo chat e os
+vincula a um orçamento. Cada orçamento ganha uma lista **Comprovantes**, igual à
+de **Recibos** que já existe, onde dá para ver cada arquivo.
+
+### 15.2 Regras de negócio
+
+| # | Regra | Onde fica |
+|---|-------|-----------|
+| R1 | **Só assinantes.** O "+" e o recebimento por compartilhamento só funcionam com `ChatMode.aiAssistant` (decidido por `CheckAiAccessUseCase`, §2). Free: nada muda (P7). Free que compartilha um arquivo pelo sistema vê a tela de assinatura. | `CheckAiAccessUseCase` (reuso) |
+| R2 | **Por envio:** até **2 imagens** OU **1 documento PDF**. A galeria bloqueia a 3ª foto. | `ValidateProofAttachmentsUseCase` |
+| R3 | **Por orçamento:** no máximo **15 comprovantes**. Ao escolher o orçamento, o usecase confere `count + novos ≤ 15`. Se passar, o chat avisa e oferece escolher outro orçamento. Cada imagem de um envio de 2 fotos conta como 1 comprovante. | `CreatePaymentProofUseCase` |
+| R4 | **Nome obrigatório.** Sem nome não salva. A **legenda** enviada com o arquivo vira o nome (não pergunta de novo). | `CreatePaymentProofUseCase` + `ParseMoneyInputUseCase.caption` |
+| R5 | **Valor obrigatório** (`> 0`), aceita `1.234,56`, `1234.56`, `R$ 500`. Se a legenda trouxer o valor (`"R$ 500"` ou `"Pix entrada R$ 500"`), ele é usado e a pergunta é pulada. | `ParseMoneyInputUseCase` + `CreatePaymentProofUseCase` (`PaymentProofValueRequired`) |
+| R6 | **Tipos aceitos:** `jpg`, `jpeg`, `png`, `heic` (convertido para jpg) e `pdf`. PDF até **10 MB**. Imagens são comprimidas para JPG (lado maior até 2048 px, qualidade caindo de 80 até 25) até ficarem com **no máximo 8 MB** antes do upload. | `ValidateProofAttachmentsUseCase` + `ProofFileLocalDatasource` |
+| R11 | **Permissões no início.** Ao abrir o chat no modo IA, pede câmera + fotos. Recusado → snack "Não consigo seguir sem liberação da permissão." (de novo ao tocar no "+"). | `PickProofAttachmentsUseCase.requestPermissions` + VM |
+| R7 | **Data e hora do salvamento** ficam gravadas (`CRIADOEM`, Timestamp) e aparecem na lista. O ID do documento é o timestamp em ms, igual aos recibos. | `CreatePaymentProofUseCase` |
+| R8 | O fluxo de comprovante é **determinístico** (perguntas fixas, botões). **Não chama a LLM**, por isso não gasta cota e não consome o limite diário (§8). | VM + usecases |
+| R10 | **Toda etapa tem "Voltar ao menu".** Cada mensagem do bot no fluxo (modal de orçamento, nome, valor, limite atingido, erro, sucesso) mostra o botão padrão **Voltar ao menu** (`menuBackLabel`, o mesmo de recomeçar o chat). Ao tocar: descarta o `PaymentProofDraft` (nada vai para o Storage/Firestore), limpa os passos `proof*` e mostra o menu principal. O ícone de recomeçar (`restartTooltip`) na barra superior faz o mesmo. Toque não chama a LLM (P4/R8). | VM (`cancelProofFlow`) |
+| R9 | Valores gravados fixos (P5): `TIPO` = `IMAGEM` / `PDF`. Só o label é traduzido. | entity |
+
+### 15.3 Fluxo completo no chat
+
+```
+[Usuário toca "+" na barra do chat]
+  └─ Abre o painel de anexos em MODAL (navigator raiz, cobre a tab bar):
+       [Fotos]   [Câmera]   [Documento]
+        │          │           │
+        │          │           └─ file_selector (pdf) → 1 arquivo → prévia
+        │          └─ image_picker(camera) → 1 foto → prévia
+        └─ Seletor em modal de 75% da tela (grade, abas Fotos/Álbuns,
+           máx. 2, número da ordem na bolinha), barra embaixo com
+           [miniatura ✎ recortar] [Adicione uma legenda…] [enviar ²]
+  Prévia (câmera/PDF/compartilhamento): arquivo grande, [✎ recortar] à
+  esquerda da legenda (imagem atual), enviar com contador.
+[Usuário toca enviar]
+  └─ Bolha do usuário: imagem(ns) (ou card do PDF) + legenda
+  └─ Legenda → nome e/ou valor (ParseMoneyInputUseCase.caption)
+  └─ bot: "A qual orçamento…?" [Selecionar orçamento] [Voltar ao menu]
+       → modal de orçamentos (fechar sem escolher mantém o botão ativo)
+       └─ escolheu → CheckProofLimitUseCase
+            ├─ limite → "Esse orçamento já tem 15…" [Escolher outro] [Voltar ao menu]
+            └─ ok → pergunta só o que falta:
+                 ├─ sem nome  → "Qual o nome do comprovante?"   [Voltar ao menu]
+                 ├─ sem valor → "Qual o valor do comprovante?"  [Voltar ao menu]
+                 │               inválido → "Não entendi o valor. Ex.: 150,00"
+                 └─ completo  → salva
+                      ├─ sucesso → "Comprovante salvo com sucesso ✅"
+                      │            [Ver comprovantes] [Voltar ao menu]
+                      └─ erro    → "Não consegui salvar…" [Tentar de novo] [Voltar ao menu]
+```
+
+- A pergunta "Quer digitar o valor?" (Sim/Não) **saiu**: o valor é obrigatório.
+- **Durante o fluxo**, o texto digitado vai para a state machine (passos
+  `proof*`) e **não** para o agente, igual ao handoff do §3.3.
+- **Agente (pendente):** `start_flow(flow: attach_payment_proof, budget_id?)`
+  abriria o painel de anexos. O agente nunca recebe a imagem (custo e LGPD).
+
+**Novos passos em `ChatFlowStep`:** `proofSelectBudget`, `proofAskName`,
+`proofAskValue`, `proofSaving`, `proofSaveError`, `proofDone`. O rascunho fica em
+`PaymentProofDraft{files, caption, budgetId, name, value}` no VM, só em memória.
+
+### 15.4 Receber pelo compartilhamento do sistema (Android e iOS)
+
+O app aparece na folha de compartilhamento para **imagens e PDF**.
+
+| Plataforma | Configuração |
+|-----------|--------------|
+| Android | `AndroidManifest.xml`: `intent-filter` com `ACTION_SEND` (`image/*`, `application/pdf`) e `ACTION_SEND_MULTIPLE` (`image/*`) na `MainActivity`, `launchMode="singleTask"`. |
+| iOS | **Share Extension** (target novo `ShareExtension` no Xcode) + **App Group** (`group.<bundle>.share`) nos dois targets. `NSExtensionActivationRule` aceita até 2 imagens e 1 PDF. Adicionar o URL scheme do pacote em `Info.plist`. Ajustar o Podfile para o target da extensão. |
+
+- Pacote: `receive_sharing_intent` (Android e iOS, cobre `SEND`/`SEND_MULTIPLE`
+  e Share Extension). Uso **só** no datasource.
+- `SharedMediaRemoteDatasource` (módulo `chat_assistant`) expõe `initialMedia()`
+  e `mediaStream()` → lista de `{path, mimeType}`.
+- `ReceiveSharedProofUseCase`: valida com `ValidateProofAttachmentsUseCase`
+  (mais de 2 imagens → usa as 2 primeiras e avisa), checa o acesso (R1) e
+  devolve o rascunho.
+- **Navegação:** app aberto ou frio → se não estiver logado, guarda o rascunho e
+  segue após o login. Logado e assinante → abre o chat já na **tela de prévia**
+  (mesma do passo "Fotos"), e o fluxo segue igual ao §15.3. Não assinante →
+  tela de assinatura.
+
+### 15.5 Dados — Firestore e Storage
+
+```
+Firestore: EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{budgetId}/COMPROVANTES/{id}
+{
+  "NOME":       "Pix entrada",            // obrigatório
+  "VALOR":      500.0,                    // opcional (null = sem valor)
+  "COMENTARIO": "pago pela esposa",       // opcional (legenda)
+  "TIPO":       "IMAGEM" | "PDF",         // valor fixo (P5)
+  "ARQUIVO":    "https://...",            // download URL do Storage
+  "CAMINHO":    "comprovantes/{uid}/{budgetId}/{id}.jpg",  // para excluir depois
+  "TAMANHO":    183422,                   // bytes
+  "CRIADOEM":   Timestamp,                // data + hora do salvamento
+  "ORIGEM":     "CHAT" | "COMPARTILHAMENTO"
+}
+
+Storage: comprovantes/{uid}/{budgetId}/{id}.{jpg|pdf}
+```
+
+- Envio de 2 fotos = **2 documentos** com o mesmo `NOME` e sufixo ` (1)`/` (2)`.
+- Ordem de gravação: upload no Storage → grava o documento. Se o documento
+  falhar, o usecase apaga o arquivo enviado (sem órfãos).
+- `firestore.rules`: `COMPROVANTES` com leitura/escrita só quando o caminho é do
+  `request.auth.uid`. **O limite de 15 é reforçado na regra** quando possível
+  (contador `QTDCOMPROVANTES` no orçamento, via transação) — senão fica só no
+  usecase (decisão no início da fase).
+- `storage.rules`: `comprovantes/{uid}/**` só para o dono; `contentType` imagem
+  ou pdf; `size < 10 MB`.
+Regras para colar no console (Firestore e Storage não estão versionados no repo):
+
+```
+// firestore.rules (dentro de match /databases/{database}/documents)
+match /EMPRESAS/{uid}/USERS/{uid2}/ORCAMENTOS/{budgetId}/COMPROVANTES/{id} {
+  allow read, delete: if request.auth.uid == uid;
+  allow create: if request.auth.uid == uid
+    && request.resource.data.NOME is string && request.resource.data.NOME.size() > 0
+    && request.resource.data.TIPO in ['IMAGEM', 'PDF'];
+}
+
+// storage.rules
+match /comprovantes/{uid}/{budgetId}/{file} {
+  allow read, delete: if request.auth.uid == uid;
+  allow write: if request.auth.uid == uid
+    && request.resource.size < 10 * 1024 * 1024
+    && (request.resource.contentType.matches('image/.*')
+        || request.resource.contentType == 'application/pdf');
+}
+```
+
+- Recibos e comprovantes são **independentes**: comprovante **não** entra no
+  `ReceiptLedger` nem no "pago" da Fase 10 (o valor é informativo). Se um dia
+  entrar, só o agregador muda.
+
+### 15.6 Arquivos (UseCase → Repo → DataSource)
+
+Novo módulo **`payment_proof`** (o dono da regra), no mesmo formato de `receipt`:
+
+```
+lib/modules/payment_proof/
+├── payment_proof_binds.dart
+├── data/
+│   ├── datasource/payment_proof_remote_datasource.dart   # Firestore COMPROVANTES (CRUD + count)
+│   ├── datasource/payment_proof_storage_datasource.dart  # Firebase Storage (upload/delete)
+│   ├── datasource/proof_file_local_datasource.dart       # compressão de imagem, heic→jpg, tamanho
+│   ├── model/payment_proof.dart                          # fromJson/toJson com as chaves acima
+│   └── repository/payment_proof_repository_impl.dart
+├── domain/
+│   ├── entity/payment_proof_type.dart                    # enum IMAGEM/PDF (valor fixo)
+│   ├── entity/payment_proof_draft.dart                   # arquivos + legenda + budgetId + nome + valor
+│   ├── repository/payment_proof_repository.dart
+│   └── usecase/
+│       ├── validate_proof_attachments_usecase.dart       # R2, R6
+│       ├── check_proof_limit_usecase.dart                # R3 (count do orçamento)
+│       ├── create_payment_proof_usecase.dart             # R3, R4, R7: upload + gravação + rollback
+│       ├── list_payment_proofs_usecase.dart              # ordem CRIADOEM desc
+│       └── delete_payment_proof_usecase.dart             # apaga doc + arquivo
+└── presenter/
+    ├── strings/payment_proof_pt_string.dart (+ en)
+    ├── payment_proof_list/                               # tela (aba "Comprovantes" do orçamento)
+    │   ├── payment_proof_list_view.dart
+    │   ├── payment_proof_list_view_model.dart
+    │   └── components/payment_proof_tile.dart            # padrão do card de orçamento
+    └── payment_proof_viewer/                             # imagem em tela cheia (zoom)
+        ├── payment_proof_viewer_view.dart
+        └── payment_proof_viewer_view_model.dart
+```
+
+Alterações:
+
+| Arquivo | Mudança |
+|---------|---------|
+| `chat_assistant/presenter/chat_assistant/components/chat_input_bar.dart` | Botão **"+"** à esquerda (só no modo IA). Alterna teclado ↔ painel. |
+| `chat_assistant/presenter/chat_attachment_panel/` (**modal-tela**, §19 da arquitetura) | Grade Fotos/Câmera/Documento. View + VM + `components/chat_attachment_option.dart`. |
+| `chat_assistant/presenter/chat_media_picker/` (**tela**) | Grade de miniaturas com seleção (máx. 2, bolinha com número), abas Fotos/Álbuns, tela de prévia com legenda e botão enviar com contador (print 2). Usa `photo_manager` (listar galeria) — `image_picker` não permite essa UI. |
+| `chat_assistant/data/datasource/device_media_datasource.dart` | Único lugar com `photo_manager`, `image_picker` (câmera) e `file_selector` (PDF). |
+| `chat_assistant/data/datasource/shared_media_remote_datasource.dart` | `receive_sharing_intent` (§15.4). |
+| `chat_assistant/domain/usecase/receive_shared_proof_usecase.dart` | §15.4. |
+| `chat_assistant/domain/entity/chat_message_entity.dart` | **+** `ChatMessageType.attachment` (payload: `files[{path,type,name}]`, `caption`). |
+| `chat_assistant/presenter/.../components/chat_attachment_bubble.dart` | Bolha do usuário com 1–2 miniaturas (ou card PDF) + legenda + hora. Toque abre o visualizador. |
+| `chat_assistant_view_model.dart` | Passos `proof*` (§15.3), `PaymentProofDraft`, métodos `openAttachments`, `onAttachmentsSent`, `onProofBudgetSelected`. Os handlers existentes **não mudam**. Avaliar extrair para `ChatProofFlowController` pelo tamanho do VM. |
+| `chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart` | `start_flow` ganha `attach_payment_proof`. |
+| `budget` (tela de detalhe/menu do orçamento) | Nova opção **Comprovantes** ao lado de **Recibos**, com contador `x/15`. |
+| `pdf` | O `SfPdfViewer` atual abre o PDF por URL (`SfPdfViewer.network`) ao tocar num comprovante PDF. |
+| `android/app/src/main/AndroidManifest.xml` | Intent filters (§15.4); permissões de câmera e `READ_MEDIA_IMAGES`. |
+| `ios/Runner/Info.plist` + `ios/ShareExtension/` | `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, Share Extension, App Group. |
+| `pubspec.yaml` | `photo_manager`, `file_selector`, `receive_sharing_intent`, `flutter_image_compress` (versões estáveis mais recentes). |
+| `firestore.rules`, `storage.rules` | §15.5. |
+| `main.dart` / `main_tab` | Escuta `mediaStream()` após login e navega para o chat (§15.4). |
+
+> **Débito técnico encontrado:** hoje `image/presenter/image_edit_view_model.dart`
+> usa `firebase_storage` direto no VM, violando "chamada externa só no
+> DataSource". A Fase 11 não copia esse padrão; migrar o upload do logo para um
+> datasource é tarefa separada.
+
+### 15.7 Lista de comprovantes (dentro do orçamento)
+
+- Mesmo padrão visual do card da lista de orçamentos (avatar com ícone do tipo,
+  título, subtítulo, valor à direita, chip à direita embaixo).
+- **Título:** `NOME`. **Subtítulo:** `dd/MM/yyyy às HH:mm` (de `CRIADOEM`, fuso
+  local). **Direita:** valor em moeda local, ou "Sem valor". **Chip:** `Imagem`/`PDF`.
+  Comentário em 1 linha, se houver.
+- Cabeçalho com `x de 15 comprovantes`. Ordem: mais recente primeiro.
+- **A lista não baixa imagens** (só ícone do tipo), para poupar dados do
+  cliente e leituras do Storage.
+- **Rodapé** (`PaymentProofTotalBar`, mesmo visual do total dos itens do
+  orçamento): quantidade de comprovantes e soma dos valores (soma no
+  `ListPaymentProofsUseCase`).
+- **Toque:** modal de 80% (`PaymentProofDetailSheet`) com a imagem no topo
+  (baixada só agora) e nome, valor, data/hora, tipo e comentário abaixo. Tocar
+  na imagem abre tela cheia com zoom; PDF mostra "Abrir PDF" → visualizador do app.
+- Menu `⋮`: Compartilhar (`share_plus`) e Excluir (com confirmação, §19). Excluir
+  libera vaga no limite de 15.
+- Estado vazio: "Nenhum comprovante ainda. Envie pelo chat 📎".
+- Botão "Adicionar comprovante" na lista abre o chat já no painel de anexos com o
+  orçamento escolhido (pula o modal).
+
+### 15.8 Strings (pt + en)
+
+`attachPhotos` "Fotos", `attachCamera` "Câmera", `attachDocument` "Documento",
+`captionHint` "Adicione uma legenda…", `proofAskName` "Qual o nome do comprovante?",
+`cropTitle` "Recortar imagem", `permissionDenied` "Não consigo seguir sem liberação da permissão.",
+`menuBackLabel` "Voltar ao menu" (reuso, já existe), `proofAskValue` "Qual o valor do comprovante?",
+`proofInvalidValue` "Não entendi o valor. Ex.: 150,00", `proofSaved`
+"Comprovante salvo com sucesso", `proofLimitReached` "Esse orçamento já tem 15
+comprovantes.", `proofMaxPhotos` "Você pode enviar até 2 fotos.", `proofTooBig`
+"Arquivo maior que 10 MB.", `proofsTitle` "Comprovantes", `proofNoValue` "Sem valor",
+`proofDateTime` "{data} às {hora}".
+
+### 15.9 Testes
+
+- **Unit:** `ValidateProofAttachmentsUseCase` (3 fotos, foto + PDF, tipo inválido,
+  > 10 MB); `CheckProofLimitUseCase` (14 + 2 = bloqueia, 13 + 2 = ok);
+  `CreatePaymentProofUseCase` (sem nome → erro; sem valor; com valor; 2 fotos =
+  2 docs; falha no Firestore apaga o arquivo do Storage); parser de valor
+  (legenda "R$ 500" → valor, "pago ontem" → comentário).
+- **VM:** sequência de passos `proof*` com repos fake (nome/valor vindos da legenda, valor inválido, Voltar ao menu,
+  cancelar o modal, "Voltar ao menu" em cada passo descarta o rascunho sem upload, limite atingido, erro e "Tentar de novo"); nenhuma chamada
+  ao `ChatAiRepository` durante o fluxo (R8).
+- **Manual:** compartilhar 1 e 2 fotos e 1 PDF a partir da Galeria/Arquivos no
+  Android e no iOS (app aberto e fechado); câmera; free não vê o "+".
+- **Regressão:** usuário free tem o chat idêntico ao de hoje.
+
+### 15.10 Checklist da fase
+
+- [ ] "+" e compartilhamento só para assinantes; free sem mudança
+- [ ] Máx. 2 imagens por envio; máx. 15 por orçamento (usecase + regra)
+- [ ] Nome obrigatório; valor opcional; legenda vira comentário
+- [ ] `CRIADOEM` com data e hora, exibido na lista
+- [ ] Firestore/Storage/pickers/share intent só em datasource (P3)
+- [ ] Upload com rollback (sem arquivo órfão)
+- [ ] Fluxo sem LLM (R8)
+- [ ] Botão "Voltar ao menu" em todas as etapas, descartando o rascunho (R10)
+- [ ] Share Extension iOS + intent filters Android testados em aparelho real
+- [ ] Regras do Firestore e do Storage publicadas antes do release
+- [ ] `ARCHITECTURE.md` §20 atualizado com o módulo `payment_proof`

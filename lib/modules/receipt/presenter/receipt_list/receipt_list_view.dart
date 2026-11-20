@@ -5,6 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/modals/receipt_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/receipt_card.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_list/components/receipt_total_bar.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -198,6 +199,14 @@ class _ReceiptListView extends State<ReceiptListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _viewModel,
+        builder:
+            (_, __) => ReceiptTotalBar(
+              count: _viewModel.foundPayment.length,
+              total: _viewModel.totalText,
+            ),
+      ),
       body: AnimatedBuilder(
         animation: _viewModel,
         builder: (context, _) {

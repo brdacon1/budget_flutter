@@ -34,25 +34,26 @@ class BudgetCreatorInfoSection extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: BudgetCreatorViewModel.statusOptions.map((status) {
-            final selected = viewModel.statusController.text == status;
-            final color = colorFor(status);
-            return ChoiceChip(
-              label: Text(labelFor(status)),
-              selected: selected,
-              showCheckmark: false,
-              onSelected: (_) => viewModel.setStatus(status),
-              backgroundColor: bgColor,
-              selectedColor: color.withValues(alpha: 0.15),
-              side: BorderSide(color: selected ? color : sheetHandleColor),
-              shape: const StadiumBorder(),
-              labelStyle: GoogleFonts.heebo(
-                color: selected ? color : whiteColor,
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              ),
-            );
-          }).toList(),
+          children:
+              BudgetCreatorViewModel.statusOptions.map((status) {
+                final selected = viewModel.statusController.text == status;
+                final color = colorFor(status);
+                return ChoiceChip(
+                  label: Text(labelFor(status)),
+                  selected: selected,
+                  showCheckmark: false,
+                  onSelected: (_) => viewModel.setStatus(status),
+                  backgroundColor: bgColor,
+                  selectedColor: color.withValues(alpha: 0.15),
+                  side: BorderSide(color: selected ? color : sheetHandleColor),
+                  shape: const StadiumBorder(),
+                  labelStyle: GoogleFonts.heebo(
+                    color: selected ? color : whiteColor,
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              }).toList(),
         ),
       ],
     );

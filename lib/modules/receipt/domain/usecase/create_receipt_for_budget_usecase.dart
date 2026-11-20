@@ -1,3 +1,4 @@
+import 'package:oflite/modules/receipt/domain/entity/payment_method.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
@@ -60,7 +61,7 @@ class CreateReceiptForBudgetUsecase {
         _paymentRepo.receiptId = receipt.id;
         final paid = await _paymentRepo.savePayment(
           PaymentCustomer(
-            method: method,
+            method: PaymentMethod.fromValue(method)?.value ?? method,
             description: description.trim(),
             price: amount,
           ),

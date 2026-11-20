@@ -90,4 +90,35 @@ class BudgetStrings {
           : 'The budget total has been updated.';
   static String get itemQuantityErrorTitle =>
       _isPt ? 'Não foi possível atualizar' : "Couldn't update";
+
+  // --- Métricas do orçamento ---
+  static String get metricsTitle => _isPt ? 'Métricas' : 'Metrics';
+  static String metricsSubtitle(String id) =>
+      _isPt ? 'Orçamento nº $id' : 'Budget #$id';
+  static String get metricsBudgetTotal =>
+      _isPt ? 'Total do orçamento' : 'Budget total';
+  static String get metricsToReceive => _isPt ? 'A receber' : 'To receive';
+  static String metricsReceivedPercent(int p) =>
+      _isPt ? '$p% recebido' : '$p% received';
+  static String get metricsItems => _isPt ? 'Itens' : 'Items';
+  static String get metricsProducts => _isPt ? 'Produtos' : 'Products';
+  static String get metricsProofCoverage =>
+      _isPt ? 'Comprovação dos recebimentos' : 'Payment proof coverage';
+  static String metricsProofCoveragePercent(int p) =>
+      _isPt
+          ? '$p% do valor recebido tem comprovante'
+          : '$p% of received value has proof';
+  static String get metricsUnproven =>
+      _isPt ? 'Recebido sem comprovante' : 'Received without proof';
+  static String get metricsServices => _isPt ? 'Serviços' : 'Services';
+  static String get metricsReceipts => _isPt ? 'Recibos' : 'Receipts';
+  static String get metricsProofs => _isPt ? 'Comprovantes' : 'Proofs';
+  static String get metricsReceived => _isPt ? 'Recebimentos' : 'Payments';
+  static String metricsReceiptsCount(int n) =>
+      _isPt ? '$n recibo(s) emitido(s)' : '$n receipt(s) issued';
+  static String get metricsOthers => _isPt ? 'Outros' : 'Others';
+  static String get metricsLoadError =>
+      _isPt
+          ? 'Não foi possível carregar as métricas.'
+          : 'Could not load metrics.';
 }

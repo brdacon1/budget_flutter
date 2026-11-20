@@ -1,4 +1,4 @@
 /* Mensagens de permissão (português) */
-"NSCameraUsageDescription" = "A câmera é usada para fotografar o logotipo da sua empresa. Por exemplo: você tira uma foto do seu logo e ele é inserido no cabeçalho dos PDFs de orçamento enviados aos seus clientes.";
+"NSCameraUsageDescription" = "A câmera é usada para fotografar o logotipo da sua empresa e comprovantes de pagamento. Por exemplo: você fotografa o comprovante de um Pix e ele fica salvo no orçamento do cliente.";
 "NSContactsUsageDescription" = "Seus contatos são usados para preencher os dados do cliente ao criar um orçamento e, se você quiser, salvar um novo cliente na agenda. Por exemplo: ao escolher \"Maria\" na sua lista, o nome e o telefone dela são preenchidos automaticamente no orçamento.";
-"NSPhotoLibraryUsageDescription" = "Suas fotos são usadas para escolher a imagem do logotipo da sua empresa. Por exemplo: você seleciona o logo na galeria e ele aparece no cabeçalho dos PDFs de orçamento enviados aos seus clientes.";
+"NSPhotoLibraryUsageDescription" = "Suas fotos são usadas para escolher o logotipo da sua empresa e anexar comprovantes de pagamento aos orçamentos. Por exemplo: você seleciona o print de um Pix e ele fica salvo no orçamento do cliente.";

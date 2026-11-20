@@ -18,11 +18,17 @@ class BudgetCreatorAddressSection extends StatelessWidget {
           child: SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: buttonColor),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: buttonColor,
+            ),
           ),
         );
       case CepLookupState.found:
-        return const Icon(Icons.check_circle_outline, color: statusApprovedColor);
+        return const Icon(
+          Icons.check_circle_outline,
+          color: statusApprovedColor,
+        );
       case CepLookupState.notFound:
         return const Icon(Icons.error_outline, color: statusRejectedColor);
       case CepLookupState.idle:
@@ -56,7 +62,10 @@ class BudgetCreatorAddressSection extends StatelessWidget {
             padding: const EdgeInsets.only(left: 4, top: 6),
             child: Text(
               'CEP não encontrado. Preencha o endereço abaixo.',
-              style: GoogleFonts.heebo(color: statusRejectedColor, fontSize: 12),
+              style: GoogleFonts.heebo(
+                color: statusRejectedColor,
+                fontSize: 12,
+              ),
             ),
           ),
         const SizedBox(height: 12),

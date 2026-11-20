@@ -1,4 +1,3 @@
-
 class ObservationBudget {
   String? id;
   String? observacao;
@@ -6,12 +5,7 @@ class ObservationBudget {
   String? uid;
   bool? checkbox;
 
-  ObservationBudget({
-     this.id,
-     this.observacao,
-     this.data,
-     this.uid,
-  });
+  ObservationBudget({this.id, this.observacao, this.data, this.uid});
   ObservationBudget.fromMap(dynamic json) {
     id = json['id'];
     observacao = json['OBSERVACAO'];

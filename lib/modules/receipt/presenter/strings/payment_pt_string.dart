@@ -21,12 +21,16 @@ class PaymentStrings {
   static String get editPaymentTitle =>
       _isPt ? 'Editar pagamento' : 'Edit payment';
 
-  static String get defaultPaymentType =>
-      _isPt ? 'Dinheiro' : 'Cash';
+  static String get defaultPaymentType => _isPt ? 'Dinheiro' : 'Cash';
 
-  static List<String> get paymentTypeOptions => _isPt
-      ? ['Crédito', 'Débito', 'Dinheiro', 'PIX']
-      : ['Credit', 'Debit', 'Cash', 'PIX'];
+  static List<String> get paymentTypeOptions =>
+      _isPt
+          ? ['Crédito', 'Débito', 'Dinheiro', 'PIX']
+          : ['Credit', 'Debit', 'Cash', 'PIX'];
+
+  static String get methodCash => _isPt ? 'Dinheiro' : 'Cash';
+  static String get methodCredit => _isPt ? 'Crédito' : 'Credit';
+  static String get methodDebit => _isPt ? 'Débito' : 'Debit';
 
   static String get selectPaymentTypeTitle =>
       _isPt ? 'Tipo do pagamento' : 'Payment type';
@@ -40,14 +44,22 @@ class PaymentStrings {
   static String get paymentHint =>
       _isPt ? 'Definir pagamento' : 'Define payment';
 
+  static String get priceRequired =>
+      _isPt ? 'Informe o valor pago' : 'Enter the amount paid';
+
+  static String get descriptionRequired =>
+      _isPt
+          ? 'Informe a descrição do pagamento'
+          : 'Enter the payment description';
+
   static String get priceHint => _isPt ? 'Preço' : 'Price';
 
-  static String get paymentDescriptionHint => _isPt
-      ? 'Escreva a descrição do pagamento...'
-      : 'Write the payment description...';
+  static String get paymentDescriptionHint =>
+      _isPt
+          ? 'Escreva a descrição do pagamento...'
+          : 'Write the payment description...';
 
-  static String get paymentsTitle =>
-      _isPt ? 'Pagamentos' : 'Payments';
+  static String get paymentsTitle => _isPt ? 'Pagamentos' : 'Payments';
 
   static String get deleteLabel => _isPt ? 'Excluir' : 'Delete';
 
@@ -57,28 +69,31 @@ class PaymentStrings {
 
   static String get errorTitle => _isPt ? 'Erro!' : 'Error!';
 
-  static String get paymentCreated => _isPt
-      ? 'Pagamento criado com sucesso!'
-      : 'Payment created successfully!';
+  static String get paymentCreated =>
+      _isPt ? 'Pagamento criado com sucesso!' : 'Payment created successfully!';
 
-  static String get paymentUpdated => _isPt
-      ? 'Pagamento atualizado com sucesso!'
-      : 'Payment updated successfully!';
+  static String get paymentUpdated =>
+      _isPt
+          ? 'Pagamento atualizado com sucesso!'
+          : 'Payment updated successfully!';
 
-  static String get paymentRemoved => _isPt
-      ? 'Pagamento removido com sucesso!'
-      : 'Payment removed successfully!';
+  static String get paymentRemoved =>
+      _isPt
+          ? 'Pagamento removido com sucesso!'
+          : 'Payment removed successfully!';
 
-  static String get errorRemovePayment => _isPt
-      ? 'Problemas para remover o pagamento'
-      : 'Problems removing the payment';
+  static String get errorRemovePayment =>
+      _isPt
+          ? 'Problemas para remover o pagamento'
+          : 'Problems removing the payment';
 
   static String get receiptNotSaved =>
       _isPt ? 'Recibo não salvo' : 'Receipt not saved';
 
-  static String get receiptNotSavedMessage => _isPt
-      ? 'Salve o recibo na aba "Recibo" antes de adicionar pagamentos.'
-      : 'Save the receipt in the "Receipt" tab before adding payments.';
+  static String get receiptNotSavedMessage =>
+      _isPt
+          ? 'Salve o recibo na aba "Recibo" antes de adicionar pagamentos.'
+          : 'Save the receipt in the "Receipt" tab before adding payments.';
 
   static String paymentValueLabel(String value) =>
       _isPt ? 'Valor do pagamento: $value' : 'Payment value: $value';
@@ -92,9 +107,10 @@ class PaymentStrings {
   static String get paymentsSubtitleEmpty =>
       _isPt ? 'Pagamentos do recibo' : 'Receipt payments';
 
-  static String paymentsCount(int n) => _isPt
-      ? (n == 1 ? '1 pagamento' : '$n pagamentos')
-      : (n == 1 ? '1 payment' : '$n payments');
+  static String paymentsCount(int n) =>
+      _isPt
+          ? (n == 1 ? '1 pagamento' : '$n pagamentos')
+          : (n == 1 ? '1 payment' : '$n payments');
 
   static String get totalPaidLabel => _isPt ? 'Total pago' : 'Total paid';
 
@@ -102,17 +118,18 @@ class PaymentStrings {
 
   static String get detailValue => _isPt ? 'Valor' : 'Value';
 
-  static String get addPayment =>
-      _isPt ? 'Adicionar pagamento' : 'Add payment';
+  static String get addPayment => _isPt ? 'Adicionar pagamento' : 'Add payment';
 
   static String get removeTitle =>
       _isPt ? 'Remover pagamento' : 'Remove payment';
 
-  static String get removeMessage => _isPt
-      ? 'Essa ação não pode ser desfeita.'
-      : 'This action cannot be undone.';
+  static String get removeMessage =>
+      _isPt
+          ? 'Essa ação não pode ser desfeita.'
+          : 'This action cannot be undone.';
 
-  static String get emptyPaymentsSubtitle => _isPt
-      ? 'Os pagamentos recebidos aparecem aqui com o total pago.'
-      : 'Received payments show up here with the total paid.';
+  static String get emptyPaymentsSubtitle =>
+      _isPt
+          ? 'Os pagamentos recebidos aparecem aqui com o total pago.'
+          : 'Received payments show up here with the total paid.';
 }

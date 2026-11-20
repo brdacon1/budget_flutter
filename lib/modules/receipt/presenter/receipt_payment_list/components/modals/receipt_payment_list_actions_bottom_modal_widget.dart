@@ -1,3 +1,4 @@
+import 'package:oflite/modules/receipt/domain/entity/payment_method.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
@@ -71,7 +72,10 @@ class ReceiptPaymentListActionsBottomModalWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Divider(color: cardBorderColor, height: 1),
-            _label(PaymentStrings.detailMethod, item.method ?? ''),
+            _label(
+              PaymentStrings.detailMethod,
+              PaymentMethod.labelOf(item.method),
+            ),
             _label(
               PaymentStrings.detailValue,
               moneyConvert.convertFromDouble(item.price ?? 0),

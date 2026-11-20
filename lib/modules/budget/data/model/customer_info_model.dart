@@ -15,7 +15,8 @@ class CustomerInfo {
   bool? checkBox;
   int index = 0;
 
-  CustomerInfo({this.id,
+  CustomerInfo({
+    this.id,
     this.data,
     this.street,
     this.generated,
@@ -27,7 +28,8 @@ class CustomerInfo {
     this.customerName,
     this.status,
     this.zip,
-    this.totalValue});
+    this.totalValue,
+  });
 
   CustomerInfo.fromMap(dynamic json) {
     id = json['ID'];
