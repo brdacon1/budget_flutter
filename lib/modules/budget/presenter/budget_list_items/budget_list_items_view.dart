@@ -9,7 +9,8 @@ import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
-import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
+import 'package:oflite/modules/product/presenter/product_price_picker/product_price_picker_view.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
@@ -113,15 +114,18 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Future<void> _openPriceList() async {
-    await Navigator.push(
+    final added = await showProductPricePickerBottomModal(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                ProductPriceListView(item: widget.item, fromMenu: false),
-      ),
+      budgetId: widget.item.id!,
     );
+    if (!added || !mounted) return;
     await _viewModel.getListItens();
+    if (!mounted) return;
+    await _displayAlert.notificationNotCloseScreen(
+      context,
+      ProductPtString.doneTitle,
+      ProductPtString.cartAddSuccess,
+    );
   }
 
   Widget _buildSearchBar() {

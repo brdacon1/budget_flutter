@@ -164,7 +164,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const ProductPriceListView(fromMenu: true),
+            builder: (_) => const ProductPriceListView(),
           ),
         );
         if (mounted) {

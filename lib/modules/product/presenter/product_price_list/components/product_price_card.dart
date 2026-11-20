@@ -7,33 +7,25 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Card de item da lista de preço.
 ///
 /// Component `Stateless` puro — recebe o item ([ProductPriceModel]), o
-/// conversor de moeda, os flags de visibilidade dos checkboxes
-/// (`checkBoxAppear` para exclusão no leading, `checkBoxProductVisible` para
-/// carrinho no trailing, `fromMenu` que esconde o checkbox de carrinho) e os
-/// callbacks (`onLongPress`, `onTap`, `onToggleSelectProduct`,
-/// `onToggleDelete`). Não conhece o ViewModel nem services.
+/// conversor de moeda, o flag `checkBoxAppear` (checkbox de exclusão) e os
+/// callbacks (`onLongPress`, `onTap`, `onToggleDelete`). Não conhece o
+/// ViewModel nem services.
 class ProductPriceCard extends StatelessWidget {
   const ProductPriceCard({
     super.key,
     required this.item,
     required this.moneyConvert,
-    required this.fromMenu,
     required this.checkBoxAppear,
-    required this.checkBoxProductVisible,
     required this.onLongPress,
     required this.onTap,
-    required this.onToggleSelectProduct,
     required this.onToggleDelete,
   });
 
   final ProductPriceModel item;
   final ConvertCoinRepository moneyConvert;
-  final bool fromMenu;
   final bool checkBoxAppear;
-  final bool checkBoxProductVisible;
   final VoidCallback onLongPress;
   final VoidCallback onTap;
-  final VoidCallback onToggleSelectProduct;
   final VoidCallback onToggleDelete;
 
   @override
@@ -137,22 +129,8 @@ class ProductPriceCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                // Seletor lateral direito: carrinho ou círculo vazio
-                if (!checkBoxAppear && !fromMenu && checkBoxProductVisible)
-                  Transform.scale(
-                    scale: 1.6,
-                    child: Checkbox(
-                      side: const BorderSide(color: whiteColor),
-                      checkColor: bgColor,
-                      activeColor: whiteColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      value: item.selectProduct ?? false,
-                      onChanged: (bool? newValue) => onToggleSelectProduct(),
-                    ),
-                  )
-                else if (!checkBoxAppear)
+                // Indicador lateral direito (fora do modo exclusão)
+                if (!checkBoxAppear)
                   Transform.scale(
                     scale: 1.4,
                     child: Container(

@@ -15,8 +15,8 @@ extension ProductRouteExtension on ProductRoute {
   }
 }
 
-/// ProductPriceListView aceita argumentos opcionais (modo picker, fromMenu);
-/// a rota expõe a versão sem argumentos (útil para navegação do menu).
+/// ProductPriceListView é a tela de gestão da lista de preço. A seleção de
+/// itens para o orçamento é o modal `ProductPricePickerView`.
 /// ProductPriceCreatorView é exibido como bottom modal — navegação
 /// interna via `MaterialPageRoute`.
 final Map<String, WidgetBuilder> productRoutes = {

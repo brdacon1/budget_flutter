@@ -26,7 +26,9 @@ class ProductPtString {
   static String get editTitle => _isPt ? 'Editar item' : 'Edit item';
   static String get createTitle => _isPt ? 'Criar item' : 'Create item';
   static String get subtitle =>
-      _isPt ? 'Cadastro de produto ou serviço' : 'Product or service registration';
+      _isPt
+          ? 'Cadastro de produto ou serviço'
+          : 'Product or service registration';
 
   // --- Card de formulário ---
   static String get formCardTitle =>
@@ -43,13 +45,13 @@ class ProductPtString {
       _isPt ? 'Definir categoria' : 'Set category';
   static String get categoryProducts => _isPt ? 'Produtos' : 'Products';
   static String get categoryServices => _isPt ? 'Serviços' : 'Services';
-  static String get unitHint =>
-      _isPt ? 'Unidade de medida' : 'Unit of measure';
+  static String get unitHint => _isPt ? 'Unidade de medida' : 'Unit of measure';
   static String get priceHint => _isPt ? 'Preço' : 'Price';
   static String get qtyHint => _isPt ? 'Quantidade' : 'Quantity';
-  static String get descriptionHint => _isPt
-      ? 'Escreva a descrição do produto ou serviço...'
-      : 'Write the product or service description...';
+  static String get descriptionHint =>
+      _isPt
+          ? 'Escreva a descrição do produto ou serviço...'
+          : 'Write the product or service description...';
 
   // --- Botões ---
   static String get saveButton => _isPt ? 'SALVAR' : 'SAVE';
@@ -62,40 +64,52 @@ class ProductPtString {
       _isPt ? 'Item adicionado com sucesso!' : 'Item added successfully!';
   static String get updateSuccess =>
       _isPt ? 'Item atualizado com sucesso!' : 'Item updated successfully!';
-  static String get addError => _isPt
-      ? 'Não foi possível adicionar um novo item em sua lista de preço'
-      : 'Could not add a new item to your price list';
-  static String get updatePriceListError => _isPt
-      ? 'Não foi possível atualizar o item em sua lista de preço'
-      : 'Could not update the item in your price list';
-  static String get updateOrcamentoError => _isPt
-      ? 'Não foi possível atualizar o item na lista de orçamentos.'
-      : 'Could not update the item in the budget list.';
+  static String get addError =>
+      _isPt
+          ? 'Não foi possível adicionar um novo item em sua lista de preço'
+          : 'Could not add a new item to your price list';
+  static String get updatePriceListError =>
+      _isPt
+          ? 'Não foi possível atualizar o item em sua lista de preço'
+          : 'Could not update the item in your price list';
+  static String get updateOrcamentoError =>
+      _isPt
+          ? 'Não foi possível atualizar o item na lista de orçamentos.'
+          : 'Could not update the item in the budget list.';
   static String get defaultError =>
-      _isPt ? 'Ocorreu um erro. Tente novamente.' : 'An error occurred. Try again.';
+      _isPt
+          ? 'Ocorreu um erro. Tente novamente.'
+          : 'An error occurred. Try again.';
 
   // --- Lista de preço ---
   static String get listTitle => _isPt ? 'Lista de preço' : 'Price list';
-  static String get searchHint => _isPt
-      ? 'Digite a descrição do item...'
-      : 'Type the item description...';
+  static String get searchHint =>
+      _isPt ? 'Digite a descrição do item...' : 'Type the item description...';
 
-  // --- Carrinho (adicionar ao orçamento) ---
-  static String get cartTitle =>
-      _isPt ? 'Carrinho de produtos' : 'Product cart';
-  static String get cartButton => _isPt ? 'ADICIONAR' : 'ADD';
-  static String get cartEmptyLabel =>
-      _isPt ? 'Carrinho vazio' : 'Cart is empty';
-  static String get cartAddSuccess => _isPt
-      ? 'Itens adicionados na lista do orçamento com sucesso!'
-      : 'Items added to the budget list successfully!';
-  static String get cartAddError => _isPt
-      ? 'Ocorreu um erro para adicionar os itens na lista do orçamento'
-      : 'An error occurred while adding the items to the budget list';
-  static String get cartWarningTitle => _isPt ? 'Ops!' : 'Oops!';
-  static String get cartWarning => _isPt
-      ? 'Você tem itens no carrinho. Por favor, escolha entre esvaziar o carrinho ou adicionar esses itens ao orçamento.'
-      : 'You have items in the cart. Please choose between emptying the cart or adding these items to the budget.';
+  // --- Seleção para o orçamento (modal-picker) ---
+  static String get cartAddSuccess =>
+      _isPt
+          ? 'Itens adicionados na lista do orçamento com sucesso!'
+          : 'Items added to the budget list successfully!';
+  static String get cartAddError =>
+      _isPt
+          ? 'Ocorreu um erro para adicionar os itens na lista do orçamento'
+          : 'An error occurred while adding the items to the budget list';
+  static String get filterAll => _isPt ? 'Todos' : 'All';
+  static String get pickerAddAll => _isPt ? 'Adicionar tudo' : 'Add all';
+  static String get pickerAdding => _isPt ? 'Adicionando...' : 'Adding...';
+  static String get pickerEmpty =>
+      _isPt ? 'Nenhum item na lista de preço' : 'No items in the price list';
+  static String get pickerTotalLabel =>
+      _isPt ? 'Total dos itens' : 'Items total';
+  static String pickerCount(int n) =>
+      _isPt
+          ? '$n ${n == 1 ? 'item' : 'itens'}'
+          : '$n ${n == 1 ? 'item' : 'items'}';
+  static String get qtyMustBePositive =>
+      _isPt
+          ? 'A quantidade deve ser maior que zero'
+          : 'Quantity must be greater than zero';
 
   // --- Remoção de itens ---
   static String get deleteListTitle =>
@@ -103,18 +117,20 @@ class ProductPtString {
   static String get deleteButton => _isPt ? 'EXCLUIR ITENS' : 'DELETE ITEMS';
   static String get deleteSuccess =>
       _isPt ? 'Itens removidos com sucesso!' : 'Items removed successfully!';
-  static String get deleteError => _isPt
-      ? 'Ocorreu um erro ao remover os itens.'
-      : 'An error occurred while removing the items.';
+  static String get deleteError =>
+      _isPt
+          ? 'Ocorreu um erro ao remover os itens.'
+          : 'An error occurred while removing the items.';
 
   // --- Quantidade (modal de input) ---
-  static String get qtyTitle =>
-      _isPt ? 'Defina quantidade' : 'Set quantity';
+  static String get qtyTitle => _isPt ? 'Defina quantidade' : 'Set quantity';
+  static String get qtyConfirm => _isPt ? 'Confirmar' : 'Confirm';
   static String get qtyInputHint =>
       _isPt ? 'Digite a quantidade' : 'Type the quantity';
 
   // --- Plano premium ---
-  static String get premiumError => _isPt
-      ? 'Você não possuí o plano premium onde é possível cadastrar produtos ilimitados'
-      : "You don't have the premium plan which allows registering unlimited products";
+  static String get premiumError =>
+      _isPt
+          ? 'Você não possuí o plano premium onde é possível cadastrar produtos ilimitados'
+          : "You don't have the premium plan which allows registering unlimited products";
 }

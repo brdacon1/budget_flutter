@@ -33,7 +33,7 @@ class MainConfigMenuViewModel extends ChangeNotifier {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ProductPriceListView(fromMenu: true),
+            builder: (context) => const ProductPriceListView(),
           ),
         );
         break;
