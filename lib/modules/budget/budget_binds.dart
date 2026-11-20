@@ -1,5 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_comment_remote_datasource.dart';
+import 'package:oflite/modules/budget/data/datasource/budget_metrics_remote_datasource.dart';
+import 'package:oflite/modules/budget/data/repository/budget_metrics_repository_impl.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_metrics_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/get_budget_metrics_usecase.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/repository/budget_comment_repository_impl.dart';
 import 'package:oflite/modules/budget/data/repository/budget_repository_impl.dart';
@@ -64,5 +68,18 @@ void registerBudgetDependencies(GetIt sl) {
       sl<BudgetCommentRemoteDatasource>(),
       sl<UserRepository>(),
     ),
+  );
+
+  sl.registerLazySingleton<BudgetMetricsRemoteDatasource>(
+    () => BudgetMetricsRemoteDatasource(),
+  );
+  sl.registerLazySingleton<BudgetMetricsRepository>(
+    () => BudgetMetricsRepositoryImpl(
+      sl<BudgetMetricsRemoteDatasource>(),
+      sl<UserRepository>(),
+    ),
+  );
+  sl.registerFactory<GetBudgetMetricsUsecase>(
+    () => GetBudgetMetricsUsecase(sl<BudgetMetricsRepository>()),
   );
 }

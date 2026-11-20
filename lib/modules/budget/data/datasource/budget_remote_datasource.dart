@@ -9,7 +9,7 @@ class BudgetRemoteDataSource {
   final FirebaseFirestore _firestore;
 
   BudgetRemoteDataSource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference _budgetsCollection(String userUid) =>
       _firestore.collection('EMPRESAS/$userUid/USERS/$userUid/ORCAMENTOS');
@@ -27,9 +27,9 @@ class BudgetRemoteDataSource {
     required int limit,
     String? startAfterId,
   }) async {
-    var query = _budgetsCollection(userUid)
-        .orderBy('ID', descending: true)
-        .limit(limit);
+    var query = _budgetsCollection(
+      userUid,
+    ).orderBy('ID', descending: true).limit(limit);
 
     if (startAfterId != null && startAfterId.isNotEmpty) {
       query = query.startAfter([startAfterId]);
@@ -61,7 +61,11 @@ class BudgetRemoteDataSource {
     await _budgetsCollection(userUid).doc(id).set(data);
   }
 
-  Future<void> updateBudget(String userUid, String id, Map<String, dynamic> data) async {
+  Future<void> updateBudget(
+    String userUid,
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     await _budgetsCollection(userUid).doc(id).update(data);
   }
 
@@ -69,12 +73,16 @@ class BudgetRemoteDataSource {
     await _budgetsCollection(userUid).doc(id).delete();
   }
 
-  Future<List<Map<String, dynamic>>> getBudgetItems(String userUid, String budgetId) async {
-    final snapshot = await _budgetsCollection(userUid)
-        .doc(budgetId)
-        .collection('ITENS')
-        .orderBy('CATEGORIA', descending: false)
-        .get();
+  Future<List<Map<String, dynamic>>> getBudgetItems(
+    String userUid,
+    String budgetId,
+  ) async {
+    final snapshot =
+        await _budgetsCollection(userUid)
+            .doc(budgetId)
+            .collection('ITENS')
+            .orderBy('CATEGORIA', descending: false)
+            .get();
     return snapshot.docs.map((d) {
       final map = Map<String, dynamic>.from(d.data());
       map['id'] = d.id;
@@ -83,25 +91,34 @@ class BudgetRemoteDataSource {
   }
 
   Future<void> saveBudgetItem(
-      String userUid, String budgetId, String itemId, Map<String, dynamic> data) async {
-    await _budgetsCollection(userUid)
-        .doc(budgetId)
-        .collection('ITENS')
-        .doc(itemId)
-        .set(data);
+    String userUid,
+    String budgetId,
+    String itemId,
+    Map<String, dynamic> data,
+  ) async {
+    await _budgetsCollection(
+      userUid,
+    ).doc(budgetId).collection('ITENS').doc(itemId).set(data);
   }
 
-  Future<void> deleteBudgetItem(String userUid, String budgetId, String itemId) async {
-    await _budgetsCollection(userUid)
-        .doc(budgetId)
-        .collection('ITENS')
-        .doc(itemId)
-        .delete();
+  Future<void> deleteBudgetItem(
+    String userUid,
+    String budgetId,
+    String itemId,
+  ) async {
+    await _budgetsCollection(
+      userUid,
+    ).doc(budgetId).collection('ITENS').doc(itemId).delete();
   }
 
-  Future<List<Map<String, dynamic>>> getComments(String userUid, String budgetId) async {
+  Future<List<Map<String, dynamic>>> getComments(
+    String userUid,
+    String budgetId,
+  ) async {
     final snapshot =
-        await _budgetsCollection(userUid).doc(budgetId).collection('OBSERVACAO').get();
+        await _budgetsCollection(
+          userUid,
+        ).doc(budgetId).collection('OBSERVACAO').get();
     return snapshot.docs.map((d) {
       final map = Map<String, dynamic>.from(d.data());
       map['id'] = d.id;
@@ -109,23 +126,30 @@ class BudgetRemoteDataSource {
     }).toList();
   }
 
-  Future<void> addComment(String userUid, String budgetId, Map<String, dynamic> data) async {
-    await _budgetsCollection(userUid)
-        .doc(budgetId)
-        .collection('OBSERVACAO')
-        .doc()
-        .set(data);
+  Future<void> addComment(
+    String userUid,
+    String budgetId,
+    Map<String, dynamic> data,
+  ) async {
+    await _budgetsCollection(
+      userUid,
+    ).doc(budgetId).collection('OBSERVACAO').doc().set(data);
   }
 
-  Future<void> deleteComment(String userUid, String budgetId, String commentId) async {
-    await _budgetsCollection(userUid)
-        .doc(budgetId)
-        .collection('OBSERVACAO')
-        .doc(commentId)
-        .delete();
+  Future<void> deleteComment(
+    String userUid,
+    String budgetId,
+    String commentId,
+  ) async {
+    await _budgetsCollection(
+      userUid,
+    ).doc(budgetId).collection('OBSERVACAO').doc(commentId).delete();
   }
 
-  Future<List<Map<String, dynamic>>> getItemsByBudgetId(String userUid, String budgetId) async {
+  Future<List<Map<String, dynamic>>> getItemsByBudgetId(
+    String userUid,
+    String budgetId,
+  ) async {
     // alias para duplicação
     return getBudgetItems(userUid, budgetId);
   }
@@ -138,7 +162,9 @@ class BudgetRemoteDataSource {
     List<String> values,
   ) async {
     final snapshot =
-        await _budgetsCollection(userUid).where('STATUS', whereIn: values).get();
+        await _budgetsCollection(
+          userUid,
+        ).where('STATUS', whereIn: values).get();
     return snapshot.docs
         .map((d) => Map<String, dynamic>.from(d.data() as Map))
         .toList();
@@ -170,12 +196,16 @@ class BudgetRemoteDataSource {
 
   /// Busca orçamentos cujo ID (timestamp) está dentro do range de datas.
   Future<List<Map<String, dynamic>>> getBudgetsByMonthRange(
-      String userUid, String startId, String endId) async {
-    final snapshot = await _budgetsCollection(userUid)
-        .where('ID', isGreaterThanOrEqualTo: startId)
-        .where('ID', isLessThanOrEqualTo: endId)
-        .orderBy('ID', descending: false)
-        .get();
+    String userUid,
+    String startId,
+    String endId,
+  ) async {
+    final snapshot =
+        await _budgetsCollection(userUid)
+            .where('ID', isGreaterThanOrEqualTo: startId)
+            .where('ID', isLessThanOrEqualTo: endId)
+            .orderBy('ID', descending: false)
+            .get();
     return snapshot.docs
         .map((d) => Map<String, dynamic>.from(d.data() as Map))
         .toList();

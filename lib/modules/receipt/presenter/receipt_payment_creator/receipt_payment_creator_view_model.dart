@@ -1,3 +1,4 @@
+import 'package:oflite/modules/receipt/domain/entity/payment_method.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
@@ -90,7 +91,7 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
     if (isEditing) {
       nameButton = PaymentStrings.updateButton;
       titlePage = PaymentStrings.editPaymentTitle;
-      typeText.text = item.method.toString();
+      typeText.text = PaymentMethod.labelOf(item.method);
       controller.text = _moneyConvert.convertFromDouble(item.price ?? 0);
       final desc = item.description;
       descricaoText.text = (desc == null || desc == 'null') ? '' : desc;
@@ -129,7 +130,8 @@ class ReceiptPaymentCreatorViewModel extends ChangeNotifier {
 
       final currentItem =
           PaymentCustomer()
-            ..method = typeText.text
+            ..method =
+                PaymentMethod.fromValue(typeText.text)?.value ?? typeText.text
             ..description = descricaoText.text.trim()
             ..price = cleanAmount;
 

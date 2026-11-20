@@ -254,9 +254,12 @@ class BudgetRepositoryImpl extends BudgetRepository {
 
       // Origem só é lida quando algo dela é copiado. O VALORTOTAL é derivado
       // dos itens: só acompanha a cópia quando os itens também são copiados.
-      final CustomerInfo? source = (copyClientData || copyItems)
-          ? CustomerInfo.fromMap(await _remote.getBudgetById(userUid, sourceId))
-          : null;
+      final CustomerInfo? source =
+          (copyClientData || copyItems)
+              ? CustomerInfo.fromMap(
+                await _remote.getBudgetById(userUid, sourceId),
+              )
+              : null;
       final double? totalValue = copyItems ? source?.totalValue : 0;
 
       final CustomerInfo newBudget;

@@ -3,14 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 class BudgetListDuplicateBottomModalWidget extends StatefulWidget {
-  const BudgetListDuplicateBottomModalWidget({super.key, required this.onConfirm});
+  const BudgetListDuplicateBottomModalWidget({
+    super.key,
+    required this.onConfirm,
+  });
 
   final Future<void> Function(
     bool clientData,
     bool quoteItems,
     bool comments,
     bool receipts,
-  ) onConfirm;
+  )
+  onConfirm;
 
   @override
   State<BudgetListDuplicateBottomModalWidget> createState() =>
@@ -63,12 +67,14 @@ class _BudgetListDuplicateBottomModalWidgetState
             _CheckTile(
               title: 'Duplicar dados do cliente',
               value: duplicateClientData,
-              onChanged: (v) => setState(() => duplicateClientData = v ?? false),
+              onChanged:
+                  (v) => setState(() => duplicateClientData = v ?? false),
             ),
             _CheckTile(
               title: 'Duplicar itens do orçamento',
               value: duplicateQuoteItems,
-              onChanged: (v) => setState(() => duplicateQuoteItems = v ?? false),
+              onChanged:
+                  (v) => setState(() => duplicateQuoteItems = v ?? false),
             ),
             _CheckTile(
               title: 'Duplicar comentários',

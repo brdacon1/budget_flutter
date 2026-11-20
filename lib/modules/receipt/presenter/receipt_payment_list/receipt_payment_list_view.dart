@@ -107,12 +107,13 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: transparentColor,
-      builder: (_) => ReceiptPaymentListActionsBottomModalWidget(
-        item: _viewModel.foundPayment[index],
-        moneyConvert: _viewModel.moneyConvert,
-        onDelete: () => _confirmDelete(index),
-        onEdit: () => _edit(index),
-      ),
+      builder:
+          (_) => ReceiptPaymentListActionsBottomModalWidget(
+            item: _viewModel.foundPayment[index],
+            moneyConvert: _viewModel.moneyConvert,
+            onDelete: () => _confirmDelete(index),
+            onEdit: () => _edit(index),
+          ),
     );
   }
 
@@ -151,17 +152,19 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
       color: refreshIndicatorColor,
       backgroundColor: bgColor,
       onRefresh: _viewModel.refresh,
-      child: items.isEmpty
-          ? _buildEmpty()
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
-              itemCount: items.length,
-              itemBuilder: (context, index) => PaymentCard(
-                item: items[index],
-                moneyConvert: _viewModel.moneyConvert,
-                onTap: () => _openActions(index),
+      child:
+          items.isEmpty
+              ? _buildEmpty()
+              : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+                itemCount: items.length,
+                itemBuilder:
+                    (context, index) => PaymentCard(
+                      item: items[index],
+                      moneyConvert: _viewModel.moneyConvert,
+                      onTap: () => _openActions(index),
+                    ),
               ),
-            ),
     );
   }
 
@@ -194,9 +197,10 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
             children: <Widget>[
               AppHeaderSecondTitle(
                 titlePage: PaymentStrings.paymentsTitle,
-                secondTitle: count == 0
-                    ? PaymentStrings.paymentsSubtitleEmpty
-                    : PaymentStrings.paymentsCount(count),
+                secondTitle:
+                    count == 0
+                        ? PaymentStrings.paymentsSubtitleEmpty
+                        : PaymentStrings.paymentsCount(count),
                 onBack: () => Navigator.pop(context, true),
               ),
               Expanded(child: _buildList()),

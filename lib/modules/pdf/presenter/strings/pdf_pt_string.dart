@@ -29,6 +29,9 @@ class PdfStrings {
   static String get menuComments =>
       _isPt ? 'Inserir comentários' : 'Insert comments';
 
+  static String get menuMetrics =>
+      _isPt ? 'Métricas do orçamento' : 'Budget metrics';
+
   static String get menuReceipt =>
       _isPt ? 'Recibo de pagamentos' : 'Payment receipt';
 

@@ -25,7 +25,8 @@ class ReceiptListViewModel extends ChangeNotifier {
   ReceiptListViewModel({required this.item});
 
   /// Soma dos recibos gerados no orçamento, formatada em moeda.
-  String get totalText => moneyConvert.convertFromDouble(_sumTotal(foundPayment));
+  String get totalText =>
+      moneyConvert.convertFromDouble(_sumTotal(foundPayment));
 
   Future<void> inicialData({bool forceRefresh = false}) async {
     _receiptRepository.budgetId = item.id;

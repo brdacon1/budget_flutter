@@ -33,14 +33,18 @@ abstract class BudgetRepository extends ChangeNotifier {
 
   /// Carrega orçamentos paginados (7 por vez). Acumula no cache.
   /// [refresh] true limpa o cache e reinicia a paginação.
-  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated({bool refresh = false});
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPaginated({
+    bool refresh = false,
+  });
 
   /// Retorna a quantidade total de orçamentos no Firestore.
   Future<Result<int>> countBudgets();
 
   /// Busca orçamentos do mês corrente (range de IDs).
   Future<Result<List<CustomerInfo>>> fetchBudgetsByMonthRange(
-      String startId, String endId);
+    String startId,
+    String endId,
+  );
 
   /// Busca no banco todos os orçamentos cujo STATUS é um dos [values].
   Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(List<String> values);
@@ -74,19 +78,27 @@ abstract class BudgetRepository extends ChangeNotifier {
 
   /// Exclui itens de um orçamento.
   Future<Result<void>> deleteBudgetItems(
-      String budgetId, List<ItemsBudget> items);
+    String budgetId,
+    List<ItemsBudget> items,
+  );
 
   /// Adiciona comentários (observações) a um orçamento.
   Future<Result<void>> addComments(
-      String budgetId, List<ObservationPdf> comments);
+    String budgetId,
+    List<ObservationPdf> comments,
+  );
 
   /// Busca comentários de um orçamento e os cacheia.
   Future<Result<List<ObservationBudget>>> fetchComments(
-      String budgetId, {bool forceRefresh = false});
+    String budgetId, {
+    bool forceRefresh = false,
+  });
 
   /// Busca itens de um orçamento e os cacheia.
   Future<Result<List<ItemsBudget>>> fetchBudgetItems(
-      String budgetId, {bool forceRefresh = false});
+    String budgetId, {
+    bool forceRefresh = false,
+  });
 
   /// Seleciona um orçamento como ativo (via ValueNotifier - substitui global_uid_budget).
   ValueNotifier<CustomerInfo?> get selectBudget;

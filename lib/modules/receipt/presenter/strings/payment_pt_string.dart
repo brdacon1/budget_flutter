@@ -28,6 +28,10 @@ class PaymentStrings {
           ? ['Crédito', 'Débito', 'Dinheiro', 'PIX']
           : ['Credit', 'Debit', 'Cash', 'PIX'];
 
+  static String get methodCash => _isPt ? 'Dinheiro' : 'Cash';
+  static String get methodCredit => _isPt ? 'Crédito' : 'Credit';
+  static String get methodDebit => _isPt ? 'Débito' : 'Debit';
+
   static String get selectPaymentTypeTitle =>
       _isPt ? 'Tipo do pagamento' : 'Payment type';
 

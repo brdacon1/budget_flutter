@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_metrics/budget_metrics_view.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
@@ -17,11 +18,27 @@ import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Ação de cada item do menu Mais (a posição na lista não importa).
+enum PdfMenuOption {
+  metrics,
+  comments,
+  receipt,
+  shareLink,
+  pdfExecutive,
+  pdfProfessional,
+  proofs,
+}
+
 class MenuItem {
+  final PdfMenuOption option;
   final IconData icon;
   final String title;
 
-  const MenuItem({required this.icon, required this.title});
+  const MenuItem({
+    required this.option,
+    required this.icon,
+    required this.title,
+  });
 }
 
 class PdfMenuViewModel extends ChangeNotifier {
@@ -42,20 +59,40 @@ class PdfMenuViewModel extends ChangeNotifier {
 
   Future<void> inicialData() async {
     menuItems = <MenuItem>[
-      MenuItem(icon: Icons.comment_outlined, title: PdfStrings.menuComments),
-      MenuItem(icon: Icons.payments_outlined, title: PdfStrings.menuReceipt),
-      MenuItem(icon: Icons.share_outlined, title: PdfStrings.menuShareLink),
       MenuItem(
+        option: PdfMenuOption.metrics,
+        icon: Icons.insights_outlined,
+        title: PdfStrings.menuMetrics,
+      ),
+      MenuItem(
+        option: PdfMenuOption.comments,
+        icon: Icons.comment_outlined,
+        title: PdfStrings.menuComments,
+      ),
+      MenuItem(
+        option: PdfMenuOption.receipt,
+        icon: Icons.payments_outlined,
+        title: PdfStrings.menuReceipt,
+      ),
+      MenuItem(
+        option: PdfMenuOption.shareLink,
+        icon: Icons.share_outlined,
+        title: PdfStrings.menuShareLink,
+      ),
+      MenuItem(
+        option: PdfMenuOption.pdfExecutive,
         icon: Icons.business_center_outlined,
         title: PdfStrings.menuPdfExecutive,
       ),
       MenuItem(
+        option: PdfMenuOption.pdfProfessional,
         icon: Icons.workspace_premium_outlined,
         title: PdfStrings.menuPdfProfessional,
       ),
       // Comprovantes: só assinantes (mesmo gate do chat com IA).
       if (getIt<CheckAiAccessUsecase>()())
         MenuItem(
+          option: PdfMenuOption.proofs,
           icon: Icons.attach_file_rounded,
           title: PaymentProofStrings.menuLabel,
         ),
@@ -66,8 +103,16 @@ class PdfMenuViewModel extends ChangeNotifier {
   Future<void> refresh() => inicialData();
 
   Future<void> openOption(BuildContext context, int index) async {
-    switch (index) {
-      case 0:
+    switch (menuItems[index].option) {
+      case PdfMenuOption.metrics:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BudgetMetricsView(item: item),
+          ),
+        );
+        break;
+      case PdfMenuOption.comments:
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -75,13 +120,13 @@ class PdfMenuViewModel extends ChangeNotifier {
           ),
         );
         break;
-      case 1:
+      case PdfMenuOption.receipt:
         await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ReceiptListView(item: item)),
         );
         break;
-      case 5:
+      case PdfMenuOption.proofs:
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -89,7 +134,7 @@ class PdfMenuViewModel extends ChangeNotifier {
           ),
         );
         break;
-      case 3:
+      case PdfMenuOption.pdfExecutive:
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -99,7 +144,7 @@ class PdfMenuViewModel extends ChangeNotifier {
           ),
         );
         break;
-      case 4:
+      case PdfMenuOption.pdfProfessional:
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -109,7 +154,7 @@ class PdfMenuViewModel extends ChangeNotifier {
           ),
         );
         break;
-      case 2:
+      case PdfMenuOption.shareLink:
         if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
             false)) {
           await _displayAlert
