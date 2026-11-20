@@ -4,7 +4,7 @@ abstract class ChatMediaRepository {
   Future<bool> requestGalleryPermission();
 
   /// Câmera + fotos, pedidas ao abrir o chat (modo IA).
-  Future<bool> requestMediaPermissions();
+  Future<({bool camera, bool gallery})> requestMediaPermissions();
 
   /// Recorta a imagem; `null` se o usuário cancelar.
   Future<String?> cropImage(String path, {required String title});

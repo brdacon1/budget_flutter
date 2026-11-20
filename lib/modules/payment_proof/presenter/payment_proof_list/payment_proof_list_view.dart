@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/payment_proof/data/model/payment_proof.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/components/payment_proof_detail_sheet.dart';
@@ -115,12 +117,19 @@ class _PaymentProofListViewState extends State<PaymentProofListView> {
     );
     if (ok != true) return;
     await _vm.deleteCommand.execute(p);
-    if (_vm.deleteCommand.error && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(PaymentProofStrings.deleteError),
-          behavior: SnackBarBehavior.floating,
-        ),
+    if (!mounted) return;
+    final alert = getIt<DisplayAlertRepository>();
+    if (_vm.deleteCommand.error) {
+      await alert.notificationError(
+        context,
+        PaymentProofStrings.errorTitle,
+        PaymentProofStrings.deleteError,
+      );
+    } else if (_vm.deleteCommand.completed) {
+      await alert.notificationNotCloseScreen(
+        context,
+        PaymentProofStrings.doneTitle,
+        PaymentProofStrings.deleteSuccess,
       );
     }
   }

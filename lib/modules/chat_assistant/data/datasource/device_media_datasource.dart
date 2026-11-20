@@ -24,7 +24,7 @@ class DeviceMediaDatasource {
 
   /// Câmera + fotos. No Android < 13 a galeria vem de `storage`; no 13+
   /// de `photos` (READ_MEDIA_IMAGES). Acesso parcial conta como liberado.
-  Future<bool> requestMediaPermissions() async {
+  Future<({bool camera, bool gallery})> requestMediaPermissions() async {
     try {
       final gallery = [
         Permission.photos,
@@ -33,10 +33,12 @@ class DeviceMediaDatasource {
       final result = await [Permission.camera, ...gallery].request();
       bool ok(PermissionStatus? s) =>
           s != null && (s.isGranted || s.isLimited);
-      return ok(result[Permission.camera]) &&
-          gallery.any((p) => ok(result[p]));
+      return (
+        camera: ok(result[Permission.camera]),
+        gallery: gallery.any((p) => ok(result[p])),
+      );
     } on MissingPluginException {
-      return false;
+      return (camera: false, gallery: false);
     }
   }
 

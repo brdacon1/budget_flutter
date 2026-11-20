@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/components/chat_caption_send_bar.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/components/chat_crop_thumb_button.dart';
@@ -59,14 +60,11 @@ class _ChatMediaPickerViewState extends State<ChatMediaPickerView> {
   void _onChanged() {
     if (_vm.limitHit && mounted) {
       _vm.consumeLimitHit();
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(PaymentProofStrings.maxPhotos),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      getIt<DisplayAlertRepository>().notificationWarning(
+        context,
+        PaymentProofStrings.warningTitle,
+        PaymentProofStrings.maxPhotos,
+      );
     }
   }
 

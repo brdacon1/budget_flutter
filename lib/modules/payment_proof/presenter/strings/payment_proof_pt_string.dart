@@ -82,6 +82,11 @@ class PaymentProofStrings {
           ? 'Termine a etapa atual ou volte ao menu para anexar comprovantes.'
           : 'Finish the current step or go back to the menu to attach receipts.';
 
+  static String get errorTitle => _isPt ? 'Ops!' : 'Oops!';
+  static String get warningTitle => _isPt ? 'Atenção' : 'Heads up';
+  static String get doneTitle => _isPt ? 'Pronto' : 'Done';
+  static String get deleteSuccess =>
+      _isPt ? 'Comprovante excluído.' : 'Receipt deleted.';
   static String get cropTitle => _isPt ? 'Recortar imagem' : 'Crop image';
   static String get permissionDenied =>
       _isPt

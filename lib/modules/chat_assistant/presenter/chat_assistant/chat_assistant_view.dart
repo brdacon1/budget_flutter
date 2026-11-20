@@ -79,6 +79,9 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   void _showProofIssue(ProofAttachmentValidation v) {
+    final alert = getIt<DisplayAlertRepository>();
+    // Arquivos cortados (só os 2 primeiros / só o PDF) = aviso; recusa = erro.
+    final isWarning = v.issue == null || v.issue == ProofAttachmentIssue.mixed;
     final msg = switch (v.issue) {
       ProofAttachmentIssue.tooBig => PaymentProofStrings.tooBig,
       ProofAttachmentIssue.invalidType => PaymentProofStrings.invalidType,
@@ -87,9 +90,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       null => v.trimmed ? PaymentProofStrings.onlyFirstFiles : null,
     };
     if (msg == null || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
-    );
+    if (isWarning) {
+      alert.notificationWarning(context, PaymentProofStrings.warningTitle, msg);
+    } else {
+      alert.notificationError(context, PaymentProofStrings.errorTitle, msg);
+    }
   }
 
   Future<void> _previewAndSend(
@@ -117,7 +122,6 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   /// "+": painel de anexos em modal, por cima da tab bar.
   Future<void> _openAttachPanel() async {
     FocusScope.of(context).unfocus();
-    if (!await _vm.ensureMediaPermissions() || !mounted) return;
     final choice = await ChatAttachmentPanel.show(context);
     if (!mounted) return;
     switch (choice) {
@@ -133,6 +137,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _attachPhotos() async {
+    if (!await _vm.canUseMedia(camera: false) || !mounted) return;
     final result = await ChatMediaPickerView.show(context);
     if (result == null || !mounted) return;
     _showProofIssue(result.validation);
@@ -141,6 +146,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _attachCamera() async {
+    if (!await _vm.canUseMedia(camera: true) || !mounted) return;
     await _previewAndSend(await _vm.captureProofPhoto());
   }
 
@@ -186,12 +192,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       _vm.consumeMediaPermissionDenied();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(PaymentProofStrings.permissionDenied),
-            backgroundColor: statusRejectedColor,
-            behavior: SnackBarBehavior.floating,
-          ),
+        getIt<DisplayAlertRepository>().notificationError(
+          context,
+          PaymentProofStrings.errorTitle,
+          PaymentProofStrings.permissionDenied,
         );
       });
     }

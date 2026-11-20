@@ -858,7 +858,7 @@ comprovantes.", `proofMaxPhotos` "Você pode enviar até 2 fotos.", `proofTooBig
   `CreatePaymentProofUseCase` (sem nome → erro; sem valor; com valor; 2 fotos =
   2 docs; falha no Firestore apaga o arquivo do Storage); parser de valor
   (legenda "R$ 500" → valor, "pago ontem" → comentário).
-- **VM:** sequência de passos `proof*` com repos fake (Sim/Não/Voltar ao menu,
+- **VM:** sequência de passos `proof*` com repos fake (nome/valor vindos da legenda, valor inválido, Voltar ao menu,
   cancelar o modal, "Voltar ao menu" em cada passo descarta o rascunho sem upload, limite atingido, erro e "Tentar de novo"); nenhuma chamada
   ao `ChatAiRepository` durante o fluxo (R8).
 - **Manual:** compartilhar 1 e 2 fotos e 1 PDF a partir da Galeria/Arquivos no

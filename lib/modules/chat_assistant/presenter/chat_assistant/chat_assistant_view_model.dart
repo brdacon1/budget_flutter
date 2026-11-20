@@ -686,7 +686,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   bool get isSavingProof => _step == ChatFlowStep.proofSaving;
 
   /// Câmera/fotos liberadas? `null` = ainda não perguntado.
-  bool? _mediaPermissionGranted;
+  ({bool camera, bool gallery})? _mediaPermissions;
 
   /// View mostra o snack "Não consigo seguir sem liberação da permissão."
   bool _mediaPermissionDenied = false;
@@ -695,16 +695,30 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   void consumeMediaPermissionDenied() => _mediaPermissionDenied = false;
 
-  /// Pede câmera + fotos ao abrir o chat (só modo IA). Recusado → snack.
-  Future<bool> ensureMediaPermissions() async {
-    if (!_aiMode) return false;
-    if (_mediaPermissionGranted == true) return true;
-    _mediaPermissionGranted = await _pickProof.requestPermissions();
-    if (_mediaPermissionGranted != true) {
+  /// Pede câmera + fotos ao abrir o chat (só modo IA). Alguma recusada →
+  /// snack. Não bloqueia o "+": cada opção confere a sua com [canUseMedia].
+  Future<void> ensureMediaPermissions() async {
+    if (!_aiMode) return;
+    final p = await _pickProof.requestPermissions();
+    _mediaPermissions = p;
+    if (!p.camera || !p.gallery) {
       _mediaPermissionDenied = true;
       notifyListeners();
     }
-    return _mediaPermissionGranted!;
+  }
+
+  /// Confere (e pede de novo, se preciso) a permissão da opção escolhida.
+  /// Recusada → snack e `false`.
+  Future<bool> canUseMedia({required bool camera}) async {
+    bool ok(({bool camera, bool gallery}) p) => camera ? p.camera : p.gallery;
+    final cached = _mediaPermissions;
+    if (cached != null && ok(cached)) return true;
+    final p = await _pickProof.requestPermissions();
+    _mediaPermissions = p;
+    if (ok(p)) return true;
+    _mediaPermissionDenied = true;
+    notifyListeners();
+    return false;
   }
 
   Future<ProofAttachment> cropProofImage(ProofAttachment f) =>
