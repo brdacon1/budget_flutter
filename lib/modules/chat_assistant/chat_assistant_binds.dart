@@ -52,8 +52,50 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_us
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
 
+import 'package:oflite/modules/chat_assistant/data/datasource/device_media_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/shared_media_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/repository/chat_media_repository_impl.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_media_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view_model.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+
 /// Registra as dependências do módulo Chat Budget (Assistente).
 void registerChatBudgetDependencies(GetIt sl) {
+  sl.registerLazySingleton(() => DeviceMediaDatasource());
+  sl.registerLazySingleton(() => SharedMediaDatasource());
+  sl.registerLazySingleton<ChatMediaRepository>(
+    () => ChatMediaRepositoryImpl(
+      sl<DeviceMediaDatasource>(),
+      sl<SharedMediaDatasource>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => PickProofAttachmentsUsecase(
+      sl<ChatMediaRepository>(),
+      sl<ValidateProofAttachmentsUsecase>(),
+    ),
+  );
+  sl.registerLazySingleton(() => LoadGalleryUsecase(sl<ChatMediaRepository>()));
+  sl.registerFactory(
+    () => ChatMediaPickerViewModel(
+      sl<LoadGalleryUsecase>(),
+      sl<PickProofAttachmentsUsecase>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => ReceiveSharedProofUsecase(
+      sl<ChatMediaRepository>(),
+      sl<ValidateProofAttachmentsUsecase>(),
+      sl<CheckAiAccessUsecase>(),
+    ),
+  );
+
   // ------------------------------------------------------------------
   // DataSources
   // ------------------------------------------------------------------
@@ -276,6 +318,11 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ShowFindBudgetPromptUsecase>(),
       sl<BuildBudgetFinalActionsUsecase>(),
       sl<GenerateBudgetPdfFromChatUsecase>(),
+      sl<CheckProofLimitUsecase>(),
+      sl<CreatePaymentProofUsecase>(),
+      sl<ParseMoneyInputUsecase>(),
+      sl<PickProofAttachmentsUsecase>(),
+      sl<ReceiveSharedProofUsecase>(),
     ),
   );
 }

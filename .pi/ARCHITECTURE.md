@@ -2090,6 +2090,12 @@ O chat do assistente (`modules/chat_assistant`) tem dois modos:
 | **IA** | Assinante (`autoRenewing`) ou `FORCE_PREMIUM` em development | Texto livre no menu principal vai para o Gemini, que **opera o app chamando tools** (function calling) que executam os **mesmos UseCases das telas**. |
 
 > Plano completo e histórico das decisões: `.pi/CHAT_AI_AGENT_PLAN.md`.
+>
+> **Comprovantes de pagamento pelo chat (Fase 11, em implementação):** botão "+" com
+> painel de anexos, recebimento por compartilhamento (Android/iOS), vínculo a
+> orçamento e lista `COMPROVANTES` no novo módulo `payment_proof`. Fluxo, regras
+> (2 imagens por envio, 15 por orçamento, nome obrigatório) e arquivos em
+> `.pi/CHAT_AI_AGENT_PLAN.md` §15.
 
 ### 20.1 Princípios (não negociáveis)
 
@@ -2199,6 +2205,22 @@ modules/receipt/
 └── data/repository/receipt_ledger_repository_impl.dart   # junta recibos+pagamentos; cache 1 min
 
 modules/core/app_check/                          # Firebase App Check (datasource + repo + binds)
+
+modules/payment_proof/                           # Fase 11 — comprovantes (CHAT_AI_AGENT_PLAN §15)
+├── data/datasource/payment_proof_remote_datasource.dart   # Firestore ORCAMENTOS/{id}/COMPROVANTES
+├── data/datasource/payment_proof_storage_datasource.dart  # Storage comprovantes/{uid}/{budgetId}/
+├── data/datasource/proof_file_local_datasource.dart       # compressão (jpg 80, 2048 px) + tamanho
+├── domain/usecase/validate_proof_attachments_usecase.dart # 2 imagens OU 1 PDF, 10 MB
+├── domain/usecase/check_proof_limit_usecase.dart          # 15 por orçamento
+├── domain/usecase/create_payment_proof_usecase.dart       # nome obrigatório, CRIADOEM, rollback
+├── domain/usecase/parse_money_input_usecase.dart          # "R$ 500", "1.234,56"
+└── presenter/payment_proof_list · payment_proof_viewer    # lista (menu do orçamento) + imagem/PDF
+
+modules/chat_assistant/ (comprovantes)
+├── data/datasource/device_media_datasource.dart  # ÚNICO com photo_manager/image_picker/file_selector
+├── data/datasource/shared_media_datasource.dart  # ÚNICO com receive_sharing_intent
+├── domain/usecase/pick_proof_attachments_usecase.dart · receive_shared_proof_usecase.dart
+└── presenter/chat_media_picker (galeria estilo WhatsApp) · chat_proof_preview · components/chat_attachment_panel.dart
 ```
 
 ### 20.5 Regras de domínio relevantes

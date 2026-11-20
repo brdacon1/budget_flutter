@@ -10,6 +10,9 @@ import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
+import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
+import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/widgets/modals/ads_option_bottom_modal_widget.dart';
 import 'package:share_plus/share_plus.dart';
@@ -50,6 +53,12 @@ class PdfMenuViewModel extends ChangeNotifier {
         icon: Icons.workspace_premium_outlined,
         title: PdfStrings.menuPdfProfessional,
       ),
+      // Comprovantes: só assinantes (mesmo gate do chat com IA).
+      if (getIt<CheckAiAccessUsecase>()())
+        MenuItem(
+          icon: Icons.attach_file_rounded,
+          title: PaymentProofStrings.menuLabel,
+        ),
     ];
     notifyListeners();
   }
@@ -70,6 +79,14 @@ class PdfMenuViewModel extends ChangeNotifier {
         await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ReceiptListView(item: item)),
+        );
+        break;
+      case 5:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentProofListView(item: item),
+          ),
         );
         break;
       case 3:

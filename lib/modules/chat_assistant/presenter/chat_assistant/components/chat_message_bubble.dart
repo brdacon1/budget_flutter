@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_budget_list_card.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_month_summary_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_receipts_report_card.dart';
@@ -20,6 +22,9 @@ class ChatMessageBubble extends StatelessWidget {
   onEditMessage;
   final void Function(String value, String label)? onOptionSelect;
 
+  /// Toque num anexo enviado (imagem/PDF).
+  final void Function(ProofAttachment file)? onOpenAttachment;
+
   /// `false` deixa todos os botões da mensagem desativados (opacos).
   final bool buttonsEnabled;
 
@@ -29,6 +34,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onAction,
     this.onEditMessage,
     this.onOptionSelect,
+    this.onOpenAttachment,
     this.buttonsEnabled = false,
   });
 
@@ -141,6 +147,13 @@ class ChatMessageBubble extends StatelessWidget {
                       }),
                       const SizedBox(height: 10),
                     ],
+                    if (message.type == ChatMessageType.attachment)
+                      ChatAttachmentBubble(
+                        payload: message.payload ?? const {},
+                        onOpen: onOpenAttachment,
+                      ),
+                    if (message.type != ChatMessageType.attachment ||
+                        message.content.isNotEmpty)
                     Text.rich(
                       _buildMessageText(message.content),
                       style: const TextStyle(color: Colors.white, fontSize: 15),
@@ -327,6 +340,7 @@ class ChatMessageBubble extends StatelessWidget {
           onTap: onAction,
         );
       case ChatMessageType.text:
+      case ChatMessageType.attachment:
         return const SizedBox.shrink();
     }
   }

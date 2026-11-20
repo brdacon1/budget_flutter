@@ -6,6 +6,7 @@ import 'package:oflite/modules/core/notification/domain/repository/notification_
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 
 import 'main_tab_view_model.dart';
 
@@ -25,7 +26,10 @@ class _MainTabView extends State<MainTabView> {
     // Após o login (auto-login ou manual), a tela principal está pronta e o
     // dono está autenticado: consome um possível orçamento pendente de abrir
     // (caso de cold-start pelo toque no banner da notificação).
+    _viewModel.addListener(_onViewModelChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Comprovantes recebidos pela folha de compartilhamento (§15.4).
+      _viewModel.listenSharedFiles();
       getIt<NotificationRepository>().tryOpenPendingBudget();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
@@ -40,16 +44,26 @@ class _MainTabView extends State<MainTabView> {
     });
   }
 
+  void _onViewModelChanged() {
+    if (!_viewModel.needsSubscription || !mounted) return;
+    _viewModel.consumeNeedsSubscription();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SubscriptionView()),
+    );
+  }
+
   @override
   void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
     _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = [
-      const ChatAssistantView(),
+    final List<Widget> tabs = [
+      const SizedBox.shrink(),
       const BudgetListView(),
       const DashboardView(),
     ];
@@ -57,6 +71,10 @@ class _MainTabView extends State<MainTabView> {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
+        final children = [
+          ChatAssistantView(key: ValueKey(_viewModel.chatGeneration)),
+          ...tabs.skip(1),
+        ];
         return Scaffold(
           body: children[_viewModel.currentIndex],
           bottomNavigationBar: Theme(

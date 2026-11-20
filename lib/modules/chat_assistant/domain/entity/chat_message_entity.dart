@@ -20,6 +20,10 @@ enum ChatMessageType {
   /// Card do relatório de recibos por período (payload: ver
   /// `ChatReceiptsReportCard`).
   receiptsReportCard,
+
+  /// Anexo enviado pelo usuário (payload: `files[{path,name,type,size}]`,
+  /// `caption`).
+  attachment,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.
