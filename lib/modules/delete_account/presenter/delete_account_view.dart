@@ -21,6 +21,7 @@ class DeleteAccountView extends StatefulWidget {
 class _DeleteAccountViewState extends State<DeleteAccountView> {
   late final DeleteAccountViewModel _viewModel;
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -30,12 +31,16 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
     _emailController.addListener(() {
       _viewModel.email = _emailController.text;
     });
+    _passwordController.addListener(() {
+      _viewModel.password = _passwordController.text;
+    });
   }
 
   @override
   void dispose() {
     _viewModel.deleteCommand.removeListener(_onCommandChanged);
     _emailController.dispose();
+    _passwordController.dispose();
     _viewModel.dispose();
     super.dispose();
   }
@@ -184,7 +189,25 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passwordController,
+                    enabled: !isRunning,
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: DeleteAccountPtString.passwordLabel,
+                      labelStyle: const TextStyle(color: Colors.white54),
+                      errorText: _viewModel.passwordError,
+                      errorStyle: const TextStyle(color: redColor),
+                      filled: true,
+                      fillColor: secondaryColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),                  const SizedBox(height: 20),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -227,8 +250,7 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                     child: ElevatedButton(
                       onPressed: isRunning
                           ? null
-                          : () => _viewModel.deleteCommand
-                              .execute(_emailController.text.trim()),
+                          : () => _viewModel.deleteCommand.execute(false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: redColor,
                         disabledBackgroundColor: redColor.withValues(alpha: 0.4),
@@ -255,9 +277,31 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
                             ),
                     ),
                   ),
-                ],
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: isRunning
+                          ? null
+                          : () => _viewModel.deleteCommand.execute(true),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white38),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        DeleteAccountPtString.deleteWithGoogleButton,
+                        style: const TextStyle(color: Colors.white, fontSize: 15),
+                      ),
+                    ),
+                  ),                ],
 
-                if (_viewModel.deleteCommand.error)
+                if (_viewModel.deleteCommand.error &&
+                    _viewModel.passwordError == null &&
+                    _viewModel.emailError == null &&
+                    _viewModel.confirmError == null)
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Text(

@@ -1,6 +1,7 @@
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/strings/chat_budget_picker_pt_string.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Cabeçalho do modal: alça, título, busca por cliente e filtro de status.
@@ -37,7 +38,7 @@ class ChatBudgetPickerHeader extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          ChatBudgetStrings.budgetPickerTitle,
+          ChatBudgetPickerStrings.title,
           style: const TextStyle(
             color: whiteColor,
             fontSize: 16,
@@ -52,7 +53,7 @@ class ChatBudgetPickerHeader extends StatelessWidget {
           style: const TextStyle(color: whiteColor),
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            hintText: ChatBudgetStrings.budgetPickerSearchHint,
+            hintText: ChatBudgetPickerStrings.searchHint,
             hintStyle: const TextStyle(color: mutedTextColor),
             prefixIcon: const Icon(Icons.search, color: mutedTextColor),
             filled: true,
@@ -77,9 +78,9 @@ class ChatBudgetPickerHeader extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _chip(ChatBudgetStrings.budgetPickerAllStatus, null),
+              _chip(ChatBudgetPickerStrings.allStatus, null),
               for (final s in BudgetStatus.values)
-                _chip(ChatBudgetStrings.budgetStatusLabel(s.value), s),
+                _chip(ChatAssistantStrings.budgetStatusLabel(s.value), s),
             ],
           ),
         ),

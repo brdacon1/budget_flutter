@@ -4,34 +4,27 @@ import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 
 /// Estado de alto nível do fluxo Web de orçamento.
 ///
-/// Responsável por interpretar a URL pública
-/// `https://dominio/orcamento/{numero-endereco}?token={firebase-token}` e
-/// decidir qual tela mostrar:
+/// Interpreta a URL pública `https://dominio/o/{code}` e decide a tela:
 ///
-/// - [BudgetWebAppPhase.blocked]  → link inválido/token expirado/sem endereço.
-/// - [BudgetWebAppPhase.auth]     → token válido; aguarda validação do
-///   telefone (segunda camada de segurança).
-/// - [BudgetWebAppPhase.access]  → token + telefone válidos; orçamento liberado.
+/// - [BudgetWebAppPhase.blocked] → URL sem código válido.
+/// - [BudgetWebAppPhase.auth]    → pede o telefone; a validação do código,
+///   validade e telefone acontece no **servidor** (`openShareLink`).
+/// - [BudgetWebAppPhase.access]  → servidor liberou; dados já carregados.
 ///
-/// **Regra de segurança (spec):** o "número do endereço" localiza o
-/// orçamento; o token Firebase valida o acesso ao link; o telefone é a
-/// segunda validação. Nada é exibido antes das três checagens passarem.
+/// Nada do orçamento chega ao navegador antes do telefone conferir.
 class BudgetWebAppViewModel extends ChangeNotifier {
   BudgetWebAppPhase _phase = BudgetWebAppPhase.loading;
   BudgetWebAppPhase get phase => _phase;
 
-  /// "Número do endereço" extraído da URL — identificador do orçamento no
-  /// Firestore (document id = `ID`). Nunca é o telefone.
-  String? _enderecoNumero;
-  String? get enderecoNumero => _enderecoNumero;
+  String? _code;
+  String? get code => _code;
 
-  /// Token provisório do Firebase extraído da URL.
-  String? _token;
+  /// Telefone já validado pelo servidor — reenviado ao aprovar/reprovar.
+  String? _phone;
+  String? get phone => _phone;
 
-  /// UID do dono do orçamento, decodificado do token JWT. Necessário para
-  /// montar o path `EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{id}`.
-  String? _ownerUid;
-  String? get ownerUid => _ownerUid;
+  SharedBudget? _shared;
+  SharedBudget? get shared => _shared;
 
   String? _errorTitle;
   String? get errorTitle => _errorTitle;
@@ -39,85 +32,32 @@ class BudgetWebAppViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  /// Interpreta a [url] (path + query) e valida o token provisório.
-  ///
-  /// Em `MaterialApp.router` no Flutter Web a URL chega via
-  /// `routeInformation.uri` — passamos para cá.
-  Future<void> parseAndValidate(Uri url) async {
-    _phase = BudgetWebAppPhase.loading;
+  void parse(Uri url) {
+    final code = WebBudgetService.codeFromUri(url);
+    if (code == null) {
+      fail(BudgetWebStrings.blockedMessage);
+      return;
+    }
+    _code = code;
+    _phase = BudgetWebAppPhase.auth;
     notifyListeners();
-
-    // Path esperado: /orcamento/{numero-endereco}
-    final segments = url.pathSegments;
-    final orcamentoIndex = segments.indexOf('orcamento');
-    final numero = orcamentoIndex >= 0 && orcamentoIndex + 1 < segments.length
-        ? segments[orcamentoIndex + 1]
-        : null;
-
-    final token = url.queryParameters['token'];
-
-    if (numero == null || numero.isEmpty) {
-      _fail(BudgetWebStrings.blockedTitle, BudgetWebStrings.blockedMessage);
-      return;
-    }
-    if (token == null || token.isEmpty) {
-      _fail(BudgetWebStrings.blockedTitle, BudgetWebStrings.blockedMessage);
-      return;
-    }
-
-    // Valida o token provisório: decodifica o JWT e checa expiração + uid.
-    final claims = WebBudgetService.decodeIdToken(token);
-    if (claims == null) {
-      _fail(BudgetWebStrings.blockedTitle, BudgetWebStrings.blockedMessage);
-      return;
-    }
-    final ownerUid = (claims['user_id'] ?? claims['sub'])?.toString();
-    if (ownerUid == null || ownerUid.isEmpty) {
-      _fail(BudgetWebStrings.blockedTitle, BudgetWebStrings.blockedMessage);
-      return;
-    }
-
-    _enderecoNumero = numero;
-    _token = token;
-    _ownerUid = ownerUid;
-
-    // Pré-localiza o orçamento para confirmar que o token realmente abre o
-    // documento (o Firestore rejeita tokens inválidos com 401/403). Só assim
-    // sabemos que o link é válido antes de pedir o telefone.
-    try {
-      await WebBudgetService().getBudget(
-        ownerUid: ownerUid,
-        enderecoNumero: numero,
-        token: token,
-      );
-      _phase = BudgetWebAppPhase.auth;
-      notifyListeners();
-    } on WebBudgetAccessError catch (e) {
-      _fail(BudgetWebStrings.blockedTitle,
-          e.kind == WebBudgetErrorKind.notFound
-              ? BudgetWebStrings.blockedMessage
-              : e.message);
-    } catch (_) {
-      _fail(BudgetWebStrings.blockedTitle, BudgetWebStrings.blockedMessage);
-    }
   }
 
-  /// Chamado pela tela de autenticação quando o telefone é validado.
-  void grantAccess() {
+  /// Chamado pela tela de telefone quando o servidor libera o orçamento.
+  void grantAccess({required String phone, required SharedBudget shared}) {
+    _phone = phone;
+    _shared = shared;
     _phase = BudgetWebAppPhase.access;
     notifyListeners();
   }
 
-  void _fail(String title, String message) {
-    _errorTitle = title;
+  /// Bloqueia o fluxo (link inválido/expirado/revogado ou tentativas esgotadas).
+  void fail(String message) {
+    _errorTitle = BudgetWebStrings.blockedTitle;
     _errorMessage = message;
     _phase = BudgetWebAppPhase.blocked;
     notifyListeners();
   }
-
-  /// Token de acesso (exposto apenas após a validação) para as telas internas
-  /// (itens, PDF, aprovação) lerem/gravarem via REST.
-  String? get token => _token;
 }
 
 enum BudgetWebAppPhase { loading, blocked, auth, access }

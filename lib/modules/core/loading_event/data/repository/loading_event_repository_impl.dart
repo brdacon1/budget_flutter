@@ -7,6 +7,9 @@ class LoadingEventRepositoryImpl implements LoadingEventRepository {
 
   @override
   Future<void> alertLoading(BuildContext context) async {
+    // Já existe um loading aberto: abrir outro deixaria um diálogo órfão
+    // que o closeLoading nunca fecha (tela presa em "Aguarde...").
+    if (_isLoading) return;
     _isLoading = true;
     showDialog(
       context: context,

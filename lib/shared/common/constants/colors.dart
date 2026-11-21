@@ -33,3 +33,16 @@ const cartAccentColor = Color(0xFF00BFA5); // ícone do rodapé / pílula Servi�
 const productPillColor = Color(0xFF9C27B0); // pílula Produtos
 const priceTextColor = Color(0xFFB388FF); // preço nos cards da lista de preço
 const priceCardBorderColor = Color(0xFF2A2A3C);
+
+// Tela do chat (assistente)
+const chatBackgroundColor = Color(0xFF12121A);
+const chatBarColor = Color(0xFF1E1E2C); // app bar e barra de digitação
+const chatSendButtonColor = Color(0xFF00BFA5); // enviar / confirmar
+const chatHintColor = Color(0xFF9E9E9E); // Colors.grey[500]
+const chatHighlightColor = Colors.cyanAccent; // "Editando mensagem"
+const chatOnlineColor = Colors.greenAccent; // "online" na app bar
+const chatErrorColor = Colors.redAccent; // snackbar de erro
+const chatDividerColor = Colors.white12; // borda das barras
+const chatMutedIconColor = Colors.white70; // fechar edição
+const chatUserBubbleColor = Color(0xFF075E54); // balão do usuário
+const chatOptionBorderColor = Colors.white24; // borda das opções

@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/agent_message_entity
 import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -29,7 +29,7 @@ class ConfirmAgentActionUsecase {
   }) async {
     if (!confirmed) {
       _log(action, 'cancelado pelo usuário');
-      return ChatBudgetStrings.aiActionCancelled;
+      return ChatAssistantStrings.aiActionCancelled;
     }
 
     final args = action.args;
@@ -43,14 +43,14 @@ class ConfirmAgentActionUsecase {
         amount: args['amount'] as double?,
         method: args['method'] as String?,
       )) {
-        Ok() => ChatBudgetStrings.aiReceiptCreated(client),
+        Ok() => ChatAssistantStrings.aiReceiptCreated(client),
         Error() => null,
       },
       DispatchAgentToolUsecase.updateStatus => switch (await _updateStatus(
         budgetId,
         BudgetStatus.fromValue(args['status'] as String)!,
       )) {
-        Ok() => ChatBudgetStrings.aiStatusUpdated(
+        Ok() => ChatAssistantStrings.aiStatusUpdated(
           client,
           args['status'] as String,
         ),
@@ -60,7 +60,7 @@ class ConfirmAgentActionUsecase {
     };
 
     _log(action, done == null ? 'falhou' : 'concluído');
-    return done ?? ChatBudgetStrings.aiActionFailed;
+    return done ?? ChatAssistantStrings.aiActionFailed;
   }
 
   void _log(AgentPendingAction action, String outcome) {

@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class _FakeChatRepo extends ChangeNotifier implements ChatBudgetRepository {
@@ -39,11 +39,11 @@ void main() {
     await ResetChatToMenuUsecase(repo)(withReports: true);
     final options = repo.sent.single.payload!['options'] as List;
     expect(options[options.length - 2], {
-      'label': ChatBudgetStrings.reportsOptionLabel,
+      'label': ChatAssistantStrings.reportsOptionLabel,
       'value': '5',
     });
     expect(options.last, {
-      'label': ChatBudgetStrings.findBudgetOptionLabel,
+      'label': ChatAssistantStrings.findBudgetOptionLabel,
       'value': '6',
     });
   });
@@ -55,7 +55,7 @@ void main() {
       await ResetChatToMenuUsecase(repo)(clearSession: false);
       expect(
         _labels(repo.sent.single),
-        isNot(contains(ChatBudgetStrings.reportsOptionLabel)),
+        isNot(contains(ChatAssistantStrings.reportsOptionLabel)),
       );
       expect(repo.clears, 0);
     },
@@ -66,8 +66,8 @@ void main() {
     final step = await ShowReportsPromptUsecase(repo)();
     final msg = repo.sent.single;
     expect(step, 'mainMenu');
-    expect(msg.content, contains(ChatBudgetStrings.reportsPrompt));
-    expect(msg.content, contains(ChatBudgetStrings.reportsExample));
-    expect(msg.payload!['highlight'], ChatBudgetStrings.reportsExample);
+    expect(msg.content, contains(ChatAssistantStrings.reportsPrompt));
+    expect(msg.content, contains(ChatAssistantStrings.reportsExample));
+    expect(msg.payload!['highlight'], ChatAssistantStrings.reportsExample);
   });
 }

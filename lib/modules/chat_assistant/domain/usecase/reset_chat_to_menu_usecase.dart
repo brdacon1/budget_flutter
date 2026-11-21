@@ -1,6 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Reseta o estado do chat e restaura o menu principal como ponto de entrada.
 ///
@@ -23,12 +23,12 @@ class ResetChatToMenuUsecase {
 
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.mainMenuQuestion,
+        content: ChatAssistantStrings.mainMenuQuestion,
         labels: [
-          ...ChatBudgetStrings.mainMenuOptionLabels,
+          ...ChatAssistantStrings.mainMenuOptionLabels,
           if (withReports) ...[
-            ChatBudgetStrings.reportsOptionLabel,
-            ChatBudgetStrings.findBudgetOptionLabel,
+            ChatAssistantStrings.reportsOptionLabel,
+            ChatAssistantStrings.findBudgetOptionLabel,
           ],
         ],
         step: 'mainMenu',

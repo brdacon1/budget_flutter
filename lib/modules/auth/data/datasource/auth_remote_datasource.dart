@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -54,21 +55,33 @@ class AuthRemoteDataSource {
       ],
       nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
     );
+    // A Apple só envia o nome na 1ª autorização deste Apple ID no app.
+    debugPrint(
+      '[AppleSignIn] nome recebido: '
+      '"${apple.givenName ?? ''}" "${apple.familyName ?? ''}"',
+    );
+    final idToken = apple.identityToken;
+    if (idToken == null) throw Exception('Apple não retornou identityToken.');
+
+    // credentialWithIDToken leva o nome ao Firebase (vira displayName).
     final result = await _auth.signInWithCredential(
-      OAuthProvider('apple.com').credential(
-        idToken: apple.identityToken,
-        rawNonce: rawNonce,
-        accessToken: apple.authorizationCode,
+      AppleAuthProvider.credentialWithIDToken(
+        idToken,
+        rawNonce,
+        AppleFullPersonName(
+          givenName: apple.givenName,
+          familyName: apple.familyName,
+        ),
       ),
     );
 
-    // A Apple só envia o nome na primeira autorização: grava no Firebase.
+    // Garante o displayName quando a Apple mandou o nome.
     final name = [
       apple.givenName,
       apple.familyName,
     ].whereType<String>().join(' ').trim();
     final user = result.user;
-    if (name.isNotEmpty && (user?.displayName ?? '').isEmpty) {
+    if (name.isNotEmpty && user?.displayName != name) {
       await user?.updateDisplayName(name);
       await user?.reload();
     }

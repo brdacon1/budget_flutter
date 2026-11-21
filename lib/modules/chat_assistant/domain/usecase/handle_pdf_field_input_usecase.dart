@@ -3,7 +3,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -26,7 +26,7 @@ class HandlePdfFieldInputUsecase {
         return await _save(
           'name',
           value,
-          successMsg: '${ChatBudgetStrings.pdfEditSuccessName} $value',
+          successMsg: '${ChatAssistantStrings.pdfEditSuccessName} $value',
         );
       case 'phone':
         final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -36,7 +36,7 @@ class HandlePdfFieldInputUsecase {
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               sender: ChatSender.bot,
               type: ChatMessageType.text,
-              content: ChatBudgetStrings.pdfEditInvalidPhone,
+              content: ChatAssistantStrings.pdfEditInvalidPhone,
               timestamp: DateTime.now(),
             ),
           );
@@ -46,7 +46,7 @@ class HandlePdfFieldInputUsecase {
         return await _save(
           'phone',
           formatted,
-          successMsg: '${ChatBudgetStrings.pdfEditSuccessPhone} $formatted',
+          successMsg: '${ChatAssistantStrings.pdfEditSuccessPhone} $formatted',
         );
       case 'email':
         if (!value.contains('@') || !value.contains('.')) {
@@ -55,7 +55,7 @@ class HandlePdfFieldInputUsecase {
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               sender: ChatSender.bot,
               type: ChatMessageType.text,
-              content: ChatBudgetStrings.pdfEditInvalidEmail,
+              content: ChatAssistantStrings.pdfEditInvalidEmail,
               timestamp: DateTime.now(),
             ),
           );
@@ -64,7 +64,7 @@ class HandlePdfFieldInputUsecase {
         return await _save(
           'email',
           value,
-          successMsg: '${ChatBudgetStrings.pdfEditSuccessEmail} $value',
+          successMsg: '${ChatAssistantStrings.pdfEditSuccessEmail} $value',
         );
       case 'cnpj':
         final digits = value.replaceAll(RegExp(r'\D'), '');
@@ -74,7 +74,7 @@ class HandlePdfFieldInputUsecase {
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               sender: ChatSender.bot,
               type: ChatMessageType.text,
-              content: ChatBudgetStrings.pdfEditInvalidCnpj,
+              content: ChatAssistantStrings.pdfEditInvalidCnpj,
               timestamp: DateTime.now(),
             ),
           );
@@ -85,7 +85,7 @@ class HandlePdfFieldInputUsecase {
         return await _save(
           'cnpj',
           masked,
-          successMsg: '${ChatBudgetStrings.pdfEditSuccessCnpj} $masked',
+          successMsg: '${ChatAssistantStrings.pdfEditSuccessCnpj} $masked',
         );
       default:
         return const ChatMenuResult('pdfEditFieldInput');
@@ -125,8 +125,8 @@ class HandlePdfFieldInputUsecase {
 
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.pdfEditNextQuestion,
-        labels: ChatBudgetStrings.pdfEditNextOptionLabels,
+        content: ChatAssistantStrings.pdfEditNextQuestion,
+        labels: ChatAssistantStrings.pdfEditNextOptionLabels,
         step: 'pdfEditConfirm',
       ),
     );

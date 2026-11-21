@@ -2,7 +2,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Orquestra a transição do menu principal para o fluxo de orçamento.
 ///
@@ -23,7 +23,7 @@ class StartBudgetFromMenuUsecase {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.text,
-        content: ChatBudgetStrings.budgetTransition,
+        content: ChatAssistantStrings.budgetTransition,
         timestamp: DateTime.now(),
       ),
     );

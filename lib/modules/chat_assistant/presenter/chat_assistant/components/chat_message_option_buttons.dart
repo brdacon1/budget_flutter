@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Opções de menu do bot em botões empilhados (um embaixo do outro).
@@ -16,7 +17,7 @@ class ChatMessageOptionButtons extends StatelessWidget {
   final bool enabled;
   final void Function(String value, String label)? onSelect;
 
-  static const _accent = Color(0xFF00BFA5);
+  static const _accent = chatSendButtonColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +35,9 @@ class ChatMessageOptionButtons extends StatelessWidget {
           if (option['value'] == '0')
             OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.cyanAccent,
+                foregroundColor: chatHighlightColor,
                 side: BorderSide(
-                  color: enabled ? Colors.cyanAccent : Colors.white24,
+                  color: enabled ? chatHighlightColor : chatOptionBorderColor,
                 ),
                 shape: shape,
                 padding: padding,
@@ -48,7 +49,7 @@ class ChatMessageOptionButtons extends StatelessWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: _accent,
-                foregroundColor: Colors.black,
+                foregroundColor: blackColor,
                 shape: shape,
                 padding: padding,
               ),

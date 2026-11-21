@@ -128,6 +128,15 @@ lib/
 
 ## 2.1 Componentes de UI (Widgets) — Regra de Separação
 
+> ⛔ **PROIBIDO — sem exceção:** widget grande ou complexo **JAMAIS** é criado
+> dentro do arquivo da tela. Todo `StatelessWidget`/`StatefulWidget` que não
+> seja a própria tela vai para `presenter/{tela}/components/`, um por arquivo,
+> classe pública. Na View só cabem métodos `_build…()` pequenos e simples
+> (poucas linhas, sem estado) usados apenas naquela tela. Na dúvida, é
+> componente. Exemplo de erro já cometido: `_ManualAddressForm` e
+> `_EditAwareInputBar` dentro de `chat_assistant_view.dart` (corrigido —
+> hoje em `chat_assistant/components/`).
+
 > **NÃO** crie widgets no formato de classe privada (`class _MeuWidget`) dentro
 > das Views. Qualquer widget que não seja a própria tela deve ser extraído para
 > um arquivo separado dentro de `presenter/{tela}/components/`.
@@ -1203,6 +1212,7 @@ etc.
 | **18** | **Modal complexo é TELA: pasta própria com `{modal}_view.dart` + `{modal}_view_model.dart` + `components/` (um widget por arquivo). Só modal simples (sem usecase/repository, sem estado) dispensa ViewModel (ver seção 19)** |
 | **19** | **IA opera o app só via tools que chamam UseCases. `firebase_ai` só no DataSource; o modelo nunca calcula; toda escrita é confirmada pelo usuário; falha da IA cai no modo padrão (ver seção 20)** |
 | **20** | **Nenhuma URL/endpoint de fonte externa fora do DataSource (ex.: URL do Firebase Storage fica em `PdfRemoteDataSource.logoUrl`)** |
+| **21** | **Single Source of Truth: cada dado tem UM dono (o Repository do módulo). View/ViewModel nunca chamam HTTP, Firebase ou `getIt<…Repository>()` por fora do fluxo UseCase → Repo → DataSource (ver seção 21)** |
 
 ---
 
@@ -1416,6 +1426,10 @@ criar o arquivo**. Criar em `shared/models/` é FALHA de arquitetura.
    `import 'package:oflite/modules/{modulo}/presenter/strings/{modulo}_pt_string.dart'`
 6. **Nunca colocar strings literais (hardcoded) diretamente em Views, ViewModels
    ou componentes.**
+
+> **Módulo com várias telas** (ex.: `chat_assistant`): cada pasta de tela tem
+> o seu `strings/{tela}_pt_string.dart` ao lado da View/ViewModel/`components/`.
+> String usada por mais de uma tela fica na tela dona do contexto.
 
 > **IMPORTANTE**: strings usadas por mais de um módulo (ex: `errorTitle`) ficam
 > no módulo dono do contexto. Se todos os módulos precisam, use o módulo mais
@@ -2324,3 +2338,44 @@ a rodar a cada troca de modelo/prompt.
 
 > **Documento mantido na pasta `.pi/`** — atualizar sempre que novos padrões
 > forem adotados.
+
+---
+
+## 21. Single Source of Truth (SSoT) — Fonte Única da Verdade
+
+**Princípio:** cada dado (orçamento, mensagem do chat, comprovante, usuário,
+configuração do PDF…) é armazenado, editado e mantido em **um único lugar
+autoritativo**. Todo o resto do app **lê desse lugar** — nunca de cópias
+soltas, caches locais na tela ou chamadas paralelas à mesma fonte.
+
+> SSoT ≠ DRY: DRY evita repetir **código**; SSoT evita **dados** duplicados
+> ou conflitantes. Também não significa "um banco só": significa **dono
+> claro** de cada dado e sincronização feita por esse dono.
+
+### 21.1 Quem é o dono no OFLite
+
+| Camada | Papel no SSoT |
+|---|---|
+| `DataSource` | Única porta para a fonte externa (Firestore, Storage, Auth, HTTP/Dio, `firebase_ai`, banco local). |
+| `Repository` | **Dono do dado** no app. Guarda o estado atual (`ChangeNotifier`/`ValueNotifier`), decide cache × remoto e sincroniza. |
+| `UseCase` | Regra de negócio sobre os dados do(s) repositório(s). Não guarda cópia. |
+| `ViewModel` | Estado **de tela** (step, campos do formulário, loading). Dado de domínio vem do repositório. |
+| `View` | Só exibe o que a ViewModel expõe. |
+
+### 21.2 Regras
+
+1. **Nada de HTTP/Firebase fora do DataSource** — nem na View, nem na
+   ViewModel, nem no UseCase (complementa a seção 3 e as regras 19/20).
+2. **View não chama `getIt<…Repository>()`** — passa pela ViewModel
+   (command ou método).
+3. **ViewModel não copia dado de domínio para "segurar" na tela** quando o
+   repositório já expõe esse dado; escuta o repositório e lê dele.
+4. **Uma escrita, um caminho:** toda alteração de um dado passa pelo mesmo
+   repositório; quem escreve por fora cria duas verdades.
+5. **Sincronização é do repositório** (ex.: local ↔ Firestore). A tela
+   nunca decide de onde o dado vem.
+6. Ao revisar código, perguntar: *"se esse valor mudar, existe outro lugar
+   que vai ficar desatualizado?"* Se sim, viola SSoT.
+
+Referência: <https://en.wikipedia.org/wiki/Single_source_of_truth>
+

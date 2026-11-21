@@ -45,8 +45,10 @@ class PaymentProofStrings {
           : 'Which budget should this receipt be linked to?';
   static String get selectBudgetLabel =>
       _isPt ? 'Selecionar orçamento' : 'Select budget';
-  static String budgetChosen(String name) =>
-      _isPt ? 'Orçamento: $name' : 'Budget: $name';
+  /// Bolha do usuário após escolher no modal: o **número** do orçamento
+  /// (o nome do cliente pode ser algo como "Duplicado de: …").
+  static String budgetChosen(String number) =>
+      _isPt ? 'Orçamento selecionado: $number' : 'Selected budget: $number';
   static String get limitReached =>
       _isPt
           ? 'Esse orçamento já tem 15 comprovantes. Escolha outro orçamento.'

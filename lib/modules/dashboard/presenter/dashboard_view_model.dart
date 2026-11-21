@@ -1,235 +1,64 @@
 import 'package:flutter/foundation.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
-import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/dashboard/domain/entity/month_calculate.dart';
-import 'package:oflite/modules/dashboard/domain/entity/my_budget_dashboard.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:oflite/modules/dashboard/domain/entity/dashboard_month_summary.dart';
+import 'package:oflite/modules/dashboard/domain/entity/month_receipt_comparison.dart';
+import 'package:oflite/modules/dashboard/domain/usecase/get_dashboard_month_summary_usecase.dart';
+import 'package:oflite/modules/dashboard/domain/usecase/get_receipts_comparison_usecase.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class DashboardViewModel extends ChangeNotifier {
-  final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
+  final GetDashboardMonthSummaryUsecase _getSummary;
+  final GetReceiptsComparisonUsecase _getComparison;
 
-  final List<CustomerInfo> _foundUsers = <CustomerInfo>[];
-  List<CustomerInfo> get foundUsers => _foundUsers;
-
-  MyBudgetDashboard _myBudgetDashboard = MyBudgetDashboard(
-    qtdTotal: 0,
-    qtdIntApproved: 0,
-    qtdIntPending: 0,
-    qtdIntFinish: 0,
-    qtdIntDisapproved: 0,
-    qtdDoubleApproved: 0,
-    qtdDoublePending: 0,
-    qtdDoubleFinish: 0,
-    qtdDoubleDisapproved: 0,
-  );
-  MyBudgetDashboard get myBudgetDashboard => _myBudgetDashboard;
-
-  MonthCalculate _monthCalculate = MonthCalculate(
-    totalApprovedMonth_0: 0,
-    totalApprovedMonth_1: 0,
-    totalApprovedMonth_2: 0,
-    totalApprovedMonth_3: 0,
-    totalReprovedMonth_0: 0,
-    totalReprovedMonth_1: 0,
-    totalReprovedMonth_2: 0,
-    totalReprovedMonth_3: 0,
-    totalPendingMonth_0: 0,
-    totalPendingMonth_1: 0,
-    totalPendingMonth_2: 0,
-    totalPendingMonth_3: 0,
-    totalFinishMonth_0: 0,
-    totalFinishMonth_1: 0,
-    totalFinishMonth_2: 0,
-    totalFinishMonth_3: 0,
-  );
-  MonthCalculate get monthCalculate => _monthCalculate;
-
-  bool _loading = false;
-  bool get isLoading => _loading;
-
-  double getWeekOfMonthFromMilliseconds(int millisecondsSinceEpoch) {
-    DateTime dateTime =
-        DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
-    int day = dateTime.day;
-    double week = day / 7;
-    return week;
+  DashboardViewModel(this._getSummary, this._getComparison) {
+    loadCommand = Command1(_load);
   }
 
-  double getWeekOfMonthFromId(String? rawId) {
-    if (rawId == null || rawId.isEmpty) return 0;
-    final sanitized = rawId.replaceAll(RegExp(r'[^0-9]'), '');
-    if (sanitized.isEmpty) return 0;
-    final ms = int.tryParse(sanitized);
-    if (ms == null) return 0;
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(ms);
-    final day = dateTime.day;
-    return day / 7;
+  /// Arg = forceRefresh.
+  late final Command1<void, bool> loadCommand;
+
+  DateTime _month = _currentMonth();
+  DateTime get month => _month;
+
+  bool get canGoNext => _month.isBefore(_currentMonth());
+
+  DashboardMonthSummary _summary = DashboardMonthSummary.empty;
+  DashboardMonthSummary get summary => _summary;
+
+  List<MonthReceiptComparison> _comparison = const [];
+  List<MonthReceiptComparison> get comparison => _comparison;
+
+  static DateTime _currentMonth() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month);
   }
 
-  Future<void> startDashboard() async {
-    _loading = true;
+  void previousMonth() => _changeMonth(-1);
+
+  void nextMonth() {
+    if (canGoNext) _changeMonth(1);
+  }
+
+  void _changeMonth(int delta) {
+    _month = DateTime(_month.year, _month.month + delta);
     notifyListeners();
+    loadCommand.execute(false);
+  }
 
-    try {
-      await Permission.storage.request();
-      final value = await getInformationBudget();
-
-      _myBudgetDashboard = MyBudgetDashboard(
-        qtdTotal: value.length,
-        qtdIntApproved: 0,
-        qtdIntPending: 0,
-        qtdIntFinish: 0,
-        qtdIntDisapproved: 0,
-        qtdDoubleApproved: 0,
-        qtdDoublePending: 0,
-        qtdDoubleFinish: 0,
-        qtdDoubleDisapproved: 0,
-      );
-      _monthCalculate = MonthCalculate(
-        totalApprovedMonth_0: 0,
-        totalApprovedMonth_1: 0,
-        totalApprovedMonth_2: 0,
-        totalApprovedMonth_3: 0,
-        totalReprovedMonth_0: 0,
-        totalReprovedMonth_1: 0,
-        totalReprovedMonth_2: 0,
-        totalReprovedMonth_3: 0,
-        totalPendingMonth_0: 0,
-        totalPendingMonth_1: 0,
-        totalPendingMonth_2: 0,
-        totalPendingMonth_3: 0,
-        totalFinishMonth_0: 0,
-        totalFinishMonth_1: 0,
-        totalFinishMonth_2: 0,
-        totalFinishMonth_3: 0,
-      );
-
-      for (int i = 0; i < value.length; i++) {
-        final item = value[i];
-        double weekNumber = 0;
-
-        if (item.status == "APROVADO") {
-          _myBudgetDashboard.qtdIntApproved =
-              _myBudgetDashboard.qtdIntApproved! + 1;
-          _myBudgetDashboard.qtdDoubleApproved =
-              _myBudgetDashboard.qtdDoubleApproved! + 1;
-          weekNumber = getWeekOfMonthFromId(item.id);
-          _accumulateByWeek(
-            weekNumber,
-            item.totalValue! / 1000,
-            (v) => _monthCalculate.totalApprovedMonth_0 =
-                v + _monthCalculate.totalApprovedMonth_0!,
-            (v) => _monthCalculate.totalApprovedMonth_1 =
-                v + _monthCalculate.totalApprovedMonth_1!,
-            (v) => _monthCalculate.totalApprovedMonth_2 =
-                v + _monthCalculate.totalApprovedMonth_2!,
-            (v) => _monthCalculate.totalApprovedMonth_3 =
-                v + _monthCalculate.totalApprovedMonth_3!,
-          );
-        } else if (item.status == "PENDENTE") {
-          _myBudgetDashboard.qtdIntPending =
-              _myBudgetDashboard.qtdIntPending! + 1;
-          _myBudgetDashboard.qtdDoublePending =
-              _myBudgetDashboard.qtdDoublePending! + 1;
-          weekNumber = getWeekOfMonthFromId(item.id);
-          _accumulateByWeek(
-            weekNumber,
-            item.totalValue! / 1000,
-            (v) => _monthCalculate.totalPendingMonth_0 =
-                v + _monthCalculate.totalPendingMonth_0!,
-            (v) => _monthCalculate.totalPendingMonth_1 =
-                v + _monthCalculate.totalPendingMonth_1!,
-            (v) => _monthCalculate.totalPendingMonth_2 =
-                v + _monthCalculate.totalPendingMonth_2!,
-            (v) => _monthCalculate.totalPendingMonth_3 =
-                v + _monthCalculate.totalPendingMonth_3!,
-          );
-        } else if (item.status == "REPROVADO") {
-          _myBudgetDashboard.qtdIntDisapproved =
-              _myBudgetDashboard.qtdIntDisapproved! + 1;
-          _myBudgetDashboard.qtdDoubleDisapproved =
-              _myBudgetDashboard.qtdDoubleDisapproved! + 1;
-          weekNumber = getWeekOfMonthFromId(item.id);
-          _accumulateByWeek(
-            weekNumber,
-            item.totalValue! / 1000,
-            (v) => _monthCalculate.totalReprovedMonth_0 =
-                v + _monthCalculate.totalReprovedMonth_0!,
-            (v) => _monthCalculate.totalReprovedMonth_1 =
-                v + _monthCalculate.totalReprovedMonth_1!,
-            (v) => _monthCalculate.totalReprovedMonth_2 =
-                v + _monthCalculate.totalReprovedMonth_2!,
-            (v) => _monthCalculate.totalReprovedMonth_3 =
-                v + _monthCalculate.totalReprovedMonth_3!,
-          );
-        } else if (item.status == "FINALIZADO") {
-          _myBudgetDashboard.qtdIntFinish =
-              _myBudgetDashboard.qtdIntFinish! + 1;
-          _myBudgetDashboard.qtdDoubleFinish =
-              _myBudgetDashboard.qtdDoubleFinish! + 1;
-          weekNumber = getWeekOfMonthFromId(item.id);
-          _accumulateByWeek(
-            weekNumber,
-            item.totalValue! / 1000,
-            (v) => _monthCalculate.totalFinishMonth_0 =
-                v + _monthCalculate.totalFinishMonth_0!,
-            (v) => _monthCalculate.totalFinishMonth_1 =
-                v + _monthCalculate.totalFinishMonth_1!,
-            (v) => _monthCalculate.totalFinishMonth_2 =
-                v + _monthCalculate.totalFinishMonth_2!,
-            (v) => _monthCalculate.totalFinishMonth_3 =
-                v + _monthCalculate.totalFinishMonth_3!,
-          );
-        }
-      }
-    } catch (e) {
-      print(e);
+  Future<Result<void>> _load(bool forceRefresh) async {
+    // Em sequência: a 2ª chamada reaproveita o ledger em cache.
+    final month = _month;
+    final summary = await _getSummary(month, forceRefresh: forceRefresh);
+    final comparison = await _getComparison(month);
+    // Usuário trocou de mês no meio da carga: descarta o resultado velho.
+    if (month != _month) return const Result.ok(null);
+    if (summary is Ok<DashboardMonthSummary>) _summary = summary.value;
+    if (comparison is Ok<List<MonthReceiptComparison>>) {
+      _comparison = comparison.value;
     }
-
-    _loading = false;
     notifyListeners();
-  }
-
-  void _accumulateByWeek(
-    double weekNumber,
-    double value,
-    void Function(double) week0,
-    void Function(double) week1,
-    void Function(double) week2,
-    void Function(double) week3,
-  ) {
-    if (weekNumber <= 1) {
-      week0(value);
-    } else if (weekNumber <= 2) {
-      week1(value);
-    } else if (weekNumber <= 3) {
-      week2(value);
-    } else if (weekNumber <= 4.5) {
-      week3(value);
-    }
-  }
-
-  /// Busca no Firestore os orçamentos do mês corrente via query no backend.
-  Future<List<CustomerInfo>> getInformationBudget() async {
-    _foundUsers.clear();
-
-    DateTime currentDate = DateTime.now();
-    DateTime firstDayOfCurrentMonth =
-        DateTime(currentDate.year, currentDate.month, 1);
-    DateTime lastDayOfCurrentMonth =
-        DateTime(currentDate.year, currentDate.month + 1, 0);
-
-    String firstDayMillis = firstDayOfCurrentMonth.millisecondsSinceEpoch.toString();
-    String lastDayMillis = lastDayOfCurrentMonth.millisecondsSinceEpoch.toString();
-
-    final result = await _budgetRepository.fetchBudgetsByMonthRange(
-        firstDayMillis, lastDayMillis);
-    if (result is Ok<List<CustomerInfo>>) {
-      _foundUsers.addAll(result.value);
-    }
-
-    return _foundUsers;
+    return summary is Error<DashboardMonthSummary>
+        ? Result.error(summary.error)
+        : const Result.ok(null);
   }
 }

@@ -17,16 +17,14 @@ import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 /// Geração/visualização do PDF no fluxo Web.
 ///
 /// Reutiliza integralmente o `PdfGenerateUseCase` (a mesma regra de negócio
-/// do PDF do app mobile) — apenas pede os **bytes** (`patternPDFBytes`) e
-/// passa o token provisório do Firebase para baixar o logo, já que no Web
-/// não há login do dono.
+/// do PDF do app mobile) — apenas pede os **bytes**. No Web o logo é baixado
+/// sem token (URL pública do Storage), já que não há login do dono.
 class BudgetWebPdfViewModel extends ChangeNotifier {
   BudgetWebPdfViewModel({
     required this.items,
     required this.customer,
     required this.owner,
     required this.observations,
-    required this.token,
     PdfGenerateBudgetSimpleUsecase? pdfGenerateUseCase,
     PdfGenerateBudgetExecutiveUsecase? pdfGenerateExecutiveUseCase,
     PdfGenerateBudgetProfessionalUsecase? pdfGenerateProfessionalUseCase,
@@ -48,7 +46,6 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
   final CustomerInfo customer;
   final OwnerPdf owner;
   final List<ObservationPdf> observations;
-  final String token;
 
   final PdfGenerateBudgetSimpleUsecase _pdfGenerateUseCase;
   final PdfGenerateBudgetExecutiveUsecase _pdfExecutive;
@@ -127,7 +124,6 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               customer: customer,
               owner: owner,
               observations: List<ObservationPdf>.from(observations),
-              authToken: token,
             );
           case 'professional':
             bytes = await _pdfProfessional.professionalPDFBytes(
@@ -144,7 +140,6 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               customer: customer,
               owner: owner,
               observations: List<ObservationPdf>.from(observations),
-              authToken: token,
             );
           default:
             bytes = await _pdfGenerateUseCase.patternPDFBytes(
@@ -161,7 +156,6 @@ class BudgetWebPdfViewModel extends ChangeNotifier {
               customer: customer,
               owner: owner,
               observations: List<ObservationPdf>.from(observations),
-              authToken: token,
             );
         }
         _bytes = bytes;

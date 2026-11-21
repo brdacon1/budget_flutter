@@ -29,8 +29,8 @@ class DeleteAccountPtString {
 
   static String get step1 =>
       _isPt
-          ? 'Digite abaixo o e-mail cadastrado na sua conta OfLite.'
-          : 'Enter the email registered to your OfLite account below.';
+          ? 'Entre na sua conta OfLite abaixo: e-mail e senha, ou Google.'
+          : 'Sign in to your OfLite account below: email and password, or Google.';
 
   static String get step2 =>
       _isPt
@@ -107,6 +107,13 @@ class DeleteAccountPtString {
       _isPt
           ? 'Você precisa confirmar para prosseguir.'
           : 'You must confirm to proceed.';
+
+  static String get passwordLabel => _isPt ? 'Senha' : 'Password';
+
+  static String get deleteWithGoogleButton =>
+      _isPt
+          ? 'Entrar com Google e excluir conta'
+          : 'Sign in with Google and delete account';
 
   static String get deleteButton =>
       _isPt ? 'Excluir conta e dados' : 'Delete account and data';

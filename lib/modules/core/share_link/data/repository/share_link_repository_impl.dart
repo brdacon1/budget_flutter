@@ -14,10 +14,10 @@ class ShareLinkRepositoryImpl implements ShareLinkRepository {
 
   @override
   Future<String?> buildShareUrl({required String enderecoNumero}) async {
-    final token = await _dataSource.getCurrentUserToken();
-    if (token == null || token.isEmpty) return null;
+    final code = await _dataSource.createShareCode(budgetId: enderecoNumero);
+    if (code == null || code.isEmpty) return null;
 
     final base = webBaseUrl.replaceAll(RegExp(r'/+$'), '');
-    return '$base/orcamento/$enderecoNumero?token=$token';
+    return '$base/o/$code';
   }
 }

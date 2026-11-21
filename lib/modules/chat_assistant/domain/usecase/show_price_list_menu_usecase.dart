@@ -1,6 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Configura o submenu "Lista de preço" no chat.
 ///
@@ -14,10 +14,10 @@ class ShowPriceListMenuUsecase {
   Future<String> call() async {
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.priceListMenuQuestion,
-        labels: ChatBudgetStrings.priceListMenuOptionLabels,
+        content: ChatAssistantStrings.priceListMenuQuestion,
+        labels: ChatAssistantStrings.priceListMenuOptionLabels,
         step: 'priceListMenu',
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
 

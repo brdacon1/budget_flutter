@@ -1,3 +1,5 @@
+import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Barra de input inferior estilo WhatsApp.
@@ -20,10 +22,10 @@ class ChatInputBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C),
+        color: chatBarColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: blackColor.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -43,12 +45,12 @@ class ChatInputBar extends StatelessWidget {
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
                 textCapitalization: TextCapitalization.sentences,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: whiteColor),
                 decoration: InputDecoration(
-                  hintText: 'Digite uma mensagem...',
-                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  hintText: ChatAssistantStrings.typeMessageHint,
+                  hintStyle: TextStyle(color: chatHintColor),
                   filled: true,
-                  fillColor: const Color(0xFF2A2D3E),
+                  fillColor: secondaryColor,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -62,14 +64,14 @@ class ChatInputBar extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Material(
-              color: const Color(0xFF00BFA5),
+              color: chatSendButtonColor,
               shape: const CircleBorder(),
               child: InkWell(
                 customBorder: const CircleBorder(),
                 onTap: enabled ? onSend : null,
                 child: const Padding(
                   padding: EdgeInsets.all(10),
-                  child: Icon(Icons.send, color: Colors.white, size: 22),
+                  child: Icon(Icons.send, color: whiteColor, size: 22),
                 ),
               ),
             ),

@@ -1,9 +1,9 @@
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/strings/chat_budget_picker_pt_string.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/components/chat_budget_picker_header.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/components/chat_budget_picker_tile.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Modal (bottom sheet) para escolher um orçamento no chat.
@@ -16,7 +16,10 @@ class ChatBudgetPickerView extends StatefulWidget {
   /// Busca inicial (ex.: nome do cliente digitado no chat).
   final String initialQuery;
 
-  static Future<String?> show(BuildContext context, {String initialQuery = ''}) {
+  static Future<String?> show(
+    BuildContext context, {
+    String initialQuery = '',
+  }) {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -92,7 +95,7 @@ class _ChatBudgetPickerViewState extends State<ChatBudgetPickerView> {
     if (_vm.budgets.isEmpty) {
       return Center(
         child: Text(
-          ChatBudgetStrings.budgetPickerEmpty,
+          ChatBudgetPickerStrings.empty,
           style: const TextStyle(color: mutedTextColor),
         ),
       );

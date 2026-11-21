@@ -43,10 +43,16 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  LoginState? _lastState;
+
   void _onViewModelChanged() {
     final state = _viewModel.state;
+    final previous = _lastState;
+    _lastState = state;
 
     if (state == LoginState.loading) {
+      // Só abre o loading na transição; notificações extras não empilham.
+      if (previous == LoginState.loading) return;
       _loadingEvent.alertLoading(context);
       return;
     }
@@ -60,10 +66,15 @@ class _LoginViewState extends State<LoginView> {
     if (state == LoginState.success) {
       _loadingEvent.closeLoading(context);
       _viewModel.consumeState();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        // Login social sem nome (Apple só envia na 1ª autorização):
+        // pede o nome antes de entrar.
+        if (_viewModel.needsUserName) {
+          await _displayAlert.dialogChangeName(context);
+          if (!mounted) return;
         }
+        Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
       });
       return;
     }

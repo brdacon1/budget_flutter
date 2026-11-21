@@ -609,7 +609,7 @@ saldo = totalOrçamento − Σ paid (pagamentos de todos os recibos do orçament
 > **Status (2026-11-20):** código Flutter implementado (módulo `payment_proof`,
 > "+", galeria, prévia, fluxo `proof*` com "Voltar ao menu", lista no menu do
 > orçamento, intent filters Android). **Pendente:** criar o target *Share
-> Extension* no Xcode (arquivos já em `ios/Share Extension/`), registrar o App
+> Extension* no Xcode (arquivos já em `ios/ShareExtensionTemplate/`), registrar o App
 > Group `group.com.housestudio.oflite.share`, publicar regras do Firestore e do
 > Storage, tool `start_flow(attach_payment_proof)` e teste em aparelho real.
 > Desvio do plano: fechar o modal de orçamentos **não** cancela o envio; o botão
@@ -796,7 +796,7 @@ Alterações:
 |---------|---------|
 | `chat_assistant/presenter/chat_assistant/components/chat_input_bar.dart` | Botão **"+"** à esquerda (só no modo IA). Alterna teclado ↔ painel. |
 | `chat_assistant/presenter/chat_attachment_panel/` (**modal-tela**, §19 da arquitetura) | Grade Fotos/Câmera/Documento. View + VM + `components/chat_attachment_option.dart`. |
-| `chat_assistant/presenter/chat_media_picker/` (**tela**) | Grade de miniaturas com seleção (máx. 2, bolinha com número), abas Fotos/Álbuns, tela de prévia com legenda e botão enviar com contador (print 2). Usa `photo_manager` (listar galeria) — `image_picker` não permite essa UI. |
+| `chat_assistant/presenter/chat_media_picker/` (**tela**) | Grade de miniaturas com seleção (máx. 2, bolinha com número), abas Fotos/Álbuns, tela de prévia com legenda e botão enviar com contador (print 2). Usa `photo_manager` (listar galeria) — `image_picker` não permite essa UI. **Só iOS.** No Android "Fotos" abre o Photo Picker do sistema (`image_picker.pickMultiImage(limit: 2)`) e segue para a prévia com legenda/recorte: a política do Play proíbe `READ_MEDIA_IMAGES`/`READ_MEDIA_VIDEO` quando o seletor do sistema basta (removidas no manifest com `tools:node="remove"`). |
 | `chat_assistant/data/datasource/device_media_datasource.dart` | Único lugar com `photo_manager`, `image_picker` (câmera) e `file_selector` (PDF). |
 | `chat_assistant/data/datasource/shared_media_remote_datasource.dart` | `receive_sharing_intent` (§15.4). |
 | `chat_assistant/domain/usecase/receive_shared_proof_usecase.dart` | §15.4. |
@@ -878,3 +878,155 @@ comprovantes.", `proofMaxPhotos` "Você pode enviar até 2 fotos.", `proofTooBig
 - [ ] Share Extension iOS + intent filters Android testados em aparelho real
 - [ ] Regras do Firestore e do Storage publicadas antes do release
 - [ ] `ARCHITECTURE.md` §20 atualizado com o módulo `payment_proof`
+
+---
+
+## 16. Refatoração da tela do chat (View + ViewModel + strings por tela)
+
+> **Status (2026-11-21):** plano — nada implementado ainda.
+> **Regra nº 1: comportamento idêntico.** É refatoração pura: nenhuma
+> mudança de fluxo, texto exibido, ordem de mensagens, valores persistidos
+> (`step.name`, `payload`, `action`) ou navegação. **Nenhuma outra melhoria
+> entra nesta fase** — o que for notado fora do escopo vai para uma nota
+> no fim desta seção, não para o código.
+
+### 16.1 Diagnóstico (hoje)
+
+| Arquivo | Linhas | Problemas |
+|---|---|---|
+| `chat_assistant_view.dart` | 1023 | `_EditAwareInputBar` e `_ManualAddressForm` privados dentro da View (viola regra 10); `Color(0x…)`/`Colors.*` direto (regra 16); textos fixos (`'Assistente'`, `'online'`, `'Reiniciar conversa'`, `'Editar Logo'`, `'Erro ao compartilhar'`, `'Editando mensagem'`, `'Digite uma mensagem...'`, `'Bairro (opcional)'`, `'Confirmar endereço'`, `'CEP'`); decisões de fluxo na View (`switch` de `'SIM'/'Sim'/'NÃO'/'Não'` olhando `_vm.step`; checagem de assinante em `_openLogoEditFlow`; `getIt<UserRepository>`/`getIt<PdfRepository>`/`getIt<BudgetRepository>` chamados na View). |
+| `chat_assistant_view_model.dart` | 2123 | `_sendText` (≈130 linhas) roteia todos os steps; CEP/endereço manual/correção (`_submitCep`, `_submitManualAddress`, `_cancelCorrectionAndConfirm`, `_savePdfAddress`) com regra de negócio; fluxo de comprovante (`_saveProof`, `onProofBudgetSelected`, `_handleProofText`); `handleAction` (≈100 linhas); validação/formatação de telefone; ≈46 textos fixos; `getIt<CepRepository>()` dentro do método e `SharePlus` chamado direto (chamada externa fora do DataSource). |
+| `presenter/strings/chat_budget_pt_string.dart` | 481 | Um arquivo para 4 telas (chat, budget picker, media picker, proof preview). |
+| `components/chat_input_bar.dart` | 81 | Já existe e parece não ser usado pela View (a View usa `_EditAwareInputBar`). Confirmar antes de mexer. |
+
+### 16.2 Estrutura alvo
+
+```
+modules/chat_assistant/presenter/
+├── enum/chat_flow_step_enum.dart                 # sem mudança
+├── chat_assistant/
+│   ├── chat_assistant_view.dart                  # só commands, navegação e modais (precisam de context)
+│   ├── chat_assistant_view_model.dart            # estado + orquestração; regras viram usecases
+│   ├── strings/chat_assistant_pt_string.dart     # textos SÓ desta tela
+│   └── components/
+│       ├── chat_app_bar.dart                     # avatar + "Assistente/online" + reiniciar
+│       ├── chat_edit_aware_input_bar.dart        # ex-_EditAwareInputBar (cópia fiel)
+│       ├── chat_editing_banner.dart              # faixa "Editando mensagem"
+│       ├── chat_manual_address_form.dart         # ex-_ManualAddressForm (cópia fiel)
+│       ├── chat_message_list.dart                # ListView + typing indicator
+│       └── … (os já existentes)
+├── chat_budget_picker/
+│   └── strings/chat_budget_picker_pt_string.dart
+├── chat_media_picker/
+│   └── strings/chat_media_picker_pt_string.dart
+└── chat_proof_preview/
+    └── strings/chat_proof_preview_pt_string.dart
+```
+
+- **Strings por tela**: cada pasta de tela tem `strings/{tela}_pt_string.dart`
+  com `static String get …`. O `chat_budget_pt_string.dart` é dividido;
+  string usada por mais de uma tela fica na tela dona do contexto
+  (normalmente `chat_assistant`). **O texto não muda nem uma vírgula** — só o
+  lugar. Strings comparadas com valores persistidos/`action`
+  (`'SIM'`, `'Confirmar endereço'`, `aiConfirmLabel`…) ficam como estão até
+  existir chave estável (Regra Zero do i18n: label traduz, valor não).
+- **`_build…` na View** só para pedaços pequenos usados apenas nessa tela
+  (ex.: `_buildAvatar()`, `_buildInputArea()` que escolhe form × barra).
+  Widget com mais de ~40 linhas ou com estado → `components/`, um por arquivo.
+- **Cores**: os `Color(0x…)` dos componentes extraídos passam a usar
+  constantes de `colors.dart` **com o mesmo valor hex** (adicionar se faltar).
+
+### 16.3 O que fica na View × vai para a ViewModel
+
+**View pode:** executar commands (`_vm.xCommand.execute`), `Navigator.push`,
+abrir modal/`showModalBottomSheet`, `ScaffoldMessenger`, alertas que pedem
+`context`, controlar `ScrollController`/`FocusNode`.
+
+**Vai para a ViewModel (ou usecase):**
+
+| Hoje na View | Destino |
+|---|---|
+| `switch` `'SIM'/'Sim'/'NÃO'/'Não'` + `_vm.step` em `_handleAction` | `vm.resolveAction(action)` devolve um `ChatUiEffect` (enum: `openComments`, `openBudgetItems`, `none`…) e a View só executa o efeito de tela |
+| `_openLogoEditFlow` checando `autoRenewing` e `fetchInformationEnterprise` | `vm.prepareLogoEdit()` → `({bool needsSubscription, OwnerPdf owner})` |
+| `getIt<BudgetRepository>().clearSelectBudget()` | `vm.onBudgetPdfClosed()` |
+| regra `enabled` do input (`step != askAddress …`) | getter `vm.inputEnabled` |
+| `_showProofIssue` (decide aviso × erro e qual texto) | `vm.proofIssueMessage(v)` → `({bool warning, String? msg})`; View só mostra |
+| `_vm.shareErrorMessage ?? 'Erro ao compartilhar'` | VM já entrega a mensagem final |
+| `onSend` (trim/clear/execute) | `vm.submitInput()` |
+
+**Estados:** todo método novo da VM que muda campo termina com
+`notifyListeners()` (ou roda dentro de command, que já notifica). Checklist
+por PR: grep de cada `_campo =` e confirmar notificação.
+
+### 16.4 UseCases novos (regras saindo da ViewModel)
+
+Todos em `chat_assistant/domain/usecase/`, sem `BuildContext`, retornando
+`Result`/record. A VM continua dona do estado e só aplica o resultado.
+
+| UseCase | Sai de | Responsabilidade |
+|---|---|---|
+| `RouteChatTextUsecase` | `_sendText` (cadeia de `if/else`) | Função pura: `(step, aiMode, text, mainMenuOptions)` → `ChatTextRoute` (enum: `backToMenu`, `proof`, `reports`, `findBudgetPrompt`, `findBudget`, `ai`, `mainMenu`, `priceList`, `pdfEditConfirmEntry`, `pdfEdit`, `pdfField`, `pdfConfirm`, `username`, `usernameResult`, `logo`, `clientName`, `clientPhone`, `hasCep`, `cep`, `none`). A VM vira um `switch` de uma linha por rota. **Mesma ordem de prioridade dos `if`s atuais** (teste de tabela cobrindo cada step). |
+| `ValidateClientPhoneUsecase` | `_isValidPhone`, `_normalizePhone`, `_tryFormatPhone` | Validar/normalizar/formatar telefone. |
+| `LookupChatCepUsecase` | `_submitCep` | Limpar CEP, validar 8 dígitos, buscar via `CepRepository`, devolver `invalid` / `notFound` / `found(address mascarado)`. Remove `getIt<CepRepository>()` do método. |
+| `SaveChatAddressUsecase` | `_submitManualAddress`, `_confirmCepAddress`, `_cancelCorrectionAndConfirm` | Montar endereço e gravar no rascunho do orçamento. |
+| `SavePdfAddressUsecase` | `_savePdfAddress` | Buscar `OwnerPdf`, aplicar campos, salvar. |
+| `HandleProofTextUsecase` | `_handleProofText` | Validar nome/valor do comprovante → próximo passo. |
+| `SaveChatProofUsecase` | `_saveProof` (+ checagem de `fits` de `onProofBudgetSelected`) | Gravar comprovante via repo do módulo `payment_proof`. |
+| `ShareTextUsecase` (módulo `core/share_link`) | `SharePlus.instance.share` em `handleAction` | Compartilhamento sai da VM para o core (DataSource). |
+
+`_sendText` alvo (≈30 linhas): edição de mensagem → envia mensagem do
+usuário (payload `editableField` igual) → `route = _routeText(...)` →
+`switch (route)` chamando os handlers existentes. O texto
+`'Telefone inválido…'` e `'Erro ao processar: $e'` vão para
+`ChatAssistantStrings`.
+
+### 16.5 Fases (cada uma é um PR que compila e roda igual)
+
+1. **Strings** — dividir `chat_budget_pt_string.dart` por tela e mover os
+   literais da View/VM/componentes. Só troca de referência.
+2. **Componentes** — extrair `_EditAwareInputBar`, `_ManualAddressForm`,
+   app bar e lista para `components/` (cópia fiel, mesmos parâmetros);
+   cores para `colors.dart`; checar `chat_input_bar.dart`.
+3. **View enxuta** — mover decisões da §16.3 para a VM.
+4. **UseCases** — um usecase por vez (§16.4), começando por
+   `RouteChatTextUsecase` e `ValidateClientPhoneUsecase` (puros, fáceis de
+   testar), depois CEP/endereço, comprovante, share. Registrar em
+   `chat_assistant_binds.dart`.
+5. **Remover acessos fora da arquitetura** — nenhum `getIt<…Repository>()`
+   na View, nenhum SDK externo na VM (SSoT, `ARCHITECTURE.md` §21).
+
+**Verificação por fase:** `flutter analyze` limpo; testes existentes verdes;
+teste de tabela do `RouteChatTextUsecase`; roteiro manual: menu padrão
+(orçamento completo com CEP, sem CEP, endereço manual, correção, edição de
+nome/telefone, comentários, link/PDF), lista de preços, edição de PDF,
+nome de usuário, logo, modo IA (pergunta livre, confirmação de escrita,
+falha → modo padrão), comprovante (galeria, câmera, documento,
+compartilhamento), encontrar/duplicar orçamento, recibos, "0" volta ao menu.
+
+### 16.6 Futuro — conversas salvas no celular (estilo WhatsApp)
+
+> Só estrutura; **não implementar nesta fase**.
+
+Hoje cada conversa é uma sessão no Firestore
+(`ChatBudgetRemoteDataSource.createSession/saveMessage/fetchMessages`) e o
+chat reinicia a cada abertura. O destino é uma **lista de conversas**
+persistida no aparelho:
+
+- **Fonte única da verdade (SSoT):** o `ChatBudgetRepository` é o dono das
+  conversas. View/VM nunca leem banco local nem Firestore direto; a lista de
+  mensagens exibida é sempre a do repositório (`ChangeNotifier`).
+- **Dados:** novo `ChatLocalDataSource` (único que conhece o banco local) com
+  `conversations` (`id`, `title`, `lastMessage`, `updatedAt`, `flowStep`) e
+  `messages` (`id`, `conversationId`, `role`, `type`, `text`, `payload`,
+  `timestamp`). O Firestore vira, se mantido, sincronização feita **pelo
+  repositório**, nunca pela tela.
+- **Entidades:** `ChatConversationEntity` em `domain/entity/`; o
+  `ChatMessageEntity` ganha `conversationId`.
+- **UseCases:** `ListConversationsUsecase`, `OpenConversationUsecase`
+  (restaura mensagens + `flowStep`), `StartConversationUsecase`,
+  `DeleteConversationUsecase`.
+- **Telas:** `presenter/chat_conversation_list/` (View + VM + `components/`
+  + `strings/`) abrindo `ChatAssistantView(conversationId: …)`.
+- **Compatibilidade:** `step.name`, `payload` e `action` já salvos são
+  contrato — nunca renomear (Regra Zero). Botões de mensagens antigas
+  restauradas continuam desabilitados por `isButtonsActive`.

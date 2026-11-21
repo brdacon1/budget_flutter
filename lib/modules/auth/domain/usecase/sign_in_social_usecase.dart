@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -41,6 +42,11 @@ class SignInSocialUseCase {
     final auth = await _authenticate(provider);
     // currentUser já reflete o nome gravado no 1º login com Apple.
     final authUser = _authRepository.currentUser ?? auth.user;
+    debugPrint(
+      '[SocialLogin] uid=${authUser?.uid} '
+      'displayName="${authUser?.displayName}" '
+      'credDisplayName="${auth.user?.displayName}"',
+    );
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', authUser?.email ?? '');
@@ -56,8 +62,24 @@ class SignInSocialUseCase {
           ..googleAuth = true;
 
     final user = await _loadUserSession(uid);
+    debugPrint(
+      '[SocialLogin] doc existente=${user != null} nomeNoBanco="${user?.name}"',
+    );
     if (user?.user != authUser?.uid) {
       await _createDefaultUser(authUser);
+      debugPrint('[SocialLogin] doc criado com nome="${authUser?.displayName}"');
+      return;
+    }
+
+    // Conta já existia sem nome (ex.: criada antes de a Apple enviar o
+    // nome): grava o nome do provedor no banco.
+    final providerName = (authUser?.displayName ?? '').trim();
+    if (user != null &&
+        (user.name ?? '').trim().isEmpty &&
+        providerName.isNotEmpty) {
+      user.name = providerName;
+      await _userRepository.updateUser(user);
+      _userRepository.selectUser.value = user;
     }
   }
 
@@ -77,7 +99,10 @@ class SignInSocialUseCase {
         try {
           return await _authRepository.signInWithApple();
         } on SignInWithAppleAuthorizationException catch (e) {
-          if (e.code == AuthorizationErrorCode.canceled) {
+          // Fechar a folha da Apple sem compartilhar pode vir como
+          // `unknown` (erro 1000) em vez de `canceled`.
+          if (e.code == AuthorizationErrorCode.canceled ||
+              e.code == AuthorizationErrorCode.unknown) {
             throw AuthCancelledException();
           }
           rethrow;

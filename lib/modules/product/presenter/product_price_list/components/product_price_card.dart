@@ -7,26 +7,24 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Card de item da lista de preço.
 ///
 /// Component `Stateless` puro — recebe o item ([ProductPriceModel]), o
-/// conversor de moeda, o flag `checkBoxAppear` (checkbox de exclusão) e os
-/// callbacks (`onLongPress`, `onTap`, `onToggleDelete`). Não conhece o
+/// conversor de moeda, se está [selected] e os callbacks (`onTap` edita,
+/// `onToggleSelect` marca para remoção pelo check circular). Não conhece o
 /// ViewModel nem services.
 class ProductPriceCard extends StatelessWidget {
   const ProductPriceCard({
     super.key,
     required this.item,
     required this.moneyConvert,
-    required this.checkBoxAppear,
-    required this.onLongPress,
+    required this.selected,
     required this.onTap,
-    required this.onToggleDelete,
+    required this.onToggleSelect,
   });
 
   final ProductPriceModel item;
   final ConvertCoinRepository moneyConvert;
-  final bool checkBoxAppear;
-  final VoidCallback onLongPress;
+  final bool selected;
   final VoidCallback onTap;
-  final VoidCallback onToggleDelete;
+  final VoidCallback onToggleSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -37,40 +35,24 @@ class ProductPriceCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       decoration: BoxDecoration(
-        color: secondaryColor,
+        color: selected ? buttonColor.withValues(alpha: 0.08) : secondaryColor,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: const Color(0xFF2A2A3C), width: 1.2),
+        border: Border.all(
+          color: selected ? buttonColor : priceCardBorderColor,
+          width: 1.2,
+        ),
       ),
       child: Material(
-        color: Colors.transparent,
+        color: transparentColor,
         borderRadius: BorderRadius.circular(16.0),
         child: InkWell(
           borderRadius: BorderRadius.circular(16.0),
           onTap: onTap,
-          onLongPress: onLongPress,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Checkbox de remoção no lado esquerdo (modo exclusão)
-                if (checkBoxAppear)
-                  Transform.scale(
-                    scale: 1.6,
-                    child: Checkbox(
-                      side: const BorderSide(color: whiteColor),
-                      checkColor: bgColor,
-                      activeColor: whiteColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      value: item.checkBox ?? false,
-                      onChanged: (bool? newValue) => onToggleDelete(),
-                    ),
-                  ),
-
-                if (checkBoxAppear) const SizedBox(width: 12),
-
                 // Informações do item alinhadas à esquerda (Tag, Descrição e Preço)
                 Expanded(
                   child: Column(
@@ -83,10 +65,7 @@ class ProductPriceCard extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              isProduct
-                                  ? const Color(0xFF9C27B0)
-                                  : const Color(0xFF00BFA5),
+                          color: isProduct ? productPillColor : cartAccentColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -117,7 +96,7 @@ class ProductPriceCard extends StatelessWidget {
                       Text(
                         moneyConvert.convertFromDouble(item.preco ?? 0),
                         style: const TextStyle(
-                          color: Color(0xFFB388FF),
+                          color: priceTextColor,
                           letterSpacing: 0,
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
@@ -127,24 +106,37 @@ class ProductPriceCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                const SizedBox(width: 1),
 
-                // Indicador lateral direito (fora do modo exclusão)
-                if (!checkBoxAppear)
-                  Transform.scale(
-                    scale: 1.4,
-                    child: Container(
-                      width: 24,
-                      height: 24,
+                // Check circular de remoção (área de toque de 48px).
+                InkResponse(
+                  onTap: onToggleSelect,
+                  radius: 24,
+                  child: Padding(
+                    padding: const EdgeInsets.all(11),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 26,
+                      height: 26,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
+                        color: selected ? buttonColor : transparentColor,
                         border: Border.all(
-                          color: const Color(0xFFB388FF).withValues(alpha: 0.8),
+                          color: selected ? buttonColor : priceTextColor,
                           width: 2.2,
                         ),
                       ),
+                      child:
+                          selected
+                              ? const Icon(
+                                Icons.check,
+                                size: 16,
+                                color: bgColor,
+                              )
+                              : null,
                     ),
                   ),
+                ),
               ],
             ),
           ),

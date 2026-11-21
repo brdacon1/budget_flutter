@@ -22,20 +22,18 @@ class DeviceMediaDatasource {
     }
   }
 
-  /// Câmera + fotos. No Android < 13 a galeria vem de `storage`; no 13+
-  /// de `photos` (READ_MEDIA_IMAGES). Acesso parcial conta como liberado.
+  /// Câmera + fotos. No Android a galeria é o Photo Picker do sistema, que
+  /// não pede permissão (política do Play: sem READ_MEDIA_IMAGES). No iOS
+  /// pede `photos`; acesso parcial conta como liberado.
   Future<({bool camera, bool gallery})> requestMediaPermissions() async {
     try {
-      final gallery = [
-        Permission.photos,
-        if (Platform.isAndroid) Permission.storage,
-      ];
+      final gallery = [if (!Platform.isAndroid) Permission.photos];
       final result = await [Permission.camera, ...gallery].request();
       bool ok(PermissionStatus? s) =>
           s != null && (s.isGranted || s.isLimited);
       return (
         camera: ok(result[Permission.camera]),
-        gallery: gallery.any((p) => ok(result[p])),
+        gallery: gallery.isEmpty || gallery.any((p) => ok(result[p])),
       );
     } on MissingPluginException {
       return (camera: false, gallery: false);
@@ -89,6 +87,15 @@ class DeviceMediaDatasource {
       imageQuality: 85,
     );
     return file == null ? null : (path: file.path, mime: 'image/jpeg');
+  }
+
+  /// Photo Picker do sistema (Android), até [limit] imagens.
+  Future<List<({String path, String? mime})>> pickImages(int limit) async {
+    final files = await ImagePicker().pickMultiImage(
+      limit: limit,
+      imageQuality: 85,
+    );
+    return [for (final f in files) (path: f.path, mime: 'image/jpeg')];
   }
 
   Future<({String path, String? mime})?> pickPdf() async {

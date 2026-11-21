@@ -2,7 +2,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Processa a opção escolhida no submenu "Logo".
 class HandleLogoMenuOptionUsecase {
@@ -18,10 +18,10 @@ class HandleLogoMenuOptionUsecase {
         // Retoma o menu da logo para o usuário seguir editando
         await _chatRepo.sendMessage(
           ChatMessageEntity.botOptions(
-            content: ChatBudgetStrings.logoMenuQuestion,
-            labels: ChatBudgetStrings.logoMenuOptionLabels,
+            content: ChatAssistantStrings.logoMenuQuestion,
+            labels: ChatAssistantStrings.logoMenuOptionLabels,
             step: 'logoMenu',
-            backLabel: ChatBudgetStrings.menuBackLabel,
+            backLabel: ChatAssistantStrings.menuBackLabel,
           ),
         );
         return const ChatMenuResult('logoMenu');
@@ -44,7 +44,7 @@ class HandleLogoMenuOptionUsecase {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: ChatSender.bot,
             type: ChatMessageType.text,
-            content: ChatBudgetStrings.menuInvalidOption,
+            content: ChatAssistantStrings.menuInvalidOption,
             timestamp: DateTime.now(),
           ),
         );

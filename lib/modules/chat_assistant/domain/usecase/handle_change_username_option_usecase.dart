@@ -1,7 +1,7 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Processa a opção escolhida no submenu "Trocar nome de usuário".
 class HandleChangeUsernameOptionUsecase {
@@ -33,7 +33,7 @@ class HandleChangeUsernameOptionUsecase {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             sender: ChatSender.bot,
             type: ChatMessageType.text,
-            content: ChatBudgetStrings.menuInvalidOption,
+            content: ChatAssistantStrings.menuInvalidOption,
             timestamp: DateTime.now(),
           ),
         );
