@@ -4,7 +4,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.da
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Processa uma mensagem livre do usuário com a IA (loop de function calling).
@@ -35,7 +35,7 @@ class RunAgentTurnUsecase {
     await _aiRepo.saveUsage(today, used + 1);
 
     _aiRepo.addMessage(AgentMessageEntity(AgentRole.user, userText));
-    final system = ChatBudgetStrings.aiSystemPrompt(
+    final system = ChatAssistantStrings.aiSystemPrompt(
       today: today,
       userName: _userRepo.selectUser.value?.name ?? '',
     );

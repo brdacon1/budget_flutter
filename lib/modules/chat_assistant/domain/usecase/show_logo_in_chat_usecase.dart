@@ -1,7 +1,7 @@
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -27,7 +27,7 @@ class ShowLogoInChatUsecase {
           id: now.millisecondsSinceEpoch.toString(),
           sender: ChatSender.bot,
           type: ChatMessageType.text,
-          content: ChatBudgetStrings.logoNotFound,
+          content: ChatAssistantStrings.logoNotFound,
           timestamp: now,
         ),
       );
@@ -39,11 +39,11 @@ class ShowLogoInChatUsecase {
         id: now.millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.image,
-        content: ChatBudgetStrings.logoCaption,
+        content: ChatAssistantStrings.logoCaption,
         payload: {
           'imageUrl': imageUrl,
           'changeAction': 'open_logo_edit',
-          'changeLabel': ChatBudgetStrings.logoChangeLabel,
+          'changeLabel': ChatAssistantStrings.logoChangeLabel,
         },
         timestamp: now,
       ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 
 import 'package:material_ui/material_ui.dart';
@@ -35,7 +36,7 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
@@ -562,7 +563,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       } else if (_step == ChatFlowStep.askPhone) {
         if (!_isValidPhone(clean)) {
           await _addBotMessage(
-            'Telefone inválido. Informe apenas números com DDD. Ex: (11) 99999-9999 ou 11999999999.',
+            ChatAssistantStrings.invalidPhone,
             type: ChatMessageType.text,
           );
         } else {
@@ -576,7 +577,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           await _goToManualAddress();
         } else {
           await _addBotMessage(
-            ChatBudgetStrings.menuInvalidOption,
+            ChatAssistantStrings.menuInvalidOption,
             type: ChatMessageType.text,
           );
         }
@@ -584,7 +585,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _submitCep(clean);
       }
     } catch (e) {
-      await _addBotMessage('Erro ao processar: $e', type: ChatMessageType.text);
+      await _addBotMessage(
+        ChatAssistantStrings.processingError(e),
+        type: ChatMessageType.text,
+      );
     }
     return Result.ok(null);
   }
@@ -629,8 +633,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         type: ChatMessageType.inlineButtons,
         payload: {
           'actions': [
-            ChatBudgetStrings.aiConfirmLabel,
-            ChatBudgetStrings.aiCancelLabel,
+            ChatAssistantStrings.aiConfirmLabel,
+            ChatAssistantStrings.aiCancelLabel,
           ],
         },
       );
@@ -798,7 +802,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       payload: {
         'label': PaymentProofStrings.selectBudgetLabel,
         'action': selectProofBudgetAction,
-        'backLabel': ChatBudgetStrings.menuBackLabel,
+        'backLabel': ChatAssistantStrings.menuBackLabel,
       },
     );
     _pendingNavigation = selectProofBudgetAction;
@@ -814,10 +818,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       PaymentProofStrings.budgetChosen(budgetId),
     );
 
-    final limit = await _checkProofLimit(
-      budgetId,
-      adding: _proofFiles.length,
-    );
+    final limit = await _checkProofLimit(budgetId, adding: _proofFiles.length);
     switch (limit) {
       case Error():
         await _showProofSaveError();
@@ -831,7 +832,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
                     ? PaymentProofStrings.limitReached
                     : PaymentProofStrings.limitWouldExceed(value.count),
             labels: [PaymentProofStrings.chooseAnother],
-            backLabel: ChatBudgetStrings.menuBackLabel,
+            backLabel: ChatAssistantStrings.menuBackLabel,
             step: ChatFlowStep.proofSelectBudget.name,
           ),
         );
@@ -861,7 +862,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatMessageEntity.botOptions(
         content: message,
         labels: const [],
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
         step: ChatFlowStep.proofAskName.name,
       ),
     );
@@ -874,7 +875,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatMessageEntity.botOptions(
         content: message,
         labels: const [],
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
         step: ChatFlowStep.proofAskValue.name,
       ),
     );
@@ -934,7 +935,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           payload: {
             'label': PaymentProofStrings.seeProofs,
             'action': '$openProofsAction$budgetId',
-            'backLabel': ChatBudgetStrings.menuBackLabel,
+            'backLabel': ChatAssistantStrings.menuBackLabel,
           },
         );
       case Error(:final error) when error is PaymentProofLimitReached:
@@ -952,7 +953,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatMessageEntity.botOptions(
         content: PaymentProofStrings.saveError,
         labels: [PaymentProofStrings.tryAgain],
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
         step: ChatFlowStep.proofSaveError.name,
       ),
     );
@@ -965,12 +966,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final action = '$findBudgetAction$name';
     _setStep(ChatFlowStep.mainMenu);
     await _addBotMessage(
-      ChatBudgetStrings.findBudgetSelect(name),
+      ChatAssistantStrings.findBudgetSelect(name),
       type: ChatMessageType.action,
       payload: {
-        'label': ChatBudgetStrings.aiSelectBudgetLabel,
+        'label': ChatAssistantStrings.aiSelectBudgetLabel,
         'action': action,
-        'backLabel': ChatBudgetStrings.menuBackLabel,
+        'backLabel': ChatAssistantStrings.menuBackLabel,
       },
     );
     _pendingNavigation = action;
@@ -981,12 +982,12 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// voltar ao menu.
   Future<void> onFoundBudgetClosed(String id) async {
     await _addBotMessage(
-      ChatBudgetStrings.findBudgetReopenQuestion,
+      ChatAssistantStrings.findBudgetReopenQuestion,
       type: ChatMessageType.action,
       payload: {
-        'label': ChatBudgetStrings.findBudgetReopenLabel,
+        'label': ChatAssistantStrings.findBudgetReopenLabel,
         'action': 'open_budget|$id',
-        'backLabel': ChatBudgetStrings.menuBackLabel,
+        'backLabel': ChatAssistantStrings.menuBackLabel,
       },
     );
     notifyListeners();
@@ -1009,8 +1010,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
       copyReceipts: receipts,
     );
     await _addBotMessage(switch (result) {
-      Ok() => ChatBudgetStrings.aiBudgetDuplicated(budget.customerName ?? ''),
-      Error() => ChatBudgetStrings.aiBudgetDuplicateFailed,
+      Ok() => ChatAssistantStrings.aiBudgetDuplicated(
+        budget.customerName ?? '',
+      ),
+      Error() => ChatAssistantStrings.aiBudgetDuplicateFailed,
     });
   }
 
@@ -1046,8 +1049,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _sendUserMessageWithId(
       _generateMessageId(),
       confirmed
-          ? ChatBudgetStrings.aiConfirmLabel
-          : ChatBudgetStrings.aiCancelLabel,
+          ? ChatAssistantStrings.aiConfirmLabel
+          : ChatAssistantStrings.aiCancelLabel,
     );
     _setAiThinking(true);
     final String feedback;
@@ -1087,7 +1090,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       await _backToMainMenu();
     } else {
       await _addBotMessage(
-        ChatBudgetStrings.menuInvalidOption,
+        ChatAssistantStrings.menuInvalidOption,
         type: ChatMessageType.text,
       );
     }
@@ -1143,21 +1146,21 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<void> onUsernameChanged(String? newName) async {
     if (newName != null && newName.isNotEmpty) {
       await _addBotMessage(
-        '${ChatBudgetStrings.changeUsernameSuccess} $newName',
+        '${ChatAssistantStrings.changeUsernameSuccess} $newName',
         type: ChatMessageType.text,
       );
     } else {
       // Usuário cancelou ou não alterou
       await _addBotMessage(
-        ChatBudgetStrings.changeUsernameNotChanged,
+        ChatAssistantStrings.changeUsernameNotChanged,
         type: ChatMessageType.text,
       );
     }
 
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.changeUsernameRetryQuestion,
-        labels: ChatBudgetStrings.changeUsernameRetryOptionLabels,
+        content: ChatAssistantStrings.changeUsernameRetryQuestion,
+        labels: ChatAssistantStrings.changeUsernameRetryOptionLabels,
         step: ChatFlowStep.changeUsernameResult.name,
       ),
     );
@@ -1177,7 +1180,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         break;
       default:
         await _addBotMessage(
-          ChatBudgetStrings.menuInvalidOption,
+          ChatAssistantStrings.menuInvalidOption,
           type: ChatMessageType.text,
         );
         break;
@@ -1297,9 +1300,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<Result<void>> _showClientDataConfirmation() async {
     _setStep(ChatFlowStep.confirmClientData);
     await _addBotMessage(
-      'Confirme os dados do cliente:\n'
-      'Nome: $_pendingClientName\n'
-      'Telefone: ${_pendingPhone.isEmpty ? '—' : _pendingPhone}',
+      ChatAssistantStrings.confirmClientData(_pendingClientName, _pendingPhone),
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['Confirmar dados', 'Editar nome', 'Editar telefone'],
@@ -1358,7 +1359,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       );
     } else if (result is Error<CustomerInfo>) {
       await _addBotMessage(
-        'Ops, não consegui criar o orçamento. Tente novamente.',
+        ChatAssistantStrings.createBudgetFailed,
         type: ChatMessageType.text,
       );
     }
@@ -1370,7 +1371,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
+      payload: {
+        'label': ChatAssistantStrings.selectProductsLabel,
+        'action': 'open_products',
+      },
     );
     return Result.ok(null);
   }
@@ -1382,7 +1386,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         content: _script?.askCep ?? ChatScriptEntity.fallback.askCep,
         labels: const [],
         step: ChatFlowStep.askCep.name,
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
     return Result.ok(null);
@@ -1403,7 +1407,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
             ChatScriptEntity.fallback.askStreetFallback,
         labels: const [],
         step: ChatFlowStep.askStreetManual.name,
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
     return Result.ok(null);
@@ -1415,7 +1419,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final cleanCep = cep.replaceAll(RegExp(r'\D'), '');
     if (cleanCep.length != 8) {
       await _addBotMessage(
-        'CEP inválido. Digite 8 números.',
+        ChatAssistantStrings.invalidCep,
         type: ChatMessageType.text,
       );
       return Result.ok(null);
@@ -1445,14 +1449,17 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _setStep(ChatFlowStep.confirmCepAddress);
     await _addBotMessage(
-      'Encontrei o endereço:\n'
-      '${_upper(address.logradouro)}\n'
-      '${address.bairro != null && address.bairro!.isNotEmpty ? '${_upper(address.bairro)}\n' : ''}'
-      '${_upper(address.localidade)}',
+      ChatAssistantStrings.foundAddress(
+        _upper(address.logradouro),
+        address.bairro != null && address.bairro!.isNotEmpty
+            ? _upper(address.bairro)
+            : null,
+        _upper(address.localidade),
+      ),
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['Confirmar endereço', 'Corrigir endereço'],
-        'backLabel': ChatBudgetStrings.menuBackLabel,
+        'backLabel': ChatAssistantStrings.menuBackLabel,
       },
     );
     return Result.ok(null);
@@ -1470,7 +1477,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final fetchResult = await _pdfRepo.fetchInformationEnterprise();
     if (fetchResult is Error<OwnerPdf>) {
       await _addBotMessage(
-        'Erro ao buscar dados do PDF: ${fetchResult.error}',
+        ChatAssistantStrings.fetchPdfDataError(fetchResult.error),
         type: ChatMessageType.text,
       );
       return;
@@ -1492,7 +1499,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final saveResult = await _pdfRepo.saveInformationEnterprise(updated);
     if (saveResult is Error<void>) {
       await _addBotMessage(
-        'Erro ao salvar endereço: ${saveResult.error}',
+        ChatAssistantStrings.saveAddressError(saveResult.error),
         type: ChatMessageType.text,
       );
     }
@@ -1504,13 +1511,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _isPdfEditAddressMode = false;
 
     await _addBotMessage(
-      ChatBudgetStrings.pdfEditSuccessAddress,
+      ChatAssistantStrings.pdfEditSuccessAddress,
       type: ChatMessageType.text,
     );
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.pdfEditNextQuestion,
-        labels: ChatBudgetStrings.pdfEditNextOptionLabels,
+        content: ChatAssistantStrings.pdfEditNextQuestion,
+        labels: ChatAssistantStrings.pdfEditNextOptionLabels,
         step: ChatFlowStep.pdfEditConfirm.name,
       ),
     );
@@ -1543,13 +1550,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
-      'Endereço cadastrado com sucesso.',
+      ChatAssistantStrings.addressSaved,
       type: ChatMessageType.text,
     );
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
+      payload: {
+        'label': ChatAssistantStrings.selectProductsLabel,
+        'action': 'open_products',
+      },
     );
     return Result.ok(null);
   }
@@ -1562,7 +1572,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     if (street.isEmpty || city.isEmpty) {
       await _addBotMessage(
-        'Informe pelo menos a rua e a cidade.',
+        ChatAssistantStrings.streetAndCityRequired,
         type: ChatMessageType.text,
       );
       return Result.ok(null);
@@ -1607,13 +1617,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
-      'Endereço cadastrado com sucesso.',
+      ChatAssistantStrings.addressSaved,
       type: ChatMessageType.text,
     );
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
+      payload: {
+        'label': ChatAssistantStrings.selectProductsLabel,
+        'action': 'open_products',
+      },
     );
     return Result.ok(null);
   }
@@ -1652,13 +1665,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     _setStep(ChatFlowStep.askProducts);
     await _addBotMessage(
-      'Endereço cadastrado com sucesso.',
+      ChatAssistantStrings.addressSaved,
       type: ChatMessageType.text,
     );
     await _addBotMessage(
       _script?.askProducts ?? ChatScriptEntity.fallback.askProducts,
       type: ChatMessageType.action,
-      payload: {'label': 'Selecionar produtos', 'action': 'open_products'},
+      payload: {
+        'label': ChatAssistantStrings.selectProductsLabel,
+        'action': 'open_products',
+      },
     );
     return Result.ok(null);
   }
@@ -1703,9 +1719,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final buffer = StringBuffer();
     double grandTotal = 0;
     if (items.isEmpty) {
-      buffer.writeln('Nenhum item no orçamento.');
+      buffer.writeln(ChatAssistantStrings.noBudgetItems);
     } else {
-      buffer.writeln('Itens do orçamento:');
+      buffer.writeln(ChatAssistantStrings.budgetItemsTitle);
       for (final it in items) {
         final lineTotal = it.total ?? ((it.quantity ?? 0) * (it.price ?? 0));
         grandTotal += lineTotal;
@@ -1716,7 +1732,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         );
       }
       buffer.writeln('');
-      buffer.writeln('Total: R\$ ${grandTotal.toStringAsFixed(2)}');
+      buffer.writeln(
+        ChatAssistantStrings.budgetItemsTotal(grandTotal.toStringAsFixed(2)),
+      );
     }
 
     _setStep(ChatFlowStep.askComments);
@@ -1731,7 +1749,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _commentQuestionMsgId = _generateMessageId();
     await _sendBotMessageWithId(
       _commentQuestionMsgId!,
-      'Deseja adicionar algum comentário ou observação ao orçamento?',
+      ChatAssistantStrings.askAddComments,
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['SIM', 'NÃO'],
@@ -1747,16 +1765,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (result is Ok<CustomerInfo>) {
       _setStep(ChatFlowStep.shareLink);
       await _addBotMessage(
-        ChatBudgetStrings.budgetCreatedSuccess,
+        ChatAssistantStrings.budgetCreatedSuccess,
         type: ChatMessageType.inlineButtons,
         payload: {
           'actions': _buildFinalActions(),
-          'backLabel': ChatBudgetStrings.menuBackLabel,
+          'backLabel': ChatAssistantStrings.menuBackLabel,
         },
       );
     } else {
       await _addBotMessage(
-        'Erro ao finalizar o orçamento. Tente novamente.',
+        ChatAssistantStrings.finalizeBudgetFailed,
         type: ChatMessageType.text,
       );
     }
@@ -1766,7 +1784,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<Result<void>> _shareLink() async {
     final budgetId = _chatRepo.draftBudget?.id;
     if (budgetId == null || budgetId.isEmpty) {
-      _shareErrorMessage = 'Orçamento não disponível para compartilhar';
+      _shareErrorMessage = ChatAssistantStrings.budgetNotAvailableToShare;
       return Result.error(Exception(_shareErrorMessage));
     }
 
@@ -1774,14 +1792,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
       enderecoNumero: budgetId,
     );
     if (url == null || url.isEmpty) {
-      _shareErrorMessage =
-          'Não foi possível gerar o link. Verifique sua conexão.';
+      _shareErrorMessage = ChatAssistantStrings.shareLinkFailed;
       return Result.error(Exception(_shareErrorMessage));
     }
 
     _shareErrorMessage = null;
     await SharePlus.instance.share(
-      ShareParams(text: url, subject: 'Orçamento'),
+      ShareParams(text: url, subject: ChatAssistantStrings.shareSubject),
     );
     // A cada compartilhamento, não assinantes veem um intersticial.
     // `showInterstitial` já suprime para assinantes e recarrega o próximo.
@@ -1792,15 +1809,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<Result<void>> _copyLink() async {
     final budgetId = _chatRepo.draftBudget?.id;
     if (budgetId == null || budgetId.isEmpty) {
-      _shareErrorMessage = 'Orçamento não disponível para compartilhar';
+      _shareErrorMessage = ChatAssistantStrings.budgetNotAvailableToShare;
       return Result.error(Exception(_shareErrorMessage));
     }
     final url = await getIt<ShareLinkRepository>().buildShareUrl(
       enderecoNumero: budgetId,
     );
     if (url == null || url.isEmpty) {
-      _shareErrorMessage =
-          'Não foi possível gerar o link. Verifique sua conexão.';
+      _shareErrorMessage = ChatAssistantStrings.shareLinkFailed;
       return Result.error(Exception(_shareErrorMessage));
     }
     _shareErrorMessage = null;
@@ -1811,7 +1827,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   Future<Result<void>> _generateBudgetPdf() async {
     final result = await _generatePdf();
     if (result is Error<void>) {
-      _shareErrorMessage = ChatBudgetStrings.pdfUnavailable;
+      _shareErrorMessage = ChatAssistantStrings.pdfUnavailable;
       return result;
     }
     _shareErrorMessage = null;
@@ -1916,10 +1932,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // ------------------------------------------------------------------
   Future<void> handleAction(String action) async {
     if (_pendingAgentAction != null &&
-        (action == ChatBudgetStrings.aiConfirmLabel ||
-            action == ChatBudgetStrings.aiCancelLabel)) {
+        (action == ChatAssistantStrings.aiConfirmLabel ||
+            action == ChatAssistantStrings.aiCancelLabel)) {
       await _resolveAgentAction(
-        confirmed: action == ChatBudgetStrings.aiConfirmLabel,
+        confirmed: action == ChatAssistantStrings.aiConfirmLabel,
       );
       return;
     }
@@ -1938,7 +1954,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         if (_step == ChatFlowStep.mainMenu && !_aiMode) break;
         await _sendUserMessageWithId(
           _generateMessageId(),
-          ChatBudgetStrings.menuBackLabel,
+          ChatAssistantStrings.menuBackLabel,
         );
         await _backToMainMenu();
         break;
@@ -2034,10 +2050,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       final categoria = lastProduct.categoria ?? 'Serviços';
 
       await _addBotMessage(
-        'Produto criado com sucesso! 🎉\n\n'
-        'Descrição: $desc\n'
-        'Preço: R\$ $preco\n'
-        'Categoria: $categoria',
+        ChatAssistantStrings.productCreatedDetails(desc, preco, categoria),
         type: ChatMessageType.inlineButtons,
         payload: {
           'actions': ['Abrir lista de produtos'],
@@ -2045,7 +2058,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       );
     } else {
       await _addBotMessage(
-        'Produto criado com sucesso! 🎉',
+        ChatAssistantStrings.productCreated,
         type: ChatMessageType.text,
       );
     }
@@ -2073,8 +2086,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
     await _sendBotMessageWithId(
       msgId,
-      'Comentários atualizados com sucesso. Deseja editar '
-      'novamente ou finalizar o orçamento?',
+      ChatAssistantStrings.commentsUpdated,
       type: ChatMessageType.inlineButtons,
       payload: {
         'actions': ['Editar comentários', 'Finalizar e gerar link'],
@@ -2093,12 +2105,178 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<void> onPdfModelSelected() async {
     await _addBotMessage(
-      ChatBudgetStrings.pdfModelSelected,
+      ChatAssistantStrings.pdfModelSelected,
       type: ChatMessageType.text,
     );
     final step = await _showPdfEditUsecase();
     _setStepFromName(step);
     notifyListeners();
+  }
+
+  // ------------------------------------------------------------------
+  // Decisões que antes ficavam na View (§16.3 do CHAT_AI_AGENT_PLAN).
+  // A View só abre telas/modais; o que abrir é decidido aqui.
+  // ------------------------------------------------------------------
+
+  /// Navegações que a View executa (precisam de `context`).
+  static const openProductsNav = 'open_products';
+  static const openCommentsNav = 'open_comments';
+  static const openLogoEditNav = 'open_logo_edit';
+  static const linkCopiedNav = 'link_copied';
+
+  /// Toque num botão de mensagem. Retorna a navegação que a View deve
+  /// executar, ou `null` quando a ViewModel já tratou tudo.
+  Future<String?> onButtonAction(ChatMessageEntity msg, String action) async {
+    markButtonUsed(msg, action);
+    if (action.startsWith(findBudgetAction) ||
+        action == DispatchAgentToolUsecase.selectReceiptBudget ||
+        action == selectProofBudgetAction ||
+        action.startsWith(openProofsAction) ||
+        action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+        action.startsWith('open_budget|')) {
+      return action;
+    }
+    if (action == ChatAssistantStrings.copyLinkLabel) {
+      await copyLinkCommand.execute();
+      return copyLinkCommand.completed ? linkCopiedNav : null;
+    }
+    if (action == ChatAssistantStrings.generatePdfLabel) {
+      await generatePdfCommand.execute();
+      return null;
+    }
+    switch (action) {
+      case 'pick_contact':
+        await pickContactCommand.execute();
+      case 'SIM':
+        if (_step == ChatFlowStep.askComments) return openCommentsNav;
+        await handleAction('SIM');
+      case 'Sim':
+        if (_step == ChatFlowStep.pdfEditConfirmEntry) {
+          await sendTextCommand.execute('Sim');
+        } else {
+          await handleAction(action);
+        }
+      case 'NÃO':
+        if (_step == ChatFlowStep.askComments) {
+          await handleAction('NÃO');
+        } else {
+          await skipAddressCommand.execute();
+        }
+      case 'Não':
+        if (_step == ChatFlowStep.pdfEditConfirmEntry) {
+          await sendTextCommand.execute('Não');
+        } else if (_step == ChatFlowStep.askComments) {
+          await handleAction('NÃO');
+        } else {
+          await skipAddressCommand.execute();
+        }
+      case 'open_products':
+      case 'edit_products':
+        return openProductsNav;
+      case 'share_link':
+        await shareLinkCommand.execute();
+      case 'edit_comments':
+      case 'Editar comentários':
+        return openCommentsNav;
+      case 'finalize_budget':
+      case 'Finalizar e gerar link':
+        await handleAction('finalize_budget');
+      case 'cancel_and_proceed':
+        await handleAction('cancel_and_proceed');
+      case 'open_logo_edit':
+        return openLogoEditNav;
+      default:
+        // Ações sem interação de UI (Confirmar endereço, Corrigir endereço…)
+        await handleAction(action);
+    }
+    return null;
+  }
+
+  /// Toque numa opção de [ChatMessageType.optionList].
+  void selectOption(ChatMessageEntity msg, String value, String label) {
+    markButtonUsed(msg, value);
+    selectOptionCommand.execute((
+      value: value,
+      label: label,
+      step: msg.payload?['optionsStep'] as String? ?? '',
+    ));
+  }
+
+  /// Envia o texto digitado (botão enviar).
+  void submitInput() {
+    final text = textController.text.trim();
+    if (text.isEmpty) return;
+    textController.clear();
+    sendTextCommand.execute(text);
+  }
+
+  /// Campo de digitação habilitado no step atual.
+  bool get inputEnabled =>
+      !isLoading &&
+      _step != ChatFlowStep.askAddress &&
+      _step != ChatFlowStep.reviewProducts &&
+      _step != ChatFlowStep.shareLink &&
+      !isSavingProof;
+
+  /// Mostra o formulário de endereço manual no lugar da barra de texto.
+  bool get showManualAddressForm => _step == ChatFlowStep.askStreetManual;
+
+  /// Erro de compartilhar/copiar/gerar PDF a exibir (`null` = nenhum).
+  String? get shareErrorToShow =>
+      (shareLinkCommand.error ||
+              copyLinkCommand.error ||
+              generatePdfCommand.error)
+          ? (_shareErrorMessage ?? ChatAssistantStrings.shareError)
+          : null;
+
+  /// Aviso/erro de anexos de comprovante: arquivos cortados = aviso;
+  /// recusa = erro. `message == null` → nada a mostrar.
+  ({bool isWarning, String? message}) proofIssueAlert(
+    ProofAttachmentValidation v,
+  ) => (
+    isWarning: v.issue == null || v.issue == ProofAttachmentIssue.mixed,
+    message: switch (v.issue) {
+      ProofAttachmentIssue.tooBig => PaymentProofStrings.tooBig,
+      ProofAttachmentIssue.invalidType => PaymentProofStrings.invalidType,
+      ProofAttachmentIssue.mixed => PaymentProofStrings.mixedTypes,
+      ProofAttachmentIssue.empty => null,
+      null => v.trimmed ? PaymentProofStrings.onlyFirstFiles : null,
+    },
+  );
+
+  /// Anexos aptos a abrir a prévia (aviso de "mixed" ainda segue).
+  bool canPreviewProof(ProofAttachmentValidation v) =>
+      v.files.isNotEmpty &&
+      (v.issue == null || v.issue == ProofAttachmentIssue.mixed);
+
+  /// Dados para editar a logo. `null` = não assinante (abrir assinatura).
+  Future<OwnerPdf?> ownerForLogoEdit() async {
+    final isSubscribed =
+        getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
+    if (!isSubscribed) return null;
+    final result = await _pdfRepo.fetchInformationEnterprise();
+    return result is Ok<OwnerPdf> ? result.value : OwnerPdf();
+  }
+
+  /// Voltou da tela do PDF do orçamento recém-criado.
+  void onBudgetPdfClosed() => getIt<BudgetRepository>().clearSelectBudget();
+
+  /// Voltou da seleção de modelo de PDF.
+  Future<void> onPdfModelSelectClosed(bool selected) async {
+    if (selected) {
+      await onPdfModelSelected();
+    } else {
+      await repeatCurrentMenu();
+    }
+  }
+
+  /// Voltou do modal de criar produto.
+  Future<void> onProductCreatorClosed(bool saved) async {
+    if (saved) {
+      await onProductCreatedFromChat();
+    } else {
+      await repeatCurrentMenu();
+    }
   }
 
   @override

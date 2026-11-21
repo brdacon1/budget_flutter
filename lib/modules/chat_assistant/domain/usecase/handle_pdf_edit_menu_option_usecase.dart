@@ -1,7 +1,7 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -25,51 +25,51 @@ class HandlePdfEditMenuOptionUsecase {
         final current = owner?.empresa?.trim() ?? '';
         final msg =
             current.isNotEmpty
-                ? 'O nome da empresa atual é "$current".\n${ChatBudgetStrings.pdfEditAskName}'
-                : ChatBudgetStrings.pdfEditAskName;
+                ? 'O nome da empresa atual é "$current".\n${ChatAssistantStrings.pdfEditAskName}'
+                : ChatAssistantStrings.pdfEditAskName;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'name');
       case '2':
         final current = owner?.fone?.trim() ?? '';
         final msg =
             current.isNotEmpty
-                ? 'O telefone atual é "$current".\n${ChatBudgetStrings.pdfEditAskPhone}'
-                : ChatBudgetStrings.pdfEditAskPhone;
+                ? 'O telefone atual é "$current".\n${ChatAssistantStrings.pdfEditAskPhone}'
+                : ChatAssistantStrings.pdfEditAskPhone;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'phone');
       case '3':
         final current = owner?.email?.trim() ?? '';
         final msg =
             current.isNotEmpty
-                ? 'O email atual é "$current".\n${ChatBudgetStrings.pdfEditAskEmail}'
-                : ChatBudgetStrings.pdfEditAskEmail;
+                ? 'O email atual é "$current".\n${ChatAssistantStrings.pdfEditAskEmail}'
+                : ChatAssistantStrings.pdfEditAskEmail;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'email');
       case '4':
         final current = owner?.cnpj?.trim() ?? '';
         final msg =
             current.isNotEmpty
-                ? 'O CNPJ atual é "$current".\n${ChatBudgetStrings.pdfEditAskCnpj}'
-                : ChatBudgetStrings.pdfEditAskCnpj;
+                ? 'O CNPJ atual é "$current".\n${ChatAssistantStrings.pdfEditAskCnpj}'
+                : ChatAssistantStrings.pdfEditAskCnpj;
         await _sendTextWithBackOption(msg, highlight: current);
         return const ChatMenuResult('pdfEditFieldInput', pdfField: 'cnpj');
       case '5':
         await _chatRepo.sendMessage(
           ChatMessageEntity.botOptions(
-            content: ChatBudgetStrings.pdfEditAskHasCep,
-            labels: ChatBudgetStrings.yesNoOptionLabels,
+            content: ChatAssistantStrings.pdfEditAskHasCep,
+            labels: ChatAssistantStrings.yesNoOptionLabels,
             step: 'askHasCep',
-            backLabel: ChatBudgetStrings.menuBackLabel,
+            backLabel: ChatAssistantStrings.menuBackLabel,
           ),
         );
         return const ChatMenuResult('askHasCep');
       case '6':
         await _chatRepo.sendMessage(
           ChatMessageEntity.botOptions(
-            content: ChatBudgetStrings.logoMenuQuestion,
-            labels: ChatBudgetStrings.logoMenuOptionLabels,
+            content: ChatAssistantStrings.logoMenuQuestion,
+            labels: ChatAssistantStrings.logoMenuOptionLabels,
             step: 'logoMenu',
-            backLabel: ChatBudgetStrings.menuBackLabel,
+            backLabel: ChatAssistantStrings.menuBackLabel,
           ),
         );
         return const ChatMenuResult('logoMenu');
@@ -91,7 +91,7 @@ class HandlePdfEditMenuOptionUsecase {
         content: text,
         labels: const [],
         step: 'pdfEditFieldInput',
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
         highlight: highlight,
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Define os botões do card final do fluxo de criar orçamento.
 ///
@@ -12,9 +12,9 @@ class BuildBudgetFinalActionsUsecase {
 
   List<String> call() =>
       _ads.shouldShowAds
-          ? [ChatBudgetStrings.generatePdfLabel]
+          ? [ChatAssistantStrings.generatePdfLabel]
           : [
-            ChatBudgetStrings.copyLinkLabel,
-            ChatBudgetStrings.generatePdfLabel,
+            ChatAssistantStrings.copyLinkLabel,
+            ChatAssistantStrings.generatePdfLabel,
           ];
 }

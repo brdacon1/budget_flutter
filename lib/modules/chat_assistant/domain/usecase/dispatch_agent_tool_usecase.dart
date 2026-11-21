@@ -6,7 +6,7 @@ import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.d
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/modules/receipt/domain/entity/receipts_report.dart';
@@ -234,13 +234,13 @@ class DispatchAgentToolUsecase {
     if (args['purpose'] == purposeReceipts) {
       return _selectBudget(
         selectReceiptBudget,
-        ChatBudgetStrings.aiSelectReceiptBudget,
+        ChatAssistantStrings.aiSelectReceiptBudget,
       );
     }
     if (args['purpose'] == purposeDuplicate) {
       return _selectBudget(
         selectDuplicateBudget,
-        ChatBudgetStrings.aiSelectDuplicateBudget,
+        ChatAssistantStrings.aiSelectDuplicateBudget,
       );
     }
     final status =
@@ -283,8 +283,8 @@ class DispatchAgentToolUsecase {
               ? const []
               : [
                 _card(ChatMessageType.budgetList, {
-                  'title': ChatBudgetStrings.aiBudgetListTitle,
-                  'footer': ChatBudgetStrings.aiBudgetListFooter(
+                  'title': ChatAssistantStrings.aiBudgetListTitle,
+                  'footer': ChatAssistantStrings.aiBudgetListFooter(
                     budgets.length,
                     totalFmt,
                   ),
@@ -317,9 +317,9 @@ class DispatchAgentToolUsecase {
           type: ChatMessageType.action,
           content: text,
           payload: {
-            'label': ChatBudgetStrings.aiSelectBudgetLabel,
+            'label': ChatAssistantStrings.aiSelectBudgetLabel,
             'action': action,
-            'backLabel': ChatBudgetStrings.menuBackLabel,
+            'backLabel': ChatAssistantStrings.menuBackLabel,
           },
           timestamp: now,
         ),
@@ -354,15 +354,15 @@ class DispatchAgentToolUsecase {
       },
       messages: [
         _card(ChatMessageType.summaryCard, {
-          'title': ChatBudgetStrings.aiSummaryTitle(monthLabel),
-          'totalLabel': ChatBudgetStrings.aiSummaryTotal,
+          'title': ChatAssistantStrings.aiSummaryTitle(monthLabel),
+          'totalLabel': ChatAssistantStrings.aiSummaryTotal,
           'total': _coin.convertFromDouble(s.total),
           'count': s.count,
           'rows': [
             for (final e in s.byStatus.entries)
               {
                 'status': e.key,
-                'label': ChatBudgetStrings.budgetStatusLabel(e.key),
+                'label': ChatAssistantStrings.budgetStatusLabel(e.key),
                 'count': e.value.count,
                 'total': _coin.convertFromDouble(e.value.total),
               },
@@ -443,18 +443,18 @@ class DispatchAgentToolUsecase {
       },
       messages: [
         _card(ChatMessageType.receiptsReportCard, {
-          'title': ChatBudgetStrings.aiReceiptsReportTitle(
+          'title': ChatAssistantStrings.aiReceiptsReportTitle(
             _dm(r.from),
             _dm(r.to),
           ),
-          'countLabel': ChatBudgetStrings.aiReceiptsCountLabel,
+          'countLabel': ChatAssistantStrings.aiReceiptsCountLabel,
           'count': r.count,
-          'issuedLabel': ChatBudgetStrings.aiReceiptsIssuedLabel,
+          'issuedLabel': ChatAssistantStrings.aiReceiptsIssuedLabel,
           'issued': money(r.issued),
-          'paidLabel': ChatBudgetStrings.aiReceiptsPaidLabel,
+          'paidLabel': ChatAssistantStrings.aiReceiptsPaidLabel,
           'paid': money(r.paid),
           if (r.previous != null)
-            'previous': ChatBudgetStrings.aiReceiptsPrevious(
+            'previous': ChatAssistantStrings.aiReceiptsPrevious(
               r.previous!.count,
               money(r.previous!.paid),
             ),
@@ -471,7 +471,7 @@ class DispatchAgentToolUsecase {
                 'paidRaw': b.paid,
               },
           ],
-          'topLabel': ChatBudgetStrings.aiReceiptsTopLabel,
+          'topLabel': ChatAssistantStrings.aiReceiptsTopLabel,
           'top': [
             for (final t in r.topBudgets)
               {
@@ -498,7 +498,7 @@ class DispatchAgentToolUsecase {
       modelPayload: {'ok': true, 'cliente': budget.customerName},
       messages: [
         _card(ChatMessageType.action, {
-          'label': ChatBudgetStrings.aiShareLinkLabel,
+          'label': ChatAssistantStrings.aiShareLinkLabel,
           'action': 'share_url|$url',
         }),
       ],
@@ -540,7 +540,7 @@ class DispatchAgentToolUsecase {
         if (amount != null) 'amount': amount,
         if (method != null) 'method': method,
       }),
-      previewText: ChatBudgetStrings.aiReceiptPreview(
+      previewText: ChatAssistantStrings.aiReceiptPreview(
         client: client,
         description: description,
         amount: amount == null ? null : _coin.convertFromDouble(amount),
@@ -562,7 +562,7 @@ class DispatchAgentToolUsecase {
         'client': client,
         'status': status.value,
       }),
-      previewText: ChatBudgetStrings.aiStatusPreview(client, status.value),
+      previewText: ChatAssistantStrings.aiStatusPreview(client, status.value),
     );
   }
 

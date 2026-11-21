@@ -1,3 +1,4 @@
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
@@ -87,7 +88,7 @@ class _PdfTile extends StatelessWidget {
                         style: const TextStyle(color: whiteColor),
                       ),
                       Text(
-                        'PDF · $kb KB',
+                        ChatAssistantStrings.pdfSizeLabel(kb),
                         style: const TextStyle(
                           color: mutedTextColor,
                           fontSize: 12,

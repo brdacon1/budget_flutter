@@ -1,6 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Opção "Encontrar orçamentos" (só modo IA): pede o nome do cliente, digitado
 /// ou escolhido nos contatos (mesmo botão do "Criar orçamentos").
@@ -16,7 +16,7 @@ class ShowFindBudgetPromptUsecase {
         id: now.millisecondsSinceEpoch.toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.contactPicker,
-        content: ChatBudgetStrings.findBudgetPrompt,
+        content: ChatAssistantStrings.findBudgetPrompt,
         timestamp: now,
       ),
     );

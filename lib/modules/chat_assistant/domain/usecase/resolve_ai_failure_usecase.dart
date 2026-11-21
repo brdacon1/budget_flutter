@@ -1,5 +1,5 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// O que fazer quando a IA falha (erro, timeout, cota, limite diário).
 class AiFailureDecision {
@@ -24,18 +24,18 @@ class ResolveAiFailureUsecase {
   AiFailureDecision call(Exception error, {required int consecutiveFailures}) {
     if (error is AiDailyLimitException) {
       return AiFailureDecision(
-        ChatBudgetStrings.aiDailyLimit,
+        ChatAssistantStrings.aiDailyLimit,
         fallbackToStandard: true,
       );
     }
     if (consecutiveFailures >= maxConsecutiveFailures) {
       return AiFailureDecision(
-        ChatBudgetStrings.aiUnavailable,
+        ChatAssistantStrings.aiUnavailable,
         fallbackToStandard: true,
       );
     }
     return AiFailureDecision(
-      ChatBudgetStrings.aiFallback,
+      ChatAssistantStrings.aiFallback,
       fallbackToStandard: false,
     );
   }

@@ -5,7 +5,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -43,15 +43,15 @@ void main() {
       final actions =
           BuildBudgetFinalActionsUsecase(_FakeAds(shouldShowAds: false))();
       expect(actions, [
-        ChatBudgetStrings.copyLinkLabel,
-        ChatBudgetStrings.generatePdfLabel,
+        ChatAssistantStrings.copyLinkLabel,
+        ChatAssistantStrings.generatePdfLabel,
       ]);
     });
 
     test('não assinante: só gerar PDF', () {
       final actions =
           BuildBudgetFinalActionsUsecase(_FakeAds(shouldShowAds: true))();
-      expect(actions, [ChatBudgetStrings.generatePdfLabel]);
+      expect(actions, [ChatAssistantStrings.generatePdfLabel]);
     });
   });
 

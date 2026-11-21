@@ -1,6 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Configura o submenu "Editar PDF" no chat.
 ///
@@ -14,10 +14,10 @@ class ShowPdfEditMenuUsecase {
   Future<String> call() async {
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: ChatBudgetStrings.pdfEditMenuQuestion,
-        labels: ChatBudgetStrings.pdfEditMenuOptionLabels,
+        content: ChatAssistantStrings.pdfEditMenuQuestion,
+        labels: ChatAssistantStrings.pdfEditMenuOptionLabels,
         step: 'pdfEditMenu',
-        backLabel: ChatBudgetStrings.menuBackLabel,
+        backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
 

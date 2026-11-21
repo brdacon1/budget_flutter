@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_ai_status_dot.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Linha de orçamento (status, cliente, data · status, valor e seta).
@@ -44,7 +44,7 @@ class ChatBudgetRow extends StatelessWidget {
                     style: const TextStyle(color: whiteColor),
                   ),
                   Text(
-                    '$date · ${ChatBudgetStrings.budgetStatusLabel(status)}',
+                    '$date · ${ChatAssistantStrings.budgetStatusLabel(status)}',
                     style: const TextStyle(color: mutedTextColor, fontSize: 12),
                   ),
                 ],

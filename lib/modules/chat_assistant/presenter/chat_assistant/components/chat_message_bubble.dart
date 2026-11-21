@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/constants/colors.dart';
 import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
@@ -8,7 +9,7 @@ import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_option_buttons.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_month_summary_card.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_receipts_report_card.dart';
-import 'package:oflite/modules/chat_assistant/presenter/strings/chat_budget_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Bolha de mensagem estilo WhatsApp.
 ///
@@ -91,10 +92,7 @@ class ChatMessageBubble extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color:
-                      _isUser
-                          ? const Color(0xFF075E54)
-                          : const Color(0xFF2A2D3E),
+                  color: _isUser ? chatUserBubbleColor : secondaryColor,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(16),
                     topRight: const Radius.circular(16),
@@ -106,10 +104,10 @@ class ChatMessageBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (!_isUser) ...[
-                      const Text(
-                        'Assistente',
-                        style: TextStyle(
-                          color: Colors.cyanAccent,
+                      Text(
+                        ChatAssistantStrings.assistantTitle,
+                        style: const TextStyle(
+                          color: chatHighlightColor,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -128,14 +126,14 @@ class ChatMessageBubble extends StatelessWidget {
                                 TextSpan(
                                   text: row['label'],
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: whiteColor,
                                     fontSize: 15,
                                   ),
                                 ),
                                 TextSpan(
                                   text: ' ${row['value']}',
                                   style: const TextStyle(
-                                    color: Color(0xFF00BFA5),
+                                    color: chatSendButtonColor,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -154,16 +152,16 @@ class ChatMessageBubble extends StatelessWidget {
                       ),
                     if (message.type != ChatMessageType.attachment ||
                         message.content.isNotEmpty)
-                    Text.rich(
-                      _buildMessageText(message.content),
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
-                    ),
+                      Text.rich(
+                        _buildMessageText(message.content),
+                        style: const TextStyle(color: whiteColor, fontSize: 15),
+                      ),
                     if (message.type == ChatMessageType.contactPicker) ...[
                       const SizedBox(height: 8),
                       Text(
-                        ChatBudgetStrings.contactPickerHint,
+                        ChatAssistantStrings.contactPickerHint,
                         style: TextStyle(
-                          color: Colors.white.withAlpha(200),
+                          color: whiteColor.withAlpha(200),
                           fontSize: 13,
                           fontStyle: FontStyle.italic,
                         ),
@@ -171,9 +169,9 @@ class ChatMessageBubble extends StatelessWidget {
                     ] else if (_hasSelectableOptions) ...[
                       const SizedBox(height: 8),
                       Text(
-                        ChatBudgetStrings.typeOptionInstruction,
+                        ChatAssistantStrings.typeOptionInstruction,
                         style: TextStyle(
-                          color: Colors.white.withAlpha(200),
+                          color: whiteColor.withAlpha(200),
                           fontSize: 13,
                           fontStyle: FontStyle.italic,
                         ),
@@ -187,13 +185,13 @@ class ChatMessageBubble extends StatelessWidget {
                           const Icon(
                             Icons.edit,
                             size: 12,
-                            color: Colors.white70,
+                            color: chatMutedIconColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Toque e segure para editar',
+                            ChatAssistantStrings.holdToEdit,
                             style: TextStyle(
-                              color: Colors.white.withAlpha(179),
+                              color: whiteColor.withAlpha(179),
                               fontSize: 11,
                             ),
                           ),
@@ -213,7 +211,7 @@ class ChatMessageBubble extends StatelessWidget {
   }
 
   static const _highlightStyle = TextStyle(
-    color: Color(0xFF00BFA5),
+    color: chatSendButtonColor,
     fontWeight: FontWeight.bold,
   );
 
@@ -267,10 +265,10 @@ class ChatMessageBubble extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: const BoxDecoration(
-        color: Colors.cyan,
+        color: chatBotAvatarColor,
         shape: BoxShape.circle,
       ),
-      child: const Icon(Icons.support_agent, size: 18, color: Colors.white),
+      child: const Icon(Icons.support_agent, size: 18, color: whiteColor),
     );
   }
 
@@ -301,7 +299,9 @@ class ChatMessageBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _ActionButton(
-              label: message.payload?['label'] as String? ?? 'Abrir',
+              label:
+                  message.payload?['label'] as String? ??
+                  ChatAssistantStrings.openLabel,
               action: message.payload?['action'] as String? ?? 'action',
               onTap: onAction,
             ),
@@ -391,8 +391,8 @@ class _InlineButtons extends StatelessWidget {
           actions.map((label) {
             return ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00BFA5),
-                foregroundColor: Colors.black,
+                backgroundColor: chatSendButtonColor,
+                foregroundColor: blackColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -423,10 +423,10 @@ class _ContactPickerButton extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: ElevatedButton.icon(
         icon: const Icon(Icons.contacts, size: 18),
-        label: const Text('Escolher contato'),
+        label: Text(ChatAssistantStrings.pickContactLabel),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF00BFA5),
-          foregroundColor: Colors.black,
+          backgroundColor: chatSendButtonColor,
+          foregroundColor: blackColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -452,8 +452,8 @@ class _ActionButton extends StatelessWidget {
         icon: const Icon(Icons.open_in_new, size: 18),
         label: Text(label),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF00BFA5),
-          foregroundColor: Colors.black,
+          backgroundColor: chatSendButtonColor,
+          foregroundColor: blackColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -476,13 +476,13 @@ class _ProductListActions extends StatelessWidget {
       child: Opacity(
         opacity: onEdit == null ? 0.4 : 1,
         child: OutlinedButton.icon(
-          icon: const Icon(Icons.edit, size: 16, color: Colors.cyanAccent),
-          label: const Text(
-            'Editar seleção',
-            style: TextStyle(color: Colors.cyanAccent),
+          icon: const Icon(Icons.edit, size: 16, color: chatHighlightColor),
+          label: Text(
+            ChatAssistantStrings.editSelection,
+            style: const TextStyle(color: chatHighlightColor),
           ),
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.cyanAccent),
+            side: const BorderSide(color: chatHighlightColor),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -507,7 +507,9 @@ class _ImageContent extends StatelessWidget {
     final imageBase64 = payload!['imageBase64'] as String?;
     final imageUrl = payload!['imageUrl'] as String?;
     final changeAction = payload!['changeAction'] as String?;
-    final changeLabel = payload!['changeLabel'] as String? ?? 'Alterar logo';
+    final changeLabel =
+        payload!['changeLabel'] as String? ??
+        ChatAssistantStrings.changeLogoLabel;
 
     Widget imageWidget;
     if (imageBase64 != null && imageBase64.isNotEmpty) {
@@ -536,8 +538,8 @@ class _ImageContent extends StatelessWidget {
             icon: const Icon(Icons.edit, size: 16),
             label: Text(changeLabel),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00BFA5),
-              foregroundColor: Colors.black,
+              backgroundColor: chatSendButtonColor,
+              foregroundColor: blackColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
