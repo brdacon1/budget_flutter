@@ -8,12 +8,11 @@ import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 
 import '../budget_web_app/budget_web_app_view_model.dart';
 
-/// Validação do telefone (segunda camada de segurança do fluxo Web).
+/// Validação do telefone do fluxo Web.
 ///
-/// Recebe o `BudgetWebAppViewModel` (que já validou o token e localizou o
-/// orçamento). Compara os dígitos do telefone informado com o `FONE`
-/// cadastrado no orçamento. Só em caso de correspondência chama
-/// `onGranted` para liberar o acesso — nenhum dado é exibido antes disso.
+/// Envia código + telefone para `openShareLink`; a comparação com o `FONE`
+/// do orçamento (e o limite de tentativas) acontece no servidor. Só quando
+/// o servidor libera os dados é que `grantAccess`/`onGranted` são chamados.
 class BudgetWebAuthViewModel extends ChangeNotifier {
   BudgetWebAuthViewModel({required this.appViewModel, required this.onGranted});
 
@@ -53,45 +52,43 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
     _loadingEvent.alertLoading(context);
 
     try {
-      // Busca novamente o orçamento (com o token já validado) e compara o
-      // telefone. O número do endereço localiza; o telefone só valida.
-      final budget = await _service.getBudget(
-        ownerUid: appViewModel.ownerUid!,
-        enderecoNumero: appViewModel.enderecoNumero!,
-        token: appViewModel.token!,
+      // O servidor confere código + validade + telefone e só então devolve
+      // o orçamento. Nada é baixado se o telefone não conferir.
+      final shared = await _service.open(
+        code: appViewModel.code!,
+        phone: digits,
       );
-      final budgetDigits = (budget.phone ?? '').replaceAll(RegExp(r'\D'), '');
 
       if (context.mounted) _loadingEvent.closeLoading(context);
-
-      if (budgetDigits.isEmpty || budgetDigits != digits) {
-        _validating = false;
-        notifyListeners();
-        if (context.mounted) {
-          await _displayAlert.notificationWarning(
-            context,
-            BudgetWebStrings.blockedTitle,
-            BudgetWebStrings.phoneInvalid,
-          );
-        }
-        return;
-      }
-
       _validating = false;
       notifyListeners();
+      appViewModel.grantAccess(phone: digits, shared: shared);
       onGranted();
     } on WebBudgetAccessError catch (e) {
       if (context.mounted) _loadingEvent.closeLoading(context);
       _validating = false;
       notifyListeners();
-      if (context.mounted) {
-        await _displayAlert.notificationError(
-          context,
-          BudgetWebStrings.blockedTitle,
-          e.kind == WebBudgetErrorKind.notFound
-              ? BudgetWebStrings.blockedMessage
-              : e.message,
-        );
+      switch (e.kind) {
+        case WebBudgetErrorKind.phone:
+          if (context.mounted) {
+            await _displayAlert.notificationWarning(
+              context,
+              BudgetWebStrings.blockedTitle,
+              BudgetWebStrings.phoneInvalid,
+            );
+          }
+        case WebBudgetErrorKind.locked:
+          appViewModel.fail(BudgetWebStrings.phoneLocked);
+        case WebBudgetErrorKind.invalidLink:
+          appViewModel.fail(BudgetWebStrings.blockedMessage);
+        case WebBudgetErrorKind.unknown:
+          if (context.mounted) {
+            await _displayAlert.notificationError(
+              context,
+              BudgetWebStrings.blockedTitle,
+              BudgetWebStrings.blockedMessage,
+            );
+          }
       }
     } catch (_) {
       if (context.mounted) _loadingEvent.closeLoading(context);

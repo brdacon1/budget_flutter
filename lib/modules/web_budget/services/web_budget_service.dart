@@ -1,359 +1,151 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/shared/common/utils/dio_client.dart';
 
-/// Camada de acesso aos dados do orçamento no fluxo **Web público**.
+/// Acesso aos dados do orçamento no fluxo **Web público**.
 ///
-/// O aplicativo mobile lê/gravar o orçamento via `cloud_firestore`
-/// autenticado como o próprio dono (`cloud_firestore`). No fluxo Web, o cliente
-/// **não** é o usuário autenticado — ele recebe apenas um *token provisório
-/// do Firebase* (Firebase ID Token do dono, ~1h de validade) embutido na URL.
+/// O link é `https://dominio/o/{code}`: um código curto, com escopo de UM
+/// orçamento, criado pelo app do dono (`createShareLink`). A Web não tem
+/// token de usuário nenhum — fala só com as Cloud Functions:
 ///
-/// Para reutilizar as regras de negócio sem duplicar services e sem mexer no
-/// `cloud_firestore` autenticado do mobile, este serviço lê/gravar o mesmo
-/// caminho do Firestore (`EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS/{id}`) pela
-/// **Firestore REST API**, enviando o token do dono em
-/// `Authorization: Bearer {token}`. As regras de segurança do Firestore
-/// continuam sendo a fonte de verdade: um token inválido/expirado é
-/// rejeitado pela própria API (401/403).
-///
-/// Este serviço é **aditivo**: nada no app mobile depende dele.
+/// - `openShareLink(code, phone)` → o telefone é validado no **servidor** e
+///   só então vêm os dados daquele orçamento;
+/// - `respondShareLink(code, phone, status)` → altera apenas o `STATUS` e
+///   cria a notificação do dono.
 class WebBudgetService {
-  static const String _firestoreHost = 'firestore.googleapis.com';
+  static const String functionsBaseUrl = String.fromEnvironment(
+    'FUNCTIONS_BASE_URL',
+    defaultValue:
+        'https://southamerica-east1-orcamentofacil-lite.cloudfunctions.net',
+  );
 
-  final DioClient _dioClient = DioClient();
+  final Dio _dio = DioClient().dioClient;
 
-  /// Decodifica o payload de um JWT (Firebase ID Token) sem validar a
-  /// assinatura — a validação real de acesso é feita pelo Firestore ao
-  /// receber o token. Aqui só extraímos o `uid` do dono (necessário para
-  /// montar o path) e checamos a expiração para UX.
-  ///
-  /// Retorna `null` se o token não for um JWT bem formado ou estiver expirado.
-  static Map<String, dynamic>? decodeIdToken(String? token) {
-    if (token == null || token.isEmpty) return null;
-    final parts = token.split('.');
-    if (parts.length != 3) return null;
-    try {
-      final payload = _decodeBase64Url(parts[1]);
-      final Map<String, dynamic> claims = jsonDecode(payload);
-      final exp = claims['exp'];
-      if (exp is num) {
-        final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-        if (exp.toInt() < now) return null; // expirado
-      } else {
-        return null; // sem exp = não é um token provisório válido
-      }
-      // UID do dono vem em `user_id` (Firebase) ou `sub`.
-      final uid = claims['user_id'] ?? claims['sub'];
-      if (uid == null || (uid is String && uid.isEmpty)) return null;
-      return claims;
-    } catch (_) {
-      return null;
-    }
+  /// Extrai o código de `/o/{code}`. `null` se a URL não for um link válido.
+  static String? codeFromUri(Uri url) {
+    final segments = url.pathSegments;
+    final i = segments.indexOf('o');
+    if (i < 0 || i + 1 >= segments.length) return null;
+    final code = segments[i + 1];
+    return RegExp(r'^[A-Za-z0-9_-]{16}$').hasMatch(code) ? code : null;
   }
 
-  static String _decodeBase64Url(String src) {
-    String output = src.replaceAll('-', '+').replaceAll('_', '');
-    switch (output.length % 4) {
-      case 0:
-        break;
-      case 2:
-        output += '==';
-        break;
-      case 3:
-        output += '=';
-        break;
-      default:
-        throw FormatException('Invalid base64url');
-    }
-    return utf8.decode(base64.decode(output));
-  }
-
-  /// Project ID do Firebase configurado no app.
-  static String? _projectId;
-
-  static String get projectId {
-    if (_projectId != null) return _projectId!;
-    // Reutiliza a config já inicializada pelo Firebase.initializeApp().
-    final FirebaseOptions options = Firebase.app().options;
-    _projectId = options.projectId;
-    return _projectId!;
-  }
-
-  static String get _documentsBaseUrl =>
-      'https://$_firestoreHost/v1/projects/$projectId/databases/(default)/documents';
-
-  static Map<String, String> _headers(String token) => {
-    'Authorization': 'Bearer $token',
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  };
-
-  /// Path raiz dos orçamentos de um dono, no formato do Firestore REST.
-  /// `EMPRESAS/{uid}/USERS/{uid}/ORCAMENTOS`
-  static String _orcamentosPath(String ownerUid) =>
-      'EMPRESAS/$ownerUid/USERS/$ownerUid/ORCAMENTOS';
-
-  // ---------------------------------------------------------------------------
-  // Read
-  // ---------------------------------------------------------------------------
-
-  /// Localiza o orçamento pelo "número do endereço" (document id = `ID`).
-  ///
-  /// Lança [WebBudgetAccessError] quando o token é inválido/expirado (401/403)
-  /// ou o orçamento não existe (404). O telefone **não** é usado para localizar.
-  Future<CustomerInfo> getBudget({
-    required String ownerUid,
-    required String enderecoNumero,
-    required String token,
+  Future<SharedBudget> open({
+    required String code,
+    required String phone,
   }) async {
-    final url =
-        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero';
-    final response = await _dioClient.dioClient.get(
-      url,
-      options: Options(headers: _headers(token)),
-    );
-    _ensureOk(response, 'getBudget');
-    final fields = _extractFields(response.data);
-    final model = CustomerInfo.fromMap(fields);
-    // Garante o ID documental mesmo que o campo ID não esteja gravado.
-    model.id ??= enderecoNumero;
-    return model;
-  }
+    final data = await _post('openShareLink', {'code': code, 'phone': phone});
 
-  /// Lista os itens do orçamento (subcoleção `ITENS`), ordenados por
-  /// `CATEGORIA`, igual ao app mobile.
-  Future<List<ItemsBudget>> getItems({
-    required String ownerUid,
-    required String enderecoNumero,
-    required String token,
-  }) async {
-    final url =
-        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/ITENS'
-        '?orderBy=CATEGORIA';
-    final response = await _dioClient.dioClient.get(
-      url,
-      options: Options(headers: _headers(token)),
-    );
-    _ensureOk(response, 'getItems');
-    final List<ItemsBudget> items = <ItemsBudget>[];
-    final body = response.data as Map<String, dynamic>;
-    for (final doc in (body['documents'] as List?) ?? const []) {
-      final docMap = doc as Map<String, dynamic>;
-      final fields = _extractFieldsFromDoc(docMap);
-      final item = ItemsBudget.fromMap(fields);
-      item.id = docMap['name']?.toString().split('/').last;
+    final items = <ItemsBudget>[];
+    for (final raw in (data['items'] as List? ?? const [])) {
+      final map = Map<String, dynamic>.from(raw as Map);
+      final item = ItemsBudget.fromMap(map);
+      item.id = map['id']?.toString();
       item.checkBox = false;
       item.selectProduct = false;
       items.add(item);
     }
-    return items;
-  }
 
-  /// Dados do titular/empresa (INFOPDF/INFORMATION), reutilizado pelo PDF.
-  Future<Map<String, dynamic>> getOwnerInfo({
-    required String ownerUid,
-    required String token,
-  }) async {
-    final url =
-        '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/INFOPDF/INFORMATION';
-    final response = await _dioClient.dioClient.get(
-      url,
-      options: Options(headers: _headers(token)),
-    );
-    _ensureOk(response, 'getOwnerInfo');
-    return _extractFields(response.data);
-  }
-
-  /// Observações/comentários do orçamento, reutilizadas pelo PDF.
-  Future<List<ObservationPdf>> getObservations({
-    required String ownerUid,
-    required String enderecoNumero,
-    required String token,
-  }) async {
-    final url =
-        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero/OBSERVACAO';
-    final response = await _dioClient.dioClient.get(
-      url,
-      options: Options(headers: _headers(token)),
-    );
-    _ensureOk(response, 'getObservations');
-    final List<ObservationPdf> list = <ObservationPdf>[];
-    final body = response.data as Map<String, dynamic>;
-    for (final doc in (body['documents'] as List?) ?? const []) {
-      final docMap = doc as Map<String, dynamic>;
-      final fields = _extractFieldsFromDoc(docMap);
-      list.add(
+    final observations = <ObservationPdf>[
+      for (final raw in (data['observations'] as List? ?? const []))
         ObservationPdf(
-          data: (fields['DATA'] ?? '').toString(),
-          observacao: (fields['OBSERVACAO'] ?? '').toString(),
+          data: ((raw as Map)['DATA'] ?? '').toString(),
+          observacao: (raw['OBSERVACAO'] ?? '').toString(),
         ),
-      );
-    }
-    return list;
-  }
+    ];
 
-  // ---------------------------------------------------------------------------
-  // Write (status de aprovação — regra de negócio existente: campo STATUS)
-  // ---------------------------------------------------------------------------
-
-  /// Atualiza o `STATUS` do orçamento (Aprovado/Reprovado/...). Reutiliza o
-  /// mesmo campo/valores usados pelo app mobile — nenhuma regra paralela.
-  Future<void> updateStatus({
-    required String ownerUid,
-    required String enderecoNumero,
-    required String token,
-    required String status,
-  }) async {
-    final url =
-        '$_documentsBaseUrl/${_orcamentosPath(ownerUid)}/$enderecoNumero'
-        '?updateMask.fieldPaths=STATUS';
-    final body = jsonEncode({
-      'fields': {
-        'STATUS': {'stringValue': status},
-      },
-    });
-    final response = await _dioClient.dioClient.patch(
-      url,
-      options: Options(headers: _headers(token)),
-      data: body,
+    final budgetId = data['budgetId'].toString();
+    final budget = CustomerInfo.fromMap(
+      Map<String, dynamic>.from(data['budget'] as Map),
     );
-    _ensureOk(response, 'updateStatus');
+    budget.id ??= budgetId;
+
+    return SharedBudget(
+      budget: budget,
+      items: items,
+      observations: observations,
+      owner: Map<String, dynamic>.from(data['owner'] as Map? ?? const {}),
+    );
   }
 
-  // ---------------------------------------------------------------------------
-  // Notificação push ao DONO do orçamento (quem criou/enviou o orçamento)
-  // ---------------------------------------------------------------------------
-
-  /// Grava um documento em `EMPRESAS/{ownerUid}/USERS/{ownerUid}/NOTIFICACOES`
-  /// avisando que o cliente acabou de aprovar/reprovar o orçamento pela Web.
-  ///
-  /// O app mobile (do dono) escuta essa coleção em tempo real via Firestore
-  /// (`NotificationRepository`) e exibe uma **notificação local** ao receber um
-  /// novo documento — é o "push" que avisa quem criou o orçamento.
-  ///
-  /// Reutiliza o **mesmo token provisório do Firebase** do dono já usado no
-  /// fluxo (camada de segurança do link) e a **mesma coleção base do dono**
-  /// já usada pelo app — não cria uma segunda arquitetura de autenticação nem
-  /// um novo sistema de push paralelo. A escrita cumpre as regras de segurança
-  /// do Firestore (o dono escreve no próprio path com o próprio token).
-  ///
-  /// Falhas aqui são silenciosas (log only): a aprovação em si já foi gravada
-  /// por [updateStatus]; a notificação é best-effort e não deve reverter o
-  /// status aprovado.
-  Future<void> sendApprovalNotification({
-    required String ownerUid,
-    required String enderecoNumero,
-    required String token,
+  /// Aprova/reprova (`APROVADO`/`REPROVADO`). A notificação ao dono é criada
+  /// pela própria Function.
+  Future<void> respond({
+    required String code,
+    required String phone,
     required String status,
     required String title,
     required String message,
   }) async {
-    try {
-      final url =
-          '$_documentsBaseUrl/EMPRESAS/$ownerUid/USERS/$ownerUid/NOTIFICACOES';
-      final body = jsonEncode({
-        'fields': {
-          'TITULO': {'stringValue': title},
-          'MENSAGEM': {'stringValue': message},
-          'STATUS': {'stringValue': status},
-          'ORCAMENTO_ID': {'stringValue': enderecoNumero},
-          'CRIADO_EM': {
-            'timestampValue': DateTime.now().toUtc().toIso8601String(),
-          },
-          'LIDO': {'booleanValue': false},
-        },
-      });
-      final response = await _dioClient.dioClient.post(
-        url,
-        options: Options(headers: _headers(token)),
-        data: body,
-      );
-      // 200 = criado com ID gerado pelo servidor. Não lança em falha para não
-      // reverter a aprovação já gravada.
-      final code = response.statusCode ?? 0;
-      if (code < 200 || code >= 300) {
-        debugPrint(
-          '[WebBudgetService] sendApprovalNotification falhou: '
-          '$code ${response.data}',
-        );
-      }
-    } catch (e) {
-      debugPrint('[WebBudgetService] sendApprovalNotification erro: $e');
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helpers REST -> map plano (compatível com os `fromMap` dos models)
-  // ---------------------------------------------------------------------------
-
-  static Map<String, dynamic> _extractFields(dynamic responseData) {
-    final Map<String, dynamic> doc =
-        jsonDecode(jsonEncode(responseData)) as Map<String, dynamic>;
-    return _extractFieldsFromDoc(doc);
-  }
-
-  /// Converte o `{"fields":{...}}` do Firestore REST num mapa plano com as
-  /// chaves maiúsculas já esperadas pelos `fromMap` dos models (ID, FONE,
-  /// VALORTOTAL, CATEGORIA, ...).
-  static Map<String, dynamic> _extractFieldsFromDoc(Map<String, dynamic> doc) {
-    final fields = doc['fields'] as Map<String, dynamic>?;
-    if (fields == null) return <String, dynamic>{};
-    final out = <String, dynamic>{};
-    fields.forEach((key, value) {
-      out[key] = _unwrap(value as Map<String, dynamic>);
+    await _post('respondShareLink', {
+      'code': code,
+      'phone': phone,
+      'status': status,
+      'title': title,
+      'message': message,
     });
-    return out;
   }
 
-  static dynamic _unwrap(Map<String, dynamic> typed) {
-    if (typed.containsKey('stringValue')) return typed['stringValue'];
-    if (typed.containsKey('integerValue')) {
-      final v = typed['integerValue'];
-      return v is String ? int.tryParse(v) : v;
-    }
-    if (typed.containsKey('doubleValue')) {
-      final v = typed['doubleValue'];
-      return v is String ? double.tryParse(v) : (v as num?)?.toDouble();
-    }
-    if (typed.containsKey('booleanValue')) return typed['booleanValue'];
-    if (typed.containsKey('timestampValue')) return typed['timestampValue'];
-    if (typed.containsKey('nullValue')) return null;
-    // Fallback: devolve o primeiro valor encontrado.
-    return typed.values.first;
-  }
-
-  static void _ensureOk(Response<dynamic> response, String op) {
-    final code = response.statusCode ?? 0;
-    if (code == 401 || code == 403) {
-      throw WebBudgetAccessError(
-        'Token inválido ou expirado ($op).',
-        kind: WebBudgetErrorKind.token,
+  Future<Map<String, dynamic>> _post(
+    String function,
+    Map<String, dynamic> body,
+  ) async {
+    final Response<dynamic> response;
+    try {
+      response = await _dio.post(
+        '$functionsBaseUrl/$function',
+        data: body,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (_) => true,
+        ),
       );
-    }
-    if (code == 404) {
+    } catch (e) {
+      debugPrint('[WebBudgetService] $function erro: $e');
       throw WebBudgetAccessError(
-        'Orçamento não encontrado ($op).',
-        kind: WebBudgetErrorKind.notFound,
-      );
-    }
-    if (code < 200 || code >= 300) {
-      debugPrint('[WebBudgetService] $op falhou: $code ${response.data}');
-      throw WebBudgetAccessError(
-        'Erro de comunicação ($op: $code).',
+        'Erro de comunicação ($function).',
         kind: WebBudgetErrorKind.unknown,
       );
     }
+
+    final data = response.data is Map
+        ? Map<String, dynamic>.from(response.data as Map)
+        : <String, dynamic>{};
+    if (response.statusCode == 200 && data['ok'] == true) return data;
+
+    debugPrint('[WebBudgetService] $function ${response.statusCode}: $data');
+    final kind = switch (data['error']) {
+      'phone' => WebBudgetErrorKind.phone,
+      'locked' => WebBudgetErrorKind.locked,
+      'invalid' || 'expired' || 'revoked' => WebBudgetErrorKind.invalidLink,
+      _ => WebBudgetErrorKind.unknown,
+    };
+    throw WebBudgetAccessError(
+      'Falha em $function (${response.statusCode}).',
+      kind: kind,
+    );
   }
 }
 
-enum WebBudgetErrorKind { token, notFound, unknown }
+/// Dados de um orçamento liberado pelo link.
+class SharedBudget {
+  const SharedBudget({
+    required this.budget,
+    required this.items,
+    required this.observations,
+    required this.owner,
+  });
+
+  final CustomerInfo budget;
+  final List<ItemsBudget> items;
+  final List<ObservationPdf> observations;
+  final Map<String, dynamic> owner;
+}
+
+enum WebBudgetErrorKind { phone, locked, invalidLink, unknown }
 
 class WebBudgetAccessError implements Exception {
   final String message;

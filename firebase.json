@@ -35,7 +35,7 @@
         "destination": "/index.html"
       },
       {
-        "source": "/orcamento/**",
+        "source": "/o/**",
         "destination": "/index.html"
       },
       {

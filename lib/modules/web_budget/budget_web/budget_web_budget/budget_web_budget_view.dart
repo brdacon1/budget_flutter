@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 import 'package:oflite/modules/web_budget/budget_web/budget_web_pdf_data/budget_web_pdf_data_view.dart';
 import 'budget_web_budget_view_model.dart';
@@ -17,14 +18,14 @@ import 'budget_web_budget_view_model.dart';
 class BudgetWebBudgetView extends StatefulWidget {
   const BudgetWebBudgetView({
     super.key,
-    required this.enderecoNumero,
-    required this.ownerUid,
-    required this.token,
+    required this.code,
+    required this.phone,
+    required this.shared,
   });
 
-  final String enderecoNumero;
-  final String ownerUid;
-  final String token;
+  final String code;
+  final String phone;
+  final SharedBudget shared;
 
   @override
   State<BudgetWebBudgetView> createState() => _BudgetWebBudgetViewState();
@@ -37,9 +38,9 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
   void initState() {
     super.initState();
     _viewModel = BudgetWebBudgetViewModel(
-      ownerUid: widget.ownerUid,
-      enderecoNumero: widget.enderecoNumero,
-      token: widget.token,
+      code: widget.code,
+      phone: widget.phone,
+      shared: widget.shared,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.inicialData());
   }
@@ -79,7 +80,6 @@ class _BudgetWebBudgetViewState extends State<BudgetWebBudgetView> {
             items: _viewModel.items,
             observations: _viewModel.observations,
             owner: _viewModel.owner!,
-            token: widget.token,
             moneyConvert: _viewModel.moneyConvert,
             totalProducts: _viewModel.totalProducts,
             totalServices: _viewModel.totalServices,

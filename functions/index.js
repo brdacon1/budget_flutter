@@ -65,6 +65,20 @@ const auth = getAuth();
 const messaging = getMessaging();
 
 /**
+ * Valida o `Authorization: Bearer <Firebase ID Token>` da requisição.
+ * Retorna o token decodificado ou `null` (inválido, expirado ou revogado).
+ */
+async function verifyBearer(req) {
+  const idToken = String(req.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!idToken) return null;
+  try {
+    return await auth.verifyIdToken(idToken, true);
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
  * Códigos de erro do FCM v1 que indicam token inválido/expirado e que o
  * token deve ser removido da lista (a pessoa desinstalou o app, limpou
  * dados, ou o token expirou). Referência:
@@ -213,29 +227,28 @@ async function sendFcmToOwner(ownerUid, { title, body, orcamentoId, status }) {
 exports.sendTestPush = onRequest(
   { region: REGION },
   async (req, res) => {
-    // CORS liberal p/ teste (não importa em prod aqui).
-    res.set("Access-Control-Allow-Origin", "*");
-    if (req.method === "OPTIONS") {
-      res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-      res.set("Access-Control-Allow-Headers", "Content-Type");
-      res.status(204).send("");
-      return;
-    }
-    const ownerUid = String(req.body?.ownerUid || "").trim();
-    const orcamentoId = String(req.body?.orcamentoId || "").trim();
-    if (!ownerUid) {
-      res.status(400).json({ ok: false, erro: "ownerUid é obrigatório" });
-      return;
-    }
-    logger.info("[TESTE] sendTestPush chamado", { ownerUid, orcamentoId });
-    const report = await sendFcmToOwner(ownerUid, {
-      title: "Teste de Push OfLite",
-      body: `Teste de envio para ${ownerUid}`,
-      orcamentoId: orcamentoId || "TESTE",
-      status: "TESTE",
+    cors(req, res, async () => {
+      if (req.method !== "POST") {
+        res.status(405).json({ ok: false, erro: "Use POST." });
+        return;
+      }
+      // Exige login: só envia push de teste para os PRÓPRIOS dispositivos.
+      const decoded = await verifyBearer(req);
+      if (!decoded) {
+        res.status(401).json({ ok: false, erro: "Não autenticado." });
+        return;
+      }
+      const ownerUid = decoded.uid;
+      const orcamentoId = String(req.body?.orcamentoId || "").trim();
+      logger.info("[TESTE] sendTestPush chamado", { ownerUid, orcamentoId });
+      const report = await sendFcmToOwner(ownerUid, {
+        title: "Teste de Push OfLite",
+        body: "Teste de envio",
+        orcamentoId: orcamentoId || "TESTE",
+        status: "TESTE",
+      });
+      res.status(200).json({ ok: true, report });
     });
-    logger.info("[TESTE] report", report);
-    res.status(200).json({ ok: true, report });
   }
 );
 
@@ -303,126 +316,67 @@ async function deleteDocRecursive(docRef) {
   }
 }
 
+// Login precisa ser recente para excluir (evita usar um token antigo/vazado).
+const DELETE_MAX_AUTH_AGE_SECONDS = 5 * 60;
+
 exports.deleteAccount = onRequest(
   { region: REGION, timeoutSeconds: 540, memory: "1GiB" },
   async (req, res) => {
-    // Responde CORS preflight imediatamente, antes de qualquer processamento.
-    res.set("Access-Control-Allow-Origin", "*");
-    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, X-Requested-With");
-
-    if (req.method === "OPTIONS") {
-      res.status(204).send("");
-      return;
-    }
-
-    if (req.method !== "POST") {
-      res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
-      return;
-    }
-
-    const email = String(req.body?.email || "").trim();
-    if (!email) {
-      res.status(400).json({ ok: false, erro: "email é obrigatório" });
-      return;
-    }
-
-    logger.info("[deleteAccount] solicitação recebida", { email });
-
-    let uid = null;
-    const deletados = [];
-    const falhas = [];
-
-    try {
-      // 1. Localiza o usuário no Auth
-      const userRecord = await auth.getUserByEmail(email);
-      uid = userRecord.uid;
-      logger.info("[deleteAccount] usuário encontrado", { uid, email });
-    } catch (e) {
-      logger.error("[deleteAccount] erro ao localizar usuário", { email, error: e.message });
-      if (e.code === "auth/user-not-found" || String(e).includes("There is no user record")) {
-        res.status(404).json({ ok: false, erro: "Usuário não encontrado." });
+    cors(req, res, async () => {
+      if (req.method !== "POST") {
+        res.status(405).json({ ok: false, erro: "Método não permitido. Use POST." });
         return;
       }
-      res.status(500).json({ ok: false, erro: "Erro ao localizar usuário.", detalhe: e.message });
-      return;
-    }
 
-    // 2. Deleta subcoleções conhecidas do documento da empresa
-    const empresaPath = `EMPRESAS/${uid}`;
-    const subcolecoesEmpresa = [
-      "ORCAMENTOS",
-      "RECIBOS",
-      "INFOPDF",
-      "FCM",
-      "NOTIFICACOES",
-      "USERS",
-      "CLIENTES",
-      "PRODUTOS",
-      "SERVICOS",
-    ];
-
-    for (const sub of subcolecoesEmpresa) {
-      const path = `${empresaPath}/${sub}`;
-      try {
-        const snap = await db.collection(path).limit(500).get();
-        if (snap.empty) {
-          deletados.push(path + " (vazio)");
-          continue;
-        }
-        const batch = db.batch();
-        snap.docs.forEach((doc) => batch.delete(doc.ref));
-        await batch.commit();
-        deletados.push(`${path} (${snap.size} docs)`);
-        logger.info("[deleteAccount] subcoleção deletada", { path, qtd: snap.size });
-      } catch (e) {
-        falhas.push({ path, erro: e.message });
-        logger.error("[deleteAccount] falha ao deletar subcoleção", { path, error: e.message });
+      // Só o PRÓPRIO usuário, autenticado agora, pode excluir a conta.
+      // Nunca aceitar e-mail/uid vindo do corpo da requisição.
+      const decoded = await verifyBearer(req);
+      if (!decoded) {
+        res.status(401).json({ ok: false, erro: "Não autenticado." });
+        return;
       }
-    }
+      const authAge = Math.floor(Date.now() / 1000) - Number(decoded.auth_time || 0);
+      if (authAge > DELETE_MAX_AUTH_AGE_SECONDS) {
+        res.status(401).json({ ok: false, erro: "Faça login novamente para excluir a conta." });
+        return;
+      }
 
-    // 3. Deleta o documento raiz da empresa
-    try {
-      await db.doc(empresaPath).delete();
-      deletados.push(empresaPath);
-      logger.info("[deleteAccount] documento empresa deletado", { uid });
-    } catch (e) {
-      falhas.push({ path: empresaPath, erro: e.message });
-      logger.error("[deleteAccount] falha ao deletar empresa", { uid, error: e.message });
-    }
+      const uid = decoded.uid;
+      logger.info("[deleteAccount] solicitação autenticada", { uid });
+      const deletados = [];
+      const falhas = [];
 
-    // 4. Deleta documento na coleção USUARIOS
-    const usuarioPath = `USUARIOS/${uid}`;
-    try {
-      await db.doc(usuarioPath).delete();
-      deletados.push(usuarioPath);
-      logger.info("[deleteAccount] documento USUARIOS deletado", { uid });
-    } catch (e) {
-      falhas.push({ path: usuarioPath, erro: e.message });
-      logger.error("[deleteAccount] falha ao deletar USUARIOS", { uid, error: e.message });
-    }
+      const steps = [
+        // EMPRESAS/{uid} com TODAS as subcoleções (inclui USERS/{uid}/ORCAMENTOS etc.)
+        ["EMPRESAS", () => deleteDocRecursive(db.doc(`EMPRESAS/${uid}`))],
+        ["USUARIOS", () => db.doc(`USUARIOS/${uid}`).delete()],
+        ["SHARE_LINKS", async () => {
+          const links = await db.collection("SHARE_LINKS").where("ownerUid", "==", uid).get();
+          await Promise.all(links.docs.map((d) => d.ref.delete()));
+        }],
+        ["auth/user", () => auth.deleteUser(uid)],
+      ];
 
-    // 5. Deleta o usuário do Firebase Auth
-    try {
-      await auth.deleteUser(uid);
-      deletados.push("auth/user");
-      logger.info("[deleteAccount] usuário Auth removido", { uid });
-    } catch (e) {
-      falhas.push({ path: "auth/user", erro: e.message });
-      logger.error("[deleteAccount] falha ao deletar usuário Auth", { uid, error: e.message });
-    }
+      for (const [name, run] of steps) {
+        try {
+          await run();
+          deletados.push(name);
+        } catch (e) {
+          falhas.push({ path: name, erro: e.message });
+          logger.error("[deleteAccount] falha", { uid, step: name, error: e.message });
+        }
+      }
 
-    // 6. Responde com resumo
-    if (falhas.length === 0) {
-      res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso.", uid, deletados });
-    } else {
-      res.status(500).json({
-        ok: false,
-        erro: "Algumas etapas da exclusão falharam.",
-        uid,
-        deletados,
-        falhas,
-      });
-    }
+      if (falhas.length === 0) {
+        res.status(200).json({ ok: true, message: "Conta e dados removidos com sucesso." });
+      } else {
+        res.status(500).json({ ok: false, erro: "Algumas etapas da exclusão falharam.", falhas });
+      }
+    });
   }
 );
+
+// ---------------------------------------------------------------------------
+// Link público de orçamento (código curto + telefone validado no servidor)
+// ---------------------------------------------------------------------------
+require("./share_link").registerShareLinkFunctions(exports, REGION);

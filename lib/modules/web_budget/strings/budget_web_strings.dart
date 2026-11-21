@@ -41,6 +41,11 @@ class BudgetWebStrings {
           ? 'Telefone não confere com o cadastrado no orçamento.'
           : 'The phone number does not match the one registered on the budget.';
 
+  static String get phoneLocked =>
+      _locale.languageCode == 'pt'
+          ? 'Muitas tentativas incorretas. Solicite um novo link ao responsável pelo orçamento.'
+          : 'Too many incorrect attempts. Ask the budget owner for a new link.';
+
   static String get phoneRequired =>
       _locale.languageCode == 'pt'
           ? 'O telefone é obrigatório.'

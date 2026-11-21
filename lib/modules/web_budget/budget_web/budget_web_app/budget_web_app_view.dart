@@ -9,7 +9,7 @@ import 'components/budget_web_app_blocked_view.dart';
 
 /// Raiz do fluxo Web de orçamento.
 ///
-/// Interpreta a URL pública, valida o token provisório do Firebase e
+/// Interpreta a URL pública (`/o/{code}`), pede o telefone e
 /// apresenta, conforme o estado:
 ///
 /// - `loading`  → spinner;
@@ -33,9 +33,9 @@ class _BudgetWebAppViewState extends State<BudgetWebAppView> {
   void initState() {
     super.initState();
     // No Flutter Web, `Uri.base` reflete a URL atual do navegador
-    // (ex.: https://dominio/orcamento/123?token=ABC).
+    // (ex.: https://dominio/o/Xk9fQ2mL7aBcDeFg).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.parseAndValidate(Uri.base);
+      _viewModel.parse(Uri.base);
     });
   }
 
@@ -67,13 +67,15 @@ class _BudgetWebAppViewState extends State<BudgetWebAppView> {
             case BudgetWebAppPhase.auth:
               return BudgetWebAuthView(
                 viewModel: _viewModel,
-                onGranted: () => _viewModel.grantAccess(),
+                // A tela de telefone já chama `grantAccess` com os dados
+                // liberados pelo servidor; aqui não há nada a fazer.
+                onGranted: () {},
               );
             case BudgetWebAppPhase.access:
               return BudgetWebBudgetView(
-                enderecoNumero: _viewModel.enderecoNumero!,
-                ownerUid: _viewModel.ownerUid!,
-                token: _viewModel.token!,
+                code: _viewModel.code!,
+                phone: _viewModel.phone!,
+                shared: _viewModel.shared!,
               );
           }
         },

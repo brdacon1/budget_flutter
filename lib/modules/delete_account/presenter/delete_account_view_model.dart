@@ -10,7 +10,8 @@ class DeleteAccountViewModel extends ChangeNotifier {
     deleteCommand = Command1(_executeDelete);
   }
 
-  late final Command1<void, String> deleteCommand;
+  /// `true` = entrar com Google; `false` = e-mail e senha.
+  late final Command1<void, bool> deleteCommand;
 
   String _email = '';
   String get email => _email;
@@ -19,6 +20,16 @@ class DeleteAccountViewModel extends ChangeNotifier {
     _emailError = null;
     notifyListeners();
   }
+
+  String _password = '';
+  set password(String value) {
+    _password = value;
+    _passwordError = null;
+    notifyListeners();
+  }
+
+  String? _passwordError;
+  String? get passwordError => _passwordError;
 
   bool _confirmed = false;
   bool get confirmed => _confirmed;
@@ -39,20 +50,28 @@ class DeleteAccountViewModel extends ChangeNotifier {
 
   void clearErrors() {
     _emailError = null;
+    _passwordError = null;
     _confirmError = null;
     notifyListeners();
   }
 
-  Future<Result<void>> _executeDelete(String email) async {
+  Future<Result<void>> _executeDelete(bool withGoogle) async {
     _success = false;
     bool hasError = false;
+    final email = _email.trim();
 
-    if (email.trim().isEmpty) {
-      _emailError = 'Informe o e-mail cadastrado.';
-      hasError = true;
-    } else if (!_isValidEmail(email.trim())) {
-      _emailError = 'Informe um e-mail válido.';
-      hasError = true;
+    if (!withGoogle) {
+      if (email.isEmpty) {
+        _emailError = 'Informe o e-mail cadastrado.';
+        hasError = true;
+      } else if (!_isValidEmail(email)) {
+        _emailError = 'Informe um e-mail válido.';
+        hasError = true;
+      }
+      if (_password.isEmpty) {
+        _passwordError = 'Informe a senha da conta.';
+        hasError = true;
+      }
     }
 
     if (!_confirmed) {
@@ -65,16 +84,15 @@ class DeleteAccountViewModel extends ChangeNotifier {
       return Result.error(Exception('validation'));
     }
 
-    final result = await _repository.deleteAccountByEmail(email.trim());
+    final result = withGoogle
+        ? await _repository.deleteWithGoogle()
+        : await _repository.deleteWithPassword(email, _password);
 
     if (result is Ok<void>) {
       _success = true;
-    } else if (result is Error<void>) {
-      _success = false;
-      final msg = result.error.toString();
-      if (msg.contains('Usuário não encontrado') || msg.contains('404')) {
-        _emailError = 'Nenhuma conta encontrada com este e-mail.';
-      }
+    } else if (result is Error<void> &&
+        result.error is DeleteAccountInvalidCredentials) {
+      _passwordError = 'E-mail ou senha incorretos.';
     }
 
     notifyListeners();

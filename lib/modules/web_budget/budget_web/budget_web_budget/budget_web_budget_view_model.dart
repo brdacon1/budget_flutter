@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
@@ -15,21 +13,20 @@ import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
 
 /// Estado do orçamento liberado no fluxo Web.
 ///
-/// Carrega, uma única vez, o orçamento (CustomerInfo), os itens, os dados do
-/// titular (OwnerPdf) e as observações — tudo via [WebBudgetService] (REST
-/// + token provisório do Firebase). Centraliza totais e a ação de
-/// aprovação/reprovação, reutilizando o campo `STATUS` (regra de negócio
-/// existente) — nenhuma regra paralela.
+/// Recebe os dados já liberados pelo servidor ([SharedBudget], após o
+/// telefone conferir). Centraliza totais e a ação de aprovação/reprovação,
+/// feita pela Function `respondShareLink` (altera só o `STATUS` e cria a
+/// notificação do dono).
 class BudgetWebBudgetViewModel extends ChangeNotifier {
   BudgetWebBudgetViewModel({
-    required this.ownerUid,
-    required this.enderecoNumero,
-    required this.token,
+    required this.code,
+    required this.phone,
+    required this.shared,
   });
 
-  final String ownerUid;
-  final String enderecoNumero;
-  final String token;
+  final String code;
+  final String phone;
+  final SharedBudget shared;
 
   final WebBudgetService _service = WebBudgetService();
   final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
@@ -78,30 +75,10 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
     _error = null;
     _safeNotify();
     try {
-      final budget = await _service.getBudget(
-        ownerUid: ownerUid,
-        enderecoNumero: enderecoNumero,
-        token: token,
-      );
-      final items = await _service.getItems(
-        ownerUid: ownerUid,
-        enderecoNumero: enderecoNumero,
-        token: token,
-      );
-      final ownerMap = await _service.getOwnerInfo(
-        ownerUid: ownerUid,
-        token: token,
-      );
-      final observations = await _service.getObservations(
-        ownerUid: ownerUid,
-        enderecoNumero: enderecoNumero,
-        token: token,
-      );
-
-      _budget = budget;
-      _items = items;
-      _owner = OwnerPdf.fromJson(ownerMap);
-      _observations = observations;
+      _budget = shared.budget;
+      _items = shared.items;
+      _owner = OwnerPdf.fromJson(shared.owner);
+      _observations = shared.observations;
       _calcTotals();
     } on WebBudgetAccessError catch (_) {
       _error = BudgetWebStrings.blockedMessage;
@@ -142,35 +119,25 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
   Future<void> updateStatus(BuildContext context, String status) async {
     _loadingEvent.alertLoading(context);
     try {
-      await _service.updateStatus(
-        ownerUid: ownerUid,
-        enderecoNumero: enderecoNumero,
-        token: token,
+      final isApproved = status.toUpperCase() == 'APROVADO';
+      final id = _budget?.id ?? '';
+      // A Function grava o STATUS e cria a notificação (push) do dono.
+      await _service.respond(
+        code: code,
+        phone: phone,
         status: status,
+        title:
+            isApproved
+                ? BudgetWebStrings.notificationTitleApproved(id)
+                : BudgetWebStrings.notificationTitleRejected(id),
+        message:
+            isApproved
+                ? BudgetWebStrings.notificationMessageApproved(id)
+                : BudgetWebStrings.notificationMessageRejected(id),
       );
       if (context.mounted) _loadingEvent.closeLoading(context);
-      // Atualiza localmente (imutável onde possível; CustomerInfo é legado).
       _budget?.status = status;
       _safeNotify();
-      // Notifica o dono (quem criou/enviou o orçamento) — push via Firestore.
-      final isApproved = status.toUpperCase() == 'APROVADO';
-      final id = _budget?.id ?? enderecoNumero;
-      unawaited(
-        _service.sendApprovalNotification(
-          ownerUid: ownerUid,
-          enderecoNumero: enderecoNumero,
-          token: token,
-          status: status,
-          title:
-              isApproved
-                  ? BudgetWebStrings.notificationTitleApproved(id)
-                  : BudgetWebStrings.notificationTitleRejected(id),
-          message:
-              isApproved
-                  ? BudgetWebStrings.notificationMessageApproved(id)
-                  : BudgetWebStrings.notificationMessageRejected(id),
-        ),
-      );
       if (context.mounted) {
         await _displayAlert.notification(
           context,

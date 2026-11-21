@@ -46,7 +46,6 @@ class BudgetWebDataView extends StatefulWidget {
     required this.items,
     required this.observations,
     required this.owner,
-    required this.token,
     required this.moneyConvert,
     required this.totalProducts,
     required this.totalServices,
@@ -58,7 +57,6 @@ class BudgetWebDataView extends StatefulWidget {
   final List<ItemsBudget> items;
   final List<ObservationPdf> observations;
   final OwnerPdf owner;
-  final String token;
   final ConvertCoinRepository moneyConvert;
   final double totalProducts;
   final double totalServices;
@@ -97,7 +95,6 @@ class _BudgetWebDataViewState extends State<BudgetWebDataView> {
       customer: widget.budget,
       owner: widget.owner,
       observations: widget.observations,
-      token: widget.token,
     );
   }
 
