@@ -25,7 +25,11 @@ class AppCheckRemoteDataSource {
           ? AndroidDebugProvider(debugToken: token)
           : const AndroidPlayIntegrityProvider(),
       providerApple: kDebugMode
-          ? AppleDebugProvider(debugToken: token)
+          // iOS ignora o token passado (o plugin usa setenv depois do processo
+          // iniciar). Sem token, o SDK usa o token local do aparelho/simulador
+          // e imprime no log "Firebase App Check Debug Token: ..." — cadastre
+          // esse valor no Console (uma vez por simulador/aparelho).
+          ? const AppleDebugProvider()
           // DeviceCheck: não exige entitlement nem mudança no provisioning
           // profile. Migrar para App Attest exige o entitlement
           // `appattest-environment` + App ID + novo profile no CI.
