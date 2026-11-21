@@ -23,6 +23,7 @@ jobs:
 
     env:
       BUNDLE_ID: com.housestudio.oflite
+      SHARE_BUNDLE_ID: com.housestudio.oflite.share-proof
       PROFILE_KIND: ${{ github.event.inputs.profile || 'publishment' }}
 
     steps:
@@ -66,19 +67,25 @@ jobs:
           IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
           MOBILE_PROVISION_PUBLISHMENT: ${{ secrets.MOBILE_PROVISION_PUBLISHMENT }}
           MOBILE_PROVISION_DEVELOPMENT: ${{ secrets.MOBILE_PROVISION_DEVELOPMENT }}
+          # Share Extension (comprovantes) — profile próprio, mesmo App Group.
+          MOBILE_PROVISION_SHARE_PUBLISHMENT: ${{ secrets.MOBILE_PROVISION_SHARE_PUBLISHMENT }}
+          MOBILE_PROVISION_SHARE_DEVELOPMENT: ${{ secrets.MOBILE_PROVISION_SHARE_DEVELOPMENT }}
         run: |
           set -euo pipefail
 
           if [ "$PROFILE_KIND" = "development" ]; then
             PROFILE_B64="$MOBILE_PROVISION_DEVELOPMENT"; PROFILE_SECRET=MOBILE_PROVISION_DEVELOPMENT
+            SHARE_B64="$MOBILE_PROVISION_SHARE_DEVELOPMENT"; SHARE_SECRET=MOBILE_PROVISION_SHARE_DEVELOPMENT
           else
             PROFILE_B64="$MOBILE_PROVISION_PUBLISHMENT"; PROFILE_SECRET=MOBILE_PROVISION_PUBLISHMENT
+            SHARE_B64="$MOBILE_PROVISION_SHARE_PUBLISHMENT"; SHARE_SECRET=MOBILE_PROVISION_SHARE_PUBLISHMENT
           fi
 
           missing=0
           [ -z "$IOS_P12_BASE64" ]   && { echo "::error::Secret IOS_P12_BASE64 não configurado."; missing=1; }
           [ -z "$IOS_P12_PASSWORD" ] && { echo "::error::Secret IOS_P12_PASSWORD não configurado."; missing=1; }
           [ -z "$PROFILE_B64" ]      && { echo "::error::Secret $PROFILE_SECRET não configurado."; missing=1; }
+          [ -z "$SHARE_B64" ]        && { echo "::error::Secret $SHARE_SECRET não configurado."; missing=1; }
           [ "$missing" -eq 0 ] || exit 1
 
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
@@ -126,6 +133,14 @@ jobs:
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
 
+          # Profile da Share Extension
+          SHARE_PP_PATH="$RUNNER_TEMP/share.mobileprovision"
+          printf '%s' "$SHARE_B64" | base64 --decode > "$SHARE_PP_PATH"
+          security cms -D -i "$SHARE_PP_PATH" > "$RUNNER_TEMP/share.plist"
+          SHARE_PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/share.plist")
+          cp "$SHARE_PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$SHARE_PROFILE_UUID.mobileprovision"
+          echo "Share profile: $(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/share.plist") ($SHARE_PROFILE_UUID)"
+
           echo "Profile: $PROFILE_NAME ($PROFILE_UUID)"
           echo "Team ID: $TEAM_ID"
           echo "Método:  $EXPORT_METHOD"
@@ -133,6 +148,7 @@ jobs:
           {
             echo "SIGN_IDENTITY=$SIGN_IDENTITY"
             echo "PROFILE_UUID=$PROFILE_UUID"
+            echo "SHARE_PROFILE_UUID=$SHARE_PROFILE_UUID"
             echo "TEAM_ID=$TEAM_ID"
             echo "EXPORT_METHOD=$EXPORT_METHOD"
           } >> "$GITHUB_ENV"
@@ -151,6 +167,11 @@ jobs:
             -e "s/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = \"iPhone Developer\";/\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"$SIGN_IDENTITY\";/g" \
             -e "s/DEVELOPMENT_TEAM = [A-Z0-9]*;/DEVELOPMENT_TEAM = $TEAM_ID;/g" \
             -e "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"$PROFILE_UUID\";/g" \
+            "$PBXPROJ"
+          # A Share Extension não tem PROVISIONING_PROFILE_SPECIFIER: insere o
+          # profile dela logo após o bundle id em cada configuração.
+          sed -i '' \
+            -e "s/\(PRODUCT_BUNDLE_IDENTIFIER = \"$SHARE_BUNDLE_ID\";\)/\1 PROVISIONING_PROFILE_SPECIFIER = \"$SHARE_PROFILE_UUID\";/g" \
             "$PBXPROJ"
           grep -nE "CODE_SIGN_STYLE|CODE_SIGN_IDENTITY|PROVISIONING_PROFILE_SPECIFIER|DEVELOPMENT_TEAM" "$PBXPROJ"
 
@@ -173,6 +194,8 @@ jobs:
             <dict>
               <key>${BUNDLE_ID}</key>
               <string>${PROFILE_UUID}</string>
+              <key>${SHARE_BUNDLE_ID}</key>
+              <string>${SHARE_PROFILE_UUID}</string>
             </dict>
             <key>uploadSymbols</key>
             <true/>
