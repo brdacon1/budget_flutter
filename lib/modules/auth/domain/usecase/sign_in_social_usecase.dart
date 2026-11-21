@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -41,6 +42,11 @@ class SignInSocialUseCase {
     final auth = await _authenticate(provider);
     // currentUser já reflete o nome gravado no 1º login com Apple.
     final authUser = _authRepository.currentUser ?? auth.user;
+    debugPrint(
+      '[SocialLogin] uid=${authUser?.uid} '
+      'displayName="${authUser?.displayName}" '
+      'credDisplayName="${auth.user?.displayName}"',
+    );
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', authUser?.email ?? '');
@@ -56,8 +62,12 @@ class SignInSocialUseCase {
           ..googleAuth = true;
 
     final user = await _loadUserSession(uid);
+    debugPrint(
+      '[SocialLogin] doc existente=${user != null} nomeNoBanco="${user?.name}"',
+    );
     if (user?.user != authUser?.uid) {
       await _createDefaultUser(authUser);
+      debugPrint('[SocialLogin] doc criado com nome="${authUser?.displayName}"');
       return;
     }
 

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/domain/exception/auth_cancelled_exception.dart';
 import 'package:oflite/modules/auth/domain/usecase/restore_session_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/sign_in_email_usecase.dart';
@@ -26,6 +27,7 @@ class LoginViewModel extends ChangeNotifier {
   final SignInEmailUseCase _signInEmail = getIt<SignInEmailUseCase>();
   final SignInSocialUseCase _signInSocial = getIt<SignInSocialUseCase>();
   final RestoreSessionUseCase _restoreSession = getIt<RestoreSessionUseCase>();
+  final UserRepository _userRepository = getIt<UserRepository>();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -89,6 +91,12 @@ class LoginViewModel extends ChangeNotifier {
       errorMessage = null;
     }
     notifyListeners();
+  }
+
+  /// Sessão sem nome válido (vazio ou o padrão "Usuário"/"User").
+  bool get needsUserName {
+    final name = (_userRepository.selectUser.value?.name ?? '').trim();
+    return name.isEmpty || name == LoginStrings.userFallback;
   }
 
   void consumeState() {
