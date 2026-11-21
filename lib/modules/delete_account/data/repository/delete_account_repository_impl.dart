@@ -24,6 +24,13 @@ class DeleteAccountRepositoryImpl implements DeleteAccountRepository {
   Future<Result<void>> deleteWithGoogle() =>
       _run(_dataSource.deleteWithGoogle);
 
+  @override
+  String? get currentProvider => _dataSource.currentProvider;
+
+  @override
+  Future<Result<void>> deleteCurrentUser({String? password}) =>
+      _run(() => _dataSource.deleteCurrentUser(password: password));
+
   Future<Result<void>> _run(Future<void> Function() action) async {
     try {
       await action();

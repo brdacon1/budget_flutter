@@ -21,4 +21,10 @@ class MainConfigMenuStrings {
 
   static String get menuChangeUsername =>
       _isPt ? 'Trocar nome de usuário' : 'Change username';
+
+  static String get menuPremium =>
+      _isPt ? 'Seja Premium (assinatura)' : 'Go Premium (subscription)';
+
+  static String get menuDeleteAccount =>
+      _isPt ? 'Excluir conta' : 'Delete account';
 }

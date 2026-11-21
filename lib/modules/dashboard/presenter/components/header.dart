@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,8 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view.dart';
 import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
+import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/delete_account_in_app_view.dart';
+import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/modules/dashboard/presenter/strings/dashboard_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -76,7 +79,7 @@ class _ProfileCard extends State<ProfileCard> {
   late String _selectedItem;
   late final List<String> _dropdownItems;
 
-  final List<IconData> _dropdownIcons = [Icons.person, Icons.logout];
+  late final List<IconData> _dropdownIcons;
 
   @override
   void initState() {
@@ -85,7 +88,19 @@ class _ProfileCard extends State<ProfileCard> {
         getIt<UserRepository>().selectUser.value?.name ??
         DashboardStrings.userFallback;
     _selectedItem = capitalizeFirstLetter(name.split(' ')[0]);
-    _dropdownItems = [_selectedItem, DashboardStrings.logout];
+    // Premium e exclusão de conta só no app (web tem página própria).
+    _dropdownItems = [
+      _selectedItem,
+      if (!kIsWeb) DashboardStrings.premium,
+      if (!kIsWeb) DashboardStrings.deleteAccount,
+      DashboardStrings.logout,
+    ];
+    _dropdownIcons = [
+      Icons.person,
+      if (!kIsWeb) Icons.workspace_premium_outlined,
+      if (!kIsWeb) Icons.delete_forever_outlined,
+      Icons.logout,
+    ];
   }
 
   Future<void> _openNavigationScreen() async {
@@ -113,6 +128,20 @@ class _ProfileCard extends State<ProfileCard> {
         underline: Container(color: Colors.transparent),
         value: _selectedItem,
         onChanged: (String? newValue) async {
+          if (newValue == DashboardStrings.premium) {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SubscriptionView()),
+            );
+            return;
+          }
+          if (newValue == DashboardStrings.deleteAccount) {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DeleteAccountInAppView()),
+            );
+            return;
+          }
           SharedPreferences prefs = await SharedPreferences.getInstance();
           if (newValue! == DashboardStrings.logout) {
             getIt<NotificationRepository>().stopBudgetApprovalListener();

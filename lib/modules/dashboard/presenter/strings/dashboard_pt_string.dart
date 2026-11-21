@@ -95,6 +95,12 @@ class DashboardStrings {
 
   static String get userFallback => _isPt ? 'Usuário' : 'User';
 
+  static String get premium =>
+      _isPt ? 'Seja Premium' : 'Go Premium';
+
+  static String get deleteAccount =>
+      _isPt ? 'Excluir conta' : 'Delete account';
+
   static String get logout => _isPt ? 'Sair' : 'Logout';
 
   /// Rótulo curto de eixo: R$ 0, R$ 850, R$ 2,5k.
