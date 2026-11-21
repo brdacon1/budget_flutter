@@ -124,10 +124,12 @@ class _ProfileCard extends State<ProfileCard> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         border: Border.all(color: Colors.white10),
       ),
-      child: DropdownButton<String>(
-        underline: Container(color: Colors.transparent),
-        value: _selectedItem,
-        onChanged: (String? newValue) async {
+      // PopupMenuButton: a largura acompanha só o nome, não o item mais
+      // longo do menu (DropdownButton sempre usa o mais largo).
+      child: PopupMenuButton<String>(
+        tooltip: '',
+        color: Theme.of(context).canvasColor,
+        onSelected: (String newValue) async {
           if (newValue == DashboardStrings.premium) {
             await Navigator.push(
               context,
@@ -142,8 +144,8 @@ class _ProfileCard extends State<ProfileCard> {
             );
             return;
           }
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          if (newValue! == DashboardStrings.logout) {
+          if (newValue == DashboardStrings.logout) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
             getIt<NotificationRepository>().stopBudgetApprovalListener();
             getIt<CrashlyticsRepository>().setUser(null);
             await _logout();
@@ -152,26 +154,40 @@ class _ProfileCard extends State<ProfileCard> {
             await _openNavigationScreen();
           }
         },
-        items:
-            _dropdownItems.asMap().entries.map<DropdownMenuItem<String>>((
-              entry,
-            ) {
-              int index = entry.key;
-              String value = entry.value;
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Row(
-                  children: [
-                    Icon(_dropdownIcons[index]), // Ícone
-                    const SizedBox(
-                      width: 5,
-                    ), // Espaçamento entre o ícone e o texto
-                    Text(value, style: const TextStyle(fontSize: 12)),
-                    const SizedBox(width: 5), // Texto do item
-                  ],
+        itemBuilder: (context) => [
+          for (var i = 1; i < _dropdownItems.length; i++)
+            PopupMenuItem<String>(
+              value: _dropdownItems[i],
+              child: Row(
+                children: [
+                  Icon(_dropdownIcons[i]),
+                  const SizedBox(width: 8),
+                  Text(_dropdownItems[i], style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+        ],
+        child: ValueListenableBuilder(
+          valueListenable: getIt<UserRepository>().selectUser,
+          builder: (context, user, _) {
+            final name = capitalizeFirstLetter(
+              (user?.name ?? '').trim().split(' ').first,
+            );
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.person),
+                const SizedBox(width: 5),
+                Text(
+                  name.isEmpty ? DashboardStrings.userFallback : name,
+                  style: const TextStyle(fontSize: 12),
                 ),
-              );
-            }).toList(),
+                const SizedBox(width: 5),
+                const Icon(Icons.arrow_drop_down),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

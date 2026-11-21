@@ -37,6 +37,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");
 const { getMessaging } = require("firebase-admin/messaging");
+const { getStorage } = require("firebase-admin/storage");
 const cors = require("cors")({
   // Domínios oficiais do app + localhost para teste local com `firebase emulators:start`.
   origin: [
@@ -353,6 +354,14 @@ exports.deleteAccount = onRequest(
         ["SHARE_LINKS", async () => {
           const links = await db.collection("SHARE_LINKS").where("ownerUid", "==", uid).get();
           await Promise.all(links.docs.map((d) => d.ref.delete()));
+        }],
+        // Storage: logo da empresa (`{uid}.jpg`, `images/{uid}.jpg`) e
+        // comprovantes de pagamento (`comprovantes/{uid}/...`).
+        ["storage", async () => {
+          const bucket = getStorage().bucket();
+          await bucket.deleteFiles({ prefix: `comprovantes/${uid}/` });
+          await Promise.all([`${uid}.jpg`, `images/${uid}.jpg`].map((p) =>
+            bucket.file(p).delete({ ignoreNotFound: true })));
         }],
         ["auth/user", () => auth.deleteUser(uid)],
       ];

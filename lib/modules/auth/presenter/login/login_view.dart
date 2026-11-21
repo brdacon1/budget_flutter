@@ -43,10 +43,16 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  LoginState? _lastState;
+
   void _onViewModelChanged() {
     final state = _viewModel.state;
+    final previous = _lastState;
+    _lastState = state;
 
     if (state == LoginState.loading) {
+      // Só abre o loading na transição; notificações extras não empilham.
+      if (previous == LoginState.loading) return;
       _loadingEvent.alertLoading(context);
       return;
     }
