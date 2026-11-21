@@ -19,6 +19,9 @@ abstract class ChatMediaRepository {
 
   Future<RawMediaFile?> pickPdf();
 
+  /// Seletor de fotos do sistema (Android Photo Picker).
+  Future<List<RawMediaFile>> pickImages(int limit);
+
   Future<List<RawMediaFile>> initialShared();
 
   Stream<List<RawMediaFile>> sharedStream();

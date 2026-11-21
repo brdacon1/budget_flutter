@@ -52,6 +52,9 @@ class ChatMediaRepositoryImpl implements ChatMediaRepository {
   Future<RawMediaFile?> pickPdf() => _device.pickPdf();
 
   @override
+  Future<List<RawMediaFile>> pickImages(int limit) => _device.pickImages(limit);
+
+  @override
   Future<List<RawMediaFile>> initialShared() => _shared.initialMedia();
 
   @override

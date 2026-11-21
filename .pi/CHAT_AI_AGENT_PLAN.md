@@ -796,7 +796,7 @@ Alterações:
 |---------|---------|
 | `chat_assistant/presenter/chat_assistant/components/chat_input_bar.dart` | Botão **"+"** à esquerda (só no modo IA). Alterna teclado ↔ painel. |
 | `chat_assistant/presenter/chat_attachment_panel/` (**modal-tela**, §19 da arquitetura) | Grade Fotos/Câmera/Documento. View + VM + `components/chat_attachment_option.dart`. |
-| `chat_assistant/presenter/chat_media_picker/` (**tela**) | Grade de miniaturas com seleção (máx. 2, bolinha com número), abas Fotos/Álbuns, tela de prévia com legenda e botão enviar com contador (print 2). Usa `photo_manager` (listar galeria) — `image_picker` não permite essa UI. |
+| `chat_assistant/presenter/chat_media_picker/` (**tela**) | Grade de miniaturas com seleção (máx. 2, bolinha com número), abas Fotos/Álbuns, tela de prévia com legenda e botão enviar com contador (print 2). Usa `photo_manager` (listar galeria) — `image_picker` não permite essa UI. **Só iOS.** No Android "Fotos" abre o Photo Picker do sistema (`image_picker.pickMultiImage(limit: 2)`) e segue para a prévia com legenda/recorte: a política do Play proíbe `READ_MEDIA_IMAGES`/`READ_MEDIA_VIDEO` quando o seletor do sistema basta (removidas no manifest com `tools:node="remove"`). |
 | `chat_assistant/data/datasource/device_media_datasource.dart` | Único lugar com `photo_manager`, `image_picker` (câmera) e `file_selector` (PDF). |
 | `chat_assistant/data/datasource/shared_media_remote_datasource.dart` | `receive_sharing_intent` (§15.4). |
 | `chat_assistant/domain/usecase/receive_shared_proof_usecase.dart` | §15.4. |

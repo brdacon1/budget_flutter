@@ -730,6 +730,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<ProofAttachmentValidation?> captureProofPhoto() => _pickProof.camera();
 
+  Future<ProofAttachmentValidation?> pickSystemPhotos() =>
+      _pickProof.systemPhotos();
+
   Future<ProofAttachmentValidation?> pickProofDocument() =>
       _pickProof.document();
 

@@ -1,5 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_media_repository.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_limits.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
 
@@ -13,6 +14,12 @@ class PickProofAttachmentsUsecase {
   Future<ProofAttachmentValidation?> camera() async {
     final f = await _media.takePhoto();
     return f == null ? null : _validate([f]);
+  }
+
+  /// Seletor de fotos do sistema, limitado a [PaymentProofLimits.maxImagesPerSend].
+  Future<ProofAttachmentValidation?> systemPhotos() async {
+    final files = await _media.pickImages(PaymentProofLimits.maxImagesPerSend);
+    return files.isEmpty ? null : _validate(files);
   }
 
   Future<ProofAttachmentValidation?> document() async {

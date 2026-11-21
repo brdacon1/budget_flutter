@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_app_bar.dart';
@@ -418,6 +419,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _attachPhotos() async {
+    // Android: Photo Picker do sistema (política do Play, sem READ_MEDIA_*).
+    if (Platform.isAndroid) {
+      await _previewAndSend(await _vm.pickSystemPhotos());
+      return;
+    }
     if (!await _vm.canUseMedia(camera: false) || !mounted) return;
     final result = await ChatMediaPickerView.show(context);
     if (result == null || !mounted) return;
