@@ -140,4 +140,24 @@ class ProductPtString {
       _isPt
           ? 'Você não possuí o plano premium onde é possível cadastrar produtos ilimitados'
           : "You don't have the premium plan which allows registering unlimited products";
+
+  // --- Seleção para remoção (mesmo fluxo da lista de itens do orçamento) ---
+  static String get newItem => _isPt ? 'Novo Item' : 'New item';
+  static String removeSelected(int n) => _isPt ? 'Remover ($n)' : 'Remove ($n)';
+  static String selectedCount(int n) =>
+      n == 1
+          ? (_isPt ? '1 selecionado' : '1 selected')
+          : (_isPt ? '$n selecionados' : '$n selected');
+  static String get cancelSelection =>
+      _isPt ? 'Cancelar seleção' : 'Cancel selection';
+  static String get selectAll => _isPt ? 'Selecionar todos' : 'Select all';
+  static String get clearSelection => _isPt ? 'Limpar' : 'Clear';
+  static String confirmRemoveTitle(int n) =>
+      n == 1
+          ? (_isPt ? 'Remover item' : 'Remove item')
+          : (_isPt ? 'Remover $n itens' : 'Remove $n items');
+  static String get confirmRemoveMessage =>
+      _isPt
+          ? 'Essa ação não pode ser desfeita.'
+          : 'This action cannot be undone.';
 }

@@ -1,8 +1,12 @@
-import 'package:badges/badges.dart' as badges;
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
+import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_selection_bar.dart';
+import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
+import 'package:oflite/injection.dart';
+import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'product_price_list_view_model.dart';
@@ -13,9 +17,10 @@ import 'product_price_list_view_model.dart';
 /// descarta em `dispose`. Toda a reconstrução reativa acontece via
 /// `AnimatedBuilder(animation: _viewModel, ...)` — **nenhum `setState`**.
 ///
-/// A View apenas compõe a estrutura (header + lista + FABs) e delega as
-/// ações (carregar, buscar, abrir carrinho, excluir, criar/editar, voltar)
-/// ao ViewModel. Os blocos visuais repetidos vivem em `components/`
+/// A View apenas compõe a estrutura (header + barra de seleção + lista +
+/// FABs) e delega as ações ao ViewModel. Remoção: o check circular do card
+/// marca o item → "Remover (n)" → confirmação (mesmo fluxo da lista de itens
+/// do orçamento). Os blocos visuais repetidos vivem em `components/`
 /// ([ProductPriceListHeader], [ProductPriceCard]).
 class ProductPriceListView extends StatefulWidget {
   const ProductPriceListView({super.key});
@@ -42,61 +47,78 @@ class _ProductPriceListView extends State<ProductPriceListView> {
     super.dispose();
   }
 
+  /// Confirma e remove os itens marcados (mesmo fluxo da lista de itens
+  /// do orçamento).
+  Future<void> _confirmDelete() async {
+    final count = _viewModel.selectedCount;
+    final confirm = await showConfirmBottomModal(
+      context,
+      title: ProductPtString.confirmRemoveTitle(count),
+      message: ProductPtString.confirmRemoveMessage,
+    );
+    if (!confirm || !mounted) return;
+    final ok = await _viewModel.deleteSelected();
+    if (!mounted) return;
+    final alert = getIt<DisplayAlertRepository>();
+    if (ok) {
+      await alert.notificationNotCloseScreen(
+        context,
+        ProductPtString.doneTitle,
+        ProductPtString.deleteSuccess,
+      );
+    } else {
+      await alert.notificationError(
+        context,
+        ProductPtString.errorTitle,
+        ProductPtString.deleteError,
+      );
+    }
+  }
+
   Widget _buildFloatingActionButton() {
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
-        if (_viewModel.deleteVisible) {
-          return badges.Badge(
-            badgeStyle: badges.BadgeStyle(
-              badgeColor: const Color.fromARGB(255, 231, 15, 87),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            badgeContent: Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: Center(
-                child: Text(
-                  _viewModel.deleteItems.length.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-            ),
-            child: FloatingActionButton.extended(
-              heroTag: 'delete',
-              onPressed: () => _viewModel.openDeleteModal(context),
-              backgroundColor: buttonColor,
-              elevation: 4,
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: Colors.black,
-              ),
-              label: const Text(
-                'Remover todos',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
+        if (_viewModel.selectionMode) {
+          return FloatingActionButton.extended(
+            heroTag: 'delete',
+            onPressed: _viewModel.deleting ? null : _confirmDelete,
+            backgroundColor: statusRejectedColor,
+            elevation: 4,
+            icon:
+                _viewModel.deleting
+                    ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: whiteColor,
+                      ),
+                    )
+                    : const Icon(
+                      Icons.delete_outline_rounded,
+                      color: whiteColor,
+                    ),
+            label: Text(
+              ProductPtString.removeSelected(_viewModel.selectedCount),
+              style: const TextStyle(
+                color: whiteColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
           );
         }
-
         return FloatingActionButton.extended(
           heroTag: 'adicionar_novo_item',
           onPressed: () => _viewModel.addNew(context),
           backgroundColor: buttonColor,
           elevation: 4,
-          icon: const Icon(Icons.add, color: Colors.black, size: 20),
-          label: const Text(
-            'Novo Item',
-            style: TextStyle(
-              color: Colors.black,
+          icon: const Icon(Icons.add, color: blackColor, size: 20),
+          label: Text(
+            ProductPtString.newItem,
+            style: const TextStyle(
+              color: blackColor,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -109,12 +131,9 @@ class _ProductPriceListView extends State<ProductPriceListView> {
   Widget _buildList({required List<ProductPriceModel> list}) {
     return Expanded(
       child: RefreshIndicator(
-        color: Colors.cyan[50],
+        color: refreshIndicatorColor,
         backgroundColor: bgColor,
-        onRefresh: () async {
-          await _viewModel.refresh();
-          _viewModel.clearDeleteState();
-        },
+        onRefresh: _viewModel.refresh,
         child: ListView.builder(
           shrinkWrap: true,
           padding: const EdgeInsets.only(
@@ -128,10 +147,13 @@ class _ProductPriceListView extends State<ProductPriceListView> {
             return ProductPriceCard(
               item: list[index],
               moneyConvert: _viewModel.moneyConvert,
-              checkBoxAppear: _viewModel.checkBoxAppear,
-              onLongPress: _viewModel.onLongPress,
-              onTap: () => _viewModel.openCreator(context, item: list[index]),
-              onToggleDelete: () => _viewModel.toggleDeleteCheckbox(index),
+              selected: _viewModel.isSelected(list[index]),
+              onTap: () {
+                // No modo remoção o toque seleciona; fora dele, edita.
+                if (_viewModel.toggleIfSelecting(list[index])) return;
+                _viewModel.openCreator(context, item: list[index]);
+              },
+              onToggleSelect: () => _viewModel.toggleSelect(list[index]),
             );
           },
         ),
@@ -155,6 +177,13 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                 onBack: () => Navigator.pop(context, true),
                 onSearchChanged: (_) => _viewModel.onSearchChanged(),
               ),
+              if (_viewModel.selectionMode)
+                ProductPriceSelectionBar(
+                  count: _viewModel.selectedCount,
+                  allSelected: _viewModel.allFilteredSelected,
+                  onCancel: _viewModel.clearSelection,
+                  onToggleAll: _viewModel.selectAllFiltered,
+                ),
               _buildList(list: list),
             ],
           );
