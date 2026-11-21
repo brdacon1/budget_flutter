@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -112,8 +111,8 @@ class _ImageEditView extends State<ImageEditView> {
   Widget _buildImage() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    if (_viewModel.croppedFile != null) {
-      final path = _viewModel.croppedFile!.path;
+    if (_viewModel.croppedPath != null) {
+      final path = _viewModel.croppedPath!;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -121,8 +120,8 @@ class _ImageEditView extends State<ImageEditView> {
         ),
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
-    } else if (_viewModel.pickedFile != null) {
-      final path = _viewModel.pickedFile!.path;
+    } else if (_viewModel.pickedPath != null) {
+      final path = _viewModel.pickedPath!;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 0.8 * screenWidth,
@@ -163,9 +162,7 @@ class _ImageEditView extends State<ImageEditView> {
     );
     if (choice == null) return;
 
-    await _viewModel.pickImage(
-      choice == camera ? ImageSource.camera : ImageSource.gallery,
-    );
+    await _viewModel.pickImage(camera: choice == camera);
   }
 
   Widget _buildMenu() {
@@ -235,7 +232,7 @@ class _ImageEditView extends State<ImageEditView> {
           tooltip: ImageStrings.tooltipSave,
           child: const Icon(Icons.save),
         ),
-        if (_viewModel.croppedFile == null)
+        if (_viewModel.croppedPath == null)
           Padding(
             padding: const EdgeInsets.only(left: 32.0),
             child: FloatingActionButton(

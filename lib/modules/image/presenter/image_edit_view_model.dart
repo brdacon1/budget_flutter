@@ -1,26 +1,24 @@
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/modules/image/presenter/strings/image_pt_string.dart';
-import 'package:oflite/shared/common/utils/dio_client.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:oflite/modules/image/domain/repository/image_logo_repository.dart';
+import 'package:oflite/modules/image/domain/usecase/crop_logo_usecase.dart';
+import 'package:oflite/modules/image/domain/usecase/delete_logo_usecase.dart';
+import 'package:oflite/modules/image/domain/usecase/upload_logo_usecase.dart';
 
 class ImageEditViewModel extends ChangeNotifier {
-  XFile? pickedFile;
-  CroppedFile? croppedFile;
+  final ImageLogoRepository _repository;
+  final CropLogoUsecase _crop;
+  final UploadLogoUsecase _upload;
+  final DeleteLogoUsecase _delete;
+
+  ImageEditViewModel(this._repository, this._crop, this._upload, this._delete);
+
+  String? pickedPath;
+  String? croppedPath;
   String? fileName;
   String? initialImageUrl;
 
-  final DioClient _dioClient = DioClient();
-
   bool get hasImage =>
-      croppedFile != null || pickedFile != null || initialImageUrl != null;
+      croppedPath != null || pickedPath != null || initialImageUrl != null;
 
   void loadInitialImage(String? fotoId, String? logoName) {
     if (fotoId == null || fotoId.isEmpty) return;
@@ -29,117 +27,49 @@ class ImageEditViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Seleciona o logotipo pela [source] escolhida: câmera ou galeria.
-  Future<void> pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+  /// Seleciona o logotipo pela câmera ou galeria.
+  Future<void> pickImage({required bool camera}) async {
+    final path = await _repository.pickImage(camera: camera);
+    if (path == null) return;
 
-    if (pickedFile != null) {
-      this.pickedFile = pickedFile;
-      croppedFile = null;
-      initialImageUrl = null;
-      notifyListeners();
-    }
+    pickedPath = path;
+    croppedPath = null;
+    initialImageUrl = null;
+    notifyListeners();
   }
 
   Future<void> cropImage() async {
-    if (pickedFile == null && initialImageUrl == null) return;
+    final path = await _crop(localPath: pickedPath, remoteUrl: initialImageUrl);
+    if (path == null) return;
 
-    String sourcePath;
-    if (pickedFile != null) {
-      sourcePath = pickedFile!.path;
-    } else {
-      final response = await _dioClient.dioClientAuth.get(initialImageUrl!);
-      if (response.statusCode != 200) {
-        return;
-      }
-
-      final Directory appDir = await getApplicationDocumentsDirectory();
-      final tempPath = '${appDir.path}/temp_crop_image.jpg';
-      final File tempFile = File(tempPath);
-      await tempFile.writeAsBytes(response.data as Uint8List);
-      sourcePath = tempPath;
-    }
-
-    final croppedFile = await ImageCropper().cropImage(
-      sourcePath: sourcePath,
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: ImageStrings.cropImageTitle,
-          toolbarColor: const Color(0xFF2A2D3E),
-          toolbarWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false,
-        ),
-        IOSUiSettings(title: ImageStrings.cropperTitle),
-      ],
-    );
-
-    if (croppedFile != null) {
-      this.croppedFile = croppedFile;
-      initialImageUrl = null;
-      notifyListeners();
-    }
+    croppedPath = path;
+    initialImageUrl = null;
+    notifyListeners();
   }
 
+  /// Devolve a URL do logotipo enviado, ou `''` se não houver/falhar.
   Future<String> uploadImageToFirebase() async {
-    if (croppedFile == null && pickedFile == null) return '';
+    final path = croppedPath ?? pickedPath;
+    if (path == null) return '';
 
-    try {
-      final FirebaseStorage storage = FirebaseStorage.instance;
-      final String? userId = getIt<UserRepository>().selectUser.value?.user;
-      final Directory appDir = await getApplicationDocumentsDirectory();
-
-      fileName = "$userId.jpg";
-      final filePath = "${appDir.path}/$fileName";
-      final File file = File(filePath);
-
-      final Uint8List fileBytes;
-      final cropped = croppedFile;
-      if (cropped != null) {
-        fileBytes = await cropped.readAsBytes();
-      } else {
-        fileBytes = await pickedFile!.readAsBytes();
-      }
-      await file.writeAsBytes(fileBytes);
-
-      final Reference ref = storage.ref().child('$fileName');
-      final UploadTask uploadTask = ref.putFile(file);
-
-      final TaskSnapshot taskSnapshot = await uploadTask;
-      final String imageUrl = await taskSnapshot.ref.getDownloadURL();
-
-      file.delete();
-      return imageUrl;
-    } catch (e) {
-      return '';
-    }
+    final result = await _upload(path);
+    if (result == null) return '';
+    fileName = result.fileName;
+    return result.url;
   }
 
-  Future<void> deleteImage(String? imageName) async {
-    if (imageName == null || imageName.isEmpty) return;
-
-    try {
-      final FirebaseStorage storage = FirebaseStorage.instance;
-      final Reference ref = storage.ref().child('images/$imageName.jpg');
-      await ref.delete();
-    } catch (e) {
-      print('Erro ao excluir a imagem: $e');
-    }
-  }
+  Future<void> deleteImage(String? imageName) => _delete(imageName);
 
   void resetImage() {
-    pickedFile = null;
-    croppedFile = null;
+    pickedPath = null;
+    croppedPath = null;
     fileName = null;
     initialImageUrl = null;
     notifyListeners();
   }
 
   void resetCrop() {
-    croppedFile = null;
+    croppedPath = null;
     notifyListeners();
   }
 }
