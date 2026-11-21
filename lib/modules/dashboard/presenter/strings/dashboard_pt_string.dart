@@ -13,17 +13,77 @@ class DashboardStrings {
 
   static String get pageTitle => _isPt ? 'Dashboard' : 'Dashboard';
 
-  static String get recentBudgets =>
-      _isPt ? 'Orçamentos recentes' : 'Recent budgets';
+  static String get received => _isPt ? 'Recebido' : 'Received';
+
+  static String get toReceive => _isPt ? 'Falta receber' : 'To receive';
+
+  static String get receiptsComparison =>
+      _isPt ? 'Recebimentos por mês' : 'Payments by month';
+
+  static String get total => 'Total';
+
+  static String get soldInMonth =>
+      _isPt ? 'Vendidos no mês' : 'Sold this month';
+
+  static String get soldHint =>
+      _isPt
+          ? 'Itens de orçamentos aprovados e finalizados'
+          : 'Items from approved and finished budgets';
+
+  static String quantity(double q) {
+    final n =
+        q == q.roundToDouble() ? q.toInt().toString() : q.toStringAsFixed(1);
+    return _isPt ? '$n un.' : '$n units';
+  }
+
+  static String get previousMonth => _isPt ? 'Mês anterior' : 'Previous month';
+
+  static String get nextMonth => _isPt ? 'Próximo mês' : 'Next month';
+
+  static String get loadError =>
+      _isPt
+          ? 'Não foi possível carregar o dashboard'
+          : 'Could not load dashboard';
+
+  static const _monthsPt = [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
+  ];
+  static const _monthsEn = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  static String shortMonth(DateTime d) =>
+      (_isPt ? _monthsPt : _monthsEn)[d.month - 1];
+
+  static String monthLabel(DateTime d) => '${shortMonth(d)}/${d.year}';
 
   static String get monthBudgets =>
       _isPt ? 'Orçamentos do mês' : 'Month budgets';
 
-  static String get weeklyProgress =>
-      _isPt ? 'Progresso semanal' : 'Weekly progress';
-
-  static String get weeklyResult =>
-      _isPt ? 'Resultado semanal' : 'Weekly result';
+  static String get monthlyProgress =>
+      _isPt ? 'Progresso mensal' : 'Monthly progress';
 
   static String get approved => _isPt ? 'Aprovados' : 'Approved';
 
@@ -37,21 +97,12 @@ class DashboardStrings {
 
   static String get logout => _isPt ? 'Sair' : 'Logout';
 
-  static String get search => _isPt ? 'Pesquisar' : 'Search';
-
-  static String get clientColumn => _isPt ? 'Cliente' : 'Customer';
-
-  static String get dateColumn => _isPt ? 'Data' : 'Date';
-
-  static String get numberColumn => _isPt ? 'Número' : 'Number';
-
-  static String weekLabel(int week) =>
-      _isPt ? 'Sem. $week' : 'Week $week';
-
-  static String currencyLabel(int value) {
-    if (_isPt) {
-      return 'R\$ ${value}k';
-    }
-    return r'$ ${value}k';
+  /// Rótulo curto de eixo: R$ 0, R$ 850, R$ 2,5k.
+  static String compactCurrency(double value) {
+    final symbol = _isPt ? 'R\$' : '\$';
+    if (value < 1000) return '$symbol ${value.round()}';
+    final k = (value / 1000).toStringAsFixed(value < 10000 ? 1 : 0);
+    final text = k.endsWith('.0') ? k.substring(0, k.length - 2) : k;
+    return '$symbol ${_isPt ? text.replaceAll('.', ',') : text}k';
   }
 }

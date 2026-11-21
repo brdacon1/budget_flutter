@@ -440,6 +440,11 @@ class BudgetRepositoryImpl extends BudgetRepository {
     }
   }
 
+  /// Cache curto por intervalo: trocar de mês e voltar no dashboard não relê
+  /// o Firestore. Outras telas gravam sem passar por aqui, daí o TTL.
+  static const _monthCacheTtl = Duration(minutes: 1);
+  final Map<String, ({DateTime at, List<CustomerInfo> list})> _monthCache = {};
+
   @override
   Future<Result<List<CustomerInfo>>> fetchBudgetsByMonthRange(
     String startId,
@@ -449,9 +454,16 @@ class BudgetRepositoryImpl extends BudgetRepository {
     if (userUid == null || userUid.isEmpty) {
       return Result.error(Exception('User not authenticated'));
     }
+    final key = '$userUid|$startId|$endId';
+    final cached = _monthCache[key];
+    if (cached != null &&
+        DateTime.now().difference(cached.at) < _monthCacheTtl) {
+      return Result.ok(cached.list);
+    }
     try {
       final raw = await _remote.getBudgetsByMonthRange(userUid, startId, endId);
       final list = raw.map((e) => CustomerInfo.fromMap(e)).toList();
+      _monthCache[key] = (at: DateTime.now(), list: list);
       return Result.ok(list);
     } catch (e) {
       return Result.error(Exception(e.toString()));
