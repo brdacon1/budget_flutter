@@ -609,7 +609,7 @@ saldo = totalOrçamento − Σ paid (pagamentos de todos os recibos do orçament
 > **Status (2026-11-20):** código Flutter implementado (módulo `payment_proof`,
 > "+", galeria, prévia, fluxo `proof*` com "Voltar ao menu", lista no menu do
 > orçamento, intent filters Android). **Pendente:** criar o target *Share
-> Extension* no Xcode (arquivos já em `ios/Share Extension/`), registrar o App
+> Extension* no Xcode (arquivos já em `ios/ShareExtensionTemplate/`), registrar o App
 > Group `group.com.housestudio.oflite.share`, publicar regras do Firestore e do
 > Storage, tool `start_flow(attach_payment_proof)` e teste em aparelho real.
 > Desvio do plano: fechar o modal de orçamentos **não** cancela o envio; o botão

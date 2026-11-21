@@ -809,11 +809,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// "Selecionar orçamento" continua ativo para tentar de novo.
   Future<void> onProofBudgetSelected(String? budgetId) async {
     if (budgetId == null || _step != ChatFlowStep.proofSelectBudget) return;
-    final budget = await budgetForNavigation(budgetId);
-    final name = budget?.customerName ?? '';
     await _sendUserMessageWithId(
       _generateMessageId(),
-      PaymentProofStrings.budgetChosen(name),
+      PaymentProofStrings.budgetChosen(budgetId),
     );
 
     final limit = await _checkProofLimit(
