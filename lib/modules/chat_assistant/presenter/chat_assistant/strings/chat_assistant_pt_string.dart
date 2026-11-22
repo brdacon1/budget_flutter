@@ -201,6 +201,21 @@ class ChatAssistantStrings {
           ? 'Selecione o orçamento que deseja duplicar'
           : 'Select the budget you want to duplicate';
 
+  static String get aiSelectCommentBudget =>
+      _isPt
+          ? 'Selecione o orçamento que deseja comentar'
+          : 'Select the budget you want to comment on';
+
+  static String aiBudgetCommentsSaved(String client) =>
+      _isPt
+          ? 'Comentários do orçamento de $client atualizados ✅'
+          : '$client\'s budget comments updated ✅';
+
+  static String get aiBudgetCommentsSkipped =>
+      _isPt
+          ? 'Tudo bem, nenhum comentário adicionado.'
+          : 'Alright, no comments added.';
+
   static String aiBudgetDuplicated(String client) =>
       _isPt
           ? 'Orçamento de $client duplicado ✅'
@@ -268,7 +283,7 @@ Regras:
 5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
 6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
-8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito.
+8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito. Para adicionar/editar comentários ou observações de um orçamento, chame list_budgets com purpose "comments" do mesmo jeito (não pergunte o cliente em texto).
 9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
 10. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
 ''';

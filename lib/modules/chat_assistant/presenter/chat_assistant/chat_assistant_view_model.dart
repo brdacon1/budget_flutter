@@ -338,6 +338,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _reviewMsgId = null;
     _commentQuestionMsgId = null;
     _commentsFeedbackMsgId = null;
+    _commentBudget = null;
     _pdfEditField = null;
     _pendingNavigation = null;
     _isPdfEditAddressMode = false;
@@ -408,6 +409,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action.startsWith(findBudgetAction) ||
       action == DispatchAgentToolUsecase.selectReceiptBudget ||
       action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+      action == DispatchAgentToolUsecase.selectCommentBudget ||
       action == selectProofBudgetAction ||
       action.startsWith(openProofsAction);
 
@@ -1018,6 +1020,42 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ),
       Error() => ChatAssistantStrings.aiBudgetDuplicateFailed,
     });
+  }
+
+  // ------------------------------------------------------------------
+  // IA: comentários de um orçamento existente (list_budgets "comments")
+  // ------------------------------------------------------------------
+
+  /// Orçamento escolhido no modal para comentar.
+  CustomerInfo? _commentBudget;
+  CustomerInfo? get commentBudget => _commentBudget;
+
+  /// Após escolher o orçamento no modal: pergunta se quer comentar.
+  Future<void> askCommentsForBudget(CustomerInfo budget) async {
+    _commentBudget = budget;
+    _setStep(ChatFlowStep.askExistingBudgetComments);
+    await _sendBotMessageWithId(
+      _generateMessageId(),
+      ChatAssistantStrings.askAddComments,
+      type: ChatMessageType.inlineButtons,
+      payload: {
+        'actions': ['SIM', 'NÃO'],
+      },
+    );
+  }
+
+  /// Voltou da tela de comentários do orçamento existente.
+  Future<void> onExistingBudgetCommentsClosed() async {
+    final client = _commentBudget?.customerName ?? '';
+    _commentBudget = null;
+    _setStep(ChatFlowStep.mainMenu);
+    await _addBotMessage(ChatAssistantStrings.aiBudgetCommentsSaved(client));
+  }
+
+  Future<void> skipExistingBudgetComments() async {
+    _commentBudget = null;
+    _setStep(ChatFlowStep.mainMenu);
+    await _addBotMessage(ChatAssistantStrings.aiBudgetCommentsSkipped);
   }
 
   /// Orçamento para a View abrir a tela (card da IA / tool `open_budget`).
@@ -2124,6 +2162,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Navegações que a View executa (precisam de `context`).
   static const openProductsNav = 'open_products';
   static const openCommentsNav = 'open_comments';
+  static const openExistingCommentsNav = 'open_existing_comments';
   static const openLogoEditNav = 'open_logo_edit';
   static const linkCopiedNav = 'link_copied';
 
@@ -2136,6 +2175,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         action == selectProofBudgetAction ||
         action.startsWith(openProofsAction) ||
         action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+        action == DispatchAgentToolUsecase.selectCommentBudget ||
         action.startsWith('open_budget|')) {
       return action;
     }
@@ -2152,6 +2192,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await pickContactCommand.execute();
       case 'SIM':
         if (_step == ChatFlowStep.askComments) return openCommentsNav;
+        if (_step == ChatFlowStep.askExistingBudgetComments) {
+          return openExistingCommentsNav;
+        }
         await handleAction('SIM');
       case 'Sim':
         if (_step == ChatFlowStep.pdfEditConfirmEntry) {
@@ -2160,7 +2203,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
           await handleAction(action);
         }
       case 'NÃO':
-        if (_step == ChatFlowStep.askComments) {
+        if (_step == ChatFlowStep.askExistingBudgetComments) {
+          await skipExistingBudgetComments();
+        } else if (_step == ChatFlowStep.askComments) {
           await handleAction('NÃO');
         } else {
           await skipAddressCommand.execute();
