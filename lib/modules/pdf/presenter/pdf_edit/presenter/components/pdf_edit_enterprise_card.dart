@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +15,7 @@ class PdfEditEnterpriseCard extends StatelessWidget {
   final TextEditingController emailText;
   final TextEditingController cnpjText;
   final MaskTextInputFormatter maskPhone;
-  final MaskTextInputFormatter maskCnpj;
+  final TextInputFormatter maskCnpj;
   final Gender? selected;
   final Color enabledColor;
   final Color disabledColor;
@@ -113,7 +114,8 @@ class PdfEditEnterpriseCard extends StatelessWidget {
               enabledColor: enabledColor,
               disabledColor: disabledColor,
               mask: maskCnpj,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.characters,
               onTap: () => onSelect(Gender.cpf),
             ),
             const SizedBox(height: 12),

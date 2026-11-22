@@ -8,5 +8,13 @@ class ChatMenuResult {
   final String? navigation;
   final String? pdfField;
 
-  const ChatMenuResult(this.nextStep, {this.navigation, this.pdfField});
+  /// Valor atual do campo (para pré-preencher formulários).
+  final String? currentValue;
+
+  const ChatMenuResult(
+    this.nextStep, {
+    this.navigation,
+    this.pdfField,
+    this.currentValue,
+  });
 }

@@ -1,4 +1,6 @@
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -212,6 +214,8 @@ void registerChatBudgetDependencies(GetIt sl) {
     () => HandlePdfFieldInputUsecase(
       sl<UpdatePdfFieldUsecase>(),
       sl<ChatBudgetRepository>(),
+      sl<ValidateDocumentUsecase>(),
+      sl<FormatDocumentUsecase>(),
     ),
   );
   sl.registerLazySingleton<HandlePdfEditConfirmOptionUsecase>(
@@ -331,6 +335,7 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<ParseMoneyInputUsecase>(),
       sl<PickProofAttachmentsUsecase>(),
       sl<ReceiveSharedProofUsecase>(),
+      sl<FormatDocumentUsecase>(),
     ),
   );
 }

@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_logo/pdf_logo_fit.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -122,11 +124,24 @@ class PdfGenerateBudgetSimpleUsecase {
     final PdfPage page = document.pages.add();
     final PdfGraphics graphics = page.graphics;
 
-    final double sizeWithImage = await _drawLogo(page, owner, authToken);
+    final Size logoSize = await _drawLogo(page, owner, authToken);
 
-    _drawOwnerGrid(page, graphics, owner, sizeWithImage);
-    _drawBudgetDataTitle(page, graphics);
-    final double budgetDataBottomY = _drawBudgetDataGrid(page, customer);
+    final double ownerBottomY = _drawOwnerGrid(
+      page,
+      graphics,
+      owner,
+      logoSize.width,
+    );
+    // Cabeçalho dinâmico: a faixa "DADOS DO ORÇAMENTO" fica logo abaixo do
+    // que for mais alto (logo ou dados da empresa), sem altura fixa.
+    final double headerBottomY = math.max(logoSize.height, ownerBottomY);
+    final double budgetTitleY = headerBottomY + 8;
+    _drawBudgetDataTitle(page, graphics, budgetTitleY);
+    final double budgetDataBottomY = _drawBudgetDataGrid(
+      page,
+      customer,
+      budgetTitleY + 40,
+    );
 
     // Posicionamento dinâmico: o título da lista de itens fica logo abaixo
     // dos dados do orçamento, respeitando a altura real renderizada.
@@ -176,7 +191,8 @@ class PdfGenerateBudgetSimpleUsecase {
   // Logo / image
   // ---------------------------------------------------------------------------
 
-  Future<double> _drawLogo(
+  /// Desenha a logo e retorna o tamanho ocupado (zero quando não há logo).
+  Future<Size> _drawLogo(
     PdfPage page,
     OwnerPdf owner,
     String? authToken,
@@ -190,38 +206,30 @@ class PdfGenerateBudgetSimpleUsecase {
       // Web: falha no logo (CORS/rede) não derruba o PDF — segue sem logo.
       if (!kIsWeb) rethrow;
     }
-    if (image == null) return 0;
+    if (image == null) return Size.zero;
 
-    final double originalRatio = image.width / image.height;
-    final double sizeH = image.height.toDouble();
-    final double sizeW = image.width.toDouble();
-
-    Rect bounds;
-    double sizeWithImage;
-
-    if (sizeH == sizeW) {
-      sizeWithImage = 80 + 10;
-      bounds = const Rect.fromLTWH(0, 0, 80, 80);
-    } else if (sizeH > sizeW) {
-      sizeWithImage = 60 + 10;
-      bounds = const Rect.fromLTWH(0, 0, 60, 80);
-    } else {
-      sizeWithImage = (80 * originalRatio) + 10;
-      bounds = Rect.fromLTWH(0, 0, 80 * originalRatio, 80);
-    }
+    // Encaixa a logo em 140x80 mantendo a proporção (sem esticar).
+    final Size logo = fitLogoSize(
+      image.width,
+      image.height,
+      maxW: 140,
+      maxH: 80,
+    );
+    final double sizeWithImage = logo.width + 10;
 
     page.graphics.drawImage(
       image,
-      Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height),
+      Rect.fromLTWH(0, 0, logo.width, logo.height),
     );
-    return sizeWithImage;
+    return Size(sizeWithImage, logo.height);
   }
 
   // ---------------------------------------------------------------------------
   // Owner info grid
   // ---------------------------------------------------------------------------
 
-  void _drawOwnerGrid(
+  /// Desenha os dados da empresa e retorna o Y final do bloco.
+  double _drawOwnerGrid(
     PdfPage page,
     PdfGraphics graphics,
     OwnerPdf owner,
@@ -240,9 +248,24 @@ class PdfGenerateBudgetSimpleUsecase {
     addRow(owner.cnpj);
     addRow(owner.email);
     addRow(owner.fone);
-    addRow(owner.rua);
-    addRow(owner.city);
-    if (owner.cep != null && owner.cep!.isNotEmpty) addRow('CEP: ${owner.cep}');
+    // Endereço no mesmo formato do layout Profissional:
+    // "Endereço: RUA - BAIRRO - CIDADE - CEP: 00000-000".
+    final addressParts = <String>[];
+    if (owner.rua != null && owner.rua!.isNotEmpty) {
+      addressParts.add(owner.rua!);
+    }
+    if (owner.bairro != null && owner.bairro!.isNotEmpty) {
+      addressParts.add(owner.bairro!);
+    }
+    if (owner.city != null && owner.city!.isNotEmpty) {
+      addressParts.add(owner.city!);
+    }
+    if (owner.cep != null && owner.cep!.isNotEmpty) {
+      addressParts.add('CEP: ${owner.cep}');
+    }
+    if (addressParts.isNotEmpty) {
+      addRow('Endereço: ${addressParts.join(' - ')}');
+    }
 
     final PdfGridCellStyle style =
         PdfGridCellStyle()..borders.all = PdfPens.transparent;
@@ -279,8 +302,10 @@ class PdfGenerateBudgetSimpleUsecase {
     pdfGrid.headers.applyStyle(headerStyle);
     pdfGrid.columns[0].width = 180;
     pdfGrid.columns[1].width = 620;
-    pdfGrid.draw(
-      graphics: page.graphics,
+    // Desenhar com `page:` (e não `graphics:`): só assim o Syncfusion
+    // devolve o PdfLayoutResult com a altura real do bloco.
+    final PdfLayoutResult? result = pdfGrid.draw(
+      page: page,
       bounds: Rect.fromLTWH(
         sizeWithImage,
         0,
@@ -288,13 +313,14 @@ class PdfGenerateBudgetSimpleUsecase {
         page.getClientSize().height,
       ),
     );
+    return result?.bounds.bottom ?? 0;
   }
 
   // ---------------------------------------------------------------------------
   // Budget data section title
   // ---------------------------------------------------------------------------
 
-  void _drawBudgetDataTitle(PdfPage page, PdfGraphics graphics) {
+  void _drawBudgetDataTitle(PdfPage page, PdfGraphics graphics, double top) {
     final PdfFont font1 = PdfStandardFont(
       PdfFontFamily.helvetica,
       13,
@@ -308,7 +334,7 @@ class PdfGenerateBudgetSimpleUsecase {
     graphics.drawRectangle(
       brush: PdfSolidBrush(PdfColor(255, 255, 255)),
       pen: PdfPen(PdfColor(211, 211, 211)),
-      bounds: Rect.fromLTWH(0, 95, page.getClientSize().width, 30),
+      bounds: Rect.fromLTWH(0, top, page.getClientSize().width, 30),
     );
 
     graphics.drawString(
@@ -317,7 +343,7 @@ class PdfGenerateBudgetSimpleUsecase {
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
         0,
-        86.5,
+        top - 8.5,
         page.getClientSize().width,
         page.getClientSize().height,
       ),
@@ -329,9 +355,11 @@ class PdfGenerateBudgetSimpleUsecase {
   // Budget data grid
   // ---------------------------------------------------------------------------
 
-  double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer) {
-    const double startY = 135;
-
+  double _drawBudgetDataGrid(
+    PdfPage page,
+    CustomerInfo customer,
+    double startY,
+  ) {
     // Fonte/padding explícitos nas células => altura de linha previsível e
     // texto sempre visível (não depende da fonte padrão do PdfGrid).
     final PdfFont rowFont = PdfStandardFont(

@@ -49,10 +49,18 @@ class HandlePdfEditMenuOptionUsecase {
         final current = owner?.cnpj?.trim() ?? '';
         final msg =
             current.isNotEmpty
-                ? 'O CNPJ atual é "$current".\n${ChatAssistantStrings.pdfEditAskCnpj}'
+                ? '${ChatAssistantStrings.pdfEditCurrentDocument(current)}\n${ChatAssistantStrings.pdfEditAskCnpj}'
                 : ChatAssistantStrings.pdfEditAskCnpj;
-        await _sendTextWithBackOption(msg, highlight: current);
-        return const ChatMenuResult('pdfEditFieldInput', pdfField: 'cnpj');
+        await _sendTextWithBackOption(
+          msg,
+          highlight: current,
+          step: 'pdfEditDocumentForm',
+        );
+        return ChatMenuResult(
+          'pdfEditDocumentForm',
+          pdfField: 'cnpj',
+          currentValue: current,
+        );
       case '5':
         await _chatRepo.sendMessage(
           ChatMessageEntity.botOptions(
@@ -85,12 +93,16 @@ class HandlePdfEditMenuOptionUsecase {
     }
   }
 
-  Future<void> _sendTextWithBackOption(String text, {String? highlight}) async {
+  Future<void> _sendTextWithBackOption(
+    String text, {
+    String? highlight,
+    String step = 'pdfEditFieldInput',
+  }) async {
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
         content: text,
         labels: const [],
-        step: 'pdfEditFieldInput',
+        step: step,
         backLabel: ChatAssistantStrings.menuBackLabel,
         highlight: highlight,
       ),

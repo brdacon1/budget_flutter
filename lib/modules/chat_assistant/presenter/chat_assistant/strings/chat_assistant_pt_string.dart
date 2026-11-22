@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/document_validation_result.dart';
 
 /// Textos da tela do assistente (chat) — e dos usecases que montam as
 /// mensagens dela.
@@ -86,7 +87,8 @@ class ChatAssistantStrings {
           ? 'Opção inválida. Toque em uma das opções acima.'
           : 'Invalid option. Tap one of the options above.';
 
-  static String get menuBackLabel => _isPt ? '↩️ Voltar ao menu' : '↩️ Back to menu';
+  static String get menuBackLabel =>
+      _isPt ? '↩️ Voltar ao menu' : '↩️ Back to menu';
 
   // ------------------------------------------------------------------
   // Assistente com IA (assinantes)
@@ -97,7 +99,8 @@ class ChatAssistantStrings {
           : "I couldn't understand that right now 😕 Pick one of the options below.";
 
   /// Opção "Relatórios" do menu principal (só no modo IA) — valor `'5'`.
-  static String get reportsOptionLabel => _isPt ? '📊 Relatórios' : '📊 Reports';
+  static String get reportsOptionLabel =>
+      _isPt ? '📊 Relatórios' : '📊 Reports';
 
   /// Opção "Encontrar orçamentos" do menu (só no modo IA) — valor `'6'`.
   static String get findBudgetOptionLabel =>
@@ -344,7 +347,7 @@ Regras:
             'Nome da empresa',
             'Telefone',
             'Email',
-            'CNPJ',
+            'CNPJ / CPF',
             'Endereço',
             'Logo',
             'Modelo de PDF',
@@ -353,7 +356,7 @@ Regras:
             'Company name',
             'Phone',
             'Email',
-            'CNPJ',
+            'CNPJ / CPF',
             'Address',
             'Logo',
             'PDF Model',
@@ -379,7 +382,37 @@ Regras:
       _isPt ? 'Digite o novo email:' : 'Enter the new email:';
 
   static String get pdfEditAskCnpj =>
-      _isPt ? 'Digite o novo CNPJ:' : 'Enter the new CNPJ:';
+      _isPt
+          ? 'Digite o CNPJ ou CPF da empresa:'
+          : 'Enter the company CNPJ or CPF:';
+
+  static String pdfEditCurrentDocument(String value) =>
+      _isPt
+          ? 'O CNPJ / CPF atual é "$value".'
+          : 'The current CNPJ / CPF is "$value".';
+
+  static String get documentFormHint => _isPt ? 'CNPJ ou CPF' : 'CNPJ or CPF';
+
+  static String get documentFormSave => _isPt ? 'Salvar' : 'Save';
+
+  static String get documentFormCancel => _isPt ? 'Voltar' : 'Back';
+
+  static String documentError(DocumentValidationError error) {
+    switch (error) {
+      case DocumentValidationError.empty:
+        return _isPt
+            ? 'O campo CPF ou CNPJ é obrigatório.'
+            : 'CPF or CNPJ is required.';
+      case DocumentValidationError.invalidCpf:
+        return _isPt ? 'CPF inválido.' : 'Invalid CPF.';
+      case DocumentValidationError.invalidCnpj:
+        return _isPt ? 'CNPJ inválido.' : 'Invalid CNPJ.';
+      case DocumentValidationError.invalidLength:
+        return _isPt
+            ? 'Digite um CPF ou CNPJ válido.'
+            : 'Enter a valid CPF or CNPJ.';
+    }
+  }
 
   static String get pdfEditInvalidPhone =>
       _isPt
@@ -390,11 +423,6 @@ Regras:
       _isPt
           ? 'Email inválido. Informe um email válido.'
           : 'Invalid email. Enter a valid email.';
-
-  static String get pdfEditInvalidCnpj =>
-      _isPt
-          ? 'CNPJ inválido. Informe 14 números.'
-          : 'Invalid CNPJ. Enter 14 numbers.';
 
   static String get pdfEditSuccessName =>
       _isPt
@@ -409,8 +437,12 @@ Regras:
   static String get pdfEditSuccessEmail =>
       _isPt ? 'Email atualizado com sucesso:' : 'Email successfully updated:';
 
-  static String get pdfEditSuccessCnpj =>
-      _isPt ? 'CNPJ atualizado com sucesso:' : 'CNPJ successfully updated:';
+  static String pdfEditSuccessDocument(DocumentType type) {
+    final label = type == DocumentType.cpf ? 'CPF' : 'CNPJ';
+    return _isPt
+        ? '$label atualizado com sucesso:'
+        : '$label successfully updated:';
+  }
 
   static String get pdfEditSuccessAddress =>
       _isPt

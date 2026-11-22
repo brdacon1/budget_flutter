@@ -10,6 +10,10 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
+import 'package:oflite/modules/pdf/presenter/formatter/document_input_formatter.dart';
+import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -20,6 +24,8 @@ class PdfEditViewModel extends ChangeNotifier {
   final UserRepository _userRepository;
   final DisplayAlertRepository _displayAlert;
   final LoadingEventRepository _loadingEvent;
+  final ValidateDocumentUsecase _validateDocument;
+  final FormatDocumentUsecase _formatDocument;
 
   final Color enabledtxt = Colors.white;
   final Color deaible = Colors.white;
@@ -44,10 +50,8 @@ class PdfEditViewModel extends ChangeNotifier {
     filter: {"#": RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
-  final MaskTextInputFormatter maskCnpj = MaskTextInputFormatter(
-    mask: '##.###.###/0001-##',
-    filter: {"#": RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
+  late final DocumentInputFormatter maskCnpj = DocumentInputFormatter(
+    _formatDocument.partial,
   );
   final MaskTextInputFormatter maskCep = MaskTextInputFormatter(
     mask: '#####-###',
@@ -60,7 +64,11 @@ class PdfEditViewModel extends ChangeNotifier {
     UserRepository? userRepository,
     DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
-  }) : _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
+    ValidateDocumentUsecase? validateDocument,
+    FormatDocumentUsecase? formatDocument,
+  }) : _validateDocument = validateDocument ?? getIt<ValidateDocumentUsecase>(),
+       _formatDocument = formatDocument ?? getIt<FormatDocumentUsecase>(),
+       _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
        _userRepository = userRepository ?? getIt<UserRepository>(),
        _displayAlert =
            displayAlertRepository ?? getIt<DisplayAlertRepository>(),
@@ -109,6 +117,22 @@ class PdfEditViewModel extends ChangeNotifier {
   }
 
   Future<void> save(BuildContext context) async {
+    // Documento é opcional nesta tela; se preenchido, precisa ser válido.
+    var document = cpfText.text.trim();
+    if (document.isNotEmpty) {
+      final validation = _validateDocument(document);
+      if (!validation.isValid) {
+        await _displayAlert.notificationError(
+          context,
+          "Erro!",
+          PdfStrings.documentError(validation.error!),
+        );
+        return;
+      }
+      document = _formatDocument(validation.cleaned!, validation.type!);
+      cpfText.text = document;
+    }
+    if (!context.mounted) return;
     _loadingEvent.alertLoading(context);
     try {
       final localOwner =
@@ -120,7 +144,7 @@ class PdfEditViewModel extends ChangeNotifier {
             ..cep = cepText.text.trim()
             ..email = emailText.text.trim()
             ..fone = phoneText.text.trim()
-            ..cnpj = cpfText.text.trim()
+            ..cnpj = document
             ..empresa = nameText.text.trim().toUpperCase()
             ..logoName = owner.logoName
             ..pdfLayoutType = owner.pdfLayoutType;

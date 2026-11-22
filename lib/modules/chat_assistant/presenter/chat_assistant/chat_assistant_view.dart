@@ -15,6 +15,7 @@ import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assi
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_panel.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_edit_aware_input_bar.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_manual_address_form.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_document_form.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
@@ -513,6 +514,21 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Widget _buildInputArea() {
+    if (_vm.showDocumentForm) {
+      return ListenableBuilder(
+        listenable: _vm.submitDocumentCommand,
+        builder:
+            (context, _) => ChatDocumentForm(
+              controller: _vm.documentController,
+              formatter: _vm.documentFormatter,
+              errorText: _vm.documentError,
+              isSaving: _vm.submitDocumentCommand.running,
+              onChanged: _vm.onDocumentChanged,
+              onSubmit: () => _vm.submitDocumentCommand.execute(),
+              onCancel: _vm.cancelDocumentForm,
+            ),
+      );
+    }
     if (_vm.showManualAddressForm) {
       return ChatManualAddressForm(
         streetController: _vm.streetController,

@@ -13,6 +13,8 @@ import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_budget/pdf_genera
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_executive_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_professional_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_generate_receipt/pdf_generate_receipt_simple_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_add_wrapped_rows_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/pdf_text/pdf_sanitize_text_usecase.dart';
 
@@ -32,6 +34,12 @@ void registerPdfDependencies(GetIt sl) {
   );
 
   // Usecases (stateless)
+  sl.registerLazySingleton<ValidateDocumentUsecase>(
+    () => const ValidateDocumentUsecase(),
+  );
+  sl.registerLazySingleton<FormatDocumentUsecase>(
+    () => const FormatDocumentUsecase(),
+  );
   sl.registerLazySingleton<PdfSanitizeTextUsecase>(
     () => const PdfSanitizeTextUsecase(),
   );
@@ -91,6 +99,8 @@ void registerPdfDependencies(GetIt sl) {
       userRepository: sl<UserRepository>(),
       displayAlertRepository: sl<DisplayAlertRepository>(),
       loadingEventRepository: sl<LoadingEventRepository>(),
+      validateDocument: sl<ValidateDocumentUsecase>(),
+      formatDocument: sl<FormatDocumentUsecase>(),
     ),
   );
   sl.registerFactory<PdfBudgetViewModel>(

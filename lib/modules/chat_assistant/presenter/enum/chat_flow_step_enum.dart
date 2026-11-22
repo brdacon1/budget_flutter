@@ -23,6 +23,7 @@ enum ChatFlowStep {
   pdfEditConfirmEntry,
   pdfEditMenu,
   pdfEditFieldInput,
+  pdfEditDocumentForm,
   pdfEditConfirm,
   changeUsername,
   changeUsernameResult,
