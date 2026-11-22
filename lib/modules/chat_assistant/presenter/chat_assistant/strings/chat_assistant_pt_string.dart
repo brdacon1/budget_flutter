@@ -15,6 +15,7 @@ class ChatAssistantStrings {
   static String get assistantName => _isPt ? 'Assistente' : 'Assistant';
 
   static String get online => _isPt ? 'online' : 'online';
+
   static String get closeKeyboard =>
       _isPt ? 'Fechar teclado' : 'Close keyboard';
 
@@ -25,7 +26,7 @@ class ChatAssistantStrings {
       _isPt ? 'Erro ao compartilhar' : 'Error sharing';
 
   static String get finalizeAndGenerateLink =>
-      _isPt ? 'Finalizar e gerar link' : 'Finalize and generate link';
+      _isPt ? 'Finalizar e gerar link' : 'Gerar orçamento';
 
   static String get editingMessage =>
       _isPt ? 'Editando mensagem' : 'Editing message';
@@ -490,33 +491,54 @@ Regras:
   // ------------------------------------------------------------------
 
   static String get assistantTitle => 'Assistente';
+
   static String get restartConversation => 'Reiniciar conversa';
+
   static String get shareError => 'Erro ao compartilhar';
+
   static String get editLogoTitle => 'Editar Logo';
+
   static String get editingMessageTitle => 'Editando mensagem';
+
   static String get editMessageHint => 'Edite a mensagem...';
+
   static String get typeMessageHint => 'Digite uma mensagem...';
+
   static String get cepField => 'CEP';
+
   static String get neighborhoodField => 'Bairro (opcional)';
+
   static String get confirmAddressButton => 'Confirmar endereço';
+
   static String get holdToEdit => 'Toque e segure para editar';
+
   static String get openLabel => 'Abrir';
+
   static String get pickContactLabel => 'Escolher contato';
+
   static String get editSelection => 'Editar seleção';
+
   static String get changeLogoLabel => 'Alterar logo';
+
   static String pdfSizeLabel(Object kb) => 'PDF · $kb KB';
 
   static String get invalidPhone =>
       'Telefone inválido. Informe apenas números com DDD. Ex: (11) 99999-9999 ou 11999999999.';
+
   static String processingError(Object e) => 'Erro ao processar: $e';
+
   static String confirmClientData(String name, String phone) =>
       'Confirme os dados do cliente:\n'
       'Nome: $name\n'
       'Telefone: ${phone.isEmpty ? '—' : phone}';
+
   static String get createBudgetFailed =>
       'Ops, não consegui criar o orçamento. Tente novamente.';
+
   static String get selectProductsLabel => 'Selecionar produtos';
+
   static String get invalidCep => 'CEP inválido. Digite 8 números.';
+
   static String foundAddress(
     String street,
     String? neighborhood,
@@ -526,25 +548,39 @@ Regras:
       '$street\n'
       '${neighborhood != null ? '$neighborhood\n' : ''}'
       '$city';
+
   static String fetchPdfDataError(Object e) =>
       'Erro ao buscar dados do PDF: $e';
+
   static String saveAddressError(Object e) => 'Erro ao salvar endereço: $e';
+
   static String get addressSaved => 'Endereço cadastrado com sucesso.';
+
   static String get streetAndCityRequired =>
       'Informe pelo menos a rua e a cidade.';
+
   static String get noBudgetItems => 'Nenhum item no orçamento.';
+
   static String get budgetItemsTitle => 'Itens do orçamento:';
+
   static String budgetItemsTotal(String total) => 'Total: R\$ $total';
+
   static String get askAddComments =>
       'Deseja adicionar algum comentário ou observação ao orçamento?';
+
   static String get finalizeBudgetFailed =>
       'Erro ao finalizar o orçamento. Tente novamente.';
+
   static String get budgetNotAvailableToShare =>
       'Orçamento não disponível para compartilhar';
+
   static String get shareLinkFailed =>
       'Não foi possível gerar o link. Verifique sua conexão.';
+
   static String get shareSubject => 'Orçamento';
+
   static String get productCreated => 'Produto criado com sucesso! 🎉';
+
   static String productCreatedDetails(
     String desc,
     String price,
@@ -554,6 +590,7 @@ Regras:
       'Descrição: $desc\n'
       'Preço: R\$ $price\n'
       'Categoria: $category';
+
   static String get commentsUpdated =>
       'Comentários atualizados com sucesso. Deseja editar '
       'novamente ou finalizar o orçamento?';
