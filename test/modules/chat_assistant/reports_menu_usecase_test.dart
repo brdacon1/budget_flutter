@@ -34,17 +34,21 @@ List<String> _labels(ChatMessageEntity m) => [
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('menu do modo IA tem "Relatórios" (5) e "Encontrar orçamentos" (6)', () async {
+  test('menu do modo IA tem "Relatórios" (5), "Encontrar orçamentos" (6) e "Comentários" (7)', () async {
     final repo = _FakeChatRepo();
     await ResetChatToMenuUsecase(repo)(withReports: true);
     final options = repo.sent.single.payload!['options'] as List;
-    expect(options[options.length - 2], {
+    expect(options[options.length - 3], {
       'label': ChatAssistantStrings.reportsOptionLabel,
       'value': '5',
     });
-    expect(options.last, {
+    expect(options[options.length - 2], {
       'label': ChatAssistantStrings.findBudgetOptionLabel,
       'value': '6',
+    });
+    expect(options.last, {
+      'label': ChatAssistantStrings.commentLibraryOptionLabel,
+      'value': '7',
     });
   });
 

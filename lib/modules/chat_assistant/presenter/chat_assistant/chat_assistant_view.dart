@@ -1,3 +1,6 @@
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
@@ -12,6 +15,7 @@ import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assi
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_panel.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_edit_aware_input_bar.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_manual_address_form.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_document_form.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
@@ -225,6 +229,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         if (mounted) await _vm.resetChatCommand.execute();
       case 'open_product_creator':
         _openProductCreator();
+      case HandleCommentLibraryMenuOptionUsecase.openListNav:
+        await _push(const CommentLibraryListView());
+        if (mounted) await _vm.repeatCurrentMenu();
+      case HandleCommentLibraryMenuOptionUsecase.openCreatorNav:
+        final saved = await showCommentLibraryCreatorBottomModal(context);
+        if (mounted) await _vm.onCommentCreatorClosed(saved?.name);
       case 'open_pdf_edit':
         _push(const PdfEditView());
       case 'open_change_name':
@@ -504,6 +514,21 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Widget _buildInputArea() {
+    if (_vm.showDocumentForm) {
+      return ListenableBuilder(
+        listenable: _vm.submitDocumentCommand,
+        builder:
+            (context, _) => ChatDocumentForm(
+              controller: _vm.documentController,
+              formatter: _vm.documentFormatter,
+              errorText: _vm.documentError,
+              isSaving: _vm.submitDocumentCommand.running,
+              onChanged: _vm.onDocumentChanged,
+              onSubmit: () => _vm.submitDocumentCommand.execute(),
+              onCancel: _vm.cancelDocumentForm,
+            ),
+      );
+    }
     if (_vm.showManualAddressForm) {
       return ChatManualAddressForm(
         streetController: _vm.streetController,

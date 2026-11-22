@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_logo/pdf_logo_fit.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
@@ -219,17 +220,10 @@ class PdfGenerateBudgetExecutiveUsecase {
       if (!kIsWeb) rethrow;
     }
     if (image != null) {
-      final ratio = image.width / image.height;
-      if (image.height == image.width) {
-        logoW = 70;
-        logoH = 70;
-      } else if (image.height > image.width) {
-        logoW = 50;
-        logoH = 70;
-      } else {
-        logoW = 70 * ratio;
-        logoH = 70;
-      }
+      // Encaixa a logo em 120x70 mantendo a proporção (sem esticar).
+      final logo = fitLogoSize(image.width, image.height, maxW: 120, maxH: 70);
+      logoW = logo.width;
+      logoH = logo.height;
     }
 
     // --- Altura do conteúdo esquerdo ---

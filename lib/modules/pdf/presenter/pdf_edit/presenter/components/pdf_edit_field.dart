@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:flutter/services.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../pdf_edit_view_model.dart';
@@ -12,7 +12,8 @@ class PdfEditField extends StatelessWidget {
   final Color enabledColor;
   final Color disabledColor;
   final Gender? selected;
-  final MaskTextInputFormatter? mask;
+  final TextInputFormatter? mask;
+  final TextCapitalization textCapitalization;
   final TextInputType? keyboardType;
   final VoidCallback? onTap;
   final ValueChanged<String>? onChanged;
@@ -30,6 +31,7 @@ class PdfEditField extends StatelessWidget {
     this.keyboardType,
     this.onTap,
     this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   Color get _color => selected == gender ? enabledColor : disabledColor;
@@ -48,6 +50,7 @@ class PdfEditField extends StatelessWidget {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
         inputFormatters: mask != null ? [mask!] : null,
         onTap: onTap,
         onChanged: onChanged,

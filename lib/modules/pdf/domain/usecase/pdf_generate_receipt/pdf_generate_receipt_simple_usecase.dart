@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:oflite/shared/design_pattern/result.dart';
+import 'package:oflite/modules/pdf/domain/usecase/pdf_logo/pdf_logo_fit.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -41,12 +43,18 @@ class PdfGenerateReceiptUseCase {
       final PdfPage page = document.pages.add();
       final PdfGraphics graphics = page.graphics;
 
-      final double sizeWithImage = await _drawLogo(page, owner);
+      final Size logoSize = await _drawLogo(page, owner);
 
-      _drawOwnerGrid(page, owner, sizeWithImage);
-      _drawReceiptTitle(page, graphics);
-      final double count = _drawBudgetDataGrid(page, customer);
-      _drawReceiptInfoGrid(page, recived);
+      final double ownerBottomY = _drawOwnerGrid(page, owner, logoSize.width);
+      // Cabeçalho dinâmico: a faixa "RECIBO" fica logo abaixo do que for mais
+      // alto (logo ou dados da empresa). [offset] desloca todas as seções
+      // abaixo em relação à posição original da faixa (95).
+      final double titleY = math.max(logoSize.height, ownerBottomY) + 8;
+      final double offset = titleY - 95;
+      _drawReceiptTitle(page, graphics, titleY);
+      final double count =
+          _drawBudgetDataGrid(page, customer, titleY + 40) + offset;
+      _drawReceiptInfoGrid(page, recived, titleY + 40);
 
       _drawPaymentsSectionTitle(page, graphics, count);
 
@@ -86,7 +94,8 @@ class PdfGenerateReceiptUseCase {
   // Logo / image
   // ---------------------------------------------------------------------------
 
-  Future<double> _drawLogo(PdfPage page, OwnerPdf owner) async {
+  /// Desenha a logo e retorna o tamanho ocupado (zero quando não há logo).
+  Future<Size> _drawLogo(PdfPage page, OwnerPdf owner) async {
     PdfBitmap? image;
     try {
       final logo = await _pdfRepository.fetchLogo(owner);
@@ -96,38 +105,27 @@ class PdfGenerateReceiptUseCase {
       // Web: falha no logo (CORS/rede) não derruba o PDF — segue sem logo.
       if (!kIsWeb) rethrow;
     }
-    if (image == null) return 0;
+    if (image == null) return Size.zero;
 
-    final double originalRatio = image.width / image.height;
-    final double sizeH = image.height.toDouble();
-    final double sizeW = image.width.toDouble();
-
-    Rect bounds;
-    double sizeWithImage;
-
-    if (sizeH == sizeW) {
-      sizeWithImage = 80 + 10;
-      bounds = const Rect.fromLTWH(0, 0, 80, 80);
-    } else if (sizeH > sizeW) {
-      sizeWithImage = 60 + 10;
-      bounds = const Rect.fromLTWH(0, 0, 60, 80);
-    } else {
-      sizeWithImage = (80 * originalRatio) + 10;
-      bounds = Rect.fromLTWH(0, 0, 80 * originalRatio, 80);
-    }
-
-    page.graphics.drawImage(
-      image,
-      Rect.fromLTWH(bounds.left, bounds.top, bounds.width, bounds.height),
+    // Encaixa a logo em 140x80 mantendo a proporção (sem esticar).
+    final Size logo = fitLogoSize(
+      image.width,
+      image.height,
+      maxW: 140,
+      maxH: 80,
     );
-    return sizeWithImage;
+    final double sizeWithImage = logo.width + 10;
+
+    page.graphics.drawImage(image, Rect.fromLTWH(0, 0, logo.width, logo.height));
+    return Size(sizeWithImage, logo.height);
   }
 
   // ---------------------------------------------------------------------------
   // Owner info grid
   // ---------------------------------------------------------------------------
 
-  void _drawOwnerGrid(PdfPage page, OwnerPdf owner, double sizeWithImage) {
+  /// Desenha os dados da empresa e retorna o Y final do bloco.
+  double _drawOwnerGrid(PdfPage page, OwnerPdf owner, double sizeWithImage) {
     final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
     pdfGrid.headers.clear();
 
@@ -141,9 +139,24 @@ class PdfGenerateReceiptUseCase {
     addRow(owner.cnpj);
     addRow(owner.email);
     addRow(owner.fone);
-    addRow(owner.rua);
-    addRow(owner.city);
-    if (owner.cep != null && owner.cep!.isNotEmpty) addRow('CEP: ${owner.cep}');
+    // Endereço no mesmo formato do layout Profissional:
+    // "Endereço: RUA - BAIRRO - CIDADE - CEP: 00000-000".
+    final addressParts = <String>[];
+    if (owner.rua != null && owner.rua!.isNotEmpty) {
+      addressParts.add(owner.rua!);
+    }
+    if (owner.bairro != null && owner.bairro!.isNotEmpty) {
+      addressParts.add(owner.bairro!);
+    }
+    if (owner.city != null && owner.city!.isNotEmpty) {
+      addressParts.add(owner.city!);
+    }
+    if (owner.cep != null && owner.cep!.isNotEmpty) {
+      addressParts.add('CEP: ${owner.cep}');
+    }
+    if (addressParts.isNotEmpty) {
+      addRow('Endereço: ${addressParts.join(' - ')}');
+    }
 
     final PdfGridCellStyle style =
         PdfGridCellStyle()..borders.all = PdfPens.transparent;
@@ -160,7 +173,7 @@ class PdfGenerateReceiptUseCase {
               : PdfStandardFont(
                 PdfFontFamily.helvetica,
                 8,
-                style: PdfFontStyle.regular,
+                style: PdfFontStyle.bold,
               );
       for (int j = 0; j < row.cells.count; j++) {
         row.cells[j].style = style;
@@ -180,8 +193,10 @@ class PdfGenerateReceiptUseCase {
     pdfGrid.headers.applyStyle(headerStyle);
     pdfGrid.columns[0].width = 180;
     pdfGrid.columns[1].width = 620;
-    pdfGrid.draw(
-      graphics: page.graphics,
+    // Desenhar com `page:` (e não `graphics:`): só assim o Syncfusion
+    // devolve o PdfLayoutResult com a altura real do bloco.
+    final PdfLayoutResult? result = pdfGrid.draw(
+      page: page,
       bounds: Rect.fromLTWH(
         sizeWithImage,
         0,
@@ -189,13 +204,14 @@ class PdfGenerateReceiptUseCase {
         page.getClientSize().height,
       ),
     );
+    return result?.bounds.bottom ?? 0;
   }
 
   // ---------------------------------------------------------------------------
   // Receipt section title
   // ---------------------------------------------------------------------------
 
-  void _drawReceiptTitle(PdfPage page, PdfGraphics graphics) {
+  void _drawReceiptTitle(PdfPage page, PdfGraphics graphics, double top) {
     final PdfFont font1 = PdfStandardFont(
       PdfFontFamily.helvetica,
       13,
@@ -209,7 +225,7 @@ class PdfGenerateReceiptUseCase {
     graphics.drawRectangle(
       brush: PdfSolidBrush(PdfColor(255, 255, 255)),
       pen: PdfPen(PdfColor(211, 211, 211)),
-      bounds: Rect.fromLTWH(0, 95, page.getClientSize().width, 30),
+      bounds: Rect.fromLTWH(0, top, page.getClientSize().width, 30),
     );
 
     graphics.drawString(
@@ -218,7 +234,7 @@ class PdfGenerateReceiptUseCase {
       brush: PdfBrushes.black,
       bounds: Rect.fromLTWH(
         0,
-        86.5,
+        top - 8.5,
         page.getClientSize().width,
         page.getClientSize().height,
       ),
@@ -230,7 +246,11 @@ class PdfGenerateReceiptUseCase {
   // Budget data grid
   // ---------------------------------------------------------------------------
 
-  double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer) {
+  double _drawBudgetDataGrid(
+    PdfPage page,
+    CustomerInfo customer,
+    double top,
+  ) {
     double count = 0;
     try {
       final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
@@ -280,7 +300,7 @@ class PdfGenerateReceiptUseCase {
         graphics: page.graphics,
         bounds: Rect.fromLTWH(
           page.getClientSize().width / 2,
-          135,
+          top,
           page.getClientSize().width,
           page.getClientSize().height,
         ),
@@ -295,7 +315,7 @@ class PdfGenerateReceiptUseCase {
   // Receipt info grid
   // ---------------------------------------------------------------------------
 
-  void _drawReceiptInfoGrid(PdfPage page, Receipt recived) {
+  void _drawReceiptInfoGrid(PdfPage page, Receipt recived, double top) {
     try {
       final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);
       pdfGrid.headers.clear();
@@ -338,7 +358,7 @@ class PdfGenerateReceiptUseCase {
         graphics: page.graphics,
         bounds: Rect.fromLTWH(
           0,
-          135,
+          top,
           page.getClientSize().width,
           page.getClientSize().height,
         ),

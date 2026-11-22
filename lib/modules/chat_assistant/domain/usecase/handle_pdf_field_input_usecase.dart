@@ -5,14 +5,38 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/chat_menu_result.da
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/document_validation_result.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Valida o input de um campo PDF, salva e envia mensagens de confirmação.
 class HandlePdfFieldInputUsecase {
   final UpdatePdfFieldUsecase _updatePdfField;
   final ChatBudgetRepository _chatRepo;
+  final ValidateDocumentUsecase _validateDocument;
+  final FormatDocumentUsecase _formatDocument;
 
-  HandlePdfFieldInputUsecase(this._updatePdfField, this._chatRepo);
+  HandlePdfFieldInputUsecase(
+    this._updatePdfField,
+    this._chatRepo,
+    this._validateDocument,
+    this._formatDocument,
+  );
+
+  /// Valida CPF/CNPJ e devolve o valor mascarado, ou o erro.
+  ({String? masked, DocumentType? type, DocumentValidationError? error})
+  prepareDocument(String value) {
+    final result = _validateDocument(value);
+    if (!result.isValid) {
+      return (masked: null, type: result.type, error: result.error);
+    }
+    return (
+      masked: _formatDocument(result.cleaned!, result.type!),
+      type: result.type,
+      error: null,
+    );
+  }
 
   final _phoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
@@ -67,25 +91,24 @@ class HandlePdfFieldInputUsecase {
           successMsg: '${ChatAssistantStrings.pdfEditSuccessEmail} $value',
         );
       case 'cnpj':
-        final digits = value.replaceAll(RegExp(r'\D'), '');
-        if (digits.length != 14) {
+        final doc = prepareDocument(value);
+        if (doc.error != null) {
           await _chatRepo.sendMessage(
             ChatMessageEntity(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               sender: ChatSender.bot,
               type: ChatMessageType.text,
-              content: ChatAssistantStrings.pdfEditInvalidCnpj,
+              content: ChatAssistantStrings.documentError(doc.error!),
               timestamp: DateTime.now(),
             ),
           );
-          return const ChatMenuResult('pdfEditFieldInput', pdfField: 'cnpj');
+          return const ChatMenuResult('pdfEditDocumentForm', pdfField: 'cnpj');
         }
-        final masked =
-            '${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/${digits.substring(8, 12)}-${digits.substring(12, 14)}';
         return await _save(
           'cnpj',
-          masked,
-          successMsg: '${ChatAssistantStrings.pdfEditSuccessCnpj} $masked',
+          doc.masked!,
+          successMsg:
+              '${ChatAssistantStrings.pdfEditSuccessDocument(doc.type!)} ${doc.masked}',
         );
       default:
         return const ChatMenuResult('pdfEditFieldInput');

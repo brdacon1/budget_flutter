@@ -1,3 +1,6 @@
+import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
@@ -55,6 +58,8 @@ import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_us
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
 import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/presenter/formatter/document_input_formatter.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
@@ -97,6 +102,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final ParseMoneyInputUsecase _parseMoney;
   final PickProofAttachmentsUsecase _pickProof;
   final ReceiveSharedProofUsecase _receiveShared;
+  final FormatDocumentUsecase _formatDocument;
 
   bool _disposed = false;
 
@@ -132,6 +138,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._parseMoney,
     this._pickProof,
     this._receiveShared,
+    this._formatDocument,
   ) {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
@@ -197,6 +204,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Opção "Encontrar orçamentos" do menu (só existe no modo IA).
   static const _findBudgetOption = '6';
 
+  /// Opção "Cadastrar comentários" do menu (só existe no modo IA).
+  static const _commentLibraryOption = '7';
+
+  final ShowCommentLibraryMenuUsecase _showCommentLibraryMenu =
+      getIt<ShowCommentLibraryMenuUsecase>();
+  final HandleCommentLibraryMenuOptionUsecase _handleCommentLibraryMenuOption =
+      getIt<HandleCommentLibraryMenuOptionUsecase>();
+
   /// Ação/navegação que abre o modal de orçamentos já buscando o nome.
   static const findBudgetAction = 'find_budget|';
 
@@ -215,6 +230,19 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final numberController = TextEditingController();
   final cityController = TextEditingController();
   final neighborhoodController = TextEditingController();
+  final documentController = TextEditingController();
+
+  /// Máscara dinâmica CPF/CNPJ do formulário de documento.
+  late final DocumentInputFormatter documentFormatter = DocumentInputFormatter(
+    _formatDocument.partial,
+  );
+
+  String? _documentError;
+
+  /// Erro de validação do CNPJ/CPF a exibir no campo (`null` = nenhum).
+  String? get documentError => _documentError;
+
+  late final Command0<void> submitDocumentCommand = Command0(_submitDocument);
 
   bool _isCorrectingAddress = false;
 
@@ -331,6 +359,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     numberController.clear();
     cityController.clear();
     neighborhoodController.clear();
+    documentController.clear();
+    _documentError = null;
     _clientNameMsgId = null;
     _clientPhoneMsgId = null;
     _editingMsgId = null;
@@ -443,6 +473,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       step = await _showPriceListUsecase();
     } else if (_step == ChatFlowStep.pdfEditMenu) {
       step = await _showPdfEditUsecase();
+    } else if (_step == ChatFlowStep.commentLibraryMenu) {
+      step = await _showCommentLibraryMenu();
     }
     if (step == null) return;
     _setStepFromName(step);
@@ -530,6 +562,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
           clean == _findBudgetOption) {
         _setStepFromName(await _showFindBudgetPrompt());
         notifyListeners();
+      } else if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          clean == _commentLibraryOption &&
+          getIt<CheckCommentLibraryAccessUsecase>()()) {
+        _setStepFromName(await _showCommentLibraryMenu());
+        notifyListeners();
+      } else if (_step == ChatFlowStep.commentLibraryMenu) {
+        await _handleCommentLibrary(clean);
       } else if (_step == ChatFlowStep.findBudgetAskName) {
         await _findBudget(clean);
       } else if (_step == ChatFlowStep.mainMenu &&
@@ -545,6 +585,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       } else if (_step == ChatFlowStep.pdfEditMenu) {
         await _handlePdfEdit(clean);
       } else if (_step == ChatFlowStep.pdfEditFieldInput) {
+        await _handlePdfField(clean);
+      } else if (_step == ChatFlowStep.pdfEditDocumentForm) {
         await _handlePdfField(clean);
       } else if (_step == ChatFlowStep.pdfEditConfirm) {
         await _handlePdfConfirm(clean);
@@ -1122,6 +1164,30 @@ class ChatAssistantViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _handleCommentLibrary(String option) async {
+    final result = _handleCommentLibraryMenuOption(option);
+    if (result.navigation != null) _pendingNavigation = result.navigation;
+    if (result.nextStep != _step.name) {
+      if (result.nextStep == 'mainMenu') {
+        await _backToMainMenu();
+        return;
+      }
+      _setStepFromName(result.nextStep);
+    }
+    notifyListeners();
+  }
+
+  /// Callback da View ao fechar o modal de criar comentário.
+  Future<void> onCommentCreatorClosed(String? savedName) async {
+    if (savedName != null) {
+      await _addBotMessage(
+        ChatAssistantStrings.commentLibraryCreated(savedName),
+        type: ChatMessageType.text,
+      );
+    }
+    await repeatCurrentMenu();
+  }
+
   Future<void> _handlePdfEditConfirmEntry(String option) async {
     final upper = option.trim().toUpperCase();
     if (upper == 'SIM') {
@@ -1147,8 +1213,31 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (result.nextStep == 'askHasCep') {
       _isPdfEditAddressMode = true;
     }
+    if (result.nextStep == ChatFlowStep.pdfEditDocumentForm.name) {
+      _documentError = null;
+      documentController.text = _formatDocument.partial(
+        result.currentValue ?? '',
+      );
+    }
     _setStepFromName(result.nextStep);
     notifyListeners();
+  }
+
+  Future<Result<void>> _submitDocument() async {
+    final doc = _handlePdfFieldInput.prepareDocument(documentController.text);
+    if (doc.error != null) {
+      _documentError = ChatAssistantStrings.documentError(doc.error!);
+      notifyListeners();
+      return Result.ok(null);
+    }
+    _documentError = null;
+    documentController.clear();
+    await _sendUserMessageWithId(_generateMessageId(), doc.masked!);
+    final result = await _handlePdfFieldInput('cnpj', doc.masked!);
+    _pdfEditField = result.pdfField;
+    _setStepFromName(result.nextStep);
+    notifyListeners();
+    return Result.ok(null);
   }
 
   Future<void> _handlePdfField(String value) async {
@@ -2267,6 +2356,26 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _step != ChatFlowStep.shareLink &&
       !isSavingProof;
 
+  /// Mostra o formulário de CNPJ/CPF no lugar da barra de texto.
+  bool get showDocumentForm => _step == ChatFlowStep.pdfEditDocumentForm;
+
+  /// Limpa o erro do campo de documento enquanto o usuário digita.
+  void onDocumentChanged(String _) {
+    if (_documentError == null) return;
+    _documentError = null;
+    notifyListeners();
+  }
+
+  /// Desiste da edição do documento e volta ao menu "Editar PDF".
+  Future<void> cancelDocumentForm() async {
+    documentController.clear();
+    _documentError = null;
+    _pdfEditField = null;
+    final step = await _showPdfEditUsecase();
+    _setStepFromName(step);
+    notifyListeners();
+  }
+
   /// Mostra o formulário de endereço manual no lugar da barra de texto.
   bool get showManualAddressForm => _step == ChatFlowStep.askStreetManual;
 
@@ -2342,6 +2451,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     numberController.dispose();
     cityController.dispose();
     neighborhoodController.dispose();
+    documentController.dispose();
     super.dispose();
   }
 }
