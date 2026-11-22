@@ -173,7 +173,7 @@ class PdfGenerateReceiptUseCase {
               : PdfStandardFont(
                 PdfFontFamily.helvetica,
                 8,
-                style: PdfFontStyle.regular,
+                style: PdfFontStyle.bold,
               );
       for (int j = 0; j < row.cells.count; j++) {
         row.cells[j].style = style;
