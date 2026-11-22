@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/main_config_menu/presenter/strings/main_config_menu_pt_string.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/delete_account_in_app_view.dart';
@@ -19,6 +21,10 @@ class MainConfigMenuViewModel extends ChangeNotifier {
 
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: MainConfigMenuStrings.menuPriceList),
+    MenuItem(
+      icon: Icons.chat_bubble_outline,
+      title: MainConfigMenuStrings.menuComments,
+    ),
     MenuItem(
       icon: Icons.picture_as_pdf_outlined,
       title: MainConfigMenuStrings.menuEditPdf,
@@ -48,21 +54,24 @@ class MainConfigMenuViewModel extends ChangeNotifier {
         );
         break;
       case 1:
+        _openComments(context);
+        break;
+      case 2:
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const PdfEditView()),
         );
         break;
-      case 2:
+      case 3:
         _displayAlert.dialogChangeName(context);
         break;
-      case 3:
+      case 4:
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const SubscriptionView()),
         );
         break;
-      case 4:
+      case 5:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -71,5 +80,27 @@ class MainConfigMenuViewModel extends ChangeNotifier {
         );
         break;
     }
+  }
+
+  /// Biblioteca de comentários com IA: só assinante. Free vê o aviso e vai
+  /// para a assinatura.
+  Future<void> _openComments(BuildContext context) async {
+    if (getIt<CheckCommentLibraryAccessUsecase>()()) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CommentLibraryListView()),
+      );
+      return;
+    }
+    await _displayAlert.notificationWarning(
+      context,
+      MainConfigMenuStrings.premiumOnlyTitle,
+      MainConfigMenuStrings.commentsPremiumOnly,
+    );
+    if (!context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SubscriptionView()),
+    );
   }
 }

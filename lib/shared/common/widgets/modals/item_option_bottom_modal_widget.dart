@@ -8,17 +8,24 @@ import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart
 /// Retorna o valor selecionado via `Navigator.pop(context, value)`. Fundo
 /// branco, textos cinza máximo, sem botão de ação (a seleção já fecha).
 class ItemOptionBottomModalWidget extends StatelessWidget {
-  const ItemOptionBottomModalWidget({super.key});
+  const ItemOptionBottomModalWidget({
+    super.key,
+    this.title = 'Como você quer inserir o item?',
+    this.createLabel = 'Criar novo item',
+    this.selectLabel = 'Selecionar da lista de preço',
+  });
 
-  static const List<String> _values = [
-    'Criar novo item',
-    'Selecionar da lista de preço',
-  ];
+  /// Padrões = fluxo de itens do orçamento; comentários passam os seus.
+  final String title;
+  final String createLabel;
+  final String selectLabel;
+
+  List<String> get _values => [createLabel, selectLabel];
 
   @override
   Widget build(BuildContext context) {
     return AppBottomModal(
-      title: 'Como você quer inserir o item?',
+      title: title,
       buttonLabel: '',
       onButtonPressed: () {},
       buttonVisible: false,

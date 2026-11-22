@@ -47,6 +47,12 @@ abstract class DisplayAlertRepository {
 
   /// Modal de opções para inserir item (criar novo x selecionar da lista).
   ///
-  /// Retorna o valor selecionado (string vazia se usuário cancelar).
-  Future<String> listNotification(BuildContext context);
+  /// Retorna o label escolhido (string vazia se usuário cancelar). Sem
+  /// labels → textos do fluxo de itens.
+  Future<String> listNotification(
+    BuildContext context, {
+    String? title,
+    String? createLabel,
+    String? selectLabel,
+  });
 }

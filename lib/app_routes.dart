@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'modules/auth/auth_routes.dart';
 import 'modules/budget/budget_routes.dart';
 import 'modules/chat_assistant/chat_assistant_routes.dart';
+import 'modules/comment_library/comment_library_routes.dart';
 import 'modules/dashboard/dashboard_routes.dart';
 import 'modules/image/image_routes.dart';
 import 'modules/main_config_menu/main_config_menu_routes.dart';
@@ -27,6 +28,7 @@ enum AppRoute {
   termsConditions,
   chatAssistant,
   productPriceList,
+  commentLibraryList,
   webBudgetApp,
   dashboard,
   mainConfigMenu,
@@ -51,6 +53,8 @@ extension AppRouteExtension on AppRoute {
         return ChatBudgetRoute.chatAssistant.path;
       case AppRoute.productPriceList:
         return ProductRoute.productPriceList.path;
+      case AppRoute.commentLibraryList:
+        return CommentLibraryRoute.commentLibraryList.path;
       case AppRoute.webBudgetApp:
         return WebBudgetRoute.webBudgetApp.path;
       case AppRoute.dashboard:
@@ -73,6 +77,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   ...chatBudgetRoutes,
   ...imageRoutes,
   ...productRoutes,
+  ...commentLibraryRoutes,
   ...receiptRoutes,
   ...webBudgetRoutes,
   ...dashboardRoutes,

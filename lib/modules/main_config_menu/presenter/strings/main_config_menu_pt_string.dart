@@ -16,6 +16,17 @@ class MainConfigMenuStrings {
   static String get menuPriceList =>
       _isPt ? 'Lista de preço' : 'Price list';
 
+  static String get menuComments =>
+      _isPt ? 'Meus comentários' : 'My comments';
+
+  static String get premiumOnlyTitle =>
+      _isPt ? 'Recurso premium' : 'Premium feature';
+
+  static String get commentsPremiumOnly =>
+      _isPt
+          ? 'Salvar comentários com nome e texto melhorado por IA é exclusivo para assinantes.'
+          : 'Saving comments with AI names and AI-improved text is for subscribers only.';
+
   static String get menuEditPdf =>
       _isPt ? 'Editar PDF' : 'Edit PDF';
 

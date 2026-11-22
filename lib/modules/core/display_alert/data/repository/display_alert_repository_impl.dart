@@ -204,13 +204,24 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   }
 
   @override
-  Future<String> listNotification(BuildContext context) async {
+  Future<String> listNotification(
+    BuildContext context, {
+    String? title,
+    String? createLabel,
+    String? selectLabel,
+  }) async {
+    const defaults = ItemOptionBottomModalWidget();
     String resultText = '';
     await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const ItemOptionBottomModalWidget(),
+      builder:
+          (context) => ItemOptionBottomModalWidget(
+            title: title ?? defaults.title,
+            createLabel: createLabel ?? defaults.createLabel,
+            selectLabel: selectLabel ?? defaults.selectLabel,
+          ),
     ).then((value) {
       resultText = value ?? '';
     });
