@@ -12,6 +12,9 @@ enum ChatFlowStep {
   askProducts,
   reviewProducts,
   askComments,
+
+  /// IA: perguntou se quer comentar um orçamento já existente.
+  askExistingBudgetComments,
   shareLink,
   mainMenu,
   priceListMenu,

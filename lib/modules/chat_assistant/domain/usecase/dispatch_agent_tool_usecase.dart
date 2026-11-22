@@ -58,12 +58,16 @@ class DispatchAgentToolUsecase {
   static const purposeReceipts = 'receipts';
   static const purposeView = 'view';
   static const purposeDuplicate = 'duplicate';
+  static const purposeComments = 'comments';
 
   /// Navegação/ação que abre o modal de seleção de orçamento para recibo.
   static const selectReceiptBudget = 'select_receipt_budget';
 
   /// Navegação/ação que abre o modal de seleção de orçamento para duplicar.
   static const selectDuplicateBudget = 'select_duplicate_budget';
+
+  /// Navegação/ação que abre o modal de seleção de orçamento para comentar.
+  static const selectCommentBudget = 'select_comment_budget';
 
   /// Fluxo do menu (valor enviado pela IA) → opção do menu principal.
   static const flowToMenuOption = {
@@ -108,11 +112,18 @@ class DispatchAgentToolUsecase {
         },
         'purpose': {
           'type': 'enum',
-          'values': [purposeView, purposeReceipts, purposeDuplicate],
+          'values': [
+            purposeView,
+            purposeReceipts,
+            purposeDuplicate,
+            purposeComments,
+          ],
           'description':
               'use "receipts" quando o usuário precisa escolher o orçamento '
               'para criar/ver recibos, "duplicate" para duplicar/clonar um '
-              'orçamento (ambos abrem um modal de seleção); senão "view"',
+              'orçamento, "comments" para adicionar/editar comentários ou '
+              'observações de um orçamento (todos abrem um modal de '
+              'seleção); senão "view"',
         },
       },
     ),
@@ -235,6 +246,12 @@ class DispatchAgentToolUsecase {
       return _selectBudget(
         selectReceiptBudget,
         ChatAssistantStrings.aiSelectReceiptBudget,
+      );
+    }
+    if (args['purpose'] == purposeComments) {
+      return _selectBudget(
+        selectCommentBudget,
+        ChatAssistantStrings.aiSelectCommentBudget,
       );
     }
     if (args['purpose'] == purposeDuplicate) {

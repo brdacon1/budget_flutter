@@ -1,25 +1,29 @@
 import 'dart:async';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
-import 'package:oflite/modules/chat_assistant/domain/entity/agent_tool_entity.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_action_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/create_budget_from_chat_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/fetch_chat_script_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_change_username_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_logo_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_main_menu_option_usecase.dart';
@@ -28,38 +32,34 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_edit_men
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_field_input_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
-import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
+import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
+import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
-import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
-import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
-import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
-import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
-import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
-import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 
 /// ViewModel do assistente de chat.
 ///
@@ -338,6 +338,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _reviewMsgId = null;
     _commentQuestionMsgId = null;
     _commentsFeedbackMsgId = null;
+    _commentBudget = null;
     _pdfEditField = null;
     _pendingNavigation = null;
     _isPdfEditAddressMode = false;
@@ -408,6 +409,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action.startsWith(findBudgetAction) ||
       action == DispatchAgentToolUsecase.selectReceiptBudget ||
       action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+      action == DispatchAgentToolUsecase.selectCommentBudget ||
       action == selectProofBudgetAction ||
       action.startsWith(openProofsAction);
 
@@ -1018,6 +1020,43 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ),
       Error() => ChatAssistantStrings.aiBudgetDuplicateFailed,
     });
+  }
+
+  // ------------------------------------------------------------------
+  // IA: comentários de um orçamento existente (list_budgets "comments")
+  // ------------------------------------------------------------------
+
+  /// Orçamento escolhido no modal para comentar.
+  CustomerInfo? _commentBudget;
+
+  CustomerInfo? get commentBudget => _commentBudget;
+
+  /// Após escolher o orçamento no modal: pergunta se quer comentar.
+  Future<void> askCommentsForBudget(CustomerInfo budget) async {
+    _commentBudget = budget;
+    _setStep(ChatFlowStep.askExistingBudgetComments);
+    await _sendBotMessageWithId(
+      _generateMessageId(),
+      ChatAssistantStrings.askAddComments,
+      type: ChatMessageType.inlineButtons,
+      payload: {
+        'actions': ['SIM', 'NÃO'],
+      },
+    );
+  }
+
+  /// Voltou da tela de comentários do orçamento existente.
+  Future<void> onExistingBudgetCommentsClosed() async {
+    final client = _commentBudget?.customerName ?? '';
+    _commentBudget = null;
+    _setStep(ChatFlowStep.mainMenu);
+    await _addBotMessage(ChatAssistantStrings.aiBudgetCommentsSaved(client));
+  }
+
+  Future<void> skipExistingBudgetComments() async {
+    _commentBudget = null;
+    _setStep(ChatFlowStep.mainMenu);
+    await _addBotMessage(ChatAssistantStrings.aiBudgetCommentsSkipped);
   }
 
   /// Orçamento para a View abrir a tela (card da IA / tool `open_budget`).
@@ -2092,7 +2131,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       ChatAssistantStrings.commentsUpdated,
       type: ChatMessageType.inlineButtons,
       payload: {
-        'actions': ['Editar comentários', 'Finalizar e gerar link'],
+        'actions': ['Editar comentários', 'Gerar orçamento'],
       },
     );
   }
@@ -2124,6 +2163,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Navegações que a View executa (precisam de `context`).
   static const openProductsNav = 'open_products';
   static const openCommentsNav = 'open_comments';
+  static const openExistingCommentsNav = 'open_existing_comments';
   static const openLogoEditNav = 'open_logo_edit';
   static const linkCopiedNav = 'link_copied';
 
@@ -2136,6 +2176,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         action == selectProofBudgetAction ||
         action.startsWith(openProofsAction) ||
         action == DispatchAgentToolUsecase.selectDuplicateBudget ||
+        action == DispatchAgentToolUsecase.selectCommentBudget ||
         action.startsWith('open_budget|')) {
       return action;
     }
@@ -2152,6 +2193,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await pickContactCommand.execute();
       case 'SIM':
         if (_step == ChatFlowStep.askComments) return openCommentsNav;
+        if (_step == ChatFlowStep.askExistingBudgetComments) {
+          return openExistingCommentsNav;
+        }
         await handleAction('SIM');
       case 'Sim':
         if (_step == ChatFlowStep.pdfEditConfirmEntry) {
@@ -2160,7 +2204,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
           await handleAction(action);
         }
       case 'NÃO':
-        if (_step == ChatFlowStep.askComments) {
+        if (_step == ChatFlowStep.askExistingBudgetComments) {
+          await skipExistingBudgetComments();
+        } else if (_step == ChatFlowStep.askComments) {
           await handleAction('NÃO');
         } else {
           await skipAddressCommand.execute();
@@ -2182,7 +2228,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       case 'Editar comentários':
         return openCommentsNav;
       case 'finalize_budget':
-      case 'Finalizar e gerar link':
+      case 'Gerar orçamento':
         await handleAction('finalize_budget');
       case 'cancel_and_proceed':
         await handleAction('cancel_and_proceed');

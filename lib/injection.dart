@@ -2,7 +2,9 @@ import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/auth/auth_binds.dart';
 import 'package:oflite/modules/budget/budget_binds.dart';
 import 'package:oflite/modules/chat_assistant/chat_assistant_binds.dart';
+import 'package:oflite/modules/comment_library/comment_library_binds.dart';
 import 'package:oflite/modules/core/ads/ads_binds.dart';
+import 'package:oflite/modules/core/ai_text/ai_text_binds.dart';
 import 'package:oflite/modules/core/cep/cep_binds.dart';
 import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
 import 'package:oflite/modules/core/app_check/app_check_binds.dart';
@@ -55,6 +57,7 @@ void setupDependencyInjection() {
   registerCepDependencies(getIt);
   registerShareLinkDependencies(getIt);
   registerAdsDependencies(getIt);
+  registerAiTextDependencies(getIt);
   registerInAppPurchaseDependencies(getIt);
 
   // ------------------------------------------------------------------
@@ -64,6 +67,7 @@ void setupDependencyInjection() {
   registerReceiptDependencies(getIt);
   registerPaymentProofDependencies(getIt);
   registerProductDependencies(getIt);
+  registerCommentLibraryDependencies(getIt);
   registerPdfDependencies(getIt);
   registerAuthDependencies(getIt);
   registerChatBudgetDependencies(getIt);

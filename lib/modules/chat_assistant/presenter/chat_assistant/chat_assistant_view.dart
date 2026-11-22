@@ -184,6 +184,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         return _openBudgetItems();
       case ChatAssistantViewModel.openCommentsNav:
         return _openComments();
+      case ChatAssistantViewModel.openExistingCommentsNav:
+        return _openExistingBudgetComments();
     }
     await _navigate(nav);
   }
@@ -216,6 +218,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _pickBudgetForProof();
       case DispatchAgentToolUsecase.selectDuplicateBudget:
         await _pickBudgetToDuplicate();
+      case DispatchAgentToolUsecase.selectCommentBudget:
+        await _pickBudgetToComment();
       case 'open_price_list':
         await _push(const ProductPriceListView());
         if (mounted) await _vm.resetChatCommand.execute();
@@ -251,6 +255,23 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     await _push(BudgetCommentListView(item: budget));
     // Ao voltar da tela de comentários, finaliza o orçamento
     await _vm.finalizeAfterComments();
+  }
+
+  /// IA: escolhe o orçamento no modal e pergunta se quer comentar.
+  Future<void> _pickBudgetToComment() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _vm.budgetForNavigation(id);
+    if (budget == null || !mounted) return;
+    await _vm.askCommentsForBudget(budget);
+  }
+
+  /// Tela de comentários do orçamento escolhido (fluxo da IA).
+  Future<void> _openExistingBudgetComments() async {
+    final budget = _vm.commentBudget;
+    if (budget == null) return;
+    await _push(BudgetCommentListView(item: budget));
+    if (mounted) await _vm.onExistingBudgetCommentsClosed();
   }
 
   /// Abre a tela do orçamento (card da IA ou tool `open_budget`).
@@ -375,8 +396,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
 
   /// Arquivos vindos da folha de compartilhamento → prévia → chat.
   Future<void> _consumeSharedProof() async {
+    // Checa antes de retirar: um chat já descartado (geração anterior) não
+    // pode consumir o pendente, senão o chat novo recebe null.
+    if (!mounted) return;
     final shared = _vm.takeSharedProof();
-    if (shared == null || !mounted) return;
+    if (shared == null) return;
     await _previewAndSend(shared, origin: PaymentProofOrigin.share);
   }
 

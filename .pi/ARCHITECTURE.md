@@ -1223,6 +1223,7 @@ etc.
 - [x] `budget` — Orçamentos (list, creator, items, tab)
 - [x] `chat_assistant` — Assistente por chat (modo padrão + modo IA, ver §20)
 - [x] `comment` — Comentários nos orçamentos
+- [x] `comment_library` — Lista de comentários reutilizáveis com IA, só assinantes (nome gerado pela IA, "Melhorar com IA"; plano em `.pi/COMMENT_LIBRARY_PLAN.md`)
 - [x] `dashboard` — Dashboard com gráficos
 - [x] `image` — Edição de imagens/logo
 - [x] `login` — Autenticação
@@ -1243,6 +1244,7 @@ etc.
 ### Core — com DataSource (fonte externa)
 
 - [x] `core/ads` — Google Mobile Ads (exibe apenas para não-assinantes)
+- [x] `core/ai_text` — Texto simples com Gemini (sem tools); limite 30/dia em `GenerateAiTextUsecase`
 - [x] `core/app_check` — Firebase App Check (protege o Firebase AI Logic; mobile only)
 - [x] `core/cep` — Consulta de CEP
 - [x] `core/crashlytics` — Relatório de crashes (mobile only)
@@ -2117,7 +2119,7 @@ O chat do assistente (`modules/chat_assistant`) tem dois modos:
 |---|-----------|
 | P1 | **LLM decide, UseCase executa.** O modelo só escolhe a tool e os argumentos; a regra de negócio está no UseCase do módulo dono (`budget`, `receipt`…). |
 | P2 | **LLM nunca calcula.** Somas, contagens e totais vêm do UseCase, já formatados (`ConvertCoinRepository`). O modelo só repete. |
-| P3 | **`firebase_ai` só no DataSource** (`ChatAiRemoteDatasource`). O domínio declara tools como dados neutros (`AgentToolSpec`) e nunca importa o SDK. |
+| P3 | **`firebase_ai` só no DataSource** (`ChatAiRemoteDatasource` e `core/ai_text/AiTextRemoteDatasource` — texto simples, sem tools; limite 30/dia no `GenerateAiTextUsecase`). O domínio declara tools como dados neutros (`AgentToolSpec`) e nunca importa o SDK. |
 | P4 | **Toda escrita é confirmada pelo usuário.** A tool de escrita só devolve uma prévia + botões *Confirmar/Cancelar*; quem grava é o `ConfirmAgentActionUsecase`, sem chamar a IA. |
 | P5 | **Valor persistido fixo** (Regra Zero do i18n): status trafega como `PENDENTE/APROVADO/REPROVADO/FINALIZADO` (`BudgetStatus`); só o label é traduzido. |
 | P6 | **Resposta é UI.** A lista completa vai para um card nativo; ao modelo vai no máximo 20 itens enxutos. |
@@ -2281,6 +2283,8 @@ modules/chat_assistant/ (comprovantes)
 | Máx. 20 itens por `functionResponse`; lista completa só no card | `DispatchAgentToolUsecase` |
 | Histórico de 20 mensagens | `ChatAiRepositoryImpl` |
 | **100 mensagens/dia por usuário** (`RunAgentTurnUsecase.dailyLimit`) | contador local |
+| **30 chamadas/dia** de texto simples (nome + "Melhorar" dos comentários) (`GenerateAiTextUsecase.dailyLimit`) | contador local separado (`core/ai_text`) |
+| Log `[AiText] tokens in=… out=…` | `AiTextRepositoryImpl` |
 | Log `[ChatAI] tokens in=… out=…` por chamada | `ChatAiRepositoryImpl` |
 
 Faturamento: Gemini Developer API (AI Studio). Usar **recarga automática** com
