@@ -1,3 +1,6 @@
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
@@ -225,6 +228,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         if (mounted) await _vm.resetChatCommand.execute();
       case 'open_product_creator':
         _openProductCreator();
+      case HandleCommentLibraryMenuOptionUsecase.openListNav:
+        await _push(const CommentLibraryListView());
+        if (mounted) await _vm.repeatCurrentMenu();
+      case HandleCommentLibraryMenuOptionUsecase.openCreatorNav:
+        final saved = await showCommentLibraryCreatorBottomModal(context);
+        if (mounted) await _vm.onCommentCreatorClosed(saved?.name);
       case 'open_pdf_edit':
         _push(const PdfEditView());
       case 'open_change_name':

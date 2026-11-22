@@ -1,3 +1,6 @@
+import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
@@ -196,6 +199,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Opção "Encontrar orçamentos" do menu (só existe no modo IA).
   static const _findBudgetOption = '6';
+
+  /// Opção "Cadastrar comentários" do menu (só existe no modo IA).
+  static const _commentLibraryOption = '7';
+
+  final ShowCommentLibraryMenuUsecase _showCommentLibraryMenu =
+      getIt<ShowCommentLibraryMenuUsecase>();
+  final HandleCommentLibraryMenuOptionUsecase _handleCommentLibraryMenuOption =
+      getIt<HandleCommentLibraryMenuOptionUsecase>();
 
   /// Ação/navegação que abre o modal de orçamentos já buscando o nome.
   static const findBudgetAction = 'find_budget|';
@@ -443,6 +454,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       step = await _showPriceListUsecase();
     } else if (_step == ChatFlowStep.pdfEditMenu) {
       step = await _showPdfEditUsecase();
+    } else if (_step == ChatFlowStep.commentLibraryMenu) {
+      step = await _showCommentLibraryMenu();
     }
     if (step == null) return;
     _setStepFromName(step);
@@ -530,6 +543,14 @@ class ChatAssistantViewModel extends ChangeNotifier {
           clean == _findBudgetOption) {
         _setStepFromName(await _showFindBudgetPrompt());
         notifyListeners();
+      } else if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          clean == _commentLibraryOption &&
+          getIt<CheckCommentLibraryAccessUsecase>()()) {
+        _setStepFromName(await _showCommentLibraryMenu());
+        notifyListeners();
+      } else if (_step == ChatFlowStep.commentLibraryMenu) {
+        await _handleCommentLibrary(clean);
       } else if (_step == ChatFlowStep.findBudgetAskName) {
         await _findBudget(clean);
       } else if (_step == ChatFlowStep.mainMenu &&
@@ -1120,6 +1141,30 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _setStepFromName(result.nextStep);
     }
     notifyListeners();
+  }
+
+  Future<void> _handleCommentLibrary(String option) async {
+    final result = _handleCommentLibraryMenuOption(option);
+    if (result.navigation != null) _pendingNavigation = result.navigation;
+    if (result.nextStep != _step.name) {
+      if (result.nextStep == 'mainMenu') {
+        await _backToMainMenu();
+        return;
+      }
+      _setStepFromName(result.nextStep);
+    }
+    notifyListeners();
+  }
+
+  /// Callback da View ao fechar o modal de criar comentário.
+  Future<void> onCommentCreatorClosed(String? savedName) async {
+    if (savedName != null) {
+      await _addBotMessage(
+        ChatAssistantStrings.commentLibraryCreated(savedName),
+        type: ChatMessageType.text,
+      );
+    }
+    await repeatCurrentMenu();
   }
 
   Future<void> _handlePdfEditConfirmEntry(String option) async {

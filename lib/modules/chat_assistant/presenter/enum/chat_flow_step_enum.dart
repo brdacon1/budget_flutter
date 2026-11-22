@@ -19,6 +19,7 @@ enum ChatFlowStep {
   mainMenu,
   priceListMenu,
   priceListAddResult,
+  commentLibraryMenu,
   pdfEditConfirmEntry,
   pdfEditMenu,
   pdfEditFieldInput,

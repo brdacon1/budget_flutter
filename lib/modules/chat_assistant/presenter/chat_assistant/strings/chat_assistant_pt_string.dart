@@ -69,16 +69,16 @@ class ChatAssistantStrings {
   static List<String> get mainMenuOptionLabels =>
       _isPt
           ? const [
-            'Criar orçamentos',
-            'Cadastrar produtos e serviços',
-            'Editar PDF',
-            'Trocar nome de usuário',
+            '📝 Criar orçamentos',
+            '📦 Cadastrar produtos e serviços',
+            '📄 Editar PDF',
+            '👤 Trocar nome de usuário',
           ]
           : const [
-            'Create budget',
-            'Price list',
-            'Edit PDF',
-            'Change username',
+            '📝 Create budget',
+            '📦 Price list',
+            '📄 Edit PDF',
+            '👤 Change username',
           ];
 
   static String get menuInvalidOption =>
@@ -86,7 +86,7 @@ class ChatAssistantStrings {
           ? 'Opção inválida. Toque em uma das opções acima.'
           : 'Invalid option. Tap one of the options above.';
 
-  static String get menuBackLabel => _isPt ? 'Voltar ao menu' : 'Back to menu';
+  static String get menuBackLabel => _isPt ? '↩️ Voltar ao menu' : '↩️ Back to menu';
 
   // ------------------------------------------------------------------
   // Assistente com IA (assinantes)
@@ -97,11 +97,11 @@ class ChatAssistantStrings {
           : "I couldn't understand that right now 😕 Pick one of the options below.";
 
   /// Opção "Relatórios" do menu principal (só no modo IA) — valor `'5'`.
-  static String get reportsOptionLabel => _isPt ? 'Relatórios' : 'Reports';
+  static String get reportsOptionLabel => _isPt ? '📊 Relatórios' : '📊 Reports';
 
   /// Opção "Encontrar orçamentos" do menu (só no modo IA) — valor `'6'`.
   static String get findBudgetOptionLabel =>
-      _isPt ? 'Encontrar orçamentos' : 'Find budgets';
+      _isPt ? '🔍 Encontrar orçamentos' : '🔍 Find budgets';
 
   static String get findBudgetPrompt =>
       _isPt
@@ -305,8 +305,30 @@ Regras:
 
   static List<String> get priceListMenuOptionLabels =>
       _isPt
-          ? const ['Ver lista de produtos', 'Adicionar um novo produto']
-          : const ['View product list', 'Add new product'];
+          ? const ['📋 Ver lista de produtos', '➕ Adicionar um novo produto']
+          : const ['📋 View product list', '➕ Add new product'];
+
+  // ------------------------------------------------------------------
+  // Comentários (biblioteca — só modo IA/assinantes)
+  // ------------------------------------------------------------------
+  /// Opção do menu principal (só no modo IA) — valor `'7'`.
+  static String get commentLibraryOptionLabel =>
+      _isPt ? '💬 Cadastrar comentários' : '💬 Saved comments';
+
+  static String get commentLibraryMenuQuestion =>
+      _isPt
+          ? 'Beleza! O que você quer fazer com seus comentários?'
+          : 'Sure! What do you want to do with your comments?';
+
+  static List<String> get commentLibraryMenuOptionLabels =>
+      _isPt
+          ? const ['📋 Ver meus comentários', '➕ Adicionar um novo comentário']
+          : const ['📋 View my comments', '➕ Add a new comment'];
+
+  static String commentLibraryCreated(String name) =>
+      _isPt
+          ? 'Comentário "$name" salvo com sucesso! 🎉'
+          : 'Comment "$name" saved successfully! 🎉';
 
   // ------------------------------------------------------------------
   // Editar PDF
