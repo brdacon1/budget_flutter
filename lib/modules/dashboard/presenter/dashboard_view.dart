@@ -49,18 +49,50 @@ class _DashboardView extends State<DashboardView> {
     // tablet estreito): a coluna do resumo precisa de ~400 px.
     final twoColumns = ResponsiveWidget.isDesktop(context);
     const gap = SizedBox(height: defaultPadding, width: defaultPadding);
-    final overview = Column(
+    final status = DashboardStatusOverview(summary: vm.summary);
+    final sold = DashboardSoldItems(summary: vm.summary);
+    final progress = DashboardMonthlyProgress(summary: vm.summary);
+    final comparison = DashboardReceiptsComparison(items: vm.comparison);
+
+    // Duas linhas de dois cards com a mesma altura em cada linha: o topo e a
+    // base dos cards ficam alinhados entre as colunas. Resumo e vendidos à
+    // esquerda (coluna mais estreita), gráficos à direita.
+    Widget pair(Widget left, Widget right) => IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(flex: 2, child: left),
+          gap,
+          Expanded(flex: 3, child: right),
+        ],
+      ),
+    );
+
+    final monthBar = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DashboardStatusOverview(summary: vm.summary),
-        gap,
-        DashboardSoldItems(summary: vm.summary),
+        DashboardMonthFilter(
+          month: vm.month,
+          canGoNext: vm.canGoNext,
+          onPrevious: vm.previousMonth,
+          onNext: vm.nextMonth,
+        ),
+        SizedBox(
+          height: 2,
+          child:
+              vm.loadCommand.running ? const LinearProgressIndicator() : null,
+        ),
+        if (vm.loadCommand.error)
+          Padding(
+            padding: const EdgeInsets.only(top: defaultPadding),
+            child: Text(
+              DashboardStrings.loadError,
+              style: const TextStyle(color: statusRejectedColor),
+              textAlign: TextAlign.center,
+            ),
+          ),
       ],
     );
-    final charts = [
-      DashboardMonthlyProgress(summary: vm.summary),
-      gap,
-      DashboardReceiptsComparison(items: vm.comparison),
-    ];
 
     return Scaffold(
       body: SafeArea(
@@ -71,39 +103,33 @@ class _DashboardView extends State<DashboardView> {
             children: [
               const Header(),
               gap,
-              DashboardMonthFilter(
-                month: vm.month,
-                canGoNext: vm.canGoNext,
-                onPrevious: vm.previousMonth,
-                onNext: vm.nextMonth,
-              ),
-              SizedBox(
-                height: 2,
-                child:
-                    vm.loadCommand.running
-                        ? const LinearProgressIndicator()
-                        : null,
-              ),
-              if (vm.loadCommand.error)
-                Padding(
-                  padding: const EdgeInsets.only(top: defaultPadding),
-                  child: Text(
-                    DashboardStrings.loadError,
-                    style: const TextStyle(color: statusRejectedColor),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              gap,
-              if (!twoColumns) ...[overview, gap, ...charts],
               if (twoColumns)
+                // Filtro de mês na largura da coluna da esquerda.
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 3, child: Column(children: charts)),
+                    Expanded(flex: 2, child: monthBar),
                     gap,
-                    Expanded(flex: 2, child: overview),
+                    const Expanded(flex: 3, child: SizedBox.shrink()),
                   ],
-                ),
+                )
+              else
+                monthBar,
+              gap,
+              if (!twoColumns) ...[
+                status,
+                gap,
+                sold,
+                gap,
+                progress,
+                gap,
+                comparison,
+              ],
+              if (twoColumns) ...[
+                pair(status, progress),
+                gap,
+                pair(sold, comparison),
+              ],
             ],
           ),
         ),

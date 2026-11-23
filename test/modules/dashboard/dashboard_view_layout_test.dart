@@ -8,7 +8,10 @@ import 'package:oflite/modules/dashboard/domain/entity/dashboard_month_summary.d
 import 'package:oflite/modules/dashboard/domain/entity/month_receipt_comparison.dart';
 import 'package:oflite/modules/dashboard/domain/usecase/get_dashboard_month_summary_usecase.dart';
 import 'package:oflite/modules/dashboard/domain/usecase/get_receipts_comparison_usecase.dart';
+import 'package:oflite/modules/dashboard/presenter/components/dashboard_month_filter.dart';
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_monthly_progress.dart';
+import 'package:oflite/modules/dashboard/presenter/components/dashboard_receipts_comparison.dart';
+import 'package:oflite/modules/dashboard/presenter/components/dashboard_sold_items.dart';
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_status_overview.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view_model.dart';
@@ -70,15 +73,47 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('expanded: gráficos à esquerda e resumo à direita',
-      (tester) async {
+  testWidgets('expanded: resumo à esquerda e gráficos à direita', (
+    tester,
+  ) async {
     await pump(tester, const Size(1194, 834));
     final charts = tester.getTopLeft(find.byType(DashboardMonthlyProgress));
     final overview = tester.getTopLeft(find.byType(DashboardStatusOverview));
-    expect(overview.dx, greaterThan(charts.dx));
+    expect(charts.dx, greaterThan(overview.dx));
     expect(overview.dy, charts.dy);
-    expect(tester.getSize(find.byType(DashboardStatusOverview)).width,
-        greaterThan(400));
+    expect(
+      tester.getSize(find.byType(DashboardStatusOverview)).width,
+      greaterThan(400),
+    );
+  });
+
+  testWidgets('expanded: cards da mesma linha alinhados (topo e base)', (
+    tester,
+  ) async {
+    await pump(tester, const Size(1194, 834));
+    Rect r(Type t) => tester.getRect(find.byType(t));
+    final progress = r(DashboardMonthlyProgress);
+    final status = r(DashboardStatusOverview);
+    final comparison = r(DashboardReceiptsComparison);
+    final sold = r(DashboardSoldItems);
+    expect(progress.top, status.top);
+    expect(progress.bottom, status.bottom);
+    expect(comparison.top, sold.top);
+    expect(comparison.bottom, sold.bottom);
+    expect(comparison.top, greaterThan(progress.bottom));
+    expect(sold.left, status.left);
+    expect(status.right, lessThan(progress.left));
+  });
+
+  testWidgets('expanded: filtro de mês na largura da coluna da esquerda', (
+    tester,
+  ) async {
+    await pump(tester, const Size(1194, 834));
+    final filter = tester.getRect(find.byType(DashboardMonthFilter));
+    final status = tester.getRect(find.byType(DashboardStatusOverview));
+    expect(filter.left, status.left);
+    expect(filter.right, status.right);
+    expect(filter.bottom, lessThan(status.top));
   });
 
   testWidgets('abaixo de 1024: uma coluna', (tester) async {
