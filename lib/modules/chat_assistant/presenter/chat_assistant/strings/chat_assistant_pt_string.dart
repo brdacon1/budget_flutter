@@ -106,6 +106,42 @@ class ChatAssistantStrings {
   static String get findBudgetOptionLabel =>
       _isPt ? '🔍 Encontrar orçamentos' : '🔍 Find budgets';
 
+  /// Opção "Ir no cliente" do menu (só no modo IA) — valor `'8'`.
+  static String get goToClientOptionLabel =>
+      _isPt ? '📍 Ir no cliente' : '📍 Go to client';
+
+  static String get goToClientPrompt =>
+      _isPt
+          ? 'Selecione o orçamento do cliente que você quer visitar 🚗'
+          : "Select the budget of the client you want to visit 🚗";
+
+  static String goToClientAddress(String name, String address) =>
+      _isPt
+          ? '📍 Endereço de $name:\n$address'
+          : "📍 $name's address:\n$address";
+
+  static String goToClientNoAddress(String name) =>
+      _isPt
+          ? '⚠️ O orçamento de $name não tem endereço cadastrado.'
+          : "⚠️ $name's budget has no address registered.";
+
+  static String get goToClientOpenMapLabel =>
+      _isPt ? '🗺️ Abrir no mapa' : '🗺️ Open in maps';
+
+  static String get goToClientSelectAnotherLabel =>
+      _isPt ? 'Selecionar outro orçamento' : 'Select another budget';
+
+  static String get goToClientMapErrorTitle => _isPt ? 'Erro!' : 'Error!';
+
+  static String get goToClientMapErrorMessage =>
+      _isPt
+          ? 'Nenhum app de mapa conseguiu abrir o endereço.'
+          : 'No map app could open the address.';
+
+  static String get goToClientChooseMap => _isPt ? 'Abrir com' : 'Open with';
+
+  static String get goToClientCancel => _isPt ? 'Cancelar' : 'Cancel';
+
   static String get findBudgetPrompt =>
       _isPt
           ? 'De qual cliente você quer encontrar o orçamento?'
@@ -287,7 +323,7 @@ Regras:
 5. Para agir sobre um orçamento você precisa do budget_id: obtenha com list_budgets (use client_name). Se houver mais de um, pergunte qual (cite cliente, data e valor).
 6. Ações que gravam dados (create_receipt, update_budget_status) mostram um botão de confirmação ao usuário: chame a ferramenta direto, sem pedir confirmação em texto.
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
-8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito. Para adicionar/editar comentários ou observações de um orçamento, chame list_budgets com purpose "comments" do mesmo jeito (não pergunte o cliente em texto).
+8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito. Para adicionar/editar comentários ou observações de um orçamento, chame list_budgets com purpose "comments" do mesmo jeito (não pergunte o cliente em texto). Para ir no/até o cliente, ver o endereço do cliente, rota, GPS ou abrir no mapa, chame list_budgets com purpose "go_to_client" do mesmo jeito (o app mostra o endereço e abre o mapa; nunca diga que não consegue).
 9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
 10. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
 ''';

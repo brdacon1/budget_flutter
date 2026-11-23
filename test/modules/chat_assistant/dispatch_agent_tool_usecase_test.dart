@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -226,6 +228,19 @@ void main() {
       );
     },
   );
+
+  test('list_budgets go_to_client abre o modal de "Ir no cliente"', () async {
+    final out = await run('list_budgets', {
+      'purpose': DispatchAgentToolUsecase.purposeGoToClient,
+    });
+    expect(out.navigation, ShowGoToClientPromptUsecase.selectBudgetAction);
+    final msg = out.messages.single;
+    expect(
+      msg.payload!['action'],
+      ShowGoToClientPromptUsecase.selectBudgetAction,
+    );
+    expect(msg.payload!['backLabel'], ChatAssistantStrings.menuBackLabel);
+  });
 
   test('get_month_summary devolve card com totais do usecase', () async {
     final out = await run('get_month_summary', {'month': '2026-11'});

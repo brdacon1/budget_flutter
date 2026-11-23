@@ -33,10 +33,16 @@ class BudgetStrings {
   static String get detailDate => _isPt ? 'Data' : 'Date';
   static String get detailStatus => 'Status';
   static String get detailPhone => _isPt ? 'Telefone' : 'Phone';
+  static String get detailAddress => _isPt ? 'Endereço' : 'Address';
   static String get detailValue => _isPt ? 'Valor' : 'Value';
   static String get actionDelete => _isPt ? 'Excluir' : 'Delete';
   static String get actionDuplicate => _isPt ? 'Duplicar' : 'Duplicate';
-  static String get actionOpen => _isPt ? 'Abrir' : 'Open';
+  static String get actionMap => _isPt ? 'Mapa' : 'Map';
+  static String get chooseMap => _isPt ? 'Abrir com' : 'Open with';
+  static String get cancel => _isPt ? 'Cancelar' : 'Cancel';
+  static String get mapErrorTitle => _isPt ? 'Erro!' : 'Error!';
+  static String get mapErrorMessage =>
+      _isPt ? 'Não foi possível abrir o mapa.' : 'Could not open the map.';
 
   static String get selectAll => _isPt ? 'Selecionar todos' : 'Select all';
   static String get clearAll => _isPt ? 'Limpar' : 'Clear';

@@ -56,7 +56,9 @@ class CommentStrings {
       _isPt ? 'Comentários do orçamento' : 'Budget comments';
   static String get newComment => _isPt ? 'Novo comentário' : 'New comment';
   static String get emptyList =>
-      _isPt ? 'O orçamento não possui comentários' : 'This budget has no comments';
+      _isPt
+          ? 'O orçamento não possui comentários'
+          : 'This budget has no comments';
   static String get loadError =>
       _isPt
           ? 'Não foi possível carregar os comentários'

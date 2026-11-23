@@ -1,3 +1,5 @@
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
 import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
@@ -278,6 +280,12 @@ void registerChatBudgetDependencies(GetIt sl) {
   );
   sl.registerLazySingleton<ShowReportsPromptUsecase>(
     () => ShowReportsPromptUsecase(sl<ChatBudgetRepository>()),
+  );
+  sl.registerLazySingleton<ShowGoToClientPromptUsecase>(
+    () => ShowGoToClientPromptUsecase(sl<ChatBudgetRepository>()),
+  );
+  sl.registerLazySingleton<ShowClientAddressUsecase>(
+    () => ShowClientAddressUsecase(sl<ChatBudgetRepository>()),
   );
   sl.registerLazySingleton<ShowFindBudgetPromptUsecase>(
     () => ShowFindBudgetPromptUsecase(sl<ChatBudgetRepository>()),

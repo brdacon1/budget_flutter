@@ -34,23 +34,30 @@ List<String> _labels(ChatMessageEntity m) => [
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('menu do modo IA tem "Relatórios" (5), "Encontrar orçamentos" (6) e "Comentários" (7)', () async {
-    final repo = _FakeChatRepo();
-    await ResetChatToMenuUsecase(repo)(withReports: true);
-    final options = repo.sent.single.payload!['options'] as List;
-    expect(options[options.length - 3], {
-      'label': ChatAssistantStrings.reportsOptionLabel,
-      'value': '5',
-    });
-    expect(options[options.length - 2], {
-      'label': ChatAssistantStrings.findBudgetOptionLabel,
-      'value': '6',
-    });
-    expect(options.last, {
-      'label': ChatAssistantStrings.commentLibraryOptionLabel,
-      'value': '7',
-    });
-  });
+  test(
+    'menu do modo IA tem "Relatórios" (5), "Encontrar orçamentos" (6), "Comentários" (7) e "Ir no cliente" (8)',
+    () async {
+      final repo = _FakeChatRepo();
+      await ResetChatToMenuUsecase(repo)(withReports: true);
+      final options = repo.sent.single.payload!['options'] as List;
+      expect(options[options.length - 4], {
+        'label': ChatAssistantStrings.reportsOptionLabel,
+        'value': '5',
+      });
+      expect(options[options.length - 3], {
+        'label': ChatAssistantStrings.findBudgetOptionLabel,
+        'value': '6',
+      });
+      expect(options[options.length - 2], {
+        'label': ChatAssistantStrings.commentLibraryOptionLabel,
+        'value': '7',
+      });
+      expect(options.last, {
+        'label': ChatAssistantStrings.goToClientOptionLabel,
+        'value': '8',
+      });
+    },
+  );
 
   test(
     'menu free (ou modo padrão de segurança) não tem "Relatórios"',

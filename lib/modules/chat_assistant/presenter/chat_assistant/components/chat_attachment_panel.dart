@@ -104,7 +104,10 @@ class _Option extends StatelessWidget {
               child: Icon(icon, color: color, size: 30),
             ),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(color: whiteColor, fontSize: 14)),
+            Text(
+              label,
+              style: const TextStyle(color: whiteColor, fontSize: 14),
+            ),
           ],
         ),
       ),

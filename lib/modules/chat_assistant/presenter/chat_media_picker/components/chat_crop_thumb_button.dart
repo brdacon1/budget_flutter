@@ -4,7 +4,11 @@ import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Miniatura com lápis à esquerda da legenda (igual WhatsApp): abre o recorte.
 class ChatCropThumbButton extends StatelessWidget {
-  const ChatCropThumbButton({super.key, required this.image, required this.onTap});
+  const ChatCropThumbButton({
+    super.key,
+    required this.image,
+    required this.onTap,
+  });
 
   final ImageProvider? image;
   final VoidCallback onTap;

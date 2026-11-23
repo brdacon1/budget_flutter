@@ -28,10 +28,14 @@ class PickProofAttachmentsUsecase {
   }
 
   /// Câmera + fotos ao abrir o chat (melhoria 7).
-  Future<({bool camera, bool gallery})> requestPermissions() => _media.requestMediaPermissions();
+  Future<({bool camera, bool gallery})> requestPermissions() =>
+      _media.requestMediaPermissions();
 
   /// Recorta uma imagem já escolhida. PDF ou cancelado → o mesmo anexo.
-  Future<ProofAttachment> crop(ProofAttachment file, {required String title}) async {
+  Future<ProofAttachment> crop(
+    ProofAttachment file, {
+    required String title,
+  }) async {
     if (file.isPdf) return file;
     final path = await _media.cropImage(file.path, title: title);
     if (path == null) return file;

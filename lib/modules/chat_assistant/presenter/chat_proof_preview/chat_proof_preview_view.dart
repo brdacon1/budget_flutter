@@ -7,7 +7,8 @@ import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Resultado da prévia: arquivos (recortados ou não) + legenda.
-typedef ChatProofPreviewResult = ({List<ProofAttachment> files, String caption});
+typedef ChatProofPreviewResult =
+    ({List<ProofAttachment> files, String caption});
 
 /// Prévia antes de enviar (câmera, documento ou compartilhamento):
 /// arquivo grande, recorte à esquerda da legenda (estilo WhatsApp) e enviar
@@ -102,7 +103,11 @@ class _ChatProofPreviewViewState extends State<ChatProofPreviewView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.picture_as_pdf, size: 96, color: statusRejectedColor),
+            const Icon(
+              Icons.picture_as_pdf,
+              size: 96,
+              color: statusRejectedColor,
+            ),
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),

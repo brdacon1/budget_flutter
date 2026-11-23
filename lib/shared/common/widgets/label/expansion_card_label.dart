@@ -34,13 +34,17 @@ class ExpansionCardLabel extends StatelessWidget {
               fontSize: 12.0,
             ),
           ),
-          Text(
-            textData,
-            style: const TextStyle(
-              color: whiteColor,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              fontSize: 12.0,
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              textData,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: whiteColor,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+                fontSize: 12.0,
+              ),
             ),
           ),
         ],

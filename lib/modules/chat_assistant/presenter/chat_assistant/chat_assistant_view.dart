@@ -1,3 +1,7 @@
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
+import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
@@ -207,6 +211,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     if (nav.startsWith('open_budget|')) {
       return _openBudget(nav.substring('open_budget|'.length));
     }
+    if (nav.startsWith(ShowClientAddressUsecase.openMapAction)) {
+      return _openClientMap(
+        nav.substring(ShowClientAddressUsecase.openMapAction.length),
+      );
+    }
     if (nav.startsWith(ChatAssistantViewModel.findBudgetAction)) {
       return _findBudget(
         nav.substring(ChatAssistantViewModel.findBudgetAction.length),
@@ -222,6 +231,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _pickBudgetForProof();
       case DispatchAgentToolUsecase.selectDuplicateBudget:
         await _pickBudgetToDuplicate();
+      case ShowGoToClientPromptUsecase.selectBudgetAction:
+        await _pickBudgetToGoToClient();
       case DispatchAgentToolUsecase.selectCommentBudget:
         await _pickBudgetToComment();
       case 'open_price_list':
@@ -330,6 +341,37 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     final id = await ChatBudgetPickerView.show(context);
     if (!mounted) return;
     await _vm.onProofBudgetSelected(id);
+  }
+
+  /// "Ir no cliente": modal de seleção → endereço no chat. Fechar sem
+  /// escolher não muda o chat (o botão segue ativo).
+  Future<void> _pickBudgetToGoToClient() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    await _vm.onGoToClientBudgetSelected(id);
+  }
+
+  /// "Abrir no mapa": Android abre o seletor nativo; iOS a action sheet.
+  Future<void> _openClientMap(String id) async {
+    final result = await _vm.resolveClientMaps(id);
+    if (!mounted) return;
+    switch (result) {
+      case AddressMapsOpenedBySystem():
+        return;
+      case AddressMapsUnavailable():
+        await getIt<DisplayAlertRepository>().notificationError(
+          context,
+          ChatAssistantStrings.goToClientMapErrorTitle,
+          ChatAssistantStrings.goToClientMapErrorMessage,
+        );
+      case AddressMapsAvailable(:final maps):
+        await showMapChooserSheet(
+          context,
+          maps: maps,
+          title: ChatAssistantStrings.goToClientChooseMap,
+          cancelLabel: ChatAssistantStrings.goToClientCancel,
+        );
+    }
   }
 
   /// Modal de seleção → modal de opções de duplicação (o mesmo da lista de

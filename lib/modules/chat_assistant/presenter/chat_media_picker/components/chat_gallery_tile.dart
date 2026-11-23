@@ -52,7 +52,10 @@ class _ChatGalleryTileState extends State<ChatGalleryTile> {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selected ? cartAccentColor : blackColor.withValues(alpha: 0.2),
+                color:
+                    selected
+                        ? cartAccentColor
+                        : blackColor.withValues(alpha: 0.2),
                 border: Border.all(color: whiteColor, width: 2),
               ),
               child:

@@ -1,3 +1,4 @@
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_filter.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
@@ -59,6 +60,7 @@ class DispatchAgentToolUsecase {
   static const purposeView = 'view';
   static const purposeDuplicate = 'duplicate';
   static const purposeComments = 'comments';
+  static const purposeGoToClient = 'go_to_client';
 
   /// Navegação/ação que abre o modal de seleção de orçamento para recibo.
   static const selectReceiptBudget = 'select_receipt_budget';
@@ -117,12 +119,14 @@ class DispatchAgentToolUsecase {
             purposeReceipts,
             purposeDuplicate,
             purposeComments,
+            purposeGoToClient,
           ],
           'description':
               'use "receipts" quando o usuário precisa escolher o orçamento '
               'para criar/ver recibos, "duplicate" para duplicar/clonar um '
               'orçamento, "comments" para adicionar/editar comentários ou '
-              'observações de um orçamento (todos abrem um modal de '
+              'observações de um orçamento, "go_to_client" para ir ao '
+              'cliente / ver o endereço / abrir no mapa (todos abrem um modal de '
               'seleção); senão "view"',
         },
       },
@@ -252,6 +256,12 @@ class DispatchAgentToolUsecase {
       return _selectBudget(
         selectCommentBudget,
         ChatAssistantStrings.aiSelectCommentBudget,
+      );
+    }
+    if (args['purpose'] == purposeGoToClient) {
+      return _selectBudget(
+        ShowGoToClientPromptUsecase.selectBudgetAction,
+        ChatAssistantStrings.goToClientPrompt,
       );
     }
     if (args['purpose'] == purposeDuplicate) {

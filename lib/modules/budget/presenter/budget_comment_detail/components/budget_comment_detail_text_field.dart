@@ -69,7 +69,10 @@ class BudgetCommentDetailTextField extends StatelessWidget {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: statusRejectedColor, width: 1.5),
+            borderSide: const BorderSide(
+              color: statusRejectedColor,
+              width: 1.5,
+            ),
           ),
         ),
       ),

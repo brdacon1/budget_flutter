@@ -78,6 +78,15 @@ class BudgetCreatorAddressSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         AppFormField(
+          label: 'Número',
+          prefixIcon: Icons.tag,
+          controller: viewModel.numberController,
+          focusNode: viewModel.numberNode,
+          keyboardType: TextInputType.number,
+          textCapitalization: TextCapitalization.characters,
+        ),
+        const SizedBox(height: 12),
+        AppFormField(
           label: 'Bairro',
           prefixIcon: Icons.holiday_village_outlined,
           controller: viewModel.bairroController,

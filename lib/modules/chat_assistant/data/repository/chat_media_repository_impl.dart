@@ -16,7 +16,8 @@ class ChatMediaRepositoryImpl implements ChatMediaRepository {
   Future<bool> requestGalleryPermission() => _device.requestGalleryPermission();
 
   @override
-  Future<({bool camera, bool gallery})> requestMediaPermissions() => _device.requestMediaPermissions();
+  Future<({bool camera, bool gallery})> requestMediaPermissions() =>
+      _device.requestMediaPermissions();
 
   @override
   Future<String?> cropImage(String path, {required String title}) =>

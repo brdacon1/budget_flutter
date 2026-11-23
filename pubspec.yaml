@@ -60,6 +60,8 @@ dependencies:
   receive_sharing_intent: ^1.9.0
   flutter_image_compress: ^2.5.1
   file_selector: ^1.1.0
+  map_launcher: ^7.0.0
+  geocoding: ^5.0.1
 
 dev_dependencies:
   flutter_test:

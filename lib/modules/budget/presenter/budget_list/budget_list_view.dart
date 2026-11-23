@@ -13,6 +13,8 @@ import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart'
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
+import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
@@ -273,6 +275,31 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
+  Future<void> _showMapError() => _viewModel.displayAlert.notificationError(
+    context,
+    BudgetStrings.mapErrorTitle,
+    BudgetStrings.mapErrorMessage,
+  );
+
+  /// Android: seletor nativo do sistema. iOS: action sheet nativa.
+  Future<void> _openMap(CustomerInfo item) async {
+    final result = await _viewModel.resolveMaps(item);
+    if (!mounted) return;
+    switch (result) {
+      case AddressMapsOpenedBySystem():
+        return;
+      case AddressMapsUnavailable():
+        return _showMapError();
+      case AddressMapsAvailable(:final maps):
+        return showMapChooserSheet(
+          context,
+          maps: maps,
+          title: BudgetStrings.chooseMap,
+          cancelLabel: BudgetStrings.cancel,
+        );
+    }
+  }
+
   Future<void> _openActions(CustomerInfo item) {
     return showModalBottomSheet<void>(
       context: context,
@@ -281,7 +308,7 @@ class _BudgetListView extends State<BudgetListView> {
           (_) => BudgetListActionsBottomModalWidget(
             item: item,
             moneyConvert: moneyConvert,
-            onOpen: () => _openBudget(item),
+            onMap: () => _openMap(item),
             onDuplicate: () => _duplicateBudget(item),
             onDelete: () {
               if (!_viewModel.isSelected(item)) _viewModel.toggleSelect(item);

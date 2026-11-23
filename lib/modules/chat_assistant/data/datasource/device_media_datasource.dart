@@ -29,8 +29,7 @@ class DeviceMediaDatasource {
     try {
       final gallery = [if (!Platform.isAndroid) Permission.photos];
       final result = await [Permission.camera, ...gallery].request();
-      bool ok(PermissionStatus? s) =>
-          s != null && (s.isGranted || s.isLimited);
+      bool ok(PermissionStatus? s) => s != null && (s.isGranted || s.isLimited);
       return (
         camera: ok(result[Permission.camera]),
         gallery: gallery.isEmpty || gallery.any((p) => ok(result[p])),

@@ -4,7 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart' show RawMediaFile;
+import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart'
+    show RawMediaFile;
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_limits.dart';
 import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
@@ -125,7 +126,10 @@ class ChatMediaPickerViewModel extends ChangeNotifier {
     if (last == null) return;
     final path = _cropped[last.id] ?? await last.filePath();
     if (path == null) return;
-    final out = await _pick.cropPath(path, title: PaymentProofStrings.cropTitle);
+    final out = await _pick.cropPath(
+      path,
+      title: PaymentProofStrings.cropTitle,
+    );
     if (out == null) return;
     _cropped[last.id] = out;
     _notify();
