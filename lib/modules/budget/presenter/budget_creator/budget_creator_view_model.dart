@@ -256,7 +256,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       _applyToItem(budget);
       _takeSnapshot();
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

@@ -13,9 +13,6 @@ class PaymentDataForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var we = MediaQuery.of(context).size.width;
-    var he = MediaQuery.of(context).size.height;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0),
       child: Theme(
@@ -51,8 +48,9 @@ class PaymentDataForm extends StatelessWidget {
           ),
           children: <Widget>[
             Container(
-              width: we * 0.80,
-              height: he * 0.078,
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              height: 66,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
                 color:
@@ -67,24 +65,25 @@ class PaymentDataForm extends StatelessWidget {
                 decoration: InputDecoration(
                   enabledBorder: InputBorder.none,
                   border: InputBorder.none,
-                  prefixIcon: Icon(Icons.list_alt, color: Colors.white),
-                  suffixIcon: Icon(
+                  prefixIcon: const Icon(Icons.list_alt, color: Colors.white),
+                  suffixIcon: const Icon(
                     Icons.keyboard_arrow_down_outlined,
                     color: Colors.white,
                   ),
                   hintText: PaymentStrings.paymentHint,
                   hintStyle: const TextStyle(color: Colors.grey),
                 ),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            SizedBox(height: he * 0.02),
+            const SizedBox(height: 16),
             Container(
-              width: we * 0.80,
-              height: he * 0.078,
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              height: 66,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
                 color:
@@ -97,7 +96,7 @@ class PaymentDataForm extends StatelessWidget {
                 decoration: InputDecoration(
                   enabledBorder: InputBorder.none,
                   border: InputBorder.none,
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.price_change_outlined,
                     color: Colors.white,
                   ),
@@ -105,7 +104,7 @@ class PaymentDataForm extends StatelessWidget {
                   hintStyle: const TextStyle(color: Colors.grey),
                 ),
                 keyboardType: TextInputType.number,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -114,8 +113,9 @@ class PaymentDataForm extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 20),
               child: Container(
-                width: we * 0.80,
-                height: he * 0.30,
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                height: 250,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.0),
                   color:
@@ -133,9 +133,9 @@ class PaymentDataForm extends StatelessWidget {
                     enabledBorder: InputBorder.none,
                     border: InputBorder.none,
                     hintText: PaymentStrings.paymentDescriptionHint,
-                    hintStyle: TextStyle(color: Colors.grey),
+                    hintStyle: const TextStyle(color: Colors.grey),
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),

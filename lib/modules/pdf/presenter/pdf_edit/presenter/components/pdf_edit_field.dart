@@ -38,10 +38,10 @@ class PdfEditField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
     return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
-      height: he * 0.071,
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      height: 60,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
         color: bgColor,

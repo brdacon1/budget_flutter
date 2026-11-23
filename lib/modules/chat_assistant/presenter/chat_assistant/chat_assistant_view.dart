@@ -411,7 +411,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   Future<void> _openProductCreator() async {
     final result = await showProductPriceCreatorBottomModal(
       context,
-      item: ProductPriceModel(),
+      item: const ProductPriceModel(),
     );
     if (result == true || mounted) {
       await _vm.onProductCreatorClosed(result == true);

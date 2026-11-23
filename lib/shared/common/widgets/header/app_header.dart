@@ -13,12 +13,10 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double we = MediaQuery.of(context).size.width;
-    final double he = MediaQuery.of(context).size.height;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        SizedBox(height: he * 0.08),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
@@ -27,7 +25,7 @@ class AppHeader extends StatelessWidget {
               onTap: onBack,
               child: Container(
                 alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(left: we * 0.04),
+                margin: const EdgeInsets.only(left: 16),
                 child: const Icon(
                   Icons.arrow_back_outlined,
                   color: Colors.white,
@@ -37,10 +35,10 @@ class AppHeader extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: he * 0.03),
+        const SizedBox(height: 24),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.04),
+          margin: const EdgeInsets.only(left: 16),
           child: Text(
             titleText,
             style: GoogleFonts.heebo(
@@ -51,7 +49,7 @@ class AppHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.03),
+        const SizedBox(height: 24),
       ],
     );
   }

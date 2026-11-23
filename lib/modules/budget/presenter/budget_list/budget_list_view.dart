@@ -290,7 +290,7 @@ class _BudgetListView extends State<BudgetListView> {
       if (!mounted) return;
       await Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SubscriptionView()),
+        MaterialPageRoute(builder: (context) => const SubscriptionView()),
       );
     } else {
       getIt<BudgetRepository>().selectBudget.value = item;

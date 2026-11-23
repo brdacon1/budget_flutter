@@ -23,7 +23,7 @@ class GenerateAiTextUsecase {
     final today = _isoDate(now ?? DateTime.now());
     final used = await _repo.usageOf(today);
     if (used >= dailyLimit) {
-      return Result.error(const AiTextDailyLimitException());
+      return const Result.error(AiTextDailyLimitException());
     }
     await _repo.saveUsage(today, used + 1);
     final result = await _repo.generate(
@@ -33,7 +33,7 @@ class GenerateAiTextUsecase {
       jsonKeys: jsonKeys,
     );
     if (result is Ok<String> && result.value.isEmpty) {
-      return Result.error(const AiTextEmptyException());
+      return const Result.error(AiTextEmptyException());
     }
     return result;
   }

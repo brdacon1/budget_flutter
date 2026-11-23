@@ -14,17 +14,15 @@ class PaymentCreatorHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var he = MediaQuery.of(context).size.height;
-    var we = MediaQuery.of(context).size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        SizedBox(height: he * 0.07),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 16),
         GestureDetector(
           onTap: onBack,
           child: Container(
             alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.04),
+            margin: const EdgeInsets.only(left: 16),
             child: const Icon(
               Icons.arrow_back_outlined,
               color: Colors.white,
@@ -32,10 +30,10 @@ class PaymentCreatorHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.048),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             titlePage!,
             style: GoogleFonts.heebo(
@@ -48,7 +46,7 @@ class PaymentCreatorHeader extends StatelessWidget {
         ),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             PaymentStrings.paymentDataTitle,
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),

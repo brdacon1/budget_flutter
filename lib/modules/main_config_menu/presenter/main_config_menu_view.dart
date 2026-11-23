@@ -35,8 +35,6 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
 
   @override
   Widget build(BuildContext context) {
-    var he = MediaQuery.of(context).size.height;
-
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, child) {
@@ -45,10 +43,10 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
           body: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              SizedBox(height: he * 0.04),
-              SizedBox(height: he * 0.03),
+              SizedBox(height: MediaQuery.paddingOf(context).top + 24),
               Container(
-                margin: const EdgeInsets.only(right: 285.0),
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: Text(
                   MainConfigMenuStrings.pageTitle,
                   style: GoogleFonts.heebo(

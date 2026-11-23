@@ -46,7 +46,7 @@ class _DeleteAccountInAppViewState extends State<DeleteAccountInAppView> {
       );
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => LoginView()),
+        MaterialPageRoute(builder: (_) => const LoginView()),
         (_) => false,
       );
       return;

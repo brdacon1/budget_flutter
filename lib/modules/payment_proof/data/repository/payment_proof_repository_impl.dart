@@ -110,7 +110,7 @@ class PaymentProofRepositoryImpl implements PaymentProofRepository {
       try {
         await _storage.delete(proof.storagePath);
       } catch (_) {}
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

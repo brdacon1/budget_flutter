@@ -22,14 +22,14 @@ class ImproveCommentTextUsecase {
   Future<Result<String>> call(String text) async {
     final original = text.trim();
     if (original.isEmpty) {
-      return Result.error(const CommentTextEmptyException());
+      return const Result.error(CommentTextEmptyException());
     }
     final result = await _ai(system: system, prompt: original);
     if (result is! Ok<String>) return result;
     final improved = result.value.trim();
     if (improved.length > SaveLibraryCommentUsecase.maxTextLength ||
         !_keepsNumbers(original, improved)) {
-      return Result.error(const CommentImproveInvalidException());
+      return const Result.error(CommentImproveInvalidException());
     }
     return Result.ok(improved);
   }

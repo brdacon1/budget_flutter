@@ -89,7 +89,7 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
         _products[index] = product;
         notifyListeners();
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -105,7 +105,7 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
       await _remote.deleteProduct(userUid, id);
       _products.removeWhere((p) => p.id == id);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -123,7 +123,7 @@ class ProductPriceRepositoryImpl extends ProductPriceRepository {
       }
       _products.removeWhere((p) => ids.contains(p.id));
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

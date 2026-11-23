@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 /// Modal inferior para digitar um valor (ex.: quantidade).
@@ -72,7 +73,7 @@ class _TextInputBottomModalWidgetState extends State<TextInputBottomModalWidget>
               hintText: widget.hintText,
               hintStyle: TextStyle(color: Colors.grey[600]),
             ),
-            style: TextStyle(
+            style: const TextStyle(
               color: AppBottomModal.grayColor,
               fontWeight: FontWeight.bold,
             ),
@@ -93,10 +94,8 @@ Future<String?> showTextInputBottomModal(
   int? maxLength = 10,
   String buttonLabel = 'OK',
 }) {
-  return showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<String>(
+    context,
     builder: (context) => TextInputBottomModalWidget(
       title: title,
       hintText: hintText,

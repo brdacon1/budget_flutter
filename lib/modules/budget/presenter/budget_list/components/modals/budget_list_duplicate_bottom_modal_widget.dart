@@ -35,7 +35,7 @@ class _BudgetListDuplicateBottomModalWidgetState
         !duplicateComments &&
         !duplicateReceipts) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor selecione alguma opção')),
+        const SnackBar(content: const Text('Por favor selecione alguma opção')),
       );
       return;
     }

@@ -27,14 +27,12 @@ class ProductPriceListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
 
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(height: he * 0.07),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,
@@ -43,7 +41,7 @@ class ProductPriceListHeader extends StatelessWidget {
               onTap: onBack,
               child: Container(
                 alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(left: we * 0.032),
+                margin: const EdgeInsets.only(left: 12),
                 child: const Icon(
                   Icons.arrow_back_outlined,
                   color: Colors.white,
@@ -53,10 +51,10 @@ class ProductPriceListHeader extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.04),
+          margin: const EdgeInsets.only(left: 16),
           child: Text(
             title ?? ProductPtString.listTitle,
             style: GoogleFonts.heebo(
@@ -67,7 +65,7 @@ class ProductPriceListHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         Container(
           height: 50.0,
           margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),

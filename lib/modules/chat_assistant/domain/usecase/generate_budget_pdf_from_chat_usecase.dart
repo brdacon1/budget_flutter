@@ -25,6 +25,6 @@ class GenerateBudgetPdfFromChatUsecase {
     }
     _budgetRepo.selectBudget.value = budget;
     if (_ads.shouldShowAds) await _ads.showInterstitialAndWait();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 }

@@ -126,7 +126,7 @@ class BudgetPaymentRepositoryImpl extends ReceiptPaymentRepository {
       );
       _payments.add(payment);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -154,7 +154,7 @@ class BudgetPaymentRepositoryImpl extends ReceiptPaymentRepository {
         _payments[index] = payment;
         notifyListeners();
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -173,7 +173,7 @@ class BudgetPaymentRepositoryImpl extends ReceiptPaymentRepository {
       await _remote.deletePayment(userUid, _budgetId!, _receiptId!, id);
       _payments.removeWhere((p) => p.id == id);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -193,7 +193,7 @@ class BudgetPaymentRepositoryImpl extends ReceiptPaymentRepository {
       }
       _payments.removeWhere((p) => payments.any((d) => d.id == p.id));
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

@@ -37,7 +37,6 @@ class _PdfEditView extends State<PdfEditView> {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
@@ -90,9 +89,9 @@ class _PdfEditView extends State<PdfEditView> {
                         onSelect: vm.selectField,
                         onCepChanged: vm.lookupCep,
                       ),
-                      SizedBox(height: he * 0.02),
+                      const SizedBox(height: 16),
                       PdfEditSaveButton(onPressed: () => vm.save(context)),
-                      SizedBox(height: he * 0.10),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),

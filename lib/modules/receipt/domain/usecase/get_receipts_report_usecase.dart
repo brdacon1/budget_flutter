@@ -23,11 +23,11 @@ class GetReceiptsReportUsecase {
     final from = _day(filter.from);
     final to = _day(filter.to);
     if (to.isBefore(from)) {
-      return Result.error(const FormatException('from_after_to'));
+      return const Result.error(FormatException('from_after_to'));
     }
     final days = to.difference(from).inDays + 1;
     if (days > maxDays) {
-      return Result.error(const FormatException('period_too_long'));
+      return const Result.error(FormatException('period_too_long'));
     }
 
     final fetched = await _ledger.fetchLedger();

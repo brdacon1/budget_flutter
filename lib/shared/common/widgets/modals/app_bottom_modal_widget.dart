@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Base visual reutilizável para os bottom modals do app.
@@ -177,12 +178,11 @@ Future<void> showAppBottomModal(
   bool isScrollControlled = true,
   bool dismissible = true,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
+  return showAppModal<void>(
+    context,
     isScrollControlled: isScrollControlled,
     isDismissible: dismissible,
     enableDrag: dismissible,
-    backgroundColor: Colors.transparent,
     builder:
         (context) => AppBottomModal(
           title: title,

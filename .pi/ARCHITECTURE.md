@@ -4,6 +4,10 @@
 > **Gerenciamento de Estado**: `ChangeNotifier` (Provider pattern) + `get_it`
 > (Injeção de Dependência)
 > **Roteamento**: `MaterialPageRoute` + Map de rotas estáticas
+> **Visual**: [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) — fonte única de cores,
+> tipografia, raios, espaçamentos e componentes (obrigatório em toda tela)
+> **Responsivo/Tablet**: [`TABLET_RESPONSIVE_PLAN.md`](TABLET_RESPONSIVE_PLAN.md)
+> e §22 deste arquivo
 
 ---
 
@@ -2391,3 +2395,34 @@ soltas, caches locais na tela ou chamadas paralelas à mesma fonte.
 
 Referência: <https://en.wikipedia.org/wiki/Single_source_of_truth>
 
+
+---
+
+## 22. Design System e Responsividade (Tablet/Web)
+
+> Visual: **[`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md)** · Plano de execução e
+> checklist de todas as telas: **[`TABLET_RESPONSIVE_PLAN.md`](TABLET_RESPONSIVE_PLAN.md)**.
+
+### 22.1 Regras
+
+1. **Todo detalhe visual** (cor, fonte, raio, espaçamento, componente) vem do
+   `DESIGN_SYSTEM.md`. Valor novo entra **primeiro** no documento (e em
+   `colors.dart`, §15) e só depois na tela.
+2. **Layout decide por largura da janela** (`ResponsiveWidget.sizeOf` /
+   `LayoutBuilder`): `compact` < 600, `medium` 600–1023, `expanded` ≥ 1024.
+   **Nunca** por `Platform.isIOS/isAndroid` nem `dart:io` em widget de layout
+   (o mesmo widget precisa servir ao Web).
+3. **Proibido tamanho por fração da tela** (`MediaQuery…size.height * 0.08`,
+   `screenAwareSize`) e margens mágicas (`right: 285`). Use a escala de
+   espaçamento do design system e `AppPageContainer`.
+4. **Tela larga = composição nova em `components/`**; o layout `compact`
+   (celular) permanece como está. Widgets adaptativos compartilhados ficam em
+   `shared/common/widgets/adaptive/` (§2.1: públicos, um por arquivo).
+5. **Tablet abre deitado** (iPad e Android com `shortestSide >= 600`);
+   celular não é afetado.
+6. **Bottom navigation (§17.7)** continua intacta em `compact`/`medium`;
+   em `expanded` a navegação é a sidebar do `main_tab`.
+7. **Modais** abrem por `showAppModal` (sheet centralizado, largura máx. 640);
+   regras do §19 seguem valendo.
+8. Toda **nova tela** entra na matriz do `TABLET_RESPONSIVE_PLAN.md` (§5) com
+   seu comportamento em `expanded` antes de ser dada como pronta.

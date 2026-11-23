@@ -10,17 +10,15 @@ class PdfEditHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: he * 0.07),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 16),
         GestureDetector(
           onTap: onBack,
           child: Container(
             alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.040),
+            margin: const EdgeInsets.only(left: 16),
             child: const Icon(
               Icons.arrow_back_outlined,
               color: Colors.white,
@@ -28,10 +26,10 @@ class PdfEditHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.03),
+        const SizedBox(height: 24),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             PdfStrings.editPdfTitle,
             style: GoogleFonts.heebo(
@@ -44,7 +42,7 @@ class PdfEditHeader extends StatelessWidget {
         ),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             PdfStrings.pdfInfoTitle,
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),

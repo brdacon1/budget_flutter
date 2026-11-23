@@ -22,18 +22,16 @@ class AppHeaderSecondTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: insideSafeArea ? 16 : he * 0.07),
+        SizedBox(height: insideSafeArea ? 16 : MediaQuery.paddingOf(context).top + 16),
         GestureDetector(
           onTap: onBack,
           child: Container(
             alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.040),
+            margin: const EdgeInsets.only(left: 16),
             child: const Icon(
               Icons.arrow_back_outlined,
               color: Colors.white,
@@ -41,10 +39,10 @@ class AppHeaderSecondTitle extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.03),
+        const SizedBox(height: 24),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             titlePage,
             style: GoogleFonts.heebo(
@@ -57,13 +55,13 @@ class AppHeaderSecondTitle extends StatelessWidget {
         ),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             secondTitle,
             style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
           ),
         ),
-        isBottomPadding ? SizedBox(height: he * 0.02) : Container(),
+        isBottomPadding ? const SizedBox(height: 16) : Container(),
       ],
     );
   }

@@ -7,7 +7,6 @@ import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_st
 import 'package:oflite/modules/terms_conditions/presenter/terms_conditions_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/enums/alert_type_enum.dart';
-import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'components/subscription_benefit_chip.dart';
 import 'components/subscription_bottom_bar.dart';
@@ -88,7 +87,7 @@ class _SubscriptionView extends State<SubscriptionView> {
         backgroundColor: transparentColor,
         elevation: 0.0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, size: screenAwareSize(20.0, context)),
+          icon: Icon(Icons.arrow_back, size: 26.0),
           onPressed: () async {
             await _viewModel.checkExistingSubscription();
             if (mounted) Navigator.pop(context, true);
@@ -98,7 +97,7 @@ class _SubscriptionView extends State<SubscriptionView> {
           SubscriptionStrings.pageTitle,
           style: TextStyle(
             color: whiteColor,
-            fontSize: screenAwareSize(18.0, context),
+            fontSize: 24.0,
             fontFamily: "Montserrat-Bold",
           ),
         ),

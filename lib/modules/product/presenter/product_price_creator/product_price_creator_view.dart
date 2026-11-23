@@ -65,7 +65,6 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
 
     return AnimatedBuilder(
       animation: _viewModel,
@@ -81,7 +80,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(height: he * 0.01),
+                const SizedBox(height: 8),
                 ProductPriceField(
                   controller: _viewModel.categoriaText,
                   hintText: ProductPtString.categoryHint,
@@ -93,7 +92,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                     color: AppBottomModal.grayColor,
                   ),
                 ),
-                SizedBox(height: he * 0.02),
+                const SizedBox(height: 16),
                 ProductPriceField(
                   controller: _viewModel.unidadeText,
                   hintText: ProductPtString.unitHint,
@@ -102,7 +101,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                       () =>
                           _viewModel.selectField(ProductPriceFieldType.unidade),
                 ),
-                SizedBox(height: he * 0.02),
+                const SizedBox(height: 16),
                 ProductPriceField(
                   controller: _viewModel.priceController,
                   hintText: ProductPtString.priceHint,
@@ -111,7 +110,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                   onTap:
                       () => _viewModel.selectField(ProductPriceFieldType.preco),
                 ),
-                SizedBox(height: he * 0.02),
+                const SizedBox(height: 16),
                 Visibility(
                   visible: _viewModel.fieldVisible,
                   child: Column(
@@ -128,7 +127,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                               ProductPriceFieldType.qtd,
                             ),
                       ),
-                      SizedBox(height: he * 0.02),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -143,7 +142,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                         ProductPriceFieldType.descricao,
                       ),
                 ),
-                SizedBox(height: he * 0.01),
+                const SizedBox(height: 8),
               ],
             ),
           ),

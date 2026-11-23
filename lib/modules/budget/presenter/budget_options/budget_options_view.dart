@@ -88,7 +88,7 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
       );
       if (!mounted) return;
       if (choice == BudgetStrings.goPremium) {
-        await _push(SubscriptionView());
+        await _push(const SubscriptionView());
         return;
       }
       if (choice != BudgetStrings.watchAd) return;

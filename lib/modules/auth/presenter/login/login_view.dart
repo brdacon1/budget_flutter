@@ -113,7 +113,7 @@ class _LoginViewState extends State<LoginView> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: 0),
+                constraints: const BoxConstraints(minHeight: 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[

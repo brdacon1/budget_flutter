@@ -102,7 +102,7 @@ class ChatEditAwareInputBar extends StatelessWidget {
                           isEditing
                               ? ChatAssistantStrings.editMessageHint
                               : ChatAssistantStrings.typeMessageHint,
-                      hintStyle: TextStyle(color: chatHintColor),
+                      hintStyle: const TextStyle(color: chatHintColor),
                       filled: true,
                       fillColor: secondaryColor,
                       contentPadding: const EdgeInsets.symmetric(

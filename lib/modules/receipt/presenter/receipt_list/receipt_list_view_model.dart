@@ -46,14 +46,14 @@ class ReceiptListViewModel extends ChangeNotifier {
       await _receiptRepository.deleteReceipt(foundPayment[index]);
 
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
   }
 
   Future<void> addReceipt(BuildContext context) async {
-    final Receipt itens = Receipt(
+    final Receipt itens = const Receipt(
       data: '',
       id: '',
       descricao: 'null',

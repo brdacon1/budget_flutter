@@ -49,7 +49,7 @@ class _MainTabView extends State<MainTabView> {
     _viewModel.consumeNeedsSubscription();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => SubscriptionView()),
+      MaterialPageRoute(builder: (_) => const SubscriptionView()),
     );
   }
 

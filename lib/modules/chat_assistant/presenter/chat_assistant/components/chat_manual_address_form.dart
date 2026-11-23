@@ -133,7 +133,7 @@ class ChatManualAddressForm extends StatelessWidget {
       style: const TextStyle(color: whiteColor),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: chatHintColor),
+        hintStyle: const TextStyle(color: chatHintColor),
         filled: true,
         fillColor: secondaryColor,
         contentPadding: const EdgeInsets.symmetric(

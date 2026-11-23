@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
@@ -35,7 +36,7 @@ class OptionBottomModalWidget extends StatelessWidget {
           return Material(
             color: Colors.transparent,
             child: ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.chevron_right,
                 color: AppBottomModal.grayColor,
               ),
@@ -62,10 +63,8 @@ Future<String?> showOptionBottomModal(
   required String title,
   required List<String> values,
 }) {
-  return showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<String>(
+    context,
     builder: (context) => OptionBottomModalWidget(
       title: title,
       values: values,

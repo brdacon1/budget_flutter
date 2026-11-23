@@ -198,7 +198,7 @@ class PdfEditViewModel extends ChangeNotifier {
   Future<void> openSubscription(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SubscriptionView()),
+      MaterialPageRoute(builder: (context) => const SubscriptionView()),
     );
     await inicialData();
   }
