@@ -127,4 +127,25 @@ class BudgetStrings {
       _isPt
           ? 'Não foi possível carregar as métricas.'
           : 'Could not load metrics.';
+
+  static String get customerBudgetsTitle =>
+      _isPt ? 'Orçamentos do cliente' : 'Client budgets';
+  static String get customerBudgetsEmpty =>
+      _isPt
+          ? 'Nenhum orçamento encontrado para este telefone'
+          : 'No budgets found for this phone';
+  static String get customerBudgetsNoPhone =>
+      _isPt
+          ? 'Cadastre o telefone do cliente na aba "Cliente" para ver os orçamentos vinculados.'
+          : 'Add the client phone in the "Client" tab to see linked budgets.';
+  static String get customerBudgetsLoadError =>
+      _isPt
+          ? 'Não foi possível carregar os orçamentos.'
+          : 'Could not load budgets.';
+  static String get createErrorTitle =>
+      _isPt ? 'Não foi possível criar' : 'Could not create';
+  static String get createErrorMessage =>
+      _isPt
+          ? 'Verifique sua conexão e tente novamente.'
+          : 'Check your connection and try again.';
 }

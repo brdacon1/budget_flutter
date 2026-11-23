@@ -5,8 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 
 class BudgetTabViewModel extends ChangeNotifier {
   final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
-  int _currentIndex = 0;
-  int get currentIndex => _currentIndex;
+  int currentIndex = 0;
 
   void onTabTapped(
     int index,
@@ -15,10 +14,10 @@ class BudgetTabViewModel extends ChangeNotifier {
     CustomerInfo item,
   ) {
     if (index == 0) {
-      _currentIndex = index;
+      currentIndex = index;
     } else {
       if (item.id != null && item.id!.isNotEmpty) {
-        _currentIndex = index;
+        currentIndex = index;
       } else {
         _displayAlert.notificationWarning(
           context,

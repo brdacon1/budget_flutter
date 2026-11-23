@@ -487,6 +487,24 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
+  Stream<Result<List<CustomerInfo>>> watchBudgetsByPhone(
+    List<String> values,
+  ) async* {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      yield Result.error(Exception('User not authenticated'));
+      return;
+    }
+    try {
+      await for (final raw in _remote.watchBudgetsByPhone(userUid, values)) {
+        yield Result.ok(raw.map((e) => CustomerInfo.fromMap(e)).toList());
+      }
+    } catch (e) {
+      yield Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<List<CustomerInfo>>> searchBudgetsByName(
     List<String> prefixes,
   ) async {

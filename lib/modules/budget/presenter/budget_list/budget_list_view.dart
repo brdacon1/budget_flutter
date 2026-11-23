@@ -9,6 +9,7 @@ import 'package:oflite/modules/budget/presenter/budget_list/components/budget_li
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/new_budget_gate.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
@@ -19,10 +20,15 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
 class BudgetListView extends StatefulWidget {
-  const BudgetListView({super.key});
+  /// Com cliente: mostra só os orçamentos dele (mesmo telefone), sem busca,
+  /// e "Novo orçamento" já vem com os dados do cliente.
+  final CustomerInfo? customer;
+
+  const BudgetListView({super.key, this.customer});
 
   @override
   State<BudgetListView> createState() => _BudgetListView();
@@ -35,7 +41,8 @@ class _BudgetListView extends State<BudgetListView> {
 
   @override
   void initState() {
-    getIt<BudgetRepository>().clearSelectBudget();
+    _viewModel.customer = widget.customer;
+    if (widget.customer == null) getIt<BudgetRepository>().clearSelectBudget();
     getIt<AdsRepository>().loadInterstitial();
     _scrollController.addListener(_onScroll);
     _viewModel.initialScreen();
@@ -56,6 +63,10 @@ class _BudgetListView extends State<BudgetListView> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _viewModel.dispose();
+    // Volta o orçamento de origem como selecionado (PDF etc. dependem dele).
+    if (widget.customer != null) {
+      getIt<BudgetRepository>().selectBudget.value = widget.customer;
+    }
     super.dispose();
   }
 
@@ -149,42 +160,18 @@ class _BudgetListView extends State<BudgetListView> {
     return FloatingActionButton.extended(
       heroTag: "adicionar",
       onPressed: () async {
-        if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ??
-            false)) {
-          final value = await _viewModel.displayAlert.adsNotification(context);
-          if (!mounted) return;
-          if (value == "Ver anuncio") {
-            getIt<AdsRepository>().showInterstitial();
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) =>
-                        BudgetTabView(item: _viewModel.customerInfoNew()),
-              ),
-            );
-            if (!mounted) return;
-            getIt<BudgetRepository>().clearSelectBudget();
-            await _viewModel.getInformationOrcamento(refresh: true);
-          } else if (value == "Se tornar premium") {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SubscriptionView()),
-            );
-          }
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) =>
-                      BudgetTabView(item: _viewModel.customerInfoNew()),
-            ),
-          ).then((_) async {
-            getIt<BudgetRepository>().clearSelectBudget();
-            await _viewModel.getInformationOrcamento(refresh: true);
-          });
-        }
+        if (!await confirmNewBudgetAccess(context) || !mounted) return;
+        if (widget.customer != null) return _createForCustomer();
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => BudgetTabView(item: _viewModel.customerInfoNew()),
+          ),
+        );
+        if (!mounted) return;
+        getIt<BudgetRepository>().clearSelectBudget();
+        await _viewModel.getInformationOrcamento(refresh: true);
       },
       backgroundColor: buttonColor,
       elevation: 4,
@@ -214,7 +201,8 @@ class _BudgetListView extends State<BudgetListView> {
 
   Widget _buildSelectionBar() {
     final count = _viewModel.selectedIds.length;
-    final data = _viewModel.getFilteredData();
+    final data =
+        _viewModel.getFilteredData().where((b) => !_viewModel.isOrigin(b));
     final allSelected = data.isNotEmpty && data.every(_viewModel.isSelected);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 20, 8),
@@ -246,11 +234,45 @@ class _BudgetListView extends State<BudgetListView> {
     );
   }
 
+  Future<void> _createForCustomer() async {
+    final loading = getIt<LoadingEventRepository>();
+    await loading.alertLoading(context);
+    final created = await _viewModel.createForCustomer();
+    if (!mounted) return;
+    loading.closeLoading(context);
+    if (created == null) {
+      await _viewModel.displayAlert.notificationError(
+        context,
+        BudgetStrings.createErrorTitle,
+        BudgetStrings.createErrorMessage,
+      );
+      return;
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => BudgetTabView(
+              item: created,
+              initialIndex: 1,
+              fromCustomerBudgets: true,
+            ),
+      ),
+    );
+    getIt<BudgetRepository>().clearSelectBudget();
+  }
+
   void _openBudget(CustomerInfo item) {
     getIt<BudgetRepository>().selectBudget.value = item;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => BudgetTabView(item: item)),
+      MaterialPageRoute(
+        builder:
+            (context) => BudgetTabView(
+              item: item,
+              fromCustomerBudgets: widget.customer != null,
+            ),
+      ),
     ).then((_) {
       getIt<BudgetRepository>().clearSelectBudget();
     });
@@ -344,7 +366,12 @@ class _BudgetListView extends State<BudgetListView> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      BudgetStrings.emptyStateTitle,
+                      widget.customer == null
+                          ? BudgetStrings.emptyStateTitle
+                          : _viewModel.customerHasPhone
+                          ? BudgetStrings.customerBudgetsEmpty
+                          : BudgetStrings.customerBudgetsNoPhone,
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.heebo(
                         color: loadingIndicatorColor,
                         fontSize: 16,
@@ -393,16 +420,21 @@ class _BudgetListView extends State<BudgetListView> {
               item: item,
               selected: _viewModel.isSelected(item),
               moneyConvert: moneyConvert,
+              // Orçamento de origem: já está aberto por baixo, sem ações.
               onTap:
-                  () =>
-                      _viewModel.selectionMode
-                          ? _viewModel.toggleSelect(item)
-                          : _openBudget(item),
+                  _viewModel.isOrigin(item)
+                      ? null
+                      : () =>
+                          _viewModel.selectionMode
+                              ? _viewModel.toggleSelect(item)
+                              : _openBudget(item),
               onMore:
-                  () =>
-                      _viewModel.selectionMode
-                          ? _viewModel.toggleSelect(item)
-                          : _openActions(item),
+                  _viewModel.isOrigin(item)
+                      ? null
+                      : () =>
+                          _viewModel.selectionMode
+                              ? _viewModel.toggleSelect(item)
+                              : _openActions(item),
             );
           },
         ),
@@ -453,8 +485,18 @@ class _BudgetListView extends State<BudgetListView> {
   Widget _buildScreen() {
     return Column(
       children: <Widget>[
-        _buildHeaderScreen(),
-        _buildSearchBar(),
+        if (widget.customer == null) ...[
+          _buildHeaderScreen(),
+          _buildSearchBar(),
+        ] else ...[
+          AppHeaderSecondTitle(
+            titlePage: BudgetStrings.customerBudgetsTitle,
+            secondTitle: widget.customer!.customerName ?? '',
+            onBack: () => Navigator.pop(context),
+            isBottomPadding: false,
+          ),
+          const SizedBox(height: 12),
+        ],
         if (_viewModel.canFilterStatus)
           BudgetListStatusFilter(
             status: _viewModel.status,

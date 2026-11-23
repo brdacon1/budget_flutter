@@ -11,7 +11,19 @@ import 'package:oflite/shared/common/constants/colors.dart';
 class BudgetTabView extends StatefulWidget {
   final CustomerInfo item;
 
-  const BudgetTabView({super.key, required this.item});
+  /// Aba aberta ao entrar (0 Cliente, 1 Itens, 2 PDF, 3 Mais).
+  final int initialIndex;
+
+  /// Aberto por "Orçamentos do cliente": o Mais não repete essa opção
+  /// (evita abrir a lista dentro da lista em loop).
+  final bool fromCustomerBudgets;
+
+  const BudgetTabView({
+    super.key,
+    required this.item,
+    this.initialIndex = 0,
+    this.fromCustomerBudgets = false,
+  });
 
   @override
   State<BudgetTabView> createState() => _BudgetTabView();
@@ -24,6 +36,7 @@ class _BudgetTabView extends State<BudgetTabView> {
   @override
   void initState() {
     super.initState();
+    _viewModel.currentIndex = widget.initialIndex;
   }
 
   @override
@@ -39,7 +52,10 @@ class _BudgetTabView extends State<BudgetTabView> {
       BudgetCreatorView(item: widget.item),
       BudgetListItemsView(item: widget.item),
       const PdfBudgetView(),
-      PdfMenuView(item: widget.item),
+      PdfMenuView(
+        item: widget.item,
+        showCustomerBudgets: !widget.fromCustomerBudgets,
+      ),
     ];
     return AnimatedBuilder(
       animation: _viewModel,

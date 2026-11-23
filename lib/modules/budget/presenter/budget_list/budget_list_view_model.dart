@@ -9,6 +9,8 @@ import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/create_budget_for_customer_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/watch_customer_budgets_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -23,6 +25,18 @@ class BudgetListViewModel extends ChangeNotifier {
   final ListBudgetsUsecase _listBudgets = getIt<ListBudgetsUsecase>();
   final ResolveAddressMapsUsecase _resolveMaps =
       getIt<ResolveAddressMapsUsecase>();
+  final WatchCustomerBudgetsUsecase _watchCustomerBudgets =
+      getIt<WatchCustomerBudgetsUsecase>();
+  final CreateBudgetForCustomerUsecase _createForCustomer =
+      getIt<CreateBudgetForCustomerUsecase>();
+
+  /// Modo "Orçamentos do cliente": a lista são os orçamentos com o mesmo
+  /// telefone de [customer], em tempo real. `null` = lista principal.
+  CustomerInfo? customer;
+  bool get isCustomerMode => customer != null;
+  bool get customerHasPhone => (customer?.phone ?? '').trim().isNotEmpty;
+  StreamSubscription<Result<List<CustomerInfo>>>? _customerSubscription;
+  List<CustomerInfo> _customerBudgets = const [];
 
   /// Como abrir o endereço do cliente no mapa (Android: seletor nativo já
   /// aberto; iOS: apps para a action sheet).
@@ -31,7 +45,8 @@ class BudgetListViewModel extends ChangeNotifier {
 
   /// Filtro por status: recurso só de assinantes.
   bool get canFilterStatus =>
-      getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
+      (isCustomerMode && customerHasPhone) ||
+      (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
 
   BudgetStatus? _status;
   BudgetStatus? get status => _status;
@@ -81,7 +96,12 @@ class BudgetListViewModel extends ChangeNotifier {
   bool get hasMoreBudgets => _budgetRepository.hasMoreBudgets;
 
   Future<void> loadMore() async {
-    if (_searchResults != null || _isRefreshing || !hasMoreBudgets) return;
+    if (isCustomerMode ||
+        _searchResults != null ||
+        _isRefreshing ||
+        !hasMoreBudgets) {
+      return;
+    }
     await getInformationOrcamento(refresh: false);
   }
 
@@ -89,7 +109,7 @@ class BudgetListViewModel extends ChangeNotifier {
   /// delete/duplicate), então só espelhamos — sem buscar a próxima página
   /// e sem resetar a paginação (preserva o scroll).
   void _onBudgetRepoChanged() {
-    if (_disposed || _isRefreshing) return;
+    if (_disposed || _isRefreshing || isCustomerMode) return;
     _foundUsers
       ..clear()
       ..addAll(_budgetRepository.budgets);
@@ -98,7 +118,35 @@ class BudgetListViewModel extends ChangeNotifier {
 
   Future<void> initialScreen() async {
     await loadCount();
+    if (isCustomerMode) return _watchCustomer();
     await getInformationOrcamento(refresh: true);
+  }
+
+  /// Escuta o Firestore: a lista do cliente atualiza sozinha.
+  void _watchCustomer() {
+    if (!customerHasPhone) return;
+    _isRefreshing = true;
+    _customerSubscription?.cancel();
+    _customerSubscription = _watchCustomerBudgets(customer!.phone!).listen((
+      result,
+    ) {
+      if (_disposed) return;
+      _isRefreshing = false;
+      if (result is Ok<List<CustomerInfo>>) {
+        _customerBudgets = result.value;
+      }
+      notifyListeners();
+    });
+  }
+
+  /// Cria orçamento com os dados do cliente (modo cliente).
+  Future<CustomerInfo?> createForCustomer() async {
+    final result = await _createForCustomer(customer!);
+    if (result is Ok<CustomerInfo>) {
+      _totalBudgetCount++;
+      return result.value;
+    }
+    return null;
   }
 
   Future<void> duplicateEvent(
@@ -148,6 +196,8 @@ class BudgetListViewModel extends ChangeNotifier {
   Future<List<CustomerInfo>> getInformationOrcamento({
     bool refresh = true,
   }) async {
+    // Modo cliente: o stream já mantém a lista atualizada.
+    if (isCustomerMode) return getFilteredData();
     _isRefreshing = true;
     final result = await _budgetRepository.fetchBudgetsPaginated(
       refresh: refresh,
@@ -172,6 +222,10 @@ class BudgetListViewModel extends ChangeNotifier {
   void selectStatus(BudgetStatus? status) {
     if (status == _status) return;
     _status = status;
+    if (isCustomerMode) {
+      notifyListeners();
+      return;
+    }
     _search();
   }
 
@@ -201,17 +255,36 @@ class BudgetListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<CustomerInfo> getFilteredData() => _searchResults ?? _foundUsers;
+  /// Orçamento de onde o usuário veio (modo cliente).
+  bool isOrigin(CustomerInfo b) => isCustomerMode && b.id == customer!.id;
+
+  /// Modo cliente: o orçamento de origem sempre em primeiro.
+  List<CustomerInfo> getFilteredData() {
+    if (!isCustomerMode) return _searchResults ?? _foundUsers;
+    return [
+      ..._customerBudgets.where(isOrigin),
+      ..._customerBudgets.where(
+        (b) =>
+            !isOrigin(b) &&
+            (_status == null ||
+                (b.status ?? '').toUpperCase() == _status!.value),
+      ),
+    ];
+  }
 
   void toggleSelect(CustomerInfo b) {
     final id = b.id;
-    if (id == null) return;
+    if (id == null || isOrigin(b)) return;
     if (!selectedIds.remove(id)) selectedIds.add(id);
     if (!_disposed) notifyListeners();
   }
 
   void selectAllFiltered() {
-    final ids = getFilteredData().map((b) => b.id).whereType<String>();
+    final ids =
+        getFilteredData()
+            .where((b) => !isOrigin(b))
+            .map((b) => b.id)
+            .whereType<String>();
     if (ids.every(selectedIds.contains)) {
       selectedIds.removeAll(ids);
     } else {
@@ -248,6 +321,7 @@ class BudgetListViewModel extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _debounce?.cancel();
+    _customerSubscription?.cancel();
     _budgetRepository.removeListener(_onBudgetRepoChanged);
     super.dispose();
   }

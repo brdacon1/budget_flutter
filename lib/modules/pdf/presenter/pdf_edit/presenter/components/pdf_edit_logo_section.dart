@@ -75,18 +75,16 @@ class PdfEditLogoSection extends StatelessWidget {
           children: [
             Text(
               PdfStrings.noImage,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.white),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: Colors.white),
             ),
             const SizedBox(height: 8.0),
             Text(
               PdfStrings.tapToAddImage,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: Colors.white),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: Colors.white),
             ),
           ],
         ),
@@ -107,7 +105,10 @@ class PdfEditLogoSection extends StatelessWidget {
         else
           GestureDetector(
             onTap: autoRenewing ? onEditLogo : onOpenSubscription,
-            child: fileContent != null ? _imageCard(context) : _emptyLabel(context),
+            child:
+                fileContent != null
+                    ? _imageCard(context)
+                    : _emptyLabel(context),
           ),
       ],
     );

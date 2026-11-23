@@ -1,9 +1,5 @@
 /// Tipos de layout disponíveis para geração do PDF do orçamento.
-enum PdfLayoutType {
-  standard,
-  executive,
-  professional,
-}
+enum PdfLayoutType { standard, executive, professional }
 
 extension PdfLayoutTypeExtension on PdfLayoutType {
   String get displayName {

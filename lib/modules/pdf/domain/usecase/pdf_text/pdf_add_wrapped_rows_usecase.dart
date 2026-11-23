@@ -39,11 +39,7 @@ class PdfAddWrappedRowsUsecase {
       final rowStyle =
           lines.length == 1
               ? style
-              : _joinedStyle(
-                style,
-                first: i == 0,
-                last: i == lines.length - 1,
-              );
+              : _joinedStyle(style, first: i == 0, last: i == lines.length - 1);
       for (var c = 0; c < row.cells.count; c++) {
         row.cells[c].style = rowStyle;
       }

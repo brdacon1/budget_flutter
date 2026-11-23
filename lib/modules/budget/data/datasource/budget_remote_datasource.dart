@@ -170,6 +170,23 @@ class BudgetRemoteDataSource {
         .toList();
   }
 
+  /// Orçamentos cujo FONE é um dos [values] (formatos do mesmo telefone),
+  /// em tempo real: emite de novo a cada criação/alteração/exclusão.
+  Stream<List<Map<String, dynamic>>> watchBudgetsByPhone(
+    String userUid,
+    List<String> values,
+  ) {
+    return _budgetsCollection(userUid)
+        .where('FONE', whereIn: values)
+        .snapshots()
+        .map(
+          (s) =>
+              s.docs
+                  .map((d) => Map<String, dynamic>.from(d.data() as Map))
+                  .toList(),
+        );
+  }
+
   /// Orçamentos cujo NOMECLIENTE começa com algum dos [prefixes]. O Firestore
   /// não tem "contains"/case-insensitive: uma query de range por prefixo,
   /// resultados unidos por ID.

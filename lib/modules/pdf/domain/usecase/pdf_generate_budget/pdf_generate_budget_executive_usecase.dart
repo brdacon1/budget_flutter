@@ -248,14 +248,15 @@ class PdfGenerateBudgetExecutiveUsecase {
       9,
       style: PdfFontStyle.regular,
     );
-    final double addressH = address.isEmpty
-        ? 0
-        : grayReg
-              .measureString(
-                _sanitizeText('Endereço: $address'),
-                layoutArea: Size(addressW, 0),
-              )
-              .height;
+    final double addressH =
+        address.isEmpty
+            ? 0
+            : grayReg
+                .measureString(
+                  _sanitizeText('Endereço: $address'),
+                  layoutArea: Size(addressW, 0),
+                )
+                .height;
     leftH += addressH;
 
     // --- Altura do conteúdo direito ---
