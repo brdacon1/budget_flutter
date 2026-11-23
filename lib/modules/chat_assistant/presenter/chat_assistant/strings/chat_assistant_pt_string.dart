@@ -106,6 +106,42 @@ class ChatAssistantStrings {
   static String get findBudgetOptionLabel =>
       _isPt ? '🔍 Encontrar orçamentos' : '🔍 Find budgets';
 
+  /// Opção "Ir no cliente" do menu (só no modo IA) — valor `'8'`.
+  static String get goToClientOptionLabel =>
+      _isPt ? '📍 Ir no cliente' : '📍 Go to client';
+
+  static String get goToClientPrompt =>
+      _isPt
+          ? 'Selecione o orçamento do cliente que você quer visitar 🚗'
+          : "Select the budget of the client you want to visit 🚗";
+
+  static String goToClientAddress(String name, String address) =>
+      _isPt
+          ? '📍 Endereço de $name:\n$address'
+          : "📍 $name's address:\n$address";
+
+  static String goToClientNoAddress(String name) =>
+      _isPt
+          ? '⚠️ O orçamento de $name não tem endereço cadastrado.'
+          : "⚠️ $name's budget has no address registered.";
+
+  static String get goToClientOpenMapLabel =>
+      _isPt ? '🗺️ Abrir no mapa' : '🗺️ Open in maps';
+
+  static String get goToClientSelectAnotherLabel =>
+      _isPt ? 'Selecionar outro orçamento' : 'Select another budget';
+
+  static String get goToClientMapErrorTitle => _isPt ? 'Erro!' : 'Error!';
+
+  static String get goToClientMapErrorMessage =>
+      _isPt
+          ? 'Nenhum app de mapa conseguiu abrir o endereço.'
+          : 'No map app could open the address.';
+
+  static String get goToClientChooseMap => _isPt ? 'Abrir com' : 'Open with';
+
+  static String get goToClientCancel => _isPt ? 'Cancelar' : 'Cancel';
+
   static String get findBudgetPrompt =>
       _isPt
           ? 'De qual cliente você quer encontrar o orçamento?'

@@ -10,8 +10,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
-import 'package:oflite/modules/core/map_launcher/domain/repository/map_launcher_repository.dart';
-import 'package:map_launcher/map_launcher.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -22,15 +21,13 @@ class BudgetListViewModel extends ChangeNotifier {
       getIt<DuplicateBudgetUsecase>();
   final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final ListBudgetsUsecase _listBudgets = getIt<ListBudgetsUsecase>();
-  final MapLauncherRepository _mapLauncher = getIt<MapLauncherRepository>();
+  final ResolveAddressMapsUsecase _resolveMaps =
+      getIt<ResolveAddressMapsUsecase>();
 
-  /// Mapas que conseguem abrir o endereço do cliente (iOS).
-  Future<List<SupportedMap>> mapsForAddress(CustomerInfo item) =>
-      _mapLauncher.mapsForAddress(item.fullAddress);
-
-  /// Abre o seletor nativo de mapas do Android.
-  Future<bool> openMapChooser(CustomerInfo item) =>
-      _mapLauncher.openWithSystemChooser(item.fullAddress);
+  /// Como abrir o endereço do cliente no mapa (Android: seletor nativo já
+  /// aberto; iOS: apps para a action sheet).
+  Future<AddressMapsResult> resolveMaps(CustomerInfo item) =>
+      _resolveMaps(item.fullAddress);
 
   /// Filtro por status: recurso só de assinantes.
   bool get canFilterStatus =>

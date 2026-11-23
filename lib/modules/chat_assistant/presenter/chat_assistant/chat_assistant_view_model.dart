@@ -1,4 +1,7 @@
 import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'dart:async';
@@ -206,6 +209,16 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Opção "Cadastrar comentários" do menu (só existe no modo IA).
   static const _commentLibraryOption = '7';
+
+  /// Opção "Ir no cliente" do menu (só existe no modo IA).
+  static const _goToClientOption = '8';
+
+  final ShowGoToClientPromptUsecase _showGoToClientPrompt =
+      getIt<ShowGoToClientPromptUsecase>();
+  final ShowClientAddressUsecase _showClientAddress =
+      getIt<ShowClientAddressUsecase>();
+  final ResolveAddressMapsUsecase _resolveMaps =
+      getIt<ResolveAddressMapsUsecase>();
 
   final ShowCommentLibraryMenuUsecase _showCommentLibraryMenu =
       getIt<ShowCommentLibraryMenuUsecase>();
@@ -441,7 +454,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action == DispatchAgentToolUsecase.selectDuplicateBudget ||
       action == DispatchAgentToolUsecase.selectCommentBudget ||
       action == selectProofBudgetAction ||
-      action.startsWith(openProofsAction);
+      action.startsWith(openProofsAction) ||
+      action == ShowGoToClientPromptUsecase.selectBudgetAction ||
+      action.startsWith(ShowClientAddressUsecase.openMapAction);
 
   bool isButtonsActive(ChatMessageEntity msg) {
     if (msg.type == ChatMessageType.budgetList ||
@@ -561,6 +576,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
           _aiMode &&
           clean == _findBudgetOption) {
         _setStepFromName(await _showFindBudgetPrompt());
+        notifyListeners();
+      } else if (_step == ChatFlowStep.mainMenu &&
+          _aiMode &&
+          clean == _goToClientOption) {
+        _pendingNavigation = await _showGoToClientPrompt();
         notifyListeners();
       } else if (_step == ChatFlowStep.mainMenu &&
           _aiMode &&
@@ -1023,6 +1043,23 @@ class ChatAssistantViewModel extends ChangeNotifier {
     );
     _pendingNavigation = action;
     notifyListeners();
+  }
+
+  /// "Ir no cliente": modal de orçamentos fechou com [id] escolhido → mostra
+  /// o endereço com "Abrir no mapa" (ou aviso de sem endereço).
+  Future<void> onGoToClientBudgetSelected(String id) async {
+    final budget = await budgetForNavigation(id);
+    if (budget == null) return;
+    await _showClientAddress(budget);
+    notifyListeners();
+  }
+
+  /// "Abrir no mapa": Android já abre o seletor nativo; iOS devolve os apps
+  /// para a action sheet da View.
+  Future<AddressMapsResult> resolveClientMaps(String id) async {
+    final budget = await budgetForNavigation(id);
+    if (budget == null) return const AddressMapsUnavailable();
+    return _resolveMaps(budget.fullAddress);
   }
 
   /// Ao voltar da tela do orçamento encontrado: oferece abrir de novo ou
@@ -2266,6 +2303,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
         action.startsWith(openProofsAction) ||
         action == DispatchAgentToolUsecase.selectDuplicateBudget ||
         action == DispatchAgentToolUsecase.selectCommentBudget ||
+        action == ShowGoToClientPromptUsecase.selectBudgetAction ||
+        action.startsWith(ShowClientAddressUsecase.openMapAction) ||
         action.startsWith('open_budget|')) {
       return action;
     }

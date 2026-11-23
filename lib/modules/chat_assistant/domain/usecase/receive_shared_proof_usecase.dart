@@ -54,9 +54,10 @@ class ReceiveSharedProofUsecase {
   Future<SharedProofEvent?> initial() async =>
       _handle(await _media.initialShared());
 
-  Stream<SharedProofEvent> stream() => _media
-      .sharedStream()
-      .asyncMap(_handle)
-      .where((e) => e != null)
-      .cast<SharedProofEvent>();
+  Stream<SharedProofEvent> stream() =>
+      _media
+          .sharedStream()
+          .asyncMap(_handle)
+          .where((e) => e != null)
+          .cast<SharedProofEvent>();
 }

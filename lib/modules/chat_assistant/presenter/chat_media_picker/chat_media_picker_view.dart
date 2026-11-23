@@ -12,10 +12,8 @@ import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Resultado do seletor: anexos validados + legenda.
-typedef ChatMediaPickResult = ({
-  ProofAttachmentValidation validation,
-  String caption,
-});
+typedef ChatMediaPickResult =
+    ({ProofAttachmentValidation validation, String caption});
 
 /// Seletor de fotos estilo WhatsApp em modal de 75% da tela (abas
 /// Fotos/Álbuns, até 2 fotos, recorte, legenda e enviar com contador).
@@ -100,10 +98,11 @@ class _ChatMediaPickerViewState extends State<ChatMediaPickerView> {
         centerTitle: true,
         title: AnimatedBuilder(
           animation: _vm,
-          builder: (_, __) => _Tabs(
-            showAlbums: _vm.showAlbums,
-            onChanged: _vm.setShowAlbums,
-          ),
+          builder:
+              (_, __) => _Tabs(
+                showAlbums: _vm.showAlbums,
+                onChanged: _vm.setShowAlbums,
+              ),
         ),
       ),
       body: AnimatedBuilder(
@@ -150,7 +149,11 @@ class _ChatMediaPickerViewState extends State<ChatMediaPickerView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.photo_library_outlined, size: 56, color: emptyStateIconColor),
+          const Icon(
+            Icons.photo_library_outlined,
+            size: 56,
+            color: emptyStateIconColor,
+          ),
           const SizedBox(height: 12),
           Text(
             PaymentProofStrings.galleryPermission,
@@ -204,7 +207,8 @@ class _ChatMediaPickerViewState extends State<ChatMediaPickerView> {
 
   Widget _albums() => ListView.separated(
     itemCount: _vm.albums.length,
-    separatorBuilder: (_, __) => const Divider(height: 1, color: cardBorderColor),
+    separatorBuilder:
+        (_, __) => const Divider(height: 1, color: cardBorderColor),
     itemBuilder: (_, i) {
       final a = _vm.albums[i];
       return ListTile(

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:oflite/modules/core/map_launcher/data/datasource/map_launcher_datasource.dart';
 import 'package:oflite/modules/core/map_launcher/data/repository/map_launcher_repository_impl.dart';
 import 'package:oflite/modules/core/map_launcher/domain/repository/map_launcher_repository.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 
 /// Registra o serviço que abre endereços nos apps de mapa.
 void registerMapLauncherDependencies(GetIt sl) {
@@ -11,5 +12,8 @@ void registerMapLauncherDependencies(GetIt sl) {
   );
   sl.registerLazySingleton<MapLauncherRepository>(
     () => MapLauncherRepositoryImpl(sl<MapLauncherDataSource>()),
+  );
+  sl.registerLazySingleton<ResolveAddressMapsUsecase>(
+    () => ResolveAddressMapsUsecase(sl<MapLauncherRepository>()),
   );
 }

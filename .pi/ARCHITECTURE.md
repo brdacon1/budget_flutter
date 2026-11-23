@@ -2265,6 +2265,12 @@ modules/chat_assistant/ (comprovantes)
 
 - **Opção "Relatórios"** (5ª do menu, só no modo IA): mostra "Descreva o que você
   precisa saber" + exemplo em destaque; o texto seguinte vai para a IA.
+- **Opção "Ir no cliente"** (8ª do menu, só no modo IA, sem LLM): `ShowGoToClientPromptUsecase`
+  abre o `ChatBudgetPickerView` → `ShowClientAddressUsecase` mostra "📍 Endereço de …"
+  + *Abrir no mapa* (`open_client_map|<id>`), ou aviso de sem endereço + *Selecionar
+  outro*. Toda mensagem tem *Voltar ao menu*. O mapa usa o mesmo
+  `core/map_launcher` da lista de orçamentos: `ResolveAddressMapsUsecase` (Android:
+  seletor nativo; iOS: apps instalados) + `showMapChooserSheet` (action sheet iOS).
 - **Digitando…:** `ChatTypingIndicator` no fim da lista enquanto
   `ChatAssistantViewModel.isAiThinking` (modelo pensando ou ação confirmada gravando).
 - **Cards:** `budgetList` e `summaryCard` são `ChatMessageType` próprios e ficam
