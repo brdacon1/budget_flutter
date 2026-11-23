@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_empty_detail.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
@@ -43,9 +44,13 @@ class _BudgetListView extends State<BudgetListView> {
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   final ScrollController _scrollController = ScrollController();
 
-  /// Navigator do painel de detalhe (tela larga) e o orçamento aberto nele.
+  /// Navigator do painel de detalhe (tela larga).
   final GlobalKey<NavigatorState> _detailKey = GlobalKey<NavigatorState>();
-  String? _activeId;
+
+  /// Rascunho do orçamento novo e orçamento aberto (selecionado): a lista
+  /// destaca o aberto e mostra o rascunho como um card que se atualiza ao vivo.
+  final BudgetDraftNotifier _draft = getIt<BudgetDraftNotifier>();
+  final _selected = getIt<BudgetRepository>().selectBudget;
 
   /// Lista + detalhe lado a lado: só em tela larga e na lista principal (a
   /// lista "orçamentos do cliente" continua empilhando telas).
@@ -58,6 +63,8 @@ class _BudgetListView extends State<BudgetListView> {
     if (widget.customer == null) getIt<BudgetRepository>().clearSelectBudget();
     getIt<AdsRepository>().loadInterstitial();
     _scrollController.addListener(_onScroll);
+    _draft.addListener(_onOpenBudgetChanged);
+    _selected.addListener(_onOpenBudgetChanged);
     _viewModel.initialScreen();
     super.initState();
   }
@@ -80,8 +87,24 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
+  /// Fora do build (o formulário muda esses valores em initState): reconstrói
+  /// a lista depois do frame.
+  void _onOpenBudgetChanged() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  /// Orçamento aberto no painel (tela larga): destaque da lista.
+  bool _isOpen(CustomerInfo item) {
+    final id = item.id ?? '';
+    return _splitView && id.isNotEmpty && id == _selected.value?.id;
+  }
+
   @override
   void dispose() {
+    _draft.removeListener(_onOpenBudgetChanged);
+    _selected.removeListener(_onOpenBudgetChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _viewModel.dispose();
@@ -131,8 +154,9 @@ class _BudgetListView extends State<BudgetListView> {
     );
     if (!confirm || !mounted) return;
 
+    final openId = _selected.value?.id;
     final deletesActive =
-        _activeId != null && _viewModel.selectedIds.contains(_activeId);
+        openId != null && _viewModel.selectedIds.contains(openId);
     final ok = await _viewModel.deleteSelected();
     if (!mounted) return;
     if (ok && deletesActive) {
@@ -188,10 +212,7 @@ class _BudgetListView extends State<BudgetListView> {
         if (!await confirmNewBudgetAccess(context) || !mounted) return;
         if (widget.customer != null) return _createForCustomer();
         if (_splitView) {
-          return _showDetail(
-            BudgetTabView(item: _viewModel.customerInfoNew()),
-            id: '',
-          );
+          return _showDetail(BudgetTabView(item: _viewModel.customerInfoNew()));
         }
         await Navigator.push(
           context,
@@ -297,7 +318,7 @@ class _BudgetListView extends State<BudgetListView> {
   void _openBudget(CustomerInfo item) {
     getIt<BudgetRepository>().selectBudget.value = item;
     if (_splitView) {
-      _showDetail(BudgetTabView(item: item), id: item.id ?? '');
+      _showDetail(BudgetTabView(item: item));
       return;
     }
     Navigator.push(
@@ -315,8 +336,7 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   /// Abre [page] no painel de detalhe, substituindo o que estiver aberto.
-  void _showDetail(Widget page, {required String id}) {
-    setState(() => _activeId = id);
+  void _showDetail(Widget page) {
     _detailKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute<void>(builder: (_) => page),
       (route) => route.isFirst,
@@ -327,7 +347,6 @@ class _BudgetListView extends State<BudgetListView> {
   /// atualiza a lista (novo orçamento, totais alterados).
   void _onDetailClosed() {
     if (!mounted) return;
-    setState(() => _activeId = null);
     getIt<BudgetRepository>().clearSelectBudget();
     _viewModel.getInformationOrcamento(refresh: true);
   }
@@ -395,8 +414,14 @@ class _BudgetListView extends State<BudgetListView> {
 
   Widget _buildListView() {
     final data = _viewModel.getFilteredData();
+    // Orçamento novo em edição (tela larga): card de rascunho no topo.
+    final draft = _splitView ? _draft.value : null;
+    final offset = draft == null ? 0 : 1;
     final isEmpty =
-        data.isEmpty && !_viewModel.isRefreshing && !_viewModel.isLoadingMore;
+        data.isEmpty &&
+        draft == null &&
+        !_viewModel.isRefreshing &&
+        !_viewModel.isLoadingMore;
 
     if (isEmpty) {
       return Expanded(
@@ -456,9 +481,20 @@ class _BudgetListView extends State<BudgetListView> {
           controller: _scrollController,
           shrinkWrap: true,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-          itemCount: data.length + (_viewModel.isLoadingMore ? 1 : 0),
+          itemCount: offset + data.length + (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index >= data.length) {
+            if (draft != null && index == 0) {
+              return BudgetListCard(
+                item: draft,
+                draft: true,
+                active: true,
+                selected: false,
+                moneyConvert: moneyConvert,
+                onTap: null,
+                onMore: null,
+              );
+            }
+            if (index - offset >= data.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
@@ -473,11 +509,11 @@ class _BudgetListView extends State<BudgetListView> {
                 ),
               );
             }
-            final item = data[index];
+            final item = data[index - offset];
             return BudgetListCard(
               item: item,
               selected: _viewModel.isSelected(item),
-              active: _splitView && item.id != null && item.id == _activeId,
+              active: _isOpen(item),
               moneyConvert: moneyConvert,
               // Orçamento de origem: já está aberto por baixo, sem ações.
               onTap:

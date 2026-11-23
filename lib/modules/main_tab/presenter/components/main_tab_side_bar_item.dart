@@ -31,11 +31,11 @@ class MainTabSideBarItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
             child: Row(
               children: [
                 Icon(icon, color: selected ? buttonColor : mutedTextColor),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
@@ -43,7 +43,7 @@ class MainTabSideBarItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: selected ? whiteColor : mutedTextColor,
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     ),
                   ),

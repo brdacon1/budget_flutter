@@ -20,7 +20,7 @@ class MainTabSideBar extends StatelessWidget {
   });
 
   /// Largura fixa da barra.
-  static const double width = 192;
+  static const double width = 168;
 
   /// Logo da empresa (foto do titular); `null` = sem logo.
   final Uint8List? logo;
@@ -37,7 +37,7 @@ class MainTabSideBar extends StatelessWidget {
       child: SafeArea(
         right: false,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

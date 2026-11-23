@@ -31,6 +31,8 @@ class BudgetStrings {
     'FINALIZADO' => _isPt ? 'Finalizado' : 'Finished',
     _ => _isPt ? 'Pendente' : 'Pending',
   };
+  static String get draftLabel =>
+      _isPt ? 'Novo · não salvo' : 'New · not saved';
   static String get newBudget => _isPt ? 'Novo orçamento' : 'New budget';
   static String get budgetNumber => _isPt ? 'Nº' : 'No.';
   static String get detailDate => _isPt ? 'Data' : 'Date';

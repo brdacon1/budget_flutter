@@ -105,6 +105,7 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
                         child: SafeArea(
                           bottom: false,
                           child: AppPageContainer(
+                            width: AppPageWidth.wide,
                             child: Stack(
                               children: <Widget>[
                                 ListView(

@@ -27,6 +27,9 @@ class BudgetListItemsCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onToggleSelect;
 
+  static const double _descriptionFontSize = 14;
+  static const double _descriptionLineHeight = 1.25;
+
   String _qty(double? q) {
     final v = q ?? 0;
     return v == v.roundToDouble() ? v.toInt().toString() : v.toString();
@@ -72,15 +75,24 @@ class BudgetListItemsCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        item.description ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.heebo(
-                          color: whiteColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: 1.25,
+                      // Altura fixa de 2 linhas: todos os cards ficam do mesmo
+                      // tamanho, com a descrição curta ou longa.
+                      SizedBox(
+                        height:
+                            MediaQuery.textScalerOf(context).scale(
+                              _descriptionFontSize * _descriptionLineHeight,
+                            ) *
+                            2,
+                        child: Text(
+                          item.description ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.heebo(
+                            color: whiteColor,
+                            fontSize: _descriptionFontSize,
+                            fontWeight: FontWeight.bold,
+                            height: _descriptionLineHeight,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),

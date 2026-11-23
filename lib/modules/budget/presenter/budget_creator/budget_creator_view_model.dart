@@ -6,6 +6,7 @@ import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -15,6 +16,10 @@ enum CepLookupState { idle, loading, found, notFound }
 class BudgetCreatorViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final CustomerInfo item;
+  final BudgetDraftNotifier _draft = getIt<BudgetDraftNotifier>();
+
+  /// Último rascunho publicado por este ViewModel (para só limpar o próprio).
+  CustomerInfo? _publishedDraft;
 
   BudgetCreatorViewModel({required this.item});
 
@@ -108,7 +113,23 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     if (nameError != null && nameController.text.trim().isNotEmpty) {
       nameError = null;
     }
+    _publishDraft();
     notifyListeners();
+  }
+
+  /// Orçamento novo: publica o que foi digitado para a lista mostrar um card
+  /// que se atualiza ao vivo. Orçamento existente não gera rascunho.
+  void _publishDraft() {
+    if (isEditing) return;
+    _publishedDraft = CustomerInfo(
+      id: '',
+      customerName: nameController.text.trim(),
+      phone: phoneController.text,
+      status: statusController.text,
+      data: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+      totalValue: 0,
+    );
+    _draft.value = _publishedDraft;
   }
 
   void _applyToItem(CustomerInfo source) {
@@ -159,6 +180,10 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     for (final c in _editable) {
       c.addListener(_onFieldChanged);
     }
+    // Fora do build: a lista escuta o rascunho e reconstrói.
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) => _publishDraft())
+      ..scheduleFrame();
     notifyListeners();
   }
 
@@ -254,6 +279,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
         await _budgetRepository.saveBudget(budget);
       }
       _applyToItem(budget);
+      if (!isUpdate) _clearDraft();
       _takeSnapshot();
       notifyListeners();
       return const Result.ok(null);
@@ -262,8 +288,26 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     }
   }
 
+  /// Limpa o rascunho, mas só se ainda for o publicado por este ViewModel.
+  void _clearDraft() {
+    final published = _publishedDraft;
+    if (published != null && identical(_draft.value, published)) {
+      _draft.value = null;
+    }
+    _publishedDraft = null;
+  }
+
   @override
   void dispose() {
+    final published = _publishedDraft;
+    if (published != null) {
+      // Fora do unmount: a lista escuta o rascunho e reconstrói.
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) {
+          if (identical(_draft.value, published)) _draft.value = null;
+        })
+        ..scheduleFrame();
+    }
     for (final c in _editable) {
       c.removeListener(_onFieldChanged);
       c.dispose();

@@ -150,6 +150,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                         child: SafeArea(
                           bottom: false,
                           child: AppPageContainer(
+                            width: AppPageWidth.wide,
                             child: Stack(
                               children: [
                                 ListView(

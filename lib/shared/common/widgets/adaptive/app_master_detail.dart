@@ -15,7 +15,7 @@ class AppMasterDetail extends StatelessWidget {
     required this.emptyDetail,
     required this.detailNavigatorKey,
     this.onDetailClosed,
-    this.masterWidth = 380,
+    this.masterWidth = 440,
   });
 
   final Widget master;

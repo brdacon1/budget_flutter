@@ -68,3 +68,7 @@ const premiumOnAccentColor = Color(0xFF06201E); // texto sobre o ciano
 const modalTextColor = Color(0xFF424242); // texto, ícones e botão do modal
 const modalDividerColor = Color(0xFFE0E0E0); // Colors.grey[300]
 const modalHandleColor = Color(0xFFBDBDBD); // Colors.grey[400]
+
+// Tabs (bottom navigation do orçamento)
+const tabSelectedColor = Color(0xFFE0F7FA); // Colors.cyan[50]
+const tabUnselectedColor = Colors.grey;

@@ -36,7 +36,7 @@ void main() {
     for (final item in items) {
       expect(find.text(item.title), findsOneWidget);
     }
-    expect(tester.getSize(find.byType(MainTabSideBar)).width, 192);
+    expect(tester.getSize(find.byType(MainTabSideBar)).width, 168);
 
     await tester.tap(find.text('Dashboard'));
     expect(tapped, 2);
