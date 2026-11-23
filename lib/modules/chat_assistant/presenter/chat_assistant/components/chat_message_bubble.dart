@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'dart:convert';
 
@@ -85,7 +87,11 @@ class ChatMessageBubble extends StatelessWidget {
                       : null,
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                  // 75% da tela no celular; em tela larga limita o balão.
+                  maxWidth: math.min(
+                    MediaQuery.sizeOf(context).width * 0.75,
+                    560,
+                  ),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
