@@ -1234,7 +1234,7 @@ etc.
 - [x] `product` — Produtos e preços
 - [x] `receipt` — Recibos
 - [x] `singup` — Cadastro de usuário
-- [x] `subscription` — Assinaturas/Planos
+- [x] `subscription` — Assinaturas/Planos (mensal + anual; SKUs em `env/*.json`; guia de loja em `.pi/PREMIUM_SUBSCRIPTION_STORE_GUIDE.md`)
 - [x] `terms_conditions` — Termos de uso
 - [x] `web_budget` — Orçamento público web (compartilhável)
 - [x] `delete_account` — Exclusão de conta (Web — `/delete-account`)

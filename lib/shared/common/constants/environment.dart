@@ -95,15 +95,21 @@ class Environment {
     // As chaves de anúncio são por plataforma; o app usa apenas a da
     // plataforma atual (iOS → *_IOS, demais → *_ANDROID).
     final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
-    final interstitialKey = isIOS
-        ? 'ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS'
-        : 'ADMOB_INTERSTITIAL_AD_UNIT_ID_ANDROID';
+    final interstitialKey =
+        isIOS
+            ? 'ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS'
+            : 'ADMOB_INTERSTITIAL_AD_UNIT_ID_ANDROID';
 
-    final interstitialAdUnitId = (json[interstitialKey] as String?) ??
+    final interstitialAdUnitId =
+        (json[interstitialKey] as String?) ??
         (adMobJson?['interstitialAdUnitId'] as String?);
 
     final androidSubscriptionSku = json['ANDROID_SUBSCRIPTION_SKU'] as String?;
     final iosSubscriptionSku = json['IOS_SUBSCRIPTION_SKU'] as String?;
+    final androidYearSubscriptionSku =
+        json['ANDROID_SUBSCRIPTION_BY_YEAR_SKU'] as String?;
+    final iosYearSubscriptionSku =
+        json['IOS_SUBSCRIPTION_BY_YEAR_SKU'] as String?;
 
     if (interstitialAdUnitId == null || interstitialAdUnitId.isEmpty) {
       throw StateError(
@@ -125,14 +131,28 @@ class Environment {
       );
     }
 
+    if (androidYearSubscriptionSku == null ||
+        androidYearSubscriptionSku.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "ANDROID_SUBSCRIPTION_BY_YEAR_SKU" ausente/vazia '
+        'em "$_environmentFileName".',
+      );
+    }
+    if (iosYearSubscriptionSku == null || iosYearSubscriptionSku.isEmpty) {
+      throw StateError(
+        '[Environment] Chave "IOS_SUBSCRIPTION_BY_YEAR_SKU" ausente/vazia em '
+        '"$_environmentFileName".',
+      );
+    }
+
     _forcePremium = json['FORCE_PREMIUM'] == true;
 
-    adMob = AdMobConfig(
-      interstitialAdUnitId: interstitialAdUnitId,
-    );
+    adMob = AdMobConfig(interstitialAdUnitId: interstitialAdUnitId);
     subscription = SubscriptionConfig(
       androidSku: androidSubscriptionSku,
       iosSku: iosSubscriptionSku,
+      androidYearSku: androidYearSubscriptionSku,
+      iosYearSku: iosYearSubscriptionSku,
     );
     _initialized = true;
 
@@ -148,6 +168,8 @@ class Environment {
       'interstitialAdUnitId="$interstitialAdUnitId" '
       'androidSubscriptionSku="$androidSubscriptionSku" '
       'iosSubscriptionSku="$iosSubscriptionSku" '
+      'androidYearSku="$androidYearSubscriptionSku" '
+      'iosYearSku="$iosYearSubscriptionSku" '
       'forcePremium=$forcePremium',
     );
   }
@@ -155,9 +177,7 @@ class Environment {
 
 /// Configurações do AdMob por ambiente.
 class AdMobConfig {
-  const AdMobConfig({
-    required this.interstitialAdUnitId,
-  });
+  const AdMobConfig({required this.interstitialAdUnitId});
 
   /// ID do bloco de anúncios intersticial da plataforma atual.
   final String interstitialAdUnitId;
@@ -165,11 +185,22 @@ class AdMobConfig {
 
 /// Configurações de assinatura por ambiente.
 class SubscriptionConfig {
-  const SubscriptionConfig({required this.androidSku, required this.iosSku});
+  const SubscriptionConfig({
+    required this.androidSku,
+    required this.iosSku,
+    required this.androidYearSku,
+    required this.iosYearSku,
+  });
 
-  /// SKU da assinatura na Google Play.
+  /// SKU da assinatura **mensal** na Google Play.
   final String androidSku;
 
-  /// SKU da assinatura na App Store.
+  /// SKU da assinatura **mensal** na App Store.
   final String iosSku;
+
+  /// SKU da assinatura **anual** na Google Play.
+  final String androidYearSku;
+
+  /// SKU da assinatura **anual** na App Store.
+  final String iosYearSku;
 }

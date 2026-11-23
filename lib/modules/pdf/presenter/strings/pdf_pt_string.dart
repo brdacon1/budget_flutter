@@ -26,73 +26,6 @@ class PdfStrings {
 
   static String get errorTitle => _isPt ? 'Erro' : 'Error';
 
-  static String get menuComments =>
-      _isPt ? 'Inserir comentários' : 'Insert comments';
-
-  static String get menuCustomerBudgets =>
-      _isPt ? 'Orçamentos do cliente' : 'Client budgets';
-
-  static String get menuMetrics =>
-      _isPt ? 'Métricas do orçamento' : 'Budget metrics';
-
-  static String get menuReceipt =>
-      _isPt ? 'Recibo de pagamentos' : 'Payment receipt';
-
-  static String get menuShareLink =>
-      _isPt ? 'Compartilhar link do orçamento' : 'Share budget link';
-
-  // Seções do menu Mais
-  static String get sectionBudget => _isPt ? 'Orçamento' : 'Budget';
-
-  static String get sectionShare =>
-      _isPt ? 'Compartilhar e PDF' : 'Share & PDF';
-
-  static String get sectionFinance => _isPt ? 'Financeiro' : 'Finance';
-
-  // Descrições curtas dos itens do menu
-  static String get menuCustomerBudgetsDesc =>
-      _isPt
-          ? 'Veja todos os orçamentos deste cliente'
-          : 'See all budgets for this client';
-
-  static String get menuMetricsDesc =>
-      _isPt ? 'Totais, status e desempenho' : 'Totals, status and performance';
-
-  static String get menuCommentsDesc =>
-      _isPt ? 'Anotações e observações internas' : 'Internal notes and remarks';
-
-  static String get menuReceiptDesc =>
-      _isPt ? 'Registre e emita recibos' : 'Record and issue receipts';
-
-  static String get menuProofsDesc =>
-      _isPt
-          ? 'Anexe fotos e arquivos de pagamento'
-          : 'Attach payment photos and files';
-
-  static String get menuShareLinkDesc =>
-      _isPt ? 'Envie ao cliente por link' : 'Send to the client via link';
-
-  static String get menuPdfExecutiveDesc =>
-      _isPt ? 'Layout limpo e objetivo' : 'Clean, concise layout';
-
-  static String get menuPdfProfessionalDesc =>
-      _isPt ? 'Layout completo e personalizável' : 'Full, customizable layout';
-
-  static String get watchAd => _isPt ? 'Ver anuncio' : 'Watch ad';
-
-  static String get goPremium => _isPt ? 'Se tornar premium' : 'Go premium';
-
-  static String get optionsTitle => _isPt ? 'Opções' : 'Options';
-
-  static String get menuPdfExecutive =>
-      _isPt ? 'PDF Executivo' : 'Executive PDF';
-
-  static String get menuPdfProfessional =>
-      _isPt ? 'PDF Profissional' : 'Professional PDF';
-
-  static String get optionsSubtitle =>
-      _isPt ? 'Opções do orçamento' : 'Budget options';
-
   static String get editPdfTitle => _isPt ? 'Editar PDF' : 'Edit PDF';
 
   static String get pdfInfoTitle =>
@@ -198,21 +131,4 @@ class PdfStrings {
       _isPt ? 'Não foi possível gerar o PDF' : 'Could not generate the PDF';
 
   static String get oops => _isPt ? 'Ops!' : 'Oops!';
-
-  static String get notYet => _isPt ? 'Ainda não!' : 'Not yet!';
-
-  static String get saveBeforeShare =>
-      _isPt
-          ? 'Salve o orçamento antes de compartilhar o link.'
-          : 'Save the budget before sharing the link.';
-
-  static String get errorGenerateLink =>
-      _isPt
-          ? 'Não foi possível gerar o link. Verifique sua conexão e tente novamente.'
-          : 'Could not generate the link. Check your connection and try again.';
-
-  static String get errorShareLink =>
-      _isPt
-          ? 'Não foi possível compartilhar o link agora.'
-          : 'Could not share the link now.';
 }

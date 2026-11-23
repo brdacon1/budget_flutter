@@ -23,7 +23,7 @@ extension PdfRouteExtension on PdfRoute {
 }
 
 /// Telas sem argumentos expostas como rotas nomeadas.
-/// PdfMenuView e PdfReceiptView exigem [CustomerInfo] / [Receipt] —
+/// PdfReceiptView exige [CustomerInfo] / [Receipt] —
 /// navegação via `MaterialPageRoute`.
 final Map<String, WidgetBuilder> pdfRoutes = {
   PdfRoute.pdfConfig.path: (_) => const PdfEditView(),

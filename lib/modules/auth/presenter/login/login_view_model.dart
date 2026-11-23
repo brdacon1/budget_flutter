@@ -34,8 +34,14 @@ class LoginViewModel extends ChangeNotifier {
 
   final List<String> productLists =
       Platform.isAndroid
-          ? [Environment.instance.subscription.androidSku]
-          : [Environment.instance.subscription.iosSku];
+          ? [
+            Environment.instance.subscription.androidSku,
+            Environment.instance.subscription.androidYearSku,
+          ]
+          : [
+            Environment.instance.subscription.iosSku,
+            Environment.instance.subscription.iosYearSku,
+          ];
 
   Color enabled = const Color(0xFF827F8A);
   Color enabledtxt = Colors.white;
@@ -155,7 +161,9 @@ class LoginViewModel extends ChangeNotifier {
         errorMessage = LoginStrings.loginErrorGoogleDefault;
       }
     } on SignInWithAppleAuthorizationException catch (e) {
-      debugPrint('SignInWithAppleAuthorizationException: ${e.code} - ${e.message}');
+      debugPrint(
+        'SignInWithAppleAuthorizationException: ${e.code} - ${e.message}',
+      );
       state = LoginState.error;
       errorMessage = LoginStrings.loginErrorAppleDefault;
     } catch (e, stack) {

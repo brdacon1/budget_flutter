@@ -5,6 +5,8 @@
   "ADMOB_BANNER_AD_UNIT_ID_IOS": "ca-app-pub-3940256099942544/6300978111",
   "ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS": "ca-app-pub-3940256099942544/1033173712",
   "ANDROID_SUBSCRIPTION_SKU": "newproduct",
+  "ANDROID_SUBSCRIPTION_BY_YEAR_SKU": "premiumversionbyyear",
   "IOS_SUBSCRIPTION_SKU": "newproductsubscription",
+  "IOS_SUBSCRIPTION_BY_YEAR_SKU": "premiumversionbyyear",
   "FORCE_PREMIUM": true
 }
