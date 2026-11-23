@@ -201,8 +201,9 @@ class _BudgetListView extends State<BudgetListView> {
 
   Widget _buildSelectionBar() {
     final count = _viewModel.selectedIds.length;
-    final data =
-        _viewModel.getFilteredData().where((b) => !_viewModel.isOrigin(b));
+    final data = _viewModel.getFilteredData().where(
+      (b) => !_viewModel.isOrigin(b),
+    );
     final allSelected = data.isNotEmpty && data.every(_viewModel.isSelected);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 20, 8),

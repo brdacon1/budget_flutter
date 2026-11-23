@@ -1,17 +1,19 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/budget/presenter/budget_options/budget_options_view_model.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-import '../pdf_menu_view_model.dart';
-
-/// Item de opção do menu da tela [PdfMenuView].
+/// Card de uma opção da tela de opções do orçamento.
 ///
-/// Componente **Stateless** puro — recebe o item e um callback de tap.
-/// Não acessa services nem conhece o ViewModel.
-class PdfMenuCard extends StatelessWidget {
-  final MenuItem item;
+/// Componente **Stateless** puro — recebe a opção e um callback de tap.
+class BudgetOptionsCard extends StatelessWidget {
+  final BudgetOption option;
   final VoidCallback onTap;
 
-  const PdfMenuCard({super.key, required this.item, required this.onTap});
+  const BudgetOptionsCard({
+    super.key,
+    required this.option,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +37,10 @@ class PdfMenuCard extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: item.color.withValues(alpha: 0.16),
+                    color: option.color.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(13),
                   ),
-                  child: Icon(item.icon, color: item.color, size: 24),
+                  child: Icon(option.icon, color: option.color, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -46,16 +48,16 @@ class PdfMenuCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.title,
+                        option.title,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: whiteColor,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        item.subtitle,
+                        option.subtitle,
                         style: const TextStyle(
                           color: mutedTextColor,
                           fontSize: 12.5,

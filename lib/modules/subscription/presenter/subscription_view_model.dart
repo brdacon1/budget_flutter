@@ -9,6 +9,7 @@ import 'package:oflite/modules/core/in_app_purchase/domain/repository/in_app_pur
 import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/subscription/data/model/subscription_plan.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 
 enum SubscriptionState { idle, loading, success, cancelled, error }
@@ -26,11 +27,23 @@ class SubscriptionViewModel extends ChangeNotifier {
   StreamSubscription? _purchaseUpdatedSubscription;
   StreamSubscription? _purchaseErrorSubscription;
 
-  // SKU por plataforma, lido dos arquivos de ambiente
-  String get _androidSku => Environment.instance.subscription.androidSku;
-  String get _iosSku => Environment.instance.subscription.iosSku;
+  /// Plano marcado na tela (o anual vem pré-selecionado; se a loja não
+  /// devolver o anual, [init] volta para o mensal).
+  SubscriptionPlan selectedPlan = SubscriptionPlan.yearly;
 
-  String get sku => Platform.isAndroid ? _androidSku : _iosSku;
+  /// SKU de cada plano por plataforma, lido dos arquivos de ambiente.
+  String skuFor(SubscriptionPlan plan) {
+    final config = Environment.instance.subscription;
+    return switch (plan) {
+      SubscriptionPlan.monthly =>
+        Platform.isAndroid ? config.androidSku : config.iosSku,
+      SubscriptionPlan.yearly =>
+        Platform.isAndroid ? config.androidYearSku : config.iosYearSku,
+    };
+  }
+
+  /// SKU do plano selecionado.
+  String get sku => skuFor(selectedPlan);
 
   /// Guarda os produtos buscados (para obter offerToken no Android)
   List<IapProduct> _availableProducts = [];
@@ -39,10 +52,29 @@ class SubscriptionViewModel extends ChangeNotifier {
 
   bool get hasProducts => _availableProducts.isNotEmpty;
 
-  String? get displayPrice =>
-      _availableProducts.isNotEmpty
-          ? _availableProducts.first.displayPrice
-          : null;
+  /// Preço recorrente do [plan] formatado pela loja; `null` enquanto carrega
+  /// ou se o plano não existe na loja.
+  String? priceFor(SubscriptionPlan plan) {
+    final id = skuFor(plan);
+    for (final p in _availableProducts) {
+      if (p.id == id) return p.displayPrice;
+    }
+    return null;
+  }
+
+  /// O plano só aparece na tela se a loja devolveu o produto.
+  bool hasPlan(SubscriptionPlan plan) => priceFor(plan) != null;
+
+  String? get displayPrice => priceFor(selectedPlan);
+
+  /// `true` enquanto os produtos ainda estão sendo buscados na loja.
+  bool isLoadingProducts = true;
+
+  void selectPlan(SubscriptionPlan plan) {
+    if (_disposed || plan == selectedPlan || !hasPlan(plan)) return;
+    selectedPlan = plan;
+    _safeNotify();
+  }
 
   Future<void> init() async {
     state = SubscriptionState.idle;
@@ -51,9 +83,19 @@ class SubscriptionViewModel extends ChangeNotifier {
     try {
       await _iap.initConnection();
 
-      final products = await _iap.fetchProducts(skus: [sku]);
+      final products = await _iap.fetchProducts(
+        skus: [
+          skuFor(SubscriptionPlan.monthly),
+          skuFor(SubscriptionPlan.yearly),
+        ],
+      );
 
       _availableProducts = products;
+
+      // Anual indisponível na loja → cai para o mensal (comportamento antigo).
+      if (!hasPlan(selectedPlan) && hasPlan(SubscriptionPlan.monthly)) {
+        selectedPlan = SubscriptionPlan.monthly;
+      }
 
       if (kDebugMode) {
         print('[SubscriptionViewModel] Produtos: ${products.length}');
@@ -68,6 +110,7 @@ class SubscriptionViewModel extends ChangeNotifier {
       // Não quebra o flow para não travar a UI no emulador
     }
 
+    isLoadingProducts = false;
     if (_disposed) return;
     _safeNotify();
 

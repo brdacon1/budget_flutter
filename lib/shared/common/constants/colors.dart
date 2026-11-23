@@ -46,3 +46,20 @@ const chatDividerColor = Colors.white12; // borda das barras
 const chatMutedIconColor = Colors.white70; // fechar edição
 const chatUserBubbleColor = Color(0xFF075E54); // balão do usuário
 const chatOptionBorderColor = Colors.white24; // borda das opções
+
+// Tela de opções do orçamento (cor de cada ícone)
+const budgetOptionOrangeColor = Color(0xFFFF9F43);
+const budgetOptionPinkColor = Color(0xFFFF6B9D);
+
+// Tela Premium (assinatura)
+const premiumCardColor = Color(0xFF2A2540); // cards de recurso e benefício
+const premiumBorderColor = Color(0xFF3A3454); // borda do plano não selecionado
+const premiumSelectedPlanColor = Color(0xFF243238); // fundo do plano marcado
+const premiumBarBorderColor = Color(0xFF2F2A44); // linha acima do botão fixo
+const premiumGoldColor = Color(0xFFFFCB2E); // coroa, selo e estrela
+const premiumGoldTextColor = Color(0xFF3A2B00); // ícone sobre o dourado
+const premiumPurpleColor = Color(0xFF8B7CF6); // ícone do relatório
+const premiumPinkColor = Color(0xFFFF6B8A); // ícone dos comentários
+const premiumSubtleTextColor = Color(0xFFB9B4D0); // descrições
+const premiumBodyTextColor = Color(0xFFE6E3F5); // benefícios do plano
+const premiumOnAccentColor = Color(0xFF06201E); // texto sobre o ciano

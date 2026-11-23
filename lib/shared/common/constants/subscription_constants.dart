@@ -1,11 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-List<String> sizeNumlist = [
-  "7",
-  "8",
-  "9",
-  "10",
-];
+List<String> sizeNumlist = ["7", "8", "9", "10"];
 List<Color> colors = [
   const Color(0xFFF9362E),
   const Color(0xFF003CFF),

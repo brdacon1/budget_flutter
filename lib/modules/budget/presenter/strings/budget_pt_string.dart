@@ -148,4 +148,64 @@ class BudgetStrings {
       _isPt
           ? 'Verifique sua conexão e tente novamente.'
           : 'Check your connection and try again.';
+
+  // --- Tela de opções do orçamento ---
+  static String get optionsTitle => _isPt ? 'Opções' : 'Options';
+  static String get optionsSubtitle =>
+      _isPt ? 'Opções do orçamento' : 'Budget options';
+  static String get optionsSectionBudget => _isPt ? 'Orçamento' : 'Budget';
+  static String get optionsSectionShare =>
+      _isPt ? 'Compartilhar e PDF' : 'Share & PDF';
+  static String get optionsSectionFinance => _isPt ? 'Financeiro' : 'Finance';
+
+  static String get optionCustomerBudgetsDesc =>
+      _isPt
+          ? 'Veja todos os orçamentos deste cliente'
+          : 'See all budgets for this client';
+  static String get optionMetrics =>
+      _isPt ? 'Métricas do orçamento' : 'Budget metrics';
+  static String get optionMetricsDesc =>
+      _isPt ? 'Totais, status e desempenho' : 'Totals, status and performance';
+  static String get optionComments =>
+      _isPt ? 'Inserir comentários' : 'Insert comments';
+  static String get optionCommentsDesc =>
+      _isPt ? 'Anotações e observações internas' : 'Internal notes and remarks';
+  static String get optionShareLink =>
+      _isPt ? 'Compartilhar link do orçamento' : 'Share budget link';
+  static String get optionShareLinkDesc =>
+      _isPt ? 'Envie ao cliente por link' : 'Send to the client via link';
+  static String get optionPdfExecutive =>
+      _isPt ? 'PDF Executivo' : 'Executive PDF';
+  static String get optionPdfExecutiveDesc =>
+      _isPt ? 'Layout limpo e objetivo' : 'Clean, concise layout';
+  static String get optionPdfProfessional =>
+      _isPt ? 'PDF Profissional' : 'Professional PDF';
+  static String get optionPdfProfessionalDesc =>
+      _isPt ? 'Layout completo e personalizável' : 'Full, customizable layout';
+  static String get optionReceipt =>
+      _isPt ? 'Recibo de pagamentos' : 'Payment receipt';
+  static String get optionReceiptDesc =>
+      _isPt ? 'Registre e emita recibos' : 'Record and issue receipts';
+  static String get optionProofsDesc =>
+      _isPt
+          ? 'Anexe fotos e arquivos de pagamento'
+          : 'Attach payment photos and files';
+
+  static String get shareSubject => 'PDF';
+  static String get watchAd => _isPt ? 'Ver anuncio' : 'Watch ad';
+  static String get goPremium => _isPt ? 'Se tornar premium' : 'Go premium';
+  static String get shareNotYetTitle => _isPt ? 'Ainda não!' : 'Not yet!';
+  static String get shareSaveBefore =>
+      _isPt
+          ? 'Salve o orçamento antes de compartilhar o link.'
+          : 'Save the budget before sharing the link.';
+  static String get shareErrorTitle => _isPt ? 'Erro' : 'Error';
+  static String get shareErrorGenerateLink =>
+      _isPt
+          ? 'Não foi possível gerar o link. Verifique sua conexão e tente novamente.'
+          : 'Could not generate the link. Check your connection and try again.';
+  static String get shareErrorShareLink =>
+      _isPt
+          ? 'Não foi possível compartilhar o link agora.'
+          : 'Could not share the link now.';
 }

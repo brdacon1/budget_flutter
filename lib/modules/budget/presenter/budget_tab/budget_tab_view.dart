@@ -3,9 +3,9 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
+import 'package:oflite/modules/budget/presenter/budget_options/budget_options_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
-import 'package:oflite/modules/pdf/presenter/pdf_menu/pdf_menu_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 class BudgetTabView extends StatefulWidget {
@@ -52,7 +52,7 @@ class _BudgetTabView extends State<BudgetTabView> {
       BudgetCreatorView(item: widget.item),
       BudgetListItemsView(item: widget.item),
       const PdfBudgetView(),
-      PdfMenuView(
+      BudgetOptionsView(
         item: widget.item,
         showCustomerBudgets: !widget.fromCustomerBudgets,
       ),
