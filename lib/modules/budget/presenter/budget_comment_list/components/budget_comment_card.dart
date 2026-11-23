@@ -91,7 +91,11 @@ class BudgetCommentCard extends StatelessWidget {
                       ),
                       child:
                           selected
-                              ? const Icon(Icons.check, size: 16, color: bgColor)
+                              ? const Icon(
+                                Icons.check,
+                                size: 16,
+                                color: bgColor,
+                              )
                               : null,
                     ),
                   ),

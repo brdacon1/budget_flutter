@@ -97,5 +97,22 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>waze</string>
+		<string>here-location</string>
+		<string>citymapper</string>
+		<string>moovit</string>
+		<string>magicearth</string>
+		<string>tomtomgo</string>
+		<string>osmandmaps</string>
+		<string>mapswithme</string>
+		<string>yandexmaps</string>
+		<string>yandexnavi</string>
+		<string>dgis</string>
+		<string>copilot</string>
+		<string>com.sygic.aura</string>
+	</array>
 </dict>
 </plist>

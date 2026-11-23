@@ -69,12 +69,32 @@ class BudgetCreatorAddressSection extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 12),
-        AppFormField(
-          label: 'Rua',
-          prefixIcon: Icons.signpost_outlined,
-          controller: viewModel.ruaController,
-          focusNode: viewModel.ruaNode,
-          textCapitalization: TextCapitalization.characters,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: AppFormField(
+                label: 'Rua',
+                prefixIcon: Icons.signpost_outlined,
+                controller: viewModel.ruaController,
+                focusNode: viewModel.ruaNode,
+                textCapitalization: TextCapitalization.characters,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: AppFormField(
+                label: 'Número',
+                prefixIcon: Icons.tag,
+                controller: viewModel.numberController,
+                focusNode: viewModel.numberNode,
+                keyboardType: TextInputType.number,
+                textCapitalization: TextCapitalization.characters,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         AppFormField(

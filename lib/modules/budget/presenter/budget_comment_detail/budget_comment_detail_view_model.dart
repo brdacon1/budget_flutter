@@ -108,14 +108,12 @@ class BudgetCommentDetailViewModel extends ChangeNotifier {
       notifyListeners();
       return Result.error(Exception('empty'));
     }
-    final updated =
-        ObservationBudget(
-            id: comment.id,
-            observacao: text,
-            data: comment.data,
-            uid: comment.uid,
-          )
-          ..checkbox = false;
+    final updated = ObservationBudget(
+      id: comment.id,
+      observacao: text,
+      data: comment.data,
+      uid: comment.uid,
+    )..checkbox = false;
     return _repo.updateComment(budgetId, updated);
   }
 

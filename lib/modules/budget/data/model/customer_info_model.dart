@@ -47,6 +47,20 @@ class CustomerInfo {
     totalValue = json['VALORTOTAL'] ?? 0;
   }
 
+  /// Endereço montado para busca no mapa (só leitura, nada é persistido).
+  String get fullAddress => [
+    street,
+    address,
+    neighborhood,
+    city,
+    zip,
+  ].map((e) => e?.trim() ?? '').where((e) => e.isNotEmpty).join(', ');
+
+  /// Tem rua/endereço cadastrado — cidade ou CEP sozinhos não bastam.
+  bool get hasAddress =>
+      (street?.trim().isNotEmpty ?? false) ||
+      (address?.trim().isNotEmpty ?? false);
+
   CustomerInfo copyWith({
     String? id,
     String? data,

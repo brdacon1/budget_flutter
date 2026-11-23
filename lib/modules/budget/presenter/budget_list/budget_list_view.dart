@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -273,6 +275,47 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
+  Future<void> _showMapError() => _viewModel.displayAlert.notificationError(
+    context,
+    BudgetStrings.mapErrorTitle,
+    BudgetStrings.mapErrorMessage,
+  );
+
+  /// Android: seletor nativo do sistema. iOS: action sheet nativa.
+  Future<void> _openMap(CustomerInfo item) async {
+    if (Platform.isAndroid) {
+      final ok = await _viewModel.openMapChooser(item);
+      if (!ok && mounted) await _showMapError();
+      return;
+    }
+    final maps = await _viewModel.mapsForAddress(item);
+    if (!mounted) return;
+    if (maps.isEmpty) return _showMapError();
+    if (maps.length == 1) return maps.first.show();
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder:
+          (sheetContext) => CupertinoActionSheet(
+            title: Text(BudgetStrings.chooseMap),
+            actions: [
+              for (final map in maps)
+                CupertinoActionSheetAction(
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    map.show();
+                  },
+                  child: Text(map.name),
+                ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.of(sheetContext).pop(),
+              child: Text(BudgetStrings.cancel),
+            ),
+          ),
+    );
+  }
+
   Future<void> _openActions(CustomerInfo item) {
     return showModalBottomSheet<void>(
       context: context,
@@ -281,7 +324,7 @@ class _BudgetListView extends State<BudgetListView> {
           (_) => BudgetListActionsBottomModalWidget(
             item: item,
             moneyConvert: moneyConvert,
-            onOpen: () => _openBudget(item),
+            onMap: () => _openMap(item),
             onDuplicate: () => _duplicateBudget(item),
             onDelete: () {
               if (!_viewModel.isSelected(item)) _viewModel.toggleSelect(item);

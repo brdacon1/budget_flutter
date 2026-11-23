@@ -14,6 +14,7 @@ import 'package:oflite/modules/core/in_app_purchase/in_app_purchase_binds.dart';
 import 'package:oflite/modules/core/loading_event/loading_event_binds.dart';
 import 'package:oflite/modules/core/notification/notification_binds.dart';
 import 'package:oflite/modules/core/share_link/share_link_binds.dart';
+import 'package:oflite/modules/core/map_launcher/map_launcher_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
 import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
@@ -56,6 +57,7 @@ void setupDependencyInjection() {
   registerNotificationDependencies(getIt);
   registerCepDependencies(getIt);
   registerShareLinkDependencies(getIt);
+  registerMapLauncherDependencies(getIt);
   registerAdsDependencies(getIt);
   registerAiTextDependencies(getIt);
   registerInAppPurchaseDependencies(getIt);

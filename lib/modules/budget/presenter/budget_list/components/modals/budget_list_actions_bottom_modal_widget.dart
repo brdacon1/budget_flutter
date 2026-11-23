@@ -7,7 +7,8 @@ import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 import 'package:oflite/shared/common/widgets/label/expansion_card_label.dart';
 
-/// Bottom modal com os detalhes do orçamento e as ações Excluir/Duplicar/Abrir.
+/// Bottom modal com os detalhes do orçamento e as ações Excluir/Duplicar/Mapa.
+/// O botão Mapa só aparece quando o cliente tem endereço cadastrado.
 /// Cada ação fecha o modal antes de chamar o callback.
 class BudgetListActionsBottomModalWidget extends StatelessWidget {
   const BudgetListActionsBottomModalWidget({
@@ -16,14 +17,14 @@ class BudgetListActionsBottomModalWidget extends StatelessWidget {
     required this.moneyConvert,
     required this.onDelete,
     required this.onDuplicate,
-    required this.onOpen,
+    required this.onMap,
   });
 
   final CustomerInfo item;
   final ConvertCoinRepository moneyConvert;
   final VoidCallback onDelete;
   final VoidCallback onDuplicate;
-  final VoidCallback onOpen;
+  final VoidCallback onMap;
 
   void _run(BuildContext context, VoidCallback action) {
     Navigator.of(context).pop();
@@ -93,6 +94,8 @@ class BudgetListActionsBottomModalWidget extends StatelessWidget {
               ),
             ),
             _label(BudgetStrings.detailPhone, item.phone ?? ''),
+            if (item.hasAddress)
+              _label(BudgetStrings.detailAddress, item.fullAddress),
             _label(
               BudgetStrings.detailValue,
               moneyConvert.convertFromDouble(item.totalValue ?? 0),
@@ -118,15 +121,17 @@ class BudgetListActionsBottomModalWidget extends StatelessWidget {
                     onPressed: () => _run(context, onDuplicate),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ActionButton(
-                    icon: Icons.open_in_new_rounded,
-                    label: BudgetStrings.actionOpen,
-                    backgroundColor: buttonColor.withValues(alpha: 0.25),
-                    onPressed: () => _run(context, onOpen),
+                if (item.hasAddress) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ActionButton(
+                      icon: Icons.map_outlined,
+                      label: BudgetStrings.actionMap,
+                      backgroundColor: buttonColor.withValues(alpha: 0.25),
+                      onPressed: () => _run(context, onMap),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ],

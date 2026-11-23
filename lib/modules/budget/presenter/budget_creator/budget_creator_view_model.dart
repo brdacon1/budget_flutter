@@ -35,6 +35,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final phoneController = TextEditingController();
   final cepController = TextEditingController();
   final ruaController = TextEditingController();
+  final numberController = TextEditingController();
   final cityController = TextEditingController();
   final bairroController = TextEditingController();
   final statusController = TextEditingController();
@@ -43,6 +44,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
   final phoneNode = FocusNode();
   final cepNode = FocusNode();
   final ruaNode = FocusNode();
+  final numberNode = FocusNode();
   final cityNode = FocusNode();
   final bairroNode = FocusNode();
 
@@ -69,6 +71,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     statusController,
     cepController,
     ruaController,
+    numberController,
     cityController,
     bairroController,
   ];
@@ -85,7 +88,12 @@ class BudgetCreatorViewModel extends ChangeNotifier {
 
   void _fillControllers() {
     nameController.text = _clean(item.customerName);
-    ruaController.text = _clean(item.street);
+    // Gravado como "RUA, NÚMERO" (mesmo formato do chat assistant):
+    // separa na última vírgula para preencher os dois campos.
+    final street = _clean(item.street);
+    final comma = street.lastIndexOf(',');
+    ruaController.text = comma < 0 ? street : street.substring(0, comma).trim();
+    numberController.text = comma < 0 ? '' : street.substring(comma + 1).trim();
     cityController.text = _clean(item.city);
     bairroController.text = _clean(item.neighborhood);
     final status = _clean(item.status);
@@ -132,10 +140,17 @@ class BudgetCreatorViewModel extends ChangeNotifier {
       phone: phoneController.text,
       status: statusController.text,
       zip: cepController.text,
-      street: ruaController.text,
+      street: _fullStreet,
       city: cityController.text,
       neighborhood: bairroController.text,
     );
+  }
+
+  /// Junta rua e número com ", " — igual ao fluxo do chat assistant.
+  String get _fullStreet {
+    final street = ruaController.text.trim();
+    final number = numberController.text.trim();
+    return number.isNotEmpty ? '$street, $number' : street;
   }
 
   void init() {
@@ -257,6 +272,7 @@ class BudgetCreatorViewModel extends ChangeNotifier {
     phoneNode.dispose();
     cepNode.dispose();
     ruaNode.dispose();
+    numberNode.dispose();
     cityNode.dispose();
     bairroNode.dispose();
     super.dispose();
