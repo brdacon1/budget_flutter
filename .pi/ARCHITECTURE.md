@@ -2271,6 +2271,8 @@ modules/chat_assistant/ (comprovantes)
   outro*. Toda mensagem tem *Voltar ao menu*. O mapa usa o mesmo
   `core/map_launcher` da lista de orçamentos: `ResolveAddressMapsUsecase` (Android:
   seletor nativo; iOS: apps instalados) + `showMapChooserSheet` (action sheet iOS).
+  Texto livre ("ir no cliente", "endereço", "abrir no mapa") → IA chama
+  `list_budgets` com `purpose: "go_to_client"`, que cai no mesmo fluxo.
 - **Digitando…:** `ChatTypingIndicator` no fim da lista enquanto
   `ChatAssistantViewModel.isAiThinking` (modelo pensando ou ação confirmada gravando).
 - **Cards:** `budgetList` e `summaryCard` são `ChatMessageType` próprios e ficam
