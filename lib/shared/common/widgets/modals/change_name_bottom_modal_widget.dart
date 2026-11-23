@@ -8,10 +8,7 @@ import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart
 /// recebe o nome digitado e é responsável pela regra de negócio (atualizar
 /// usuário, exibir alerta) e por fechar o modal (`Navigator.pop`).
 class ChangeNameBottomModalWidget extends StatefulWidget {
-  const ChangeNameBottomModalWidget({
-    super.key,
-    required this.onSubmit,
-  });
+  const ChangeNameBottomModalWidget({super.key, required this.onSubmit});
 
   final Future<void> Function(BuildContext context, String name) onSubmit;
 

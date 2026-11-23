@@ -29,7 +29,8 @@ class TextInputBottomModalWidget extends StatefulWidget {
       _TextInputBottomModalWidgetState();
 }
 
-class _TextInputBottomModalWidgetState extends State<TextInputBottomModalWidget> {
+class _TextInputBottomModalWidgetState
+    extends State<TextInputBottomModalWidget> {
   final TextEditingController _controller = TextEditingController();
   bool _submitting = false;
 
@@ -96,12 +97,13 @@ Future<String?> showTextInputBottomModal(
 }) {
   return showAppModal<String>(
     context,
-    builder: (context) => TextInputBottomModalWidget(
-      title: title,
-      hintText: hintText,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      buttonLabel: buttonLabel,
-    ),
+    builder:
+        (context) => TextInputBottomModalWidget(
+          title: title,
+          hintText: hintText,
+          keyboardType: keyboardType,
+          maxLength: maxLength,
+          buttonLabel: buttonLabel,
+        ),
   );
 }

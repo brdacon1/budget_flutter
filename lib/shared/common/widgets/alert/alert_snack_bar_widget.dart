@@ -40,7 +40,9 @@ class AlertSnackBar {
             ),
             vertical: 12,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

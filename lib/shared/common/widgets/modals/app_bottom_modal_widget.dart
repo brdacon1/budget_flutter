@@ -49,8 +49,7 @@ class AppBottomModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final maxHeight =
-        (mq.size.height - mq.viewInsets.bottom) * maxHeightFactor;
+    final maxHeight = (mq.size.height - mq.viewInsets.bottom) * maxHeightFactor;
 
     return Padding(
       // Acompanha o teclado: ao abrir o campo, o conteúdo sobe junto.

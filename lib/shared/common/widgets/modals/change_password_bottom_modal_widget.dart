@@ -8,10 +8,7 @@ import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart
 /// O `onSubmit` recebe o e-mail digitado e é responsável pela regra de negócio
 /// (enviar reset, exibir alerta) e por fechar o modal (`Navigator.pop`).
 class ChangePasswordBottomModalWidget extends StatefulWidget {
-  const ChangePasswordBottomModalWidget({
-    super.key,
-    required this.onSubmit,
-  });
+  const ChangePasswordBottomModalWidget({super.key, required this.onSubmit});
 
   final Future<void> Function(BuildContext context, String email) onSubmit;
 

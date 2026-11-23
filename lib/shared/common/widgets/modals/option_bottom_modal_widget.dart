@@ -65,9 +65,6 @@ Future<String?> showOptionBottomModal(
 }) {
   return showAppModal<String>(
     context,
-    builder: (context) => OptionBottomModalWidget(
-      title: title,
-      values: values,
-    ),
+    builder: (context) => OptionBottomModalWidget(title: title, values: values),
   );
 }
