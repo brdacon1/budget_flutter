@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/data/model/comment_library_model.dart';
 import 'package:oflite/modules/comment_library/domain/entity/comment_library_exceptions.dart';
@@ -172,10 +173,8 @@ Future<CommentLibraryModel?> showCommentLibraryCreatorBottomModal(
   CommentLibraryModel? comment,
   String? budgetId,
 }) {
-  return showModalBottomSheet<CommentLibraryModel>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<CommentLibraryModel>(
+    context,
     builder:
         (context) =>
             CommentLibraryCreatorView(comment: comment, budgetId: budgetId),

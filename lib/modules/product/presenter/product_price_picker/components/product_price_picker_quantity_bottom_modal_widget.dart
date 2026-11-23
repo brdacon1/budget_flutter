@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
@@ -106,10 +107,8 @@ Future<double?> showProductPricePickerQuantityBottomModal(
   required String? Function(String raw) validator,
   required double? Function(String raw) parse,
 }) {
-  return showModalBottomSheet<double>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: transparentColor,
+  return showAppModal<double>(
+    context,
     builder:
         (context) => ProductPricePickerQuantityBottomModalWidget(
           validator: validator,

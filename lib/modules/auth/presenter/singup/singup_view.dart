@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
@@ -111,7 +112,6 @@ class _SingUpViewState extends State<SingUpView> {
 
   @override
   Widget build(BuildContext context) {
-
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
@@ -178,10 +178,5 @@ class _SingUpViewState extends State<SingUpView> {
 /// acompanhar o teclado, fundo transparente (a base [AppBottomModal] desenha o
 /// card branco arredondado) e drag habilitado.
 Future<void> showSingUpBottomModal(BuildContext context) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => const SingUpView(),
-  );
+  return showAppModal<void>(context, builder: (context) => const SingUpView());
 }

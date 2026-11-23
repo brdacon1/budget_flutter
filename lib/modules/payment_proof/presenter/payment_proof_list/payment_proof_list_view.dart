@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
@@ -50,6 +51,7 @@ class _PaymentProofListViewState extends State<PaymentProofListView> {
 
   Future<void> _actions(PaymentProof p) => showModalBottomSheet<void>(
     context: context,
+    constraints: const BoxConstraints(maxWidth: appModalMaxWidth),
     backgroundColor: secondaryColor,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -176,7 +178,9 @@ class _PaymentProofListViewState extends State<PaymentProofListView> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
         child: Text(
-          _vm.loadError ? PaymentProofStrings.loadError : PaymentProofStrings.empty,
+          _vm.loadError
+              ? PaymentProofStrings.loadError
+              : PaymentProofStrings.empty,
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 14, color: emptyTextColor),
         ),

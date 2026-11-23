@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/components/product_price_field.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view_model.dart';
@@ -65,7 +66,6 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
 
   @override
   Widget build(BuildContext context) {
-
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
@@ -164,10 +164,8 @@ Future<bool?> showProductPriceCreatorBottomModal(
   required ProductPriceModel item,
   bool fromListItem = false,
 }) {
-  return showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<bool>(
+    context,
     builder:
         (context) =>
             ProductPriceCreatorView(item: item, fromListItem: fromListItem),

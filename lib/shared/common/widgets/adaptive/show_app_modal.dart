@@ -12,12 +12,14 @@ Future<T?> showAppModal<T>(
   bool isScrollControlled = true,
   bool isDismissible = true,
   bool enableDrag = true,
+  bool useRootNavigator = false,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
+    useRootNavigator: useRootNavigator,
     backgroundColor: Colors.transparent,
     constraints: const BoxConstraints(maxWidth: appModalMaxWidth),
     builder: builder,

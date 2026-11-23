@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class AppHeaderSecondTitle extends StatelessWidget {
   const AppHeaderSecondTitle({
@@ -34,7 +35,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
             margin: const EdgeInsets.only(left: 16),
             child: const Icon(
               Icons.arrow_back_outlined,
-              color: Colors.white,
+              color: whiteColor,
               size: 35.0,
             ),
           ),
@@ -46,7 +47,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
           child: Text(
             titlePage,
             style: GoogleFonts.heebo(
-              color: Colors.white,
+              color: whiteColor,
               fontWeight: FontWeight.bold,
               fontSize: 26,
               letterSpacing: 2,
@@ -58,7 +59,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
           margin: const EdgeInsets.only(left: 20),
           child: Text(
             secondTitle,
-            style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
+            style: GoogleFonts.heebo(color: emptyTextColor, letterSpacing: 1),
           ),
         ),
         isBottomPadding ? const SizedBox(height: 16) : Container(),

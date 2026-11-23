@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Header da tela de lista de recibos (voltar + título "Recibos").
 ///
@@ -28,7 +29,7 @@ class AppHeader extends StatelessWidget {
                 margin: const EdgeInsets.only(left: 16),
                 child: const Icon(
                   Icons.arrow_back_outlined,
-                  color: Colors.white,
+                  color: whiteColor,
                   size: 35.0,
                 ),
               ),
@@ -42,7 +43,7 @@ class AppHeader extends StatelessWidget {
           child: Text(
             titleText,
             style: GoogleFonts.heebo(
-              color: Colors.white,
+              color: whiteColor,
               fontWeight: FontWeight.bold,
               fontSize: 26,
               letterSpacing: 2,

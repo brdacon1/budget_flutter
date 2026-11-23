@@ -1,5 +1,6 @@
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/strings/chat_budget_picker_pt_string.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/components/chat_budget_picker_header.dart';
@@ -20,10 +21,8 @@ class ChatBudgetPickerView extends StatefulWidget {
     BuildContext context, {
     String initialQuery = '',
   }) {
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: transparentColor,
+    return showAppModal<String>(
+      context,
       builder: (_) => ChatBudgetPickerView(initialQuery: initialQuery),
     );
   }

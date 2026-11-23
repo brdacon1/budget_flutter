@@ -63,3 +63,8 @@ const premiumPinkColor = Color(0xFFFF6B8A); // ícone dos comentários
 const premiumSubtleTextColor = Color(0xFFB9B4D0); // descrições
 const premiumBodyTextColor = Color(0xFFE6E3F5); // benefícios do plano
 const premiumOnAccentColor = Color(0xFF06201E); // texto sobre o ciano
+
+// Bottom modal (fundo branco)
+const modalTextColor = Color(0xFF424242); // texto, ícones e botão do modal
+const modalDividerColor = Color(0xFFE0E0E0); // Colors.grey[300]
+const modalHandleColor = Color(0xFFBDBDBD); // Colors.grey[400]

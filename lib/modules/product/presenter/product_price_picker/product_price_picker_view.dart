@@ -1,5 +1,6 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
@@ -164,10 +165,8 @@ Future<bool> showProductPricePickerBottomModal(
   BuildContext context, {
   required String budgetId,
 }) async {
-  final added = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: transparentColor,
+  final added = await showAppModal<bool>(
+    context,
     builder: (context) => ProductPricePickerView(budgetId: budgetId),
   );
   return added ?? false;

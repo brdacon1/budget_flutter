@@ -195,15 +195,14 @@ ação 19–26. SVGs só em `assets/icons/` (legado do dashboard).
 
 ## 9. Dívidas visuais conhecidas (restantes)
 
-Resolvidas na F2: `he*`/`we*` nos headers, `right: 285` do config menu,
-`screenAwareSize` (arquivo removido), larguras `0.8 × tela` dos campos de PDF e
-pagamento.
+Resolvidas (F2–F9): tamanhos por fração da tela (`he*`/`we*`), `right: 285`,
+`screenAwareSize`, largura do balão do chat, bottom sheets esticados em tela
+larga, snackbar esticado, cores inline do `AppBottomModal` e dos headers.
 
-| Local | Problema | Fase |
-|---|---|---|
-| `chat_message_bubble.dart` | `maxWidth = 75%` da largura da tela | F8 |
-| `budget_tab_view.dart` | passa `MediaQuery.size.width` ao ViewModel | F5 |
-| `login_view.dart` | usa `size` da tela para proporção do header | F6 |
-| `image_edit_view`, `pdf_edit_logo_section` | `maxWidth/maxHeight` em fração da tela | F8 |
-| `app_bottom_modal_widget.dart`, headers | cores inline fora do `colors.dart` | F9 |
-| `dashboard_view.dart` | composição em grid | F4 |
+| Local | Pendência |
+|---|---|
+| `budget_tab_view.dart` | passa `MediaQuery.size.width` ao ViewModel (parâmetro sem uso visual) |
+| `login_view.dart` | `LoginHeader` ainda recebe `width/height` da tela no layout estreito |
+| `image_edit_view`, `pdf_edit_logo_section` | `maxWidth/maxHeight` em fração da tela (limites máximos, não quebram) |
+| `payment_proof_list_view.dart` | sheet de ações com cor/shape próprios (só ganhou largura máxima) |
+| `budget_options_view` | lista de seções segue em 1 coluna |
