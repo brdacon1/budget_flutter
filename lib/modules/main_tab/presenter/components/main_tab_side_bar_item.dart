@@ -21,7 +21,8 @@ class MainTabSideBarItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
-        color: selected ? buttonColor.withValues(alpha: 0.15) : transparentColor,
+        color:
+            selected ? buttonColor.withValues(alpha: 0.15) : transparentColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: selected ? buttonColor : transparentColor),
@@ -30,11 +31,11 @@ class MainTabSideBarItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             child: Row(
               children: [
                 Icon(icon, color: selected ? buttonColor : mutedTextColor),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     title,

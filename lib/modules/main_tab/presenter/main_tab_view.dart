@@ -33,6 +33,7 @@ class _MainTabView extends State<MainTabView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Comprovantes recebidos pela folha de compartilhamento (§15.4).
       _viewModel.listenSharedFiles();
+      _viewModel.loadCompanyLogo();
       getIt<NotificationRepository>().tryOpenPendingBudget();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
@@ -84,6 +85,7 @@ class _MainTabView extends State<MainTabView> {
             body: Row(
               children: [
                 MainTabSideBar(
+                  logo: _viewModel.companyLogo,
                   items: _viewModel.tabItems,
                   currentIndex: _viewModel.currentIndex,
                   onTap: _viewModel.onTabTapped,

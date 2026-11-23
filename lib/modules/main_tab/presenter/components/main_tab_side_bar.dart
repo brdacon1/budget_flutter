@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/main_tab/presenter/components/main_tab_company_logo.dart';
 import 'package:oflite/modules/main_tab/presenter/components/main_tab_side_bar_item.dart';
 import 'package:oflite/modules/main_tab/presenter/main_tab_view_model.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -11,12 +14,16 @@ class MainTabSideBar extends StatelessWidget {
   const MainTabSideBar({
     super.key,
     required this.items,
+    this.logo,
     required this.currentIndex,
     required this.onTap,
   });
 
   /// Largura fixa da barra.
-  static const double width = 220;
+  static const double width = 192;
+
+  /// Logo da empresa (foto do titular); `null` = sem logo.
+  final Uint8List? logo;
 
   final List<TabItem> items;
   final int currentIndex;
@@ -30,17 +37,13 @@ class MainTabSideBar extends StatelessWidget {
       child: SafeArea(
         right: false,
         child: Padding(
-          padding: const EdgeInsets.all(defaultPadding),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 24),
-                child: Image.asset(
-                  'assets/login-initial-page.png',
-                  height: 72,
-                  fit: BoxFit.contain,
-                ),
+                child: Center(child: MainTabCompanyLogo(logo: logo)),
               ),
               for (var i = 0; i < items.length; i++)
                 MainTabSideBarItem(
