@@ -131,7 +131,7 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
       body: Column(
         children: <Widget>[
           AppHeaderSecondTitle(
-            showBack: !AppDetailPane.isInside(context),
+            showBack: !AppDetailPane.hidesBackOf(context),
             titlePage: BudgetStrings.optionsTitle,
             secondTitle: BudgetStrings.optionsSubtitle,
             onBack: () => Navigator.pop(context, true),

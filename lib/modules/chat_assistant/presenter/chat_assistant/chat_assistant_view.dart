@@ -1,35 +1,35 @@
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
-import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
-import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
-import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
-import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'dart:io';
+
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
-import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
-import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_app_bar.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list_items/budget_list_items_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
+import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_app_bar.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_panel.dart';
-import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_edit_aware_input_bar.dart';
-import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_manual_address_form.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_document_form.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_edit_aware_input_bar.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_empty_detail.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_manual_address_form.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_message_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_typing_indicator.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_proof_preview/chat_proof_preview_view.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
+import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
@@ -46,7 +46,11 @@ import 'package:oflite/modules/product/presenter/product_price_list/product_pric
 import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
 ///
@@ -260,8 +264,20 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     }
   }
 
-  Future<Object?> _push(Widget page) =>
-      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  /// Navigator do painel de detalhe (tela larga).
+  final GlobalKey<NavigatorState> _detailKey = GlobalKey<NavigatorState>();
+
+  /// Chat à esquerda e, à direita, o painel onde o assistente abre as telas.
+  bool get _splitView => ResponsiveWidget.isDesktop(context);
+
+  /// Tela larga: abre no painel de detalhe (o fluxo do chat continua quando a
+  /// tela é fechada, igual ao celular). Celular: tela cheia.
+  Future<Object?> _push(Widget page) {
+    final route = MaterialPageRoute<Object>(builder: (_) => page);
+    final detail = _detailKey.currentState;
+    if (_splitView && detail != null) return detail.push<Object>(route);
+    return Navigator.push<Object>(context, route);
+  }
 
   /// Abre a tela de itens do orçamento (edita/exclui/adiciona itens).
   Future<void> _openBudgetItems() async {
@@ -521,7 +537,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     });
     _showShareErrorIfAny();
 
-    return Scaffold(
+    final chat = Scaffold(
       backgroundColor: chatBackgroundColor,
       appBar: ChatAppBar(onRestart: () => _vm.resetChatCommand.execute()),
       body: Column(
@@ -547,6 +563,13 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
           ),
         ],
       ),
+    );
+    if (!_splitView) return chat;
+    return AppMasterDetail(
+      master: chat,
+      emptyDetail: const ChatEmptyDetail(),
+      detailNavigatorKey: _detailKey,
+      masterWidth: 550,
     );
   }
 

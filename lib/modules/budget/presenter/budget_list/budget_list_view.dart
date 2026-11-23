@@ -640,6 +640,7 @@ class _BudgetListView extends State<BudgetListView> {
       master: list,
       emptyDetail: const BudgetListEmptyDetail(),
       detailNavigatorKey: _detailKey,
+      hideBackOnRootScreens: true,
       onDetailClosed: _onDetailClosed,
     );
   }

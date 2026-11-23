@@ -18,7 +18,9 @@ class _Detail extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('abre, troca e fecha o detalhe sem sair da lista', (tester) async {
+  testWidgets('abre, troca e fecha o detalhe sem sair da lista', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1194, 834);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -60,5 +62,53 @@ void main() {
     expect(find.text('vazio'), findsOneWidget);
     expect(find.text('lista'), findsOneWidget);
     expect(closed, 1);
+  });
+
+  for (final hide in [true, false]) {
+    testWidgets('hideBackOnRootScreens=$hide chega às telas do painel', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1194, 834);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final key = GlobalKey<NavigatorState>();
+      bool? seen;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AppMasterDetail(
+            master: const SizedBox(),
+            emptyDetail: const SizedBox(),
+            detailNavigatorKey: key,
+            hideBackOnRootScreens: hide,
+          ),
+        ),
+      );
+      key.currentState!.push(
+        MaterialPageRoute<void>(
+          builder: (context) {
+            seen = AppDetailPane.hidesBackOf(context);
+            return const SizedBox();
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(seen, hide);
+    });
+  }
+
+  testWidgets('fora de um painel, hidesBackOf é falso', (tester) async {
+    bool? seen;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            seen = AppDetailPane.hidesBackOf(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(seen, isFalse);
   });
 }

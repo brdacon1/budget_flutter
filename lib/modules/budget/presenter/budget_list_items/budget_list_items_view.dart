@@ -316,7 +316,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
             child: Column(
               children: <Widget>[
                 AppHeaderSecondTitle(
-                  showBack: !AppDetailPane.isInside(context),
+                  showBack: !AppDetailPane.hidesBackOf(context),
                   titlePage: 'Itens do orçamento',
                   secondTitle: count == 1 ? '1 item' : '$count itens',
                   onBack: () => Navigator.pop(context, true),

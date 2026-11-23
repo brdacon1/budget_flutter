@@ -542,6 +542,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _editingMsgId = null;
       _editingField = null;
       notifyListeners();
+      // Editado a partir da confirmação: reapresenta os dados para o fluxo seguir.
+      if (_step == ChatFlowStep.confirmClientData &&
+          _pendingPhone.isNotEmpty) {
+        return await _showClientDataConfirmation();
+      }
       return const Result.ok(null);
     }
 

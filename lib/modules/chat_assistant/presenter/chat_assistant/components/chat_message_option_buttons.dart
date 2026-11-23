@@ -1,8 +1,8 @@
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Opções de menu do bot: empilhadas no celular, em 2 colunas quando o balão
-/// é largo (tela larga).
+/// Opções de menu do bot em botões empilhados (um embaixo do outro), em
+/// qualquer largura de tela.
 ///
 /// Cada opção é `{'label': ..., 'value': ...}`. A opção com `value` `'0'`
 /// (voltar ao menu) é exibida por último em estilo contornado.
@@ -19,16 +19,14 @@ class ChatMessageOptionButtons extends StatelessWidget {
   final void Function(String value, String label)? onSelect;
 
   static const _accent = chatSendButtonColor;
-  static const _gap = 8.0;
-  static const _twoColumnsMinWidth = 440.0;
 
   @override
   Widget build(BuildContext context) {
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(14),
     );
-    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-    const textStyle = TextStyle(fontWeight: FontWeight.bold);
+    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 14);
+    const textStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5);
 
     Widget button(Map<String, String> option) {
       if (option['value'] == '0') {
@@ -47,9 +45,20 @@ class ChatMessageOptionButtons extends StatelessWidget {
       }
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _accent,
-          foregroundColor: blackColor,
-          shape: shape,
+          elevation: 0,
+          backgroundColor: _accent.withValues(alpha: 0.14),
+          disabledBackgroundColor: whiteColor.withValues(alpha: 0.04),
+          foregroundColor: whiteColor,
+          disabledForegroundColor: whiteColor.withValues(alpha: 0.35),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color:
+                  enabled
+                      ? _accent.withValues(alpha: 0.55)
+                      : chatOptionBorderColor,
+            ),
+          ),
           padding: padding,
         ),
         onPressed: _onPressed(option),
@@ -61,62 +70,14 @@ class ChatMessageOptionButtons extends StatelessWidget {
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Balão largo (tela larga): opções em 2 colunas; "voltar" (valor '0')
-        // fica sozinho na última linha. Estreito (celular): empilhadas.
-        final twoColumns = constraints.maxWidth >= _twoColumnsMinWidth;
-        final regular = [
-          for (final o in options)
-            if (o['value'] != '0') o,
-        ];
-        final back = [
-          for (final o in options)
-            if (o['value'] == '0') o,
-        ];
-        if (!twoColumns) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final option in options) ...[
-                const SizedBox(height: 8),
-                button(option),
-              ],
-            ],
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Pares com a mesma altura (um rótulo longo quebra em 2 linhas).
-              for (var i = 0; i < regular.length; i += 2) ...[
-                if (i > 0) const SizedBox(height: _gap),
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: button(regular[i])),
-                      const SizedBox(width: _gap),
-                      Expanded(
-                        child:
-                            i + 1 < regular.length
-                                ? button(regular[i + 1])
-                                : const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              for (final option in back) ...[
-                const SizedBox(height: _gap),
-                button(option),
-              ],
-            ],
-          ),
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final option in options) ...[
+          const SizedBox(height: 8),
+          button(option),
+        ],
+      ],
     );
   }
 
