@@ -62,6 +62,15 @@ class _BudgetListView extends State<BudgetListView> {
     super.initState();
   }
 
+  /// Paginação por rolagem: se a página carregada cabe inteira na área visível
+  /// (tela larga/alta), a lista não rola e o `_onScroll` nunca dispara. Então,
+  /// enquanto não houver o que rolar e ainda houver páginas, pede a próxima.
+  void _loadMoreIfNotScrollable() {
+    if (!mounted || !_scrollController.hasClients) return;
+    if (_scrollController.position.maxScrollExtent > 0) return;
+    _viewModel.loadMore();
+  }
+
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final maxScroll = _scrollController.position.maxScrollExtent;
@@ -431,6 +440,10 @@ class _BudgetListView extends State<BudgetListView> {
         ),
       );
     }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _loadMoreIfNotScrollable(),
+    );
 
     return Expanded(
       child: RefreshIndicator(
