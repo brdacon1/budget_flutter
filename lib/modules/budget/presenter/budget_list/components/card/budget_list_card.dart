@@ -18,8 +18,10 @@ class BudgetListCard extends StatelessWidget {
   final CustomerInfo item;
   final bool selected;
   final ConvertCoinRepository moneyConvert;
-  final VoidCallback onTap;
-  final VoidCallback onMore;
+
+  /// `null` = card sem ações (sem toque nem menu).
+  final VoidCallback? onTap;
+  final VoidCallback? onMore;
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +115,13 @@ class BudgetListCard extends StatelessWidget {
                     BudgetListStatusChip(status: item.status),
                   ],
                 ),
-                IconButton(
-                  onPressed: onMore,
-                  icon: const Icon(Icons.more_vert, color: mutedTextColor),
-                ),
+                if (onMore != null)
+                  IconButton(
+                    onPressed: onMore,
+                    icon: const Icon(Icons.more_vert, color: mutedTextColor),
+                  )
+                else
+                  const SizedBox(width: 12),
               ],
             ),
           ),

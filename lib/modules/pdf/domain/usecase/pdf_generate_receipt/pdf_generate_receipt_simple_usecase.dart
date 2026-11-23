@@ -116,7 +116,10 @@ class PdfGenerateReceiptUseCase {
     );
     final double sizeWithImage = logo.width + 10;
 
-    page.graphics.drawImage(image, Rect.fromLTWH(0, 0, logo.width, logo.height));
+    page.graphics.drawImage(
+      image,
+      Rect.fromLTWH(0, 0, logo.width, logo.height),
+    );
     return Size(sizeWithImage, logo.height);
   }
 
@@ -246,11 +249,7 @@ class PdfGenerateReceiptUseCase {
   // Budget data grid
   // ---------------------------------------------------------------------------
 
-  double _drawBudgetDataGrid(
-    PdfPage page,
-    CustomerInfo customer,
-    double top,
-  ) {
+  double _drawBudgetDataGrid(PdfPage page, CustomerInfo customer, double top) {
     double count = 0;
     try {
       final PdfGrid pdfGrid = PdfGrid()..columns.add(count: 2);

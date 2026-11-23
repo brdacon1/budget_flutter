@@ -29,6 +29,9 @@ class PdfStrings {
   static String get menuComments =>
       _isPt ? 'Inserir comentários' : 'Insert comments';
 
+  static String get menuCustomerBudgets =>
+      _isPt ? 'Orçamentos do cliente' : 'Client budgets';
+
   static String get menuMetrics =>
       _isPt ? 'Métricas do orçamento' : 'Budget metrics';
 
@@ -37,6 +40,43 @@ class PdfStrings {
 
   static String get menuShareLink =>
       _isPt ? 'Compartilhar link do orçamento' : 'Share budget link';
+
+  // Seções do menu Mais
+  static String get sectionBudget => _isPt ? 'Orçamento' : 'Budget';
+
+  static String get sectionShare =>
+      _isPt ? 'Compartilhar e PDF' : 'Share & PDF';
+
+  static String get sectionFinance => _isPt ? 'Financeiro' : 'Finance';
+
+  // Descrições curtas dos itens do menu
+  static String get menuCustomerBudgetsDesc =>
+      _isPt
+          ? 'Veja todos os orçamentos deste cliente'
+          : 'See all budgets for this client';
+
+  static String get menuMetricsDesc =>
+      _isPt ? 'Totais, status e desempenho' : 'Totals, status and performance';
+
+  static String get menuCommentsDesc =>
+      _isPt ? 'Anotações e observações internas' : 'Internal notes and remarks';
+
+  static String get menuReceiptDesc =>
+      _isPt ? 'Registre e emita recibos' : 'Record and issue receipts';
+
+  static String get menuProofsDesc =>
+      _isPt
+          ? 'Anexe fotos e arquivos de pagamento'
+          : 'Attach payment photos and files';
+
+  static String get menuShareLinkDesc =>
+      _isPt ? 'Envie ao cliente por link' : 'Send to the client via link';
+
+  static String get menuPdfExecutiveDesc =>
+      _isPt ? 'Layout limpo e objetivo' : 'Clean, concise layout';
+
+  static String get menuPdfProfessionalDesc =>
+      _isPt ? 'Layout completo e personalizável' : 'Full, customizable layout';
 
   static String get watchAd => _isPt ? 'Ver anuncio' : 'Watch ad';
 

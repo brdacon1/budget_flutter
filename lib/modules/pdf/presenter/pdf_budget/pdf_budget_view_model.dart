@@ -117,7 +117,8 @@ class PdfBudgetViewModel extends ChangeNotifier {
           if (ItemCategory.fromValue(item.category) == ItemCategory.products) {
             totalProducts += total;
             countProduct++;
-          } else if (ItemCategory.fromValue(item.category) == ItemCategory.services) {
+          } else if (ItemCategory.fromValue(item.category) ==
+              ItemCategory.services) {
             totalServices += total;
             countService++;
           }

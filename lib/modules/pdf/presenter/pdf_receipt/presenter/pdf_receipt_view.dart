@@ -31,10 +31,14 @@ class _PdfReceiptView extends State<PdfReceiptView> {
   @override
   void initState() {
     super.initState();
-    _viewModel =
-        PdfReceiptViewModel(receipt: widget.receipt, item: widget.item);
+    _viewModel = PdfReceiptViewModel(
+      receipt: widget.receipt,
+      item: widget.item,
+    );
     _viewModel.setLayoutType(widget.layoutType);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _viewModel.initialData(context));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _viewModel.initialData(context),
+    );
   }
 
   @override
@@ -61,15 +65,14 @@ class _PdfReceiptView extends State<PdfReceiptView> {
                   return Stack(
                     children: [
                       if (_viewModel.fileBytes != null)
-                        SfPdfViewer.file(
-                          File(_viewModel.fileBytes!),
-                        ),
+                        SfPdfViewer.file(File(_viewModel.fileBytes!)),
                       if (_viewModel.fileBytes == null)
                         const Align(
                           alignment: Alignment.center,
                           child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.black),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ),
                             strokeWidth: 1,
                           ),
                         ),

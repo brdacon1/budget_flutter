@@ -49,6 +49,9 @@ abstract class BudgetRepository extends ChangeNotifier {
   /// Busca no banco todos os orçamentos cujo STATUS é um dos [values].
   Future<Result<List<CustomerInfo>>> fetchBudgetsByStatus(List<String> values);
 
+  /// Escuta em tempo real os orçamentos cujo FONE é um dos [values].
+  Stream<Result<List<CustomerInfo>>> watchBudgetsByPhone(List<String> values);
+
   /// Busca no banco orçamentos cujo nome do cliente começa com um dos
   /// [prefixes].
   Future<Result<List<CustomerInfo>>> searchBudgetsByName(List<String> prefixes);
