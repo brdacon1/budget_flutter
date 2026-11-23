@@ -17,6 +17,11 @@ class ChatAssistantStrings {
 
   static String get online => _isPt ? 'online' : 'online';
 
+  static String get emptyDetailHint =>
+      _isPt
+          ? 'O que o assistente abrir aparece aqui'
+          : 'Whatever the assistant opens shows up here';
+
   static String get closeKeyboard =>
       _isPt ? 'Fechar teclado' : 'Close keyboard';
 

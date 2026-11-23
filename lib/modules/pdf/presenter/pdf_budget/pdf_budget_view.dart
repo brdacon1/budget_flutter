@@ -54,7 +54,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading:
-            !(widget.isTabRoot && AppDetailPane.isInside(context)),
+            !(widget.isTabRoot && AppDetailPane.hidesBackOf(context)),
         title: Text(PdfStrings.pdfTitle),
         backgroundColor: bgColor,
       ),

@@ -163,7 +163,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                                   children: [
                                     AppHeaderSecondTitle(
                                       showBack:
-                                          !AppDetailPane.isInside(context),
+                                          !AppDetailPane.hidesBackOf(context),
                                       titlePage: _viewModel.titlePage,
                                       secondTitle: 'Dados do cliente',
                                       onBack:

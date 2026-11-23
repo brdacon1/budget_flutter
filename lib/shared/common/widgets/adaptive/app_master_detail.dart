@@ -16,6 +16,7 @@ class AppMasterDetail extends StatelessWidget {
     required this.detailNavigatorKey,
     this.onDetailClosed,
     this.masterWidth = 440,
+    this.hideBackOnRootScreens = false,
   });
 
   final Widget master;
@@ -23,6 +24,11 @@ class AppMasterDetail extends StatelessWidget {
   final GlobalKey<NavigatorState> detailNavigatorKey;
   final VoidCallback? onDetailClosed;
   final double masterWidth;
+
+  /// `true`: as telas-raiz do painel (ex.: abas do orçamento) escondem a seta
+  /// de voltar, porque quem troca o item é a lista ao lado. `false`: telas
+  /// abertas por um fluxo (ex.: assistente) mantêm a seta para concluí-lo.
+  final bool hideBackOnRootScreens;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +38,7 @@ class AppMasterDetail extends StatelessWidget {
         const VerticalDivider(width: 1, thickness: 1, color: cardBorderColor),
         Expanded(
           child: AppDetailPane(
+            hidesBack: hideBackOnRootScreens,
             child: Navigator(
               key: detailNavigatorKey,
               observers: [_DetailClosedObserver(onDetailClosed)],
@@ -49,14 +56,23 @@ class AppMasterDetail extends StatelessWidget {
 /// (ex.: abas do orçamento) escondem a seta de voltar: quem troca o item é a
 /// lista ao lado.
 class AppDetailPane extends InheritedWidget {
-  const AppDetailPane({super.key, required super.child});
+  const AppDetailPane({
+    super.key,
+    required this.hidesBack,
+    required super.child,
+  });
 
-  /// `true` quando [context] está dentro de um painel de detalhe.
-  static bool isInside(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<AppDetailPane>() != null;
+  final bool hidesBack;
+
+  /// `true` quando [context] está num painel de detalhe que pede para as
+  /// telas-raiz esconderem a seta de voltar.
+  static bool hidesBackOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AppDetailPane>()?.hidesBack ??
+      false;
 
   @override
-  bool updateShouldNotify(AppDetailPane oldWidget) => false;
+  bool updateShouldNotify(AppDetailPane oldWidget) =>
+      hidesBack != oldWidget.hidesBack;
 }
 
 /// Avisa quando a pilha do detalhe volta para a rota-base.

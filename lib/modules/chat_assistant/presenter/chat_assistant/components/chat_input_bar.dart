@@ -50,28 +50,62 @@ class ChatInputBar extends StatelessWidget {
                   hintText: ChatAssistantStrings.typeMessageHint,
                   hintStyle: const TextStyle(color: chatHintColor),
                   filled: true,
-                  fillColor: secondaryColor,
+                  fillColor: chatBackgroundColor,
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: 20,
+                    vertical: 14,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: BorderSide(
+                      color: whiteColor.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: BorderSide(
+                      color: whiteColor.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: BorderSide(
+                      color: chatSendButtonColor.withValues(alpha: 0.7),
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(width: 6),
-            Material(
-              color: chatSendButtonColor,
-              shape: const CircleBorder(),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: enabled ? onSend : null,
-                child: const Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Icon(Icons.send, color: whiteColor, size: 22),
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00E5C0), chatSendButtonColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: chatSendButtonColor.withValues(alpha: 0.4),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: enabled ? onSend : null,
+                  child: const Padding(
+                    padding: EdgeInsets.all(13),
+                    child: Icon(
+                      Icons.arrow_upward_rounded,
+                      color: whiteColor,
+                      size: 22,
+                    ),
+                  ),
                 ),
               ),
             ),

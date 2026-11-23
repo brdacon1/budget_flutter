@@ -67,14 +67,14 @@ class ChatMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 14),
       child: Row(
         mainAxisAlignment:
             _isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!_isUser) _buildAvatar(),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           Flexible(
             child: GestureDetector(
               onLongPress:
@@ -94,16 +94,37 @@ class ChatMessageBubble extends StatelessWidget {
                   ),
                 ),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                  horizontal: 16,
+                  vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: _isUser ? chatUserBubbleColor : secondaryColor,
+                  gradient:
+                      _isUser
+                          ? const LinearGradient(
+                            colors: [Color(0xFF0A7F6F), chatUserBubbleColor],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                          : null,
+                  color: _isUser ? null : secondaryColor,
+                  border:
+                      _isUser
+                          ? null
+                          : Border.all(
+                            color: whiteColor.withValues(alpha: 0.06),
+                          ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: blackColor.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                   borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
-                    bottomLeft: Radius.circular(_isUser ? 16 : 4),
-                    bottomRight: Radius.circular(_isUser ? 4 : 16),
+                    topLeft: const Radius.circular(20),
+                    topRight: const Radius.circular(20),
+                    bottomLeft: Radius.circular(_isUser ? 20 : 6),
+                    bottomRight: Radius.circular(_isUser ? 6 : 20),
                   ),
                 ),
                 child: Column(
@@ -115,10 +136,11 @@ class ChatMessageBubble extends StatelessWidget {
                         style: const TextStyle(
                           color: chatHighlightColor,
                           fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.4,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                     ],
                     if (_dataRows != null &&
                         _dataRows!.isNotEmpty &&
@@ -160,7 +182,11 @@ class ChatMessageBubble extends StatelessWidget {
                         message.content.isNotEmpty)
                       Text.rich(
                         _buildMessageText(message.content),
-                        style: const TextStyle(color: whiteColor, fontSize: 15),
+                        style: const TextStyle(
+                          color: whiteColor,
+                          fontSize: 15.5,
+                          height: 1.35,
+                        ),
                       ),
                     if (message.type == ChatMessageType.contactPicker) ...[
                       const SizedBox(height: 8),
@@ -268,13 +294,23 @@ class ChatMessageBubble extends StatelessWidget {
 
   Widget _buildAvatar() {
     return Container(
-      width: 32,
-      height: 32,
-      decoration: const BoxDecoration(
-        color: chatBotAvatarColor,
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF00E5FF), Color(0xFF00BFA5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: chatHighlightColor.withValues(alpha: 0.3),
+            blurRadius: 8,
+          ),
+        ],
       ),
-      child: const Icon(Icons.support_agent, size: 18, color: whiteColor),
+      child: const Icon(Icons.support_agent, size: 19, color: whiteColor),
     );
   }
 
