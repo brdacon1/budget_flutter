@@ -5,6 +5,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_empty_detail.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
@@ -20,8 +21,10 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 class BudgetListView extends StatefulWidget {
   /// Com cliente: mostra só os orçamentos dele (mesmo telefone), sem busca,
@@ -38,6 +41,15 @@ class _BudgetListView extends State<BudgetListView> {
   final BudgetListViewModel _viewModel = getIt<BudgetListViewModel>();
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   final ScrollController _scrollController = ScrollController();
+
+  /// Navigator do painel de detalhe (tela larga) e o orçamento aberto nele.
+  final GlobalKey<NavigatorState> _detailKey = GlobalKey<NavigatorState>();
+  String? _activeId;
+
+  /// Lista + detalhe lado a lado: só em tela larga e na lista principal (a
+  /// lista "orçamentos do cliente" continua empilhando telas).
+  bool get _splitView =>
+      widget.customer == null && ResponsiveWidget.isDesktop(context);
 
   @override
   void initState() {
@@ -111,8 +123,13 @@ class _BudgetListView extends State<BudgetListView> {
     );
     if (!confirm || !mounted) return;
 
+    final deletesActive =
+        _activeId != null && _viewModel.selectedIds.contains(_activeId);
     final ok = await _viewModel.deleteSelected();
     if (!mounted) return;
+    if (ok && deletesActive) {
+      _detailKey.currentState?.popUntil((route) => route.isFirst);
+    }
     if (ok) {
       await _viewModel.displayAlert.notificationNotCloseScreen(
         context,
@@ -162,6 +179,12 @@ class _BudgetListView extends State<BudgetListView> {
       onPressed: () async {
         if (!await confirmNewBudgetAccess(context) || !mounted) return;
         if (widget.customer != null) return _createForCustomer();
+        if (_splitView) {
+          return _showDetail(
+            BudgetTabView(item: _viewModel.customerInfoNew()),
+            id: '',
+          );
+        }
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -265,6 +288,10 @@ class _BudgetListView extends State<BudgetListView> {
 
   void _openBudget(CustomerInfo item) {
     getIt<BudgetRepository>().selectBudget.value = item;
+    if (_splitView) {
+      _showDetail(BudgetTabView(item: item), id: item.id ?? '');
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -277,6 +304,24 @@ class _BudgetListView extends State<BudgetListView> {
     ).then((_) {
       getIt<BudgetRepository>().clearSelectBudget();
     });
+  }
+
+  /// Abre [page] no painel de detalhe, substituindo o que estiver aberto.
+  void _showDetail(Widget page, {required String id}) {
+    setState(() => _activeId = id);
+    _detailKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => page),
+      (route) => route.isFirst,
+    );
+  }
+
+  /// Detalhe fechado (voltar na tela do orçamento): limpa a seleção e
+  /// atualiza a lista (novo orçamento, totais alterados).
+  void _onDetailClosed() {
+    if (!mounted) return;
+    setState(() => _activeId = null);
+    getIt<BudgetRepository>().clearSelectBudget();
+    _viewModel.getInformationOrcamento(refresh: true);
   }
 
   Future<void> _duplicateBudget(CustomerInfo item) async {
@@ -420,6 +465,7 @@ class _BudgetListView extends State<BudgetListView> {
             return BudgetListCard(
               item: item,
               selected: _viewModel.isSelected(item),
+              active: _splitView && item.id != null && item.id == _activeId,
               moneyConvert: moneyConvert,
               // Orçamento de origem: já está aberto por baixo, sem ações.
               onTap:
@@ -517,7 +563,7 @@ class _BudgetListView extends State<BudgetListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final list = Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
         animation: _viewModel,
@@ -527,6 +573,13 @@ class _BudgetListView extends State<BudgetListView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingButton(),
+    );
+    if (!_splitView) return list;
+    return AppMasterDetail(
+      master: list,
+      emptyDetail: const BudgetListEmptyDetail(),
+      detailNavigatorKey: _detailKey,
+      onDetailClosed: _onDetailClosed,
     );
   }
 }

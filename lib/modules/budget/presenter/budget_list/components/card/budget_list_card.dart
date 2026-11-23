@@ -10,6 +10,7 @@ class BudgetListCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.selected,
+    this.active = false,
     required this.moneyConvert,
     required this.onTap,
     required this.onMore,
@@ -17,6 +18,9 @@ class BudgetListCard extends StatelessWidget {
 
   final CustomerInfo item;
   final bool selected;
+
+  /// Orçamento aberto no painel de detalhe (tela larga): só realça a borda.
+  final bool active;
   final ConvertCoinRepository moneyConvert;
 
   /// `null` = card sem ações (sem toque nem menu).
@@ -34,7 +38,9 @@ class BudgetListCard extends StatelessWidget {
         color: secondaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? buttonColor : cardBorderColor),
+          side: BorderSide(
+            color: selected || active ? buttonColor : cardBorderColor,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(

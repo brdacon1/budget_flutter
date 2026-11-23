@@ -45,7 +45,9 @@ class _DashboardView extends State<DashboardView> {
   @override
   Widget build(BuildContext context) {
     final vm = _viewModel;
-    final isMobile = ResponsiveWidget.isMobile(context);
+    // Duas colunas só em tela larga; abaixo disso uma coluna (celular e
+    // tablet estreito): a coluna do resumo precisa de ~400 px.
+    final twoColumns = ResponsiveWidget.isDesktop(context);
     const gap = SizedBox(height: defaultPadding, width: defaultPadding);
     final overview = Column(
       children: [
@@ -92,12 +94,12 @@ class _DashboardView extends State<DashboardView> {
                   ),
                 ),
               gap,
-              if (isMobile) ...[overview, gap, ...charts],
-              if (!isMobile)
+              if (!twoColumns) ...[overview, gap, ...charts],
+              if (twoColumns)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 5, child: Column(children: charts)),
+                    Expanded(flex: 3, child: Column(children: charts)),
                     gap,
                     Expanded(flex: 2, child: overview),
                   ],

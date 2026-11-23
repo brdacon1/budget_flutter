@@ -16,6 +16,9 @@ class BudgetStrings {
           ? 'Você ainda não criou orçamentos'
           : 'You have not created any budgets yet';
 
+  static String get selectBudgetHint =>
+      _isPt ? 'Selecione um orçamento' : 'Select a budget';
+
   static String get screenTitle => _isPt ? 'Meus orçamentos' : 'My budgets';
   static String get searchPlaceholder =>
       _isPt ? 'Buscar cliente' : 'Search client';

@@ -174,9 +174,9 @@ Cada fase = PR pequeno; **mobile 390×844 sem regressão**.
 | **F0 ✅** | Trava de orientação: Info.plist (iPad), `main.dart` e `MainActivity.kt` (tablet Android) |
 | **F1 ✅** | Breakpoints (`WindowSize`) + `AppPageContainer`, `AppAdaptiveGrid`, `AppSectionHeader`, `showAppModal` (já usado pelos 4 modais compartilhados) + testes + `DESIGN_SYSTEM.md`/§22. **Adiados para a fase que os usa** (evita código sem uso): `app_side_bar` (F3), `app_master_detail` (F5), `app_two_column_form` (F6), `app_kpi_card` (F4, se necessário) |
 | **F2 ✅** | Removidos `he*`/`we*`/`right:285`/`screenAwareSize` (exceto o que é de fase própria: `chat_message_bubble` e `budget_tab` → F5/F8; `login_view` → F6; `image_edit`/logo `maxWidth` 0.8 → F8). Topo = `paddingOf(context).top + 16`, margens 16/20, alturas de campo fixas, campos em largura total com margem 16. `height_calculate_utils.dart` removido |
-| **F3** | Shell: sidebar no `main_tab` |
-| **F4** | Dashboard |
-| **F5** | Orçamentos em MD (+ `budget_tab`) — maior risco (Navigator aninhado, notificação via `globalNavigatorKey`) |
+| **F3 ✅** | `main_tab`: `MainTabSideBar` (220 px, logo + 3 abas) em `expanded`; bottom nav intacta abaixo disso. Atalho Premium/Configurações **não entrou** (hoje não existem como aba; Premium/Excluir conta/Sair seguem no `ProfileCard` do Dashboard) |
+| **F4 ✅** | Dashboard: em `expanded` duas colunas 3:2 (gráficos à esquerda, resumo por status + vendidos à direita, ~460 px); abaixo de 1024 uma coluna; título do `Header` sempre visível. **Não entraram**: chip de variação % (exige UseCase novo) e tooltip nos gráficos |
+| **F5 ✅** | `AppMasterDetail` (Navigator aninhado, rota-base = estado vazio; voltar na tela do orçamento "fecha" o detalhe) + `BudgetListEmptyDetail`; `BudgetListView` em `expanded` (lista principal, não a de cliente) abre/troca orçamento no painel, realça o card ativo (`active`), cria novo orçamento no painel, fecha o detalhe se o aberto for excluído e atualiza a lista ao fechar. Notificação e chat continuam abrindo `BudgetTabView` em tela cheia pelo navigator raiz. **Validado no simulador iPad Pro 13"** (abrir, trocar de orçamento, aba Itens no painel, voltar fecha o detalhe). **Não validado**: novo orçamento no painel, exclusão do orçamento aberto, abertura por notificação |
 | **F6** | Formulários (budget/receipt/product/comment creators, auth, delete account) |
 | **F7** | Listas (G): produtos, comentários, recibos, pagamentos, comprovantes, opções, itens, métricas |
 | **F8** | Chat, PDF, imagem, Premium, config, textos |
