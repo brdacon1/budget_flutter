@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
@@ -315,6 +316,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
             child: Column(
               children: <Widget>[
                 AppHeaderSecondTitle(
+                  showBack: !AppDetailPane.isInside(context),
                   titlePage: 'Itens do orçamento',
                   secondTitle: count == 1 ? '1 item' : '$count itens',
                   onBack: () => Navigator.pop(context, true),

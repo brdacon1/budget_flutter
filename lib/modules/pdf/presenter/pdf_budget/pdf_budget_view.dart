@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -43,6 +44,7 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !AppDetailPane.isInside(context),
         title: Text(PdfStrings.pdfTitle),
         backgroundColor: bgColor,
       ),

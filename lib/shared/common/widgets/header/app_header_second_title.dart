@@ -10,6 +10,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
     required this.onBack,
     this.isBottomPadding = true,
     this.insideSafeArea = false,
+    this.showBack = true,
   });
 
   final String titlePage;
@@ -21,26 +22,33 @@ class AppHeaderSecondTitle extends StatelessWidget {
   final bool insideSafeArea;
   final VoidCallback onBack;
 
+  /// `false` esconde a seta de voltar (ex.: tela-raiz de um painel de detalhe).
+  final bool showBack;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: insideSafeArea ? 16 : MediaQuery.paddingOf(context).top + 16),
-        GestureDetector(
-          onTap: onBack,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: const EdgeInsets.only(left: 16),
-            child: const Icon(
-              Icons.arrow_back_outlined,
-              color: whiteColor,
-              size: 35.0,
+        SizedBox(
+          height: insideSafeArea ? 16 : MediaQuery.paddingOf(context).top + 16,
+        ),
+        if (showBack) ...[
+          GestureDetector(
+            onTap: onBack,
+            child: Container(
+              alignment: Alignment.topLeft,
+              margin: const EdgeInsets.only(left: 16),
+              child: const Icon(
+                Icons.arrow_back_outlined,
+                color: whiteColor,
+                size: 35.0,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
+        ],
         Container(
           alignment: Alignment.topLeft,
           margin: const EdgeInsets.only(left: 20),

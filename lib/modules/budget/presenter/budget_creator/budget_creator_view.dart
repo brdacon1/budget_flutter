@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
@@ -161,6 +162,8 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                                       ScrollViewKeyboardDismissBehavior.onDrag,
                                   children: [
                                     AppHeaderSecondTitle(
+                                      showBack:
+                                          !AppDetailPane.isInside(context),
                                       titlePage: _viewModel.titlePage,
                                       secondTitle: 'Dados do cliente',
                                       onBack:

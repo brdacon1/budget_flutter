@@ -69,6 +69,18 @@ class _BudgetListView extends State<BudgetListView> {
     super.initState();
   }
 
+  /// Tela larga: ao entrar em Orçamentos já abre o mais recente (primeiro da
+  /// lista, ordenada por id decrescente). Só uma vez por entrada na aba — se o
+  /// usuário fechar o detalhe, não reabre.
+  bool _autoOpened = false;
+
+  void _openMostRecentOnce(List<CustomerInfo> data) {
+    if (_autoOpened || !mounted || !_splitView || data.isEmpty) return;
+    if (_draft.value != null || _detailKey.currentState == null) return;
+    _autoOpened = true;
+    _openBudget(data.first);
+  }
+
   /// Paginação por rolagem: se a página carregada cabe inteira na área visível
   /// (tela larga/alta), a lista não rola e o `_onScroll` nunca dispara. Então,
   /// enquanto não houver o que rolar e ainda houver páginas, pede a próxima.
@@ -466,9 +478,10 @@ class _BudgetListView extends State<BudgetListView> {
       );
     }
 
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _loadMoreIfNotScrollable(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMoreIfNotScrollable();
+      _openMostRecentOnce(data);
+    });
 
     return Expanded(
       child: RefreshIndicator(

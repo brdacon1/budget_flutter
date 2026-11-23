@@ -31,16 +31,32 @@ class AppMasterDetail extends StatelessWidget {
         SizedBox(width: masterWidth, child: master),
         const VerticalDivider(width: 1, thickness: 1, color: cardBorderColor),
         Expanded(
-          child: Navigator(
-            key: detailNavigatorKey,
-            observers: [_DetailClosedObserver(onDetailClosed)],
-            onGenerateRoute:
-                (_) => MaterialPageRoute<void>(builder: (_) => emptyDetail),
+          child: AppDetailPane(
+            child: Navigator(
+              key: detailNavigatorKey,
+              observers: [_DetailClosedObserver(onDetailClosed)],
+              onGenerateRoute:
+                  (_) => MaterialPageRoute<void>(builder: (_) => emptyDetail),
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+/// Marca as telas que estão dentro do painel de detalhe. Telas-raiz do painel
+/// (ex.: abas do orçamento) escondem a seta de voltar: quem troca o item é a
+/// lista ao lado.
+class AppDetailPane extends InheritedWidget {
+  const AppDetailPane({super.key, required super.child});
+
+  /// `true` quando [context] está dentro de um painel de detalhe.
+  static bool isInside(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AppDetailPane>() != null;
+
+  @override
+  bool updateShouldNotify(AppDetailPane oldWidget) => false;
 }
 
 /// Avisa quando a pilha do detalhe volta para a rota-base.
