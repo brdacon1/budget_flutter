@@ -41,6 +41,18 @@ class BudgetListItemsCard extends StatelessWidget {
     final isService = category == ItemCategory.services;
     final measure = (item.measure ?? '').trim();
 
+    // Altura FIXA (não depende do texto): cada bloco tem altura reservada e
+    // o texto que não couber é cortado com reticências. Todos os cards ficam
+    // exatamente do mesmo tamanho.
+    final scale = MediaQuery.textScalerOf(context).scale;
+    final descriptionHeight =
+        scale(_descriptionFontSize * _descriptionLineHeight) * 2;
+    final quantityHeight = scale(18);
+    final footerHeight = scale(24);
+    final cardHeight =
+        // 28 = padding vertical; 2 = borda de 1 px do card.
+        30 + descriptionHeight + 4 + quantityHeight + 6 + footerHeight;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -50,6 +62,7 @@ class BudgetListItemsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Container(
+            height: cardHeight,
             padding: const EdgeInsets.fromLTRB(14, 14, 3, 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -78,11 +91,7 @@ class BudgetListItemsCard extends StatelessWidget {
                       // Altura fixa de 2 linhas: todos os cards ficam do mesmo
                       // tamanho, com a descrição curta ou longa.
                       SizedBox(
-                        height:
-                            MediaQuery.textScalerOf(context).scale(
-                              _descriptionFontSize * _descriptionLineHeight,
-                            ) *
-                            2,
+                        height: descriptionHeight,
                         child: Text(
                           item.description ?? '',
                           maxLines: 2,
@@ -96,44 +105,68 @@ class BudgetListItemsCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${_qty(item.quantity)}${measure.isEmpty ? '' : ' $measure'}'
-                        ' × ${moneyConvert.convertFromDouble(item.price ?? 0)}',
-                        style: GoogleFonts.heebo(
-                          color: mutedTextColor,
-                          fontSize: 12,
+                      SizedBox(
+                        height: quantityHeight,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${_qty(item.quantity)}${measure.isEmpty ? '' : ' $measure'}'
+                            ' × ${moneyConvert.convertFromDouble(item.price ?? 0)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.heebo(
+                              color: mutedTextColor,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: bgColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              category?.label ?? (item.category ?? ''),
-                              style: GoogleFonts.heebo(
-                                color: mutedTextColor,
-                                fontSize: 11,
+                      SizedBox(
+                        height: footerHeight,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: bgColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  category?.label ?? (item.category ?? ''),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.heebo(
+                                    color: mutedTextColor,
+                                    fontSize: 11,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            moneyConvert.convertFromDouble(item.total ?? 0),
-                            style: GoogleFonts.heebo(
-                              color: whiteColor,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  moneyConvert.convertFromDouble(
+                                    item.total ?? 0,
+                                  ),
+                                  maxLines: 1,
+                                  style: GoogleFonts.heebo(
+                                    color: whiteColor,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

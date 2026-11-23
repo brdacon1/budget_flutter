@@ -81,7 +81,7 @@ class _BudgetTabView extends State<BudgetTabView> {
     final List children = [
       BudgetCreatorView(item: widget.item),
       BudgetListItemsView(item: widget.item),
-      const PdfBudgetView(),
+      const PdfBudgetView(isTabRoot: true),
       BudgetOptionsView(
         item: widget.item,
         showCustomerBudgets: !widget.fromCustomerBudgets,

@@ -12,51 +12,88 @@ class _FakeMoney implements ConvertCoinRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-void main() {
-  testWidgets('cards têm a mesma altura com descrição curta ou longa', (
-    tester,
-  ) async {
-    ItemsBudget item(String description) => ItemsBudget(
-      description: description,
-      category: 'PRODUTOS',
-      quantity: 1,
-      price: 10,
-      total: 10,
-    );
+const _veryLong =
+    'Descrição bem longa do item que precisa quebrar em duas linhas e ainda '
+    'passar disso para cortar com reticências no final do texto';
 
-    Widget card(Key key, String description) => BudgetListItemsCard(
-      key: key,
-      item: item(description),
-      selected: false,
-      moneyConvert: _FakeMoney(),
-      onTap: () {},
-      onToggleSelect: () {},
-    );
-
-    const shortKey = Key('short');
-    const longKey = Key('long');
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 360,
-            child: Column(
-              children: [
-                card(shortKey, 'Curto'),
-                card(
-                  longKey,
-                  'Descrição bem longa do item que precisa quebrar em duas '
-                  'linhas e ainda passar disso para cortar com reticências',
-                ),
-              ],
+Future<List<double>> _heights(
+  WidgetTester tester,
+  List<ItemsBudget> items, {
+  double width = 360,
+  double textScale = 1,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: SizedBox(
+              width: width,
+              child: Column(
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    BudgetListItemsCard(
+                      key: ValueKey(i),
+                      item: items[i],
+                      selected: false,
+                      moneyConvert: _FakeMoney(),
+                      onTap: () {},
+                      onToggleSelect: () {},
+                    ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-    expect(
-      tester.getSize(find.byKey(shortKey)).height,
-      tester.getSize(find.byKey(longKey)).height,
-    );
-  });
+    ),
+  );
+  return [
+    for (var i = 0; i < items.length; i++)
+      tester.getSize(find.byKey(ValueKey(i))).height,
+  ];
+}
+
+ItemsBudget _item({
+  String description = 'Curto',
+  String measure = 'un',
+  double quantity = 1,
+  double price = 10,
+  double total = 10,
+  String category = 'PRODUTOS',
+}) => ItemsBudget(
+  description: description,
+  category: category,
+  measure: measure,
+  quantity: quantity,
+  price: price,
+  total: total,
+);
+
+void main() {
+  final variations = [
+    _item(),
+    _item(description: _veryLong),
+    _item(description: 'Duas linhas aproximadamente neste texto do item aqui'),
+    _item(measure: 'unidade de medida muito comprida', quantity: 1234567),
+    _item(price: 99999999.99, total: 123456789.99),
+    _item(category: 'SERVICOS', description: _veryLong, total: 987654321),
+  ];
+
+  for (final scale in [1.0, 1.3]) {
+    for (final width in [260.0, 360.0, 480.0]) {
+      testWidgets('mesma altura (largura $width, texto x$scale)', (
+        tester,
+      ) async {
+        final heights = await _heights(
+          tester,
+          variations,
+          width: width,
+          textScale: scale,
+        );
+        expect(heights.toSet().length, 1, reason: 'alturas: $heights');
+      });
+    }
+  }
 }
