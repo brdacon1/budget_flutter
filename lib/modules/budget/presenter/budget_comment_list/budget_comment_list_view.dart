@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
@@ -212,7 +213,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
                   ),
                 ],
               )
-              : ListView.builder(
+              : AppAdaptiveGrid(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 150),
                 itemCount: list.length,
                 itemBuilder: (context, index) {

@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
@@ -154,8 +155,7 @@ class _ReceiptListView extends State<ReceiptListView> {
         color: refreshIndicatorColor,
         backgroundColor: bgColor,
         onRefresh: _viewModel.refresh,
-        child: ListView.builder(
-          shrinkWrap: true,
+        child: AppAdaptiveGrid(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
           itemCount: _viewModel.foundPayment.length,
           itemBuilder: (context, index) {

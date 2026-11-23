@@ -80,5 +80,27 @@ void main() {
         tester.getTopLeft(find.byKey(const ValueKey(0))).dy,
       );
     });
+
+    testWidgets('altura variável: linhas lado a lado e no máximo 3 colunas', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const Size(1600, 900),
+        AppAdaptiveGrid(
+          itemCount: 7,
+          itemBuilder:
+              (_, i) => SizedBox(key: ValueKey(i), height: i.isEven ? 60 : 100),
+        ),
+      );
+      Offset at(int i) => tester.getTopLeft(find.byKey(ValueKey(i)));
+      // 3 colunas (teto), mesmo topo na linha.
+      expect(at(1).dy, at(0).dy);
+      expect(at(2).dy, at(0).dy);
+      expect(at(3).dx, at(0).dx);
+      // A linha seguinte começa abaixo do maior card da anterior (100).
+      expect(at(3).dy, greaterThanOrEqualTo(at(0).dy + 100));
+      expect(at(1).dx, greaterThan(at(0).dx));
+    });
   });
 }

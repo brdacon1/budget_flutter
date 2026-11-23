@@ -1,5 +1,6 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
@@ -155,7 +156,7 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
       child:
           items.isEmpty
               ? _buildEmpty()
-              : ListView.builder(
+              : AppAdaptiveGrid(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
                 itemCount: items.length,
                 itemBuilder:

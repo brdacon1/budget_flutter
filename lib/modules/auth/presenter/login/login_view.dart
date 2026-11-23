@@ -10,6 +10,8 @@ import 'package:oflite/modules/auth/presenter/login/components/login_tab_toggle.
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 import '../../../terms_conditions/presenter/terms_conditions_view.dart';
@@ -112,56 +114,87 @@ class _LoginViewState extends State<LoginView> {
             top: false,
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    LoginTabToggle(
-                      isLoginSelected: _isLoginTab,
-                      onLoginTap: () => _switchTab(true),
-                      onSignUpTap: () => _switchTab(false),
+              child: _buildForm(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        LoginTabToggle(
+          isLoginSelected: _isLoginTab,
+          onLoginTap: () => _switchTab(true),
+          onSignUpTap: () => _switchTab(false),
+        ),
+        const SizedBox(height: 20),
+        AnimatedCrossFade(
+          firstChild: LoginTab(
+            viewModel: _viewModel,
+            onForgotPassword: () => _displayAlert.dialogChangePassword(context),
+            onGoogleLogin: () => _viewModel.loginWithGoogle(context),
+            onAppleLogin: _viewModel.loginWithApple,
+          ),
+          secondChild: const LoginSignUpTab(),
+          crossFadeState:
+              _isLoginTab
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 250),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 25),
+          child: Center(
+            child: LoginFooter(
+              onPrivacyPolicy: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TermsConditionsView(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Tela larga: logo à esquerda, formulário centralizado à direita.
+  Widget _buildSideBySide() {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Container(
+            color: secondaryColor,
+            alignment: Alignment.center,
+            child: const LoginHeader(width: 600, height: 800),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            color: bgColor,
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: AppPageWidth.auth.maxWidth,
                     ),
-                    const SizedBox(height: 20),
-                    AnimatedCrossFade(
-                      firstChild: LoginTab(
-                        viewModel: _viewModel,
-                        onForgotPassword:
-                            () => _displayAlert.dialogChangePassword(context),
-                        onGoogleLogin:
-                            () => _viewModel.loginWithGoogle(context),
-                        onAppleLogin: _viewModel.loginWithApple,
-                      ),
-                      secondChild: const LoginSignUpTab(),
-                      crossFadeState:
-                          _isLoginTab
-                              ? CrossFadeState.showFirst
-                              : CrossFadeState.showSecond,
-                      duration: const Duration(milliseconds: 250),
-                    ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: Center(
-                        child: LoginFooter(
-                          onPrivacyPolicy: () async {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => const TermsConditionsView(),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                    child: _buildForm(),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -179,12 +212,18 @@ class _LoginViewState extends State<LoginView> {
         }
         return Scaffold(
           backgroundColor: secondaryColor,
-          body: Column(
-            children: <Widget>[
-              Expanded(flex: 1, child: LoginHeader(width: we, height: he)),
-              _buildScreen(),
-            ],
-          ),
+          body:
+              ResponsiveWidget.isDesktop(context)
+                  ? _buildSideBySide()
+                  : Column(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: LoginHeader(width: we, height: he),
+                      ),
+                      _buildScreen(),
+                    ],
+                  ),
         );
       },
     );

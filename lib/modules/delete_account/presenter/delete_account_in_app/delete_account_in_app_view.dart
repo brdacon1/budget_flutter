@@ -5,6 +5,7 @@ import 'package:oflite/modules/core/display_alert/domain/repository/display_aler
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/delete_account_in_app_view_model.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/strings/delete_account_in_app_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 
 /// Exclusão de conta dentro do app (exigência App Store 5.1.1(v)).
 class DeleteAccountInAppView extends StatefulWidget {
@@ -72,68 +73,88 @@ class _DeleteAccountInAppViewState extends State<DeleteAccountInAppView> {
         title: Text(DeleteAccountInAppStrings.title),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            const Icon(Icons.warning_amber_rounded,
-                color: Colors.redAccent, size: 48),
-            const SizedBox(height: 16),
-            Text(DeleteAccountInAppStrings.warning,
-                style: const TextStyle(color: Colors.white, fontSize: 15)),
-            const SizedBox(height: 12),
-            Text(DeleteAccountInAppStrings.subscriptionNote,
-                style: const TextStyle(color: Colors.white70, fontSize: 13)),
-            const SizedBox(height: 12),
-            Text(DeleteAccountInAppStrings.reauthNote,
-                style: const TextStyle(color: Colors.white70, fontSize: 13)),
-            if (_viewModel.needsPassword) ...[
-              const SizedBox(height: 20),
-              TextField(
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                onChanged: (v) => _viewModel.password = v,
-                decoration: InputDecoration(
-                  labelText: DeleteAccountInAppStrings.passwordLabel,
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  errorText: _viewModel.passwordError,
+        child: AppPageContainer(
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.redAccent,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                DeleteAccountInAppStrings.warning,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                DeleteAccountInAppStrings.subscriptionNote,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                DeleteAccountInAppStrings.reauthNote,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              if (_viewModel.needsPassword) ...[
+                const SizedBox(height: 20),
+                TextField(
+                  obscureText: true,
+                  style: const TextStyle(color: Colors.white),
+                  onChanged: (v) => _viewModel.password = v,
+                  decoration: InputDecoration(
+                    labelText: DeleteAccountInAppStrings.passwordLabel,
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    errorText: _viewModel.passwordError,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _viewModel.confirmed,
+                onChanged: (v) => _viewModel.confirmed = v ?? false,
+                title: Text(
+                  DeleteAccountInAppStrings.confirmLabel,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                subtitle:
+                    _viewModel.confirmError == null
+                        ? null
+                        : Text(
+                          _viewModel.confirmError!,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                  ),
+                  onPressed: running ? null : _viewModel.deleteCommand.execute,
+                  child:
+                      running
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text(DeleteAccountInAppStrings.button),
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: _viewModel.confirmed,
-              onChanged: (v) => _viewModel.confirmed = v ?? false,
-              title: Text(DeleteAccountInAppStrings.confirmLabel,
-                  style: const TextStyle(color: Colors.white, fontSize: 14)),
-              subtitle: _viewModel.confirmError == null
-                  ? null
-                  : Text(_viewModel.confirmError!,
-                      style: const TextStyle(color: Colors.redAccent)),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26)),
-                ),
-                onPressed: running ? null : _viewModel.deleteCommand.execute,
-                child: running
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(DeleteAccountInAppStrings.button),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

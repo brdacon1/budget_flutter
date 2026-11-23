@@ -11,6 +11,7 @@ import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart'
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_summary_card.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
@@ -148,45 +149,48 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                         // SafeArea: o conteúdo rolado não passa por baixo da status bar.
                         child: SafeArea(
                           bottom: false,
-                          child: Stack(
-                            children: [
-                              ListView(
-                                // Espaço extra no fim para o último campo não ficar sob o
-                                // botão flutuante.
-                                padding: const EdgeInsets.only(bottom: 96),
-                                keyboardDismissBehavior:
-                                    ScrollViewKeyboardDismissBehavior.onDrag,
-                                children: [
-                                  AppHeaderSecondTitle(
-                                    titlePage: _viewModel.titlePage,
-                                    secondTitle: 'Dados do cliente',
-                                    onBack: () => Navigator.pop(context, true),
-                                    insideSafeArea: true,
-                                  ),
-                                  if (_viewModel.isEditing)
-                                    BudgetCreatorSummaryCard(
+                          child: AppPageContainer(
+                            child: Stack(
+                              children: [
+                                ListView(
+                                  // Espaço extra no fim para o último campo não ficar sob o
+                                  // botão flutuante.
+                                  padding: const EdgeInsets.only(bottom: 96),
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
+                                  children: [
+                                    AppHeaderSecondTitle(
+                                      titlePage: _viewModel.titlePage,
+                                      secondTitle: 'Dados do cliente',
+                                      onBack:
+                                          () => Navigator.pop(context, true),
+                                      insideSafeArea: true,
+                                    ),
+                                    if (_viewModel.isEditing)
+                                      BudgetCreatorSummaryCard(
+                                        viewModel: _viewModel,
+                                      ),
+                                    BudgetCreatorContactSection(
+                                      viewModel: _viewModel,
+                                      onPickContact: _viewModel.pickContact,
+                                    ),
+                                    BudgetCreatorInfoSection(
                                       viewModel: _viewModel,
                                     ),
-                                  BudgetCreatorContactSection(
-                                    viewModel: _viewModel,
-                                    onPickContact: _viewModel.pickContact,
-                                  ),
-                                  BudgetCreatorInfoSection(
-                                    viewModel: _viewModel,
-                                  ),
-                                  BudgetCreatorAddressSection(
-                                    viewModel: _viewModel,
-                                  ),
-                                ],
-                              ),
-                              if (!keyboardOpen)
-                                Positioned(
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  child: _buildSaveButton(),
+                                    BudgetCreatorAddressSection(
+                                      viewModel: _viewModel,
+                                    ),
+                                  ],
                                 ),
-                            ],
+                                if (!keyboardOpen)
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    child: _buildSaveButton(),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
