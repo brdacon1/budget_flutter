@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/subscription/data/model/subscription_plan.dart';
 import 'package:oflite/modules/subscription/presenter/strings/subscription_pt_string.dart';
 import 'package:oflite/modules/terms_conditions/presenter/terms_conditions_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/enums/alert_type_enum.dart';
-import 'package:oflite/shared/common/utils/height_calculate_utils.dart';
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'components/subscription_benefit_chip.dart';
 import 'components/subscription_bottom_bar.dart';
@@ -88,7 +88,7 @@ class _SubscriptionView extends State<SubscriptionView> {
         backgroundColor: transparentColor,
         elevation: 0.0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, size: screenAwareSize(20.0, context)),
+          icon: Icon(Icons.arrow_back, size: 26.0),
           onPressed: () async {
             await _viewModel.checkExistingSubscription();
             if (mounted) Navigator.pop(context, true);
@@ -98,57 +98,60 @@ class _SubscriptionView extends State<SubscriptionView> {
           SubscriptionStrings.pageTitle,
           style: TextStyle(
             color: whiteColor,
-            fontSize: screenAwareSize(18.0, context),
+            fontSize: 24.0,
             fontFamily: "Montserrat-Bold",
           ),
         ),
         centerTitle: true,
       ),
       // O botão de assinar fica fixo no rodapé; o conteúdo rola por trás.
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SubscriptionHeroCard(),
-                  _buildSectionLabel(SubscriptionStrings.aiSectionTitle),
-                  ..._buildAiFeatures(),
-                  _buildSectionLabel(SubscriptionStrings.planIncludesTitle),
-                  _buildPlanBenefits(),
-                  _buildSectionLabel(SubscriptionStrings.choosePlanTitle),
-                  _buildPlans(),
-                  const SizedBox(height: 16),
-                  Text(
-                    SubscriptionStrings.renewalNotice,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: mutedTextColor,
-                      fontSize: 10.5,
-                      height: 1.5,
+      body: AppPageContainer(
+        width: AppPageWidth.reading,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SubscriptionHeroCard(),
+                    _buildSectionLabel(SubscriptionStrings.aiSectionTitle),
+                    ..._buildAiFeatures(),
+                    _buildSectionLabel(SubscriptionStrings.planIncludesTitle),
+                    _buildPlanBenefits(),
+                    _buildSectionLabel(SubscriptionStrings.choosePlanTitle),
+                    _buildPlans(),
+                    const SizedBox(height: 16),
+                    Text(
+                      SubscriptionStrings.renewalNotice,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: mutedTextColor,
+                        fontSize: 10.5,
+                        height: 1.5,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SubscriptionBottomBar(
-            caption: _caption,
-            isLoading: _viewModel.state == SubscriptionState.loading,
-            canSubscribe: _viewModel.displayPrice != null,
-            onSubscribe: _viewModel.requestSubscription,
-            onRestore: Platform.isIOS ? _viewModel.restorePurchases : null,
-            onTerms:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const TermsConditionsView(),
+            SubscriptionBottomBar(
+              caption: _caption,
+              isLoading: _viewModel.state == SubscriptionState.loading,
+              canSubscribe: _viewModel.displayPrice != null,
+              onSubscribe: _viewModel.requestSubscription,
+              onRestore: Platform.isIOS ? _viewModel.restorePurchases : null,
+              onTerms:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TermsConditionsView(),
+                    ),
                   ),
-                ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

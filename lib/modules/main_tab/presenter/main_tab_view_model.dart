@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 class TabItem {
   final IconData icon;
@@ -12,8 +15,36 @@ class TabItem {
 
 class MainTabViewModel extends ChangeNotifier {
   final ReceiveSharedProofUsecase _receiveShared;
+  final PdfRepository _pdfRepository;
 
-  MainTabViewModel(this._receiveShared);
+  MainTabViewModel(this._receiveShared, this._pdfRepository) {
+    // Logo trocado em "Editar PDF": o repositório avisa e a barra atualiza.
+    _pdfRepository.addListener(loadCompanyLogo);
+  }
+
+  /// Logo da empresa (foto do titular), mostrada na barra lateral. `null` =
+  /// sem logo cadastrado (ou ainda carregando).
+  Uint8List? companyLogo;
+  bool _loadingLogo = false;
+
+  Future<void> loadCompanyLogo() async {
+    if (_loadingLogo) return;
+    _loadingLogo = true;
+    try {
+      final info = await _pdfRepository.fetchInformationEnterprise();
+      if (info is! Ok) return;
+      final owner = _pdfRepository.ownerPdf;
+      if (owner == null) return;
+      final logo = await _pdfRepository.fetchLogo(owner, requireImage: true);
+      final bytes = logo is Ok<Uint8List?> ? logo.value : null;
+      if (bytes != companyLogo) {
+        companyLogo = bytes;
+        notifyListeners();
+      }
+    } finally {
+      _loadingLogo = false;
+    }
+  }
 
   StreamSubscription<SharedProofEvent>? _sharedSub;
 
@@ -46,6 +77,7 @@ class MainTabViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _pdfRepository.removeListener(loadCompanyLogo);
     _sharedSub?.cancel();
     super.dispose();
   }

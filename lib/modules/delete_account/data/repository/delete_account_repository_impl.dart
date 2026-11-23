@@ -34,10 +34,10 @@ class DeleteAccountRepositoryImpl implements DeleteAccountRepository {
   Future<Result<void>> _run(Future<void> Function() action) async {
     try {
       await action();
-      return Result.ok(null);
+      return const Result.ok(null);
     } on FirebaseAuthException catch (e) {
       if (_invalidCredentialCodes.contains(e.code)) {
-        return Result.error(const DeleteAccountInvalidCredentials());
+        return const Result.error(DeleteAccountInvalidCredentials());
       }
       return Result.error(Exception(e.code));
     } catch (e) {

@@ -50,7 +50,7 @@ class ChatDocumentForm extends StatelessWidget {
               style: const TextStyle(color: whiteColor),
               decoration: InputDecoration(
                 hintText: ChatAssistantStrings.documentFormHint,
-                hintStyle: TextStyle(color: chatHintColor),
+                hintStyle: const TextStyle(color: chatHintColor),
                 errorText: errorText,
                 filled: true,
                 fillColor: secondaryColor,

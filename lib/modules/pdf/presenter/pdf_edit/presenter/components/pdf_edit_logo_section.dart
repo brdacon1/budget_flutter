@@ -94,10 +94,9 @@ class PdfEditLogoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
     return Column(
       children: [
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         if (loading)
           const Center(child: CircularProgressIndicator())
         else if (hasError)

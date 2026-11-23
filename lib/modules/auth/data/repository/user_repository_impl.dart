@@ -34,7 +34,7 @@ class UserRepositoryImpl extends UserRepository {
     try {
       final raw = await _remote.getUserInfo(userUid);
       if (raw == null) {
-        return Result.ok(null);
+        return const Result.ok(null);
       }
       final user =
           InfoUser()
@@ -64,7 +64,7 @@ class UserRepositoryImpl extends UserRepository {
       _currentUser = user;
       _selectUser.value = user;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -77,7 +77,7 @@ class UserRepositoryImpl extends UserRepository {
       _currentUser = user;
       _selectUser.value = user;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -95,7 +95,7 @@ class UserRepositoryImpl extends UserRepository {
       _selectUser.value = user;
       _defaultPdf = pdf;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

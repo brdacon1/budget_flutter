@@ -20,20 +20,18 @@ class CommentLibraryListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(height: he * 0.07),
+        SizedBox(height: MediaQuery.paddingOf(context).top + 16),
         Align(
           alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: onBack,
-            child: Padding(
-              padding: EdgeInsets.only(left: we * 0.032),
-              child: const Icon(
+            child: const Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Icon(
                 Icons.arrow_back_outlined,
                 color: whiteColor,
                 size: 35.0,
@@ -41,9 +39,9 @@ class CommentLibraryListHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         Padding(
-          padding: EdgeInsets.only(left: we * 0.04),
+          padding: const EdgeInsets.only(left: 16),
           child: Text(
             CommentLibraryStrings.listTitle,
             style: GoogleFonts.heebo(
@@ -54,7 +52,7 @@ class CommentLibraryListHeader extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: he * 0.02),
+        const SizedBox(height: 16),
         Container(
           height: 50.0,
           margin: const EdgeInsets.only(right: 17.0, left: 17.0, bottom: 25),

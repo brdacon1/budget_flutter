@@ -346,7 +346,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     final step = await _resetToMenuUsecase(withReports: _aiMode);
     _setStepFromName(step);
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<void> _backToMainMenu() async {
@@ -506,7 +506,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Envia o `value` da opção pelo mesmo caminho do texto digitado,
   /// exibindo o `label` na bolha do usuário.
   Future<Result<void>> _selectOption(ChatOptionTap option) async {
-    if (option.step != _step.name) return Result.ok(null); // menu antigo
+    if (option.step != _step.name) return const Result.ok(null); // menu antigo
     return _sendText(option.value, displayText: option.label);
   }
 
@@ -514,7 +514,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Envia texto do usuário
   // ------------------------------------------------------------------
   Future<Result<void>> _sendText(String text, {String? displayText}) async {
-    if (text.trim().isEmpty) return Result.ok(null);
+    if (text.trim().isEmpty) return const Result.ok(null);
     final clean = text.trim();
 
     // Em qualquer fluxo, "0" volta ao menu principal
@@ -523,7 +523,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         await _sendUserMessageWithId(_generateMessageId(), displayText);
       }
       await _backToMainMenu();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     // Texto livre após "Comprovante salvo": volta a valer o menu principal.
@@ -542,7 +542,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _editingMsgId = null;
       _editingField = null;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     // Envia mensagem do usuário
@@ -654,7 +654,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         type: ChatMessageType.text,
       );
     }
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   // ------------------------------------------------------------------
@@ -1265,7 +1265,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (doc.error != null) {
       _documentError = ChatAssistantStrings.documentError(doc.error!);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
     _documentError = null;
     documentController.clear();
@@ -1274,7 +1274,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _pdfEditField = result.pdfField;
     _setStepFromName(result.nextStep);
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<void> _handlePdfField(String value) async {
@@ -1377,7 +1377,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           .request(user_info.PermissionType.read);
       if (permissionStatus != user_info.PermissionStatus.granted &&
           permissionStatus != user_info.PermissionStatus.limited) {
-        return Result.ok(null);
+        return const Result.ok(null);
       }
 
       final contact = await user_info.FlutterContacts.native.showPicker(
@@ -1386,7 +1386,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           user_info.ContactProperty.phone,
         },
       );
-      if (contact == null) return Result.ok(null);
+      if (contact == null) return const Result.ok(null);
 
       String name = contact.displayName?.trim() ?? '';
       if (name.isEmpty) {
@@ -1399,7 +1399,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       if (_step == ChatFlowStep.findBudgetAskName) {
         await _sendUserMessageWithId(_generateMessageId(), name);
         await _findBudget(name);
-        return Result.ok(null);
+        return const Result.ok(null);
       }
 
       String? phone;
@@ -1433,7 +1433,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
           _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
           type: ChatMessageType.text,
         );
-        return Result.ok(null);
+        return const Result.ok(null);
       }
 
       _pendingPhone = phone;
@@ -1445,7 +1445,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<Result<void>> _createDraftFromName() async {
     final name = textController.text.trim();
-    if (name.isEmpty) return Result.ok(null);
+    if (name.isEmpty) return const Result.ok(null);
     textController.clear();
 
     final msgId = _generateMessageId();
@@ -1462,7 +1462,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _script?.askPhone ?? ChatScriptEntity.fallback.askPhone,
       type: ChatMessageType.text,
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _showClientDataConfirmation() async {
@@ -1474,7 +1474,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'actions': ['Confirmar dados', 'Editar nome', 'Editar telefone'],
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   void prepareEditMessage(String field, String currentText, String messageId) {
@@ -1485,15 +1485,15 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _askEditName() async {
-    if (_clientNameMsgId == null) return Result.ok(null);
+    if (_clientNameMsgId == null) return const Result.ok(null);
     _prepareEditField('clientName', _pendingClientName, _clientNameMsgId!);
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _askEditPhone() async {
-    if (_clientPhoneMsgId == null) return Result.ok(null);
+    if (_clientPhoneMsgId == null) return const Result.ok(null);
     _prepareEditField('clientPhone', _pendingPhone, _clientPhoneMsgId!);
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   void _prepareEditField(String field, String currentText, String msgId) {
@@ -1531,7 +1531,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         type: ChatMessageType.text,
       );
     }
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _skipAddress() async {
@@ -1544,7 +1544,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'action': 'open_products',
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _askForCep() async {
@@ -1557,7 +1557,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _goToManualAddress() async {
@@ -1578,7 +1578,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         backLabel: ChatAssistantStrings.menuBackLabel,
       ),
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   String _upper(String? v) => (v ?? '').trim().toUpperCase();
@@ -1590,7 +1590,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         ChatAssistantStrings.invalidCep,
         type: ChatMessageType.text,
       );
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     final viaCep = getIt<CepRepository>();
@@ -1609,7 +1609,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
             ChatScriptEntity.fallback.askStreetFallback,
         type: ChatMessageType.text,
       );
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     _pendingAddress = address;
@@ -1630,7 +1630,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'backLabel': ChatAssistantStrings.menuBackLabel,
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   // ------------------------------------------------------------------
@@ -1693,7 +1693,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<Result<void>> _confirmCepAddress() async {
-    if (_pendingAddress == null) return Result.ok(null);
+    if (_pendingAddress == null) return const Result.ok(null);
 
     if (_isPdfEditAddressMode) {
       await _savePdfAddress(
@@ -1703,7 +1703,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         neighborhood: _upper(_pendingAddress!.bairro),
       );
       await _finishPdfAddressFlow();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     await _usecase.updateAddress(
@@ -1729,7 +1729,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'action': 'open_products',
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _submitManualAddress() async {
@@ -1743,7 +1743,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         ChatAssistantStrings.streetAndCityRequired,
         type: ChatMessageType.text,
       );
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     final fullStreet = number.isNotEmpty ? '$street, $number' : street;
@@ -1763,7 +1763,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       cityController.clear();
       neighborhoodController.clear();
       await _finishPdfAddressFlow();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     await _usecase.updateAddress(
@@ -1796,11 +1796,11 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'action': 'open_products',
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _cancelCorrectionAndConfirm() async {
-    if (_pendingAddress == null) return Result.ok(null);
+    if (_pendingAddress == null) return const Result.ok(null);
 
     if (_isPdfEditAddressMode) {
       await _savePdfAddress(
@@ -1814,7 +1814,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       cityController.clear();
       neighborhoodController.clear();
       await _finishPdfAddressFlow();
-      return Result.ok(null);
+      return const Result.ok(null);
     }
 
     await _usecase.updateAddress(
@@ -1844,7 +1844,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         'action': 'open_products',
       },
     );
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _confirmProducts(
@@ -1924,7 +1924,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       },
     );
 
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _finalizeAndShare() async {
@@ -1946,7 +1946,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         type: ChatMessageType.text,
       );
     }
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _shareLink() async {
@@ -1971,7 +1971,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     // A cada compartilhamento, não assinantes veem um intersticial.
     // `showInterstitial` já suprime para assinantes e recarrega o próximo.
     getIt<AdsRepository>().showInterstitial();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _copyLink() async {
@@ -1989,7 +1989,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     }
     _shareErrorMessage = null;
     await Clipboard.setData(ClipboardData(text: url));
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _generateBudgetPdf() async {
@@ -2001,7 +2001,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _shareErrorMessage = null;
     _pendingNavigation = openBudgetPdfAction;
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   Future<Result<void>> _resetChat() async {
@@ -2011,7 +2011,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _clearLocalState();
     final step = await _resetToMenuUsecase(withReports: _aiMode);
     _setStepFromName(step);
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   // ------------------------------------------------------------------
@@ -2070,7 +2070,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await _chatRepo.sendMessage(msg);
   }
 
-  Future<Result<void>> _noop() async => Result.ok(null);
+  Future<Result<void>> _noop() async => const Result.ok(null);
 
   void _onRepoChanged() {
     if (!_disposed) notifyListeners();

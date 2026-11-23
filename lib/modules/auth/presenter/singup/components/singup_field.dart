@@ -71,7 +71,7 @@ class SingUpField extends StatelessWidget {
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[600]),
         ),
-        style: TextStyle(
+        style: const TextStyle(
           color: AppBottomModal.grayColor,
           fontWeight: FontWeight.bold,
         ),

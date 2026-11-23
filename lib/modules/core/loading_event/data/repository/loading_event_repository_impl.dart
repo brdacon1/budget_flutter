@@ -15,9 +15,9 @@ class LoadingEventRepositoryImpl implements LoadingEventRepository {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return PopScope(
+        return const PopScope(
           canPop: false, // Prevents closing the dialog via the back button
-          child: const AlertDialog(
+          child: AlertDialog(
             backgroundColor: bgColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,

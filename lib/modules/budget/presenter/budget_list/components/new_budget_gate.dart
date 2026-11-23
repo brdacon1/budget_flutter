@@ -20,7 +20,7 @@ Future<bool> confirmNewBudgetAccess(BuildContext context) async {
   if (value == "Se tornar premium") {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SubscriptionView()),
+      MaterialPageRoute(builder: (context) => const SubscriptionView()),
     );
   }
   return false;

@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
@@ -134,8 +135,7 @@ class _ProductPriceListView extends State<ProductPriceListView> {
         color: refreshIndicatorColor,
         backgroundColor: bgColor,
         onRefresh: _viewModel.refresh,
-        child: ListView.builder(
-          shrinkWrap: true,
+        child: AppAdaptiveGrid(
           padding: const EdgeInsets.only(
             bottom: 160,
             left: 15,

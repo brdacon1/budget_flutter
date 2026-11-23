@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_comment_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_metrics_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/repository/budget_metrics_repository_impl.dart';
@@ -25,6 +26,7 @@ import 'presenter/budget_tab/budget_tab_view_model.dart';
 
 /// Registra as dependências do módulo Budget (orçamentos).
 void registerBudgetDependencies(GetIt sl) {
+  sl.registerLazySingleton<BudgetDraftNotifier>(() => BudgetDraftNotifier());
   sl.registerLazySingleton<BudgetRemoteDataSource>(
     () => BudgetRemoteDataSource(),
   );

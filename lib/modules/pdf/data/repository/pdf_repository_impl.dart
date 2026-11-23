@@ -61,7 +61,7 @@ class PdfRepositoryImpl extends PdfRepository {
       await _pdfRemote.saveInformationEnterprise(userUid, pdf.toJson());
       _ownerPdf = pdf;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -77,7 +77,7 @@ class PdfRepositoryImpl extends PdfRepository {
       await _pdfRemote.updateInformationEnterprise(userUid, pdf.toJson());
       _ownerPdf = pdf;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

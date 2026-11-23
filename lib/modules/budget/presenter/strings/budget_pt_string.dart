@@ -16,6 +16,9 @@ class BudgetStrings {
           ? 'Você ainda não criou orçamentos'
           : 'You have not created any budgets yet';
 
+  static String get selectBudgetHint =>
+      _isPt ? 'Selecione um orçamento' : 'Select a budget';
+
   static String get screenTitle => _isPt ? 'Meus orçamentos' : 'My budgets';
   static String get searchPlaceholder =>
       _isPt ? 'Buscar cliente' : 'Search client';
@@ -28,6 +31,8 @@ class BudgetStrings {
     'FINALIZADO' => _isPt ? 'Finalizado' : 'Finished',
     _ => _isPt ? 'Pendente' : 'Pending',
   };
+  static String get draftLabel =>
+      _isPt ? 'Novo · não salvo' : 'New · not saved';
   static String get newBudget => _isPt ? 'Novo orçamento' : 'New budget';
   static String get budgetNumber => _isPt ? 'Nº' : 'No.';
   static String get detailDate => _isPt ? 'Data' : 'Date';

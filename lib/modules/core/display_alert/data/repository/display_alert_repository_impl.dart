@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
@@ -99,10 +100,8 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
 
   @override
   Future<void> dialogChangePassword(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    return showAppModal<void>(
+      context,
       builder:
           (context) => ChangePasswordBottomModalWidget(
             onSubmit: (modalContext, email) async {
@@ -133,10 +132,8 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   @override
   Future<String?> dialogChangeName(BuildContext context) async {
     String? savedName;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showAppModal<void>(
+      context,
       builder:
           (context) => ChangeNameBottomModalWidget(
             onSubmit: (modalContext, name) async {
@@ -192,10 +189,8 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   @override
   Future<String> adsNotification(BuildContext context) async {
     String resultText = '';
-    await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showAppModal<String>(
+      context,
       builder: (context) => const AdsOptionBottomModalWidget(),
     ).then((value) {
       resultText = value ?? '';
@@ -212,10 +207,8 @@ class DisplayAlertRepositoryImpl implements DisplayAlertRepository {
   }) async {
     const defaults = ItemOptionBottomModalWidget();
     String resultText = '';
-    await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showAppModal<String>(
+      context,
       builder:
           (context) => ItemOptionBottomModalWidget(
             title: title ?? defaults.title,

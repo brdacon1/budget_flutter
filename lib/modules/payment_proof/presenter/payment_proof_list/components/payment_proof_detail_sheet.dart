@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/payment_proof/data/model/payment_proof.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_viewer/payment_proof_viewer_view.dart';
@@ -25,11 +26,10 @@ class PaymentProofDetailSheet extends StatelessWidget {
     required PaymentProof proof,
     required String dateTime,
     required String value,
-  }) => showModalBottomSheet<void>(
-    context: context,
+  }) => showAppModal<void>(
+    context,
     useRootNavigator: true,
     isScrollControlled: true,
-    backgroundColor: transparentColor,
     builder:
         (sheet) => SizedBox(
           height: MediaQuery.of(sheet).size.height * 0.8,
@@ -179,7 +179,10 @@ class PaymentProofDetailSheet extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(color: whiteColor, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: whiteColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],

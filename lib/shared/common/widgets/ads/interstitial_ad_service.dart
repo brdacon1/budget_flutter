@@ -18,8 +18,7 @@ class InterstitialAdService {
   /// ID do bloco de anúncios, lido do ambiente (preenchido em
   /// `Environment.instance.initialize()`, aguardado em `main` antes do
   /// `runApp`). As chaves vivem exclusivamente em `env/*.json`.
-  String get _adUnitId =>
-      Environment.instance.adMob.interstitialAdUnitId;
+  String get _adUnitId => Environment.instance.adMob.interstitialAdUnitId;
 
   InterstitialAd? _interstitialAd;
   int _numInterstitialLoadAttempts = 0;

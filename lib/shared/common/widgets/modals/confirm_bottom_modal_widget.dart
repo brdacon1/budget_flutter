@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
@@ -124,11 +125,14 @@ class _Button extends StatelessWidget {
       style: TextButton.styleFrom(
         backgroundColor: outlined ? Colors.white : const Color(0xFF0DF5E4),
         foregroundColor: AppBottomModal.grayColor,
-        side: outlined
-            ? const BorderSide(color: Color(0xFF9E9E9E), width: 2)
-            : null,
+        side:
+            outlined
+                ? const BorderSide(color: Color(0xFF9E9E9E), width: 2)
+                : null,
         padding: const EdgeInsets.symmetric(vertical: 14.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
       ),
       child: Text(
         label,
@@ -151,16 +155,15 @@ Future<bool> showConfirmBottomModal(
   String confirmLabel = 'Sim',
   String cancelLabel = 'Não',
 }) async {
-  final result = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => ConfirmBottomModalWidget(
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
-    ),
+  final result = await showAppModal<bool>(
+    context,
+    builder:
+        (context) => ConfirmBottomModalWidget(
+          title: title,
+          message: message,
+          confirmLabel: confirmLabel,
+          cancelLabel: cancelLabel,
+        ),
   );
   return result ?? false;
 }

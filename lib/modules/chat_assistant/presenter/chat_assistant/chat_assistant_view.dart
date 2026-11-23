@@ -7,6 +7,8 @@ import 'package:oflite/modules/comment_library/presenter/comment_library_creator
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
 import 'dart:io';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_app_bar.dart';
 import 'package:oflite/injection.dart';
@@ -381,10 +383,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     if (id == null || !mounted) return;
     final budget = await _vm.budgetForNavigation(id);
     if (budget == null || !mounted) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: transparentColor,
+    await showAppModal<void>(
+      context,
       builder:
           (dialogContext) => BudgetListDuplicateBottomModalWidget(
             onConfirm: (clientData, items, comments, receipts) async {
@@ -411,7 +411,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   Future<void> _openProductCreator() async {
     final result = await showProductPriceCreatorBottomModal(
       context,
-      item: ProductPriceModel(),
+      item: const ProductPriceModel(),
     );
     if (result == true || mounted) {
       await _vm.onProductCreatorClosed(result == true);
@@ -526,9 +526,25 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       appBar: ChatAppBar(onRestart: () => _vm.resetChatCommand.execute()),
       body: Column(
         children: [
-          Expanded(child: _buildMessageList()),
+          // Conteúdo numa coluna central; fundo e barra de digitação seguem
+          // de ponta a ponta (tela larga).
+          Expanded(
+            child: AppPageContainer(
+              width: AppPageWidth.reading,
+              child: _buildMessageList(),
+            ),
+          ),
           AppKeyboardDismissBar(label: ChatAssistantStrings.closeKeyboard),
-          _buildInputArea(),
+          Container(
+            decoration: const BoxDecoration(
+              color: chatBarColor,
+              border: Border(top: BorderSide(color: chatDividerColor)),
+            ),
+            child: AppPageContainer(
+              width: AppPageWidth.reading,
+              child: _buildInputArea(),
+            ),
+          ),
         ],
       ),
     );

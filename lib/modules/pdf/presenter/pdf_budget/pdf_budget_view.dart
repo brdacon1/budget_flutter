@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -13,7 +14,16 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 class PdfBudgetView extends StatefulWidget {
   final PdfLayoutType layoutType;
 
-  const PdfBudgetView({super.key, this.layoutType = PdfLayoutType.standard});
+  const PdfBudgetView({
+    super.key,
+    this.layoutType = PdfLayoutType.standard,
+    this.isTabRoot = false,
+  });
+
+  /// `true` quando é a aba PDF do orçamento: no painel de detalhe (tablet) a
+  /// aba não tem seta de voltar. Aberta por cima (Executivo/Profissional, chat)
+  /// mantém a seta.
+  final bool isTabRoot;
 
   @override
   State<PdfBudgetView> createState() => _PdfBudgetView();
@@ -43,6 +53,8 @@ class _PdfBudgetView extends State<PdfBudgetView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading:
+            !(widget.isTabRoot && AppDetailPane.isInside(context)),
         title: Text(PdfStrings.pdfTitle),
         backgroundColor: bgColor,
       ),

@@ -1,5 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 
+/// Classe de tamanho da janela (ARCHITECTURE §22).
+///
+/// - [compact]: < 600 (celular)
+/// - [medium]: 600–1023 (tablet pequeno / janela estreita)
+/// - [expanded]: >= 1024 (iPad deitado, web)
+enum WindowSize { compact, medium, expanded }
+
 class ResponsiveWidget extends StatelessWidget {
   final Widget mobile;
   final Widget? tablet;
@@ -12,33 +19,34 @@ class ResponsiveWidget extends StatelessWidget {
     required this.desktop,
   });
 
-// This size work fine on my design, maybe you need some customization depends on your design
+  static const double mediumBreakpoint = 600;
+  static const double expandedBreakpoint = 1024;
 
-  // This isMobile, isTablet, isDesktop helep us later
+  static WindowSize sizeOf(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width >= expandedBreakpoint) return WindowSize.expanded;
+    if (width >= mediumBreakpoint) return WindowSize.medium;
+    return WindowSize.compact;
+  }
+
   static bool isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < 850;
+      sizeOf(context) == WindowSize.compact;
 
   static bool isTablet(BuildContext context) =>
-      MediaQuery.of(context).size.width < 1100 &&
-      MediaQuery.of(context).size.width >= 850;
+      sizeOf(context) == WindowSize.medium;
 
   static bool isDesktop(BuildContext context) =>
-      MediaQuery.of(context).size.width >= 1100;
+      sizeOf(context) == WindowSize.expanded;
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-    // If our width is more than 1100 then we consider it a desktop
-    if (size.width >= 1100) {
-      return desktop;
-    }
-    // If width it less then 1100 and more then 850 we consider it as tablet
-    else if (size.width >= 850 && tablet != null) {
-      return tablet!;
-    }
-    // Or less then that we called it mobile
-    else {
-      return mobile;
+    switch (sizeOf(context)) {
+      case WindowSize.expanded:
+        return desktop;
+      case WindowSize.medium:
+        return tablet ?? mobile;
+      case WindowSize.compact:
+        return mobile;
     }
   }
 }

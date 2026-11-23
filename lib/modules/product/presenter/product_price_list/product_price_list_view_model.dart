@@ -128,7 +128,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }) async {
     await showProductPriceCreatorBottomModal(
       context,
-      item: item ?? ProductPriceModel(),
+      item: item ?? const ProductPriceModel(),
       fromListItem: false,
     );
     await inicialData();

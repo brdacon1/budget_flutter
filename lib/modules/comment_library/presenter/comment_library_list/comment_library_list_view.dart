@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/data/model/comment_library_model.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
@@ -152,7 +153,7 @@ class _CommentLibraryListViewState extends State<CommentLibraryListView> {
                   ),
                 ],
               )
-              : ListView.builder(
+              : AppAdaptiveGrid(
                 padding: const EdgeInsets.fromLTRB(15, 10, 15, 160),
                 itemCount: list.length,
                 itemBuilder: (context, index) {

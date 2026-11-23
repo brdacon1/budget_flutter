@@ -67,6 +67,6 @@ class ConfirmAgentActionUsecase {
     _aiRepo.addMessage(
       AgentMessageEntity(AgentRole.user, '[${action.toolName}: $outcome]'),
     );
-    _aiRepo.addMessage(AgentMessageEntity(AgentRole.model, 'Ok.'));
+    _aiRepo.addMessage(const AgentMessageEntity(AgentRole.model, 'Ok.'));
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/enums/alert_type_enum.dart';
@@ -10,6 +12,8 @@ import 'package:oflite/shared/common/enums/alert_type_enum.dart';
 /// fundo colorido, conforme padrão visual definido para os alertas.
 class AlertSnackBar {
   AlertSnackBar._();
+
+  static const double _maxWidth = 560;
 
   static void show(
     BuildContext context, {
@@ -28,8 +32,17 @@ class AlertSnackBar {
           duration: duration,
           backgroundColor: type.background,
           behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          // Em tela larga o aviso fica centralizado com largura máxima.
+          margin: EdgeInsets.symmetric(
+            horizontal: math.max(
+              12,
+              (MediaQuery.sizeOf(context).width - _maxWidth) / 2,
+            ),
+            vertical: 12,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

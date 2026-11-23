@@ -118,7 +118,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       await _budgetRepo.updateBudget(updated);
       _draft = updated;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -139,7 +139,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
         await _budgetRepo.saveBudgetItem(_draft!.id!, itemWithId);
       }
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -153,7 +153,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
     try {
       await _budgetRepo.deleteBudgetItems(_draft!.id!, items);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -179,7 +179,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       }
     }
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   @override
@@ -190,14 +190,14 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
     }
     _messages[i] = _messages[i].copyWith(content: newContent);
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   @override
   Future<Result<void>> removeMessageById(String id) async {
     _messages.removeWhere((m) => m.id == id);
     notifyListeners();
-    return Result.ok(null);
+    return const Result.ok(null);
   }
 
   @override
@@ -238,7 +238,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       _draft = updated;
       _budgetRepo.selectBudget.value = _draft?.copyWith(totalValue: total);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -285,7 +285,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
   @override
   Future<Result<void>> deleteDraft() async {
     if (_draft == null || _draft!.id == null) {
-      return Result.ok(null);
+      return const Result.ok(null);
     }
     try {
       // Limpa cache de itens do BudgetRepository para este draft
@@ -294,7 +294,7 @@ class ChatBudgetRepositoryImpl extends ChatBudgetRepository {
       await _budgetRepo.deleteBudgets([_draft!]);
       _draft = null;
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

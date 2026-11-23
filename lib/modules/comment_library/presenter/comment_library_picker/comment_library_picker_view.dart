@@ -1,5 +1,6 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/comment_library_picker_view_model.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/components/comment_library_picker_card.dart';
@@ -138,10 +139,8 @@ Future<bool> showCommentLibraryPickerBottomModal(
   BuildContext context, {
   required String budgetId,
 }) async {
-  final added = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: transparentColor,
+  final added = await showAppModal<bool>(
+    context,
     builder: (context) => CommentLibraryPickerView(budgetId: budgetId),
   );
   return added ?? false;

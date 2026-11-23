@@ -27,21 +27,19 @@ class Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (!ResponsiveWidget.isDesktop(context))
-          Container(
-            alignment: Alignment.topLeft,
-            child: Text(
-              DashboardStrings.pageTitle,
-              style: GoogleFonts.heebo(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                letterSpacing: 1,
-              ),
+        Container(
+          alignment: Alignment.topLeft,
+          child: Text(
+            DashboardStrings.pageTitle,
+            style: GoogleFonts.heebo(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              letterSpacing: 1,
             ),
           ),
-        if (!ResponsiveWidget.isMobile(context))
-          Spacer(flex: ResponsiveWidget.isDesktop(context) ? 2 : 1),
+        ),
+        if (!ResponsiveWidget.isMobile(context)) const Spacer(),
         const ProfileCard(),
       ],
     );
@@ -106,7 +104,7 @@ class _ProfileCard extends State<ProfileCard> {
   Future<void> _openNavigationScreen() async {
     await Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginView()),
+      MaterialPageRoute(builder: (context) => const LoginView()),
       (Route<dynamic> route) => false,
     ).then((value) async => {});
   }

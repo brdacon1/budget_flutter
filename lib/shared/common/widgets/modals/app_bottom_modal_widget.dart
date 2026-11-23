@@ -1,10 +1,12 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Base visual reutilizável para os bottom modals do app.
 ///
 /// O conteúdo é exibido num [showModalBottomSheet] com:
-/// - fundo branco (`Colors.white`);
+/// - fundo branco (`whiteColor`);
 /// - header com título (cinza máximo) + botão fechar (cinza);
 /// - padding automático de `viewInsets` para acompanhar o teclado;
 /// - botão de ação padrão (estilo `buttonColor`, cantos arredondados) no rodapé,
@@ -37,7 +39,7 @@ class AppBottomModal extends StatelessWidget {
   final bool scrollable;
 
   /// Cor cinza "máxima" usada em todos os textos do modal.
-  static const Color grayColor = Color(0xFF424242);
+  static const Color grayColor = modalTextColor;
 
   /// Fração máxima da área visível (tela − teclado) que o modal ocupa. O
   /// header (handle + título + fechar) nunca chega à status bar; o que passar
@@ -47,8 +49,7 @@ class AppBottomModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final maxHeight =
-        (mq.size.height - mq.viewInsets.bottom) * maxHeightFactor;
+    final maxHeight = (mq.size.height - mq.viewInsets.bottom) * maxHeightFactor;
 
     return Padding(
       // Acompanha o teclado: ao abrir o campo, o conteúdo sobe junto.
@@ -56,7 +57,7 @@ class AppBottomModal extends StatelessWidget {
       child: Container(
         constraints: BoxConstraints(maxHeight: maxHeight),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: whiteColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -68,7 +69,7 @@ class AppBottomModal extends StatelessWidget {
             children: [
               _DragHandle(),
               _Header(title: title),
-              const Divider(color: Color(0xFFE0E0E0), thickness: 1),
+              const Divider(color: modalDividerColor, thickness: 1),
               Flexible(
                 fit: FlexFit.loose,
                 child: scrollable ? SingleChildScrollView(child: child) : child,
@@ -94,7 +95,7 @@ class _DragHandle extends StatelessWidget {
         width: 48,
         height: 5,
         decoration: BoxDecoration(
-          color: const Color(0xFFBDBDBD),
+          color: modalHandleColor,
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -146,7 +147,7 @@ class _ModalButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: const Color(0xFF0DF5E4), // buttonColor padrão
+        backgroundColor: buttonColor,
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 70),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -177,12 +178,11 @@ Future<void> showAppBottomModal(
   bool isScrollControlled = true,
   bool dismissible = true,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
+  return showAppModal<void>(
+    context,
     isScrollControlled: isScrollControlled,
     isDismissible: dismissible,
     enableDrag: dismissible,
-    backgroundColor: Colors.transparent,
     builder:
         (context) => AppBottomModal(
           title: title,

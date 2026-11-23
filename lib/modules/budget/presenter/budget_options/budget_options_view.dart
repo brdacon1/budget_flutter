@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
@@ -88,7 +89,7 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
       );
       if (!mounted) return;
       if (choice == BudgetStrings.goPremium) {
-        await _push(SubscriptionView());
+        await _push(const SubscriptionView());
         return;
       }
       if (choice != BudgetStrings.watchAd) return;
@@ -130,6 +131,7 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
       body: Column(
         children: <Widget>[
           AppHeaderSecondTitle(
+            showBack: !AppDetailPane.isInside(context),
             titlePage: BudgetStrings.optionsTitle,
             secondTitle: BudgetStrings.optionsSubtitle,
             onBack: () => Navigator.pop(context, true),

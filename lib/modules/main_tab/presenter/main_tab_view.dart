@@ -8,6 +8,9 @@ import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 
+import 'package:oflite/modules/main_tab/presenter/components/main_tab_side_bar.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
+
 import 'main_tab_view_model.dart';
 
 class MainTabView extends StatefulWidget {
@@ -30,6 +33,7 @@ class _MainTabView extends State<MainTabView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Comprovantes recebidos pela folha de compartilhamento (§15.4).
       _viewModel.listenSharedFiles();
+      _viewModel.loadCompanyLogo();
       getIt<NotificationRepository>().tryOpenPendingBudget();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
@@ -49,7 +53,7 @@ class _MainTabView extends State<MainTabView> {
     _viewModel.consumeNeedsSubscription();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => SubscriptionView()),
+      MaterialPageRoute(builder: (_) => const SubscriptionView()),
     );
   }
 
@@ -75,8 +79,24 @@ class _MainTabView extends State<MainTabView> {
           ChatAssistantView(key: ValueKey(_viewModel.chatGeneration)),
           ...tabs.skip(1),
         ];
+        final body = children[_viewModel.currentIndex];
+        if (ResponsiveWidget.isDesktop(context)) {
+          return Scaffold(
+            body: Row(
+              children: [
+                MainTabSideBar(
+                  logo: _viewModel.companyLogo,
+                  items: _viewModel.tabItems,
+                  currentIndex: _viewModel.currentIndex,
+                  onTap: _viewModel.onTabTapped,
+                ),
+                Expanded(child: body),
+              ],
+            ),
+          );
+        }
         return Scaffold(
-          body: children[_viewModel.currentIndex],
+          body: body,
           bottomNavigationBar: Theme(
             data: Theme.of(context).copyWith(canvasColor: secondaryColor),
             child: BottomNavigationBar(

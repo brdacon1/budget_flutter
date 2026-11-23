@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view_model.dart';
@@ -21,11 +22,10 @@ class ChatMediaPickerView extends StatefulWidget {
   const ChatMediaPickerView({super.key});
 
   static Future<ChatMediaPickResult?> show(BuildContext context) =>
-      showModalBottomSheet<ChatMediaPickResult>(
-        context: context,
+      showAppModal<ChatMediaPickResult>(
+        context,
         useRootNavigator: true,
         isScrollControlled: true,
-        backgroundColor: transparentColor,
         builder:
             (sheet) => Padding(
               padding: EdgeInsets.only(

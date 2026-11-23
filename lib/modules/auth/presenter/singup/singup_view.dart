@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
@@ -111,8 +112,6 @@ class _SingUpViewState extends State<SingUpView> {
 
   @override
   Widget build(BuildContext context) {
-    final he = MediaQuery.of(context).size.height;
-
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
@@ -129,7 +128,7 @@ class _SingUpViewState extends State<SingUpView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                SizedBox(height: he * 0.01),
+                const SizedBox(height: 8),
                 SingUpField(
                   controller: _viewModel.nomeText,
                   hintText: SingUpStrings.signUpNameHint,
@@ -137,7 +136,7 @@ class _SingUpViewState extends State<SingUpView> {
                   field: SingUpFieldType.name,
                   onTap: () => _viewModel.selectField(SingUpFieldType.name),
                 ),
-                SizedBox(height: he * 0.02),
+                const SizedBox(height: 16),
                 SingUpField(
                   controller: _viewModel.emailText,
                   hintText: SingUpStrings.signUpEmailHint,
@@ -145,7 +144,7 @@ class _SingUpViewState extends State<SingUpView> {
                   field: SingUpFieldType.email,
                   onTap: () => _viewModel.selectField(SingUpFieldType.email),
                 ),
-                SizedBox(height: he * 0.02),
+                const SizedBox(height: 16),
                 SingUpField(
                   controller: _viewModel.passwordText,
                   hintText: SingUpStrings.signUpPasswordHint,
@@ -156,13 +155,13 @@ class _SingUpViewState extends State<SingUpView> {
                   onTap: () => _viewModel.selectField(SingUpFieldType.password),
                   togglePassword: _viewModel.togglePasswordVisibility,
                 ),
-                SizedBox(height: he * 0.03),
+                const SizedBox(height: 24),
                 SingUpLoginLink(
                   // O cadastro é aberto a partir do login: "Entre" apenas
                   // fecha o modal e devolve o fluxo para a tela de login.
                   onLogin: () => Navigator.of(context).pop(),
                 ),
-                SizedBox(height: he * 0.01),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -179,10 +178,5 @@ class _SingUpViewState extends State<SingUpView> {
 /// acompanhar o teclado, fundo transparente (a base [AppBottomModal] desenha o
 /// card branco arredondado) e drag habilitado.
 Future<void> showSingUpBottomModal(BuildContext context) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => const SingUpView(),
-  );
+  return showAppModal<void>(context, builder: (context) => const SingUpView());
 }

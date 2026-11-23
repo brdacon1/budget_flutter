@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oflite/shared/common/constants/colors.dart';
 
 class AppHeaderSecondTitle extends StatelessWidget {
   const AppHeaderSecondTitle({
@@ -9,6 +10,7 @@ class AppHeaderSecondTitle extends StatelessWidget {
     required this.onBack,
     this.isBottomPadding = true,
     this.insideSafeArea = false,
+    this.showBack = true,
   });
 
   final String titlePage;
@@ -20,35 +22,40 @@ class AppHeaderSecondTitle extends StatelessWidget {
   final bool insideSafeArea;
   final VoidCallback onBack;
 
+  /// `false` esconde a seta de voltar (ex.: tela-raiz de um painel de detalhe).
+  final bool showBack;
+
   @override
   Widget build(BuildContext context) {
-    final we = MediaQuery.of(context).size.width;
-    final he = MediaQuery.of(context).size.height;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: insideSafeArea ? 16 : he * 0.07),
-        GestureDetector(
-          onTap: onBack,
-          child: Container(
-            alignment: Alignment.topLeft,
-            margin: EdgeInsets.only(left: we * 0.040),
-            child: const Icon(
-              Icons.arrow_back_outlined,
-              color: Colors.white,
-              size: 35.0,
+        SizedBox(
+          height: insideSafeArea ? 16 : MediaQuery.paddingOf(context).top + 16,
+        ),
+        if (showBack) ...[
+          GestureDetector(
+            onTap: onBack,
+            child: Container(
+              alignment: Alignment.topLeft,
+              margin: const EdgeInsets.only(left: 16),
+              child: const Icon(
+                Icons.arrow_back_outlined,
+                color: whiteColor,
+                size: 35.0,
+              ),
             ),
           ),
-        ),
-        SizedBox(height: he * 0.03),
+          const SizedBox(height: 24),
+        ],
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             titlePage,
             style: GoogleFonts.heebo(
-              color: Colors.white,
+              color: whiteColor,
               fontWeight: FontWeight.bold,
               fontSize: 26,
               letterSpacing: 2,
@@ -57,13 +64,13 @@ class AppHeaderSecondTitle extends StatelessWidget {
         ),
         Container(
           alignment: Alignment.topLeft,
-          margin: EdgeInsets.only(left: we * 0.05),
+          margin: const EdgeInsets.only(left: 20),
           child: Text(
             secondTitle,
-            style: GoogleFonts.heebo(color: Colors.grey, letterSpacing: 1),
+            style: GoogleFonts.heebo(color: emptyTextColor, letterSpacing: 1),
           ),
         ),
-        isBottomPadding ? SizedBox(height: he * 0.02) : Container(),
+        isBottomPadding ? const SizedBox(height: 16) : Container(),
       ],
     );
   }

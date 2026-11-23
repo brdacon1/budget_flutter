@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
@@ -10,10 +11,10 @@ class ChatAttachmentPanel extends StatelessWidget {
   const ChatAttachmentPanel({super.key});
 
   static Future<ChatAttachmentChoice?> show(BuildContext context) =>
-      showModalBottomSheet<ChatAttachmentChoice>(
-        context: context,
+      showAppModal<ChatAttachmentChoice>(
+        context,
         useRootNavigator: true,
-        backgroundColor: transparentColor,
+        isScrollControlled: false,
         builder: (_) => const ChatAttachmentPanel(),
       );
 

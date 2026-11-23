@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_detail/budget_comment_detail_view_model.dart';
@@ -244,10 +245,8 @@ Future<BudgetCommentDetailResult?> showBudgetCommentDetailBottomModal(
   required String budgetId,
   required ObservationBudget comment,
 }) {
-  return showModalBottomSheet<BudgetCommentDetailResult>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: transparentColor,
+  return showAppModal<BudgetCommentDetailResult>(
+    context,
     builder:
         (_) => BudgetCommentDetailView(budgetId: budgetId, comment: comment),
   );

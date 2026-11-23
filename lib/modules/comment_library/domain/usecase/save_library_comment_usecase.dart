@@ -32,9 +32,9 @@ class SaveLibraryCommentUsecase {
     String? budgetId,
   }) async {
     final body = text.trim();
-    if (body.isEmpty) return Result.error(const CommentTextEmptyException());
+    if (body.isEmpty) return const Result.error(CommentTextEmptyException());
     if (body.length > maxTextLength) {
-      return Result.error(const CommentTextTooLongException(maxTextLength));
+      return const Result.error(CommentTextTooLongException(maxTextLength));
     }
 
     final givenName = name?.trim() ?? '';

@@ -1,10 +1,13 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_empty_detail.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
@@ -20,8 +23,10 @@ import 'package:oflite/modules/core/loading_event/domain/repository/loading_even
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 class BudgetListView extends StatefulWidget {
   /// Com cliente: mostra só os orçamentos dele (mesmo telefone), sem busca,
@@ -39,14 +44,50 @@ class _BudgetListView extends State<BudgetListView> {
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   final ScrollController _scrollController = ScrollController();
 
+  /// Navigator do painel de detalhe (tela larga).
+  final GlobalKey<NavigatorState> _detailKey = GlobalKey<NavigatorState>();
+
+  /// Rascunho do orçamento novo e orçamento aberto (selecionado): a lista
+  /// destaca o aberto e mostra o rascunho como um card que se atualiza ao vivo.
+  final BudgetDraftNotifier _draft = getIt<BudgetDraftNotifier>();
+  final _selected = getIt<BudgetRepository>().selectBudget;
+
+  /// Lista + detalhe lado a lado: só em tela larga e na lista principal (a
+  /// lista "orçamentos do cliente" continua empilhando telas).
+  bool get _splitView =>
+      widget.customer == null && ResponsiveWidget.isDesktop(context);
+
   @override
   void initState() {
     _viewModel.customer = widget.customer;
     if (widget.customer == null) getIt<BudgetRepository>().clearSelectBudget();
     getIt<AdsRepository>().loadInterstitial();
     _scrollController.addListener(_onScroll);
+    _draft.addListener(_onOpenBudgetChanged);
+    _selected.addListener(_onOpenBudgetChanged);
     _viewModel.initialScreen();
     super.initState();
+  }
+
+  /// Tela larga: ao entrar em Orçamentos já abre o mais recente (primeiro da
+  /// lista, ordenada por id decrescente). Só uma vez por entrada na aba — se o
+  /// usuário fechar o detalhe, não reabre.
+  bool _autoOpened = false;
+
+  void _openMostRecentOnce(List<CustomerInfo> data) {
+    if (_autoOpened || !mounted || !_splitView || data.isEmpty) return;
+    if (_draft.value != null || _detailKey.currentState == null) return;
+    _autoOpened = true;
+    _openBudget(data.first);
+  }
+
+  /// Paginação por rolagem: se a página carregada cabe inteira na área visível
+  /// (tela larga/alta), a lista não rola e o `_onScroll` nunca dispara. Então,
+  /// enquanto não houver o que rolar e ainda houver páginas, pede a próxima.
+  void _loadMoreIfNotScrollable() {
+    if (!mounted || !_scrollController.hasClients) return;
+    if (_scrollController.position.maxScrollExtent > 0) return;
+    _viewModel.loadMore();
   }
 
   void _onScroll() {
@@ -58,8 +99,24 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
+  /// Fora do build (o formulário muda esses valores em initState): reconstrói
+  /// a lista depois do frame.
+  void _onOpenBudgetChanged() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  /// Orçamento aberto no painel (tela larga): destaque da lista.
+  bool _isOpen(CustomerInfo item) {
+    final id = item.id ?? '';
+    return _splitView && id.isNotEmpty && id == _selected.value?.id;
+  }
+
   @override
   void dispose() {
+    _draft.removeListener(_onOpenBudgetChanged);
+    _selected.removeListener(_onOpenBudgetChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _viewModel.dispose();
@@ -72,10 +129,8 @@ class _BudgetListView extends State<BudgetListView> {
 
   Future<void> _dialogDuplicate() async {
     final viewContext = context;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: transparentColor,
+    await showAppModal<void>(
+      context,
       builder: (BuildContext dialogContext) {
         return BudgetListDuplicateBottomModalWidget(
           onConfirm: (clientData, quoteItems, comments, receipts) async {
@@ -111,8 +166,14 @@ class _BudgetListView extends State<BudgetListView> {
     );
     if (!confirm || !mounted) return;
 
+    final openId = _selected.value?.id;
+    final deletesActive =
+        openId != null && _viewModel.selectedIds.contains(openId);
     final ok = await _viewModel.deleteSelected();
     if (!mounted) return;
+    if (ok && deletesActive) {
+      _detailKey.currentState?.popUntil((route) => route.isFirst);
+    }
     if (ok) {
       await _viewModel.displayAlert.notificationNotCloseScreen(
         context,
@@ -162,6 +223,9 @@ class _BudgetListView extends State<BudgetListView> {
       onPressed: () async {
         if (!await confirmNewBudgetAccess(context) || !mounted) return;
         if (widget.customer != null) return _createForCustomer();
+        if (_splitView) {
+          return _showDetail(BudgetTabView(item: _viewModel.customerInfoNew()));
+        }
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -265,6 +329,10 @@ class _BudgetListView extends State<BudgetListView> {
 
   void _openBudget(CustomerInfo item) {
     getIt<BudgetRepository>().selectBudget.value = item;
+    if (_splitView) {
+      _showDetail(BudgetTabView(item: item));
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -279,6 +347,22 @@ class _BudgetListView extends State<BudgetListView> {
     });
   }
 
+  /// Abre [page] no painel de detalhe, substituindo o que estiver aberto.
+  void _showDetail(Widget page) {
+    _detailKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => page),
+      (route) => route.isFirst,
+    );
+  }
+
+  /// Detalhe fechado (voltar na tela do orçamento): limpa a seleção e
+  /// atualiza a lista (novo orçamento, totais alterados).
+  void _onDetailClosed() {
+    if (!mounted) return;
+    getIt<BudgetRepository>().clearSelectBudget();
+    _viewModel.getInformationOrcamento(refresh: true);
+  }
+
   Future<void> _duplicateBudget(CustomerInfo item) async {
     if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ?? false) &&
         _viewModel.totalBudgetCount > 10) {
@@ -290,7 +374,7 @@ class _BudgetListView extends State<BudgetListView> {
       if (!mounted) return;
       await Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SubscriptionView()),
+        MaterialPageRoute(builder: (context) => const SubscriptionView()),
       );
     } else {
       getIt<BudgetRepository>().selectBudget.value = item;
@@ -324,9 +408,9 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Future<void> _openActions(CustomerInfo item) {
-    return showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: transparentColor,
+    return showAppModal<void>(
+      context,
+      isScrollControlled: false,
       builder:
           (_) => BudgetListActionsBottomModalWidget(
             item: item,
@@ -342,8 +426,14 @@ class _BudgetListView extends State<BudgetListView> {
 
   Widget _buildListView() {
     final data = _viewModel.getFilteredData();
+    // Orçamento novo em edição (tela larga): card de rascunho no topo.
+    final draft = _splitView ? _draft.value : null;
+    final offset = draft == null ? 0 : 1;
     final isEmpty =
-        data.isEmpty && !_viewModel.isRefreshing && !_viewModel.isLoadingMore;
+        data.isEmpty &&
+        draft == null &&
+        !_viewModel.isRefreshing &&
+        !_viewModel.isLoadingMore;
 
     if (isEmpty) {
       return Expanded(
@@ -388,6 +478,11 @@ class _BudgetListView extends State<BudgetListView> {
       );
     }
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMoreIfNotScrollable();
+      _openMostRecentOnce(data);
+    });
+
     return Expanded(
       child: RefreshIndicator(
         color: refreshIndicatorColor,
@@ -399,9 +494,20 @@ class _BudgetListView extends State<BudgetListView> {
           controller: _scrollController,
           shrinkWrap: true,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-          itemCount: data.length + (_viewModel.isLoadingMore ? 1 : 0),
+          itemCount: offset + data.length + (_viewModel.isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index >= data.length) {
+            if (draft != null && index == 0) {
+              return BudgetListCard(
+                item: draft,
+                draft: true,
+                active: true,
+                selected: false,
+                moneyConvert: moneyConvert,
+                onTap: null,
+                onMore: null,
+              );
+            }
+            if (index - offset >= data.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
@@ -416,10 +522,11 @@ class _BudgetListView extends State<BudgetListView> {
                 ),
               );
             }
-            final item = data[index];
+            final item = data[index - offset];
             return BudgetListCard(
               item: item,
               selected: _viewModel.isSelected(item),
+              active: _isOpen(item),
               moneyConvert: moneyConvert,
               // Orçamento de origem: já está aberto por baixo, sem ações.
               onTap:
@@ -517,7 +624,7 @@ class _BudgetListView extends State<BudgetListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final list = Scaffold(
       backgroundColor: bgColor,
       body: AnimatedBuilder(
         animation: _viewModel,
@@ -527,6 +634,13 @@ class _BudgetListView extends State<BudgetListView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: _buildFloatingButton(),
+    );
+    if (!_splitView) return list;
+    return AppMasterDetail(
+      master: list,
+      emptyDetail: const BudgetListEmptyDetail(),
+      detailNavigatorKey: _detailKey,
+      onDetailClosed: _onDetailClosed,
     );
   }
 }

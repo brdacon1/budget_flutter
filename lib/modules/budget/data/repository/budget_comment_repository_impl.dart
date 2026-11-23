@@ -57,7 +57,7 @@ class BudgetCommentRepositoryImpl extends BudgetCommentRepository {
       });
       _cache.remove(budgetId); // invalida cache
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -82,7 +82,7 @@ class BudgetCommentRepositoryImpl extends BudgetCommentRepository {
       });
       _cache.remove(budgetId);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -105,7 +105,7 @@ class BudgetCommentRepositoryImpl extends BudgetCommentRepository {
       }
       _cache.remove(budgetId);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -121,7 +121,7 @@ class BudgetCommentRepositoryImpl extends BudgetCommentRepository {
       await _remote.deleteComment(userUid, budgetId, commentId);
       _cache.remove(budgetId);
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

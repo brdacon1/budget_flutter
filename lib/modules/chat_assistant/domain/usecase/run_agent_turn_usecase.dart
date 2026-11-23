@@ -30,7 +30,7 @@ class RunAgentTurnUsecase {
     final today = _isoDate(now ?? DateTime.now());
     final used = await _aiRepo.usageOf(today);
     if (used >= dailyLimit) {
-      return Result.error(const AiDailyLimitException());
+      return const Result.error(AiDailyLimitException());
     }
     await _aiRepo.saveUsage(today, used + 1);
 

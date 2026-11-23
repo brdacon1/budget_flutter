@@ -10,6 +10,8 @@ class BudgetListCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.selected,
+    this.active = false,
+    this.draft = false,
     required this.moneyConvert,
     required this.onTap,
     required this.onMore,
@@ -17,6 +19,14 @@ class BudgetListCard extends StatelessWidget {
 
   final CustomerInfo item;
   final bool selected;
+
+  /// Orçamento aberto no painel de detalhe (tela larga): destaca o card como
+  /// o item selecionado da sidebar (fundo ciano translúcido + borda ciano).
+  final bool active;
+
+  /// Orçamento novo ainda não salvo (rascunho): mostra "Novo orçamento" até
+  /// o nome ser digitado e a etiqueta "não salvo" no lugar do número.
+  final bool draft;
   final ConvertCoinRepository moneyConvert;
 
   /// `null` = card sem ações (sem toque nem menu).
@@ -27,14 +37,17 @@ class BudgetListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = item.customerName ?? '';
     final initial = name.isEmpty ? '?' : name[0].toUpperCase();
+    final title = name.isEmpty && draft ? BudgetStrings.newBudget : name;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
-        color: secondaryColor,
+        color: active ? buttonColor.withValues(alpha: 0.15) : secondaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? buttonColor : cardBorderColor),
+          side: BorderSide(
+            color: selected || active ? buttonColor : cardBorderColor,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -70,7 +83,7 @@ class BudgetListCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -81,7 +94,9 @@ class BudgetListCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${BudgetStrings.budgetNumber} ${item.id}',
+                        draft
+                            ? BudgetStrings.draftLabel
+                            : '${BudgetStrings.budgetNumber} ${item.id}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(color: whiteColor, fontSize: 12),

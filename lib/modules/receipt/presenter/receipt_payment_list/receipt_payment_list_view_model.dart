@@ -66,7 +66,7 @@ class ReceiptPaymentListViewModel extends ChangeNotifier {
     try {
       await _paymentRepository.deletePayment(foundPayment[index].id!);
       await inicialData(forceRefresh: true);
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

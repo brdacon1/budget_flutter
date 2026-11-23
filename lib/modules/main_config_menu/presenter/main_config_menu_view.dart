@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -35,62 +36,71 @@ class _MainConfigMenuView extends State<MainConfigMenuView> {
 
   @override
   Widget build(BuildContext context) {
-    var he = MediaQuery.of(context).size.height;
-
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, child) {
         return Scaffold(
           backgroundColor: bgColor,
-          body: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              SizedBox(height: he * 0.04),
-              SizedBox(height: he * 0.03),
-              Container(
-                margin: const EdgeInsets.only(right: 285.0),
-                child: Text(
-                  MainConfigMenuStrings.pageTitle,
-                  style: GoogleFonts.heebo(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    letterSpacing: 2,
+          body: AppPageContainer(
+            width: AppPageWidth.reading,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(height: MediaQuery.paddingOf(context).top + 24),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: Text(
+                    MainConfigMenuStrings.pageTitle,
+                    style: GoogleFonts.heebo(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _viewModel.menuItems.length,
-                  itemBuilder: (context, index) {
-                    final menuItem = _viewModel.menuItems[index];
-                    return Padding(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
-                      child: GestureDetector(
-                        onTap: () => _viewModel.navigateToPage(context, index),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: bgColor,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: secondaryColor, width: 2),
-                          ),
-                          child: ListTile(
-                            leading: Icon(menuItem.icon),
-                            title: Text(
-                              menuItem.title,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 14),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _viewModel.menuItems.length,
+                    itemBuilder: (context, index) {
+                      final menuItem = _viewModel.menuItems[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 15,
+                        ),
+                        child: GestureDetector(
+                          onTap:
+                              () => _viewModel.navigateToPage(context, index),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: bgColor,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: secondaryColor,
+                                width: 2,
+                              ),
                             ),
-                            trailing: const Icon(Icons.arrow_right),
+                            child: ListTile(
+                              leading: Icon(menuItem.icon),
+                              title: Text(
+                                menuItem.title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              trailing: const Icon(Icons.arrow_right),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

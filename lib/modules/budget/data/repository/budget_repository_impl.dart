@@ -188,7 +188,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
         _budgets.insert(0, budget);
       }
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -210,7 +210,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
         _selectedBudget = budget;
       }
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -230,7 +230,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
       }
       _budgets.removeWhere((b) => budgetsToDelete.any((d) => d.id == b.id));
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -341,7 +341,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
       } else {
         list.add(item);
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -366,7 +366,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
       if (list != null) {
         list.removeWhere((i) => items.any((d) => d.id == i.id));
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -390,7 +390,7 @@ class BudgetRepositoryImpl extends BudgetRepository {
           'DATA': formatted,
         });
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

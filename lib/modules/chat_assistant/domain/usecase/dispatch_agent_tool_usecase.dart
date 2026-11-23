@@ -131,7 +131,7 @@ class DispatchAgentToolUsecase {
         },
       },
     ),
-    AgentToolSpec(
+    const AgentToolSpec(
       monthSummary,
       'Resumo de um mês: quantidade e valor total de orçamentos, por status.',
       {
@@ -142,7 +142,7 @@ class DispatchAgentToolUsecase {
         },
       },
     ),
-    AgentToolSpec(
+    const AgentToolSpec(
       listReceipts,
       'Lista os recibos de um orçamento com o valor pago em cada um.',
       {'budget_id': _budgetIdParam},
@@ -173,12 +173,12 @@ class DispatchAgentToolUsecase {
         },
       },
     ),
-    AgentToolSpec(
+    const AgentToolSpec(
       budgetLink,
       'Gera o link público do orçamento para enviar ao cliente.',
       {'budget_id': _budgetIdParam},
     ),
-    AgentToolSpec(
+    const AgentToolSpec(
       openBudget,
       'Abre a tela do orçamento (itens, PDF, recibos).',
       {'budget_id': _budgetIdParam},

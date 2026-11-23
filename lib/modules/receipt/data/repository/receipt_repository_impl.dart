@@ -85,7 +85,7 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
         _receipts.add(receipt);
       }
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -103,7 +103,7 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
         _receipts.removeWhere((r) => r.id == receipt.id);
         notifyListeners();
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -123,7 +123,7 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
       }
       _receipts.removeWhere((r) => receipts.any((d) => d.id == r.id));
       notifyListeners();
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }
@@ -163,7 +163,7 @@ class ReceiptRepositoryImpl extends ReceiptRepository {
           );
         }
       }
-      return Result.ok(null);
+      return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
     }

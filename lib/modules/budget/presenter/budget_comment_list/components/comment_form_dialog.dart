@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/strings/comment_pt_string.dart';
@@ -26,10 +27,8 @@ Future<bool?> showCommentFormDialog({
   final String textButtonName =
       isNew ? CommentStrings.addButton : CommentStrings.updateButton;
 
-  return showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<bool>(
+    context,
     builder:
         (context) => _CommentFormModal(
           descricaoController: descricaoController,

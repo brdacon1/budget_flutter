@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/components/payment_creator_field.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_creator/receipt_payment_creator_view_model.dart';
@@ -135,10 +136,8 @@ Future<bool?> showPaymentCreatorBottomModal(
   BuildContext context, {
   required PaymentCustomer item,
 }) {
-  return showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return showAppModal<bool>(
+    context,
     builder: (context) => ReceiptPaymentCreatorView(item: item),
   );
 }

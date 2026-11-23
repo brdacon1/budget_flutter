@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/utils/poppins_text_theme.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -25,6 +26,7 @@ final GlobalKey<NavigatorState> globalNavigatorKey =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _lockTabletToLandscape();
   setupDependencyInjection();
 
   // Inicializa o Firebase sempre (mobile e web).
@@ -71,6 +73,18 @@ Future<void> main() async {
   await Environment.instance.initialize();
 
   runApp(const MyApp());
+}
+
+/// Tablet (menor lateral >= 600 dp) abre sempre deitado; celular não muda.
+/// No iPad a trava também está no Info.plist; aqui cobre tablets Android.
+void _lockTabletToLandscape() {
+  if (kIsWeb) return;
+  final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  if (view.physicalSize.shortestSide / view.devicePixelRatio < 600) return;
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 }
 
 /// IDs de dispositivos de teste (hash do AdMob) para servir anúncios de
