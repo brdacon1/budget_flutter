@@ -16,6 +16,30 @@ class BudgetListItemsTotalBar extends StatelessWidget {
   final String products;
   final String services;
 
+  Widget _line(String label, String value, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: GoogleFonts.heebo(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(value, style: GoogleFonts.heebo(color: whiteColor, fontSize: 12)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final muted = GoogleFonts.heebo(color: mutedTextColor, fontSize: 12);
@@ -37,9 +61,9 @@ class BudgetListItemsTotalBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Produtos  $products', style: muted),
-                  const SizedBox(height: 2),
-                  Text('Serviços  $services', style: muted),
+                  _line('Produtos', products, productPillColor),
+                  const SizedBox(height: 4),
+                  _line('Serviços', services, cartAccentColor),
                 ],
               ),
             ),
@@ -47,7 +71,7 @@ class BudgetListItemsTotalBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Total', style: muted),
+                Text('Total (produtos + serviços)', style: muted),
                 Text(
                   total,
                   style: GoogleFonts.heebo(

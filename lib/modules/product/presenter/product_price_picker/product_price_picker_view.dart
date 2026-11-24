@@ -28,8 +28,12 @@ class ProductPricePickerView extends StatefulWidget {
 }
 
 class _ProductPricePickerViewState extends State<ProductPricePickerView> {
-  /// Altura do modal: 67% da área visível.
-  static const double _heightFactor = 0.67;
+  /// Altura inicial: 87% da área visível.
+  static const double _heightFactor = 0.87;
+
+  /// Teto quando precisa crescer (ex.: teclado aberto): 90% da área visível,
+  /// nunca passando da status bar.
+  static const double _maxHeightFactor = 0.9;
 
   late final ProductPricePickerViewModel _viewModel;
 
@@ -115,7 +119,10 @@ class _ProductPricePickerViewState extends State<ProductPricePickerView> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final height = (mq.size.height - mq.viewInsets.bottom) * _heightFactor;
+    final visible = mq.size.height - mq.viewInsets.bottom;
+    final keyboardOpen = mq.viewInsets.bottom > 0;
+    final factor = keyboardOpen ? _maxHeightFactor : _heightFactor;
+    final height = (visible * factor).clamp(0.0, visible - mq.padding.top);
 
     return Padding(
       padding: EdgeInsets.only(bottom: mq.viewInsets.bottom),

@@ -267,6 +267,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
       onPressed: _addComment,
       backgroundColor: buttonColor,
       elevation: 4,
+      shape: const StadiumBorder(),
       icon: const Icon(Icons.add, color: blackColor, size: 20),
       label: Text(
         CommentStrings.newComment,

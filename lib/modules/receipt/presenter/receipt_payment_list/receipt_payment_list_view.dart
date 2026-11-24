@@ -175,6 +175,8 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
       heroTag: 'adicionar_pagamento',
       onPressed: _add,
       backgroundColor: buttonColor,
+      elevation: 4,
+      shape: const StadiumBorder(),
       icon: const Icon(Icons.add, color: blackColor),
       label: Text(
         PaymentStrings.addPayment,

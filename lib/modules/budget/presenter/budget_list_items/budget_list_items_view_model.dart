@@ -24,6 +24,9 @@ class BudgetListItemsViewModel extends ChangeNotifier {
   /// Itens marcados pelo check circular para remoção.
   final Set<ItemsBudget> selected = <ItemsBudget>{};
 
+  /// Filtro por categoria; `null` = Todos.
+  ItemCategory? category;
+
   bool loading = true;
   bool deleting = false;
   ItemsBudget newItemsBudget = ItemsBudget();
@@ -80,10 +83,17 @@ class BudgetListItemsViewModel extends ChangeNotifier {
 
   List<ItemsBudget> get filteredItems {
     final q = searchController.text.trim().toLowerCase();
-    if (q.isEmpty) return budgets;
-    return budgets
-        .where((x) => (x.description ?? '').toLowerCase().contains(q))
-        .toList();
+    return budgets.where((x) {
+      if (category != null && ItemCategory.fromValue(x.category) != category) {
+        return false;
+      }
+      return q.isEmpty || (x.description ?? '').toLowerCase().contains(q);
+    }).toList();
+  }
+
+  void onCategoryChanged(ItemCategory? value) {
+    category = value;
+    notifyListeners();
   }
 
   void onSearchTextChanged(String _) => notifyListeners();
