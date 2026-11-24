@@ -2116,6 +2116,9 @@ O chat do assistente (`modules/chat_assistant`) tem dois modos:
 > orçamento e lista `COMPROVANTES` no novo módulo `payment_proof`. Fluxo, regras
 > (2 imagens por envio, 15 por orçamento, nome obrigatório) e arquivos em
 > `.pi/CHAT_AI_AGENT_PLAN.md` §15.
+>
+> **Nota fiscal / recibo de compra (planejado):** segundo tipo de anexo, separado
+> dos comprovantes de pagamento. Plano completo em **§23** deste arquivo.
 
 ### 20.1 Princípios (não negociáveis)
 
@@ -2426,3 +2429,143 @@ Referência: <https://en.wikipedia.org/wiki/Single_source_of_truth>
    regras do §19 seguem valendo.
 8. Toda **nova tela** entra na matriz do `TABLET_RESPONSIVE_PLAN.md` (§5) com
    seu comportamento em `expanded` antes de ser dada como pronta.
+
+---
+
+## 23. Notas fiscais / recibos de compra (plano) — ao lado dos comprovantes
+
+> **Status:** código Flutter implementado (2026-11-24). **Pendente:** publicar
+> regras do Firestore (`NOTASFISCAIS`) e do Storage (`notasfiscais/{uid}/…`) e
+> testar em aparelho real.
+> Só assinantes (mesmo gate de §20/§15 do `CHAT_AI_AGENT_PLAN`).
+
+### 23.1 Conceito
+
+Dois anexos do orçamento, **mesmo conceito, listas separadas**:
+
+| | Comprovante de pagamento (hoje) | Nota fiscal / recibo de compra (novo) |
+|---|---|---|
+| O que é | Cliente pagou algo ao prestador | Prestador **comprou** algo para o serviço (ex.: saco de parafusos) |
+| Efeito financeiro | Abate o que o cliente já pagou | **Valor de cobrança**: o cliente paga depois |
+| Total do orçamento | Não entra | **Não entra** — fica à parte, somado só na lista de notas |
+| Coleção | `ORCAMENTOS/{id}/COMPROVANTES` (já existe) | `ORCAMENTOS/{id}/NOTASFISCAIS` (nova, sem migração) |
+
+**Módulo próprio `modules/invoice/`** (data/domain/presenter/binds). Reaproveita de
+`payment_proof` só o que é genérico: `ProofAttachment`, `PaymentProofType/Origin`,
+`PaymentProofLimits`, compressão de imagem e os componentes de card/detalhe da lista.
+
+### 23.2 Dados e regras
+
+- `Invoice` grava `NOME`, `VALOR` (> 0), `TIPO` (`IMAGEM`/`PDF` — valor fixo,
+  Regra Zero do i18n), `ARQUIVO`, `CAMINHO`, `TAMANHO`, `CRIADOEM`, `ORIGEM`.
+  Sem CPF/CNPJ (o CPF/CNPJ do Editar PDF era só o exemplo de campo com máscara).
+- Limite: 15 notas por orçamento, à parte dos comprovantes.
+- Regra de negócio = UseCase: `CreateInvoiceUsecase`, `ListInvoicesUsecase`
+  (soma = total a cobrar), `DeleteInvoiceUsecase`, `CheckInvoiceLimitUsecase`.
+  Firestore/Storage só nos datasources do módulo.
+
+### 23.3 Fluxo no chat (botão "+")
+
+Inalterado até escolher o orçamento: "+" → painel → até 2 imagens → modal de
+orçamentos → texto com botão para reabrir o modal se o usuário fechar
+(`proofSelectBudget`). **Não mexer nisso.** A mudança começa depois:
+
+```
+[orçamento escolhido]
+Bot: "Você quer salvar um comprovante de pagamentos ou uma nota fiscal ao orçamento?"
+     [Comprovantes]  [Nota fiscal]  + Voltar ao menu (R10)
+
+[Comprovantes] → fluxo atual (muda só o item 23.5: campo de valor com máscara)
+
+[Nota fiscal]
+Bot: "Qual o nome da nota fiscal?"      (Voltar ao menu)
+Usuário digita o nome
+Bot: "Qual o valor?"
+Usuário digita o valor (máscara de moeda)
+Formulário na barra inferior (mesmo visual do `ChatDocumentForm`, Editar PDF):
+  [ Nome ] [ Valor — máscara moeda ]
+  [ Voltar ] [ Salvar ]
+Salvar → grava em NOTASFISCAIS → mensagem de sucesso (23.6)
+```
+
+- Novo `ChatFlowStep`: só `proofAskKind`; nome/valor/salvando/erro/sucesso
+  reaproveitam os `proof*` com `_proofKind` na VM. O limite (15) é conferido
+  **depois** da escolha do tipo.
+- No passo de valor (`proofAskValue`) a barra de texto dá lugar ao formulário
+  (`showProofForm`): comprovante = só valor (máscara de moeda); nota fiscal =
+  nome (já preenchido, editável) + valor + Salvar/Voltar.
+- Legenda enviada com o arquivo continua preenchendo nome/valor (não repergunta).
+- Passos de nome/valor já respondidos viram campos preenchidos do formulário; o
+  usuário pode editá-los antes de salvar.
+- Toda mensagem do bot tem "Voltar ao menu" e descarta o rascunho (R10). Sem LLM (R8).
+- Form = **componente novo** `chat_invoice_form.dart` em `components/` (§2.1),
+  reaproveitando o layout do `chat_document_form.dart`; máscaras via
+  `mask_text_input_formatter` (já usado na VM do chat) e moeda pelo mesmo
+  formatter dos campos de valor do app. Sem lógica na View: validação no usecase.
+
+### 23.4 Menu do orçamento — acesso "Notas fiscais"
+
+Em `budget_options_view_model.dart` novo `BudgetOptionType.invoices`, **idêntico**
+ao `proofs` (mesmo gate de assinante, mesmo ícone/estilo, mesma navegação):
+
+- Nova tela `payment_proof/presenter/invoice_list/` (View + VM + `components/`):
+  lista de notas igual à de comprovantes (tile, detalhe, visualizador de
+  imagem/PDF reaproveitado), com `PaymentProofTotalBar` mostrando **valor total
+  das notas** (rótulo "Total a cobrar do cliente") abaixo da lista.
+- **Campo para digitar o valor com máscara** de moeda no formulário de
+  criação/edição da nota.
+- O total das notas **não soma** no total do orçamento nem no ledger de
+  recibos; é exibido à parte (e em `budget_metrics`, linha própria, opcional).
+
+### 23.5 Comprovantes — valor com máscara (ajuste no fluxo existente)
+
+Hoje o valor do comprovante é digitado no campo de mensagem do chat
+(`proofAskValue` → `ParseMoneyInputUsecase`). Passa a usar **campo de valor com
+máscara de moeda** (mesmo form/componente do item 23.3, só com nome + valor),
+em vez de texto livre na barra de mensagens. `ParseMoneyInputUsecase.caption`
+segue para a legenda do arquivo.
+
+### 23.6 Pós-gravação (comprovante e nota)
+
+Idêntico ao de hoje para comprovante, agora também para nota:
+
+- Emoji/mensagem de sucesso (`PaymentProofStrings.saved` → par `invoiceSaved`).
+- Botão para **abrir direto no orçamento** (`open_proofs|{budgetId}`; novo
+  `open_invoices|{budgetId}`) levando à lista correspondente.
+- `Voltar ao menu`.
+
+### 23.7 Arquivos
+
+```
+modules/invoice/
+├── invoice_binds.dart
+├── data/model/invoice.dart                      # + toProof() p/ reaproveitar card/detalhe
+├── data/datasource/invoice_remote_datasource.dart    # NOTASFISCAIS
+├── data/datasource/invoice_storage_datasource.dart   # notasfiscais/{uid}/{budgetId}/
+├── data/repository/invoice_repository_impl.dart
+├── domain/repository/invoice_repository.dart
+├── domain/usecase/ create · list · delete · check_limit
+└── presenter/invoice_list/ (view + view_model) · presenter/strings/invoice_pt_string.dart
+
+modules/chat_assistant/  # proofAskKind + components/chat_proof_form.dart
+modules/budget/          # BudgetOptionType.invoices
+```
+
+### 23.8 Checklist de entrega
+
+1. Módulo `invoice` (model, datasources, repositório, usecases, binds).
+2. Regras do Firestore/Storage para `NOTASFISCAIS` e caminho `notas/{uid}/{budgetId}/`.
+3. Chat: pergunta "comprovante ou nota fiscal?" após escolher o orçamento.
+4. Chat: fluxo da nota (nome → valor → formulário nome + valor + Salvar).
+5. Comprovante: valor com máscara.
+6. Menu do orçamento: acesso Notas fiscais + lista + total + valor com máscara.
+7. Sucesso + atalho ao orçamento nos dois fluxos.
+8. Strings pt/en (§12), cores só de `colors.dart` (§15), testes dos usecases.
+9. Atualizar §20.4/§9 e `CHAT_AI_AGENT_PLAN.md` §15 ao concluir.
+
+### 23.9 Decisões em aberto
+
+- Decidido: sem CPF/CNPJ; nome perguntado por texto e depois editável no
+  formulário (o valor só no formulário).
+- Total das notas aparece no PDF/link público do orçamento? (fora deste plano)
+

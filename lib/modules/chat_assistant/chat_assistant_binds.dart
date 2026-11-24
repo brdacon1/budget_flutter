@@ -66,6 +66,8 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachme
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view_model.dart';
+import 'package:oflite/modules/invoice/domain/usecase/check_invoice_limit_usecase.dart';
+import 'package:oflite/modules/invoice/domain/usecase/create_invoice_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
@@ -340,6 +342,8 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<GenerateBudgetPdfFromChatUsecase>(),
       sl<CheckProofLimitUsecase>(),
       sl<CreatePaymentProofUsecase>(),
+      sl<CheckInvoiceLimitUsecase>(),
+      sl<CreateInvoiceUsecase>(),
       sl<ParseMoneyInputUsecase>(),
       sl<PickProofAttachmentsUsecase>(),
       sl<ReceiveSharedProofUsecase>(),
