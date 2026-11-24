@@ -1,0 +1,10 @@
+#!/bin/sh
+# Bloqueia commit que APAGA arquivos essenciais do iOS (o workflow de build
+# e o Xcode dependem deles).
+deleted=$(git diff --cached --name-only --diff-filter=D | grep -E '^ios/(Runner\.xcodeproj/|Runner\.xcworkspace/|Runner/Runner\.entitlements)')
+if [ -n "$deleted" ]; then
+  echo "❌ Commit bloqueado: arquivos essenciais do iOS estão sendo apagados:"
+  echo "$deleted"
+  echo "Restaure com: git restore --staged --worktree -- ios/ (ou use --no-verify se for intencional)"
+  exit 1
+fi
