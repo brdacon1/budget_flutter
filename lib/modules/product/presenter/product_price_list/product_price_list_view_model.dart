@@ -1,10 +1,9 @@
-import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
@@ -136,9 +135,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   }
 
   Future<void> addNew(BuildContext context) async {
-    final isPremium =
-        Environment.instance.forcePremium ||
-        (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
+    final isPremium = getIt<GetAccessStatusUseCase>().hasFullAccess;
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

@@ -48,6 +48,7 @@ class LoadUserSessionUseCase {
     }
     _notificationRepository.tryOpenPendingBudget();
 
+    await _userRepository.syncTrial(uid);
     await _loadSubscription();
     return user;
   }

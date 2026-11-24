@@ -66,7 +66,12 @@ Future<void> main() async {
       await getIt<AdsRepository>().setTestDevices(_kTestDeviceIds);
     }
 
-    await getIt<NotificationRepository>().initialize();
+    try {
+      await getIt<NotificationRepository>().initialize();
+    } catch (e, s) {
+      debugPrint('Erro ao inicializar notificações: $e');
+      getIt<CrashlyticsRepository>().recordError(e, s);
+    }
     getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
   }
 
@@ -128,6 +133,13 @@ class MyApp extends StatelessWidget {
             navigatorKey: globalNavigatorKey,
             initialRoute: AppRoute.auth.path,
             routes: appRoutes,
+            // Toque fora de um campo fecha o teclado nativo (iOS/Android).
+            builder:
+                (context, child) => GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  child: child,
+                ),
           ),
     );
   }

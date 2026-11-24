@@ -22,9 +22,14 @@ class AdsRepositoryImpl implements AdsRepository {
   static const int _maxFailedLoadAttempts = 3;
   bool _isLoading = false;
 
+  /// Anúncios desligados em todo o app (estratégia de crescimento: trial
+  /// completo e sem anúncios). O módulo continua pronto: para religar, basta
+  /// `true`. Com `false`, nada é carregado nem exibido.
+  static const bool adsEnabled = false;
+
   @override
   bool get shouldShowAds =>
-      !(_userRepository.selectUser.value?.autoRenewing ?? false);
+      adsEnabled && !(_userRepository.selectUser.value?.autoRenewing ?? false);
 
   @override
   String get interstitialAdUnitId =>
@@ -32,6 +37,7 @@ class AdsRepositoryImpl implements AdsRepository {
 
   @override
   Future<void> initialize() async {
+    if (!adsEnabled) return;
     await _dataSource.initialize();
   }
 

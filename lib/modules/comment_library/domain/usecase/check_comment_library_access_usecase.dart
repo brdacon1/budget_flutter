@@ -1,18 +1,15 @@
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 
-/// Biblioteca de comentários com IA: só assinante (`autoRenewing`).
+/// Biblioteca de comentários com IA: assinante ou teste grátis ativo.
 /// Em development, `FORCE_PREMIUM: true` no env libera sem pagamento.
 class CheckCommentLibraryAccessUsecase {
-  final UserRepository _userRepo;
-  final bool Function() _forcePremium;
+  final GetAccessStatusUseCase _access;
 
   CheckCommentLibraryAccessUsecase(
-    this._userRepo, {
+    UserRepository userRepo, {
     bool Function()? forcePremium,
-  }) : _forcePremium =
-           forcePremium ?? (() => Environment.instance.forcePremium);
+  }) : _access = GetAccessStatusUseCase(userRepo, forcePremium: forcePremium);
 
-  bool call() =>
-      _forcePremium() || (_userRepo.selectUser.value?.autoRenewing ?? false);
+  bool call() => _access.hasFullAccess;
 }

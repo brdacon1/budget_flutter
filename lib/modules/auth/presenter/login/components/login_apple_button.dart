@@ -6,9 +6,12 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Botão de login com Apple, mesmo estilo do [LoginGoogleButton].
 /// Exibido só em dispositivos Apple.
 class LoginAppleButton extends StatelessWidget {
-  const LoginAppleButton({super.key, required this.onPressed});
+  const LoginAppleButton({super.key, required this.onPressed, this.label});
 
   final VoidCallback onPressed;
+
+  /// Texto do botão; padrão = "Login com ...".
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class LoginAppleButton extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  LoginStrings.loginWithApple,
+                  label ?? LoginStrings.loginWithApple,
                   style: GoogleFonts.heebo(
                     color: bgColor,
                     fontWeight: FontWeight.bold,

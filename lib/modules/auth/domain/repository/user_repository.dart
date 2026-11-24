@@ -15,4 +15,8 @@ abstract class UserRepository extends ChangeNotifier {
   Future<Result<void>> updateUser(InfoUser user);
   Future<Result<void>> createDefaultUserData(InfoUser user, OwnerPdf pdf);
   Future<Result<String>> getIdToken();
+
+  /// Inicia (uma única vez) e sincroniza o teste grátis na sessão atual.
+  /// Falha de rede é ignorada: o acesso nunca é bloqueado por isso.
+  Future<void> syncTrial(String uid);
 }

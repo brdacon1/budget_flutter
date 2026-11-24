@@ -22,9 +22,6 @@ class ChatAssistantStrings {
           ? 'O que o assistente abrir aparece aqui'
           : 'Whatever the assistant opens shows up here';
 
-  static String get closeKeyboard =>
-      _isPt ? 'Fechar teclado' : 'Close keyboard';
-
   static String get restartTooltip =>
       _isPt ? 'Reiniciar conversa' : 'Restart conversation';
 
@@ -71,6 +68,12 @@ class ChatAssistantStrings {
   // ------------------------------------------------------------------
   static String get mainMenuQuestion =>
       _isPt ? 'O que eu posso fazer por você?' : 'What can I do for you?';
+
+  /// Pergunta do menu enquanto o usuário ainda não começou o 1º orçamento.
+  static String get firstBudgetMenuQuestion =>
+      _isPt
+          ? 'Vamos criar seu primeiro orçamento?'
+          : 'Ready to create your first budget?';
 
   static List<String> get mainMenuOptionLabels =>
       _isPt

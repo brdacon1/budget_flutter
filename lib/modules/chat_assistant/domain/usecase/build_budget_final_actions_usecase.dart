@@ -1,20 +1,19 @@
-import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 
 /// Define os botões do card final do fluxo de criar orçamento.
 ///
-/// Assinante: copiar link + gerar PDF. Não assinante: só gerar PDF
-/// (com intersticial antes — ver [GenerateBudgetPdfFromChatUsecase]).
+/// Acesso total (assinante/teste): copiar link + gerar PDF. Expirado: só PDF.
 class BuildBudgetFinalActionsUsecase {
-  final AdsRepository _ads;
+  final GetAccessStatusUseCase _access;
 
-  const BuildBudgetFinalActionsUsecase(this._ads);
+  const BuildBudgetFinalActionsUsecase(this._access);
 
   List<String> call() =>
-      _ads.shouldShowAds
-          ? [ChatAssistantStrings.generatePdfLabel]
-          : [
+      _access.hasFullAccess
+          ? [
             ChatAssistantStrings.copyLinkLabel,
             ChatAssistantStrings.generatePdfLabel,
-          ];
+          ]
+          : [ChatAssistantStrings.generatePdfLabel];
 }

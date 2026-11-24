@@ -23,6 +23,8 @@ class Command0<T> extends ChangeNotifier {
   Result<T>? get result => _result;
 
   Future<void> execute() async {
+    // Toque repetido enquanto carrega é ignorado (evita abrir 2x contatos etc.).
+    if (_running) return;
     _running = true;
     _completed = false;
     _error = false;
@@ -63,6 +65,7 @@ class Command1<T, A> extends ChangeNotifier {
   Result<T>? get result => _result;
 
   Future<void> execute(A argument) async {
+    if (_running) return;
     _running = true;
     _completed = false;
     _error = false;

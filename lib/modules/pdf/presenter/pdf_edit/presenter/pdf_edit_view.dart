@@ -1,8 +1,7 @@
-import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 import 'components/pdf_edit_address_card.dart';
@@ -59,13 +58,7 @@ class _PdfEditView extends State<PdfEditView> {
                           fileContent: vm.fileContent,
                           loading: vm.loading,
                           hasError: vm.hasError,
-                          autoRenewing:
-                              Environment.instance.forcePremium ||
-                              (getIt<UserRepository>()
-                                      .selectUser
-                                      .value
-                                      ?.autoRenewing ??
-                                  false),
+                          autoRenewing: getIt<GetAccessStatusUseCase>().hasFullAccess,
                           onEditLogo: () => vm.editLogo(context),
                           onOpenSubscription:
                               () => vm.openSubscription(context),

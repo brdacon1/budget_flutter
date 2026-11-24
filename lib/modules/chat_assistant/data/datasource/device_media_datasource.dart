@@ -41,7 +41,22 @@ class DeviceMediaDatasource {
   }
 
   /// Recorte (mesma lib da tela de logo). Devolve o novo caminho ou `null`.
+  ///
+  /// Nunca abre dois recortes ao mesmo tempo: toques repetidos durante a
+  /// espera derrubavam o app no iOS (`FLTImageCropperPlugin`).
   Future<String?> cropImage(String path, {required String title}) async {
+    if (_cropping) return null;
+    _cropping = true;
+    try {
+      return await _crop(path, title: title);
+    } finally {
+      _cropping = false;
+    }
+  }
+
+  static bool _cropping = false;
+
+  Future<String?> _crop(String path, {required String title}) async {
     final safePath = await normalizeImageFile(path);
     if (safePath == null) return null;
     final cropped = await ImageCropper().cropImage(

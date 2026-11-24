@@ -29,6 +29,12 @@ class SingUpStrings {
   static String get signUpButtonLoading =>
       _isPt ? 'Registrando...' : 'Signing up...';
 
+  static String get signUpWithGoogle =>
+      _isPt ? 'Cadastrar com Google' : 'Sign up with Google';
+
+  static String get signUpWithApple =>
+      _isPt ? 'Cadastrar com Apple' : 'Sign up with Apple';
+
   // --- Cadastro: campos ---
   static String get signUpNameHint => _isPt ? 'Seu nome' : 'Your Name';
 

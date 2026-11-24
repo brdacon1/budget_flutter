@@ -8,7 +8,6 @@ import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart'
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
-import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 
 /// Tela de criação/edição de recibo.
@@ -164,10 +163,6 @@ class _ReceiptCreatorView extends State<ReceiptCreatorView> {
                           ),
                         ),
                       ),
-                      if (keyboardOpen)
-                        AppKeyboardDismissBar(
-                          label: ReceiptPtString.closeKeyboard,
-                        ),
                     ],
                   );
                 },

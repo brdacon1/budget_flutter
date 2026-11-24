@@ -8,17 +8,21 @@ class ChatCropThumbButton extends StatelessWidget {
     super.key,
     required this.image,
     required this.onTap,
+    this.busy = false,
   });
 
   final ImageProvider? image;
   final VoidCallback onTap;
+
+  /// Carregando o recorte: mostra spinner e ignora toques.
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: PaymentProofStrings.cropTitle,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: busy ? null : onTap,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: SizedBox(
@@ -32,7 +36,19 @@ class ChatCropThumbButton extends StatelessWidget {
                 else
                   const ColoredBox(color: secondaryColor),
                 ColoredBox(color: blackColor.withValues(alpha: 0.35)),
-                const Icon(Icons.crop_rotate, color: whiteColor, size: 22),
+                if (busy)
+                  const Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: whiteColor,
+                      ),
+                    ),
+                  )
+                else
+                  const Icon(Icons.crop_rotate, color: whiteColor, size: 22),
               ],
             ),
           ),

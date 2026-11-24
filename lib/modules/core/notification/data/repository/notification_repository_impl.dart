@@ -80,23 +80,28 @@ class NotificationRepositoryImpl implements NotificationRepository {
     _dataSource.onMessageOpenedApp.listen(_onMessageOpenedApp);
     unawaited(_handleInitialMessage());
 
-    if (kIsWeb) {
-      await _dataSource.requestFcmPermission();
-    } else {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await _dataSource.requestFcmPermission(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-      } else if (defaultTargetPlatform == TargetPlatform.android) {
-        final bool? granted =
-            await _dataSource.requestAndroidNotificationPermission();
-        if (kDebugMode) {
-          debugPrint('Android POST_NOTIFICATIONS concedido? $granted');
-        }
+    // Falha ao pedir permissão (ex.: iOS rodando no Mac) não pode derrubar o app.
+    try {
+      if (kIsWeb) {
         await _dataSource.requestFcmPermission();
+      } else {
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          await _dataSource.requestFcmPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+        } else if (defaultTargetPlatform == TargetPlatform.android) {
+          final bool? granted =
+              await _dataSource.requestAndroidNotificationPermission();
+          if (kDebugMode) {
+            debugPrint('Android POST_NOTIFICATIONS concedido? $granted');
+          }
+          await _dataSource.requestFcmPermission();
+        }
       }
+    } catch (e, s) {
+      debugPrint('Erro ao solicitar permissão de notificação: $e');
     }
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {

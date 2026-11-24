@@ -11,6 +11,14 @@ class InfoUser {
   String? productId;
   bool? googleAuth = false;
 
+  /// Início do teste grátis (horário do servidor). `null` = ainda não
+  /// sincronizado (offline/conta antiga): o acesso nunca é bloqueado.
+  DateTime? trialStartedAt;
+
+  /// Diferença servidor − aparelho, medida no último sync. Impede burlar o
+  /// trial mudando a data do celular.
+  Duration serverClockOffset = Duration.zero;
+
   /// Lista de tokens FCM push do dono (um por dispositivo onde ele fez
   /// login). Preenchida em `_getUserInfo` lendo
   /// `EMPRESAS/{uid}/USERS/{uid}/FCM`. A Cloud Function lê essa

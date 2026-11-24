@@ -22,4 +22,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserCredential> signInWithApple() => _remote.signInWithApple();
+
+  @override
+  Future<UserCredential> createUserWithEmail(String email, String password) =>
+      _remote.createUserWithEmail(email, password);
+
+  @override
+  Future<UserCredential> linkWithGoogle() => _remote.linkWithGoogle();
+
+  @override
+  Future<UserCredential> linkWithApple() => _remote.linkWithApple();
 }

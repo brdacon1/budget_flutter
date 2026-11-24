@@ -1,3 +1,4 @@
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
@@ -15,12 +16,10 @@ import 'package:oflite/modules/budget/presenter/budget_list/components/modals/bu
 import 'package:oflite/modules/budget/presenter/budget_list/components/new_budget_gate.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
-import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
@@ -61,7 +60,6 @@ class _BudgetListView extends State<BudgetListView> {
   void initState() {
     _viewModel.customer = widget.customer;
     if (widget.customer == null) getIt<BudgetRepository>().clearSelectBudget();
-    getIt<AdsRepository>().loadInterstitial();
     _scrollController.addListener(_onScroll);
     _draft.addListener(_onOpenBudgetChanged);
     _selected.addListener(_onOpenBudgetChanged);
@@ -364,7 +362,7 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Future<void> _duplicateBudget(CustomerInfo item) async {
-    if (!(getIt<UserRepository>().selectUser.value?.autoRenewing ?? false) &&
+    if (!getIt<GetAccessStatusUseCase>().hasFullAccess &&
         _viewModel.totalBudgetCount > 10) {
       await _viewModel.displayAlert.notificationError(
         context,

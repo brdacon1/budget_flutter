@@ -8,4 +8,7 @@ abstract class AuthRepository {
   Future<UserCredential> signInWithEmail(String email, String password);
   Future<UserCredential> signInWithGoogle();
   Future<UserCredential> signInWithApple();
+  Future<UserCredential> createUserWithEmail(String email, String password);
+  Future<UserCredential> linkWithGoogle();
+  Future<UserCredential> linkWithApple();
 }

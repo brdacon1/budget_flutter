@@ -112,13 +112,24 @@ void main() {
       );
     });
 
-    test('não-assinante e usuário nulo não têm acesso', () {
+    test('trial ativo e sem sync (offline) têm acesso', () {
+      final trial = InfoUser()..trialStartedAt = DateTime.now();
       expect(
-        CheckAiAccessUsecase(_FakeUserRepo(InfoUser()), forcePremium: off)(),
-        isFalse,
+        CheckAiAccessUsecase(_FakeUserRepo(trial), forcePremium: off)(),
+        isTrue,
       );
       expect(
-        CheckAiAccessUsecase(_FakeUserRepo(null), forcePremium: off)(),
+        CheckAiAccessUsecase(_FakeUserRepo(InfoUser()), forcePremium: off)(),
+        isTrue,
+      );
+    });
+
+    test('trial expirado não tem acesso', () {
+      final expired =
+          InfoUser()
+            ..trialStartedAt = DateTime.now().subtract(const Duration(days: 3));
+      expect(
+        CheckAiAccessUsecase(_FakeUserRepo(expired), forcePremium: off)(),
         isFalse,
       );
     });
