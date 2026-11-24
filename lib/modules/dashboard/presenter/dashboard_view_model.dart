@@ -39,6 +39,19 @@ class DashboardViewModel extends ChangeNotifier {
     if (canGoNext) _changeMonth(1);
   }
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
   void _changeMonth(int delta) {
     _month = DateTime(_month.year, _month.month + delta);
     notifyListeners();
@@ -51,7 +64,7 @@ class DashboardViewModel extends ChangeNotifier {
     final summary = await _getSummary(month, forceRefresh: forceRefresh);
     final comparison = await _getComparison(month);
     // Usuário trocou de mês no meio da carga: descarta o resultado velho.
-    if (month != _month) return const Result.ok(null);
+    if (_disposed || month != _month) return const Result.ok(null);
     if (summary is Ok<DashboardMonthSummary>) _summary = summary.value;
     if (comparison is Ok<List<MonthReceiptComparison>>) {
       _comparison = comparison.value;

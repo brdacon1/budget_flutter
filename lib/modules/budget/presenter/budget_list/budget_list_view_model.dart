@@ -13,6 +13,7 @@ import 'package:oflite/modules/budget/domain/usecase/create_budget_for_customer_
 import 'package:oflite/modules/budget/domain/usecase/watch_customer_budgets_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -45,7 +46,7 @@ class BudgetListViewModel extends ChangeNotifier {
 
   /// Filtro por status: recurso só de assinantes.
   bool get canFilterStatus =>
-      (isCustomerMode && customerHasPhone) ||
+      Environment.instance.forcePremium ||
       (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
 
   BudgetStatus? _status;
@@ -261,14 +262,11 @@ class BudgetListViewModel extends ChangeNotifier {
   /// Modo cliente: o orçamento de origem sempre em primeiro.
   List<CustomerInfo> getFilteredData() {
     if (!isCustomerMode) return _searchResults ?? _foundUsers;
+    bool matches(CustomerInfo b) =>
+        _status == null || (b.status ?? '').toUpperCase() == _status!.value;
     return [
-      ..._customerBudgets.where(isOrigin),
-      ..._customerBudgets.where(
-        (b) =>
-            !isOrigin(b) &&
-            (_status == null ||
-                (b.status ?? '').toUpperCase() == _status!.value),
-      ),
+      ..._customerBudgets.where((b) => isOrigin(b) && matches(b)),
+      ..._customerBudgets.where((b) => !isOrigin(b) && matches(b)),
     ];
   }
 
