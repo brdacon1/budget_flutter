@@ -25,6 +25,9 @@ class ChatMediaPickerViewModel extends ChangeNotifier {
   bool showAlbums = false;
   bool sending = false;
 
+  /// Preparando/abrindo o recorte: bloqueia novos toques e mostra loading.
+  bool cropping = false;
+
   /// Avisa a View que a 3ª foto foi recusada.
   bool limitHit = false;
 
@@ -123,16 +126,22 @@ class ChatMediaPickerViewModel extends ChangeNotifier {
   /// Recorta a última foto selecionada (lápis à esquerda da legenda).
   Future<void> cropLast() async {
     final last = lastSelected;
-    if (last == null) return;
-    final path = _cropped[last.id] ?? await last.filePath();
-    if (path == null) return;
-    final out = await _pick.cropPath(
-      path,
-      title: PaymentProofStrings.cropTitle,
-    );
-    if (out == null) return;
-    _cropped[last.id] = out;
+    if (last == null || cropping) return;
+    cropping = true;
     _notify();
+    try {
+      final path = _cropped[last.id] ?? await last.filePath();
+      if (path == null) return;
+      final out = await _pick.cropPath(
+        path,
+        title: PaymentProofStrings.cropTitle,
+      );
+      if (out == null) return;
+      _cropped[last.id] = out;
+    } finally {
+      cropping = false;
+      _notify();
+    }
   }
 
   void consumeLimitHit() => limitHit = false;

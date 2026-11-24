@@ -66,7 +66,12 @@ Future<void> main() async {
       await getIt<AdsRepository>().setTestDevices(_kTestDeviceIds);
     }
 
-    await getIt<NotificationRepository>().initialize();
+    try {
+      await getIt<NotificationRepository>().initialize();
+    } catch (e, s) {
+      debugPrint('Erro ao inicializar notificações: $e');
+      getIt<CrashlyticsRepository>().recordError(e, s);
+    }
     getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
   }
 

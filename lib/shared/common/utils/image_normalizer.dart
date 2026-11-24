@@ -12,8 +12,24 @@ Future<String?> normalizeImageFile(String path, {int maxSide = 2048}) async {
   try {
     final bytes = await File(path).readAsBytes();
     if (bytes.isEmpty) return null;
-    final first = (await (await ui.instantiateImageCodec(bytes)).getNextFrame())
-        .image;
+    // Caminho rápido: JPG/PNG já dentro do limite não precisam ser
+    // re-codificados (isso era a espera antes de o recorte abrir). Só lê as
+    // dimensões, sem decodificar a imagem inteira.
+    final ext = path.toLowerCase();
+    if (ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png')) {
+      final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      try {
+        final d = await ui.ImageDescriptor.encoded(buffer);
+        final longest = d.width > d.height ? d.width : d.height;
+        final valid = d.width > 0 && d.height > 0;
+        d.dispose();
+        if (valid && longest <= maxSide) return path;
+      } finally {
+        buffer.dispose();
+      }
+    }
+    final first =
+        (await (await ui.instantiateImageCodec(bytes)).getNextFrame()).image;
     final w = first.width, h = first.height;
     first.dispose();
     if (w == 0 || h == 0) return null;

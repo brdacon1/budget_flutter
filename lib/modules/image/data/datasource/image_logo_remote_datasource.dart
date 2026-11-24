@@ -17,8 +17,8 @@ class ImageLogoRemoteDatasource {
   final FirebaseStorage _storage;
 
   ImageLogoRemoteDatasource({DioClient? dio, FirebaseStorage? storage})
-      : _dio = dio ?? DioClient(),
-        _storage = storage ?? FirebaseStorage.instance;
+    : _dio = dio ?? DioClient(),
+      _storage = storage ?? FirebaseStorage.instance;
 
   Future<String?> pickImage({required bool camera}) async {
     final file = await ImagePicker().pickImage(
@@ -38,7 +38,8 @@ class ImageLogoRemoteDatasource {
     if (png == null) return null;
 
     final dir = await getTemporaryDirectory();
-    final path = '${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.png';
+    final path =
+        '${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.png';
     await File(path).writeAsBytes(png);
     return path;
   }
@@ -72,7 +73,24 @@ class ImageLogoRemoteDatasource {
     }
   }
 
+  static bool _cropping = false;
+
+  /// Nunca abre dois recortes ao mesmo tempo (toque repetido derruba o iOS).
   Future<String?> cropImage(
+    String path, {
+    required String androidTitle,
+    required String iosTitle,
+  }) async {
+    if (_cropping) return null;
+    _cropping = true;
+    try {
+      return await _crop(path, androidTitle: androidTitle, iosTitle: iosTitle);
+    } finally {
+      _cropping = false;
+    }
+  }
+
+  Future<String?> _crop(
     String path, {
     required String androidTitle,
     required String iosTitle,

@@ -242,7 +242,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   ChatScriptEntity? get _script => _scriptRepo.currentScript;
 
-  bool get isLoading => initializeChat.running || sendTextCommand.running;
+  bool get isLoading =>
+      initializeChat.running ||
+      sendTextCommand.running ||
+      pickContactCommand.running;
 
   String? get shareErrorMessage => _shareErrorMessage;
   String? _shareErrorMessage;
@@ -1516,6 +1519,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Fluxo de orçamento
   // ------------------------------------------------------------------
   Future<Result<void>> _pickContact() async {
+    // Mostra "digitando…" enquanto a lista de contatos carrega (no iOS ela
+    // trava a tela por um instante). Espera um frame para o indicador pintar.
+    _setAiThinking(true);
+    await Future<void>.delayed(const Duration(milliseconds: 60));
     try {
       final permissionStatus = await user_info.FlutterContacts.permissions
           .request(user_info.PermissionType.read);
@@ -1584,6 +1591,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
       return await _showClientDataConfirmation();
     } catch (e) {
       return Result.error(Exception(e.toString()));
+    } finally {
+      _setAiThinking(false);
     }
   }
 

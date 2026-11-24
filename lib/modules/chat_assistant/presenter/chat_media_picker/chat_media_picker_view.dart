@@ -125,6 +125,7 @@ class _ChatMediaPickerViewState extends State<ChatMediaPickerView> {
                   onSend: _send,
                   leading: ChatCropThumbButton(
                     image: _cropImageOf(),
+                    busy: _vm.cropping,
                     onTap: _vm.cropLast,
                   ),
                 ),
