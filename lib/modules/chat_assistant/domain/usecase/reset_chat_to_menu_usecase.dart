@@ -17,8 +17,8 @@ class ResetChatToMenuUsecase {
   /// [withReports] acrescenta as opções de IA "Relatórios" e "Encontrar
   /// orçamentos", "Cadastrar comentários" e "Ir no cliente" (só no modo IA — recursos pagos).
   ///
-  /// [trialMenu] (teste grátis): só as 3 opções principais — criar orçamentos,
-  /// produtos e editar PDF. Quem assina vê o menu completo.
+  /// [trialMenu] (teste grátis): só as 4 opções principais — criar orçamentos,
+  /// produtos, editar PDF e comentários. Quem assina vê o menu completo.
   Future<String> call({
     bool clearSession = true,
     bool withReports = false,
@@ -44,6 +44,7 @@ class ResetChatToMenuUsecase {
                   ChatAssistantStrings.mainMenuOptionLabels[0],
                   ChatAssistantStrings.mainMenuOptionLabels[1],
                   ChatAssistantStrings.mainMenuOptionLabels[2],
+                  ChatAssistantStrings.commentLibraryOptionLabel,
                 ]
                 : [
                   ...ChatAssistantStrings.mainMenuOptionLabels,
@@ -54,6 +55,8 @@ class ResetChatToMenuUsecase {
                     ChatAssistantStrings.goToClientOptionLabel,
                   ],
                 ],
+        // Valores fixos: no teste, "Comentários" é o 4º botão com valor 7.
+        values: trialMenu ? const ['1', '2', '3', '7'] : null,
         step: 'mainMenu',
       ),
     );

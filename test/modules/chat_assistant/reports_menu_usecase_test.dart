@@ -95,11 +95,15 @@ void main() {
         ChatAssistantStrings.firstBudgetMenuQuestion,
       );
 
-      // Teste grátis: só criar orçamentos, produtos e editar PDF.
+      // Teste grátis: criar orçamentos, produtos, editar PDF e comentários.
       final trial = _FakeChatRepo();
       await ResetChatToMenuUsecase(trial)(withReports: true, trialMenu: true);
       final opts = (trial.sent.last.payload!['options'] as List).cast<Map>();
-      expect(opts.map((o) => o['value']), ['1', '2', '3']);
+      expect(opts.map((o) => o['value']), ['1', '2', '3', '7']);
+      expect(
+        opts.last['label'],
+        ChatAssistantStrings.commentLibraryOptionLabel,
+      );
 
       SharedPreferences.setMockInitialValues({'first_budget_started': true});
       final repo2 = _FakeChatRepo();
