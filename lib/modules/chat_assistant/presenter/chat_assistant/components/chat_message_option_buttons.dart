@@ -1,8 +1,7 @@
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Opções de menu do bot em botões empilhados (um embaixo do outro), em
-/// qualquer largura de tela.
+/// Opções de menu do bot em botões empilhados (um embaixo do outro).
 ///
 /// Cada opção é `{'label': ..., 'value': ...}`. A opção com `value` `'0'`
 /// (voltar ao menu) é exibida por último em estilo contornado.
@@ -23,59 +22,48 @@ class ChatMessageOptionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(20),
     );
-    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 14);
-    const textStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5);
-
-    Widget button(Map<String, String> option) {
-      if (option['value'] == '0') {
-        return OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: chatHighlightColor,
-            side: BorderSide(
-              color: enabled ? chatHighlightColor : chatOptionBorderColor,
-            ),
-            shape: shape,
-            padding: padding,
-          ),
-          onPressed: _onPressed(option),
-          child: Text(option['label'] ?? '', style: textStyle),
-        );
-      }
-      return ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: _accent.withValues(alpha: 0.14),
-          disabledBackgroundColor: whiteColor.withValues(alpha: 0.04),
-          foregroundColor: whiteColor,
-          disabledForegroundColor: whiteColor.withValues(alpha: 0.35),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(
-              color:
-                  enabled
-                      ? _accent.withValues(alpha: 0.55)
-                      : chatOptionBorderColor,
-            ),
-          ),
-          padding: padding,
-        ),
-        onPressed: _onPressed(option),
-        child: Text(
-          option['label'] ?? '',
-          style: textStyle,
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
+    const padding = EdgeInsets.symmetric(horizontal: 8, vertical: 12);
+    const textStyle = TextStyle(fontWeight: FontWeight.bold);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final option in options) ...[
           const SizedBox(height: 8),
-          button(option),
+          if (option['value'] == '0')
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: chatHighlightColor,
+                side: BorderSide(
+                  color: enabled ? chatHighlightColor : chatOptionBorderColor,
+                ),
+                shape: shape,
+                padding: padding,
+              ),
+              onPressed: _onPressed(option),
+              child: Text(option['label'] ?? '', style: textStyle),
+            )
+          else
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accent,
+                foregroundColor: blackColor,
+                shape: shape,
+                padding: padding,
+              ),
+              onPressed: _onPressed(option),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  option['label'] ?? '',
+                  style: textStyle,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              ),
+            ),
         ],
       ],
     );

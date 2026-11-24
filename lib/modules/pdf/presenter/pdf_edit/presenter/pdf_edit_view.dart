@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/injection.dart';
@@ -59,11 +60,12 @@ class _PdfEditView extends State<PdfEditView> {
                           loading: vm.loading,
                           hasError: vm.hasError,
                           autoRenewing:
-                              getIt<UserRepository>()
-                                  .selectUser
-                                  .value
-                                  ?.autoRenewing ??
-                              false,
+                              Environment.instance.forcePremium ||
+                              (getIt<UserRepository>()
+                                      .selectUser
+                                      .value
+                                      ?.autoRenewing ??
+                                  false),
                           onEditLogo: () => vm.editLogo(context),
                           onOpenSubscription:
                               () => vm.openSubscription(context),

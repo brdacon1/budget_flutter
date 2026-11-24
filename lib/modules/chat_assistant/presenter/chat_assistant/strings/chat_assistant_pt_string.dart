@@ -165,15 +165,17 @@ class ChatAssistantStrings {
 
   static String get reportsPrompt =>
       _isPt
-          ? 'Descreva o que você precisa saber'
-          : 'Describe what you need to know';
+          ? '📊 Qual relatório você quer ver? Escreva sua pergunta com suas palavras.'
+          : '📊 Which report do you want to see? Write your question in your own words.';
 
   static String get reportsExample =>
       _isPt
-          ? 'Ex: Quantos orçamentos eu tenho aprovado nesse mês?\n'
-              'Ex: Quantos recibos gerei essa semana e quanto recebi?'
-          : 'E.g.: How many approved budgets do I have this month?\n'
-              'E.g.: How many receipts did I issue this week and how much did I receive?';
+          ? 'Exemplos:\n'
+              '• Quantos orçamentos aprovei este mês?\n'
+              '• Quanto recebi esta semana?'
+          : 'Examples:\n'
+              '• How many budgets did I approve this month?\n'
+              '• How much did I receive this week?';
 
   static String get aiUnavailable =>
       _isPt
