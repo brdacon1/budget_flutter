@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show MissingPluginException;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:oflite/shared/common/utils/image_normalizer.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -41,8 +42,12 @@ class DeviceMediaDatasource {
 
   /// Recorte (mesma lib da tela de logo). Devolve o novo caminho ou `null`.
   Future<String?> cropImage(String path, {required String title}) async {
+    final safePath = await normalizeImageFile(path);
+    if (safePath == null) return null;
     final cropped = await ImageCropper().cropImage(
-      sourcePath: path,
+      sourcePath: safePath,
+      maxWidth: 2048,
+      maxHeight: 2048,
       compressFormat: ImageCompressFormat.jpg,
       compressQuality: 95,
       uiSettings: [

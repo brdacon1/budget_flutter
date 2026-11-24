@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:oflite/shared/common/utils/image_normalizer.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/utils/dio_client.dart';
@@ -76,8 +77,12 @@ class ImageLogoRemoteDatasource {
     required String androidTitle,
     required String iosTitle,
   }) async {
+    final safePath = await normalizeImageFile(path);
+    if (safePath == null) return null;
     final cropped = await ImageCropper().cropImage(
-      sourcePath: path,
+      sourcePath: safePath,
+      maxWidth: 2048,
+      maxHeight: 2048,
       compressFormat: ImageCompressFormat.jpg,
       compressQuality: 100,
       uiSettings: [

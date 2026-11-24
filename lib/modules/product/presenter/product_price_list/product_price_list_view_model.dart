@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
@@ -136,7 +137,8 @@ class ProductPriceListViewModel extends ChangeNotifier {
 
   Future<void> addNew(BuildContext context) async {
     final isPremium =
-        getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
+        Environment.instance.forcePremium ||
+        (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
     if (!isPremium && found.length > 15) {
       await displayAlert.notificationError(
         context,

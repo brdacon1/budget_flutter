@@ -39,9 +39,29 @@ class ChatMediaRepositoryImpl implements ChatMediaRepository {
       for (final a in assets)
         GalleryAssetEntity(
           id: a.id,
-          thumbnail:
-              () => a.thumbnailDataWithSize(const ThumbnailSize.square(300)),
-          filePath: () async => (await a.file)?.path,
+          // Foto só no iCloud: permite baixar (progressHandler) e nunca
+          // propaga o erro 1006 do CloudPhotoLibrary — devolve null.
+          thumbnail: () async {
+            try {
+              return await a.thumbnailDataWithSize(
+                const ThumbnailSize.square(300),
+                progressHandler: PMProgressHandler(),
+              );
+            } catch (_) {
+              return null;
+            }
+          },
+          filePath: () async {
+            try {
+              final f = await a.loadFile(
+                isOrigin: false,
+                progressHandler: PMProgressHandler(),
+              );
+              return f?.path;
+            } catch (_) {
+              return null;
+            }
+          },
         ),
     ];
   }

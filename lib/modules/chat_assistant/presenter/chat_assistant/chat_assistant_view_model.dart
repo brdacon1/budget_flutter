@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
@@ -2454,7 +2455,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Dados para editar a logo. `null` = não assinante (abrir assinatura).
   Future<OwnerPdf?> ownerForLogoEdit() async {
     final isSubscribed =
-        getIt<UserRepository>().selectUser.value?.autoRenewing ?? false;
+        Environment.instance.forcePremium ||
+        (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
     if (!isSubscribed) return null;
     final result = await _pdfRepo.fetchInformationEnterprise();
     return result is Ok<OwnerPdf> ? result.value : OwnerPdf();
