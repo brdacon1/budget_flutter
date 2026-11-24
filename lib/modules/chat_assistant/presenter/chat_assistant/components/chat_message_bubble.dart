@@ -256,6 +256,11 @@ class ChatMessageBubble extends StatelessWidget {
   /// Quebra a linha nas ocorrências de [_highlight], destacando-as.
   List<TextSpan> _highlightSpans(String line) {
     final highlight = _highlight;
+    if (highlight != null && highlight.contains('\n')) {
+      // Destaque de várias linhas: cada linha do destaque é colorida inteira.
+      final isBlock = highlight.split('\n').contains(line) && line.isNotEmpty;
+      return [TextSpan(text: line, style: isBlock ? _highlightStyle : null)];
+    }
     if (highlight == null || !line.contains(highlight)) {
       return [TextSpan(text: line)];
     }
