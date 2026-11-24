@@ -128,6 +128,13 @@ class MyApp extends StatelessWidget {
             navigatorKey: globalNavigatorKey,
             initialRoute: AppRoute.auth.path,
             routes: appRoutes,
+            // Toque fora de um campo fecha o teclado nativo (iOS/Android).
+            builder:
+                (context, child) => GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  child: child,
+                ),
           ),
     );
   }

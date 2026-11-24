@@ -18,7 +18,42 @@ class UserRemoteDataSource {
             .where('USER', isEqualTo: uid)
             .get();
     if (snapshot.docs.isEmpty) return null;
-    return Map<String, dynamic>.from(snapshot.docs.first.data());
+    return _normalize(snapshot.docs.first.data());
+  }
+
+  /// Timestamps do Firestore viram milissegundos (o domínio não conhece o SDK).
+  Map<String, dynamic> _normalize(Map<String, dynamic> data) {
+    final map = Map<String, dynamic>.from(data);
+    for (final key in ['TrialStartedAt', 'LastSeenAt']) {
+      final v = map[key];
+      if (v is Timestamp) map[key] = v.millisecondsSinceEpoch;
+    }
+    return map;
+  }
+
+  /// Garante `TrialStartedAt` (só na primeira vez, com hora do servidor) e
+  /// devolve início do trial e "agora" do servidor, em milissegundos.
+  /// `null` se o documento do usuário ainda não existe.
+  Future<({int trialStartedAt, int serverNow})?> syncTrial(String uid) async {
+    final query =
+        await _firestore
+            .collection('USUARIOS')
+            .where('USER', isEqualTo: uid)
+            .get();
+    if (query.docs.isEmpty) return null;
+    final ref = query.docs.first.reference;
+    final hasTrial = query.docs.first.data()['TrialStartedAt'] != null;
+    await ref.set({
+      if (!hasTrial) 'TrialStartedAt': FieldValue.serverTimestamp(),
+      'LastSeenAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    final fresh = _normalize(
+      (await ref.get(const GetOptions(source: Source.server))).data() ?? {},
+    );
+    final start = fresh['TrialStartedAt'];
+    final now = fresh['LastSeenAt'];
+    if (start is! int || now is! int) return null;
+    return (trialStartedAt: start, serverNow: now);
   }
 
   Future<void> saveUser(InfoUser user) async {
@@ -32,7 +67,7 @@ class UserRemoteDataSource {
       'IdPay': user.idPay,
       'ProductId': user.productId,
       'PurchaseToken': user.purchaseToken,
-    });
+    }, SetOptions(merge: true));
   }
 
   Future<void> updateUser(InfoUser user) async {

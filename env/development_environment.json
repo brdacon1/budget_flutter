@@ -8,5 +8,5 @@
   "ANDROID_SUBSCRIPTION_BY_YEAR_SKU": "premiumversionbyyear",
   "IOS_SUBSCRIPTION_SKU": "newproductsubscription",
   "IOS_SUBSCRIPTION_BY_YEAR_SKU": "premiumversionbyyear",
-  "FORCE_PREMIUM": true
+  "FORCE_PREMIUM": false
 }

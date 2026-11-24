@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
@@ -32,6 +33,8 @@ List<String> _labels(ChatMessageEntity m) => [
 ];
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
@@ -81,4 +84,27 @@ void main() {
     expect(msg.content, contains(ChatAssistantStrings.reportsExample));
     expect(msg.payload!['highlight'], ChatAssistantStrings.reportsExample);
   });
+
+  test(
+    '1º acesso convida a criar o primeiro orçamento; depois, menu normal',
+    () async {
+      final repo = _FakeChatRepo();
+      await ResetChatToMenuUsecase(repo)();
+      expect(
+        repo.sent.last.content,
+        ChatAssistantStrings.firstBudgetMenuQuestion,
+      );
+
+      // Teste grátis: só criar orçamentos, produtos e editar PDF.
+      final trial = _FakeChatRepo();
+      await ResetChatToMenuUsecase(trial)(withReports: true, trialMenu: true);
+      final opts = (trial.sent.last.payload!['options'] as List).cast<Map>();
+      expect(opts.map((o) => o['value']), ['1', '2', '3']);
+
+      SharedPreferences.setMockInitialValues({'first_budget_started': true});
+      final repo2 = _FakeChatRepo();
+      await ResetChatToMenuUsecase(repo2)();
+      expect(repo2.sent.last.content, ChatAssistantStrings.mainMenuQuestion);
+    },
+  );
 }

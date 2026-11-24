@@ -51,7 +51,6 @@ import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 /// Tela do assistente de orçamentos (chat estilo WhatsApp).
@@ -563,7 +562,6 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
               child: _buildMessageList(),
             ),
           ),
-          AppKeyboardDismissBar(label: ChatAssistantStrings.closeKeyboard),
           Container(
             decoration: const BoxDecoration(
               color: chatBarColor,

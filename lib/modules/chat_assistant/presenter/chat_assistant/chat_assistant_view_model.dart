@@ -1,4 +1,4 @@
-import 'package:oflite/shared/common/constants/environment.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
@@ -14,7 +14,6 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -51,7 +50,6 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_men
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
 import 'package:oflite/modules/chat_assistant/presenter/enum/chat_flow_step_enum.dart';
-import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/cep/data/model/address.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
@@ -188,6 +186,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Assinante: texto livre no menu principal vai para a IA.
   /// Decidido uma vez por sessão no [_initialize].
   bool _aiMode = false;
+
+  /// Teste grátis ativo (não assinante): menu enxuto, sem Relatórios etc.
+  bool get _isTrial => getIt<GetAccessStatusUseCase>()() == AccessStatus.trial;
 
   bool get aiMode => _aiMode;
 
@@ -348,11 +349,13 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _aiMode = _checkAiAccess();
     _aiFailures = 0;
     // Pré-carrega o intersticial do "compartilhar link" (ignorado p/ assinante)
-    getIt<AdsRepository>().loadInterstitial();
     try {
       await _fetchScriptUsecase.call();
     } catch (_) {}
-    final step = await _resetToMenuUsecase(withReports: _aiMode);
+    final step = await _resetToMenuUsecase(
+      withReports: _aiMode,
+      trialMenu: _aiMode && _isTrial,
+    );
     _setStepFromName(step);
     notifyListeners();
     return const Result.ok(null);
@@ -360,7 +363,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   Future<void> _backToMainMenu() async {
     _clearLocalState();
-    final step = await _resetToMenuUsecase(withReports: _aiMode);
+    final step = await _resetToMenuUsecase(
+      withReports: _aiMode,
+      trialMenu: _aiMode && _isTrial,
+    );
     _setStepFromName(step);
     notifyListeners();
   }
@@ -2106,9 +2112,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     await SharePlus.instance.share(
       ShareParams(text: url, subject: ChatAssistantStrings.shareSubject),
     );
-    // A cada compartilhamento, não assinantes veem um intersticial.
-    // `showInterstitial` já suprime para assinantes e recarrega o próximo.
-    getIt<AdsRepository>().showInterstitial();
     return const Result.ok(null);
   }
 
@@ -2147,7 +2150,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
       await _chatRepo.deleteDraft();
     }
     _clearLocalState();
-    final step = await _resetToMenuUsecase(withReports: _aiMode);
+    final step = await _resetToMenuUsecase(
+      withReports: _aiMode,
+      trialMenu: _aiMode && _isTrial,
+    );
     _setStepFromName(step);
     return const Result.ok(null);
   }
@@ -2587,9 +2593,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Dados para editar a logo. `null` = não assinante (abrir assinatura).
   Future<OwnerPdf?> ownerForLogoEdit() async {
-    final isSubscribed =
-        Environment.instance.forcePremium ||
-        (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
+    final isSubscribed = getIt<GetAccessStatusUseCase>().hasFullAccess;
     if (!isSubscribed) return null;
     final result = await _pdfRepo.fetchInformationEnterprise();
     return result is Ok<OwnerPdf> ? result.value : OwnerPdf();

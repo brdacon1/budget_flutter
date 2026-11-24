@@ -3,6 +3,7 @@ import 'package:oflite/modules/chat_assistant/domain/entity/chat_script_entity.d
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Orquestra a transição do menu principal para o fluxo de orçamento.
 ///
@@ -13,9 +14,14 @@ class StartBudgetFromMenuUsecase {
 
   const StartBudgetFromMenuUsecase(this._chatRepo, this._scriptRepo);
 
+  /// Marca que o usuário já começou um orçamento (some o convite do menu).
+  static const startedPrefKey = 'first_budget_started';
+
   /// Inicia o fluxo de orçamento a partir do menu principal.
   Future<String> call() async {
     final script = _scriptRepo.currentScript;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(startedPrefKey, true);
 
     // Mensagem de transição
     await _chatRepo.sendMessage(

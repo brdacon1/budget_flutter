@@ -7,6 +7,8 @@ import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
+import 'package:oflite/modules/main_tab/presenter/components/main_tab_trial_banner.dart';
 
 import 'package:oflite/modules/main_tab/presenter/components/main_tab_side_bar.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -34,6 +36,14 @@ class _MainTabView extends State<MainTabView> {
       // Comprovantes recebidos pela folha de compartilhamento (§15.4).
       _viewModel.listenSharedFiles();
       _viewModel.loadCompanyLogo();
+      // Teste grátis acabou: ao entrar, abre a assinatura (volta = somente
+      // leitura dos orçamentos já criados).
+      if (getIt<GetAccessStatusUseCase>()() == AccessStatus.expired) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SubscriptionView()),
+        );
+      }
       getIt<NotificationRepository>().tryOpenPendingBudget();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
@@ -99,25 +109,31 @@ class _MainTabView extends State<MainTabView> {
           body: body,
           bottomNavigationBar: Theme(
             data: Theme.of(context).copyWith(canvasColor: secondaryColor),
-            child: BottomNavigationBar(
-              showUnselectedLabels: true,
-              selectedItemColor: Colors.cyan[50],
-              selectedLabelStyle: const TextStyle(
-                fontSize: 11.0,
-                fontWeight: FontWeight.bold,
-              ),
-              unselectedItemColor: Colors.grey,
-              onTap: _viewModel.onTabTapped,
-              currentIndex: _viewModel.currentIndex,
-              items:
-                  _viewModel.tabItems
-                      .map(
-                        (tabItem) => BottomNavigationBarItem(
-                          icon: Icon(tabItem.icon),
-                          label: tabItem.title,
-                        ),
-                      )
-                      .toList(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const MainTabTrialBanner(),
+                BottomNavigationBar(
+                  showUnselectedLabels: true,
+                  selectedItemColor: Colors.cyan[50],
+                  selectedLabelStyle: const TextStyle(
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  unselectedItemColor: Colors.grey,
+                  onTap: _viewModel.onTabTapped,
+                  currentIndex: _viewModel.currentIndex,
+                  items:
+                      _viewModel.tabItems
+                          .map(
+                            (tabItem) => BottomNavigationBarItem(
+                              icon: Icon(tabItem.icon),
+                              label: tabItem.title,
+                            ),
+                          )
+                          .toList(),
+                ),
+              ],
             ),
           ),
         );

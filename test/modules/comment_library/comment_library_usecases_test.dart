@@ -104,16 +104,23 @@ void main() {
       );
     });
 
-    test('free sem acesso; sem usuário sem acesso', () {
+    test('trial ativo tem acesso; expirado não', () {
+      final active = InfoUser()..trialStartedAt = DateTime.now();
+      final expired =
+          InfoUser()
+            ..trialStartedAt = DateTime.now().subtract(const Duration(days: 3));
       expect(
         CheckCommentLibraryAccessUsecase(
-          _FakeUserRepo(InfoUser()),
+          _FakeUserRepo(active),
           forcePremium: off,
         )(),
-        isFalse,
+        isTrue,
       );
       expect(
-        CheckCommentLibraryAccessUsecase(_FakeUserRepo(null), forcePremium: off)(),
+        CheckCommentLibraryAccessUsecase(
+          _FakeUserRepo(expired),
+          forcePremium: off,
+        )(),
         isFalse,
       );
     });
@@ -121,7 +128,12 @@ void main() {
     test('FORCE_PREMIUM libera', () {
       expect(
         CheckCommentLibraryAccessUsecase(
-          _FakeUserRepo(InfoUser()),
+          _FakeUserRepo(
+            InfoUser()
+              ..trialStartedAt = DateTime.now().subtract(
+                const Duration(days: 3),
+              ),
+          ),
           forcePremium: on,
         )(),
         isTrue,
@@ -131,7 +143,9 @@ void main() {
 
   group('GenerateCommentNameUsecase', () {
     test('usa o nome do JSON, limpo', () async {
-      final ai = _FakeAi(const Result.ok('{"name": "\\"Garantia de 90 dias.\\""}'));
+      final ai = _FakeAi(
+        const Result.ok('{"name": "\\"Garantia de 90 dias.\\""}'),
+      );
       expect(
         await GenerateCommentNameUsecase(ai)('Garantia de 90 dias no serviço'),
         'Garantia de 90 dias',
@@ -160,7 +174,10 @@ void main() {
 
     test('JSON com nome vazio → fallback', () async {
       final ai = _FakeAi(const Result.ok('{"name": ""}'));
-      expect(await GenerateCommentNameUsecase(ai)('Prazo curto'), 'Prazo curto');
+      expect(
+        await GenerateCommentNameUsecase(ai)('Prazo curto'),
+        'Prazo curto',
+      );
     });
   });
 
@@ -192,7 +209,10 @@ void main() {
 
     test('erro da IA é repassado', () async {
       final ai = _FakeAi(Result.error(Exception('timeout')));
-      expect(await ImproveCommentTextUsecase(ai)('texto'), isA<Error<String>>());
+      expect(
+        await ImproveCommentTextUsecase(ai)('texto'),
+        isA<Error<String>>(),
+      );
     });
   });
 
@@ -237,7 +257,10 @@ void main() {
     test('IA falhou → grava com nome fallback', () async {
       ai.reply = Result.error(Exception('offline'));
       final r = await save(text: 'Prazo de entrega 10 dias');
-      expect((r as Ok<CommentLibraryModel>).value.name, 'Prazo de entrega 10 dias');
+      expect(
+        (r as Ok<CommentLibraryModel>).value.name,
+        'Prazo de entrega 10 dias',
+      );
     });
 
     test('nome informado não chama a IA', () async {

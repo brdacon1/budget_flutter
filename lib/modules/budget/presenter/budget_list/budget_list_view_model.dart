@@ -1,9 +1,9 @@
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_filter.dart';
 import 'package:oflite/modules/budget/domain/entity/budget_status.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
@@ -13,7 +13,6 @@ import 'package:oflite/modules/budget/domain/usecase/create_budget_for_customer_
 import 'package:oflite/modules/budget/domain/usecase/watch_customer_budgets_usecase.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
-import 'package:oflite/shared/common/constants/environment.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 TextEditingController searchController = TextEditingController();
@@ -45,9 +44,7 @@ class BudgetListViewModel extends ChangeNotifier {
       _resolveMaps(item.fullAddress);
 
   /// Filtro por status: recurso só de assinantes.
-  bool get canFilterStatus =>
-      Environment.instance.forcePremium ||
-      (getIt<UserRepository>().selectUser.value?.autoRenewing ?? false);
+  bool get canFilterStatus => getIt<GetAccessStatusUseCase>().hasFullAccess;
 
   BudgetStatus? _status;
   BudgetStatus? get status => _status;

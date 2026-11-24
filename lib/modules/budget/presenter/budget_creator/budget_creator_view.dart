@@ -8,7 +8,6 @@ import 'package:oflite/modules/budget/presenter/budget_creator/components/budget
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_contact_section.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
 import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
-import 'package:oflite/shared/common/widgets/form/app_keyboard_dismiss_bar.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_summary_card.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -198,8 +197,6 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
                           ),
                         ),
                       ),
-                      if (keyboardOpen)
-                        const AppKeyboardDismissBar(label: 'Fechar teclado'),
                     ],
                   );
                 },

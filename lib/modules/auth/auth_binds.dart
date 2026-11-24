@@ -5,7 +5,9 @@ import 'package:oflite/modules/auth/data/repository/auth_repository_impl.dart';
 import 'package:oflite/modules/auth/domain/repository/auth_repository.dart';
 import 'package:oflite/modules/auth/data/repository/user_repository_impl.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/load_user_session_usecase.dart';
+import 'package:oflite/modules/auth/domain/usecase/register_email_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/restore_session_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/sign_in_email_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/sign_in_social_usecase.dart';
@@ -28,6 +30,9 @@ void registerAuthDependencies(GetIt sl) {
   );
 
   // UseCases
+  sl.registerLazySingleton<GetAccessStatusUseCase>(
+    () => GetAccessStatusUseCase(sl<UserRepository>()),
+  );
   sl.registerLazySingleton<LoadUserSessionUseCase>(
     () => LoadUserSessionUseCase(
       sl<UserRepository>(),
@@ -45,6 +50,15 @@ void registerAuthDependencies(GetIt sl) {
   );
   sl.registerLazySingleton<SignInSocialUseCase>(
     () => SignInSocialUseCase(
+      sl<AuthRepository>(),
+      sl<UserRepository>(),
+      sl<PdfRepository>(),
+      sl<LoadUserSessionUseCase>(),
+      sl<CreateSampleProductUseCase>(),
+    ),
+  );
+  sl.registerLazySingleton<RegisterEmailUseCase>(
+    () => RegisterEmailUseCase(
       sl<AuthRepository>(),
       sl<UserRepository>(),
       sl<PdfRepository>(),

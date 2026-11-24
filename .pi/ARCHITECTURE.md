@@ -1994,12 +1994,10 @@ Use os widgets de `shared/common/widgets/form/` em todo formulário:
   das abas, que já consome o inset, e ele volta sempre 0. Não renderize o
   `AppFormSaveButton`; ele volta quando o teclado
   fecha. Nada pode cobrir o campo em edição.
-- **Sempre dar um jeito de fechar o teclado**: enquanto ele está aberto,
-  exiba `AppKeyboardDismissBar` (barra "Fechar teclado" acima do teclado).
-  A barra se mostra/esconde sozinha (escuta `didChangeMetrics`): coloque-a
-  sem `if` na View.
-  Mantenha também o tap fora (`GestureDetector` → `unfocus`) e
-  `keyboardDismissBehavior: onDrag` no scroll.
+- **Fechar o teclado é nativo**: não existe mais barra "Fechar teclado" (ocupava
+  espaço). O `MaterialApp.builder` (`main.dart`) fecha o teclado em qualquer
+  toque fora do campo. Mantenha `keyboardDismissBehavior: onDrag` no scroll e
+  `textInputAction: done` no último campo.
 - **Telas de formulário não têm banner de anúncio** (`BannerAdWidget`): ele
   rouba espaço do campo em edição.
 - Referências: `budget_creator_view.dart` e `receipt_creator_view.dart`.

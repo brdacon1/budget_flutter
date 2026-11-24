@@ -5,9 +5,12 @@ import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Botão de login com Google estilizado para o card de login.
 class LoginGoogleButton extends StatelessWidget {
-  const LoginGoogleButton({super.key, required this.onPressed});
+  const LoginGoogleButton({super.key, required this.onPressed, this.label});
 
   final VoidCallback onPressed;
+
+  /// Texto do botão; padrão = "Login com ...".
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,7 @@ class LoginGoogleButton extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  LoginStrings.loginWithGoogle,
+                  label ?? LoginStrings.loginWithGoogle,
                   style: GoogleFonts.heebo(
                     color: bgColor,
                     fontWeight: FontWeight.bold,

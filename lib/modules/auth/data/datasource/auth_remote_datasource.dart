@@ -35,14 +35,43 @@ class AuthRemoteDataSource {
         password: password.trim(),
       );
 
-  Future<UserCredential> signInWithGoogle() async {
+  Future<UserCredential> createUserWithEmail(String email, String password) =>
+      _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+
+  Future<AuthCredential> _googleCredential() async {
     final googleUser = await _googleSignIn.authenticate();
     final idToken = googleUser.authentication.idToken;
     if (idToken == null || idToken.isEmpty) {
       throw Exception('Google Sign-In retornou idToken nulo ou vazio.');
     }
-    return _auth.signInWithCredential(
-      GoogleAuthProvider.credential(idToken: idToken),
+    return GoogleAuthProvider.credential(idToken: idToken);
+  }
+
+  Future<UserCredential> signInWithGoogle() async =>
+      _auth.signInWithCredential(await _googleCredential());
+
+  /// Vincula o Google à conta logada (cadastro e-mail + rede social).
+  Future<UserCredential> linkWithGoogle() async =>
+      _auth.currentUser!.linkWithCredential(await _googleCredential());
+
+  /// Vincula a Apple à conta logada (cadastro e-mail + rede social).
+  Future<UserCredential> linkWithApple() async {
+    final rawNonce = _nonce();
+    final apple = await SignInWithApple.getAppleIDCredential(
+      scopes: [AppleIDAuthorizationScopes.email],
+      nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
+    );
+    final idToken = apple.identityToken;
+    if (idToken == null) throw Exception('Apple não retornou identityToken.');
+    return _auth.currentUser!.linkWithCredential(
+      AppleAuthProvider.credentialWithIDToken(
+        idToken,
+        rawNonce,
+        AppleFullPersonName(),
+      ),
     );
   }
 

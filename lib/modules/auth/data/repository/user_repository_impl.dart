@@ -47,6 +47,10 @@ class UserRepositoryImpl extends UserRepository {
             ..productId = raw['ProductId']
             ..purchaseToken = raw['PurchaseToken']
             ..autoRenewing = raw['AutoRenewing'] ?? false;
+      final trial = raw['TrialStartedAt'];
+      if (trial is int) {
+        user.trialStartedAt = DateTime.fromMillisecondsSinceEpoch(trial);
+      }
 
       _currentUser = user;
       _selectUser.value = user;
@@ -94,10 +98,29 @@ class UserRepositoryImpl extends UserRepository {
       _currentUser = user;
       _selectUser.value = user;
       _defaultPdf = pdf;
+      await syncTrial(user.user ?? '');
       notifyListeners();
       return const Result.ok(null);
     } catch (e) {
       return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
+  Future<void> syncTrial(String uid) async {
+    try {
+      final r = await _remote.syncTrial(uid);
+      final user = _selectUser.value;
+      if (r == null || user == null) return;
+      user.trialStartedAt = DateTime.fromMillisecondsSinceEpoch(
+        r.trialStartedAt,
+      );
+      user.serverClockOffset = DateTime.fromMillisecondsSinceEpoch(
+        r.serverNow,
+      ).difference(DateTime.now());
+      notifyListeners();
+    } catch (_) {
+      // Offline/permissão: segue sem bloquear (fail-open).
     }
   }
 

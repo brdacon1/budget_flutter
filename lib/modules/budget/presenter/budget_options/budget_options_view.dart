@@ -8,14 +8,12 @@ import 'package:oflite/modules/budget/presenter/budget_metrics/budget_metrics_vi
 import 'package:oflite/modules/budget/presenter/budget_options/budget_options_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_options/components/budget_options_section.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
-import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/invoice/presenter/invoice_list/invoice_list_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
-import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -83,21 +81,7 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
       Navigator.push(context, MaterialPageRoute(builder: (_) => page));
 
   Future<void> _share() async {
-    var watchedAd = false;
-    if (!_viewModel.isSubscriber) {
-      final choice = await getIt<DisplayAlertRepository>().adsNotification(
-        context,
-      );
-      if (!mounted) return;
-      if (choice == BudgetStrings.goPremium) {
-        await _push(const SubscriptionView());
-        return;
-      }
-      if (choice != BudgetStrings.watchAd) return;
-      watchedAd = true;
-    }
     await _viewModel.shareCommand.execute();
-    if (watchedAd) getIt<AdsRepository>().showInterstitial();
   }
 
   Future<void> _open(BudgetOption option) async {

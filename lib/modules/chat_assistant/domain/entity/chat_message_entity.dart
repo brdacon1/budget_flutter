@@ -56,6 +56,7 @@ class ChatMessageEntity {
     required String step,
     String? backLabel,
     String? highlight,
+    List<String>? values,
   }) {
     final now = DateTime.now();
     return ChatMessageEntity(
@@ -66,7 +67,7 @@ class ChatMessageEntity {
       payload: {
         'options': [
           for (var i = 0; i < labels.length; i++)
-            {'label': labels[i], 'value': '${i + 1}'},
+            {'label': labels[i], 'value': values?[i] ?? '${i + 1}'},
           if (backLabel != null) {'label': backLabel, 'value': '0'},
         ],
         'optionsStep': step,

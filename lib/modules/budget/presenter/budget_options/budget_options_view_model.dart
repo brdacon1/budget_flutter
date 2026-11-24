@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
@@ -61,7 +60,6 @@ class BudgetShareException implements Exception {
 
 class BudgetOptionsViewModel extends ChangeNotifier {
   final ShareLinkRepository _shareLinkRepository;
-  final UserRepository _userRepository;
   final CheckAiAccessUsecase _checkAiAccess;
   final CustomerInfo item;
   final bool showCustomerBudgets;
@@ -72,18 +70,12 @@ class BudgetOptionsViewModel extends ChangeNotifier {
     required this.item,
     this.showCustomerBudgets = true,
     ShareLinkRepository? shareLinkRepository,
-    UserRepository? userRepository,
     CheckAiAccessUsecase? checkAiAccess,
   }) : _shareLinkRepository =
            shareLinkRepository ?? getIt<ShareLinkRepository>(),
-       _userRepository = userRepository ?? getIt<UserRepository>(),
        _checkAiAccess = checkAiAccess ?? getIt<CheckAiAccessUsecase>() {
     shareCommand = Command0(_executeShare);
   }
-
-  /// Assinante vai direto ao compartilhamento; os demais veem o anúncio.
-  bool get isSubscriber =>
-      _userRepository.selectUser.value?.autoRenewing ?? false;
 
   /// Opções agrupadas por seção (seções vazias não aparecem).
   Map<BudgetOptionSection, List<BudgetOption>> get sections {

@@ -1,4 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/auth/domain/usecase/sign_in_social_usecase.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_apple_button.dart';
+import 'package:oflite/modules/auth/presenter/login/components/login_google_button.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_button.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_signup_field.dart';
@@ -70,7 +76,23 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
     setState(() {});
   }
 
-  void _register() {
+  bool get _hasTypedData =>
+      _viewModel.nomeText.text.trim().isNotEmpty ||
+      _viewModel.emailText.text.trim().isNotEmpty ||
+      _viewModel.passwordText.text.isNotEmpty ||
+      _confirmPasswordController.text.isNotEmpty;
+
+  /// Campos vazios: só a rede social. Com dados digitados: cadastra e-mail e
+  /// senha e vincula a rede social à mesma conta.
+  void _socialSignUp(SocialProvider provider) {
+    if (!_hasTypedData) {
+      _viewModel.signUpWithSocial(provider);
+      return;
+    }
+    _register(linkWith: provider);
+  }
+
+  void _register({SocialProvider? linkWith}) {
     final password = _viewModel.passwordText.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
@@ -83,12 +105,13 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
       return;
     }
 
-    _viewModel.register();
+    _viewModel.register(linkWith: linkWith);
   }
 
   @override
   Widget build(BuildContext context) {
     final registering = _viewModel.state == SingUpState.loading;
+    final showApple = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,6 +173,39 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
           backgroundColor: buttonColor,
           textColor: bgColor,
         ),
+        const SizedBox(height: 20),
+        if (showApple)
+          Row(
+            children: [
+              Expanded(
+                child: LoginAppleButton(
+                  label: SingUpStrings.signUpWithApple,
+                  onPressed:
+                      registering
+                          ? () {}
+                          : () => _socialSignUp(SocialProvider.apple),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: LoginGoogleButton(
+                  label: SingUpStrings.signUpWithGoogle,
+                  onPressed:
+                      registering
+                          ? () {}
+                          : () => _socialSignUp(SocialProvider.google),
+                ),
+              ),
+            ],
+          )
+        else
+          LoginGoogleButton(
+            label: SingUpStrings.signUpWithGoogle,
+            onPressed:
+                registering
+                    ? () {}
+                    : () => _socialSignUp(SocialProvider.google),
+          ),
       ],
     );
   }
