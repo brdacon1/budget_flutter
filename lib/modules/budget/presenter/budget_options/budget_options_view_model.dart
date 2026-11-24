@@ -5,6 +5,7 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
+import 'package:oflite/modules/invoice/presenter/strings/invoice_pt_string.dart';
 import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/design_pattern/command.dart';
@@ -21,6 +22,7 @@ enum BudgetOptionType {
   pdfExecutive,
   pdfProfessional,
   proofs,
+  invoices,
 }
 
 /// Agrupamento visual das opções.
@@ -152,6 +154,15 @@ class BudgetOptionsViewModel extends ChangeNotifier {
           color: budgetOptionPinkColor,
           title: PaymentProofStrings.menuLabel,
           subtitle: BudgetStrings.optionProofsDesc,
+        ),
+      if (_checkAiAccess())
+        BudgetOption(
+          type: BudgetOptionType.invoices,
+          section: BudgetOptionSection.finance,
+          icon: Icons.receipt_long_outlined,
+          color: budgetOptionOrangeColor,
+          title: InvoiceStrings.menuLabel,
+          subtitle: BudgetStrings.optionInvoicesDesc,
         ),
     ];
     return {

@@ -6,9 +6,21 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Rodapé da lista de comprovantes (mesmo visual do total dos itens do
 /// orçamento): quantidade à esquerda, soma dos valores em destaque.
 class PaymentProofTotalBar extends StatelessWidget {
-  const PaymentProofTotalBar({super.key, required this.count, required this.total});
+  const PaymentProofTotalBar({
+    super.key,
+    required this.count,
+    required this.total,
+    this.countText,
+    this.counterText,
+    this.totalLabel,
+  });
 
   final int count;
+
+  /// Textos próprios (ex.: notas fiscais). Padrão: comprovantes.
+  final String? countText;
+  final String? counterText;
+  final String? totalLabel;
 
   /// Valor já formatado em moeda.
   final String total;
@@ -31,9 +43,9 @@ class PaymentProofTotalBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(PaymentProofStrings.proofsCount(count), style: muted),
+                  Text(countText ?? PaymentProofStrings.proofsCount(count), style: muted),
                   const SizedBox(height: 2),
-                  Text(PaymentProofStrings.listCounter(count), style: muted),
+                  Text(counterText ?? PaymentProofStrings.listCounter(count), style: muted),
                 ],
               ),
             ),
@@ -41,7 +53,7 @@ class PaymentProofTotalBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(PaymentProofStrings.totalLabel, style: muted),
+                Text(totalLabel ?? PaymentProofStrings.totalLabel, style: muted),
                 Text(
                   total,
                   style: GoogleFonts.heebo(

@@ -33,6 +33,7 @@ enum ChatFlowStep {
 
   // Comprovantes de pagamento (§15 do CHAT_AI_AGENT_PLAN)
   proofSelectBudget,
+  proofAskKind,
   proofAskName,
   proofAskValue,
   proofSaving,

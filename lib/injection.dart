@@ -24,6 +24,7 @@ import 'package:oflite/modules/main_tab/main_tab_binds.dart';
 import 'package:oflite/modules/pdf/pdf_binds.dart';
 import 'package:oflite/modules/product/product_binds.dart';
 import 'package:oflite/modules/receipt/receipt_binds.dart';
+import 'package:oflite/modules/invoice/invoice_binds.dart';
 import 'package:oflite/modules/payment_proof/payment_proof_binds.dart';
 import 'package:oflite/modules/subscription/subscription_binds.dart';
 import 'package:oflite/modules/support/support_binds.dart';
@@ -68,6 +69,7 @@ void setupDependencyInjection() {
   registerBudgetDependencies(getIt);
   registerReceiptDependencies(getIt);
   registerPaymentProofDependencies(getIt);
+  registerInvoiceDependencies(getIt);
   registerProductDependencies(getIt);
   registerCommentLibraryDependencies(getIt);
   registerPdfDependencies(getIt);

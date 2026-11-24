@@ -10,6 +10,7 @@ import 'package:oflite/modules/budget/presenter/budget_options/components/budget
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/ads/domain/repository/ads_repository.dart';
 import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
+import 'package:oflite/modules/invoice/presenter/invoice_list/invoice_list_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
@@ -111,6 +112,8 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
         await _push(ReceiptListView(item: widget.item));
       case BudgetOptionType.proofs:
         await _push(PaymentProofListView(item: widget.item));
+      case BudgetOptionType.invoices:
+        await _push(InvoiceListView(item: widget.item));
       case BudgetOptionType.pdfExecutive:
         await _push(const PdfBudgetView(layoutType: PdfLayoutType.executive));
       case BudgetOptionType.pdfProfessional:

@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
+import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
@@ -56,6 +57,9 @@ import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
 import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
+import 'package:oflite/modules/invoice/domain/usecase/check_invoice_limit_usecase.dart';
+import 'package:oflite/modules/invoice/domain/usecase/create_invoice_usecase.dart';
+import 'package:oflite/modules/invoice/presenter/strings/invoice_pt_string.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
@@ -103,6 +107,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
   final GenerateBudgetPdfFromChatUsecase _generatePdf;
   final CheckProofLimitUsecase _checkProofLimit;
   final CreatePaymentProofUsecase _createProof;
+  final CheckInvoiceLimitUsecase _checkInvoiceLimit;
+  final CreateInvoiceUsecase _createInvoice;
   final ParseMoneyInputUsecase _parseMoney;
   final PickProofAttachmentsUsecase _pickProof;
   final ReceiveSharedProofUsecase _receiveShared;
@@ -139,6 +145,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     this._generatePdf,
     this._checkProofLimit,
     this._createProof,
+    this._checkInvoiceLimit,
+    this._createInvoice,
     this._parseMoney,
     this._pickProof,
     this._receiveShared,
@@ -456,6 +464,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action == DispatchAgentToolUsecase.selectCommentBudget ||
       action == selectProofBudgetAction ||
       action.startsWith(openProofsAction) ||
+      action.startsWith(openInvoicesAction) ||
       action == ShowGoToClientPromptUsecase.selectBudgetAction ||
       action.startsWith(ShowClientAddressUsecase.openMapAction);
 
@@ -544,8 +553,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       _editingField = null;
       notifyListeners();
       // Editado a partir da confirmação: reapresenta os dados para o fluxo seguir.
-      if (_step == ChatFlowStep.confirmClientData &&
-          _pendingPhone.isNotEmpty) {
+      if (_step == ChatFlowStep.confirmClientData && _pendingPhone.isNotEmpty) {
         return await _showClientDataConfirmation();
       }
       return const Result.ok(null);
@@ -734,15 +742,37 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Ação que abre a lista de comprovantes: `open_proofs|{budgetId}`.
   static const openProofsAction = 'open_proofs|';
 
+  /// Ação que abre a lista de notas fiscais: `open_invoices|{budgetId}`.
+  static const openInvoicesAction = 'open_invoices|';
+
   List<ProofAttachment> _proofFiles = [];
   String? _proofComment;
   double? _proofValue;
   String? _proofBudgetId;
   String? _proofName;
   PaymentProofOrigin _proofOrigin = PaymentProofOrigin.chat;
+  bool _proofIsInvoice = false;
+
+  // Formulário de valor (comprovante) / nome+valor+CPF/CNPJ (nota fiscal).
+  final proofNameController = TextEditingController();
+  final proofValueController = MoneyMaskedTextController(leftSymbol: 'R\$ ');
+  String? _proofFormError;
+  String? get proofFormError => _proofFormError;
+
+  bool get isInvoiceFlow => _proofIsInvoice;
+
+  /// Mostra o formulário no lugar da barra de texto.
+  bool get showProofForm => _step == ChatFlowStep.proofAskValue;
+
+  void onProofFormChanged(String _) {
+    if (_proofFormError == null) return;
+    _proofFormError = null;
+    notifyListeners();
+  }
 
   bool get _isProofStep => switch (_step) {
     ChatFlowStep.proofSelectBudget ||
+    ChatFlowStep.proofAskKind ||
     ChatFlowStep.proofAskName ||
     ChatFlowStep.proofAskValue ||
     ChatFlowStep.proofSaving ||
@@ -828,6 +858,10 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _proofBudgetId = null;
     _proofName = null;
     _proofOrigin = PaymentProofOrigin.chat;
+    _proofIsInvoice = false;
+    _proofFormError = null;
+    proofNameController.clear();
+    proofValueController.updateValue(0);
   }
 
   /// Usuário enviou 1–2 imagens ou 1 PDF (painel "+" ou compartilhamento).
@@ -891,19 +925,50 @@ class ChatAssistantViewModel extends ChangeNotifier {
       PaymentProofStrings.budgetChosen(budgetId),
     );
 
-    final limit = await _checkProofLimit(budgetId, adding: _proofFiles.length);
+    _proofBudgetId = budgetId;
+    await _askProofKind();
+  }
+
+  Future<void> _askProofKind() async {
+    _setStep(ChatFlowStep.proofAskKind);
+    await _chatRepo.sendMessage(
+      ChatMessageEntity.botOptions(
+        content: InvoiceStrings.askKind,
+        labels: [InvoiceStrings.kindProof, InvoiceStrings.kindInvoice],
+        backLabel: ChatAssistantStrings.menuBackLabel,
+        step: ChatFlowStep.proofAskKind.name,
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// Escolheu "Comprovantes" ou "Nota fiscal": confere o limite do tipo
+  /// (15 por orçamento) e segue para nome/valor.
+  Future<void> _onProofKindChosen({required bool invoice}) async {
+    final budgetId = _proofBudgetId;
+    if (budgetId == null) return;
+    _proofIsInvoice = invoice;
+    final limit =
+        invoice
+            ? await _checkInvoiceLimit(budgetId, adding: _proofFiles.length)
+            : await _checkProofLimit(budgetId, adding: _proofFiles.length);
     switch (limit) {
       case Error():
         await _showProofSaveError();
         return;
       case Ok(:final value) when !value.fits:
+        _proofBudgetId = null;
         _setStep(ChatFlowStep.proofSelectBudget);
         await _chatRepo.sendMessage(
           ChatMessageEntity.botOptions(
             content:
                 value.count >= 15
-                    ? PaymentProofStrings.limitReached
-                    : PaymentProofStrings.limitWouldExceed(value.count),
+                    ? (invoice
+                        ? InvoiceStrings.limitReached
+                        : PaymentProofStrings.limitReached)
+                    : (invoice
+                        ? InvoiceStrings.limitWouldExceed(value.count)
+                        : PaymentProofStrings.limitWouldExceed(value.count)),
             labels: [PaymentProofStrings.chooseAnother],
             backLabel: ChatAssistantStrings.menuBackLabel,
             step: ChatFlowStep.proofSelectBudget.name,
@@ -914,16 +979,20 @@ class ChatAssistantViewModel extends ChangeNotifier {
       case Ok():
         break;
     }
-    _proofBudgetId = budgetId;
     await _askNextProofField();
   }
 
   /// Pergunta o que falta (nome → valor) ou salva. Os dois são obrigatórios.
   Future<void> _askNextProofField() async {
     if (_proofName == null || _proofName!.isEmpty) {
-      await _askProofName(PaymentProofStrings.askName);
-    } else if (_proofValue == null) {
-      await _askProofValue(PaymentProofStrings.askValue);
+      await _askProofName(
+        isInvoiceFlow ? InvoiceStrings.askName : PaymentProofStrings.askName,
+      );
+    } else if (_proofValue == null || isInvoiceFlow) {
+      // Nota fiscal sempre passa pelo formulário (CPF/CNPJ + conferência).
+      await _askProofValue(
+        isInvoiceFlow ? InvoiceStrings.askValue : PaymentProofStrings.askValue,
+      );
     } else {
       await _saveProof();
     }
@@ -943,6 +1012,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<void> _askProofValue(String message) async {
+    _proofFormError = null;
+    proofNameController.text = _proofName ?? '';
+    proofValueController.updateValue(_proofValue ?? 0);
     _setStep(ChatFlowStep.proofAskValue);
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
@@ -961,21 +1033,26 @@ class ChatAssistantViewModel extends ChangeNotifier {
         // "Escolher outro orçamento" (1) ou texto qualquer → reabre o modal.
         _pendingNavigation = selectProofBudgetAction;
         notifyListeners();
+      case ChatFlowStep.proofAskKind:
+        switch (text.trim()) {
+          case '1':
+            await _onProofKindChosen(invoice: false);
+          case '2':
+            await _onProofKindChosen(invoice: true);
+          default:
+            await _askProofKind();
+        }
       case ChatFlowStep.proofAskName:
         if (text.trim().isEmpty) {
-          await _askProofName(PaymentProofStrings.nameRequired);
+          await _askProofName(
+            isInvoiceFlow
+                ? InvoiceStrings.nameRequired
+                : PaymentProofStrings.nameRequired,
+          );
           return;
         }
         _proofName = text.trim();
         await _askNextProofField();
-      case ChatFlowStep.proofAskValue:
-        final value = _parseMoney(text);
-        if (value == null) {
-          await _askProofValue(PaymentProofStrings.invalidValue);
-          return;
-        }
-        _proofValue = value;
-        await _saveProof();
       case ChatFlowStep.proofSaveError:
         if (text.trim() == '1') await _saveProof();
       default:
@@ -989,42 +1066,97 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (budgetId == null || name == null) return;
     _setStep(ChatFlowStep.proofSaving);
     _setAiThinking(true);
-    final result = await _createProof(
-      budgetId: budgetId,
-      files: _proofFiles,
-      name: name,
-      value: _proofValue,
-      comment: _proofComment,
-      origin: _proofOrigin,
-    );
+    final invoice = _proofIsInvoice;
+    final result =
+        invoice
+            ? await _createInvoice(
+              budgetId: budgetId,
+              files: _proofFiles,
+              name: name,
+              value: _proofValue,
+              origin: _proofOrigin,
+            )
+            : await _createProof(
+              budgetId: budgetId,
+              files: _proofFiles,
+              name: name,
+              value: _proofValue,
+              comment: _proofComment,
+              origin: _proofOrigin,
+            );
     _setAiThinking(false);
     switch (result) {
       case Ok():
         _clearProofDraft();
         _setStep(ChatFlowStep.proofDone);
         await _addBotMessage(
-          PaymentProofStrings.saved,
+          invoice ? InvoiceStrings.saved : PaymentProofStrings.saved,
           type: ChatMessageType.action,
           payload: {
-            'label': PaymentProofStrings.seeProofs,
-            'action': '$openProofsAction$budgetId',
+            'label':
+                invoice
+                    ? InvoiceStrings.seeInvoices
+                    : PaymentProofStrings.seeProofs,
+            'action':
+                '${invoice ? openInvoicesAction : openProofsAction}$budgetId',
             'backLabel': ChatAssistantStrings.menuBackLabel,
           },
         );
-      case Error(:final error) when error is PaymentProofLimitReached:
+      case Error(:final error)
+          when error is PaymentProofLimitReached ||
+              error is InvoiceLimitReached:
         _proofBudgetId = null;
-        await _askProofBudget(PaymentProofStrings.limitReached);
+        await _askProofBudget(
+          invoice
+              ? InvoiceStrings.limitReached
+              : PaymentProofStrings.limitReached,
+        );
       case Error():
         await _showProofSaveError();
     }
     notifyListeners();
   }
 
+  /// "Voltar" do formulário: descarta o rascunho (R10).
+  Future<void> cancelProofForm() => _backToMainMenu();
+
+  late final Command0<void> submitProofFormCommand = Command0(_submitProofForm);
+
+  /// "Salvar" do formulário: valida nome e valor.
+  Future<Result<void>> _submitProofForm() async {
+    final name = proofNameController.text.trim();
+    final value = proofValueController.numberValue;
+    _proofFormError = null;
+    if (name.isEmpty) {
+      _proofFormError =
+          isInvoiceFlow
+              ? InvoiceStrings.nameRequired
+              : PaymentProofStrings.nameRequired;
+    } else if (value <= 0) {
+      _proofFormError = PaymentProofStrings.invalidValue;
+    }
+    if (_proofFormError != null) {
+      notifyListeners();
+      return const Result.ok(null);
+    }
+    _proofName = name;
+    _proofValue = value;
+    await _sendUserMessageWithId(
+      _generateMessageId(),
+      '$name — ${proofValueController.text}',
+    );
+    await _saveProof();
+    return const Result.ok(null);
+  }
+
   Future<void> _showProofSaveError() async {
     _setStep(ChatFlowStep.proofSaveError);
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content: PaymentProofStrings.saveError,
+        content:
+            _proofIsInvoice
+                ? InvoiceStrings.saveError
+                : PaymentProofStrings.saveError,
         labels: [PaymentProofStrings.tryAgain],
         backLabel: ChatAssistantStrings.menuBackLabel,
         step: ChatFlowStep.proofSaveError.name,
@@ -2307,6 +2439,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
         action == DispatchAgentToolUsecase.selectReceiptBudget ||
         action == selectProofBudgetAction ||
         action.startsWith(openProofsAction) ||
+        action.startsWith(openInvoicesAction) ||
         action == DispatchAgentToolUsecase.selectDuplicateBudget ||
         action == DispatchAgentToolUsecase.selectCommentBudget ||
         action == ShowGoToClientPromptUsecase.selectBudgetAction ||
@@ -2498,6 +2631,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     cityController.dispose();
     neighborhoodController.dispose();
     documentController.dispose();
+    proofNameController.dispose();
+    proofValueController.dispose();
     super.dispose();
   }
 }

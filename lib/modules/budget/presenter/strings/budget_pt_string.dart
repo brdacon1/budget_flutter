@@ -195,6 +195,10 @@ class BudgetStrings {
       _isPt
           ? 'Anexe fotos e arquivos de pagamento'
           : 'Attach payment photos and files';
+  static String get optionInvoicesDesc =>
+      _isPt
+          ? 'Notas fiscais e recibos de compra a cobrar'
+          : 'Purchase invoices and receipts to charge';
 
   static String get shareSubject => 'PDF';
   static String get watchAd => _isPt ? 'Ver anuncio' : 'Watch ad';

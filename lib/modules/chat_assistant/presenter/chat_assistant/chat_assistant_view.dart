@@ -34,6 +34,8 @@ import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_type.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_proof_form.dart';
+import 'package:oflite/modules/invoice/presenter/invoice_list/invoice_list_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_viewer/payment_proof_viewer_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
@@ -186,6 +188,11 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   Future<void> _onButtonAction(ChatMessageEntity msg, String action) async {
     final nav = await _vm.onButtonAction(msg, action);
     if (nav == null || !mounted) return;
+    if (nav.startsWith(ChatAssistantViewModel.openInvoicesAction)) {
+      return _openInvoices(
+        nav.substring(ChatAssistantViewModel.openInvoicesAction.length),
+      );
+    }
     if (nav.startsWith(ChatAssistantViewModel.openProofsAction)) {
       return _openProofs(
         nav.substring(ChatAssistantViewModel.openProofsAction.length),
@@ -330,6 +337,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     final budget = await _vm.budgetForNavigation(budgetId);
     if (budget == null || !mounted) return;
     await _push(PaymentProofListView(item: budget));
+  }
+
+  Future<void> _openInvoices(String budgetId) async {
+    final budget = await _vm.budgetForNavigation(budgetId);
+    if (budget == null || !mounted) return;
+    await _push(InvoiceListView(item: budget));
   }
 
   void _openAttachment(ProofAttachment f) => PaymentProofViewerView.open(
@@ -595,6 +608,22 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Widget _buildInputArea() {
+    if (_vm.showProofForm) {
+      return ListenableBuilder(
+        listenable: _vm.submitProofFormCommand,
+        builder:
+            (context, _) => ChatProofForm(
+              isInvoice: _vm.isInvoiceFlow,
+              nameController: _vm.proofNameController,
+              valueController: _vm.proofValueController,
+              errorText: _vm.proofFormError,
+              isSaving: _vm.submitProofFormCommand.running,
+              onChanged: _vm.onProofFormChanged,
+              onSubmit: () => _vm.submitProofFormCommand.execute(),
+              onCancel: _vm.cancelProofForm,
+            ),
+      );
+    }
     if (_vm.showDocumentForm) {
       return ListenableBuilder(
         listenable: _vm.submitDocumentCommand,
