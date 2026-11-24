@@ -18,6 +18,7 @@ class AppAdaptiveGrid extends StatelessWidget {
     this.spacing = defaultPadding,
     this.padding = EdgeInsets.zero,
     this.controller,
+    this.header,
   });
 
   final int itemCount;
@@ -29,8 +30,14 @@ class AppAdaptiveGrid extends StatelessWidget {
   final EdgeInsets padding;
   final ScrollController? controller;
 
+  /// Widget que rola junto com a lista (primeiro item). Ocupa a largura toda:
+  /// o [padding] horizontal vale só para os cards, o header cuida do seu.
+  final Widget? header;
+
   @override
   Widget build(BuildContext context) {
+    final header = this.header;
+    if (header != null) return _buildWithHeader(header);
     return LayoutBuilder(
       builder: (context, constraints) {
         final available = constraints.maxWidth - padding.horizontal;
@@ -77,6 +84,83 @@ class AppAdaptiveGrid extends StatelessWidget {
                   ),
                 ],
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildWithHeader(Widget header) {
+    final side = EdgeInsets.only(left: padding.left, right: padding.right);
+    final vertical = EdgeInsets.only(top: padding.top, bottom: padding.bottom);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available = constraints.maxWidth - padding.horizontal;
+        final columns = ((available + spacing) / (minItemWidth + spacing))
+            .floor()
+            .clamp(1, maxColumns);
+        if (columns == 1) {
+          return ListView.builder(
+            controller: controller,
+            padding: vertical,
+            itemCount: itemCount + 1,
+            itemBuilder:
+                (context, i) =>
+                    i == 0
+                        ? header
+                        : Padding(
+                          padding: side,
+                          child: itemBuilder(context, i - 1),
+                        ),
+          );
+        }
+        if (mainAxisExtent != null) {
+          return CustomScrollView(
+            controller: controller,
+            slivers: [
+              SliverToBoxAdapter(child: header),
+              SliverPadding(
+                padding: padding.copyWith(top: 0),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    mainAxisSpacing: spacing,
+                    crossAxisSpacing: spacing,
+                    mainAxisExtent: mainAxisExtent,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    itemBuilder,
+                    childCount: itemCount,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        return ListView.builder(
+          controller: controller,
+          padding: vertical,
+          itemCount: (itemCount / columns).ceil() + 1,
+          itemBuilder: (context, i) {
+            if (i == 0) return header;
+            final row = i - 1;
+            return Padding(
+              padding: side,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var c = 0; c < columns; c++) ...[
+                    if (c > 0) SizedBox(width: spacing),
+                    Expanded(
+                      child:
+                          row * columns + c < itemCount
+                              ? itemBuilder(context, row * columns + c)
+                              : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
             );
           },
         );

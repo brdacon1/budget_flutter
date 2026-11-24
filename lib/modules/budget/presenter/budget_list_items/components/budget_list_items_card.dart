@@ -133,7 +133,10 @@ class BudgetListItemsCard extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: bgColor,
+                                  color:
+                                      isService
+                                          ? cartAccentColor
+                                          : productPillColor,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -141,8 +144,9 @@ class BudgetListItemsCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.heebo(
-                                    color: mutedTextColor,
+                                    color: whiteColor,
                                     fontSize: 11,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -153,12 +157,10 @@ class BudgetListItemsCard extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  moneyConvert.convertFromDouble(
-                                    item.total ?? 0,
-                                  ),
+                                  '= ${moneyConvert.convertFromDouble(item.total ?? 0)}',
                                   maxLines: 1,
                                   style: GoogleFonts.heebo(
-                                    color: whiteColor,
+                                    color: priceTextColor,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),

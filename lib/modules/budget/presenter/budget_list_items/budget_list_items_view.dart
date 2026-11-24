@@ -19,6 +19,7 @@ import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.
 
 import 'budget_list_items_view_model.dart';
 import 'components/budget_list_items_card.dart';
+import 'components/budget_list_items_category_filter.dart';
 import 'components/budget_list_items_total_bar.dart';
 
 class BudgetListItemsView extends StatefulWidget {
@@ -198,10 +199,35 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     );
   }
 
-  Widget _buildEmpty() {
-    final searching = _viewModel.searchController.text.isNotEmpty;
+  /// Título, busca, filtro e barra de seleção: rolam junto com a lista.
+  Widget _buildHeader(int count) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppHeaderSecondTitle(
+          showBack: !AppDetailPane.hidesBackOf(context),
+          titlePage: 'Itens do orçamento',
+          secondTitle: count == 1 ? '1 item' : '$count itens',
+          onBack: () => Navigator.pop(context, true),
+          insideSafeArea: true,
+        ),
+        _buildSearchBar(),
+        BudgetListItemsCategoryFilter(
+          selected: _viewModel.category,
+          onChanged: _viewModel.onCategoryChanged,
+        ),
+        if (_viewModel.selectionMode) _buildSelectionBar(),
+      ],
+    );
+  }
+
+  Widget _buildEmpty(Widget header) {
+    final searching =
+        _viewModel.searchController.text.isNotEmpty ||
+        _viewModel.category != null;
     return ListView(
       children: [
+        header,
         const SizedBox(height: 60),
         Icon(
           searching ? Icons.search_off : Icons.playlist_add,
@@ -231,8 +257,16 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Widget _buildList() {
+    final header = _buildHeader(_viewModel.budgets.length);
     if (_viewModel.loading) {
-      return const Center(child: CircularProgressIndicator(color: buttonColor));
+      return Column(
+        children: [
+          header,
+          const Expanded(
+            child: Center(child: CircularProgressIndicator(color: buttonColor)),
+          ),
+        ],
+      );
     }
     final items = _viewModel.filteredItems;
     return RefreshIndicator(
@@ -241,8 +275,9 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       onRefresh: _viewModel.getListItens,
       child:
           items.isEmpty
-              ? _buildEmpty()
+              ? _buildEmpty(header)
               : AppAdaptiveGrid(
+                header: header,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
@@ -265,6 +300,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
         heroTag: 'delete',
         onPressed: _viewModel.deleting ? null : _confirmDelete,
         backgroundColor: statusRejectedColor,
+        shape: const StadiumBorder(),
         icon:
             _viewModel.deleting
                 ? const SizedBox(
@@ -290,6 +326,8 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       heroTag: 'adicionar',
       onPressed: _addItem,
       backgroundColor: buttonColor,
+      elevation: 4,
+      shape: const StadiumBorder(),
       icon: const Icon(Icons.add, color: blackColor),
       label: Text(
         'Adicionar item',
@@ -308,24 +346,12 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
       animation: _viewModel,
       builder: (context, _) {
         final money = _viewModel.moneyConvert;
-        final count = _viewModel.budgets.length;
         return Scaffold(
           backgroundColor: bgColor,
           body: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
-            child: Column(
-              children: <Widget>[
-                AppHeaderSecondTitle(
-                  showBack: !AppDetailPane.hidesBackOf(context),
-                  titlePage: 'Itens do orçamento',
-                  secondTitle: count == 1 ? '1 item' : '$count itens',
-                  onBack: () => Navigator.pop(context, true),
-                ),
-                _buildSearchBar(),
-                if (_viewModel.selectionMode) _buildSelectionBar(),
-                Expanded(child: _buildList()),
-              ],
-            ),
+            // SafeArea: o conteúdo rolado não passa por baixo da status bar.
+            child: SafeArea(bottom: false, child: _buildList()),
           ),
           floatingActionButton: _buildFab(),
           bottomNavigationBar: BudgetListItemsTotalBar(
