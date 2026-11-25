@@ -37,6 +37,7 @@ Future<List<double>> _heights(
                       key: ValueKey(i),
                       item: items[i],
                       selected: false,
+                      selectionMode: false,
                       moneyConvert: _FakeMoney(),
                       onTap: () {},
                       onToggleSelect: () {},

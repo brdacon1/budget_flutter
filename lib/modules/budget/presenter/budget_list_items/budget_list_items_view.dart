@@ -285,8 +285,13 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
                   return BudgetListItemsCard(
                     item: it,
                     selected: _viewModel.isSelected(it),
+                    selectionMode: _viewModel.selectionMode,
                     moneyConvert: _viewModel.moneyConvert,
-                    onTap: () => _openItem(it),
+                    onTap:
+                        () =>
+                            _viewModel.selectionMode
+                                ? _viewModel.toggleSelect(it)
+                                : _openItem(it),
                     onToggleSelect: () => _viewModel.toggleSelect(it),
                   );
                 },
