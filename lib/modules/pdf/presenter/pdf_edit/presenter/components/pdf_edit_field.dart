@@ -1,8 +1,8 @@
+import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/enum/gender_enum.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-import '../pdf_edit_view_model.dart';
 
 class PdfEditField extends StatelessWidget {
   final TextEditingController controller;

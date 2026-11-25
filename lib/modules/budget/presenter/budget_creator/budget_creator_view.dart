@@ -1,7 +1,7 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/budget_creator_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_address_section.dart';
@@ -9,7 +9,6 @@ import 'package:oflite/modules/budget/presenter/budget_creator/components/budget
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_info_section.dart';
 import 'package:oflite/shared/common/widgets/form/app_form_save_button.dart';
 import 'package:oflite/modules/budget/presenter/budget_creator/components/budget_creator_summary_card.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
@@ -58,10 +57,9 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     }
     if (!mounted) return;
 
-    final alert = getIt<DisplayAlertRepository>();
     if (cmd.error) {
       cmd.clearResult();
-      await alert.notificationError(
+      AlertSnackBar.error(
         context,
         'Não foi possível salvar',
         'Verifique sua conexão e tente novamente.',
@@ -72,7 +70,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
     cmd.clearResult();
 
     if (!_wasCreating) {
-      await alert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         'Alterações salvas',
         'Dados do orçamento atualizados.',
@@ -80,7 +78,7 @@ class _BudgetCreatorView extends State<BudgetCreatorView> {
       return;
     }
 
-    await alert.notification(
+    AlertSnackBar.success(
       context,
       'Feito!',
       'Orçamento criado. Agora adicione os itens.',

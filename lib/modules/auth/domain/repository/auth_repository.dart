@@ -11,4 +11,5 @@ abstract class AuthRepository {
   Future<UserCredential> createUserWithEmail(String email, String password);
   Future<UserCredential> linkWithGoogle();
   Future<UserCredential> linkWithApple();
+  Future<void> sendPasswordReset(String email);
 }

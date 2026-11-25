@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
@@ -7,7 +8,6 @@ import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/crashlytics/domain/repository/crashlytics_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
@@ -20,7 +20,6 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class PdfBudgetViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository;
   final PdfRepository _pdfRepository;
-  final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
   final PdfGenerateBudgetSimpleUsecase _pdfGenerateBudgetUsecase;
   final PdfGenerateBudgetExecutiveUsecase _pdfGenerateExecutiveUseCase;
@@ -40,15 +39,12 @@ class PdfBudgetViewModel extends ChangeNotifier {
   PdfBudgetViewModel({
     BudgetRepository? budgetRepository,
     PdfRepository? pdfRepository,
-    DisplayAlertRepository? displayAlertRepository,
     ConvertCoinRepository? convertCoinRepository,
     PdfGenerateBudgetSimpleUsecase? pdfGenerateBudgetUsecase,
     PdfGenerateBudgetExecutiveUsecase? pdfGenerateExecutiveUseCase,
     PdfGenerateBudgetProfessionalUsecase? pdfGenerateProfessionalUseCase,
   }) : _budgetRepository = budgetRepository ?? getIt<BudgetRepository>(),
        _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
-       _displayAlert =
-           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>(),
        _pdfGenerateBudgetUsecase =
            pdfGenerateBudgetUsecase ?? getIt<PdfGenerateBudgetSimpleUsecase>(),
@@ -188,7 +184,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
         fileBytes = generated;
       } else {
         if (context.mounted) {
-          await _displayAlert.notificationWarning(
+          AlertSnackBar.warning(
             context,
             'Ops!',
             "Para visualizar o PDF do orçamento é necessário incluir apenas um produto ou serviço na aba 'Itens'",
@@ -198,7 +194,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
     } catch (e, s) {
       getIt<CrashlyticsRepository>().recordError(e, s);
       if (context.mounted) {
-        await _displayAlert.notificationWarning(
+        AlertSnackBar.warning(
           context,
           PdfStrings.errorTitle,
           '${PdfStrings.notPossibleGeneratePdf}: ${e.toString()}',

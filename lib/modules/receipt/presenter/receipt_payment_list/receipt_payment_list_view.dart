@@ -1,10 +1,10 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_payment_list/components/modals/receipt_payment_list_actions_bottom_modal_widget.dart';
@@ -35,7 +35,6 @@ class ReceiptPaymentListView extends StatefulWidget {
 class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
   late final ReceiptPaymentListViewModel _viewModel;
   final LoadingEventRepository _loading = getIt<LoadingEventRepository>();
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -68,7 +67,7 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
     if (!mounted) return;
     if (command.error) {
       _loading.closeLoading(context);
-      await _displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         PaymentStrings.errorTitle,
         PaymentStrings.errorRemovePayment,
@@ -76,7 +75,7 @@ class _ReceiptPaymentListViewState extends State<ReceiptPaymentListView> {
       await _viewModel.inicialData();
     } else if (command.completed) {
       _loading.closeLoading(context);
-      await _displayAlert.notification(
+      AlertSnackBar.success(
         context,
         PaymentStrings.doneTitle,
         PaymentStrings.paymentRemoved,

@@ -1,7 +1,7 @@
+import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/strings/chat_assistant_pt_string.dart';
-import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -25,7 +25,9 @@ class ShowPdfEditConfirmEntryUsecase {
     dataRows.add(
       _row(
         '🏢 Nome da empresa:',
-        owner?.empresa?.trim().isNotEmpty == true
+        owner?.empresa
+            ?.trim()
+            .isNotEmpty == true
             ? owner!.empresa!.trim()
             : 'Não cadastrado',
       ),
@@ -33,7 +35,9 @@ class ShowPdfEditConfirmEntryUsecase {
     dataRows.add(
       _row(
         '📞 Telefone:',
-        owner?.fone?.trim().isNotEmpty == true
+        owner?.fone
+            ?.trim()
+            .isNotEmpty == true
             ? owner!.fone!.trim()
             : 'Não cadastrado',
       ),
@@ -41,7 +45,9 @@ class ShowPdfEditConfirmEntryUsecase {
     dataRows.add(
       _row(
         '📧 Email:',
-        owner?.email?.trim().isNotEmpty == true
+        owner?.email
+            ?.trim()
+            .isNotEmpty == true
             ? owner!.email!.trim()
             : 'Não cadastrado',
       ),
@@ -49,21 +55,35 @@ class ShowPdfEditConfirmEntryUsecase {
     dataRows.add(
       _row(
         '🏛️ CNPJ:',
-        owner?.cnpj?.trim().isNotEmpty == true
+        owner?.cnpj
+            ?.trim()
+            .isNotEmpty == true
             ? owner!.cnpj!.trim()
             : 'Não cadastrado',
       ),
     );
 
     final addressParts = <String>[];
-    if (owner?.rua?.trim().isNotEmpty == true)
+    if (owner?.rua
+        ?.trim()
+        .isNotEmpty == true) {
       addressParts.add(owner!.rua!.trim());
-    if (owner?.bairro?.trim().isNotEmpty == true)
+    }
+    if (owner?.bairro
+        ?.trim()
+        .isNotEmpty == true) {
       addressParts.add(owner!.bairro!.trim());
-    if (owner?.city?.trim().isNotEmpty == true)
+    }
+    if (owner?.city
+        ?.trim()
+        .isNotEmpty == true) {
       addressParts.add(owner!.city!.trim());
-    if (owner?.cep?.trim().isNotEmpty == true)
+    }
+    if (owner?.cep
+        ?.trim()
+        .isNotEmpty == true) {
       addressParts.add('CEP: ${owner!.cep!.trim()}');
+    }
     dataRows.add(
       _row(
         '📍 Endereço:',
@@ -73,7 +93,10 @@ class ShowPdfEditConfirmEntryUsecase {
 
     await _chatRepo.sendMessage(
       ChatMessageEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime
+            .now()
+            .millisecondsSinceEpoch
+            .toString(),
         sender: ChatSender.bot,
         type: ChatMessageType.inlineButtons,
         content: ChatAssistantStrings.pdfEditProceedQuestion,

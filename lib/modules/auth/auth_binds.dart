@@ -5,6 +5,7 @@ import 'package:oflite/modules/auth/data/repository/auth_repository_impl.dart';
 import 'package:oflite/modules/auth/domain/repository/auth_repository.dart';
 import 'package:oflite/modules/auth/data/repository/user_repository_impl.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/auth/domain/usecase/change_user_name_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/load_user_session_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/register_email_usecase.dart';
@@ -40,6 +41,9 @@ void registerAuthDependencies(GetIt sl) {
       sl<CrashlyticsRepository>(),
       sl<InAppPurchaseRepository>(),
     ),
+  );
+  sl.registerLazySingleton<ChangeUserNameUseCase>(
+    () => ChangeUserNameUseCase(sl<UserRepository>()),
   );
   sl.registerLazySingleton<SignInEmailUseCase>(
     () => SignInEmailUseCase(

@@ -9,7 +9,6 @@ import 'package:oflite/modules/core/cep/cep_binds.dart';
 import 'package:oflite/modules/core/convert_coin/convert_coin_binds.dart';
 import 'package:oflite/modules/core/app_check/app_check_binds.dart';
 import 'package:oflite/modules/core/crashlytics/crashlytics_binds.dart';
-import 'package:oflite/modules/core/display_alert/display_alert_binds.dart';
 import 'package:oflite/modules/core/in_app_purchase/in_app_purchase_binds.dart';
 import 'package:oflite/modules/core/loading_event/loading_event_binds.dart';
 import 'package:oflite/modules/core/notification/notification_binds.dart';
@@ -54,7 +53,6 @@ void setupDependencyInjection() {
   registerAppCheckDependencies(getIt);
   registerConvertCoinDependencies(getIt);
   registerLoadingEventDependencies(getIt);
-  registerDisplayAlertDependencies(getIt);
   registerNotificationDependencies(getIt);
   registerCepDependencies(getIt);
   registerShareLinkDependencies(getIt);

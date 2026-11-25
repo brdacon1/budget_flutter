@@ -1,3 +1,4 @@
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/auth/data/model/info_user.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/auth/domain/repository/auth_repository.dart';
@@ -65,6 +66,7 @@ class RegisterEmailUseCase {
         OwnerPdf()
           ..email = email
           ..empresa = SingUpStrings.defaultCompanyName
+          ..pdfLayoutType = PdfLayoutType.professional.name
           ..logoName = ''
           ..fotoId = '';
 

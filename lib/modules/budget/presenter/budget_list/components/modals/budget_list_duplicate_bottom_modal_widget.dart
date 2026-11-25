@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 class BudgetListDuplicateBottomModalWidget extends StatefulWidget {
@@ -35,7 +35,7 @@ class _BudgetListDuplicateBottomModalWidgetState
         !duplicateComments &&
         !duplicateReceipts) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: const Text('Por favor selecione alguma opção')),
+        const SnackBar(content: Text('Por favor selecione alguma opção')),
       );
       return;
     }

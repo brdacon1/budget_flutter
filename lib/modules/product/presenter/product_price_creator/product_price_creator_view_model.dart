@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/domain/entity/item_category.dart';
@@ -5,7 +6,6 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
@@ -18,7 +18,6 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository =
       getIt<ProductPriceRepository>();
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
@@ -137,7 +136,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
     if (error != null) {
       if (!context.mounted) return;
-      await displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         ProductPtString.errorTitle,
         error,
@@ -150,7 +149,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
             ? ProductPtString.addSuccess
             : ProductPtString.updateSuccess;
     if (!context.mounted) return;
-    displayAlert.notification(
+    AlertSnackBar.success(
       context,
       ProductPtString.doneTitle,
       successMessage,

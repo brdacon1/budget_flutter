@@ -4,11 +4,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/entity/gallery_asset_entity.dart'
-    show RawMediaFile;
 import 'package:oflite/modules/payment_proof/domain/entity/payment_proof_limits.dart';
-import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/payment_proof/presenter/strings/payment_proof_pt_string.dart';
 
 /// Seletor de fotos estilo WhatsApp: grade, abas Fotos/Álbuns, até 2 fotos
 /// com número da ordem, legenda e enviar com contador.

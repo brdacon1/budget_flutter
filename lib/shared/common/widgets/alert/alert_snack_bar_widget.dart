@@ -15,6 +15,18 @@ class AlertSnackBar {
 
   static const double _maxWidth = 560;
 
+  /// Alerta de erro (vermelho).
+  static void error(BuildContext context, String title, String message) =>
+      show(context, type: AlertType.error, title: title, message: message);
+
+  /// Alerta de aviso (laranja).
+  static void warning(BuildContext context, String title, String message) =>
+      show(context, type: AlertType.warning, title: title, message: message);
+
+  /// Alerta de sucesso (verde).
+  static void success(BuildContext context, String title, String message) =>
+      show(context, type: AlertType.success, title: title, message: message);
+
   static void show(
     BuildContext context, {
     required AlertType type,

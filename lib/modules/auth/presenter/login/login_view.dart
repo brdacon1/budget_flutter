@@ -1,3 +1,7 @@
+import 'package:oflite/modules/auth/presenter/change_name/show_change_name_modal.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
+import 'package:oflite/shared/common/widgets/modals/change_password_bottom_modal_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_card_clipper.dart';
@@ -8,7 +12,6 @@ import 'package:oflite/modules/auth/presenter/login/components/login_signup_tab.
 import 'package:oflite/modules/auth/presenter/login/components/login_tab.dart';
 import 'package:oflite/modules/auth/presenter/login/components/login_tab_toggle.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_page_container.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -26,7 +29,6 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final LoginViewModel _viewModel = getIt<LoginViewModel>();
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
 
   bool _isLoginTab = true;
@@ -73,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
         // Login social sem nome (Apple só envia na 1ª autorização):
         // pede o nome antes de entrar.
         if (_viewModel.needsUserName) {
-          await _displayAlert.dialogChangeName(context);
+          await showChangeNameModal(context);
           if (!mounted) return;
         }
         Navigator.pushNamedAndRemoveUntil(context, '/menu', (_) => false);
@@ -87,7 +89,7 @@ class _LoginViewState extends State<LoginView> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _displayAlert.notificationError(
+          AlertSnackBar.error(
             context,
             LoginStrings.errorTitle,
             message,
@@ -135,7 +137,7 @@ class _LoginViewState extends State<LoginView> {
         AnimatedCrossFade(
           firstChild: LoginTab(
             viewModel: _viewModel,
-            onForgotPassword: () => _displayAlert.dialogChangePassword(context),
+            onForgotPassword: _openChangePassword,
             onGoogleLogin: () => _viewModel.loginWithGoogle(context),
             onAppleLogin: _viewModel.loginWithApple,
           ),
@@ -196,6 +198,23 @@ class _LoginViewState extends State<LoginView> {
         ),
       ],
     );
+  }
+
+  Future<void> _openChangePassword() async {
+    final sent = await showAppModal<bool>(
+      context,
+      builder:
+          (_) => ChangePasswordBottomModalWidget(
+            onSave: _viewModel.sendPasswordReset,
+          ),
+    );
+    if (sent == true && mounted) {
+      AlertSnackBar.success(
+        context,
+        'Feito!',
+        'Você recebeu um email para trocar de senha',
+      );
+    }
   }
 
   @override

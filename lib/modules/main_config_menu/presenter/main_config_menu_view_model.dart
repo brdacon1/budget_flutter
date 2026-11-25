@@ -1,8 +1,9 @@
+import 'package:oflite/modules/auth/presenter/change_name/show_change_name_modal.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/main_config_menu/presenter/strings/main_config_menu_pt_string.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/delete_account_in_app_view.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
@@ -17,7 +18,6 @@ class MenuItem {
 }
 
 class MainConfigMenuViewModel extends ChangeNotifier {
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   final List<MenuItem> menuItems = [
     MenuItem(icon: Icons.list, title: MainConfigMenuStrings.menuPriceList),
@@ -63,7 +63,7 @@ class MainConfigMenuViewModel extends ChangeNotifier {
         );
         break;
       case 3:
-        _displayAlert.dialogChangeName(context);
+        showChangeNameModal(context);
         break;
       case 4:
         Navigator.push(
@@ -92,7 +92,7 @@ class MainConfigMenuViewModel extends ChangeNotifier {
       );
       return;
     }
-    await _displayAlert.notificationWarning(
+    AlertSnackBar.warning(
       context,
       MainConfigMenuStrings.premiumOnlyTitle,
       MainConfigMenuStrings.commentsPremiumOnly,

@@ -20,7 +20,6 @@ class CommentLibraryListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -30,7 +29,7 @@ class CommentLibraryListHeader extends StatelessWidget {
           child: GestureDetector(
             onTap: onBack,
             child: const Padding(
-              padding: const EdgeInsets.only(left: 12),
+              padding: EdgeInsets.only(left: 12),
               child: Icon(
                 Icons.arrow_back_outlined,
                 color: whiteColor,

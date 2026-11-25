@@ -1,8 +1,8 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
@@ -15,7 +15,6 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class ProductPriceListViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository =
       getIt<ProductPriceRepository>();
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
@@ -137,7 +136,7 @@ class ProductPriceListViewModel extends ChangeNotifier {
   Future<void> addNew(BuildContext context) async {
     final isPremium = getIt<GetAccessStatusUseCase>().hasFullAccess;
     if (!isPremium && found.length > 15) {
-      await displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         ProductPtString.errorTitle,
         ProductPtString.premiumError,

@@ -1,7 +1,7 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/login_view.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/delete_account_in_app_view_model.dart';
 import 'package:oflite/modules/delete_account/presenter/delete_account_in_app/strings/delete_account_in_app_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -17,7 +17,6 @@ class DeleteAccountInAppView extends StatefulWidget {
 
 class _DeleteAccountInAppViewState extends State<DeleteAccountInAppView> {
   late final DeleteAccountInAppViewModel _viewModel;
-  final _alert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -40,7 +39,7 @@ class _DeleteAccountInAppViewState extends State<DeleteAccountInAppView> {
   void _onDeleteChanged() {
     final cmd = _viewModel.deleteCommand;
     if (cmd.completed) {
-      _alert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         DeleteAccountInAppStrings.successTitle,
         DeleteAccountInAppStrings.successMessage,
@@ -53,7 +52,7 @@ class _DeleteAccountInAppViewState extends State<DeleteAccountInAppView> {
       return;
     }
     if (cmd.error && !_viewModel.isValidationError(cmd.result)) {
-      _alert.notificationError(
+      AlertSnackBar.error(
         context,
         DeleteAccountInAppStrings.errorTitle,
         DeleteAccountInAppStrings.errorMessage,

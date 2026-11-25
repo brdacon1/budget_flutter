@@ -1,16 +1,19 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/enums/alert_type_enum.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Modal inferior para recuperar a senha (envia e-mail de reset).
 ///
 /// Bottom modal que acompanha o teclado, fundo branco, campo no padrão do
 /// projeto (cinza máximo) e botão "Solicitar senha" no padrão dos botões.
-/// O `onSubmit` recebe o e-mail digitado e é responsável pela regra de negócio
-/// (enviar reset, exibir alerta) e por fechar o modal (`Navigator.pop`).
+/// O modal só coleta o e-mail: a regra chega por [onSave] (sem `BuildContext`)
+/// e, em sucesso, ele fecha devolvendo `true`.
 class ChangePasswordBottomModalWidget extends StatefulWidget {
-  const ChangePasswordBottomModalWidget({super.key, required this.onSubmit});
+  const ChangePasswordBottomModalWidget({super.key, required this.onSave});
 
-  final Future<void> Function(BuildContext context, String email) onSubmit;
+  final Future<Result<void>> Function(String email) onSave;
 
   @override
   State<ChangePasswordBottomModalWidget> createState() =>
@@ -31,9 +34,20 @@ class _ChangePasswordBottomModalWidgetState
   Future<void> _handleSubmit() async {
     if (_submitting) return;
     setState(() => _submitting = true);
-    await widget.onSubmit(context, _emailController.text.trim());
-    if (mounted) {
-      setState(() => _submitting = false);
+    final result = await widget.onSave(_emailController.text.trim());
+    if (!mounted) return;
+    switch (result) {
+      case Ok():
+        Navigator.of(context).pop(true);
+      case Error():
+        setState(() => _submitting = false);
+        AlertSnackBar.show(
+          context,
+          type: AlertType.error,
+          title: 'Erro!',
+          message:
+              'Problemas para restaurar sua senha verifique seu e-mail se está correto!',
+        );
     }
   }
 

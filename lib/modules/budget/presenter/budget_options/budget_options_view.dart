@@ -1,6 +1,6 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_list/budget_comment_list_view.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dart';
@@ -8,7 +8,6 @@ import 'package:oflite/modules/budget/presenter/budget_metrics/budget_metrics_vi
 import 'package:oflite/modules/budget/presenter/budget_options/budget_options_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_options/components/budget_options_section.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/invoice/presenter/invoice_list/invoice_list_view.dart';
 import 'package:oflite/modules/payment_proof/presenter/payment_proof_list/payment_proof_list_view.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
@@ -60,10 +59,9 @@ class _BudgetOptionsViewState extends State<BudgetOptionsView> {
     if (!cmd.error) return;
     final failure = (cmd.result as Error<void>).error;
     if (failure is! BudgetShareException) return;
-    final alert = getIt<DisplayAlertRepository>();
     failure.isWarning
-        ? alert.notificationWarning(context, failure.title, failure.message)
-        : alert.notificationError(context, failure.title, failure.message);
+        ? AlertSnackBar.warning(context, failure.title, failure.message)
+        : AlertSnackBar.error(context, failure.title, failure.message);
   }
 
   String _sectionTitle(BudgetOptionSection section) {

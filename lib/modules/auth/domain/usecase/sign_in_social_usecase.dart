@@ -1,3 +1,4 @@
+import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -122,6 +123,7 @@ class SignInSocialUseCase {
         OwnerPdf()
           ..email = value?.email ?? ''
           ..empresa = LoginStrings.defaultCompanyName
+          ..pdfLayoutType = PdfLayoutType.professional.name
           ..logoName = ''
           ..fotoId = '';
     await _userRepository.createDefaultUserData(infoUser, ownerPdf);

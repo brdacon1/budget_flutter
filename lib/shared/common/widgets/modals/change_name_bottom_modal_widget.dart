@@ -1,16 +1,19 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/enums/alert_type_enum.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 
 /// Modal inferior para trocar o nome do usuário.
 ///
 /// Bottom modal que acompanha o teclado, fundo branco, campo no padrão do
-/// projeto (cinza máximo) e botão "SALVAR" no padrão dos botões. O `onSubmit`
-/// recebe o nome digitado e é responsável pela regra de negócio (atualizar
-/// usuário, exibir alerta) e por fechar o modal (`Navigator.pop`).
+/// projeto (cinza máximo) e botão "SALVAR" no padrão dos botões. O modal só
+/// coleta o nome: a regra de negócio chega por [onSave] (sem `BuildContext`)
+/// e, em sucesso, o modal fecha devolvendo o nome salvo.
 class ChangeNameBottomModalWidget extends StatefulWidget {
-  const ChangeNameBottomModalWidget({super.key, required this.onSubmit});
+  const ChangeNameBottomModalWidget({super.key, required this.onSave});
 
-  final Future<void> Function(BuildContext context, String name) onSubmit;
+  final Future<Result<void>> Function(String name) onSave;
 
   @override
   State<ChangeNameBottomModalWidget> createState() =>
@@ -28,12 +31,31 @@ class _ChangeNameBottomModalWidgetState
     super.dispose();
   }
 
+  void _showError(String message) {
+    AlertSnackBar.show(
+      context,
+      type: AlertType.error,
+      title: 'Erro!',
+      message: message,
+    );
+  }
+
   Future<void> _handleSubmit() async {
     if (_submitting) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      _showError('O campo nome não pode ser vazio!');
+      return;
+    }
     setState(() => _submitting = true);
-    await widget.onSubmit(context, _nameController.text.trim());
-    if (mounted) {
-      setState(() => _submitting = false);
+    final result = await widget.onSave(name);
+    if (!mounted) return;
+    switch (result) {
+      case Ok():
+        Navigator.of(context).pop(name);
+      case Error():
+        setState(() => _submitting = false);
+        _showError('Problemas para atualizar o nome verifique os dados!');
     }
   }
 

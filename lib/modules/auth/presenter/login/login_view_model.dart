@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/domain/repository/auth_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
 import 'package:oflite/modules/auth/domain/exception/auth_cancelled_exception.dart';
 import 'package:oflite/modules/auth/domain/usecase/restore_session_usecase.dart';
 import 'package:oflite/modules/auth/domain/usecase/sign_in_email_usecase.dart';
@@ -28,6 +30,7 @@ class LoginViewModel extends ChangeNotifier {
   final SignInSocialUseCase _signInSocial = getIt<SignInSocialUseCase>();
   final RestoreSessionUseCase _restoreSession = getIt<RestoreSessionUseCase>();
   final UserRepository _userRepository = getIt<UserRepository>();
+  final AuthRepository _authRepository = getIt<AuthRepository>();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -54,6 +57,16 @@ class LoginViewModel extends ChangeNotifier {
   String? errorMessage;
 
   bool rememberMe = true;
+
+  /// Envia o e-mail de recuperação de senha.
+  Future<Result<void>> sendPasswordReset(String email) async {
+    try {
+      await _authRepository.sendPasswordReset(email);
+      return const Result.ok(null);
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
 
   /// Login com Apple só em dispositivos Apple.
   final bool showAppleLogin = !kIsWeb && (Platform.isIOS || Platform.isMacOS);

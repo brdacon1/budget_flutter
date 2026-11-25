@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
@@ -5,8 +6,6 @@ import 'package:oflite/modules/product/presenter/product_price_list/components/p
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_selection_bar.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
@@ -60,15 +59,14 @@ class _ProductPriceListView extends State<ProductPriceListView> {
     if (!confirm || !mounted) return;
     final ok = await _viewModel.deleteSelected();
     if (!mounted) return;
-    final alert = getIt<DisplayAlertRepository>();
     if (ok) {
-      await alert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         ProductPtString.doneTitle,
         ProductPtString.deleteSuccess,
       );
     } else {
-      await alert.notificationError(
+      AlertSnackBar.error(
         context,
         ProductPtString.errorTitle,
         ProductPtString.deleteError,

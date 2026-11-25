@@ -17,18 +17,21 @@ class NotificationRemoteDataSource {
     FirebaseFirestore? firestore,
     FirebaseMessaging? messaging,
     FlutterLocalNotificationsPlugin? localNotifications,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _messaging = messaging ?? FirebaseMessaging.instance,
-        _localNotifications = localNotifications ?? FlutterLocalNotificationsPlugin();
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _messaging = messaging ?? FirebaseMessaging.instance,
+       _localNotifications =
+           localNotifications ?? FlutterLocalNotificationsPlugin();
 
   // ---------------------------------------------------------------------------
   // Local notifications
   // ---------------------------------------------------------------------------
 
   Future<bool?> requestAndroidNotificationPermission() async {
-    final androidPlugin = _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin =
+        _localNotifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
     return androidPlugin?.requestNotificationsPermission();
   }
 
@@ -47,11 +50,17 @@ class NotificationRemoteDataSource {
     String channelName,
     Importance importance,
   ) async {
-    final androidPlugin = _localNotifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin =
+        _localNotifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
     await androidPlugin?.createNotificationChannel(
-      AndroidNotificationChannel(channelId, channelName, importance: importance),
+      AndroidNotificationChannel(
+        channelId,
+        channelName,
+        importance: importance,
+      ),
     );
   }
 
@@ -87,9 +96,15 @@ class NotificationRemoteDataSource {
     );
   }
 
-  Future<String?> getFcmToken() => _messaging.getToken();
+  /// Registra a instância no FCM e retorna o identificador emitido por
+  /// `onRegistered` (Firebase Installation ID).
+  Future<String?> getFcmToken() async {
+    final first = _messaging.onRegistered.first;
+    await _messaging.register();
+    return first;
+  }
 
-  Stream<String> get fcmTokenRefresh => _messaging.onTokenRefresh;
+  Stream<String> get fcmTokenRefresh => _messaging.onRegistered;
 
   Future<void> requestFcmPermission({
     bool alert = false,
@@ -109,21 +124,25 @@ class NotificationRemoteDataSource {
 
   Stream<RemoteMessage> get onMessage => FirebaseMessaging.onMessage;
 
-  Stream<RemoteMessage> get onMessageOpenedApp => FirebaseMessaging.onMessageOpenedApp;
+  Stream<RemoteMessage> get onMessageOpenedApp =>
+      FirebaseMessaging.onMessageOpenedApp;
 
   // ---------------------------------------------------------------------------
   // Firestore — tokens
   // ---------------------------------------------------------------------------
 
   Future<void> persistFcmToken(String ownerUid, String token) async {
-    final docRef = _firestore.doc('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/$token');
+    final docRef = _firestore.doc(
+      'EMPRESAS/$ownerUid/USERS/$ownerUid/FCM/$token',
+    );
     await docRef.set({'TOKEN': token}, SetOptions(merge: true));
   }
 
   Future<List<String>> loadFcmTokens(String ownerUid) async {
-    final snap = await _firestore
-        .collection('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM')
-        .get();
+    final snap =
+        await _firestore
+            .collection('EMPRESAS/$ownerUid/USERS/$ownerUid/FCM')
+            .get();
     return snap.docs.map((d) => d.id).toList(growable: false);
   }
 }

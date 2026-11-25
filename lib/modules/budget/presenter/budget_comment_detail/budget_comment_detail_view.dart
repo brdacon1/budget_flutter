@@ -1,6 +1,6 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_detail/budget_comment_detail_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_detail/components/budget_comment_detail_text_field.dart';
@@ -8,7 +8,6 @@ import 'package:oflite/modules/budget/presenter/strings/comment_pt_string.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/components/comment_library_improve_button.dart';
 import 'package:oflite/modules/comment_library/presenter/strings/comment_library_pt_string.dart';
 import 'package:oflite/modules/core/ai_text/domain/entity/ai_text_exceptions.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/button/action_button.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
@@ -33,7 +32,6 @@ class BudgetCommentDetailView extends StatefulWidget {
 
 class _BudgetCommentDetailViewState extends State<BudgetCommentDetailView> {
   late final BudgetCommentDetailViewModel _viewModel;
-  final DisplayAlertRepository _alert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -62,7 +60,7 @@ class _BudgetCommentDetailViewState extends State<BudgetCommentDetailView> {
     } else if (cmd.error) {
       cmd.clearResult();
       if (_viewModel.emptyError) return; // erro inline
-      await _alert.notificationError(
+      AlertSnackBar.error(
         context,
         CommentStrings.errorTitle,
         CommentStrings.errorUpdateMessage,
@@ -75,7 +73,7 @@ class _BudgetCommentDetailViewState extends State<BudgetCommentDetailView> {
     if (!mounted || cmd.running) return;
     if (cmd.result case Error(:final error)) {
       cmd.clearResult();
-      await _alert.notificationWarning(
+      AlertSnackBar.warning(
         context,
         CommentLibraryStrings.warningTitle,
         error is AiTextDailyLimitException

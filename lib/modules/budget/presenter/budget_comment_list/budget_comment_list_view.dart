@@ -1,6 +1,8 @@
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
+import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_comment_detail/budget_comment_detail_view.dart';
@@ -9,7 +11,6 @@ import 'package:oflite/modules/budget/presenter/strings/comment_pt_string.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/comment_library_picker_view.dart';
 import 'package:oflite/modules/comment_library/presenter/strings/comment_library_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
@@ -30,7 +31,6 @@ class BudgetCommentListView extends StatefulWidget {
 
 class _BudgetCommentListView extends State<BudgetCommentListView> {
   late final BudgetCommentListViewModel _viewModel;
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
   Future<void> _initData() async {
     final success = await _viewModel.loadComments();
     if (!success && mounted) {
-      await _displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         CommentStrings.errorTitle,
         CommentStrings.loadError,
@@ -64,14 +64,14 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
     if (!mounted || cmd.running) return;
     if (cmd.completed) {
       cmd.clearResult();
-      await _displayAlert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         CommentStrings.successTitle,
         CommentStrings.removeSuccess,
       );
     } else if (cmd.error) {
       cmd.clearResult();
-      await _displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         CommentStrings.errorTitle,
         CommentStrings.removeError,
@@ -103,7 +103,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
       case BudgetCommentDetailResult.saved:
         await _viewModel.loadComments();
         if (!mounted) return;
-        await _displayAlert.notificationNotCloseScreen(
+        AlertSnackBar.success(
           context,
           CommentStrings.successTitle,
           CommentStrings.successUpdateMessage,
@@ -119,7 +119,6 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
       context: context,
       viewModel: _viewModel,
       comment: comment,
-      displayAlert: _displayAlert,
     );
     if (saved == null) return;
     await _viewModel.loadComments();
@@ -142,11 +141,14 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
     }
     if (await _viewModel.getLibraryCount() > 0) {
       if (!mounted) return;
-      final value = await _displayAlert.listNotification(
+      final value = await showAppModal<String>(
         context,
-        title: CommentLibraryStrings.optionTitle,
-        createLabel: CommentLibraryStrings.optionCreate,
-        selectLabel: CommentLibraryStrings.optionSelect,
+        builder:
+            (_) => ItemOptionBottomModalWidget(
+              title: CommentLibraryStrings.optionTitle,
+              createLabel: CommentLibraryStrings.optionCreate,
+              selectLabel: CommentLibraryStrings.optionSelect,
+            ),
       );
       if (value == CommentLibraryStrings.optionCreate) {
         await _createFromLibrary();
@@ -165,7 +167,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
     );
     await _viewModel.loadComments();
     if (saved == null || !mounted) return;
-    await _displayAlert.notificationNotCloseScreen(
+    AlertSnackBar.success(
       context,
       CommentLibraryStrings.doneTitle,
       CommentLibraryStrings.savedAs(saved.name),
@@ -180,7 +182,7 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
     if (!added || !mounted) return;
     await _viewModel.loadComments();
     if (!mounted) return;
-    await _displayAlert.notificationNotCloseScreen(
+    AlertSnackBar.success(
       context,
       CommentLibraryStrings.doneTitle,
       CommentLibraryStrings.addedToBudget,

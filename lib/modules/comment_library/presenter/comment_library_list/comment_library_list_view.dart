@@ -1,6 +1,6 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/data/model/comment_library_model.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view_model.dart';
@@ -8,7 +8,6 @@ import 'package:oflite/modules/comment_library/presenter/comment_library_list/co
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/components/comment_library_list_header.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/components/comment_library_selection_bar.dart';
 import 'package:oflite/modules/comment_library/presenter/strings/comment_library_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 
@@ -23,7 +22,6 @@ class CommentLibraryListView extends StatefulWidget {
 
 class _CommentLibraryListViewState extends State<CommentLibraryListView> {
   late final CommentLibraryListViewModel _viewModel;
-  final DisplayAlertRepository _alert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -45,14 +43,14 @@ class _CommentLibraryListViewState extends State<CommentLibraryListView> {
     if (!mounted || cmd.running) return;
     if (cmd.completed) {
       cmd.clearResult();
-      await _alert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         CommentLibraryStrings.doneTitle,
         CommentLibraryStrings.deleteSuccess,
       );
     } else if (cmd.error) {
       cmd.clearResult();
-      await _alert.notificationError(
+      AlertSnackBar.error(
         context,
         CommentLibraryStrings.errorTitle,
         CommentLibraryStrings.deleteError,
@@ -77,7 +75,7 @@ class _CommentLibraryListViewState extends State<CommentLibraryListView> {
     );
     await _viewModel.load();
     if (saved == null || !mounted) return;
-    await _alert.notificationNotCloseScreen(
+    AlertSnackBar.success(
       context,
       CommentLibraryStrings.doneTitle,
       CommentLibraryStrings.savedAs(saved.name),
