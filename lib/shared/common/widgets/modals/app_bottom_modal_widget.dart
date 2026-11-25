@@ -24,7 +24,11 @@ class AppBottomModal extends StatelessWidget {
     required this.onButtonPressed,
     this.buttonVisible = true,
     this.scrollable = false,
+    this.buttonLoading = false,
   });
+
+  /// Trava o botão e mostra um loading circular no lugar do texto.
+  final bool buttonLoading;
 
   final String title;
   final Widget child;
@@ -76,7 +80,11 @@ class AppBottomModal extends StatelessWidget {
               ),
               if (buttonVisible) ...[
                 const SizedBox(height: 16),
-                _ModalButton(label: buttonLabel, onPressed: onButtonPressed),
+                _ModalButton(
+                  label: buttonLabel,
+                  onPressed: onButtonPressed,
+                  loading: buttonLoading,
+                ),
               ],
             ],
           ),
@@ -137,33 +145,48 @@ class _Header extends StatelessWidget {
 }
 
 class _ModalButton extends StatelessWidget {
-  const _ModalButton({required this.label, required this.onPressed});
+  const _ModalButton({
+    required this.label,
+    required this.onPressed,
+    this.loading = false,
+  });
 
   final String label;
   final VoidCallback onPressed;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed,
+      onPressed: loading ? null : onPressed,
       style: TextButton.styleFrom(
+        disabledBackgroundColor: buttonColor.withValues(alpha: 0.6),
         backgroundColor: buttonColor,
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 70),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
       ),
-      child: Text(
-        label,
-        style: GoogleFonts.heebo(
-          color: AppBottomModal.grayColor,
-          letterSpacing: 0.5,
-          fontSize: 18.0,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      child:
+          loading
+              ? SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppBottomModal.grayColor,
+                ),
+              )
+              : Text(label, style: style),
     );
   }
+
+  TextStyle get style => GoogleFonts.heebo(
+    color: AppBottomModal.grayColor,
+    letterSpacing: 0.5,
+    fontSize: 18.0,
+    fontWeight: FontWeight.bold,
+  );
 }
 
 /// Helper que abre um [AppBottomModal] como modal bottom sheet.

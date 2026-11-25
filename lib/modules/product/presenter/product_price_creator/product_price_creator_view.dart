@@ -1,11 +1,14 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/components/product_price_field.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view_model.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
 
 /// Modal inferior de criação/edição de produto ou serviço (lista de preço).
 ///
@@ -56,10 +59,39 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
       item: widget.item,
       fromListItem: widget.fromListItem,
     );
+    _viewModel.saveCommand.addListener(_onSaveChanged);
+  }
+
+  void _onSaveChanged() {
+    final cmd = _viewModel.saveCommand;
+    if (cmd.completed) {
+      AlertSnackBar.success(
+        context,
+        ProductPtString.doneTitle,
+        _viewModel.successMessage,
+      );
+      Navigator.pop(context, true);
+    } else if (cmd.error) {
+      AlertSnackBar.error(
+        context,
+        ProductPtString.errorTitle,
+        _viewModel.errorMessage ?? ProductPtString.addError,
+      );
+    }
+  }
+
+  Future<void> _selectCategory() async {
+    final value = await showOptionBottomModal(
+      context,
+      title: ProductPtString.selectCategoryTitle,
+      values: ItemCategory.values.map((c) => c.label).toList(),
+    );
+    if (value != null) _viewModel.setCategory(value);
   }
 
   @override
   void dispose() {
+    _viewModel.saveCommand.removeListener(_onSaveChanged);
     _viewModel.dispose();
     super.dispose();
   }
@@ -67,14 +99,15 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _viewModel,
+      animation: Listenable.merge([_viewModel, _viewModel.saveCommand]),
       builder: (context, _) {
-        final saving = _viewModel.isSaving;
+        final saving = _viewModel.saveCommand.running;
 
         return AppBottomModal(
           title: _viewModel.titlePage,
-          buttonLabel: saving ? 'Aguarde...' : _viewModel.nameButton,
-          onButtonPressed: saving ? () {} : () => _viewModel.save(context),
+          buttonLabel: _viewModel.nameButton,
+          buttonLoading: saving,
+          onButtonPressed: _viewModel.saveCommand.execute,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -86,7 +119,7 @@ class _ProductPriceCreatorViewState extends State<ProductPriceCreatorView> {
                   hintText: ProductPtString.categoryHint,
                   icon: Icons.list_alt,
                   readOnly: true,
-                  onTap: () => _viewModel.selectCategory(context),
+                  onTap: _selectCategory,
                   suffixIcon: const Icon(
                     Icons.keyboard_arrow_down_outlined,
                     color: AppBottomModal.grayColor,
