@@ -1,3 +1,4 @@
+import 'package:oflite/modules/pdf/presenter/pdf_edit/presenter/enum/gender_enum.dart';
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'dart:typed_data';
 
@@ -16,8 +17,6 @@ import 'package:oflite/modules/pdf/presenter/formatter/document_input_formatter.
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
-
-enum Gender { fullname, email, phone, site, cpf, cep, rua, data, city, bairro }
 
 class PdfEditViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
