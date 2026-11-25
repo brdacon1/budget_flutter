@@ -1,9 +1,9 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/modules/budget/data/model/observation_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/strings/comment_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 
 import '../budget_comment_list_view_model.dart';
@@ -18,7 +18,6 @@ Future<bool?> showCommentFormDialog({
   required BuildContext context,
   required BudgetCommentListViewModel viewModel,
   required ObservationBudget comment,
-  required DisplayAlertRepository displayAlert,
 }) {
   final TextEditingController descricaoController = TextEditingController();
   descricaoController.text = comment.observacao ?? '';
@@ -36,7 +35,6 @@ Future<bool?> showCommentFormDialog({
           isNew: isNew,
           comment: comment,
           viewModel: viewModel,
-          displayAlert: displayAlert,
         ),
   );
 }
@@ -48,7 +46,6 @@ class _CommentFormModal extends StatefulWidget {
     required this.isNew,
     required this.comment,
     required this.viewModel,
-    required this.displayAlert,
   });
 
   final TextEditingController descricaoController;
@@ -56,7 +53,6 @@ class _CommentFormModal extends StatefulWidget {
   final bool isNew;
   final ObservationBudget comment;
   final BudgetCommentListViewModel viewModel;
-  final DisplayAlertRepository displayAlert;
 
   @override
   State<_CommentFormModal> createState() => _CommentFormModalState();
@@ -82,7 +78,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
       if (success) {
         await widget.viewModel.loadComments();
         if (mounted) {
-          await widget.displayAlert.notification(
+          AlertSnackBar.success(
             context,
             CommentStrings.successTitle,
             CommentStrings.successAddMessage,
@@ -90,7 +86,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
         }
       } else {
         if (mounted) {
-          await widget.displayAlert.notificationError(
+          AlertSnackBar.error(
             context,
             CommentStrings.errorTitle,
             CommentStrings.errorAddMessage,
@@ -102,7 +98,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
       success = await widget.viewModel.updateComment(widget.comment);
       if (success) {
         if (mounted) {
-          await widget.displayAlert.notification(
+          AlertSnackBar.success(
             context,
             CommentStrings.successTitle,
             CommentStrings.successUpdateMessage,
@@ -110,7 +106,7 @@ class _CommentFormModalState extends State<_CommentFormModal> {
         }
       } else {
         if (mounted) {
-          await widget.displayAlert.notificationError(
+          AlertSnackBar.error(
             context,
             CommentStrings.errorTitle,
             CommentStrings.errorUpdateMessage,

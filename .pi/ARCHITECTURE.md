@@ -18,8 +18,7 @@ resolve o problema*.
 
 - **Não** adicionamos abstração, wrapper, conversão de tipo ou configuração que
   ninguém pediu.
-- **Não** criamos datasource em core que é puramente local (ex: `display_alert`,
-  `loading_event`).
+- **Não** criamos datasource em core que é puramente local (ex: `loading_event`).
 - **Criamos** datasource em core que acessa **fonte externa** (SDK de terceiros,
   Firebase, API REST).
 - O shortest working diff vence. Deletar > adicionar.
@@ -65,7 +64,6 @@ lib/
 │   │   │       ├── datasource/ads_remote_datasource.dart
 │   │   │       └── repository/ads_repository_impl.dart
 │   │   ├── convert_coin/              # Formatação local (sem datasource)
-│   │   ├── display_alert/             # Snackbar/Alert local (sem datasource)
 │   │   ├── loading_event/             # Loading local (sem datasource)
 │   │   ├── in_app_purchase/           # Loja Google/Apple (tem datasource — SDK externo)
 │   │   ├── notification/              # FCM + local notifications (tem datasource — SDK externo)
@@ -255,7 +253,6 @@ responsabilidade é **trocar dados brutos** (`Map<String, dynamic>`, `String`,
 | `core/notification`    | Sim (FCM + Firestore)              | ✅ Sim      |
 | `core/crashlytics`     | Sim (Firebase Crashlytics SDK)     | ✅ Sim      |
 | `core/convert_coin`    | Não (pura formatação `intl`)       | ❌ Não      |
-| `core/display_alert`   | Não (snackbar local)               | ❌ Não      |
 | `core/loading_event`   | Não (dialog local)                 | ❌ Não      |
 
 > **Regra**: se o módulo `core/` acessa qualquer SDK externo, Firebase, HTTP ou
@@ -462,7 +459,7 @@ class _BudgetCreateViewState extends State<BudgetCreateView> {
     } else if (cmd.error) {
       // erro: extrair mensagem de cmd.result
       // NUNCA SnackBar cru — use o padrão do app (ver §18)
-      getIt<DisplayAlertRepository>().notificationError(
+      AlertSnackBar.error(
         context,
         'Não foi possível salvar',
         'Verifique sua conexão e tente novamente.',
@@ -1259,7 +1256,6 @@ etc.
 ### Core — sem DataSource (lógica local / pura)
 
 - [x] `core/convert_coin` — Conversão de moeda (formatação `intl`)
-- [x] `core/display_alert` — SnackBars/Alerts globais
 - [x] `core/loading_event` — Loading global
 
 ---
@@ -2012,28 +2008,32 @@ que mantém cores (verde/laranja/vermelho), ícone, título + mensagem e estilo
 flutuante consistentes em todo o app.
 
 ### 18.1 Como usar
-Na View, **sempre via `DisplayAlertRepository`** (injetado pelo `get_it`) —
-ele é a porta de entrada e já delega para o `AlertSnackBar`:
+Chame os métodos estáticos do `AlertSnackBar` direto (não existe repository
+para alerta: é só UI, sem fonte de dados):
 
 | Situação | Método |
 |---|---|
-| Sucesso sem sair da tela | `notificationNotCloseScreen(context, título, mensagem)` |
-| Aviso | `notificationWarning(context, título, mensagem)` |
-| Erro | `notificationError(context, título, mensagem)` |
+| Sucesso | `AlertSnackBar.success(context, título, mensagem)` |
+| Aviso | `AlertSnackBar.warning(context, título, mensagem)` |
+| Erro | `AlertSnackBar.error(context, título, mensagem)` |
 
 ```dart
-await getIt<DisplayAlertRepository>().notificationNotCloseScreen(
+AlertSnackBar.success(
   context,
   'Alterações salvas',
   'Dados do orçamento atualizados.',
 );
 ```
 
+> Modais: abra com `showAppModal` e o widget do modal. Modal que executa regra
+> (ex.: trocar nome) recebe um `onSave` **sem `BuildContext`** que devolve
+> `Result`; o modal só fecha/avisa após checar `mounted`.
+
 ### 18.2 Regras
 - **NUNCA** use `ScaffoldMessenger.of(context).showSnackBar(SnackBar(...))`
   direto em telas/componentes.
-- **NUNCA** chame `AlertSnackBar.show` direto na View — use o
-  `DisplayAlertRepository` (permite trocar a implementação num só lugar).
+- **NUNCA** crie repository/wrapper para alerta ou modal: use `AlertSnackBar`
+  e `showAppModal` direto.
 - **NUNCA** exiba exceção crua (`${cmd.result}`, `e.toString()`) ao usuário:
   escreva o que aconteceu + o que fazer (§17.4).
 - Todo `Command` de save trata **os dois** desfechos: `completed` (sucesso) e

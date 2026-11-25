@@ -1,9 +1,9 @@
-import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
@@ -17,12 +17,13 @@ import 'package:oflite/modules/budget/presenter/budget_list/components/new_budge
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
-import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -42,6 +43,7 @@ class _BudgetListView extends State<BudgetListView> {
   final BudgetListViewModel _viewModel = getIt<BudgetListViewModel>();
   ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
   final ScrollController _scrollController = ScrollController();
+  final alertDisplayLoading = getIt<LoadingEventRepository>();
 
   /// Navigator do painel de detalhe (tela larga).
   final GlobalKey<NavigatorState> _detailKey = GlobalKey<NavigatorState>();
@@ -126,7 +128,6 @@ class _BudgetListView extends State<BudgetListView> {
   }
 
   Future<void> _dialogDuplicate() async {
-    final viewContext = context;
     await showAppModal<void>(
       context,
       builder: (BuildContext dialogContext) {
@@ -134,9 +135,8 @@ class _BudgetListView extends State<BudgetListView> {
           onConfirm: (clientData, quoteItems, comments, receipts) async {
             Navigator.of(dialogContext).pop();
             if (!mounted) return;
-            final alertDisplayLoading = getIt<LoadingEventRepository>();
             try {
-              await alertDisplayLoading.alertLoading(viewContext);
+              await _openLoad(isOpen: true);
               await _viewModel.duplicateEvent(
                 clientData,
                 quoteItems,
@@ -145,14 +145,22 @@ class _BudgetListView extends State<BudgetListView> {
               );
               await _viewModel.getInformationOrcamento(refresh: true);
             } finally {
-              if (mounted) {
-                alertDisplayLoading.closeLoading(viewContext);
-              }
+              await _openLoad(isOpen: false);
             }
           },
         );
       },
     );
+  }
+
+  Future<void> _openLoad({required bool isOpen}) async {
+    if (context.mounted) {
+      if (isOpen) {
+        await alertDisplayLoading.alertLoading(context);
+      } else {
+        alertDisplayLoading.closeLoading(context);
+      }
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -173,13 +181,13 @@ class _BudgetListView extends State<BudgetListView> {
       _detailKey.currentState?.popUntil((route) => route.isFirst);
     }
     if (ok) {
-      await _viewModel.displayAlert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         BudgetStrings.removeSuccessTitle,
         BudgetStrings.removeSuccessMessage,
       );
     } else {
-      await _viewModel.displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         BudgetStrings.removeErrorTitle,
         BudgetStrings.removeErrorMessage,
@@ -304,7 +312,7 @@ class _BudgetListView extends State<BudgetListView> {
     if (!mounted) return;
     loading.closeLoading(context);
     if (created == null) {
-      await _viewModel.displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         BudgetStrings.createErrorTitle,
         BudgetStrings.createErrorMessage,
@@ -364,7 +372,7 @@ class _BudgetListView extends State<BudgetListView> {
   Future<void> _duplicateBudget(CustomerInfo item) async {
     if (!getIt<GetAccessStatusUseCase>().hasFullAccess &&
         _viewModel.totalBudgetCount > 10) {
-      await _viewModel.displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         "Erro!",
         "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
@@ -380,7 +388,7 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
-  Future<void> _showMapError() => _viewModel.displayAlert.notificationError(
+  void _showMapError() => AlertSnackBar.error(
     context,
     BudgetStrings.mapErrorTitle,
     BudgetStrings.mapErrorMessage,

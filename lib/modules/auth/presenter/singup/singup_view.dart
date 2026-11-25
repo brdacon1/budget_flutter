@@ -1,9 +1,9 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/shared/common/enums/singup_field_enum.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
@@ -42,7 +42,6 @@ class SingUpView extends StatefulWidget {
 
 class _SingUpViewState extends State<SingUpView> {
   late final SingUpViewModel _viewModel;
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
 
   @override
@@ -101,7 +100,7 @@ class _SingUpViewState extends State<SingUpView> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _displayAlert.notificationError(
+        AlertSnackBar.error(
           context,
           LoginStrings.errorTitle,
           message,

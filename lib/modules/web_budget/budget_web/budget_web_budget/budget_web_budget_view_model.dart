@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/injection.dart';
@@ -5,7 +6,6 @@ import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/data/model/observation_pdf_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
@@ -29,7 +29,6 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
   final SharedBudget shared;
 
   final WebBudgetService _service = WebBudgetService();
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
@@ -139,7 +138,7 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
       _budget?.status = status;
       _safeNotify();
       if (context.mounted) {
-        await _displayAlert.notification(
+        AlertSnackBar.success(
           context,
           BudgetWebStrings.statusApproved,
           BudgetWebStrings.approvalSuccess,
@@ -148,7 +147,7 @@ class BudgetWebBudgetViewModel extends ChangeNotifier {
     } catch (_) {
       if (context.mounted) _loadingEvent.closeLoading(context);
       if (context.mounted) {
-        await _displayAlert.notificationError(
+        AlertSnackBar.error(
           context,
           BudgetWebStrings.blockedTitle,
           BudgetWebStrings.approvalError,

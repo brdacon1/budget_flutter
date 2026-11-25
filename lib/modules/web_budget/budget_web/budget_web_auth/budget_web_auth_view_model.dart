@@ -1,8 +1,8 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/injection.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/modules/web_budget/strings/budget_web_strings.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/web_budget/services/web_budget_service.dart';
 
@@ -19,7 +19,6 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
   final BudgetWebAppViewModel appViewModel;
   final VoidCallback onGranted;
 
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
   final LoadingEventRepository _loadingEvent = getIt<LoadingEventRepository>();
   final WebBudgetService _service = WebBudgetService();
 
@@ -39,7 +38,7 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
     final digits = raw.replaceAll(RegExp(r'\D'), '');
 
     if (digits.isEmpty) {
-      await _displayAlert.notificationWarning(
+      AlertSnackBar.warning(
         context,
         BudgetWebStrings.blockedTitle,
         BudgetWebStrings.phoneRequired,
@@ -71,7 +70,7 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
       switch (e.kind) {
         case WebBudgetErrorKind.phone:
           if (context.mounted) {
-            await _displayAlert.notificationWarning(
+            AlertSnackBar.warning(
               context,
               BudgetWebStrings.blockedTitle,
               BudgetWebStrings.phoneInvalid,
@@ -83,7 +82,7 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
           appViewModel.fail(BudgetWebStrings.blockedMessage);
         case WebBudgetErrorKind.unknown:
           if (context.mounted) {
-            await _displayAlert.notificationError(
+            AlertSnackBar.error(
               context,
               BudgetWebStrings.blockedTitle,
               BudgetWebStrings.blockedMessage,
@@ -95,7 +94,7 @@ class BudgetWebAuthViewModel extends ChangeNotifier {
       _validating = false;
       notifyListeners();
       if (context.mounted) {
-        await _displayAlert.notificationError(
+        AlertSnackBar.error(
           context,
           BudgetWebStrings.blockedTitle,
           BudgetWebStrings.blockedMessage,

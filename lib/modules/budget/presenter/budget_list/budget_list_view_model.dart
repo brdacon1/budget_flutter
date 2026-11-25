@@ -11,7 +11,6 @@ import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/create_budget_for_customer_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/watch_customer_budgets_usecase.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -21,7 +20,6 @@ class BudgetListViewModel extends ChangeNotifier {
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
   final DuplicateBudgetUsecase _duplicateBudget =
       getIt<DuplicateBudgetUsecase>();
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
   final ListBudgetsUsecase _listBudgets = getIt<ListBudgetsUsecase>();
   final ResolveAddressMapsUsecase _resolveMaps =
       getIt<ResolveAddressMapsUsecase>();

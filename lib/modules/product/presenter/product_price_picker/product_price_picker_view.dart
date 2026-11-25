@@ -1,8 +1,7 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/injection.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -58,7 +57,7 @@ class _ProductPricePickerViewState extends State<ProductPricePickerView> {
     if (cmd.completed) {
       Navigator.of(context).pop(true);
     } else if (cmd.error) {
-      getIt<DisplayAlertRepository>().notificationError(
+      AlertSnackBar.error(
         context,
         ProductPtString.errorTitle,
         ProductPtString.cartAddError,

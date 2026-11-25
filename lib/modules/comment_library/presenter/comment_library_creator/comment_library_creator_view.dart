@@ -1,6 +1,6 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/data/model/comment_library_model.dart';
 import 'package:oflite/modules/comment_library/domain/entity/comment_library_exceptions.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view_model.dart';
@@ -8,7 +8,6 @@ import 'package:oflite/modules/comment_library/presenter/comment_library_creator
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/components/comment_library_text_field.dart';
 import 'package:oflite/modules/comment_library/presenter/strings/comment_library_pt_string.dart';
 import 'package:oflite/modules/core/ai_text/domain/entity/ai_text_exceptions.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/widgets/modals/app_bottom_modal_widget.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
@@ -29,7 +28,6 @@ class CommentLibraryCreatorView extends StatefulWidget {
 
 class _CommentLibraryCreatorViewState extends State<CommentLibraryCreatorView> {
   late final CommentLibraryCreatorViewModel _viewModel;
-  final DisplayAlertRepository _alert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -63,7 +61,7 @@ class _CommentLibraryCreatorViewState extends State<CommentLibraryCreatorView> {
         return; // erro inline no campo
       }
       if (error is CommentSavedButNotLinkedException) {
-        await _alert.notificationWarning(
+        AlertSnackBar.warning(
           context,
           CommentLibraryStrings.warningTitle,
           CommentLibraryStrings.savedNotLinked,
@@ -72,7 +70,7 @@ class _CommentLibraryCreatorViewState extends State<CommentLibraryCreatorView> {
         if (mounted) Navigator.of(context).pop();
         return;
       }
-      await _alert.notificationError(
+      AlertSnackBar.error(
         context,
         CommentLibraryStrings.errorTitle,
         CommentLibraryStrings.saveError,
@@ -85,7 +83,7 @@ class _CommentLibraryCreatorViewState extends State<CommentLibraryCreatorView> {
     if (!mounted || cmd.running) return;
     if (cmd.result case Error(:final error)) {
       cmd.clearResult();
-      await _alert.notificationWarning(
+      AlertSnackBar.warning(
         context,
         CommentLibraryStrings.warningTitle,
         error is AiTextDailyLimitException

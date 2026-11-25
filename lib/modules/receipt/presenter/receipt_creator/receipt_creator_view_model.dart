@@ -1,8 +1,8 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/receipt/domain/repository/receipt_repository.dart';
 import 'package:oflite/modules/receipt/presenter/strings/receipt_pt_string.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
@@ -11,7 +11,6 @@ import 'package:oflite/shared/design_pattern/result.dart';
 /// Gerenciamento de estado da tela de criação/edição de recibo.
 class ReceiptCreatorViewModel extends ChangeNotifier {
   final ReceiptRepository _receiptRepository = getIt<ReceiptRepository>();
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   Receipt receipt;
   final CustomerInfo item;
@@ -101,7 +100,7 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
     if (result is Error<void>) {
       notifyListeners();
-      await displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         ReceiptPtString.saveErrorTitle,
         ReceiptPtString.saveErrorMessage,
@@ -116,13 +115,13 @@ class ReceiptCreatorViewModel extends ChangeNotifier {
 
     if (creating) {
       onReceiptCreated?.call(target);
-      await displayAlert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         ReceiptPtString.doneTitle,
         ReceiptPtString.createdNextStep,
       );
     } else {
-      await displayAlert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         ReceiptPtString.changesSaved,
         ReceiptPtString.changesSavedMessage,

@@ -1,3 +1,4 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -11,7 +12,6 @@ import 'package:oflite/modules/auth/presenter/login/components/login_signup_fiel
 import 'package:oflite/modules/auth/presenter/login/strings/login_pt_string.dart';
 import 'package:oflite/modules/auth/presenter/singup/singup_view_model.dart';
 import 'package:oflite/modules/auth/presenter/singup/strings/singup_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Aba de cadastro exibida inline dentro do card de login.
@@ -27,7 +27,6 @@ class LoginSignUpTab extends StatefulWidget {
 
 class _LoginSignUpTabState extends State<LoginSignUpTab> {
   late final SingUpViewModel _viewModel;
-  final DisplayAlertRepository _displayAlert = getIt<DisplayAlertRepository>();
 
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -65,7 +64,7 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _displayAlert.notificationError(
+          AlertSnackBar.error(
             context,
             LoginStrings.errorTitle,
             message,
@@ -97,7 +96,7 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (password != confirmPassword) {
-      _displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         LoginStrings.errorTitle,
         SingUpStrings.signUpErrorPasswordsDoNotMatch,

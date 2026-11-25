@@ -1,3 +1,6 @@
+import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
+import 'package:oflite/shared/common/widgets/modals/item_option_bottom_modal_widget.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
@@ -8,7 +11,6 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_item_quantity/budget_item_quantity_view.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/product_price_picker/product_price_picker_view.dart';
@@ -33,7 +35,6 @@ class BudgetListItemsView extends StatefulWidget {
 
 class _BudgetListItemsView extends State<BudgetListItemsView> {
   late final BudgetListItemsViewModel _viewModel;
-  final _displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -63,13 +64,13 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     final ok = await _viewModel.deleteSelected();
     if (!mounted) return;
     if (ok) {
-      await _displayAlert.notificationNotCloseScreen(
+      AlertSnackBar.success(
         context,
         count == 1 ? 'Item removido' : 'Itens removidos',
         'O total do orçamento foi atualizado.',
       );
     } else {
-      await _displayAlert.notificationError(
+      AlertSnackBar.error(
         context,
         'Não foi possível remover',
         'Verifique sua conexão e tente novamente.',
@@ -86,7 +87,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     if (!saved || !mounted) return;
     await _viewModel.getListItens();
     if (!mounted) return;
-    await _displayAlert.notificationNotCloseScreen(
+    AlertSnackBar.success(
       context,
       BudgetStrings.itemQuantitySuccessTitle,
       BudgetStrings.itemQuantitySuccessMessage,
@@ -96,7 +97,10 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   Future<void> _addItem() async {
     if (await _viewModel.getProductCount() > 0) {
       if (!mounted) return;
-      final value = await _displayAlert.listNotification(context);
+      final value = await showAppModal<String>(
+        context,
+        builder: (_) => const ItemOptionBottomModalWidget(),
+      );
       if (value == "Criar novo item") {
         await _showProductPriceCreatorBottomModal();
       } else if (value == "Selecionar da lista de preço") {
@@ -124,7 +128,7 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     if (!added || !mounted) return;
     await _viewModel.getListItens();
     if (!mounted) return;
-    await _displayAlert.notificationNotCloseScreen(
+    AlertSnackBar.success(
       context,
       ProductPtString.doneTitle,
       ProductPtString.cartAddSuccess,

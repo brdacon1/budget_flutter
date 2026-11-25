@@ -1,13 +1,12 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
-import 'package:oflite/injection.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/comment_library_picker_view_model.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/components/comment_library_picker_card.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/components/comment_library_picker_footer.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_picker/components/comment_library_picker_header.dart';
 import 'package:oflite/modules/comment_library/presenter/strings/comment_library_pt_string.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Modal-tela (§19) para **selecionar** comentários da biblioteca e copiá-los
@@ -50,7 +49,7 @@ class _CommentLibraryPickerViewState extends State<CommentLibraryPickerView> {
     if (cmd.completed) {
       Navigator.of(context).pop(true);
     } else if (cmd.error) {
-      getIt<DisplayAlertRepository>().notificationError(
+      AlertSnackBar.error(
         context,
         CommentLibraryStrings.errorTitle,
         CommentLibraryStrings.addToBudgetError,

@@ -32,4 +32,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserCredential> linkWithApple() => _remote.linkWithApple();
+
+  @override
+  Future<void> sendPasswordReset(String email) =>
+      _remote.sendPasswordReset(email);
 }

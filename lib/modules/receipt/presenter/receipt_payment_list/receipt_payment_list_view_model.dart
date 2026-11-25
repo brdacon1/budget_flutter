@@ -1,8 +1,8 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/data/model/payment_customer.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
@@ -14,7 +14,6 @@ import 'package:oflite/shared/design_pattern/result.dart';
 
 class ReceiptPaymentListViewModel extends ChangeNotifier {
   final ReceiptPaymentRepository _paymentRepository;
-  final DisplayAlertRepository _displayAlert;
   final ConvertCoinRepository _moneyConvert;
   late final Command1<void, int> deletePaymentCommand = Command1(
     _deletePayment,
@@ -30,13 +29,10 @@ class ReceiptPaymentListViewModel extends ChangeNotifier {
     required this.item,
     required this.receipt,
     ReceiptPaymentRepository? paymentRepository,
-    DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
     ConvertCoinRepository? convertCoinRepository,
   }) : _paymentRepository =
            paymentRepository ?? getIt<ReceiptPaymentRepository>(),
-       _displayAlert =
-           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
        _moneyConvert = convertCoinRepository ?? getIt<ConvertCoinRepository>();
 
   ConvertCoinRepository get moneyConvert => _moneyConvert;
@@ -85,7 +81,7 @@ class ReceiptPaymentListViewModel extends ChangeNotifier {
 
   Future<void> addPayment(BuildContext context) async {
     if (receipt.id == null || receipt.id!.isEmpty) {
-      await _displayAlert.notificationWarning(
+      AlertSnackBar.warning(
         context,
         PaymentStrings.receiptNotSaved,
         PaymentStrings.receiptNotSavedMessage,

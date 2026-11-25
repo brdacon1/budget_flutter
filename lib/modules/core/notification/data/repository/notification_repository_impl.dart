@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/budget/data/datasource/budget_remote_datasource.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/core/notification/data/datasource/notification_remote_datasource.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 
 /// Handler top-level (obrigatório ser top-level, não método de instância)
 /// para mensagens FCM em background.
@@ -100,7 +100,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
           await _dataSource.requestFcmPermission();
         }
       }
-    } catch (e, s) {
+    } catch (e) {
       debugPrint('Erro ao solicitar permissão de notificação: $e');
     }
 
@@ -118,6 +118,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = _dataSource.fcmTokenRefresh.listen((t) {
+      if (t == _fcmToken) return; // já obtido/persistido; evita escrita duplicada
       _fcmToken = t;
       final owner = _boundOwnerUid;
       if (owner != null && owner.isNotEmpty) {
@@ -145,10 +146,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     // No iOS o FCM token só existe quando o APNs token já foi entregue.
     // Aguardamos o APNs token explicitamente para evitar race condition.
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      await _ensureApnsTokenWithRetry(
-        maxAttempts: maxAttempts,
-        delay: delay,
-      );
+      await _ensureApnsTokenWithRetry(maxAttempts: maxAttempts, delay: delay);
     }
 
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -162,7 +160,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         }
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('FCM getToken() falhou (tentativa $attempt): $e');
+          debugPrint('FCM register() falhou (tentativa $attempt): $e');
         }
       }
       if (attempt < maxAttempts) {
@@ -375,7 +373,22 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<void> persistCurrentTokenToFirebase(String ownerUid) =>
       _persistFcmToken(ownerUid);
 
-  Future<void> _persistFcmToken(String ownerUid) async {
+  final Map<String, Future<void>> _persistInFlight = {};
+
+  /// Chamadas simultâneas para o mesmo owner (sessão + main tab) reutilizam
+  /// a mesma escrita em andamento.
+  Future<void> _persistFcmToken(String ownerUid) {
+    final key = ownerUid.trim();
+    final running = _persistInFlight[key];
+    if (running != null) return running;
+    final f = _persistFcmTokenImpl(ownerUid).whenComplete(
+      () => _persistInFlight.remove(key),
+    );
+    _persistInFlight[key] = f;
+    return f;
+  }
+
+  Future<void> _persistFcmTokenImpl(String ownerUid) async {
     if (ownerUid.trim().isEmpty) {
       if (kDebugMode) {
         debugPrint('persist FCM token ignorado: ownerUid vazio');

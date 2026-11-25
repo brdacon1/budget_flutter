@@ -1,9 +1,9 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/modals/receipt_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/components/receipt_card.dart';
@@ -44,7 +44,6 @@ class _ReceiptListView extends State<ReceiptListView> {
   late final ReceiptListViewModel _viewModel;
   final LoadingEventRepository alertDisplayLoading =
       getIt<LoadingEventRepository>();
-  final DisplayAlertRepository displayAlert = getIt<DisplayAlertRepository>();
 
   @override
   void initState() {
@@ -94,9 +93,9 @@ class _ReceiptListView extends State<ReceiptListView> {
   }) async {
     if (context.mounted) {
       if (isSuccess) {
-        await displayAlert.notification(context, primaryText, message);
+        AlertSnackBar.success(context, primaryText, message);
       } else {
-        await displayAlert.notificationError(context, primaryText, message);
+        AlertSnackBar.error(context, primaryText, message);
       }
     }
   }

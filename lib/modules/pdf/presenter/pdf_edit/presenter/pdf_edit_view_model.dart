@@ -1,10 +1,10 @@
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'dart:typed_data';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/cep/domain/repository/cep_repository.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -21,8 +21,6 @@ enum Gender { fullname, email, phone, site, cpf, cep, rua, data, city, bairro }
 
 class PdfEditViewModel extends ChangeNotifier {
   final PdfRepository _pdfRepository;
-  final UserRepository _userRepository;
-  final DisplayAlertRepository _displayAlert;
   final LoadingEventRepository _loadingEvent;
   final ValidateDocumentUsecase _validateDocument;
   final FormatDocumentUsecase _formatDocument;
@@ -62,16 +60,12 @@ class PdfEditViewModel extends ChangeNotifier {
   PdfEditViewModel({
     PdfRepository? pdfRepository,
     UserRepository? userRepository,
-    DisplayAlertRepository? displayAlertRepository,
     LoadingEventRepository? loadingEventRepository,
     ValidateDocumentUsecase? validateDocument,
     FormatDocumentUsecase? formatDocument,
   }) : _validateDocument = validateDocument ?? getIt<ValidateDocumentUsecase>(),
        _formatDocument = formatDocument ?? getIt<FormatDocumentUsecase>(),
        _pdfRepository = pdfRepository ?? getIt<PdfRepository>(),
-       _userRepository = userRepository ?? getIt<UserRepository>(),
-       _displayAlert =
-           displayAlertRepository ?? getIt<DisplayAlertRepository>(),
        _loadingEvent =
            loadingEventRepository ?? getIt<LoadingEventRepository>();
 
@@ -122,7 +116,7 @@ class PdfEditViewModel extends ChangeNotifier {
     if (document.isNotEmpty) {
       final validation = _validateDocument(document);
       if (!validation.isValid) {
-        await _displayAlert.notificationError(
+        AlertSnackBar.error(
           context,
           "Erro!",
           PdfStrings.documentError(validation.error!),
@@ -153,14 +147,16 @@ class PdfEditViewModel extends ChangeNotifier {
       owner = localOwner;
 
       _loadingEvent.closeLoading(context);
-      await _displayAlert.notification(
+      if (!context.mounted) return;
+      AlertSnackBar.success(
         context,
         "Feito!",
         "Dados do PDF atualizados com sucesso!",
       );
     } catch (_) {
       _loadingEvent.closeLoading(context);
-      await _displayAlert.notificationError(
+      if (!context.mounted) return;
+      AlertSnackBar.error(
         context,
         "Erro!",
         "Problemas ao atualizar os dados do PDF",

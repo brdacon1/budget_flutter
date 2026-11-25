@@ -29,6 +29,9 @@ class AuthRemoteDataSource {
         onTimeout: () => null,
       );
 
+  Future<void> sendPasswordReset(String email) =>
+      _auth.sendPasswordResetEmail(email: email.trim());
+
   Future<UserCredential> signInWithEmail(String email, String password) =>
       _auth.signInWithEmailAndPassword(
         email: email.trim(),

@@ -1,77 +1,76 @@
-import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
-import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'package:get_it/get_it.dart';
-import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/update_budget_status_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_local_datasource.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_remote_datasource.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_action_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
-import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
-import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
-import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
-import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
-import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_budget_remote_datasource.dart';
-import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
-import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_script_remote_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/device_media_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/datasource/shared_media_datasource.dart';
+import 'package:oflite/modules/chat_assistant/data/repository/chat_ai_repository_impl.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_budget_repository_impl.dart';
+import 'package:oflite/modules/chat_assistant/data/repository/chat_media_repository_impl.dart';
 import 'package:oflite/modules/chat_assistant/data/repository/chat_script_repository_impl.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_ai_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_budget_repository.dart';
+import 'package:oflite/modules/chat_assistant/domain/repository/chat_media_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/repository/chat_script_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/build_budget_final_actions_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/check_ai_access_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/confirm_agent_action_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/create_budget_from_chat_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/dispatch_agent_tool_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/fetch_chat_script_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/generate_budget_pdf_from_chat_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_change_username_option_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_logo_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_main_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_edit_confirm_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_edit_menu_option_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_pdf_field_input_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_price_list_menu_option_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/on_logo_updated_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/reset_chat_to_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/resolve_ai_failure_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/run_agent_turn_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_change_username_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_client_address_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_library_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_find_budget_prompt_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_go_to_client_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_logo_in_chat_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_confirm_entry_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_pdf_edit_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/show_price_list_menu_usecase.dart';
+import 'package:oflite/modules/chat_assistant/domain/usecase/show_reports_prompt_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/start_budget_from_menu_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/update_pdf_field_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view_model.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view_model.dart';
-
-import 'package:oflite/modules/chat_assistant/data/datasource/device_media_datasource.dart';
-import 'package:oflite/modules/chat_assistant/data/datasource/shared_media_datasource.dart';
-import 'package:oflite/modules/chat_assistant/data/repository/chat_media_repository_impl.dart';
-import 'package:oflite/modules/chat_assistant/domain/repository/chat_media_repository.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/pick_proof_attachments_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
-import 'package:oflite/modules/chat_assistant/domain/usecase/load_gallery_usecase.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_media_picker_view_model.dart';
+import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
+import 'package:oflite/modules/core/share_link/domain/repository/share_link_repository.dart';
 import 'package:oflite/modules/invoice/domain/usecase/check_invoice_limit_usecase.dart';
 import 'package:oflite/modules/invoice/domain/usecase/create_invoice_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/check_proof_limit_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/create_payment_proof_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/parse_money_input_usecase.dart';
 import 'package:oflite/modules/payment_proof/domain/usecase/validate_proof_attachments_usecase.dart';
+import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/format_document_usecase.dart';
+import 'package:oflite/modules/pdf/domain/usecase/document/validate_document_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/create_receipt_for_budget_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/get_receipts_report_usecase.dart';
+import 'package:oflite/modules/receipt/domain/usecase/list_receipts_by_budget_usecase.dart';
 
 /// Registra as dependências do módulo Chat Budget (Assistente).
 void registerChatBudgetDependencies(GetIt sl) {
@@ -194,7 +193,6 @@ void registerChatBudgetDependencies(GetIt sl) {
       sl<StartBudgetFromMenuUsecase>(),
       sl<ShowPriceListMenuUsecase>(),
       sl<ShowPdfEditConfirmEntryUsecase>(),
-      sl<ShowPdfEditMenuUsecase>(),
       sl<ShowChangeUsernameMenuUsecase>(),
       sl<ResetChatToMenuUsecase>(),
     ),

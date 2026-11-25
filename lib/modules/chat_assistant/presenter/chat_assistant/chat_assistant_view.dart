@@ -1,3 +1,5 @@
+import 'package:oflite/modules/auth/presenter/change_name/show_change_name_modal.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
@@ -26,7 +28,6 @@ import 'package:oflite/modules/chat_assistant/presenter/chat_media_picker/chat_m
 import 'package:oflite/modules/chat_assistant/presenter/chat_proof_preview/chat_proof_preview_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_creator/comment_library_creator_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
-import 'package:oflite/modules/core/display_alert/domain/repository/display_alert_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/core/map_launcher/domain/usecase/resolve_address_maps_usecase.dart';
 import 'package:oflite/modules/core/map_launcher/presenter/components/map_chooser_action_sheet.dart';
@@ -99,7 +100,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       _vm.consumeMediaPermissionDenied();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        getIt<DisplayAlertRepository>().notificationError(
+        AlertSnackBar.error(
           context,
           PaymentProofStrings.errorTitle,
           PaymentProofStrings.permissionDenied,
@@ -143,15 +144,14 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     final alert = _vm.proofIssueAlert(v);
     final msg = alert.message;
     if (msg == null || !mounted) return;
-    final display = getIt<DisplayAlertRepository>();
     if (alert.isWarning) {
-      display.notificationWarning(
+      AlertSnackBar.warning(
         context,
         PaymentProofStrings.warningTitle,
         msg,
       );
     } else {
-      display.notificationError(context, PaymentProofStrings.errorTitle, msg);
+      AlertSnackBar.error(context, PaymentProofStrings.errorTitle, msg);
     }
   }
 
@@ -389,7 +389,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       case AddressMapsOpenedBySystem():
         return;
       case AddressMapsUnavailable():
-        await getIt<DisplayAlertRepository>().notificationError(
+        AlertSnackBar.error(
           context,
           ChatAssistantStrings.goToClientMapErrorTitle,
           ChatAssistantStrings.goToClientMapErrorMessage,
@@ -447,9 +447,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   }
 
   Future<void> _openChangeNameModal() async {
-    final newName = await getIt<DisplayAlertRepository>().dialogChangeName(
-      context,
-    );
+    final newName = await showChangeNameModal(context);
     if (!mounted) return;
     await _vm.onUsernameChanged(newName);
   }
