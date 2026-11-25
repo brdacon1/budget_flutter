@@ -4,6 +4,7 @@ import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dar
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/list_budgets_page_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/update_budget_status_usecase.dart';
 import 'package:oflite/modules/chat_assistant/data/datasource/chat_ai_local_datasource.dart';
@@ -305,7 +306,7 @@ void registerChatBudgetDependencies(GetIt sl) {
   // ------------------------------------------------------------------
   sl.registerFactory<ChatBudgetPickerViewModel>(
     () => ChatBudgetPickerViewModel(
-      sl<ListBudgetsUsecase>(),
+      sl<ListBudgetsPageUsecase>(),
       sl<ConvertCoinRepository>(),
     ),
   );

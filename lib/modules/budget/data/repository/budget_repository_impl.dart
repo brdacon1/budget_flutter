@@ -154,6 +154,27 @@ class BudgetRepositoryImpl extends BudgetRepository {
   }
 
   @override
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPage({
+    required int limit,
+    String? startAfterId,
+  }) async {
+    final userUid = _userUid;
+    if (userUid == null || userUid.isEmpty) {
+      return Result.error(Exception('User not authenticated'));
+    }
+    try {
+      final raw = await _remote.getBudgetsPaginated(
+        userUid,
+        limit: limit,
+        startAfterId: startAfterId,
+      );
+      return Result.ok(raw.map((e) => CustomerInfo.fromMap(e)).toList());
+    } catch (e) {
+      return Result.error(Exception(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<CustomerInfo>> getBudgetById(String id) async {
     final userUid = _userUid;
     if (userUid == null || userUid.isEmpty) {

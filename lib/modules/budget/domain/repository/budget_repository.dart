@@ -37,6 +37,13 @@ abstract class BudgetRepository extends ChangeNotifier {
     bool refresh = false,
   });
 
+  /// Uma página de orçamentos (mais novos primeiro) a partir de
+  /// [startAfterId], **sem** tocar no cache paginado da lista principal.
+  Future<Result<List<CustomerInfo>>> fetchBudgetsPage({
+    required int limit,
+    String? startAfterId,
+  });
+
   /// Retorna a quantidade total de orçamentos no Firestore.
   Future<Result<int>> countBudgets();
 

@@ -15,6 +15,7 @@ import 'package:oflite/modules/budget/domain/usecase/create_budget_for_customer_
 import 'package:oflite/modules/budget/domain/usecase/watch_customer_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/duplicate_budget_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/get_month_summary_usecase.dart';
+import 'package:oflite/modules/budget/domain/usecase/list_budgets_page_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/list_budgets_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/update_budget_status_usecase.dart';
 import 'package:oflite/modules/budget/domain/usecase/update_budget_item_quantity_usecase.dart';
@@ -60,6 +61,12 @@ void registerBudgetDependencies(GetIt sl) {
 
   sl.registerLazySingleton<ListBudgetsUsecase>(
     () => ListBudgetsUsecase(sl<BudgetRepository>()),
+  );
+  sl.registerLazySingleton<ListBudgetsPageUsecase>(
+    () => ListBudgetsPageUsecase(
+      sl<BudgetRepository>(),
+      sl<ListBudgetsUsecase>(),
+    ),
   );
   sl.registerLazySingleton<GetMonthSummaryUsecase>(
     () => GetMonthSummaryUsecase(sl<ListBudgetsUsecase>()),

@@ -34,19 +34,26 @@ class ChatBudgetPickerView extends StatefulWidget {
 class _ChatBudgetPickerViewState extends State<ChatBudgetPickerView> {
   final _vm = getIt<ChatBudgetPickerViewModel>();
   final _searchFocus = FocusNode();
+  final _scroll = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _searchFocus.addListener(() => setState(() {}));
+    _scroll.addListener(_onScroll);
     _vm.init(widget.initialQuery);
   }
 
   @override
   void dispose() {
+    _scroll.dispose();
     _searchFocus.dispose();
     _vm.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scroll.position.extentAfter < 200) _vm.loadMore();
   }
 
   @override
@@ -99,14 +106,35 @@ class _ChatBudgetPickerViewState extends State<ChatBudgetPickerView> {
         ),
       );
     }
+    // Lista curta demais para rolar (ex.: poucos do status na 1ª página):
+    // sem rolagem não há gatilho, então pede a próxima página direto.
+    if (_vm.hasMore && !_vm.isLoadingMore) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            _scroll.hasClients &&
+            _scroll.position.maxScrollExtent <= 0) {
+          _vm.loadMore();
+        }
+      });
+    }
+    final extra = _vm.isLoadingMore ? 1 : 0;
     return ListView.separated(
+      controller: _scroll,
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemCount: _vm.budgets.length,
+      itemCount: _vm.budgets.length + extra,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
+        if (i >= _vm.budgets.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(
+              child: CircularProgressIndicator(color: loadingIndicatorColor),
+            ),
+          );
+        }
         final b = _vm.budgets[i];
         return ChatBudgetPickerTile(
           name: b.customerName ?? '',
