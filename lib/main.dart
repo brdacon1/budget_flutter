@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:core';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -29,55 +30,50 @@ Future<void> main() async {
   _lockTabletToLandscape();
   setupDependencyInjection();
 
-  // Inicializa o Firebase sempre (mobile e web).
+  // Firebase é o único init crítico; o restante nunca pode travar o boot.
   await Firebase.initializeApp();
 
-  // Crashlytics é mobile-only. Inicializa antes de Ads/Notification para
-  // capturar falhas na inicialização deles.
   if (!kIsWeb) {
-    await getIt<CrashlyticsRepository>().initialize();
-    // App Check protege a cota do Firebase AI Logic (chat com IA).
-    await getIt<AppCheckRepository>().initialize();
-  }
-
-  // Inicializa Google Sign-In exatamente uma vez por execução do app.
-  // A biblioteca exige que initialize() seja chamado uma única vez
-  // antes de qualquer outro método.
-  // serverClientId é OBRIGATÓRIO no Android para a API CredentialManager.
-  if (!kIsWeb) {
-    try {
-      await GoogleSignIn.instance.initialize(
+    await _safe('Crashlytics', () => getIt<CrashlyticsRepository>().initialize());
+    await _safe('AppCheck', () => getIt<AppCheckRepository>().initialize());
+    // serverClientId é OBRIGATÓRIO no Android (CredentialManager).
+    await _safe(
+      'GoogleSignIn',
+      () => GoogleSignIn.instance.initialize(
         serverClientId:
             '157009524901-or1nm106j8mums7rd0448ruin2slarr7.apps.googleusercontent.com',
-      );
-    } catch (e, s) {
-      debugPrint('Erro na inicialização do GoogleSignIn: $e');
-      getIt<CrashlyticsRepository>().recordError(e, s);
-    }
+      ),
+    );
   }
 
-  // Ads e notificações são mobile-only. No web esses plugins não existem
-  // e lançam exceção, causando tela branca se o entry point mobile for
-  // compilado para web por engano.
-  if (!kIsWeb) {
-    await getIt<AdsRepository>().initialize();
+  await _safe('Environment', () => Environment.instance.initialize());
 
-    if (Environment.instance.environment == 'development') {
-      await getIt<AdsRepository>().setTestDevices(_kTestDeviceIds);
-    }
-
-    try {
-      await getIt<NotificationRepository>().initialize();
-    } catch (e, s) {
-      debugPrint('Erro ao inicializar notificações: $e');
-      getIt<CrashlyticsRepository>().recordError(e, s);
-    }
-    getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
-  }
-
-  await Environment.instance.initialize();
-
+  // Sobe a UI já; Ads e notificações (que podem levar segundos: APNs/FCM com
+  // retry) inicializam em background sem bloquear nem derrubar o app.
   runApp(const MyApp());
+
+  if (!kIsWeb) {
+    getIt<NotificationRepository>().setNavigatorKey(globalNavigatorKey);
+    unawaited(_safe('Notificações', () => getIt<NotificationRepository>().initialize()));
+    unawaited(_safe('Ads', () async {
+      await getIt<AdsRepository>().initialize();
+      if (Environment.instance.environment == 'development') {
+        await getIt<AdsRepository>().setTestDevices(_kTestDeviceIds);
+      }
+    }));
+  }
+}
+
+/// Executa uma etapa de inicialização sem nunca propagar erro.
+Future<void> _safe(String name, Future<void> Function() step) async {
+  try {
+    await step();
+  } catch (e, s) {
+    debugPrint('Erro na inicialização de $name: $e');
+    try {
+      getIt<CrashlyticsRepository>().recordError(e, s);
+    } catch (_) {}
+  }
 }
 
 /// Tablet (menor lateral >= 600 dp) abre sempre deitado; celular não muda.

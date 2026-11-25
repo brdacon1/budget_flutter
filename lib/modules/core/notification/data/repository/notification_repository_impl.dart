@@ -110,11 +110,15 @@ class NotificationRepositoryImpl implements NotificationRepository {
       // FCM token no iOS.
     }
 
-    final String? token = await _acquireTokenWithRetry();
-    _fcmToken = token;
-    if (kDebugMode) {
-      debugPrint('FCM token (memória volátil): $token');
-    }
+    // Token com retry pode levar >10s; não bloqueia a inicialização.
+    unawaited(
+      _acquireTokenWithRetry().then((t) {
+        _fcmToken ??= t;
+        if (kDebugMode) debugPrint('FCM token (memória volátil): $t');
+      }).catchError((Object e) {
+        debugPrint('Erro ao obter FCM token: $e');
+      }),
+    );
 
     _tokenRefreshSub?.cancel();
     _tokenRefreshSub = _dataSource.fcmTokenRefresh.listen((t) {
@@ -139,9 +143,28 @@ class NotificationRepositoryImpl implements NotificationRepository {
     return t;
   }
 
+  Future<String?>? _tokenInFlight;
+
+  /// True após `invalid-request`: erro de configuração, não tenta de novo
+  /// nesta execução do app.
+  bool _tokenConfigBroken = false;
+
+  /// Compartilha a busca em andamento: initialize() e persistência não
+  /// disparam retries duplicados.
   Future<String?> _acquireTokenWithRetry({
     int maxAttempts = 6,
     Duration delay = const Duration(seconds: 2),
+  }) {
+    if (_tokenConfigBroken) return Future.value(null);
+    return _tokenInFlight ??= _doAcquireToken(
+      maxAttempts: maxAttempts,
+      delay: delay,
+    ).whenComplete(() => _tokenInFlight = null);
+  }
+
+  Future<String?> _doAcquireToken({
+    required int maxAttempts,
+    required Duration delay,
   }) async {
     // No iOS o FCM token só existe quando o APNs token já foi entregue.
     // Aguardamos o APNs token explicitamente para evitar race condition.
@@ -162,6 +185,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
         if (kDebugMode) {
           debugPrint('FCM register() falhou (tentativa $attempt): $e');
         }
+        // invalid-request é erro de configuração; retry não resolve.
+        if (e.toString().contains('invalid-request')) {
+          _tokenConfigBroken = true;
+          break;
+        }
       }
       if (attempt < maxAttempts) {
         await Future<void>.delayed(delay);
@@ -169,7 +197,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
     if (kDebugMode) {
       debugPrint(
-        'FCM token NULO após $maxAttempts tentativas. Verifique: '
+        'FCM token NULO (erro de configuração: $_tokenConfigBroken). Verifique: '
         '(1) iOS: certificado/chave APNs cadastrado no Console do Firebase; '
         '(2) Android: SHA-1 do certificado cadastrado; '
         '(3) google-services.json / GoogleService-Info.plist atualizado.',
