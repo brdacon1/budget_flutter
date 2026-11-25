@@ -96,15 +96,11 @@ class NotificationRemoteDataSource {
     );
   }
 
-  /// Registra a instância no FCM e retorna o identificador emitido por
-  /// `onRegistered` (Firebase Installation ID).
-  Future<String?> getFcmToken() async {
-    final first = _messaging.onRegistered.first;
-    await _messaging.register();
-    return first;
-  }
+  // ignore: deprecated_member_use
+  Future<String?> getFcmToken() => _messaging.getToken();
 
-  Stream<String> get fcmTokenRefresh => _messaging.onRegistered;
+  // ignore: deprecated_member_use
+  Stream<String> get fcmTokenRefresh => _messaging.onTokenRefresh;
 
   Future<void> requestFcmPermission({
     bool alert = false,
