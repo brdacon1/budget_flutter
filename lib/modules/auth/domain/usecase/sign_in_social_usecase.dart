@@ -68,7 +68,9 @@ class SignInSocialUseCase {
     );
     if (user?.user != authUser?.uid) {
       await _createDefaultUser(authUser);
-      debugPrint('[SocialLogin] doc criado com nome="${authUser?.displayName}"');
+      debugPrint(
+        '[SocialLogin] doc criado com nome="${authUser?.displayName}"',
+      );
       return;
     }
 

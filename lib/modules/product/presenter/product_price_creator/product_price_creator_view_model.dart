@@ -1,4 +1,3 @@
-import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/product/domain/entity/item_category.dart';
@@ -6,19 +5,17 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
-import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
 import 'package:oflite/shared/common/enums/product_price_field_enum.dart';
-import 'package:oflite/shared/common/widgets/modals/option_bottom_modal_widget.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class ProductPriceCreatorViewModel extends ChangeNotifier {
   final ProductPriceRepository _productRepository =
       getIt<ProductPriceRepository>();
   final BudgetRepository _budgetRepository = getIt<BudgetRepository>();
-  final LoadingEventRepository loadingEvent = getIt<LoadingEventRepository>();
   final ConvertCoinRepository moneyConvert = getIt<ConvertCoinRepository>();
 
   final ProductPriceModel item;
@@ -40,7 +37,6 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
   late bool fieldVisible;
   late String nameButton;
   late String titlePage;
-  bool isSaving = false;
 
   /// Item salvo/atualizado após operação bem-sucedida (exposto para quem chamou o modal).
   ProductPriceModel? savedItem;
@@ -92,80 +88,47 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> selectCategory(BuildContext context) async {
-    final value = await showOptionBottomModal(
-      context,
-      title: ProductPtString.selectCategoryTitle,
-      values: ItemCategory.values.map((c) => c.label).toList(),
-    );
-    if (value != null) {
-      _category = ItemCategory.values.firstWhere((c) => c.label == value);
-      categoriaText.text = value;
-      notifyListeners();
-    }
+  /// Aplica a categoria escolhida pela View (o modal é aberto na View).
+  void setCategory(String label) {
+    _category = ItemCategory.values.firstWhere((c) => c.label == label);
+    categoriaText.text = label;
+    notifyListeners();
   }
 
-  Future<void> save(BuildContext context) async {
-    if (isSaving) return;
-    isSaving = true;
-    notifyListeners();
+  /// Salva/atualiza o item. A View escuta o comando (running/completed/error).
+  late final Command0<void> saveCommand = Command0(_executeSave);
 
+  /// Mensagem de falha da última tentativa (exibida pela View).
+  String? errorMessage;
+
+  /// Mensagem de sucesso conforme criação ou atualização.
+  String get successMessage =>
+      nameButton == ProductPtString.saveButton
+          ? ProductPtString.addSuccess
+          : ProductPtString.updateSuccess;
+
+  Future<Result<void>> _executeSave() async {
     final cleanAmount = moneyConvert.convertFromString(priceController.text);
     final qtd = moneyConvert.convertQtdFromString(qtdText.text);
     final totalPrice = cleanAmount * qtd;
+    errorMessage = null;
+    final model = _buildModel(cleanAmount, qtd, totalPrice);
 
-    await loadingEvent.alertLoading(context);
-    if (!context.mounted) return;
     String? error;
-
     if (nameButton == ProductPtString.saveButton) {
-      error = await _create(model: _buildModel(cleanAmount, qtd, totalPrice));
+      error = await _create(model: model);
     } else if (nameButton == ProductPtString.updateButton && !fieldVisible) {
       error = await _updatePriceList(model: _buildModel(cleanAmount, 0, null));
     } else {
-      error = await _updateOrcamento(
-        model: _buildModel(cleanAmount, qtd, totalPrice),
-      );
+      error = await _updateOrcamento(model: model);
     }
-
-    if (!context.mounted) return;
-    loadingEvent.closeLoading(context);
-
-    isSaving = false;
-    notifyListeners();
 
     if (error != null) {
-      if (!context.mounted) return;
-      AlertSnackBar.error(
-        context,
-        ProductPtString.errorTitle,
-        error,
-      );
-      return;
+      errorMessage = error;
+      return Result.error(Exception(error));
     }
-
-    final successMessage =
-        nameButton == ProductPtString.saveButton
-            ? ProductPtString.addSuccess
-            : ProductPtString.updateSuccess;
-    if (!context.mounted) return;
-    AlertSnackBar.success(
-      context,
-      ProductPtString.doneTitle,
-      successMessage,
-    );
-
-    // Guarda o item salvo para quem chamou o modal
-    savedItem = _buildModel(
-      moneyConvert.convertFromString(priceController.text),
-      moneyConvert.convertQtdFromString(qtdText.text),
-      moneyConvert.convertFromString(priceController.text) *
-          moneyConvert.convertQtdFromString(qtdText.text),
-    );
-
-    if (context.mounted) {
-      Navigator.pop(context, true);
-    }
+    savedItem = model;
+    return const Result.ok(null);
   }
 
   ProductPriceModel _buildModel(double preco, double qtd, double? total) {
@@ -244,6 +207,7 @@ class ProductPriceCreatorViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    saveCommand.dispose();
     categoriaText.dispose();
     unidadeText.dispose();
     qtdText.dispose();

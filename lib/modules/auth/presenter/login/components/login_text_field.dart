@@ -44,9 +44,10 @@ class LoginTextField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isSelected
-                ? viewModel.enabledtxt.withValues(alpha: 0.3)
-                : viewModel.deaible.withValues(alpha: 0.3),
+            color:
+                isSelected
+                    ? viewModel.enabledtxt.withValues(alpha: 0.3)
+                    : viewModel.deaible.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(

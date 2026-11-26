@@ -5,6 +5,7 @@ import 'package:oflite/injection.dart';
 import 'package:oflite/modules/core/convert_coin/domain/repository/convert_coin_repository.dart';
 import 'package:oflite/modules/core/loading_event/domain/repository/loading_event_repository.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
+import 'package:oflite/modules/product/domain/entity/item_category.dart';
 import 'package:oflite/modules/product/domain/repository/product_price_repository.dart';
 import 'package:oflite/modules/product/presenter/product_price_creator/product_price_creator_view.dart';
 import 'package:oflite/modules/product/presenter/strings/product_pt_string.dart';
@@ -21,6 +22,15 @@ class ProductPriceListViewModel extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
 
   List<ProductPriceModel> _all = <ProductPriceModel>[];
+
+  /// Filtro por categoria; `null` = Todos.
+  ItemCategory? category;
+
+  void onCategoryChanged(ItemCategory? value) {
+    category = value;
+    notifyListeners();
+  }
+
   bool isLoading = false;
 
   /// Ids marcados pelo check circular para remoção.
@@ -30,12 +40,13 @@ class ProductPriceListViewModel extends ChangeNotifier {
   ProductPriceListViewModel();
 
   List<ProductPriceModel> get found {
-    final query = searchController.text;
-    if (query.isEmpty) return _all;
-    final q = query.toLowerCase();
-    return _all
-        .where((x) => (x.descricao ?? '').toLowerCase().contains(q))
-        .toList();
+    final q = searchController.text.toLowerCase();
+    return _all.where((x) {
+      if (category != null && ItemCategory.fromValue(x.categoria) != category) {
+        return false;
+      }
+      return (x.descricao ?? '').toLowerCase().contains(q);
+    }).toList();
   }
 
   void onSearchChanged() => notifyListeners();

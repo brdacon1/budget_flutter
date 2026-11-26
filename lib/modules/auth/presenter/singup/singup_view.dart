@@ -100,11 +100,7 @@ class _SingUpViewState extends State<SingUpView> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        AlertSnackBar.error(
-          context,
-          LoginStrings.errorTitle,
-          message,
-        );
+        AlertSnackBar.error(context, LoginStrings.errorTitle, message);
       });
     }
   }

@@ -12,17 +12,17 @@ class OwnerPdf {
   String? pdfLayoutType;
 
   OwnerPdf({
-     this.rua,
-     this.empresa,
-     this.email,
-     this.cnpj,
-     this.bairro,
-     this.city,
-     this.cep,
-     this.fotoId,
-     this.fone,
-     this.logoName,
-     this.pdfLayoutType,
+    this.rua,
+    this.empresa,
+    this.email,
+    this.cnpj,
+    this.bairro,
+    this.city,
+    this.cep,
+    this.fotoId,
+    this.fone,
+    this.logoName,
+    this.pdfLayoutType,
   });
 
   factory OwnerPdf.fromJson(Map<String, dynamic>? json) {

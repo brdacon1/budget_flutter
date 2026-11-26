@@ -81,6 +81,7 @@ class UserRemoteDataSource {
       'IdPay': user.idPay,
       'ProductId': user.productId,
       'PurchaseToken': user.purchaseToken,
+      if (user.segment != null) 'Segmento': user.segment,
     });
   }
 

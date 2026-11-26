@@ -29,8 +29,7 @@ class LoginStrings {
   // --- Login: abas ---
   static String get loginTabLogin => _isPt ? 'Login' : 'Login';
   static String get loginTabSignUp => _isPt ? 'Cadastrar' : 'Sign up';
-  static String get loginRememberMe =>
-      _isPt ? 'Lembrar de mim' : 'Remember me';
+  static String get loginRememberMe => _isPt ? 'Lembrar de mim' : 'Remember me';
 
   // --- Login: botões ---
   static String get loginButton => _isPt ? 'Entrar' : 'Sign in';
@@ -49,8 +48,7 @@ class LoginStrings {
   // --- Login: rodapé ---
   static String get loginRegisterPrompt =>
       _isPt ? 'Quer se cadastrar? ' : 'No account yet? ';
-  static String get loginRegisterAction =>
-      _isPt ? 'Clique aqui' : 'Sign up';
+  static String get loginRegisterAction => _isPt ? 'Clique aqui' : 'Sign up';
 
   // --- Login: erros (ViewModel) ---
   static String get loginErrorUserNotFound =>
@@ -61,21 +59,26 @@ class LoginStrings {
       _isPt ? 'E-mail inválido.' : 'Invalid email.';
   static String get loginErrorUserDisabled =>
       _isPt ? 'Usuário desativado.' : 'User disabled.';
-  static String get loginErrorDefault => _isPt
-      ? 'Problemas para realizar seu login. Verifique sua senha e e-mail.'
-      : 'Could not sign in. Please check your email and password.';
-  static String get loginErrorGoogleConfig => _isPt
-      ? 'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.'
-      : 'Google Sign-In configuration error. Check that the app is signed with the correct certificate.';
-  static String get loginErrorGoogleUnavailable => _isPt
-      ? 'A tela de login do Google não está disponível no momento. Tente novamente.'
-      : 'The Google sign-in screen is not available right now. Please try again.';
-  static String get loginErrorGoogleDefault => _isPt
-      ? 'Erro no login com Google. Tente novamente.'
-      : 'Google sign-in failed. Please try again.';
-  static String get loginErrorAppleDefault => _isPt
-      ? 'Erro no login com Apple. Tente novamente.'
-      : 'Apple sign-in failed. Please try again.';
+  static String get loginErrorDefault =>
+      _isPt
+          ? 'Problemas para realizar seu login. Verifique sua senha e e-mail.'
+          : 'Could not sign in. Please check your email and password.';
+  static String get loginErrorGoogleConfig =>
+      _isPt
+          ? 'Erro de configuração do Google Sign-In. Verifique se o app está assinado com o certificado correto.'
+          : 'Google Sign-In configuration error. Check that the app is signed with the correct certificate.';
+  static String get loginErrorGoogleUnavailable =>
+      _isPt
+          ? 'A tela de login do Google não está disponível no momento. Tente novamente.'
+          : 'The Google sign-in screen is not available right now. Please try again.';
+  static String get loginErrorGoogleDefault =>
+      _isPt
+          ? 'Erro no login com Google. Tente novamente.'
+          : 'Google sign-in failed. Please try again.';
+  static String get loginErrorAppleDefault =>
+      _isPt
+          ? 'Erro no login com Apple. Tente novamente.'
+          : 'Apple sign-in failed. Please try again.';
 
   // --- Login: dados padrão do novo usuário (gravados no Firestore) ---
   static String get defaultCompanyName =>

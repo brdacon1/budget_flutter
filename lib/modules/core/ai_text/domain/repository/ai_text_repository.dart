@@ -8,6 +8,7 @@ abstract class AiTextRepository {
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
   });
 
   /// Chamadas já usadas em [day] (`yyyy-MM-dd`).

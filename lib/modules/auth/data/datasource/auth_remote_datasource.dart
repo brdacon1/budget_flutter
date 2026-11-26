@@ -108,10 +108,11 @@ class AuthRemoteDataSource {
     );
 
     // Garante o displayName quando a Apple mandou o nome.
-    final name = [
-      apple.givenName,
-      apple.familyName,
-    ].whereType<String>().join(' ').trim();
+    final name =
+        [
+          apple.givenName,
+          apple.familyName,
+        ].whereType<String>().join(' ').trim();
     final user = result.user;
     if (name.isNotEmpty && user?.displayName != name) {
       await user?.updateDisplayName(name);
@@ -124,7 +125,9 @@ class AuthRemoteDataSource {
     const chars =
         '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = Random.secure();
-    return List.generate(length, (_) => chars[random.nextInt(chars.length)])
-        .join();
+    return List.generate(
+      length,
+      (_) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 }

@@ -12,9 +12,9 @@ enum ItemCategory {
   const ItemCategory(this.value);
 
   String get label => switch (this) {
-        ItemCategory.products => ProductPtString.categoryProducts,
-        ItemCategory.services => ProductPtString.categoryServices,
-      };
+    ItemCategory.products => ProductPtString.categoryProducts,
+    ItemCategory.services => ProductPtString.categoryServices,
+  };
 
   /// Lê o valor do Firestore aceitando legados: `'Products'`/`'Services'`
   /// (gravados por aparelhos em inglês desde o commit 389430b), sem acento e

@@ -14,13 +14,22 @@ class AiTextRemoteDatasource {
   /// [jsonKeys]: quando informado, força a resposta em JSON com essas chaves
   /// (todas string) e `text` vem como o JSON cru.
   ///
+  /// [asList]: com [jsonKeys], a resposta é um array de objetos com essas chaves.
+  ///
   /// Devolve `{text, inputTokens, outputTokens}`.
   Future<Map<String, dynamic>> generate({
     required String system,
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
   }) async {
+    final item =
+        jsonKeys == null
+            ? null
+            : Schema.object(
+              properties: {for (final k in jsonKeys) k: Schema.string()},
+            );
     final model = FirebaseAI.googleAI().generativeModel(
       model: _model,
       systemInstruction: Content.system(system),
@@ -29,11 +38,7 @@ class AiTextRemoteDatasource {
         maxOutputTokens: maxOutputTokens,
         responseMimeType: jsonKeys == null ? null : 'application/json',
         responseSchema:
-            jsonKeys == null
-                ? null
-                : Schema.object(
-                  properties: {for (final k in jsonKeys) k: Schema.string()},
-                ),
+            asList && item != null ? Schema.array(items: item) : item,
       ),
     );
     final response = await model

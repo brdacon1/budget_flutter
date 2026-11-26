@@ -9,6 +9,7 @@ import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/main_tab/presenter/components/main_tab_trial_banner.dart';
+import 'package:oflite/modules/product/presenter/product_segment/product_segment_view.dart';
 
 import 'package:oflite/modules/main_tab/presenter/components/main_tab_side_bar.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -45,6 +46,7 @@ class _MainTabView extends State<MainTabView> {
         );
       }
       getIt<NotificationRepository>().tryOpenPendingBudget();
+      _askSegment();
       // REDUNDÂNCIA de persistência do token FCM: o login já tenta salvar,
       // mas aqui (dashboard) o dono está definitivamente autenticado e o
       // token já foi obtido no startup. Se por algum motivo o save do login
@@ -56,6 +58,14 @@ class _MainTabView extends State<MainTabView> {
         getIt<NotificationRepository>().persistCurrentTokenToFirebase(ownerUid);
       }
     });
+  }
+
+  /// Primeira entrada no app: pergunta o ramo e monta a lista de preços inicial.
+  /// Fica depois da assinatura expirada (essa rota cobre a tela).
+  Future<void> _askSegment() async {
+    if (getIt<GetAccessStatusUseCase>()() == AccessStatus.expired) return;
+    if (!await _viewModel.shouldAskSegment() || !mounted) return;
+    await showProductSegmentBottomModal(context);
   }
 
   void _onViewModelChanged() {

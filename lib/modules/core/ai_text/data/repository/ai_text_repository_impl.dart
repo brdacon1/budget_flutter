@@ -16,6 +16,7 @@ class AiTextRepositoryImpl implements AiTextRepository {
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
   }) async {
     try {
       final raw = await _remote.generate(
@@ -23,6 +24,7 @@ class AiTextRepositoryImpl implements AiTextRepository {
         prompt: prompt,
         maxOutputTokens: maxOutputTokens,
         jsonKeys: jsonKeys,
+        asList: asList,
       );
       debugPrint(
         '[AiText] tokens in=${raw['inputTokens']} out=${raw['outputTokens']}',

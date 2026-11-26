@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
+import 'package:oflite/modules/product/domain/usecase/should_ask_segment_usecase.dart';
 import 'package:oflite/shared/design_pattern/result.dart';
 
 class TabItem {
@@ -16,8 +17,13 @@ class TabItem {
 class MainTabViewModel extends ChangeNotifier {
   final ReceiveSharedProofUsecase _receiveShared;
   final PdfRepository _pdfRepository;
+  final ShouldAskSegmentUsecase _shouldAskSegment;
 
-  MainTabViewModel(this._receiveShared, this._pdfRepository) {
+  MainTabViewModel(
+    this._receiveShared,
+    this._pdfRepository,
+    this._shouldAskSegment,
+  ) {
     // Logo trocado em "Editar PDF": o repositório avisa e a barra atualiza.
     _pdfRepository.addListener(loadCompanyLogo);
   }
@@ -45,6 +51,9 @@ class MainTabViewModel extends ChangeNotifier {
       _loadingLogo = false;
     }
   }
+
+  /// Ainda não perguntamos o ramo de atuação (e não há lista de preço própria).
+  Future<bool> shouldAskSegment() => _shouldAskSegment();
 
   StreamSubscription<SharedProofEvent>? _sharedSub;
 

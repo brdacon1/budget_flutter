@@ -89,11 +89,7 @@ class _LoginViewState extends State<LoginView> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          AlertSnackBar.error(
-            context,
-            LoginStrings.errorTitle,
-            message,
-          );
+          AlertSnackBar.error(context, LoginStrings.errorTitle, message);
         }
       });
     }
