@@ -14,6 +14,7 @@ class HomeOverview extends StatelessWidget {
     required this.canGoNext,
     required this.onPrevious,
     required this.onNext,
+    this.fill = false,
   });
 
   final DashboardMonthSummary summary;
@@ -21,6 +22,9 @@ class HomeOverview extends StatelessWidget {
   final bool canGoNext;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+
+  /// Tela larga: as duas linhas de cards dividem a altura disponível.
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +56,23 @@ class HomeOverview extends StatelessWidget {
           onNext: onNext,
         ),
         gap,
-        IntrinsicHeight(
-          child: row(DashboardStatus.approved, DashboardStatus.pending),
-        ),
-        gap,
-        IntrinsicHeight(
-          child: row(DashboardStatus.disapproved, DashboardStatus.finished),
-        ),
+        if (fill) ...[
+          Expanded(
+            child: row(DashboardStatus.approved, DashboardStatus.pending),
+          ),
+          gap,
+          Expanded(
+            child: row(DashboardStatus.disapproved, DashboardStatus.finished),
+          ),
+        ] else ...[
+          IntrinsicHeight(
+            child: row(DashboardStatus.approved, DashboardStatus.pending),
+          ),
+          gap,
+          IntrinsicHeight(
+            child: row(DashboardStatus.disapproved, DashboardStatus.finished),
+          ),
+        ],
       ],
     );
   }

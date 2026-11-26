@@ -125,6 +125,12 @@ Padrões: **PC** = `AppPageContainer`, **G** = `AppAdaptiveGrid`, **2C** =
 | `chat_media_picker_view` | Grid com mais colunas por `MaxCrossAxisExtent` |
 | `chat_proof_preview_view` | Imagem à esquerda, ações à direita (2 col) |
 
+### Orçamentos (lista)
+
+| Tela | Comportamento em `expanded` |
+|---|---|
+| `budget_list_view` | **3 painéis** (largura ≥ 1100): lista · orçamento aberto (abas Cliente/Itens/PDF) · **"Mais"** do orçamento aberto (**3 painéis de largura igual**, `BudgetOptionsPane` com `Navigator` próprio: métricas, recibos, comprovantes, PDF… abrem dentro do painel). A aba "Mais" some da barra de abas nesse modo (`AppAsidePane`). Abaixo de 1100: 2 painéis (lista 440 + detalhe) e a aba "Mais" volta à barra. `AppMasterDetail` ganhou o parâmetro opcional `aside`. |
+
 ### Home
 
 | Tela | Comportamento em `expanded` |

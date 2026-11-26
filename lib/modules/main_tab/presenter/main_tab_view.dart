@@ -14,7 +14,6 @@ import 'package:oflite/modules/main_tab/presenter/components/main_tab_trial_bann
 import 'package:oflite/modules/product/presenter/product_segment/product_segment_view.dart';
 
 import 'package:oflite/modules/home/presenter/components/home_sub_page.dart';
-import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 import 'main_tab_view_model.dart';
 
@@ -134,10 +133,7 @@ class _MainTabView extends State<MainTabView> {
             top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                if (!ResponsiveWidget.isDesktop(context))
-                  const MainTabTrialBanner(),
-              ],
+              children: [const MainTabTrialBanner()],
             ),
           ),
         );

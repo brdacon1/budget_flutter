@@ -11,9 +11,16 @@ import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart
 
 /// Tela **Métricas** do orçamento (acessada pelo menu Mais).
 class BudgetMetricsView extends StatefulWidget {
-  const BudgetMetricsView({super.key, required this.item});
+  const BudgetMetricsView({
+    super.key,
+    required this.item,
+    this.showBack = true,
+  });
 
   final CustomerInfo item;
+
+  /// `false` no painel de métricas do iPad (não há para onde voltar).
+  final bool showBack;
 
   @override
   State<BudgetMetricsView> createState() => _BudgetMetricsViewState();
@@ -49,6 +56,7 @@ class _BudgetMetricsViewState extends State<BudgetMetricsView> {
                   secondTitle: BudgetStrings.metricsSubtitle(
                     widget.item.id ?? '',
                   ),
+                  showBack: widget.showBack,
                   onBack: () => Navigator.pop(context),
                 ),
                 Expanded(child: _body()),

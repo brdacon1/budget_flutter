@@ -17,6 +17,8 @@ class AppMasterDetail extends StatelessWidget {
     this.onDetailClosed,
     this.masterWidth = 440,
     this.hideBackOnRootScreens = false,
+    this.aside,
+    this.asideMinWidth = 1100,
   });
 
   final Widget master;
@@ -30,24 +32,54 @@ class AppMasterDetail extends StatelessWidget {
   /// abertas por um fluxo (ex.: assistente) mantêm a seta para concluí-lo.
   final bool hideBackOnRootScreens;
 
+  /// Terceiro painel (à direita do detalhe), ex.: opções do item aberto.
+  /// Só aparece quando a largura é >= [asideMinWidth]; abaixo disso o layout
+  /// volta a ser lista + detalhe, sem apertar nenhum painel.
+  final Widget? aside;
+  final double asideMinWidth;
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(width: masterWidth, child: master),
-        const VerticalDivider(width: 1, thickness: 1, color: cardBorderColor),
-        Expanded(
-          child: AppDetailPane(
-            hidesBack: hideBackOnRootScreens,
-            child: Navigator(
-              key: detailNavigatorKey,
-              observers: [_DetailClosedObserver(onDetailClosed)],
-              onGenerateRoute:
-                  (_) => MaterialPageRoute<void>(builder: (_) => emptyDetail),
+    const divider = VerticalDivider(
+      width: 1,
+      thickness: 1,
+      color: cardBorderColor,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final threePanes =
+            aside != null && constraints.maxWidth >= asideMinWidth;
+        return Row(
+          children: [
+            // 3 painéis: tamanhos iguais (cada um 1/3 da largura).
+            if (threePanes)
+              Expanded(child: master)
+            else
+              SizedBox(width: masterWidth, child: master),
+            divider,
+            Expanded(
+              child: AppAsidePane(
+                active: threePanes,
+                child: AppDetailPane(
+                  hidesBack: hideBackOnRootScreens,
+                  child: Navigator(
+                    key: detailNavigatorKey,
+                    observers: [_DetailClosedObserver(onDetailClosed)],
+                    onGenerateRoute:
+                        (_) => MaterialPageRoute<void>(
+                          builder: (_) => emptyDetail,
+                        ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+            if (threePanes) ...[
+              divider,
+              Expanded(child: AppDetailPane(hidesBack: true, child: aside!)),
+            ],
+          ],
+        );
+      },
     );
   }
 }
@@ -73,6 +105,21 @@ class AppDetailPane extends InheritedWidget {
   @override
   bool updateShouldNotify(AppDetailPane oldWidget) =>
       hidesBack != oldWidget.hidesBack;
+}
+
+/// Indica às telas do detalhe que existe um terceiro painel ao lado (ex.: a
+/// aba "Mais" do orçamento vive nele, então a barra de abas a esconde).
+class AppAsidePane extends InheritedWidget {
+  const AppAsidePane({super.key, required this.active, required super.child});
+
+  final bool active;
+
+  static bool activeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AppAsidePane>()?.active ??
+      false;
+
+  @override
+  bool updateShouldNotify(AppAsidePane oldWidget) => active != oldWidget.active;
 }
 
 /// Avisa quando a pilha do detalhe volta para a rota-base.

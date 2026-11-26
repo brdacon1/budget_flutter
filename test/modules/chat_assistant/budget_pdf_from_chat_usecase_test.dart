@@ -36,11 +36,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('BuildBudgetFinalActionsUsecase', () {
-    test('acesso total: copiar link + gerar PDF', () {
+    test('acesso total: compartilhar link + gerar PDF', () {
       final actions =
           BuildBudgetFinalActionsUsecase(_FakeAccess(hasFullAccess: true))();
       expect(actions, [
-        ChatAssistantStrings.copyLinkLabel,
+        ChatAssistantStrings.shareLinkLabel,
         ChatAssistantStrings.generatePdfLabel,
       ]);
     });
