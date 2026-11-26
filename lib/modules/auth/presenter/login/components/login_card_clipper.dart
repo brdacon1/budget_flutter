@@ -14,11 +14,11 @@ class LoginCardClipper extends CustomClipper<Path> {
 
     path.cubicTo(
       size.width * 0.33,
-      h * 1.4,      // desce à esquerda
+      h * 1.4, // desce à esquerda
       size.width * 0.66,
-      -h * 1.2,     // sobe no centro
+      -h * 1.2, // sobe no centro
       size.width,
-      h * 0.9,      // desce à direita
+      h * 0.9, // desce à direita
     );
 
     path.lineTo(size.width, size.height);

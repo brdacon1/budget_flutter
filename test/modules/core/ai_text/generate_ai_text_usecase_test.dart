@@ -18,6 +18,7 @@ class _FakeRepo implements AiTextRepository {
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
   }) async {
     calls++;
     lastJsonKeys = jsonKeys;
@@ -36,9 +37,12 @@ void main() {
 
   test('gera texto e conta 1 uso no dia', () async {
     final repo = _FakeRepo(const Result.ok('Olá'));
-    final result = await GenerateAiTextUsecase(
-      repo,
-    )(system: 's', prompt: 'p', jsonKeys: ['name'], now: day);
+    final result = await GenerateAiTextUsecase(repo)(
+      system: 's',
+      prompt: 'p',
+      jsonKeys: ['name'],
+      now: day,
+    );
 
     expect((result as Ok<String>).value, 'Olá');
     expect(repo.usage['2026-11-22'], 1);
@@ -48,9 +52,11 @@ void main() {
   test('no limite diário não chama a IA', () async {
     final repo = _FakeRepo(const Result.ok('x'))
       ..usage['2026-11-22'] = GenerateAiTextUsecase.dailyLimit;
-    final result = await GenerateAiTextUsecase(
-      repo,
-    )(system: 's', prompt: 'p', now: day);
+    final result = await GenerateAiTextUsecase(repo)(
+      system: 's',
+      prompt: 'p',
+      now: day,
+    );
 
     expect((result as Error<String>).error, isA<AiTextDailyLimitException>());
     expect(repo.calls, 0);
@@ -59,18 +65,22 @@ void main() {
   test('outro dia zera o limite', () async {
     final repo = _FakeRepo(const Result.ok('x'))
       ..usage['2026-11-21'] = GenerateAiTextUsecase.dailyLimit;
-    final result = await GenerateAiTextUsecase(
-      repo,
-    )(system: 's', prompt: 'p', now: day);
+    final result = await GenerateAiTextUsecase(repo)(
+      system: 's',
+      prompt: 'p',
+      now: day,
+    );
 
     expect(result, isA<Ok<String>>());
   });
 
   test('resposta vazia vira AiTextEmptyException e conta o uso', () async {
     final repo = _FakeRepo(const Result.ok(''));
-    final result = await GenerateAiTextUsecase(
-      repo,
-    )(system: 's', prompt: 'p', now: day);
+    final result = await GenerateAiTextUsecase(repo)(
+      system: 's',
+      prompt: 'p',
+      now: day,
+    );
 
     expect((result as Error<String>).error, isA<AiTextEmptyException>());
     expect(repo.usage['2026-11-22'], 1);
@@ -78,9 +88,11 @@ void main() {
 
   test('erro do repositório é repassado', () async {
     final repo = _FakeRepo(Result.error(Exception('timeout')));
-    final result = await GenerateAiTextUsecase(
-      repo,
-    )(system: 's', prompt: 'p', now: day);
+    final result = await GenerateAiTextUsecase(repo)(
+      system: 's',
+      prompt: 'p',
+      now: day,
+    );
 
     expect(result, isA<Error<String>>());
   });

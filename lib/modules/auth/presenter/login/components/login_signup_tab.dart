@@ -64,11 +64,7 @@ class _LoginSignUpTabState extends State<LoginSignUpTab> {
       _viewModel.consumeState();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          AlertSnackBar.error(
-            context,
-            LoginStrings.errorTitle,
-            message,
-          );
+          AlertSnackBar.error(context, LoginStrings.errorTitle, message);
         }
       });
     }

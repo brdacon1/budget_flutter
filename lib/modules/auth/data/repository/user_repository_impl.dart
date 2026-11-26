@@ -46,7 +46,8 @@ class UserRepositoryImpl extends UserRepository {
             ..idPay = raw['IdPay']
             ..productId = raw['ProductId']
             ..purchaseToken = raw['PurchaseToken']
-            ..autoRenewing = raw['AutoRenewing'] ?? false;
+            ..autoRenewing = raw['AutoRenewing'] ?? false
+            ..segment = raw['Segmento'];
       final trial = raw['TrialStartedAt'];
       if (trial is int) {
         user.trialStartedAt = DateTime.fromMillisecondsSinceEpoch(trial);

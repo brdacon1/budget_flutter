@@ -18,6 +18,7 @@ class GenerateAiTextUsecase {
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
     DateTime? now,
   }) async {
     final today = _isoDate(now ?? DateTime.now());
@@ -31,6 +32,7 @@ class GenerateAiTextUsecase {
       prompt: prompt,
       maxOutputTokens: maxOutputTokens,
       jsonKeys: jsonKeys,
+      asList: asList,
     );
     if (result is Ok<String> && result.value.isEmpty) {
       return const Result.error(AiTextEmptyException());

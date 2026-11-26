@@ -135,6 +135,53 @@ class ProductPtString {
           : 'Sample product (you can edit or delete it)';
   static String get sampleProductMeasure => _isPt ? 'un' : 'unit';
 
+  // --- Ramo de atuação / lista de preço inicial ---
+  static String get segmentTitle =>
+      _isPt ? 'Qual o seu ramo de atuação?' : 'What is your line of work?';
+  static String get segmentSubtitle =>
+      _isPt
+          ? 'Vamos montar uma lista de preços inicial para você. Depois, '
+              'você pode editar tudo.'
+          : 'We will build a starter price list for you. You can edit '
+              'everything later.';
+  static String get segmentEarthworks => _isPt ? 'Terraplanagem' : 'Earthworks';
+  static String get segmentPainting => _isPt ? 'Pintura' : 'Painting';
+  static String get segmentMasonry => _isPt ? 'Alvenaria' : 'Masonry';
+  static String get segmentOther => _isPt ? 'Outro' : 'Other';
+  static String get segmentCustomHint =>
+      _isPt ? 'Qual é o seu ramo?' : 'What is your line of work?';
+  static String get segmentRequiredError =>
+      _isPt ? 'Escolha o seu ramo' : 'Choose your line of work';
+  static String get segmentCustomRequiredError =>
+      _isPt ? 'Informe o seu ramo' : 'Enter your line of work';
+  static String get segmentGenerateButton =>
+      _isPt ? 'Gerar minha lista' : 'Build my list';
+  static String get segmentSkip => _isPt ? 'Agora não' : 'Not now';
+  static String get segmentReviewTitle =>
+      _isPt ? 'Revise sua lista' : 'Review your list';
+  static String get segmentReviewHint =>
+      _isPt
+          ? 'Os preços são estimativas. Remova o que não quiser e ajuste '
+              'depois na lista de preços.'
+          : 'Prices are estimates. Remove what you do not want and adjust '
+              'them later in the price list.';
+  static String segmentSaveButton(int count) =>
+      _isPt ? 'Salvar $count itens' : 'Save $count items';
+  static String segmentSavedMessage(int count) =>
+      _isPt
+          ? '$count itens adicionados à sua lista de preços'
+          : '$count items added to your price list';
+  static String get segmentGenerateError =>
+      _isPt
+          ? 'Não foi possível gerar a lista. Tente novamente ou toque em '
+              '"Agora não".'
+          : 'Could not build the list. Try again or tap "Not now".';
+  static String get segmentSaveError =>
+      _isPt
+          ? 'Não foi possível salvar a lista. Tente novamente.'
+          : 'Could not save the list. Please try again.';
+  static String get segmentRemoveTooltip => _isPt ? 'Remover' : 'Remove';
+
   // --- Plano premium ---
   static String get premiumError =>
       _isPt

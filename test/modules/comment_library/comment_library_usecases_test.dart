@@ -37,6 +37,7 @@ class _FakeAi implements GenerateAiTextUsecase {
     required String prompt,
     int maxOutputTokens = 512,
     List<String>? jsonKeys,
+    bool asList = false,
     DateTime? now,
   }) async {
     calls++;

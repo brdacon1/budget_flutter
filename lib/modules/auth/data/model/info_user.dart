@@ -11,6 +11,10 @@ class InfoUser {
   String? productId;
   bool? googleAuth = false;
 
+  /// Ramo de atuação (`BusinessSegment.value`, fixo). `null` = ainda não
+  /// perguntado.
+  String? segment;
+
   /// Início do teste grátis (horário do servidor). `null` = ainda não
   /// sincronizado (offline/conta antiga): o acesso nunca é bloqueado.
   DateTime? trialStartedAt;

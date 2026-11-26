@@ -1,6 +1,7 @@
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_adaptive_grid.dart';
+import 'package:oflite/modules/budget/presenter/budget_list_items/components/budget_list_items_category_filter.dart';
 import 'package:oflite/modules/product/data/model/product_price_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_card.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/components/product_price_list_header.dart';
@@ -174,6 +175,10 @@ class _ProductPriceListView extends State<ProductPriceListView> {
                 searchController: _viewModel.searchController,
                 onBack: () => Navigator.pop(context, true),
                 onSearchChanged: (_) => _viewModel.onSearchChanged(),
+              ),
+              BudgetListItemsCategoryFilter(
+                selected: _viewModel.category,
+                onChanged: _viewModel.onCategoryChanged,
               ),
               if (_viewModel.selectionMode)
                 ProductPriceSelectionBar(
