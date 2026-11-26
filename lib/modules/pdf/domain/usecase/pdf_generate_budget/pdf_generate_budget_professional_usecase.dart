@@ -637,7 +637,9 @@ class PdfGenerateBudgetProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[3].value = _sanitizeText(label);
+    // Rótulo ocupa as colunas Qtd + Preço para não quebrar/cortar o texto.
+    row.cells[2].value = _sanitizeText(label);
+    row.cells[2].columnSpan = 2;
     row.cells[4].value = _sanitizeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(
