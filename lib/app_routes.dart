@@ -5,6 +5,7 @@ import 'modules/budget/budget_routes.dart';
 import 'modules/chat_assistant/chat_assistant_routes.dart';
 import 'modules/comment_library/comment_library_routes.dart';
 import 'modules/dashboard/dashboard_routes.dart';
+import 'modules/home/home_routes.dart';
 import 'modules/image/image_routes.dart';
 import 'modules/main_config_menu/main_config_menu_routes.dart';
 import 'modules/main_tab/main_tab_routes.dart';
@@ -81,5 +82,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   ...receiptRoutes,
   ...webBudgetRoutes,
   ...dashboardRoutes,
+  ...homeRoutes,
   ...mainConfigMenuRoutes,
 };

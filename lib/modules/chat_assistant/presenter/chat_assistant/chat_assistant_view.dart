@@ -59,7 +59,10 @@ import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 /// A View só executa commands, abre telas/modais (precisam de `context`) e
 /// controla scroll/foco. Toda decisão de fluxo fica na ViewModel.
 class ChatAssistantView extends StatefulWidget {
-  const ChatAssistantView({super.key});
+  const ChatAssistantView({super.key, this.startBudget = false});
+
+  /// Home → "Criar orçamentos": abre já no fluxo de criação do orçamento.
+  final bool startBudget;
 
   @override
   State<ChatAssistantView> createState() => _ChatAssistantViewState();
@@ -78,6 +81,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     _inputFocusNode.addListener(_onInputFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _vm.initializeChat.execute();
+      if (widget.startBudget && mounted) await _vm.startBudgetFromHome();
       // Câmera/fotos pedidas logo ao abrir o chat (modo IA).
       await _vm.ensureMediaPermissions();
       await _consumeSharedProof();
@@ -145,11 +149,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     final msg = alert.message;
     if (msg == null || !mounted) return;
     if (alert.isWarning) {
-      AlertSnackBar.warning(
-        context,
-        PaymentProofStrings.warningTitle,
-        msg,
-      );
+      AlertSnackBar.warning(context, PaymentProofStrings.warningTitle, msg);
     } else {
       AlertSnackBar.error(context, PaymentProofStrings.errorTitle, msg);
     }
@@ -171,15 +171,6 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
     });
   }
 
-  void _showLinkCopied() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(ChatAssistantStrings.linkCopied),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   // ------------------------------------------------------------------
   // Navegação: a ViewModel decide, a View abre
   // ------------------------------------------------------------------
@@ -198,8 +189,6 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       );
     }
     switch (nav) {
-      case ChatAssistantViewModel.linkCopiedNav:
-        return _showLinkCopied();
       case ChatAssistantViewModel.openProductsNav:
         return _openBudgetItems();
       case ChatAssistantViewModel.openCommentsNav:
@@ -289,7 +278,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
   Future<void> _openBudgetItems() async {
     final budget = _vm.draftBudget;
     if (budget == null) return;
-    await _push(BudgetListItemsView(item: budget));
+    await _push(BudgetListItemsView(item: budget, openAddWhenEmpty: true));
     // Ao voltar, os itens já foram salvos: segue para os comentários.
     await _vm.goToCommentsAfterProductEdit();
   }

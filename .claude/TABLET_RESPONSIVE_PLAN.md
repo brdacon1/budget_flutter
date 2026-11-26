@@ -125,6 +125,12 @@ Padrões: **PC** = `AppPageContainer`, **G** = `AppAdaptiveGrid`, **2C** =
 | `chat_media_picker_view` | Grid com mais colunas por `MaxCrossAxisExtent` |
 | `chat_proof_preview_view` | Imagem à esquerda, ações à direita (2 col) |
 
+### Home
+
+| Tela | Comportamento em `expanded` |
+|---|---|
+| `home_view` | Duas colunas dentro de `AppPageContainer(wide)`: esquerda = header, saudação, card hero, atalhos e CTA; direita = visão geral (filtro de mês + 4 cards 2×2) e card de barras. Abaixo de 1024: coluna única (como o layout do celular). |
+
 ### Dashboard
 | Tela | `expanded` |
 |---|---|

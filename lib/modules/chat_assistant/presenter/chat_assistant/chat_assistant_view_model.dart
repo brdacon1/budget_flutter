@@ -7,7 +7,6 @@ import 'package:oflite/modules/chat_assistant/domain/usecase/show_comment_librar
 import 'package:oflite/modules/chat_assistant/domain/usecase/handle_comment_library_menu_option_usecase.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_contacts/flutter_contacts.dart' as user_info;
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -153,7 +152,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _chatRepo.addListener(_onRepoChanged);
     _scriptRepo.addListener(_onRepoChanged);
     shareLinkCommand.addListener(_onCommandDone);
-    copyLinkCommand.addListener(_onCommandDone);
     generatePdfCommand.addListener(_onCommandDone);
   }
 
@@ -340,7 +338,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _editProducts,
   );
   late final Command0<void> shareLinkCommand = Command0(_shareLink);
-  late final Command0<void> copyLinkCommand = Command0(_copyLink);
   late final Command0<void> generatePdfCommand = Command0(_generateBudgetPdf);
   late final Command0<void> resetChatCommand = Command0(_resetChat);
 
@@ -2124,24 +2121,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     return const Result.ok(null);
   }
 
-  Future<Result<void>> _copyLink() async {
-    final budgetId = _chatRepo.draftBudget?.id;
-    if (budgetId == null || budgetId.isEmpty) {
-      _shareErrorMessage = ChatAssistantStrings.budgetNotAvailableToShare;
-      return Result.error(Exception(_shareErrorMessage));
-    }
-    final url = await getIt<ShareLinkRepository>().buildShareUrl(
-      enderecoNumero: budgetId,
-    );
-    if (url == null || url.isEmpty) {
-      _shareErrorMessage = ChatAssistantStrings.shareLinkFailed;
-      return Result.error(Exception(_shareErrorMessage));
-    }
-    _shareErrorMessage = null;
-    await Clipboard.setData(ClipboardData(text: url));
-    return const Result.ok(null);
-  }
-
   Future<Result<void>> _generateBudgetPdf() async {
     final result = await _generatePdf();
     if (result is Error<void>) {
@@ -2233,8 +2212,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (!_disposed &&
         (shareLinkCommand.error ||
             shareLinkCommand.completed ||
-            copyLinkCommand.error ||
-            copyLinkCommand.completed ||
             generatePdfCommand.error ||
             generatePdfCommand.completed)) {
       notifyListeners();
@@ -2244,7 +2221,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
   void clearShareError() {
     _shareErrorMessage = null;
     shareLinkCommand.clearResult();
-    copyLinkCommand.clearResult();
     generatePdfCommand.clearResult();
   }
 
@@ -2389,8 +2365,36 @@ class ChatAssistantViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Início pela Home: mesmo caminho da opção "Criar orçamentos" do menu.
+  Future<void> startBudgetFromHome() => _handleMainMenu('1');
+
+  String? _selectItemsReminderMsgId;
+
+  /// Ao voltar da lista de itens: sem item selecionado, permanece na conversa
+  /// e pede a seleção de novo; com itens, segue para a revisão/comentários.
   Future<void> goToCommentsAfterProductEdit() async {
     await _chatRepo.refreshDraftTotal();
+    final result = await _chatRepo.fetchDraftItems();
+    final items =
+        result is Ok<List<ItemsBudget>> ? result.value : _currentDraftItems;
+    if (_selectItemsReminderMsgId != null) {
+      await _chatRepo.removeMessageById(_selectItemsReminderMsgId!);
+      _selectItemsReminderMsgId = null;
+    }
+    if (items.isEmpty) {
+      _setStep(ChatFlowStep.askProducts);
+      _selectItemsReminderMsgId = _generateMessageId();
+      await _sendBotMessageWithId(
+        _selectItemsReminderMsgId!,
+        ChatAssistantStrings.selectItemsToContinue,
+        type: ChatMessageType.action,
+        payload: {
+          'label': ChatAssistantStrings.selectProductsLabel,
+          'action': 'open_products',
+        },
+      );
+      return;
+    }
     await _showProductReviewAndComments();
   }
 
@@ -2444,7 +2448,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
   static const openCommentsNav = 'open_comments';
   static const openExistingCommentsNav = 'open_existing_comments';
   static const openLogoEditNav = 'open_logo_edit';
-  static const linkCopiedNav = 'link_copied';
 
   /// Toque num botão de mensagem. Retorna a navegação que a View deve
   /// executar, ou `null` quando a ViewModel já tratou tudo.
@@ -2462,9 +2465,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
         action.startsWith('open_budget|')) {
       return action;
     }
-    if (action == ChatAssistantStrings.copyLinkLabel) {
-      await copyLinkCommand.execute();
-      return copyLinkCommand.completed ? linkCopiedNav : null;
+    if (action == ChatAssistantStrings.shareLinkLabel) {
+      await shareLinkCommand.execute();
+      return null;
     }
     if (action == ChatAssistantStrings.generatePdfLabel) {
       await generatePdfCommand.execute();
@@ -2574,9 +2577,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
 
   /// Erro de compartilhar/copiar/gerar PDF a exibir (`null` = nenhum).
   String? get shareErrorToShow =>
-      (shareLinkCommand.error ||
-              copyLinkCommand.error ||
-              generatePdfCommand.error)
+      (shareLinkCommand.error || generatePdfCommand.error)
           ? (_shareErrorMessage ?? ChatAssistantStrings.shareError)
           : null;
 
@@ -2635,7 +2636,6 @@ class ChatAssistantViewModel extends ChangeNotifier {
     _chatRepo.removeListener(_onRepoChanged);
     _scriptRepo.removeListener(_onRepoChanged);
     shareLinkCommand.removeListener(_onCommandDone);
-    copyLinkCommand.removeListener(_onCommandDone);
     generatePdfCommand.removeListener(_onCommandDone);
     textController.dispose();
     cepController.dispose();

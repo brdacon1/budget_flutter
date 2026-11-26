@@ -72,3 +72,8 @@ const modalHandleColor = Color(0xFFBDBDBD); // Colors.grey[400]
 // Tabs (bottom navigation do orçamento)
 const tabSelectedColor = Color(0xFFE0F7FA); // Colors.cyan[50]
 const tabUnselectedColor = Colors.grey;
+
+// Home (card hero e card de análise)
+const homeHeroStartColor = Color(0xFF0DF5E4); // = buttonColor
+const homeHeroEndColor = Color(0xFF0B3B45); // teal escuro do gradiente
+const homeAnalysisCardColor = Color(0xFF161622); // = cartBarColor
