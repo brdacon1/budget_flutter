@@ -573,12 +573,10 @@ Regras:
           ? 'Orçamento criado com sucesso! 👍🎉'
           : 'Budget created successfully! 👍🎉';
 
-  static String get copyLinkLabel => _isPt ? 'Copiar link' : 'Copy link';
+  static String get shareLinkLabel =>
+      _isPt ? 'Compartilhar link' : 'Share link';
 
   static String get generatePdfLabel => _isPt ? 'Gerar PDF' : 'Generate PDF';
-
-  static String get linkCopied =>
-      _isPt ? 'Link do orçamento copiado' : 'Budget link copied';
 
   static String get pdfUnavailable =>
       _isPt
@@ -636,6 +634,11 @@ Regras:
       'Ops, não consegui criar o orçamento. Tente novamente.';
 
   static String get selectProductsLabel => 'Selecionar produtos';
+
+  static String get selectItemsToContinue =>
+      _isPt
+          ? 'Para seguir preciso que você selecione os itens do orçamento'
+          : 'To continue I need you to select the budget items';
 
   static String get invalidCep => 'CEP inválido. Digite 8 números.';
 

@@ -126,6 +126,9 @@ class PdfGenerateBudgetProfessionalUsecase {
   PdfFont get _fontRegular =>
       PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.regular);
 
+  PdfFont get _fontSubtotal =>
+      PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
+
   PdfFont get _fontSmall =>
       PdfStandardFont(PdfFontFamily.helvetica, 8, style: PdfFontStyle.regular);
 
@@ -574,27 +577,17 @@ class PdfGenerateBudgetProfessionalUsecase {
         grid: grid,
         label: 'Valor de produtos:',
         value: totalPriceProducts,
-        font: _fontRegular,
+        font: _fontSubtotal,
         textBrush: _brushBlack,
         bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
       );
     }
     if (category == 'Serviços' && totalPriceServices != null) {
-      if (countProduct > 0) {
-        _addRightAlignedTotalRow(
-          grid: grid,
-          label: 'Valor de produtos:',
-          value: totalPriceProducts ?? '',
-          font: _fontRegular,
-          textBrush: _brushBlack,
-          bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
-        );
-      }
       _addRightAlignedTotalRow(
         grid: grid,
         label: 'Valor de serviços:',
         value: totalPriceServices,
-        font: _fontRegular,
+        font: _fontSubtotal,
         textBrush: _brushBlack,
         bgBrush: PdfSolidBrush(PdfColor(255, 255, 255)),
       );
@@ -644,7 +637,9 @@ class PdfGenerateBudgetProfessionalUsecase {
     required PdfBrush bgBrush,
   }) {
     final PdfGridRow row = grid.rows.add();
-    row.cells[3].value = _sanitizeText(label);
+    // Rótulo ocupa as colunas Qtd + Preço para não quebrar/cortar o texto.
+    row.cells[2].value = _sanitizeText(label);
+    row.cells[2].columnSpan = 2;
     row.cells[4].value = _sanitizeText(value);
 
     final PdfGridCellStyle style = PdfGridCellStyle(

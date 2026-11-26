@@ -66,7 +66,10 @@ class _BudgetListItemsCardState extends State<BudgetListItemsCard>
 
   void _onDragUpdate(DragUpdateDetails d) {
     if (widget.selectionMode) return;
-    _ctrl.value = (_ctrl.value - d.primaryDelta! / _actionWidth).clamp(0.0, 1.0);
+    _ctrl.value = (_ctrl.value - d.primaryDelta! / _actionWidth).clamp(
+      0.0,
+      1.0,
+    );
   }
 
   void _onDragEnd(DragEndDetails d) {

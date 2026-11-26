@@ -1,0 +1,82 @@
+import 'package:flutter/foundation.dart';
+import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
+import 'package:oflite/modules/dashboard/domain/entity/dashboard_month_summary.dart';
+import 'package:oflite/modules/dashboard/domain/entity/month_receipt_comparison.dart';
+import 'package:oflite/modules/dashboard/domain/usecase/get_dashboard_month_summary_usecase.dart';
+import 'package:oflite/modules/dashboard/domain/usecase/get_receipts_comparison_usecase.dart';
+import 'package:oflite/shared/design_pattern/command.dart';
+import 'package:oflite/shared/design_pattern/result.dart';
+
+/// Estado da Home: resumo do mês por status + comparativo de recebimentos.
+/// Reaproveita os usecases do Dashboard (sem regra nova).
+class HomeViewModel extends ChangeNotifier {
+  final GetDashboardMonthSummaryUsecase _getSummary;
+  final GetReceiptsComparisonUsecase _getComparison;
+  final UserRepository _users;
+
+  HomeViewModel(this._getSummary, this._getComparison, this._users) {
+    loadCommand = Command1(_load);
+  }
+
+  /// Arg = forceRefresh.
+  late final Command1<void, bool> loadCommand;
+
+  DateTime _month = _currentMonth();
+  DateTime get month => _month;
+  bool get canGoNext => _month.isBefore(_currentMonth());
+
+  DashboardMonthSummary _summary = DashboardMonthSummary.empty;
+  DashboardMonthSummary get summary => _summary;
+
+  List<MonthReceiptComparison> _comparison = const [];
+  List<MonthReceiptComparison> get comparison => _comparison;
+
+  /// Primeiro nome do usuário (vazio = usar fallback na View/strings).
+  String get firstName =>
+      ((_users.selectUser.value?.name ?? '').trim().split(' ').first);
+
+  static DateTime _currentMonth() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month);
+  }
+
+  void previousMonth() => _changeMonth(-1);
+
+  void nextMonth() {
+    if (canGoNext) _changeMonth(1);
+  }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
+  void _changeMonth(int delta) {
+    _month = DateTime(_month.year, _month.month + delta);
+    notifyListeners();
+    loadCommand.execute(false);
+  }
+
+  Future<Result<void>> _load(bool forceRefresh) async {
+    final month = _month;
+    final summary = await _getSummary(month, forceRefresh: forceRefresh);
+    final comparison = await _getComparison(month);
+    if (_disposed || month != _month) return const Result.ok(null);
+    if (summary is Ok<DashboardMonthSummary>) _summary = summary.value;
+    if (comparison is Ok<List<MonthReceiptComparison>>) {
+      _comparison = comparison.value;
+    }
+    notifyListeners();
+    return summary is Error<DashboardMonthSummary>
+        ? Result.error(summary.error)
+        : const Result.ok(null);
+  }
+}

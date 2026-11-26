@@ -7,6 +7,8 @@ class MainTabStrings {
   static bool get _isPt =>
       WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'pt';
 
+  static String get editLogoTitle => _isPt ? 'Editar Logo' : 'Edit Logo';
+
   /// Faixa do teste grátis. [hours] = horas restantes (arredondado p/ cima).
   static String trialBanner(int hours) {
     if (hours >= 24) {

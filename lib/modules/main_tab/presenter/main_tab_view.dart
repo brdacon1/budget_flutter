@@ -4,14 +4,16 @@ import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dar
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
+import 'package:oflite/modules/image/presenter/image_edit_view.dart';
+import 'package:oflite/modules/main_tab/presenter/strings/main_tab_pt_string.dart';
+import 'package:oflite/modules/home/presenter/home_view.dart';
 import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
-import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/modules/auth/domain/usecase/get_access_status_usecase.dart';
 import 'package:oflite/modules/main_tab/presenter/components/main_tab_trial_banner.dart';
 import 'package:oflite/modules/product/presenter/product_segment/product_segment_view.dart';
 
-import 'package:oflite/modules/main_tab/presenter/components/main_tab_side_bar.dart';
+import 'package:oflite/modules/home/presenter/components/home_sub_page.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 
 import 'main_tab_view_model.dart';
@@ -69,12 +71,33 @@ class _MainTabView extends State<MainTabView> {
   }
 
   void _onViewModelChanged() {
-    if (!_viewModel.needsSubscription || !mounted) return;
+    if (!mounted) return;
+    if (_viewModel.openChatRequested) {
+      _viewModel.consumeOpenChat();
+      _push(const ChatAssistantView());
+    }
+    if (!_viewModel.needsSubscription) return;
     _viewModel.consumeNeedsSubscription();
-    Navigator.push(
+    _push(const SubscriptionView());
+  }
+
+  Future<void> _editLogo() async {
+    final owner = await _viewModel.ownerForLogoEdit();
+    if (!mounted) return;
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const SubscriptionView()),
+      MaterialPageRoute(
+        builder:
+            (_) =>
+                owner == null
+                    ? const SubscriptionView()
+                    : ImageEditView(
+                      owner: owner,
+                      title: MainTabStrings.editLogoTitle,
+                    ),
+      ),
     );
+    if (mounted) await _viewModel.loadCompanyLogo();
   }
 
   @override
@@ -84,65 +107,36 @@ class _MainTabView extends State<MainTabView> {
     super.dispose();
   }
 
+  Future<void> _push(Widget page) =>
+      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> tabs = [
-      const SizedBox.shrink(),
-      const BudgetListView(),
-      const DashboardView(),
-    ];
-
+    // A Home é a única tela da raiz: ela chama as demais (chat, lista de
+    // orçamentos, dashboard), que abrem por cima e voltam com "voltar".
     return AnimatedBuilder(
       animation: _viewModel,
       builder: (context, _) {
-        final children = [
-          ChatAssistantView(key: ValueKey(_viewModel.chatGeneration)),
-          ...tabs.skip(1),
-        ];
-        final body = children[_viewModel.currentIndex];
-        if (ResponsiveWidget.isDesktop(context)) {
-          return Scaffold(
-            body: Row(
-              children: [
-                MainTabSideBar(
-                  logo: _viewModel.companyLogo,
-                  items: _viewModel.tabItems,
-                  currentIndex: _viewModel.currentIndex,
-                  onTap: _viewModel.onTabTapped,
-                ),
-                Expanded(child: body),
-              ],
-            ),
-          );
-        }
         return Scaffold(
-          body: body,
-          bottomNavigationBar: Theme(
-            data: Theme.of(context).copyWith(canvasColor: secondaryColor),
+          body: HomeView(
+            companyLogo: _viewModel.companyLogo,
+            companyName: _viewModel.companyName,
+            onEditLogo: _editLogo,
+            onOpenChat: () => _push(const ChatAssistantView()),
+            onCreateBudget:
+                () => _push(const ChatAssistantView(startBudget: true)),
+            onOpenBudgets:
+                () => _push(const HomeSubPage(child: BudgetListView())),
+            onOpenReports:
+                () => _push(const HomeSubPage(child: DashboardView())),
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const MainTabTrialBanner(),
-                BottomNavigationBar(
-                  showUnselectedLabels: true,
-                  selectedItemColor: Colors.cyan[50],
-                  selectedLabelStyle: const TextStyle(
-                    fontSize: 11.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  unselectedItemColor: Colors.grey,
-                  onTap: _viewModel.onTabTapped,
-                  currentIndex: _viewModel.currentIndex,
-                  items:
-                      _viewModel.tabItems
-                          .map(
-                            (tabItem) => BottomNavigationBarItem(
-                              icon: Icon(tabItem.icon),
-                              label: tabItem.title,
-                            ),
-                          )
-                          .toList(),
-                ),
+                if (!ResponsiveWidget.isDesktop(context))
+                  const MainTabTrialBanner(),
               ],
             ),
           ),

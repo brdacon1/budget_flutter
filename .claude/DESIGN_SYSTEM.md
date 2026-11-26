@@ -88,6 +88,14 @@ Bottom sheet **fundo branco**, texto `AppBottomModal.grayColor #424242`, divisor
 > ainda têm `Color(0xFF…)`/`Colors.white` inline. Mover para `colors.dart` ao
 > tocar nesses arquivos.
 
+### 2.6 Home
+
+`homeHeroStartColor` (= `buttonColor`) → `homeHeroEndColor #0B3B45`: gradiente do
+card hero (raio 20, texto `blackColor`, valor Heebo 30 bold).
+`homeAnalysisCardColor #161622` (= `cartBarColor`): card escuro de barras (raio 20).
+Atalhos: caixa 56 raio 16 (`secondaryColor` + borda), rótulo 12 `mutedTextColor`,
+largura 84. Cards de status: `secondaryColor`, raio 16, ponto na cor do status.
+
 ## 3. Tipografia
 
 | Papel | Família | Onde |

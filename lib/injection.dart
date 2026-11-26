@@ -15,6 +15,7 @@ import 'package:oflite/modules/core/notification/notification_binds.dart';
 import 'package:oflite/modules/core/share_link/share_link_binds.dart';
 import 'package:oflite/modules/core/map_launcher/map_launcher_binds.dart';
 import 'package:oflite/modules/dashboard/dashboard_binds.dart';
+import 'package:oflite/modules/home/home_binds.dart';
 import 'package:oflite/modules/delete_account/delete_account_binds.dart';
 import 'package:oflite/modules/image/image_binds.dart';
 import 'package:oflite/modules/legal/legal_binds.dart';
@@ -76,6 +77,7 @@ void setupDependencyInjection() {
 
   // ViewModels e binds de módulos que antes não tinham registro estruturado
   registerDashboardDependencies(getIt);
+  registerHomeDependencies(getIt);
   registerImageDependencies(getIt);
   registerMainConfigMenuDependencies(getIt);
   registerMainTabDependencies(getIt);

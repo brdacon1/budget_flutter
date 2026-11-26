@@ -27,7 +27,14 @@ import 'components/budget_list_items_total_bar.dart';
 class BudgetListItemsView extends StatefulWidget {
   final CustomerInfo item;
 
-  const BudgetListItemsView({super.key, required this.item});
+  const BudgetListItemsView({
+    super.key,
+    required this.item,
+    this.openAddWhenEmpty = false,
+  });
+
+  /// Fluxo do chat: com a lista vazia, já abre o modal de inserir item.
+  final bool openAddWhenEmpty;
 
   @override
   State<BudgetListItemsView> createState() => _BudgetListItemsView();
@@ -41,8 +48,11 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
     super.initState();
     _viewModel = BudgetListItemsViewModel(item: widget.item);
     getIt<BudgetRepository>().selectBudget.value = widget.item;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewModel.getListItens();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _viewModel.getListItens();
+      if (widget.openAddWhenEmpty && mounted && _viewModel.budgets.isEmpty) {
+        await _addItem();
+      }
     });
   }
 
