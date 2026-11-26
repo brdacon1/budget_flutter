@@ -6,9 +6,16 @@ import 'package:oflite/shared/common/constants/colors.dart';
 
 /// "Bom dia, Fulano 👋".
 class HomeGreeting extends StatelessWidget {
-  const HomeGreeting({super.key, required this.firstName});
+  const HomeGreeting({
+    super.key,
+    required this.firstName,
+    this.singleLine = false,
+  });
 
   final String firstName;
+
+  /// Tela larga: "Boa tarde, Fulano 👋" em uma linha.
+  final bool singleLine;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +24,7 @@ class HomeGreeting extends StatelessWidget {
             ? DashboardStrings.userFallback
             : firstName[0].toUpperCase() + firstName.substring(1).toLowerCase();
     return Text(
-      '${HomeStrings.greeting(DateTime.now())}\n$name 👋',
+      '${HomeStrings.greeting(DateTime.now())}${singleLine ? ' ' : '\n'}$name 👋',
       style: GoogleFonts.heebo(
         color: whiteColor,
         fontSize: 26,

@@ -9,6 +9,7 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_empty_detail.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/budget_options_pane.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
@@ -648,6 +649,15 @@ class _BudgetListView extends State<BudgetListView> {
       detailNavigatorKey: _detailKey,
       hideBackOnRootScreens: true,
       onDetailClosed: _onDetailClosed,
+      aside: ValueListenableBuilder<CustomerInfo?>(
+        valueListenable: _selected,
+        builder: (context, item, _) {
+          if (item == null || (item.id ?? '').isEmpty) {
+            return const BudgetListEmptyDetail();
+          }
+          return BudgetOptionsPane(key: ObjectKey(item), item: item);
+        },
+      ),
     );
   }
 }

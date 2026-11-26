@@ -7,9 +7,12 @@ import 'package:oflite/shared/common/constants/colors.dart';
 
 /// Card escuro com barras de recebido × falta receber por mês.
 class HomeAnalysisCard extends StatelessWidget {
-  const HomeAnalysisCard({super.key, required this.items});
+  const HomeAnalysisCard({super.key, required this.items, this.fill = false});
 
   final List<MonthReceiptComparison> items;
+
+  /// Tela larga: o gráfico ocupa a altura que sobra no card.
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +39,8 @@ class HomeAnalysisCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: defaultPadding),
-          SizedBox(
-            height: 160,
-            child: BarChart(
+          _chartBox(
+            BarChart(
               BarChartData(
                 maxY: top,
                 alignment: BarChartAlignment.spaceAround,
@@ -88,6 +90,14 @@ class HomeAnalysisCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _chartBox(Widget chart) =>
+      fill
+          // Stack + Positioned.fill: o gráfico não participa do cálculo de
+          // altura intrínseca (o fl_chart não suporta, e o par usa
+          // IntrinsicHeight).
+          ? Expanded(child: Stack(children: [Positioned.fill(child: chart)]))
+          : SizedBox(height: 160, child: chart);
 
   BarChartRodData _rod(double y, Color color) => BarChartRodData(
     toY: y,

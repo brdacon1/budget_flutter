@@ -112,8 +112,12 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Entrada automática ao abrir o app: nunca pede o nome (só login manual).
+  bool _fromAutoLogin = false;
+
   /// Sessão sem nome válido (vazio ou o padrão "Usuário"/"User").
   bool get needsUserName {
+    if (_fromAutoLogin) return false;
     final name = (_userRepository.selectUser.value?.name ?? '').trim();
     return name.isEmpty || name == LoginStrings.userFallback;
   }
@@ -191,6 +195,7 @@ class LoginViewModel extends ChangeNotifier {
   Future<void> _checkAutoLogin() async {
     final loggedIn = await _restoreSession(rememberMe: rememberMe);
     if (_disposed) return;
+    _fromAutoLogin = loggedIn;
     state = loggedIn ? LoginState.success : LoginState.idle;
     notifyListeners();
   }

@@ -7,6 +7,7 @@ import 'package:oflite/modules/budget/presenter/budget_options/budget_options_vi
 import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
+import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 
 class BudgetTabView extends StatefulWidget {
   final CustomerInfo item;
@@ -53,7 +54,7 @@ class _BudgetTabView extends State<BudgetTabView> {
   ];
 
   /// Bottom navigation do celular (inalterada).
-  Widget _buildBottomNavigationBar(BuildContext context) {
+  Widget _buildBottomNavigationBar(BuildContext context, int tabCount) {
     return Theme(
       data: Theme.of(context).copyWith(canvasColor: secondaryColor),
       child: BottomNavigationBar(
@@ -68,7 +69,7 @@ class _BudgetTabView extends State<BudgetTabView> {
             (index) => _viewModel.onTabTapped(index, context, we, widget.item),
         currentIndex: _viewModel.currentIndex,
         items: [
-          for (final tab in _tabs)
+          for (final tab in _tabs.take(tabCount))
             BottomNavigationBarItem(icon: Icon(tab.icon), label: tab.label),
         ],
       ),
@@ -78,6 +79,9 @@ class _BudgetTabView extends State<BudgetTabView> {
   @override
   Widget build(BuildContext context) {
     we = MediaQuery.of(context).size.width;
+    // iPad com 3 painéis: "Mais" fica no painel da direita, não na barra.
+    final tabCount = AppAsidePane.activeOf(context) ? 3 : _tabs.length;
+    if (_viewModel.currentIndex >= tabCount) _viewModel.currentIndex = 0;
     final List children = [
       BudgetCreatorView(item: widget.item),
       BudgetListItemsView(item: widget.item),
@@ -92,7 +96,7 @@ class _BudgetTabView extends State<BudgetTabView> {
       builder: (context, _) {
         return Scaffold(
           body: children[_viewModel.currentIndex],
-          bottomNavigationBar: _buildBottomNavigationBar(context),
+          bottomNavigationBar: _buildBottomNavigationBar(context, tabCount),
         );
       },
     );

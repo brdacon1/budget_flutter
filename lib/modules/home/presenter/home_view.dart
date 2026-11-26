@@ -8,6 +8,7 @@ import 'package:oflite/modules/home/presenter/components/home_greeting.dart';
 import 'package:oflite/modules/home/presenter/components/home_header.dart';
 import 'package:oflite/modules/home/presenter/components/home_hero_card.dart';
 import 'package:oflite/modules/home/presenter/components/home_overview.dart';
+import 'package:oflite/modules/home/presenter/components/home_tablet_layout.dart';
 import 'package:oflite/modules/home/presenter/components/home_quick_actions.dart';
 import 'package:oflite/modules/home/presenter/home_view_model.dart';
 import 'package:oflite/modules/product/presenter/product_price_list/product_price_list_view.dart';
@@ -161,18 +162,19 @@ class _HomeView extends State<HomeView> {
               children:
                   twoColumns
                       ? [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [top],
-                              ),
-                            ),
-                            gap,
-                            Expanded(child: overview),
-                          ],
+                        HomeTabletLayout(
+                          viewModel: vm,
+                          companyLogo: widget.companyLogo,
+                          companyName: widget.companyName,
+                          onEditLogo: widget.onEditLogo ?? noop,
+                          chatIcon: widget.chatIcon,
+                          budgetsIcon: widget.budgetsIcon,
+                          reportsIcon: widget.reportsIcon,
+                          registerItemsIcon: Icons.sell_outlined,
+                          onCreateBudget: onCreate,
+                          onOpenBudgets: widget.onOpenBudgets ?? noop,
+                          onOpenReports: widget.onOpenReports ?? noop,
+                          onRegisterItems: _openItems,
                         ),
                       ]
                       : [top, gap, overview],
