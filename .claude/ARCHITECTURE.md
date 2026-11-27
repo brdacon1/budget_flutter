@@ -2567,3 +2567,100 @@ modules/budget/          # BudgetOptionType.invoices
   formulário (o valor só no formulário).
 - Total das notas aparece no PDF/link público do orçamento? (fora deste plano)
 
+
+---
+
+## 24. Segurança no CI (GitHub Actions) — Modo Observação
+
+> **Regra Zero desta seção:** nenhum fluxo de segurança pode **impedir a geração
+> do app**. Todos rodam em workflow **separado** dos de build
+> (`github_actions.yml` / `ios_build.yml`), com `continue-on-error: true` em cada
+> job/step e **sem** ser `needs:` de nenhum job de build. O objetivo agora é
+> **validar e medir** — descobrir quais fluxos acham mais problemas — e só
+> depois decidir quais viram bloqueantes.
+
+### 24.1 Fluxos recomendados
+
+| # | Fluxo | Ferramenta | Gatilho | Cobre |
+|---|---|---|---|---|
+| 1 | Secrets scanning | gitleaks (ou trufflehog) | PR + push | Chaves de API, keystore, tokens no repo/histórico |
+| 2 | SCA (dependências) | osv-scanner sobre `pubspec.lock` + Dependabot | PR + diário | CVEs em pacotes pub/Gradle/CocoaPods |
+| 3 | SAST Dart | `flutter analyze` (lints estritos) | PR | Erros de código, null-safety, más práticas |
+| 4 | SAST de padrões | Semgrep (`p/default`, `p/secrets`) | PR | Padrões inseguros (http, logs de dados, crypto fraca) |
+| 5 | SAST do binário | MobSF (static) sobre APK/AAB | push em `main` | Checklist OWASP MASVS: permissões, backup, debuggable, cleartext |
+| 6 | Hardening do build | Verificação de `--obfuscate --split-debug-info`, `debuggable=false`, `allowBackup` | push em `main` | Build de release endurecido |
+| 7 | Config / IaC | Trivy (workflows, Dockerfiles) + `actionlint` | PR | Actions inseguras, permissões excessivas do `GITHUB_TOKEN` |
+| 8 | Regras Firebase | Testes das `firestore.rules` / `storage.rules` no Emulator | PR | Acesso indevido a dados (ver §21, isolamento por `uid`) |
+| 9 | DAST da API | OWASP ZAP (`action-api-scan`) contra **staging** | agendado (noturno) | Injeção, auth quebrada, headers, CORS no backend |
+| 10 | DAST do app | MobSF dynamic / Frida em emulador Android | manual ou semanal | Comportamento em runtime, TLS pinning, storage local |
+| 11 | Licenças | `dart pub deps` + license check | semanal | Risco jurídico de dependências |
+
+Observações:
+
+- CodeQL **não suporta Dart** — usar Semgrep no lugar.
+- O Flutter ignora o proxy do sistema (`HttpClient` próprio do Dart): interceptar
+  o tráfego do app exige `reFlutter`/Frida. Por isso o DAST útil é o da **API**
+  (#9); o dinâmico do app (#10) fica fora do fluxo de PR.
+- Nunca colocar chaves reais em staging usado pelo ZAP; usar dados de teste.
+
+### 24.2 Criticidade esperada (para priorizar a validação)
+
+Ordem em que se espera o maior retorno. Ao final da fase de observação,
+**reordenar com base nos achados reais**.
+
+| Prioridade | Fluxos | Por quê |
+|---|---|---|
+| 🔴 Crítica | #1 Secrets, #8 Regras Firebase | Vazamento de chave ou regra aberta expõe dados de todos os usuários — impacto imediato e irreversível |
+| 🟠 Alta | #2 SCA, #5 MobSF static, #9 DAST API | CVEs conhecidas, má configuração do binário e falhas no backend são exploráveis remotamente |
+| 🟡 Média | #4 Semgrep, #6 Hardening, #7 Config/IaC | Reduzem superfície de ataque e risco de supply chain no próprio CI |
+| 🟢 Baixa | #3 `flutter analyze`, #10 DAST do app, #11 Licenças | Qualidade/higiene ou custo alto de manutenção no CI |
+
+### 24.3 Como manter não-bloqueante
+
+```yaml
+# .github/workflows/security.yml  (workflow SEPARADO dos de build)
+name: security
+on:
+  pull_request:
+  push: { branches: [main] }
+  schedule: [{ cron: "0 3 * * *" }]
+
+permissions:
+  contents: read
+  security-events: write   # só se for subir SARIF
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    continue-on-error: true            # ← nunca bloqueia
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+```
+
+Regras:
+
+1. **Todo job** de segurança leva `continue-on-error: true` (job **e** steps).
+2. **Nenhum** job de build usa `needs:` apontando para jobs de segurança.
+3. Não marcar checks de segurança como *required* na branch protection.
+4. Publicar resultado como **summary** do job (`$GITHUB_STEP_SUMMARY`) ou
+   artifact (SARIF/HTML), sem falhar o pipeline.
+5. Usar `if: always()` nos steps de upload do relatório.
+
+### 24.4 Plano de validação
+
+1. Criar `security.yml` com os fluxos #1–#8 (rápidos) e rodar em 1–2 semanas.
+2. Registrar em tabela quantos achados cada fluxo gerou e quantos eram
+   **falsos positivos**.
+3. Ativar #9 (ZAP) noturno contra staging; avaliar ruído.
+4. Decidir, por fluxo, se vira **bloqueante** (só os de 🔴/🟠 com baixo falso
+   positivo) ou permanece informativo.
+5. Atualizar esta seção com a decisão final e a tabela de resultados.
+
+### 24.5 Fora de escopo agora
+
+- Tornar qualquer fluxo bloqueante.
+- DAST dinâmico do app em PR (custo e fragilidade do emulador).
+- Assinatura/atestação de artefatos (SLSA) — avaliar depois.

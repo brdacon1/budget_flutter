@@ -1,0 +1,172 @@
+name: security
+
+# Modo observação (ARCHITECTURE.md §24): NENHUM job daqui pode bloquear o build.
+# - continue-on-error em todos os jobs e steps
+# - nenhum workflow de build usa `needs:` apontando para cá
+# - não marcar estes checks como required na branch protection
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # 1. Secrets scanning
+  secrets:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: gitleaks
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
+            detect --source=/repo --report-format=json --report-path=/repo/gitleaks.json --exit-code=0 || true
+          echo "### gitleaks" >> "$GITHUB_STEP_SUMMARY"
+          echo "Achados: $(jq 'length' gitleaks.json 2>/dev/null || echo 0)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: gitleaks, path: gitleaks.json, if-no-files-found: ignore }
+
+  # 2. SCA (dependências)
+  sca:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: osv-scanner
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/src" ghcr.io/google/osv-scanner:latest \
+            --lockfile=/src/pubspec.lock --format=table > osv.txt || true
+          { echo "### osv-scanner"; echo '```'; head -c 60000 osv.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: osv, path: osv.txt, if-no-files-found: ignore }
+
+  # 3. SAST Dart
+  analyze:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter pub get
+        continue-on-error: true
+      - name: flutter analyze
+        continue-on-error: true
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings > analyze.txt || true
+          { echo "### flutter analyze"; echo '```'; tail -n 80 analyze.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # 4. SAST de padrões
+  semgrep:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: semgrep
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/src" semgrep/semgrep:latest \
+            semgrep scan --config p/default --config p/secrets --json -o /src/semgrep.json /src || true
+          echo "### semgrep" >> "$GITHUB_STEP_SUMMARY"
+          echo "Achados: $(jq '.results|length' semgrep.json 2>/dev/null || echo 0)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: semgrep, path: semgrep.json, if-no-files-found: ignore }
+
+  # 5 + 6. Binário (MobSF static) + hardening do build
+  android-binary:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Manifest hardening check
+        continue-on-error: true
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          {
+            echo "### Hardening (AndroidManifest)"
+            grep -q 'allowBackup="false"' "$M" && echo "- allowBackup=false: OK" || echo "- allowBackup: ATENÇÃO (não está false)"
+            grep -q 'usesCleartextTraffic="true"' "$M" && echo "- cleartext: ATENÇÃO (habilitado)" || echo "- cleartext: OK"
+            grep -q 'android:debuggable="true"' "$M" && echo "- debuggable: ATENÇÃO" || echo "- debuggable: OK"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-java@v4
+        continue-on-error: true
+        with: { distribution: zulu, java-version: "17" }
+      - uses: subosito/flutter-action@v2
+        continue-on-error: true
+        with: { channel: stable, cache: true }
+      - name: Build APK (apenas para análise, sem assinatura de produção)
+        id: build
+        continue-on-error: true
+        run: |
+          flutter pub get
+          flutter build apk --debug --obfuscate --split-debug-info=build/symbols 2>&1 | tail -n 20 || true
+        # Obs.: debug evita exigir keystore/segredos; MobSF analisa manifesto e código igualmente.
+      - name: MobSF static
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          APK=$(ls build/app/outputs/flutter-apk/*.apk | head -1)
+          docker run -d --name mobsf -p 8000:8000 opensecurity/mobile-security-framework-mobsf:latest
+          for i in $(seq 1 30); do curl -sf localhost:8000 >/dev/null && break; sleep 5; done
+          KEY=$(docker logs mobsf 2>&1 | grep -oE 'REST API Key: [a-f0-9]+' | awk '{print $4}' | tail -1)
+          HASH=$(curl -s -F "file=@$APK" -H "Authorization: $KEY" localhost:8000/api/v1/upload | jq -r .hash)
+          curl -s -X POST --data "hash=$HASH" -H "Authorization: $KEY" localhost:8000/api/v1/scan > /dev/null
+          curl -s -X POST --data "hash=$HASH" -H "Authorization: $KEY" localhost:8000/api/v1/report_json > mobsf.json || true
+          echo "### MobSF static" >> "$GITHUB_STEP_SUMMARY"
+          echo "Security score: $(jq -r '.appsec.security_score // "n/d"' mobsf.json)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with: { name: mobsf, path: mobsf.json, if-no-files-found: ignore }
+
+  # 7. Config / IaC dos workflows
+  config:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: actionlint
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -color > actionlint.txt || true
+          { echo "### actionlint"; echo '```'; head -c 30000 actionlint.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: trivy config
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/repo" aquasec/trivy:latest config --exit-code 0 /repo > trivy.txt || true
+          { echo "### trivy config"; echo '```'; tail -n 60 trivy.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # 8. Regras do Firebase (sintaxe/compilação no emulator; testes de regra quando existirem)
+  firebase-rules:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        continue-on-error: true
+        with: { node-version: "20" }
+      - name: Validar firestore.rules
+        continue-on-error: true
+        run: |
+          npm i -g firebase-tools
+          firebase emulators:exec --only firestore --project demo-security "echo regras carregadas" > rules.txt 2>&1 || true
+          { echo "### firestore.rules"; echo '```'; tail -n 40 rules.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Aviso storage.rules
+        run: |
+          [ -f storage.rules ] || echo "- ⚠️ storage.rules não existe no repositório" >> "$GITHUB_STEP_SUMMARY"
