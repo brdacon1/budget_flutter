@@ -91,10 +91,13 @@ class _BudgetCommentListView extends State<BudgetCommentListView> {
 
   // --- Detalhe (ver / editar / excluir) ---
   Future<void> _openDetail(ObservationBudget comment) async {
-    final result = await showBudgetCommentDetailBottomModal(
+    final result = await showAppModal<BudgetCommentDetailResult>(
       context,
-      budgetId: widget.item.id!,
-      comment: comment,
+      builder:
+          (_) => BudgetCommentDetailView(
+            budgetId: widget.item.id!,
+            comment: comment,
+          ),
     );
     if (!mounted) return;
     switch (result) {
