@@ -115,9 +115,22 @@ class _MainTabView extends State<MainTabView> {
   Future<void> _push(Widget page) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => page));
 
+  /// Primeiro uso, sem orçamento: leva direto à criação de um. Ao concluir,
+  /// segue para o que o usuário pediu, já com o orçamento criado escolhido.
+  Future<void> _withBudget(Future<void> Function(String? id) next) async {
+    if (await _viewModel.hasBudgets()) return next(null);
+    if (!mounted) return;
+    await _push(const ChatAssistantView(startBudget: true));
+    if (!mounted) return;
+    final id = await _viewModel.latestBudgetId();
+    if (id != null && mounted) await next(id);
+  }
+
   /// Modal de escolha do orçamento (o do chat) → criar recibo direto na tab.
-  Future<void> _createReceipt() async {
-    final id = await ChatBudgetPickerView.show(context);
+  Future<void> _createReceipt() => _withBudget(_createReceiptFlow);
+
+  Future<void> _createReceiptFlow(String? preselected) async {
+    final id = preselected ?? await ChatBudgetPickerView.show(context);
     if (id == null || !mounted) return;
     final budget = await _viewModel.budgetById(id);
     if (budget == null || !mounted) return;
@@ -135,8 +148,10 @@ class _MainTabView extends State<MainTabView> {
   }
 
   /// Modal de orçamentos → lista de recibos do orçamento escolhido.
-  Future<void> _openReceipts() async {
-    final id = await ChatBudgetPickerView.show(context);
+  Future<void> _openReceipts() => _withBudget(_openReceiptsFlow);
+
+  Future<void> _openReceiptsFlow(String? preselected) async {
+    final id = preselected ?? await ChatBudgetPickerView.show(context);
     if (id == null || !mounted) return;
     final budget = await _viewModel.budgetById(id);
     if (budget == null || !mounted) return;
@@ -144,8 +159,10 @@ class _MainTabView extends State<MainTabView> {
   }
 
   /// Modal de orçamentos → lista só com os orçamentos daquele cliente.
-  Future<void> _openClientBudgets() async {
-    final id = await ChatBudgetPickerView.show(context);
+  Future<void> _openClientBudgets() => _withBudget(_openClientBudgetsFlow);
+
+  Future<void> _openClientBudgetsFlow(String? preselected) async {
+    final id = preselected ?? await ChatBudgetPickerView.show(context);
     if (id == null || !mounted) return;
     final budget = await _viewModel.budgetById(id);
     if (budget == null || !mounted) return;
@@ -185,7 +202,9 @@ class _MainTabView extends State<MainTabView> {
             onClientBudgets: _openClientBudgets,
             onSaveComments: _openCommentLibrary,
             onSaveProofs:
-                () => _push(const ChatAssistantView(startProof: true)),
+                () => _withBudget(
+                  (_) => _push(const ChatAssistantView(startProof: true)),
+                ),
             onOpenReports:
                 () => _push(const HomeSubPage(child: DashboardView())),
           ),

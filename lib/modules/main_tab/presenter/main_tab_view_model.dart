@@ -39,6 +39,22 @@ class MainTabViewModel extends ChangeNotifier {
 
   bool get canUseCommentLibrary => getIt<CheckCommentLibraryAccessUsecase>()();
 
+  /// Já existe algum orçamento? Em erro de rede assume que sim (não bloqueia).
+  Future<bool> hasBudgets() async {
+    final count = await _budgets.countBudgets();
+    if (count is! Ok<int> || count.value > 0) return true;
+    final list = await _budgets.fetchBudgets(forceRefresh: true);
+    return list is! Ok<List<CustomerInfo>> || list.value.isNotEmpty;
+  }
+
+  /// Id do orçamento mais recente (o 1º criado no primeiro uso).
+  Future<String?> latestBudgetId() async {
+    final list = await _budgets.fetchBudgets(forceRefresh: true);
+    return list is Ok<List<CustomerInfo>> && list.value.isNotEmpty
+        ? list.value.first.id
+        : null;
+  }
+
   /// Orçamento escolhido no modal para abrir o fluxo de recibo; `null` = falhou.
   Future<CustomerInfo?> budgetById(String id) async {
     final result = await _budgets.getBudgetById(id);
