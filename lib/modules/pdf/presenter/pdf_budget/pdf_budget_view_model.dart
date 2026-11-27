@@ -29,6 +29,12 @@ class PdfBudgetViewModel extends ChangeNotifier {
   bool _loading = true;
 
   bool get loading => _loading;
+
+  /// O orçamento não tem itens: não dá para montar o PDF.
+  bool _noItems = false;
+  bool get noItems => _noItems;
+
+  CustomerInfo? get budget => _budgetRepository.selectBudget.value;
   bool _disposed = false;
   PdfLayoutType _layoutType = PdfLayoutType.standard;
 
@@ -100,6 +106,7 @@ class PdfBudgetViewModel extends ChangeNotifier {
         comments = commentResult.value;
       }
 
+      _noItems = itemsResult is Ok<List<ItemsBudget>> && budgetItems.isEmpty;
       if (budgetItems.isNotEmpty && customer != null && owner != null) {
         double totalProducts = 0;
         double totalServices = 0;

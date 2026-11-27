@@ -18,6 +18,8 @@ class HomeStrings {
           : '$n budget${n == 1 ? '' : 's'} created';
   static String get createBudgets =>
       _isPt ? 'Criar orçamentos' : 'Create budgets';
+  static String get shareBudgets =>
+      _isPt ? 'Compartilhar orçamentos' : 'Share budgets';
   static String get createReceipts =>
       _isPt ? 'Criar recibos' : 'Create receipts';
   static String get saveProofs =>

@@ -28,6 +28,7 @@ class HomeTabletLayout extends StatelessWidget {
     required this.reportsIcon,
     required this.registerItemsIcon,
     required this.onCreateBudget,
+    this.onShareBudgets,
     required this.onOpenBudgets,
     required this.onOpenReports,
     required this.onCreateReceipt,
@@ -49,6 +50,7 @@ class HomeTabletLayout extends StatelessWidget {
   final IconData reportsIcon;
   final IconData registerItemsIcon;
   final VoidCallback onCreateBudget;
+  final VoidCallback? onShareBudgets;
   final VoidCallback onOpenBudgets;
   final VoidCallback onOpenReports;
   final VoidCallback onCreateReceipt;
@@ -104,6 +106,7 @@ class HomeTabletLayout extends StatelessWidget {
                       reportsIcon: reportsIcon,
                       registerItemsIcon: registerItemsIcon,
                       onCreateBudget: onCreateBudget,
+                      onShareBudgets: onShareBudgets,
                       onOpenBudgets: onOpenBudgets,
                       onOpenReports: onOpenReports,
                       onRegisterItems: onRegisterItems,

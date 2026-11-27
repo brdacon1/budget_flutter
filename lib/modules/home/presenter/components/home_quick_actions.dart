@@ -11,6 +11,7 @@ class HomeQuickActions extends StatelessWidget {
     required this.reportsIcon,
     required this.registerItemsIcon,
     required this.onCreateBudget,
+    this.onShareBudgets,
     required this.onOpenBudgets,
     required this.onOpenReports,
     required this.onRegisterItems,
@@ -28,6 +29,9 @@ class HomeQuickActions extends StatelessWidget {
   final IconData reportsIcon;
   final IconData registerItemsIcon;
   final VoidCallback onCreateBudget;
+
+  /// `null` = sem orçamentos: o atalho não aparece.
+  final VoidCallback? onShareBudgets;
   final VoidCallback onOpenBudgets;
   final VoidCallback onOpenReports;
   final VoidCallback onRegisterItems;
@@ -47,6 +51,12 @@ class HomeQuickActions extends StatelessWidget {
         label: HomeStrings.createBudgets,
         onTap: onCreateBudget,
       ),
+      if (onShareBudgets != null)
+        HomeQuickActionItem(
+          icon: Icons.share_outlined,
+          label: HomeStrings.shareBudgets,
+          onTap: onShareBudgets!,
+        ),
       HomeQuickActionItem(
         icon: budgetListIcon,
         label: HomeStrings.budgetList,

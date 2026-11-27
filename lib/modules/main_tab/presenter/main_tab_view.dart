@@ -4,6 +4,7 @@ import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dar
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
 import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';
 import 'package:oflite/modules/receipt/data/model/receipt.dart';
 import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
@@ -44,6 +45,7 @@ class _MainTabView extends State<MainTabView> {
       // Comprovantes recebidos pela folha de compartilhamento (§15.4).
       _viewModel.listenSharedFiles();
       _viewModel.loadCompanyLogo();
+      _viewModel.refreshAnyBudget();
       // Teste grátis acabou: ao entrar, abre a assinatura (volta = somente
       // leitura dos orçamentos já criados).
       if (getIt<GetAccessStatusUseCase>()() == AccessStatus.expired) {
@@ -112,8 +114,11 @@ class _MainTabView extends State<MainTabView> {
     super.dispose();
   }
 
-  Future<void> _push(Widget page) =>
-      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  Future<void> _push(Widget page) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+    // Voltou de outra tela: pode ter criado/removido orçamentos.
+    if (mounted) _viewModel.refreshAnyBudget();
+  }
 
   /// Primeiro uso, sem orçamento: leva direto à criação de um. Ao concluir,
   /// segue para o que o usuário pediu, já com o orçamento criado escolhido.
@@ -170,6 +175,17 @@ class _MainTabView extends State<MainTabView> {
     await _push(BudgetListView(customer: budget));
   }
 
+  /// Modal de orçamentos → PDF do escolhido (com compartilhar). Sem itens, a
+  /// própria tela do PDF abre o orçamento na lista de itens.
+  Future<void> _shareBudgets() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _viewModel.budgetById(id);
+    if (budget == null || !mounted) return;
+    _viewModel.selectBudget(budget);
+    await _push(const PdfBudgetView());
+  }
+
   /// Lista de comentários cadastrados (mesmo acesso do chat).
   Future<void> _openCommentLibrary() => _push(
     _viewModel.canUseCommentLibrary
@@ -192,6 +208,7 @@ class _MainTabView extends State<MainTabView> {
             onOpenChat: () => _push(const ChatAssistantView()),
             onCreateBudget:
                 () => _push(const ChatAssistantView(startBudget: true)),
+            onShareBudgets: _viewModel.anyBudget ? _shareBudgets : null,
             onOpenBudgets:
                 () => _push(const HomeSubPage(child: BudgetListView())),
             onCreateReceipt: _createReceipt,
