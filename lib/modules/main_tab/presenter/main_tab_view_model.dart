@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -14,11 +16,13 @@ class MainTabViewModel extends ChangeNotifier {
   final ReceiveSharedProofUsecase _receiveShared;
   final PdfRepository _pdfRepository;
   final ShouldAskSegmentUsecase _shouldAskSegment;
+  final BudgetRepository _budgets;
 
   MainTabViewModel(
     this._receiveShared,
     this._pdfRepository,
     this._shouldAskSegment,
+    this._budgets,
   ) {
     // Logo trocado em "Editar PDF": o repositório avisa e a barra atualiza.
     _pdfRepository.addListener(loadCompanyLogo);
@@ -31,6 +35,15 @@ class MainTabViewModel extends ChangeNotifier {
   /// Nome da empresa (`EMPRESA` do titular); vazio = ainda sem cadastro.
   String companyName = '';
   bool _loadingLogo = false;
+
+  /// Orçamento escolhido no modal para abrir o fluxo de recibo; `null` = falhou.
+  Future<CustomerInfo?> budgetById(String id) async {
+    final result = await _budgets.getBudgetById(id);
+    return switch (result) {
+      Ok(:final value) when value.id != null => value,
+      _ => null,
+    };
+  }
 
   Future<void> loadCompanyLogo() async {
     if (_loadingLogo) return;

@@ -2,10 +2,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/dashboard/domain/entity/dashboard_month_summary.dart';
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_month_filter.dart';
 import 'package:oflite/modules/home/presenter/components/home_overview_card.dart';
+import 'package:oflite/modules/home/presenter/components/home_receipts_card.dart';
 import 'package:oflite/modules/home/presenter/strings/home_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-/// Título + filtro de mês + grade 2×2 com os 4 status.
+/// Título + filtro de mês + grade 2×2 com os 4 status + card de recibos.
 class HomeOverview extends StatelessWidget {
   const HomeOverview({
     super.key,
@@ -64,6 +65,8 @@ class HomeOverview extends StatelessWidget {
           Expanded(
             child: row(DashboardStatus.disapproved, DashboardStatus.finished),
           ),
+          gap,
+          Expanded(child: HomeReceiptsCard(data: summary.receipts)),
         ] else ...[
           IntrinsicHeight(
             child: row(DashboardStatus.approved, DashboardStatus.pending),
@@ -72,6 +75,8 @@ class HomeOverview extends StatelessWidget {
           IntrinsicHeight(
             child: row(DashboardStatus.disapproved, DashboardStatus.finished),
           ),
+          gap,
+          HomeReceiptsCard(data: summary.receipts),
         ],
       ],
     );

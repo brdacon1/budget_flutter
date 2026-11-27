@@ -59,10 +59,17 @@ import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 /// A View só executa commands, abre telas/modais (precisam de `context`) e
 /// controla scroll/foco. Toda decisão de fluxo fica na ViewModel.
 class ChatAssistantView extends StatefulWidget {
-  const ChatAssistantView({super.key, this.startBudget = false});
+  const ChatAssistantView({
+    super.key,
+    this.startBudget = false,
+    this.startProof = false,
+  });
 
   /// Home → "Criar orçamentos": abre já no fluxo de criação do orçamento.
   final bool startBudget;
+
+  /// Home → "Salvar notas/comprovantes": abre já o painel de anexos.
+  final bool startProof;
 
   @override
   State<ChatAssistantView> createState() => _ChatAssistantViewState();
@@ -85,6 +92,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       // Câmera/fotos pedidas logo ao abrir o chat (modo IA).
       await _vm.ensureMediaPermissions();
       await _consumeSharedProof();
+      if (widget.startProof && mounted && _vm.aiMode) await _openAttachPanel();
     });
   }
 

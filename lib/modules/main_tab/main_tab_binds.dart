@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/modules/main_tab/presenter/main_tab_view_model.dart';
 import 'package:oflite/modules/pdf/domain/repository/pdf_repository.dart';
@@ -12,6 +13,7 @@ void registerMainTabDependencies(GetIt sl) {
       sl<ReceiveSharedProofUsecase>(),
       sl<PdfRepository>(),
       sl<ShouldAskSegmentUsecase>(),
+      sl<BudgetRepository>(),
     ),
   );
 }

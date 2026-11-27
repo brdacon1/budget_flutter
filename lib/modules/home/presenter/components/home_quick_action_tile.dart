@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-/// Atalho grande da Home em tela larga: card com ícone 32 e rótulo 14.
+/// Atalho grande da Home em tela larga: card com ícone 40 e rótulo 14.
 class HomeQuickActionTile extends StatelessWidget {
   const HomeQuickActionTile({
     super.key,
@@ -33,13 +33,13 @@ class HomeQuickActionTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 64,
-                height: 64,
+                width: 72,
+                height: 72,
                 decoration: BoxDecoration(
                   color: buttonColor.withValues(alpha: 0.15),
                   borderRadius: const BorderRadius.all(Radius.circular(16)),
                 ),
-                child: Icon(icon, color: buttonColor, size: 32),
+                child: Icon(icon, color: buttonColor, size: 40),
               ),
               const SizedBox(height: 12),
               // Altura de 2 linhas: os ícones alinham mesmo com rótulos de 1 linha.

@@ -5,7 +5,6 @@ import 'package:oflite/modules/dashboard/presenter/components/dashboard_monthly_
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_sold_items.dart';
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_status_overview.dart';
 import 'package:oflite/modules/home/presenter/components/home_analysis_card.dart';
-import 'package:oflite/modules/home/presenter/components/home_greeting.dart';
 import 'package:oflite/modules/home/presenter/components/home_header.dart';
 import 'package:oflite/modules/home/presenter/components/home_hero_card.dart';
 import 'package:oflite/modules/home/presenter/components/home_overview.dart';
@@ -31,6 +30,8 @@ class HomeTabletLayout extends StatelessWidget {
     required this.onCreateBudget,
     required this.onOpenBudgets,
     required this.onOpenReports,
+    required this.onCreateReceipt,
+    required this.onSaveProofs,
     required this.onRegisterItems,
   });
 
@@ -45,6 +46,8 @@ class HomeTabletLayout extends StatelessWidget {
   final VoidCallback onCreateBudget;
   final VoidCallback onOpenBudgets;
   final VoidCallback onOpenReports;
+  final VoidCallback onCreateReceipt;
+  final VoidCallback onSaveProofs;
   final VoidCallback onRegisterItems;
 
   @override
@@ -84,6 +87,22 @@ class HomeTabletLayout extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: HomeQuickActionTile(
+            icon: Icons.receipt_long_outlined,
+            label: HomeStrings.createReceipts,
+            onTap: onCreateReceipt,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: HomeQuickActionTile(
+            icon: Icons.upload_file_outlined,
+            label: HomeStrings.saveProofs,
+            onTap: onSaveProofs,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: HomeQuickActionTile(
             icon: reportsIcon,
             label: HomeStrings.reports,
             onTap: onOpenReports,
@@ -108,8 +127,6 @@ class HomeTabletLayout extends StatelessWidget {
           companyName: companyName,
           onEditLogo: onEditLogo,
         ),
-        gap,
-        HomeGreeting(firstName: vm.firstName, singleLine: true),
         gap,
         // Topo: hero + atalhos à esquerda e visão geral à direita, com a
         // mesma altura (base alinhada).

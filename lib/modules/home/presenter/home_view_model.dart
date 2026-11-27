@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:oflite/modules/auth/domain/repository/user_repository.dart';
 import 'package:oflite/modules/dashboard/domain/entity/dashboard_month_summary.dart';
 import 'package:oflite/modules/dashboard/domain/entity/month_receipt_comparison.dart';
 import 'package:oflite/modules/dashboard/domain/usecase/get_dashboard_month_summary_usecase.dart';
@@ -12,9 +11,8 @@ import 'package:oflite/shared/design_pattern/result.dart';
 class HomeViewModel extends ChangeNotifier {
   final GetDashboardMonthSummaryUsecase _getSummary;
   final GetReceiptsComparisonUsecase _getComparison;
-  final UserRepository _users;
 
-  HomeViewModel(this._getSummary, this._getComparison, this._users) {
+  HomeViewModel(this._getSummary, this._getComparison) {
     loadCommand = Command1(_load);
   }
 
@@ -30,10 +28,6 @@ class HomeViewModel extends ChangeNotifier {
 
   List<MonthReceiptComparison> _comparison = const [];
   List<MonthReceiptComparison> get comparison => _comparison;
-
-  /// Primeiro nome do usuário (vazio = usar fallback na View/strings).
-  String get firstName =>
-      ((_users.selectUser.value?.name ?? '').trim().split(' ').first);
 
   static DateTime _currentMonth() {
     final now = DateTime.now();

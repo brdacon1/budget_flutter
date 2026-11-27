@@ -2,6 +2,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
@@ -109,6 +112,25 @@ class _MainTabView extends State<MainTabView> {
   Future<void> _push(Widget page) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => page));
 
+  /// Modal de escolha do orçamento (o do chat) → criar recibo direto na tab.
+  Future<void> _createReceipt() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _viewModel.budgetById(id);
+    if (budget == null || !mounted) return;
+    await _push(
+      ReceiptTabView(
+        item: budget,
+        receipt: const Receipt(
+          data: '',
+          id: '',
+          descricao: 'null',
+          valorTotal: 0,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // A Home é a única tela da raiz: ela chama as demais (chat, lista de
@@ -126,6 +148,9 @@ class _MainTabView extends State<MainTabView> {
                 () => _push(const ChatAssistantView(startBudget: true)),
             onOpenBudgets:
                 () => _push(const HomeSubPage(child: BudgetListView())),
+            onCreateReceipt: _createReceipt,
+            onSaveProofs:
+                () => _push(const ChatAssistantView(startProof: true)),
             onOpenReports:
                 () => _push(const HomeSubPage(child: DashboardView())),
           ),

@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/home/presenter/components/home_analysis_card.dart';
 import 'package:oflite/modules/home/presenter/components/home_chat_fab.dart';
-import 'package:oflite/modules/home/presenter/components/home_greeting.dart';
 import 'package:oflite/modules/home/presenter/components/home_header.dart';
 import 'package:oflite/modules/home/presenter/components/home_hero_card.dart';
 import 'package:oflite/modules/home/presenter/components/home_overview.dart';
@@ -31,6 +30,8 @@ class HomeView extends StatefulWidget {
     this.onCreateBudget,
     this.onOpenBudgets,
     this.onOpenReports,
+    this.onCreateReceipt,
+    this.onSaveProofs,
   });
 
   final Uint8List? companyLogo;
@@ -43,6 +44,8 @@ class HomeView extends StatefulWidget {
   final VoidCallback? onCreateBudget;
   final VoidCallback? onOpenBudgets;
   final VoidCallback? onOpenReports;
+  final VoidCallback? onCreateReceipt;
+  final VoidCallback? onSaveProofs;
 
   @override
   State<HomeView> createState() => _HomeView();
@@ -96,8 +99,6 @@ class _HomeView extends State<HomeView> {
           onEditLogo: widget.onEditLogo ?? noop,
         ),
         gap,
-        HomeGreeting(firstName: vm.firstName),
-        gap,
         HomeHeroCard(summary: vm.summary, month: vm.month),
         gap,
         HomeQuickActions(
@@ -108,6 +109,8 @@ class _HomeView extends State<HomeView> {
           onCreateBudget: onCreate,
           onOpenBudgets: widget.onOpenBudgets ?? noop,
           onOpenReports: widget.onOpenReports ?? noop,
+          onCreateReceipt: widget.onCreateReceipt ?? noop,
+          onSaveProofs: widget.onSaveProofs ?? noop,
           onRegisterItems: _openItems,
         ),
       ],
@@ -174,6 +177,8 @@ class _HomeView extends State<HomeView> {
                           onCreateBudget: onCreate,
                           onOpenBudgets: widget.onOpenBudgets ?? noop,
                           onOpenReports: widget.onOpenReports ?? noop,
+                          onCreateReceipt: widget.onCreateReceipt ?? noop,
+                          onSaveProofs: widget.onSaveProofs ?? noop,
                           onRegisterItems: _openItems,
                         ),
                       ]

@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 
-/// Ícone em caixa + rótulo (atalho da Home).
+/// Atalho da Home: card com ícone e rótulo escuros dentro, sobre `buttonColor`.
 class HomeQuickActionItem extends StatelessWidget {
   const HomeQuickActionItem({
     super.key,
@@ -16,32 +16,36 @@ class HomeQuickActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: const BorderRadius.all(Radius.circular(13)),
-      child: SizedBox(
-        width: 84,
-        child: Column(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: secondaryColor,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
-                border: Border.all(color: cardBorderColor),
-              ),
-              child: Icon(icon, color: buttonColor, size: 24),
+    return Material(
+      color: buttonColor,
+      borderRadius: const BorderRadius.all(Radius.circular(18)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: const BorderRadius.all(Radius.circular(18)),
+        child: SizedBox(
+          height: 112,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: blackColor, size: 36),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: blackColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: mutedTextColor, fontSize: 12),
-            ),
-          ],
+          ),
         ),
       ),
     );

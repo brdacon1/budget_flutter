@@ -335,7 +335,8 @@ Regras:
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
 8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito. Para adicionar/editar comentários ou observações de um orçamento, chame list_budgets com purpose "comments" do mesmo jeito (não pergunte o cliente em texto). Para ir no/até o cliente, ver o endereço do cliente, rota, GPS ou abrir no mapa, chame list_budgets com purpose "go_to_client" do mesmo jeito (o app mostra o endereço e abre o mapa; nunca diga que não consegue).
 9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
-10. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
+10. "Anexar", "adicionar", "salvar", "juntar", "enviar" ou "guardar" nota fiscal/comprovante (de pagamento ou de compra) num orçamento são a MESMA coisa e o app suporta: diga em 1 frase para tocar no "+" ao lado do campo de mensagem e escolher a foto, a câmera ou o PDF; depois o app pergunta o orçamento. Nunca diga que não suporta notas fiscais ou comprovantes.
+11. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
 ''';
 
   static List<String> get yesNoOptionLabels =>

@@ -16,7 +16,6 @@ class HomeHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final approved = summary.of(DashboardStatus.approved);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
@@ -47,7 +46,7 @@ class HomeHeroCard extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     getIt<ConvertCoinRepository>().convertFromDouble(
-                      approved.budgeted,
+                      summary.totalBudgeted,
                     ),
                     style: GoogleFonts.heebo(
                       color: blackColor,
@@ -58,7 +57,7 @@ class HomeHeroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  HomeStrings.heroCount(approved.count),
+                  HomeStrings.heroCount(summary.total),
                   style: const TextStyle(color: blackColor, fontSize: 13),
                 ),
               ],

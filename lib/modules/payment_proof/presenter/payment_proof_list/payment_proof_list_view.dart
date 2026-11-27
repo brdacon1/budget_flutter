@@ -46,6 +46,8 @@ class _PaymentProofListViewState extends State<PaymentProofListView> {
     proof: p,
     dateTime: _vm.dateTimeOf(p),
     value: _vm.valueOf(p),
+    budgetNumber: widget.item.id ?? '',
+    clientName: widget.item.customerName ?? '',
   );
 
   Future<void> _actions(PaymentProof p) => showModalBottomSheet<void>(
