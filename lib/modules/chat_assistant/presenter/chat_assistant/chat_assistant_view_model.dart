@@ -2368,6 +2368,9 @@ class ChatAssistantViewModel extends ChangeNotifier {
   /// Início pela Home: mesmo caminho da opção "Criar orçamentos" do menu.
   Future<void> startBudgetFromHome() => _handleMainMenu('1');
 
+  /// Início pela Home: mesmo caminho da opção "Editar PDF" do menu.
+  Future<void> startPdfEditFromHome() => _handleMainMenu('3');
+
   String? _selectItemsReminderMsgId;
 
   /// Ao voltar da lista de itens: sem item selecionado, permanece na conversa

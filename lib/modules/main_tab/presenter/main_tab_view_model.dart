@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/budget/data/model/customer_info_model.dart';
 import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
+import 'package:oflite/modules/comment_library/domain/usecase/check_comment_library_access_usecase.dart';
 import 'package:oflite/modules/chat_assistant/domain/usecase/receive_shared_proof_usecase.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/auth/data/model/owner_pdf.dart';
@@ -35,6 +36,8 @@ class MainTabViewModel extends ChangeNotifier {
   /// Nome da empresa (`EMPRESA` do titular); vazio = ainda sem cadastro.
   String companyName = '';
   bool _loadingLogo = false;
+
+  bool get canUseCommentLibrary => getIt<CheckCommentLibraryAccessUsecase>()();
 
   /// Orçamento escolhido no modal para abrir o fluxo de recibo; `null` = falhou.
   Future<CustomerInfo?> budgetById(String id) async {

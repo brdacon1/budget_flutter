@@ -25,13 +25,18 @@ class HomeView extends StatefulWidget {
     this.onEditLogo,
     this.chatIcon = Icons.support_agent,
     this.budgetsIcon = Icons.inventory_outlined,
-    this.reportsIcon = Icons.dashboard,
+    this.reportsIcon = Icons.bar_chart_rounded,
     this.onOpenChat,
     this.onCreateBudget,
     this.onOpenBudgets,
     this.onOpenReports,
     this.onCreateReceipt,
+    this.onOpenReceipts,
     this.onSaveProofs,
+    this.onConfigurePdf,
+    this.onPdfType,
+    this.onClientBudgets,
+    this.onSaveComments,
   });
 
   final Uint8List? companyLogo;
@@ -45,7 +50,12 @@ class HomeView extends StatefulWidget {
   final VoidCallback? onOpenBudgets;
   final VoidCallback? onOpenReports;
   final VoidCallback? onCreateReceipt;
+  final VoidCallback? onOpenReceipts;
   final VoidCallback? onSaveProofs;
+  final VoidCallback? onConfigurePdf;
+  final VoidCallback? onPdfType;
+  final VoidCallback? onClientBudgets;
+  final VoidCallback? onSaveComments;
 
   @override
   State<HomeView> createState() => _HomeView();
@@ -110,7 +120,12 @@ class _HomeView extends State<HomeView> {
           onOpenBudgets: widget.onOpenBudgets ?? noop,
           onOpenReports: widget.onOpenReports ?? noop,
           onCreateReceipt: widget.onCreateReceipt ?? noop,
+          onOpenReceipts: widget.onOpenReceipts ?? noop,
           onSaveProofs: widget.onSaveProofs ?? noop,
+          onConfigurePdf: widget.onConfigurePdf ?? noop,
+          onPdfType: widget.onPdfType ?? noop,
+          onClientBudgets: widget.onClientBudgets ?? noop,
+          onSaveComments: widget.onSaveComments ?? noop,
           onRegisterItems: _openItems,
         ),
       ],
@@ -178,7 +193,12 @@ class _HomeView extends State<HomeView> {
                           onOpenBudgets: widget.onOpenBudgets ?? noop,
                           onOpenReports: widget.onOpenReports ?? noop,
                           onCreateReceipt: widget.onCreateReceipt ?? noop,
+          onOpenReceipts: widget.onOpenReceipts ?? noop,
                           onSaveProofs: widget.onSaveProofs ?? noop,
+          onConfigurePdf: widget.onConfigurePdf ?? noop,
+          onPdfType: widget.onPdfType ?? noop,
+          onClientBudgets: widget.onClientBudgets ?? noop,
+          onSaveComments: widget.onSaveComments ?? noop,
                           onRegisterItems: _openItems,
                         ),
                       ]

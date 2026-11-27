@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import 'components/pdf_model_select_arrow.dart';
 import 'pdf_model_select_view_model.dart';
 
 class PdfModelSelectView extends StatefulWidget {
@@ -29,6 +30,12 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
     _viewModel.dispose();
     super.dispose();
   }
+
+  void _go(int delta) => _viewModel.pageController.animateToPage(
+    _viewModel.currentIndex + delta,
+    duration: const Duration(milliseconds: 250),
+    curve: Curves.easeOut,
+  );
 
   Future<void> _onSelect() async {
     final success = await _viewModel.selectCurrentLayout();
@@ -102,7 +109,9 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
                   : Column(
                     children: [
                       Expanded(
-                        child: PageView.builder(
+                        child: Stack(
+                          children: [
+                            Positioned.fill(child: PageView.builder(
                           controller: _viewModel.pageController,
                           onPageChanged: _viewModel.onPageChanged,
                           itemCount: _viewModel.layouts.length,
@@ -146,6 +155,33 @@ class _PdfModelSelectViewState extends State<PdfModelSelectView> {
                               ),
                             );
                           },
+                        )),
+                            if (_viewModel.currentIndex > 0)
+                              Positioned(
+                                left: 20,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: PdfModelSelectArrow(
+                                    icon: Icons.chevron_left,
+                                    onTap: () => _go(-1),
+                                  ),
+                                ),
+                              ),
+                            if (_viewModel.currentIndex <
+                                _viewModel.layouts.length - 1)
+                              Positioned(
+                                right: 20,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: PdfModelSelectArrow(
+                                    icon: Icons.chevron_right,
+                                    onTap: () => _go(1),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       SafeArea(

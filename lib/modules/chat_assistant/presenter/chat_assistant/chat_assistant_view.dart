@@ -63,6 +63,7 @@ class ChatAssistantView extends StatefulWidget {
     super.key,
     this.startBudget = false,
     this.startProof = false,
+    this.startPdfEdit = false,
   });
 
   /// Home → "Criar orçamentos": abre já no fluxo de criação do orçamento.
@@ -70,6 +71,9 @@ class ChatAssistantView extends StatefulWidget {
 
   /// Home → "Salvar notas/comprovantes": abre já o painel de anexos.
   final bool startProof;
+
+  /// Home → "Configurar PDF": abre já no fluxo de editar o PDF.
+  final bool startPdfEdit;
 
   @override
   State<ChatAssistantView> createState() => _ChatAssistantViewState();
@@ -91,6 +95,7 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       if (widget.startBudget && mounted) await _vm.startBudgetFromHome();
       // Câmera/fotos pedidas logo ao abrir o chat (modo IA).
       await _vm.ensureMediaPermissions();
+      if (widget.startPdfEdit && mounted) await _vm.startPdfEditFromHome();
       await _consumeSharedProof();
       if (widget.startProof && mounted && _vm.aiMode) await _openAttachPanel();
     });

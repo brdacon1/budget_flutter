@@ -24,6 +24,14 @@ class HomeStrings {
       _isPt ? 'Salvar notas/comprovantes' : 'Save invoices/proofs';
   static String get receiptsIssued =>
       _isPt ? 'Recibos gerados' : 'Receipts issued';
+  static String get configurePdf =>
+      _isPt ? 'Configurar PDF' : 'Configure PDF';
+  static String get pdfType => _isPt ? 'Tipo do PDF' : 'PDF type';
+  static String get clientBudgets =>
+      _isPt ? 'Orçamentos do cliente' : 'Client budgets';
+  static String get saveComments =>
+      _isPt ? 'Cadastrar comentários' : 'Saved comments';
+  static String get receiptList => _isPt ? 'Lista de recibos' : 'Receipt list';
   static String get budgetList => _isPt ? 'Lista de orçamentos' : 'Budget list';
   static String get reports => _isPt ? 'Relatórios' : 'Reports';
   static String get registerItems => _isPt ? 'Cadastrar itens' : 'Add items';
