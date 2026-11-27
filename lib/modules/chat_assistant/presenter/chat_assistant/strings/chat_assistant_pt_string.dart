@@ -90,6 +90,39 @@ class ChatAssistantStrings {
             '👤 Change username',
           ];
 
+  static String get aiIntroHint =>
+      _isPt
+          ? 'Digite o que precisa e me envie'
+          : 'Type what you need and send it to me';
+
+  /// Pedidos de exemplo digitados no balão de abertura do modo IA.
+  static List<String> aiExamples({required bool trial}) =>
+      _isPt
+          ? [
+            'Criar orçamento',
+            'Cadastrar produtos e serviços',
+            'Editar PDF',
+            'Cadastrar comentário',
+            if (!trial) ...[
+              'Criar recibo',
+              'Relatório de recibos do mês',
+              'Ir até o cliente',
+              'Anexar nota fiscal',
+            ],
+          ]
+          : [
+            'Create budget',
+            'Add products and services',
+            'Edit PDF',
+            'Add comment',
+            if (!trial) ...[
+              'Create receipt',
+              'Monthly receipts report',
+              'Go to the client',
+              'Attach invoice',
+            ],
+          ];
+
   static String get menuInvalidOption =>
       _isPt
           ? 'Opção inválida. Toque em uma das opções acima.'

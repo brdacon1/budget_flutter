@@ -32,6 +32,20 @@ class ResetChatToMenuUsecase {
     final firstTime =
         !(prefs.getBool(StartBudgetFromMenuUsecase.startedPrefKey) ?? false);
 
+    // Modo IA (assinante/teste): sem botões — balão animado e o usuário digita.
+    if (withReports) {
+      for (final m in ChatMessageEntity.aiIntro(
+        question:
+            firstTime
+                ? ChatAssistantStrings.firstBudgetMenuQuestion
+                : ChatAssistantStrings.mainMenuQuestion,
+        examples: ChatAssistantStrings.aiExamples(trial: trialMenu),
+      )) {
+        await _chatRepo.sendMessage(m);
+      }
+      return 'mainMenu';
+    }
+
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
         content:
