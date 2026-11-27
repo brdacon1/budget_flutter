@@ -6,9 +6,18 @@ import 'package:oflite/shared/common/constants/colors.dart';
 /// Digita cada exemplo letra a letra, segura um instante, apaga como um
 /// backspace e passa ao próximo — em loop, com cursor piscando.
 class ChatAiTypingExamples extends StatefulWidget {
-  const ChatAiTypingExamples({super.key, required this.examples});
+  const ChatAiTypingExamples({
+    super.key,
+    required this.examples,
+    this.active = true,
+    this.selected,
+  });
 
   final List<String> examples;
+
+  /// `false`: para a animação e mostra só [selected].
+  final bool active;
+  final String? selected;
 
   @override
   State<ChatAiTypingExamples> createState() => _ChatAiTypingExamplesState();
@@ -41,7 +50,7 @@ class _ChatAiTypingExamplesState extends State<ChatAiTypingExamples> {
   void _schedule(Duration d) => _timer = Timer(d, _tick);
 
   void _tick() {
-    if (!mounted) return;
+    if (!mounted || !widget.active) return;
     final text = widget.examples[_index];
     Duration next;
     setState(() {
@@ -70,7 +79,24 @@ class _ChatAiTypingExamplesState extends State<ChatAiTypingExamples> {
   Duration _next = _pauseDelay;
 
   @override
+  void didUpdateWidget(ChatAiTypingExamples old) {
+    super.didUpdateWidget(old);
+    if (!widget.active) _timer?.cancel();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!widget.active) {
+      return Text(
+        widget.selected ?? '',
+        style: const TextStyle(
+          color: whiteColor,
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+      );
+    }
     final text =
         widget.examples.isEmpty
             ? ''

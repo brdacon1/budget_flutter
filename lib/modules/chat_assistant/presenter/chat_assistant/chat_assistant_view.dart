@@ -97,7 +97,10 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       await _vm.ensureMediaPermissions();
       if (widget.startPdfEdit && mounted) await _vm.startPdfEditFromHome();
       await _consumeSharedProof();
-      if (widget.startProof && mounted && _vm.aiMode) await _openAttachPanel();
+      if (widget.startProof && mounted && _vm.aiMode) {
+        await _vm.startProofFromHome();
+        if (mounted) await _openAttachPanel();
+      }
     });
   }
 
@@ -243,6 +246,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _pickBudgetForReceipts();
       case ChatAssistantViewModel.selectProofBudgetAction:
         await _pickBudgetForProof();
+      case ChatAssistantViewModel.openAttachPanelAction:
+        await _openAttachPanel();
       case DispatchAgentToolUsecase.selectDuplicateBudget:
         await _pickBudgetToDuplicate();
       case ShowGoToClientPromptUsecase.selectBudgetAction:
@@ -593,7 +598,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       itemBuilder: (context, index) {
         if (index == _vm.messages.length) return const ChatTypingIndicator();
         final msg = _vm.messages[index];
+        // Fluxo já escolhido: o balão de exemplos para e mostra só a opção.
+        if (msg.type == ChatMessageType.aiExamples &&
+            !_vm.introActive &&
+            _vm.introSelected == null) {
+          return const SizedBox.shrink();
+        }
         return ChatMessageBubble(
+          introActive: _vm.introActive,
+          introSelected: _vm.introSelected,
           message: msg,
           onAction: (action) => _onButtonAction(msg, action),
           buttonsEnabled: _vm.isButtonsActive(msg),

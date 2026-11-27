@@ -90,37 +90,49 @@ class ChatAssistantStrings {
             '👤 Change username',
           ];
 
+  static String get proofIntroLabel =>
+      _isPt ? 'Salvar notas/comprovantes' : 'Save invoices/proofs';
+
+  static String get openMediaHint =>
+      _isPt
+          ? 'Escolha a foto, a câmera ou o documento do comprovante ou nota fiscal.'
+          : 'Pick the photo, camera or document of the proof or invoice.';
+
+  static String get openMediaAgainLabel =>
+      _isPt ? 'Abrir mídia novamente' : 'Open media again';
+
   static String get aiIntroHint =>
       _isPt
           ? 'Digite o que precisa e me envie'
           : 'Type what you need and send it to me';
 
-  /// Pedidos de exemplo digitados no balão de abertura do modo IA.
-  static List<String> aiExamples({required bool trial}) =>
+  /// Pedidos extras que a IA entende, digitados no balão de abertura (além
+  /// das opções do menu).
+  static List<String> get aiExtraExamples =>
       _isPt
-          ? [
-            'Criar orçamento',
-            'Cadastrar produtos e serviços',
-            'Editar PDF',
-            'Cadastrar comentário',
-            if (!trial) ...[
-              'Criar recibo',
-              'Relatório de recibos do mês',
-              'Ir até o cliente',
-              'Anexar nota fiscal',
-            ],
+          ? const [
+            'Criar recibo',
+            'Ver recibos de um orçamento',
+            'Relatório de recibos do mês',
+            'Resumo dos orçamentos do mês',
+            'Anexar nota fiscal',
+            'Salvar comprovante de pagamento',
+            'Aprovar um orçamento',
+            'Duplicar orçamento',
+            'Compartilhar link do orçamento',
+            'Abrir orçamento do cliente',
           ]
-          : [
-            'Create budget',
-            'Add products and services',
-            'Edit PDF',
-            'Add comment',
-            if (!trial) ...[
-              'Create receipt',
-              'Monthly receipts report',
-              'Go to the client',
-              'Attach invoice',
-            ],
+          : const [
+            'Create receipt',
+            'View a budget\'s receipts',
+            'Monthly receipts report',
+            'Monthly budgets summary',
+            'Attach invoice',
+            'Save payment proof',
+            'Approve a budget',
+            'Duplicate budget',
+            'Share budget link',
+            'Open client budget',
           ];
 
   static String get menuInvalidOption =>

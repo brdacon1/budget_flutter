@@ -32,6 +32,10 @@ class ChatMessageBubble extends StatelessWidget {
   /// `false` deixa todos os botões da mensagem desativados (opacos).
   final bool buttonsEnabled;
 
+  /// Modo IA: `false` para a animação de exemplos e mostra [introSelected].
+  final bool introActive;
+  final String? introSelected;
+
   const ChatMessageBubble({
     super.key,
     required this.message,
@@ -40,6 +44,8 @@ class ChatMessageBubble extends StatelessWidget {
     this.onOptionSelect,
     this.onOpenAttachment,
     this.buttonsEnabled = false,
+    this.introActive = true,
+    this.introSelected,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
@@ -403,6 +409,8 @@ class ChatMessageBubble extends StatelessWidget {
         final raw = message.payload?['examples'];
         return ChatAiTypingExamples(
           examples: raw is List ? raw.map((e) => '$e').toList() : const [],
+          active: introActive,
+          selected: introSelected,
         );
       case ChatMessageType.aiIntro:
       case ChatMessageType.text:
