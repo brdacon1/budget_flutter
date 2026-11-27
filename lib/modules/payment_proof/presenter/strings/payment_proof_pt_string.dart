@@ -97,6 +97,8 @@ class PaymentProofStrings {
   static String get attach => _isPt ? 'Anexar' : 'Attach';
 
   // --- Detalhe ---
+  static String get detailBudget => _isPt ? 'Orçamento' : 'Budget';
+  static String get detailClient => _isPt ? 'Cliente' : 'Client';
   static String get detailName => _isPt ? 'Nome' : 'Name';
   static String get detailValue => _isPt ? 'Valor' : 'Amount';
   static String get detailDate => _isPt ? 'Salvo em' : 'Saved on';

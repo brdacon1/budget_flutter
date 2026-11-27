@@ -15,17 +15,23 @@ class PaymentProofDetailSheet extends StatelessWidget {
     required this.proof,
     required this.dateTime,
     required this.value,
+    required this.budgetNumber,
+    required this.clientName,
   });
 
   final PaymentProof proof;
   final String dateTime;
   final String value;
+  final String budgetNumber;
+  final String clientName;
 
   static Future<void> show(
     BuildContext context, {
     required PaymentProof proof,
     required String dateTime,
     required String value,
+    required String budgetNumber,
+    required String clientName,
   }) => showAppModal<void>(
     context,
     useRootNavigator: true,
@@ -37,6 +43,8 @@ class PaymentProofDetailSheet extends StatelessWidget {
             proof: proof,
             dateTime: dateTime,
             value: value,
+            budgetNumber: budgetNumber,
+            clientName: clientName,
           ),
         ),
   );
@@ -76,6 +84,10 @@ class PaymentProofDetailSheet extends StatelessWidget {
                 children: [
                   _preview(context),
                   const SizedBox(height: 20),
+                  if (budgetNumber.isNotEmpty)
+                    _row(PaymentProofStrings.detailBudget, 'Nº $budgetNumber'),
+                  if (clientName.isNotEmpty)
+                    _row(PaymentProofStrings.detailClient, clientName),
                   _row(PaymentProofStrings.detailName, proof.name),
                   _row(PaymentProofStrings.detailValue, value),
                   _row(PaymentProofStrings.detailDate, dateTime),

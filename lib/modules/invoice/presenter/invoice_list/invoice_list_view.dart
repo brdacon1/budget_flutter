@@ -47,6 +47,8 @@ class _InvoiceListViewState extends State<InvoiceListView> {
     proof: p.toProof(),
     dateTime: _vm.dateTimeOf(p),
     value: _vm.valueOf(p),
+    budgetNumber: widget.item.id ?? '',
+    clientName: widget.item.customerName ?? '',
   );
 
   Future<void> _actions(Invoice p) => showModalBottomSheet<void>(

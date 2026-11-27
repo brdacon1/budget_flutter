@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:oflite/modules/chat_assistant/domain/entity/chat_message_entity.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_ai_typing_examples.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_attachment_bubble.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/components/chat_budget_list_card.dart';
 import 'package:oflite/modules/payment_proof/domain/entity/proof_attachment.dart';
@@ -31,6 +32,10 @@ class ChatMessageBubble extends StatelessWidget {
   /// `false` deixa todos os botões da mensagem desativados (opacos).
   final bool buttonsEnabled;
 
+  /// Modo IA: `false` para a animação de exemplos e mostra [introSelected].
+  final bool introActive;
+  final String? introSelected;
+
   const ChatMessageBubble({
     super.key,
     required this.message,
@@ -39,6 +44,8 @@ class ChatMessageBubble extends StatelessWidget {
     this.onOptionSelect,
     this.onOpenAttachment,
     this.buttonsEnabled = false,
+    this.introActive = true,
+    this.introSelected,
   });
 
   bool get _isUser => message.sender == ChatSender.user;
@@ -130,7 +137,8 @@ class ChatMessageBubble extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (!_isUser) ...[
+                    if (!_isUser &&
+                        message.type != ChatMessageType.aiExamples) ...[
                       Text(
                         ChatAssistantStrings.assistantTitle,
                         style: const TextStyle(
@@ -178,8 +186,9 @@ class ChatMessageBubble extends StatelessWidget {
                         payload: message.payload ?? const {},
                         onOpen: onOpenAttachment,
                       ),
-                    if (message.type != ChatMessageType.attachment ||
-                        message.content.isNotEmpty)
+                    if ((message.type != ChatMessageType.attachment ||
+                            message.content.isNotEmpty) &&
+                        message.type != ChatMessageType.aiExamples)
                       Text.rich(
                         _buildMessageText(message.content),
                         style: const TextStyle(
@@ -192,6 +201,16 @@ class ChatMessageBubble extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         ChatAssistantStrings.contactPickerHint,
+                        style: TextStyle(
+                          color: whiteColor.withAlpha(200),
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ] else if (message.type == ChatMessageType.aiIntro) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        ChatAssistantStrings.aiIntroHint,
                         style: TextStyle(
                           color: whiteColor.withAlpha(200),
                           fontSize: 13,
@@ -386,6 +405,14 @@ class ChatMessageBubble extends StatelessWidget {
           payload: message.payload ?? {},
           onTap: onAction,
         );
+      case ChatMessageType.aiExamples:
+        final raw = message.payload?['examples'];
+        return ChatAiTypingExamples(
+          examples: raw is List ? raw.map((e) => '$e').toList() : const [],
+          active: introActive,
+          selected: introSelected,
+        );
+      case ChatMessageType.aiIntro:
       case ChatMessageType.text:
       case ChatMessageType.attachment:
         return const SizedBox.shrink();

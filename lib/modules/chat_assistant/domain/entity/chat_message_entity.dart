@@ -24,6 +24,12 @@ enum ChatMessageType {
   /// Anexo enviado pelo usuário (payload: `files[{path,name,type,size}]`,
   /// `caption`).
   attachment,
+
+  /// Abertura do chat no modo IA: pergunta + dica "digite o que precisa".
+  aiIntro,
+
+  /// Balão com exemplos digitados e apagados em loop (payload: `examples`).
+  aiExamples,
 }
 
 /// Representa uma mensagem no chat do assistente de orçamentos.
@@ -43,6 +49,33 @@ class ChatMessageEntity {
     this.payload,
     required this.timestamp,
   });
+
+  /// Abertura do modo IA (assinante/teste): dois balões — pergunta com a dica
+  /// e exemplos animados de pedidos. Sem botões: o usuário digita.
+  static List<ChatMessageEntity> aiIntro({
+    required String question,
+    required List<String> examples,
+  }) {
+    final now = DateTime.now();
+    final id = now.millisecondsSinceEpoch;
+    return [
+      ChatMessageEntity(
+        id: '$id',
+        sender: ChatSender.bot,
+        type: ChatMessageType.aiIntro,
+        content: question,
+        timestamp: now,
+      ),
+      ChatMessageEntity(
+        id: '${id + 1}',
+        sender: ChatSender.bot,
+        type: ChatMessageType.aiExamples,
+        content: '',
+        payload: {'examples': examples},
+        timestamp: now,
+      ),
+    ];
+  }
 
   /// Mensagem do bot com opções em botões empilhados ([ChatMessageType.optionList]).
   ///

@@ -39,6 +39,14 @@ class DashboardSoldTotals {
   const DashboardSoldTotals({this.quantity = 0, this.total = 0});
 }
 
+/// Recibos emitidos no mês: quantidade e valor (`VALORTOTAL` dos recibos).
+class DashboardReceiptsSummary {
+  final int count;
+  final double issued;
+
+  const DashboardReceiptsSummary({this.count = 0, this.issued = 0});
+}
+
 /// Resumo mensal do dashboard, por status.
 ///
 /// `products`/`services` = itens de orçamentos aprovados ou finalizados.
@@ -46,11 +54,13 @@ class DashboardMonthSummary {
   final Map<DashboardStatus, DashboardStatusSummary> byStatus;
   final DashboardSoldTotals products;
   final DashboardSoldTotals services;
+  final DashboardReceiptsSummary receipts;
 
   const DashboardMonthSummary(
     this.byStatus, {
     this.products = const DashboardSoldTotals(),
     this.services = const DashboardSoldTotals(),
+    this.receipts = const DashboardReceiptsSummary(),
   });
 
   static const empty = DashboardMonthSummary({});
@@ -59,4 +69,8 @@ class DashboardMonthSummary {
       byStatus[s] ?? const DashboardStatusSummary();
 
   int get total => byStatus.values.fold(0, (s, e) => s + e.count);
+
+  /// Soma do valor orçado de todos os status.
+  double get totalBudgeted =>
+      byStatus.values.fold(0.0, (s, e) => s + e.budgeted);
 }

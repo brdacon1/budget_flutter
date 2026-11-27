@@ -90,6 +90,51 @@ class ChatAssistantStrings {
             '👤 Change username',
           ];
 
+  static String get proofIntroLabel =>
+      _isPt ? 'Salvar notas/comprovantes' : 'Save invoices/proofs';
+
+  static String get openMediaHint =>
+      _isPt
+          ? 'Escolha a foto, a câmera ou o documento do comprovante ou nota fiscal.'
+          : 'Pick the photo, camera or document of the proof or invoice.';
+
+  static String get openMediaAgainLabel =>
+      _isPt ? 'Abrir mídia novamente' : 'Open media again';
+
+  static String get aiIntroHint =>
+      _isPt
+          ? 'Digite o que precisa e me envie'
+          : 'Type what you need and send it to me';
+
+  /// Pedidos extras que a IA entende, digitados no balão de abertura (além
+  /// das opções do menu).
+  static List<String> get aiExtraExamples =>
+      _isPt
+          ? const [
+            'Criar recibo',
+            'Ver recibos de um orçamento',
+            'Relatório de recibos do mês',
+            'Resumo dos orçamentos do mês',
+            'Anexar nota fiscal',
+            'Salvar comprovante de pagamento',
+            'Aprovar um orçamento',
+            'Duplicar orçamento',
+            'Compartilhar link do orçamento',
+            'Abrir orçamento do cliente',
+          ]
+          : const [
+            'Create receipt',
+            'View a budget\'s receipts',
+            'Monthly receipts report',
+            'Monthly budgets summary',
+            'Attach invoice',
+            'Save payment proof',
+            'Approve a budget',
+            'Duplicate budget',
+            'Share budget link',
+            'Open client budget',
+          ];
+
   static String get menuInvalidOption =>
       _isPt
           ? 'Opção inválida. Toque em uma das opções acima.'
@@ -335,7 +380,8 @@ Regras:
 7. Para criar orçamento, cadastrar produtos, editar o PDF/logo ou trocar o nome de usuário, chame start_flow sem perguntar antes.
 8. Se o usuário quer criar ou ver recibos e ainda não escolheu o orçamento, chame list_budgets com purpose "receipts" (abre um modal para o usuário escolher; não pergunte qual orçamento em texto). Para duplicar/clonar um orçamento, chame list_budgets com purpose "duplicate" do mesmo jeito. Para adicionar/editar comentários ou observações de um orçamento, chame list_budgets com purpose "comments" do mesmo jeito (não pergunte o cliente em texto). Para ir no/até o cliente, ver o endereço do cliente, rota, GPS ou abrir no mapa, chame list_budgets com purpose "go_to_client" do mesmo jeito (o app mostra o endereço e abre o mapa; nunca diga que não consegue).
 9. Se faltar dado obrigatório, pergunte UMA coisa por vez. Fora do escopo do app, diga educadamente o que você sabe fazer.
-10. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
+10. "Anexar", "adicionar", "salvar", "juntar", "enviar" ou "guardar" nota fiscal/comprovante (de pagamento ou de compra) num orçamento são a MESMA coisa e o app suporta: diga em 1 frase para tocar no "+" ao lado do campo de mensagem e escolher a foto, a câmera ou o PDF; depois o app pergunta o orçamento. Nunca diga que não suporta notas fiscais ou comprovantes.
+11. Se uma ferramenta devolver error, diga em 1 frase que não conseguiu e sugira tentar de novo. NUNCA responda com dados de outra ferramenta no lugar (ex.: resumo de orçamentos quando pediram recibos).
 ''';
 
   static List<String> get yesNoOptionLabels =>

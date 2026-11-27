@@ -7,33 +7,31 @@ class HomeStrings {
   static bool get _isPt =>
       WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'pt';
 
-  static String greeting(DateTime now) {
-    final h = now.hour;
-    if (_isPt) {
-      return h < 12
-          ? 'Bom dia,'
-          : h < 18
-          ? 'Boa tarde,'
-          : 'Boa noite,';
-    }
-    return h < 12
-        ? 'Good morning,'
-        : h < 18
-        ? 'Good afternoon,'
-        : 'Good evening,';
-  }
-
   static String get tabTitle => _isPt ? 'Início' : 'Home';
   static String get appSubtitle =>
       _isPt ? 'Orçamentos e recibos' : 'Budgets and receipts';
   static String get heroTitle =>
-      _isPt ? 'Aprovados no mês' : 'Approved this month';
+      _isPt ? 'Total em orçamentos' : 'Total in budgets';
   static String heroCount(int n) =>
       _isPt
-          ? '$n orçamento${n == 1 ? '' : 's'}'
-          : '$n budget${n == 1 ? '' : 's'}';
+          ? '$n orçamento${n == 1 ? '' : 's'} gerado${n == 1 ? '' : 's'}'
+          : '$n budget${n == 1 ? '' : 's'} created';
   static String get createBudgets =>
       _isPt ? 'Criar orçamentos' : 'Create budgets';
+  static String get createReceipts =>
+      _isPt ? 'Criar recibos' : 'Create receipts';
+  static String get saveProofs =>
+      _isPt ? 'Salvar notas/comprovantes' : 'Save invoices/proofs';
+  static String get receiptsIssued =>
+      _isPt ? 'Recibos gerados' : 'Receipts issued';
+  static String get configurePdf =>
+      _isPt ? 'Configurar PDF' : 'Configure PDF';
+  static String get pdfType => _isPt ? 'Tipo do PDF' : 'PDF type';
+  static String get clientBudgets =>
+      _isPt ? 'Orçamentos do cliente' : 'Client budgets';
+  static String get saveComments =>
+      _isPt ? 'Cadastrar comentários' : 'Saved comments';
+  static String get receiptList => _isPt ? 'Lista de recibos' : 'Receipt list';
   static String get budgetList => _isPt ? 'Lista de orçamentos' : 'Budget list';
   static String get reports => _isPt ? 'Relatórios' : 'Reports';
   static String get registerItems => _isPt ? 'Cadastrar itens' : 'Add items';

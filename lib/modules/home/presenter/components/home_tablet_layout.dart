@@ -5,11 +5,10 @@ import 'package:oflite/modules/dashboard/presenter/components/dashboard_monthly_
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_sold_items.dart';
 import 'package:oflite/modules/dashboard/presenter/components/dashboard_status_overview.dart';
 import 'package:oflite/modules/home/presenter/components/home_analysis_card.dart';
-import 'package:oflite/modules/home/presenter/components/home_greeting.dart';
 import 'package:oflite/modules/home/presenter/components/home_header.dart';
 import 'package:oflite/modules/home/presenter/components/home_hero_card.dart';
 import 'package:oflite/modules/home/presenter/components/home_overview.dart';
-import 'package:oflite/modules/home/presenter/components/home_quick_action_tile.dart';
+import 'package:oflite/modules/home/presenter/components/home_quick_actions.dart';
 import 'package:oflite/modules/home/presenter/home_view_model.dart';
 import 'package:oflite/modules/home/presenter/strings/home_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -31,6 +30,13 @@ class HomeTabletLayout extends StatelessWidget {
     required this.onCreateBudget,
     required this.onOpenBudgets,
     required this.onOpenReports,
+    required this.onCreateReceipt,
+    required this.onOpenReceipts,
+    required this.onSaveProofs,
+    required this.onConfigurePdf,
+    required this.onPdfType,
+    required this.onClientBudgets,
+    required this.onSaveComments,
     required this.onRegisterItems,
   });
 
@@ -45,6 +51,13 @@ class HomeTabletLayout extends StatelessWidget {
   final VoidCallback onCreateBudget;
   final VoidCallback onOpenBudgets;
   final VoidCallback onOpenReports;
+  final VoidCallback onCreateReceipt;
+  final VoidCallback onOpenReceipts;
+  final VoidCallback onSaveProofs;
+  final VoidCallback onConfigurePdf;
+  final VoidCallback onPdfType;
+  final VoidCallback onClientBudgets;
+  final VoidCallback onSaveComments;
   final VoidCallback onRegisterItems;
 
   @override
@@ -63,43 +76,6 @@ class HomeTabletLayout extends StatelessWidget {
       ),
     );
 
-    final tiles = Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: HomeQuickActionTile(
-            icon: chatIcon,
-            label: HomeStrings.createBudgets,
-            onTap: onCreateBudget,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: HomeQuickActionTile(
-            icon: budgetsIcon,
-            label: HomeStrings.budgetList,
-            onTap: onOpenBudgets,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: HomeQuickActionTile(
-            icon: reportsIcon,
-            label: HomeStrings.reports,
-            onTap: onOpenReports,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: HomeQuickActionTile(
-            icon: registerItemsIcon,
-            label: HomeStrings.registerItems,
-            onTap: onRegisterItems,
-          ),
-        ),
-      ],
-    );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -108,8 +84,6 @@ class HomeTabletLayout extends StatelessWidget {
           companyName: companyName,
           onEditLogo: onEditLogo,
         ),
-        gap,
-        HomeGreeting(firstName: vm.firstName, singleLine: true),
         gap,
         // Topo: hero + atalhos à esquerda e visão geral à direita, com a
         // mesma altura (base alinhada).
@@ -124,7 +98,23 @@ class HomeTabletLayout extends StatelessWidget {
                   children: [
                     HomeHeroCard(summary: vm.summary, month: vm.month),
                     gap,
-                    Expanded(child: tiles),
+                    HomeQuickActions(
+                      createBudgetIcon: chatIcon,
+                      budgetListIcon: budgetsIcon,
+                      reportsIcon: reportsIcon,
+                      registerItemsIcon: registerItemsIcon,
+                      onCreateBudget: onCreateBudget,
+                      onOpenBudgets: onOpenBudgets,
+                      onOpenReports: onOpenReports,
+                      onRegisterItems: onRegisterItems,
+                      onCreateReceipt: onCreateReceipt,
+                      onOpenReceipts: onOpenReceipts,
+                      onSaveProofs: onSaveProofs,
+                      onConfigurePdf: onConfigurePdf,
+                      onPdfType: onPdfType,
+                      onClientBudgets: onClientBudgets,
+                      onSaveComments: onSaveComments,
+                    ),
                   ],
                 ),
               ),

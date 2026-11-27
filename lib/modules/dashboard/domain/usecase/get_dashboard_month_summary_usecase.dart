@@ -89,8 +89,22 @@ class GetDashboardMonthSummaryUsecase {
       }
     }
 
+    // Recibos emitidos no mês (data do recibo = createdAt).
+    var receiptsCount = 0;
+    var receiptsIssued = 0.0;
+    for (final r in ledger?.all ?? const <LedgerReceipt>[]) {
+      if (r.createdAt.year == month.year && r.createdAt.month == month.month) {
+        receiptsCount++;
+        receiptsIssued += r.issued;
+      }
+    }
+
     return Result.ok(
       DashboardMonthSummary(
+        receipts: DashboardReceiptsSummary(
+          count: receiptsCount,
+          issued: receiptsIssued,
+        ),
         products: DashboardSoldTotals(quantity: products.q, total: products.t),
         services: DashboardSoldTotals(quantity: services.q, total: services.t),
         {

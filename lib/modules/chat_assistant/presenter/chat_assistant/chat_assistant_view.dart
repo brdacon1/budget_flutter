@@ -59,10 +59,21 @@ import 'package:oflite/shared/common/widgets/responsive_widget.dart';
 /// A View só executa commands, abre telas/modais (precisam de `context`) e
 /// controla scroll/foco. Toda decisão de fluxo fica na ViewModel.
 class ChatAssistantView extends StatefulWidget {
-  const ChatAssistantView({super.key, this.startBudget = false});
+  const ChatAssistantView({
+    super.key,
+    this.startBudget = false,
+    this.startProof = false,
+    this.startPdfEdit = false,
+  });
 
   /// Home → "Criar orçamentos": abre já no fluxo de criação do orçamento.
   final bool startBudget;
+
+  /// Home → "Salvar notas/comprovantes": abre já o painel de anexos.
+  final bool startProof;
+
+  /// Home → "Configurar PDF": abre já no fluxo de editar o PDF.
+  final bool startPdfEdit;
 
   @override
   State<ChatAssistantView> createState() => _ChatAssistantViewState();
@@ -84,7 +95,12 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       if (widget.startBudget && mounted) await _vm.startBudgetFromHome();
       // Câmera/fotos pedidas logo ao abrir o chat (modo IA).
       await _vm.ensureMediaPermissions();
+      if (widget.startPdfEdit && mounted) await _vm.startPdfEditFromHome();
       await _consumeSharedProof();
+      if (widget.startProof && mounted && _vm.aiMode) {
+        await _vm.startProofFromHome();
+        if (mounted) await _openAttachPanel();
+      }
     });
   }
 
@@ -230,6 +246,8 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
         await _pickBudgetForReceipts();
       case ChatAssistantViewModel.selectProofBudgetAction:
         await _pickBudgetForProof();
+      case ChatAssistantViewModel.openAttachPanelAction:
+        await _openAttachPanel();
       case DispatchAgentToolUsecase.selectDuplicateBudget:
         await _pickBudgetToDuplicate();
       case ShowGoToClientPromptUsecase.selectBudgetAction:
@@ -580,7 +598,15 @@ class _ChatAssistantViewState extends State<ChatAssistantView> {
       itemBuilder: (context, index) {
         if (index == _vm.messages.length) return const ChatTypingIndicator();
         final msg = _vm.messages[index];
+        // Fluxo já escolhido: o balão de exemplos para e mostra só a opção.
+        if (msg.type == ChatMessageType.aiExamples &&
+            !_vm.introActive &&
+            _vm.introSelected == null) {
+          return const SizedBox.shrink();
+        }
         return ChatMessageBubble(
+          introActive: _vm.introActive,
+          introSelected: _vm.introSelected,
           message: msg,
           onAction: (action) => _onButtonAction(msg, action),
           buttonsEnabled: _vm.isButtonsActive(msg),

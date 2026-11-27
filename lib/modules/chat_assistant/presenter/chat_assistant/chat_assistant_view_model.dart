@@ -372,6 +372,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   void _clearLocalState() {
+    introSelected = null;
     _usedButtonMsgIds.clear();
     _chatRepo.clearSession();
     _chatRepo.setCurrentFlowStep(null);
@@ -469,6 +470,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
       action == DispatchAgentToolUsecase.selectDuplicateBudget ||
       action == DispatchAgentToolUsecase.selectCommentBudget ||
       action == selectProofBudgetAction ||
+      action == openAttachPanelAction ||
       action.startsWith(openProofsAction) ||
       action.startsWith(openInvoicesAction) ||
       action == ShowGoToClientPromptUsecase.selectBudgetAction ||
@@ -583,6 +585,8 @@ class ChatAssistantViewModel extends ChangeNotifier {
     } else if (_step == ChatFlowStep.askPhone) {
       _clientPhoneMsgId = msgId;
     }
+
+    if (_step == ChatFlowStep.mainMenu) _markIntroSelected(clean);
 
     try {
       if (_isProofStep) {
@@ -741,6 +745,24 @@ class ChatAssistantViewModel extends ChangeNotifier {
   // Toda mensagem do bot no fluxo tem "Voltar ao menu" (R10): o botão envia
   // "0", que descarta o rascunho em [_backToMainMenu].
   // ------------------------------------------------------------------
+
+  /// Ação/navegação que reabre o painel de anexos (foto/câmera/documento).
+  static const openAttachPanelAction = 'open_attach_panel';
+
+  /// Início pela Home ("Salvar notas/comprovantes"): marca a opção no balão
+  /// de abertura e deixa no chat o botão para reabrir o painel de anexos.
+  Future<void> startProofFromHome() async {
+    introSelected = ChatAssistantStrings.proofIntroLabel;
+    await _addBotMessage(
+      ChatAssistantStrings.openMediaHint,
+      type: ChatMessageType.action,
+      payload: {
+        'label': ChatAssistantStrings.openMediaAgainLabel,
+        'action': openAttachPanelAction,
+      },
+    );
+    notifyListeners();
+  }
 
   /// Ação/navegação que abre o modal de orçamentos para o comprovante.
   static const selectProofBudgetAction = 'proof_select_budget';
@@ -1328,6 +1350,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
   }
 
   Future<void> _handleMainMenu(String option) async {
+    _markIntroSelected(option);
     final result = await _handleMainMenuOption(option);
     _setStepFromName(result.nextStep);
     _pendingNavigation = result.navigation;
@@ -2365,8 +2388,33 @@ class ChatAssistantViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Opção escolhida (sem emoji) que o balão de abertura do modo IA mostra
+  /// parado quando o fluxo já foi definido; `null` = nada escolhido.
+  String? introSelected;
+
+  /// A animação de exemplos só roda enquanto o usuário está no menu.
+  bool get introActive =>
+      _step == ChatFlowStep.mainMenu && introSelected == null;
+
+  void _markIntroSelected(String option) {
+    final labels = [
+      ...ChatAssistantStrings.mainMenuOptionLabels,
+      ChatAssistantStrings.reportsOptionLabel,
+      ChatAssistantStrings.findBudgetOptionLabel,
+      ChatAssistantStrings.commentLibraryOptionLabel,
+      ChatAssistantStrings.goToClientOptionLabel,
+    ];
+    final i = int.tryParse(option);
+    if (i == null || i < 1 || i > labels.length) return;
+    final l = labels[i - 1];
+    introSelected = l.substring(l.indexOf(' ') + 1);
+  }
+
   /// Início pela Home: mesmo caminho da opção "Criar orçamentos" do menu.
   Future<void> startBudgetFromHome() => _handleMainMenu('1');
+
+  /// Início pela Home: mesmo caminho da opção "Editar PDF" do menu.
+  Future<void> startPdfEditFromHome() => _handleMainMenu('3');
 
   String? _selectItemsReminderMsgId;
 
@@ -2456,6 +2504,7 @@ class ChatAssistantViewModel extends ChangeNotifier {
     if (action.startsWith(findBudgetAction) ||
         action == DispatchAgentToolUsecase.selectReceiptBudget ||
         action == selectProofBudgetAction ||
+        action == openAttachPanelAction ||
         action.startsWith(openProofsAction) ||
         action.startsWith(openInvoicesAction) ||
         action == DispatchAgentToolUsecase.selectDuplicateBudget ||

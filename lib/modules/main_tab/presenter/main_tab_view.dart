@@ -2,6 +2,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/injection.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view.dart';
 import 'package:oflite/modules/chat_assistant/presenter/chat_assistant/chat_assistant_view.dart';
+import 'package:oflite/modules/chat_assistant/presenter/chat_budget_picker/chat_budget_picker_view.dart';
+import 'package:oflite/modules/comment_library/presenter/comment_library_list/comment_library_list_view.dart';
+import 'package:oflite/modules/pdf/presenter/pdf_model_select/presenter/pdf_model_select_view.dart';
+import 'package:oflite/modules/receipt/data/model/receipt.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_list/receipt_list_view.dart';
+import 'package:oflite/modules/receipt/presenter/receipt_tab/receipt_tab_view.dart';
 import 'package:oflite/modules/core/notification/domain/repository/notification_repository.dart';
 import 'package:oflite/modules/dashboard/presenter/dashboard_view.dart';
 import 'package:oflite/modules/image/presenter/image_edit_view.dart';
@@ -109,6 +115,51 @@ class _MainTabView extends State<MainTabView> {
   Future<void> _push(Widget page) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => page));
 
+  /// Modal de escolha do orçamento (o do chat) → criar recibo direto na tab.
+  Future<void> _createReceipt() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _viewModel.budgetById(id);
+    if (budget == null || !mounted) return;
+    await _push(
+      ReceiptTabView(
+        item: budget,
+        receipt: const Receipt(
+          data: '',
+          id: '',
+          descricao: 'null',
+          valorTotal: 0,
+        ),
+      ),
+    );
+  }
+
+  /// Modal de orçamentos → lista de recibos do orçamento escolhido.
+  Future<void> _openReceipts() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _viewModel.budgetById(id);
+    if (budget == null || !mounted) return;
+    await _push(ReceiptListView(item: budget));
+  }
+
+  /// Modal de orçamentos → lista só com os orçamentos daquele cliente.
+  Future<void> _openClientBudgets() async {
+    final id = await ChatBudgetPickerView.show(context);
+    if (id == null || !mounted) return;
+    final budget = await _viewModel.budgetById(id);
+    if (budget == null || !mounted) return;
+    // Com cliente a lista já tem o próprio header com voltar (sem HomeSubPage).
+    await _push(BudgetListView(customer: budget));
+  }
+
+  /// Lista de comentários cadastrados (mesmo acesso do chat).
+  Future<void> _openCommentLibrary() => _push(
+    _viewModel.canUseCommentLibrary
+        ? const CommentLibraryListView()
+        : const SubscriptionView(),
+  );
+
   @override
   Widget build(BuildContext context) {
     // A Home é a única tela da raiz: ela chama as demais (chat, lista de
@@ -126,6 +177,15 @@ class _MainTabView extends State<MainTabView> {
                 () => _push(const ChatAssistantView(startBudget: true)),
             onOpenBudgets:
                 () => _push(const HomeSubPage(child: BudgetListView())),
+            onCreateReceipt: _createReceipt,
+            onOpenReceipts: _openReceipts,
+            onConfigurePdf:
+                () => _push(const ChatAssistantView(startPdfEdit: true)),
+            onPdfType: () => _push(const PdfModelSelectView()),
+            onClientBudgets: _openClientBudgets,
+            onSaveComments: _openCommentLibrary,
+            onSaveProofs:
+                () => _push(const ChatAssistantView(startProof: true)),
             onOpenReports:
                 () => _push(const HomeSubPage(child: DashboardView())),
           ),

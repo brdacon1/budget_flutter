@@ -32,29 +32,47 @@ class ResetChatToMenuUsecase {
     final firstTime =
         !(prefs.getBool(StartBudgetFromMenuUsecase.startedPrefKey) ?? false);
 
+    final question =
+        firstTime
+            ? ChatAssistantStrings.firstBudgetMenuQuestion
+            : ChatAssistantStrings.mainMenuQuestion;
+    final labels =
+        trialMenu
+            ? [
+              ChatAssistantStrings.mainMenuOptionLabels[0],
+              ChatAssistantStrings.mainMenuOptionLabels[1],
+              ChatAssistantStrings.mainMenuOptionLabels[2],
+              ChatAssistantStrings.commentLibraryOptionLabel,
+            ]
+            : [
+              ...ChatAssistantStrings.mainMenuOptionLabels,
+              if (withReports) ...[
+                ChatAssistantStrings.reportsOptionLabel,
+                ChatAssistantStrings.findBudgetOptionLabel,
+                ChatAssistantStrings.commentLibraryOptionLabel,
+                ChatAssistantStrings.goToClientOptionLabel,
+              ],
+            ];
+
+    // Modo IA (assinante/teste): sem botões — balão animado e o usuário digita.
+    // Os exemplos digitados são todas as opções do menu (sem o emoji).
+    if (withReports) {
+      for (final m in ChatMessageEntity.aiIntro(
+        question: question,
+        examples: [
+          for (final l in labels) l.substring(l.indexOf(' ') + 1),
+          ...ChatAssistantStrings.aiExtraExamples,
+        ],
+      )) {
+        await _chatRepo.sendMessage(m);
+      }
+      return 'mainMenu';
+    }
+
     await _chatRepo.sendMessage(
       ChatMessageEntity.botOptions(
-        content:
-            firstTime
-                ? ChatAssistantStrings.firstBudgetMenuQuestion
-                : ChatAssistantStrings.mainMenuQuestion,
-        labels:
-            trialMenu
-                ? [
-                  ChatAssistantStrings.mainMenuOptionLabels[0],
-                  ChatAssistantStrings.mainMenuOptionLabels[1],
-                  ChatAssistantStrings.mainMenuOptionLabels[2],
-                  ChatAssistantStrings.commentLibraryOptionLabel,
-                ]
-                : [
-                  ...ChatAssistantStrings.mainMenuOptionLabels,
-                  if (withReports) ...[
-                    ChatAssistantStrings.reportsOptionLabel,
-                    ChatAssistantStrings.findBudgetOptionLabel,
-                    ChatAssistantStrings.commentLibraryOptionLabel,
-                    ChatAssistantStrings.goToClientOptionLabel,
-                  ],
-                ],
+        content: question,
+        labels: labels,
         // Valores fixos: no teste, "Comentários" é o 4º botão com valor 7.
         values: trialMenu ? const ['1', '2', '3', '7'] : null,
         step: 'mainMenu',
