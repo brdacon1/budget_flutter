@@ -28,6 +28,7 @@ class HomeView extends StatefulWidget {
     this.reportsIcon = Icons.bar_chart_rounded,
     this.onOpenChat,
     this.onCreateBudget,
+    this.onShareBudgets,
     this.onOpenBudgets,
     this.onOpenReports,
     this.onCreateReceipt,
@@ -47,6 +48,9 @@ class HomeView extends StatefulWidget {
   final IconData reportsIcon;
   final VoidCallback? onOpenChat;
   final VoidCallback? onCreateBudget;
+
+  /// `null` esconde o atalho (ainda não há orçamento para compartilhar).
+  final VoidCallback? onShareBudgets;
   final VoidCallback? onOpenBudgets;
   final VoidCallback? onOpenReports;
   final VoidCallback? onCreateReceipt;
@@ -117,6 +121,7 @@ class _HomeView extends State<HomeView> {
           reportsIcon: widget.reportsIcon,
           registerItemsIcon: Icons.sell_outlined,
           onCreateBudget: onCreate,
+          onShareBudgets: widget.onShareBudgets,
           onOpenBudgets: widget.onOpenBudgets ?? noop,
           onOpenReports: widget.onOpenReports ?? noop,
           onCreateReceipt: widget.onCreateReceipt ?? noop,
@@ -190,6 +195,7 @@ class _HomeView extends State<HomeView> {
                           reportsIcon: widget.reportsIcon,
                           registerItemsIcon: Icons.sell_outlined,
                           onCreateBudget: onCreate,
+                          onShareBudgets: widget.onShareBudgets,
                           onOpenBudgets: widget.onOpenBudgets ?? noop,
                           onOpenReports: widget.onOpenReports ?? noop,
                           onCreateReceipt: widget.onCreateReceipt ?? noop,

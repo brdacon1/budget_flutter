@@ -39,6 +39,17 @@ class MainTabViewModel extends ChangeNotifier {
 
   bool get canUseCommentLibrary => getIt<CheckCommentLibraryAccessUsecase>()();
 
+  /// Cache para esconder atalhos que dependem de orçamento (ex.: compartilhar).
+  bool _anyBudget = false;
+  bool get anyBudget => _anyBudget;
+
+  Future<void> refreshAnyBudget() async {
+    final value = await hasBudgets();
+    if (value == _anyBudget) return;
+    _anyBudget = value;
+    notifyListeners();
+  }
+
   /// Já existe algum orçamento? Em erro de rede assume que sim (não bloqueia).
   Future<bool> hasBudgets() async {
     final count = await _budgets.countBudgets();
@@ -63,6 +74,10 @@ class MainTabViewModel extends ChangeNotifier {
       _ => null,
     };
   }
+
+  /// Marca o orçamento como o atual: é o que a tela do PDF lê.
+  void selectBudget(CustomerInfo budget) =>
+      _budgets.selectBudget = ValueNotifier<CustomerInfo?>(budget);
 
   Future<void> loadCompanyLogo() async {
     if (_loadingLogo) return;

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oflite/injection.dart';
+import 'package:oflite/modules/budget/presenter/budget_tab/budget_tab_view.dart';
 import 'package:oflite/modules/pdf/domain/entity/pdf_layout_type.dart';
 import 'package:oflite/modules/pdf/presenter/pdf_budget/pdf_budget_view_model.dart';
 import 'package:oflite/modules/pdf/presenter/strings/pdf_pt_string.dart';
@@ -39,8 +40,23 @@ class _PdfBudgetView extends State<PdfBudgetView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _viewModel.setLayoutType(widget.layoutType);
-      _viewModel.initialData(context);
+      _viewModel.initialData(context).then((_) => _openItemsIfEmpty());
     });
+  }
+
+  /// Sem itens (aberto por cima): leva o usuário à lista de itens do orçamento
+  /// para adicionar. Na aba PDF do orçamento fica o aviso (a aba Itens é irmã).
+  void _openItemsIfEmpty() {
+    final budget = _viewModel.budget;
+    if (!mounted || widget.isTabRoot || !_viewModel.noItems || budget == null) {
+      return;
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BudgetTabView(item: budget, initialIndex: 1),
+      ),
+    );
   }
 
   @override
