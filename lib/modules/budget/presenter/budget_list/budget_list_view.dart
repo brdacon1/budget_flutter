@@ -1,4 +1,3 @@
-import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
@@ -9,8 +8,8 @@ import 'package:oflite/modules/budget/domain/repository/budget_repository.dart';
 import 'package:oflite/modules/budget/presenter/budget_draft_notifier.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/budget_list_view_model.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_empty_detail.dart';
-import 'package:oflite/modules/budget/presenter/budget_list/components/budget_options_pane.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/budget_list_status_filter.dart';
+import 'package:oflite/modules/budget/presenter/budget_list/components/budget_options_pane.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/card/budget_list_card.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_actions_bottom_modal_widget.dart';
 import 'package:oflite/modules/budget/presenter/budget_list/components/modals/budget_list_duplicate_bottom_modal_widget.dart';
@@ -25,6 +24,7 @@ import 'package:oflite/modules/subscription/presenter/subscription_view.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
 import 'package:oflite/shared/common/widgets/adaptive/app_master_detail.dart';
 import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
+import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:oflite/shared/common/widgets/header/app_header_second_title.dart';
 import 'package:oflite/shared/common/widgets/modals/confirm_bottom_modal_widget.dart';
 import 'package:oflite/shared/common/widgets/responsive_widget.dart';
@@ -196,6 +196,114 @@ class _BudgetListView extends State<BudgetListView> {
     }
   }
 
+  Future<void> _createForCustomer() async {
+    final loading = getIt<LoadingEventRepository>();
+    await loading.alertLoading(context);
+    final created = await _viewModel.createForCustomer();
+    if (!mounted) return;
+    loading.closeLoading(context);
+    if (created == null) {
+      AlertSnackBar.error(
+        context,
+        BudgetStrings.createErrorTitle,
+        BudgetStrings.createErrorMessage,
+      );
+      return;
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => BudgetTabView(
+              item: created,
+              initialIndex: 1,
+              fromCustomerBudgets: true,
+            ),
+      ),
+    );
+    getIt<BudgetRepository>().clearSelectBudget();
+  }
+
+  void _openBudget(CustomerInfo item) {
+    getIt<BudgetRepository>().selectBudget.value = item;
+    if (_splitView) {
+      _showDetail(BudgetTabView(item: item));
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => BudgetTabView(
+              item: item,
+              fromCustomerBudgets: widget.customer != null,
+            ),
+      ),
+    ).then((_) {
+      getIt<BudgetRepository>().clearSelectBudget();
+    });
+  }
+
+  /// Abre [page] no painel de detalhe, substituindo o que estiver aberto.
+  void _showDetail(Widget page) {
+    _detailKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => page),
+      (route) => route.isFirst,
+    );
+  }
+
+  /// Detalhe fechado (voltar na tela do orçamento): limpa a seleção e
+  /// atualiza a lista (novo orçamento, totais alterados).
+  void _onDetailClosed() {
+    if (!mounted) return;
+    getIt<BudgetRepository>().clearSelectBudget();
+    _viewModel.getInformationOrcamento(refresh: true);
+  }
+
+  Future<void> _duplicateBudget(CustomerInfo item) async {
+    if (!getIt<GetAccessStatusUseCase>().hasFullAccess &&
+        _viewModel.totalBudgetCount > 10) {
+      AlertSnackBar.error(
+        context,
+        "Erro!",
+        "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
+      );
+      if (!mounted) return;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SubscriptionView()),
+      );
+    } else {
+      getIt<BudgetRepository>().selectBudget.value = item;
+      await _dialogDuplicate();
+    }
+  }
+
+  void _showMapError() => AlertSnackBar.error(
+    context,
+    BudgetStrings.mapErrorTitle,
+    BudgetStrings.mapErrorMessage,
+  );
+
+  /// Android: seletor nativo do sistema. iOS: action sheet nativa.
+  Future<void> _openMap(CustomerInfo item) async {
+    final result = await _viewModel.resolveMaps(item);
+    if (!mounted) return;
+    switch (result) {
+      case AddressMapsOpenedBySystem():
+        return;
+      case AddressMapsUnavailable():
+        return _showMapError();
+      case AddressMapsAvailable(:final maps):
+        return showMapChooserSheet(
+          context,
+          maps: maps,
+          title: BudgetStrings.chooseMap,
+          cancelLabel: BudgetStrings.cancel,
+        );
+    }
+  }
+
   Widget _buildDeleteFloatingButton() {
     return FloatingActionButton.extended(
       heroTag: 'delete',
@@ -304,114 +412,6 @@ class _BudgetListView extends State<BudgetListView> {
         ],
       ),
     );
-  }
-
-  Future<void> _createForCustomer() async {
-    final loading = getIt<LoadingEventRepository>();
-    await loading.alertLoading(context);
-    final created = await _viewModel.createForCustomer();
-    if (!mounted) return;
-    loading.closeLoading(context);
-    if (created == null) {
-      AlertSnackBar.error(
-        context,
-        BudgetStrings.createErrorTitle,
-        BudgetStrings.createErrorMessage,
-      );
-      return;
-    }
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => BudgetTabView(
-              item: created,
-              initialIndex: 1,
-              fromCustomerBudgets: true,
-            ),
-      ),
-    );
-    getIt<BudgetRepository>().clearSelectBudget();
-  }
-
-  void _openBudget(CustomerInfo item) {
-    getIt<BudgetRepository>().selectBudget.value = item;
-    if (_splitView) {
-      _showDetail(BudgetTabView(item: item));
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => BudgetTabView(
-              item: item,
-              fromCustomerBudgets: widget.customer != null,
-            ),
-      ),
-    ).then((_) {
-      getIt<BudgetRepository>().clearSelectBudget();
-    });
-  }
-
-  /// Abre [page] no painel de detalhe, substituindo o que estiver aberto.
-  void _showDetail(Widget page) {
-    _detailKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => page),
-      (route) => route.isFirst,
-    );
-  }
-
-  /// Detalhe fechado (voltar na tela do orçamento): limpa a seleção e
-  /// atualiza a lista (novo orçamento, totais alterados).
-  void _onDetailClosed() {
-    if (!mounted) return;
-    getIt<BudgetRepository>().clearSelectBudget();
-    _viewModel.getInformationOrcamento(refresh: true);
-  }
-
-  Future<void> _duplicateBudget(CustomerInfo item) async {
-    if (!getIt<GetAccessStatusUseCase>().hasFullAccess &&
-        _viewModel.totalBudgetCount > 10) {
-      AlertSnackBar.error(
-        context,
-        "Erro!",
-        "Você não possuí o plano premium onde é possível realizar orçamentos ilimitados",
-      );
-      if (!mounted) return;
-      await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SubscriptionView()),
-      );
-    } else {
-      getIt<BudgetRepository>().selectBudget.value = item;
-      await _dialogDuplicate();
-    }
-  }
-
-  void _showMapError() => AlertSnackBar.error(
-    context,
-    BudgetStrings.mapErrorTitle,
-    BudgetStrings.mapErrorMessage,
-  );
-
-  /// Android: seletor nativo do sistema. iOS: action sheet nativa.
-  Future<void> _openMap(CustomerInfo item) async {
-    final result = await _viewModel.resolveMaps(item);
-    if (!mounted) return;
-    switch (result) {
-      case AddressMapsOpenedBySystem():
-        return;
-      case AddressMapsUnavailable():
-        return _showMapError();
-      case AddressMapsAvailable(:final maps):
-        return showMapChooserSheet(
-          context,
-          maps: maps,
-          title: BudgetStrings.chooseMap,
-          cancelLabel: BudgetStrings.cancel,
-        );
-    }
   }
 
   Future<void> _openActions(CustomerInfo item) {
