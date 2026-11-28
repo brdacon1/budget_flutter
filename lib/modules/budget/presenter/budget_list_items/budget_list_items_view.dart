@@ -89,12 +89,12 @@ class _BudgetListItemsView extends State<BudgetListItemsView> {
   }
 
   Future<void> _openItem(ItemsBudget item) async {
-    final saved = await showBudgetItemQuantityBottomModal(
+    final saved = await showAppModal<bool>(
       context,
-      budgetId: widget.item.id!,
-      item: item,
+      builder:
+          (_) => BudgetItemQuantityView(budgetId: widget.item.id!, item: item),
     );
-    if (!saved || !mounted) return;
+    if (saved != true || !mounted) return;
     await _viewModel.getListItens();
     if (!mounted) return;
     AlertSnackBar.success(

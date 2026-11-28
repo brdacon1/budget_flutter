@@ -1,7 +1,6 @@
 import 'package:oflite/shared/common/widgets/alert/alert_snack_bar_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:oflite/shared/common/widgets/adaptive/show_app_modal.dart';
 import 'package:oflite/modules/budget/data/model/items_budget_model.dart';
 import 'package:oflite/modules/budget/presenter/strings/budget_pt_string.dart';
 import 'package:oflite/shared/common/constants/colors.dart';
@@ -162,19 +161,4 @@ class _BudgetItemQuantityViewState extends State<BudgetItemQuantityView> {
       },
     );
   }
-}
-
-/// Abre o [BudgetItemQuantityView] como bottom modal. Retorna `true` quando a
-/// quantidade foi salva (a tela de origem deve recarregar os itens/totais).
-Future<bool> showBudgetItemQuantityBottomModal(
-  BuildContext context, {
-  required String budgetId,
-  required ItemsBudget item,
-}) async {
-  final saved = await showAppModal<bool>(
-    context,
-    builder:
-        (context) => BudgetItemQuantityView(budgetId: budgetId, item: item),
-  );
-  return saved ?? false;
 }
